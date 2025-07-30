@@ -8,17 +8,17 @@ body, html {
 }
 
 .hero {
-    background: url('virtualcoach-bg.png') no-repeat center center fixed;
+    background: url('./virtualcoach-bg.png') no-repeat center center fixed;
     background-size: cover;
-    min-height: 100vh;
-    padding: 2rem;
-    box-sizing: border-box;
+    height: 100vh;
     color: white;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
+}
+
 }
 
 h1 {
