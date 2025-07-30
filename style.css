@@ -4,6 +4,7 @@ body, html {
   font-family: Arial, sans-serif;
   height: 100%;
 }
+
 .hero {
   background: url('homepage-background.png') no-repeat center center fixed;
   background-size: cover;
@@ -16,9 +17,10 @@ body, html {
   padding: 20px;
 }
 
+/* BIGGER LOGO */
 .logo {
   max-width: 360px;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 h1 {
@@ -35,40 +37,6 @@ p {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
 }
 
-input[type="file"] {
-  margin-top: 1rem;
-  padding: 10px;
-  font-size: 1rem;
-  background: rgba(255,255,255,0.9);
-  border: none;
-  border-radius: 5px;
-  max-width: 90%;
-}
-
-button {
-  margin-top: 1rem;
-  padding: 12px 24px;
-  font-size: 1.1rem;
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  border: 2px solid white;
-  border-radius: 30px;
-  cursor: pointer;
-  backdrop-filter: blur(4px);
-  transition: background 0.3s ease, transform 0.2s ease;
-}
-
-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
-}
-
-
-.contact {
-  font-size: 1rem;
-  margin-top: 2rem;
-  color: white;
-}
 .custom-upload {
   display: inline-block;
   padding: 12px 24px;
@@ -87,3 +55,10 @@ button:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: scale(1.05);
 }
+
+.contact {
+  font-size: 1rem;
+  margin-top: 2rem;
+  color: white;
+}
+
