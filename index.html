@@ -8,8 +8,10 @@
 </head>
 <body>
   <div class="hero">
+    <!-- LOGO -->
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
 
+    <!-- HEADLINE -->
     <h1>WELCOME</h1>
     <p>
       to the beta launch of Virtual Coach AI –<br>
@@ -17,12 +19,13 @@
       to help you reach your golfing potential.
     </p>
 
-    <!-- Hidden file input -->
-    <input type="file" id="swingUpload" style="display: none;" onchange="handleUpload()" />
+    <!-- INVISIBLE FILE INPUT -->
+    <input type="file" id="swingUpload" style="display:none" onchange="handleUpload()" />
 
-    <!-- Sexy upload button -->
-    <label for="swingUpload" class="upload-button">⛳ Upload Your Swing</label>
+    <!-- CUSTOM UPLOAD BUTTON -->
+    <label for="swingUpload" class="upload-button">⬆ Upload Your Swing</label>
 
+    <!-- CONTACT -->
     <p class="contact">For inquiries, contact <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
   </div>
 
@@ -30,9 +33,9 @@
     function handleUpload() {
       const file = document.getElementById('swingUpload').files[0];
       if (file) {
-        alert("✅ Swing uploaded: " + file.name);
+        alert("Swing uploaded: " + file.name);
       } else {
-        alert("⚠️ Please select a file to upload.");
+        alert("Please select a file to upload.");
       }
     }
   </script>
