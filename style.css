@@ -34,5 +34,23 @@ input[type="file"] {
 .upload-btn:hover {
   background-color: #218838;
 }
+.logo {
+  max-width: 200px;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 3rem;
+  color: white;
+  margin: 0.5rem 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+p {
+  font-size: 1.5rem;
+  color: white;
+  margin: 0.5rem 0 2rem;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+}
 
 
