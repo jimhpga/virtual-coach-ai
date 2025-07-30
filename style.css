@@ -6,9 +6,8 @@ body, html {
     width: 100%;
     overflow-x: hidden;
 }
-
 .hero {
-    background: url('./virtualcoach-bg.png') no-repeat center center fixed;
+    background: url('virtualcoach-bg.png') no-repeat center center fixed;
     background-size: cover;
     height: 100vh;
     color: white;
@@ -17,6 +16,8 @@ body, html {
     align-items: center;
     justify-content: center;
     text-align: center;
+}
+
 }
 
 }
