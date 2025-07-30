@@ -4,8 +4,9 @@ body, html {
     font-family: Arial, sans-serif;
     height: 100%;
 }
+
 .hero {
-    background: url('golf-course-bg.jpg') no-repeat center center fixed;
+    background: url('virtualcoach-bg.png') no-repeat center center fixed;
     background-size: cover;
     height: 100vh;
     color: white;
@@ -15,14 +16,7 @@ body, html {
     justify-content: center;
     text-align: center;
 }
-h1 {
-    font-size: 3rem;
-    margin: 0;
-}
-p {
-    font-size: 1.5rem;
-    margin: 0.5rem 0 2rem;
-}
+
 input[type="file"] {
     margin-top: 1rem;
     padding: 10px;
@@ -31,6 +25,7 @@ input[type="file"] {
     border: none;
     border-radius: 5px;
 }
+
 button {
     margin-top: 1rem;
     padding: 10px 20px;
@@ -41,6 +36,7 @@ button {
     border-radius: 5px;
     cursor: pointer;
 }
+
 button:hover {
     background-color: #218838;
 }
