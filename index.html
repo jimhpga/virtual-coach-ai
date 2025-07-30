@@ -2,15 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Virtual Coach AI</title>
-    <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-    <div class="hero">
-        <input type="file" id="swingUpload" accept="video/*" />
-        <button onclick="uploadSwing()">Upload Swing</button>
-    </div>
-    <script src="script.js"></script>
-</body>
-</html>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100%;
+        }
+
+        .hero {
+            background: url('bg-clean.jpg') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+        }
+
+        p {
+            font-size: 1.4rem;
+            margin: 0.5rem 0 2rem;
+        }
+
+       
