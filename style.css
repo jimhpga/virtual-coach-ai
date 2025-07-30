@@ -47,18 +47,22 @@ input[type="file"] {
 
 button {
   margin-top: 1rem;
-  padding: 10px 20px;
-  font-size: 1rem;
-  background-color: #28a745;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.15);
   color: white;
-  border: none;
-  border-radius: 5px;
+  border: 2px solid white;
+  border-radius: 30px;
   cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
 button:hover {
-  background-color: #218838;
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
 }
+
 
 .contact {
   font-size: 1rem;
