@@ -3,11 +3,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Coach AI</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Welcome to Virtual Coach AI</h1>
-    <p>Golf. Baseball. Basketball. Tennis. One Coach. One Platform.</p>
+    <header>
+        <div class="logo">Virtual Coach AI</div>
+    </header>
+    <main>
+        <section class="hero">
+            <h1>Virtual Coach AI</h1>
+            <p>Upload Your Swing. Get Instant Feedback. Train Smarter.</p>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <input type="file" id="swingUpload" name="swing" accept="video/*" required>
+                <button type="submit">Upload Swing</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>© 2025 Virtual Coach AI</p>
+    </footer>
 </body>
 </html>
