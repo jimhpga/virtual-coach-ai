@@ -16,6 +16,11 @@
       the intelligent swing coach designed<br>
       to help you reach your golfing potential.
     </p>
+    <!-- Invisible file input -->
+    <input type="file" id="swingUpload" style="display:none" onchange="handleUpload()" />
+
+    <!-- Pretty custom button that triggers the hidden file input -->
+    <label for="swingUpload" class="custom-upload">Upload Your Swing</label>
 
     <input type="file" id="swingUpload" />
     <button onclick="handleUpload()">Upload Swing</button>
