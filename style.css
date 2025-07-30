@@ -1,39 +1,23 @@
 body, html {
   margin: 0;
   padding: 0;
-  height: 100%;
   font-family: Arial, sans-serif;
+  height: 100%;
 }
 
 .hero {
-  background: url('home%20page%20backrouind.png') no-repeat center center fixed;
+  background: url('home page backrouind.png') no-repeat center center fixed;
   background-size: cover;
   height: 100vh;
-  width: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-}
-
-input[type="file"] {
-  display: none;
-}
-
-.upload-btn {
-  background-color: #28a745;
-  color: white;
-  padding: 15px 30px;
-  font-size: 1.2rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
   text-align: center;
+  color: white;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
 }
 
-.upload-btn:hover {
-  background-color: #218838;
-}
 .logo {
   max-width: 200px;
   margin-bottom: 1rem;
@@ -53,4 +37,27 @@ p {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
 }
 
+input[type="file"] {
+  margin-top: 1rem;
+  padding: 10px;
+  font-size: 1rem;
+  background: rgba(255,255,255,0.8);
+  border: none;
+  border-radius: 5px;
+}
+
+button {
+  margin-top: 1rem;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #218838;
+}
 
