@@ -2,16 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Virtual Coach AI</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="hero"><img src="virtualcoach-logo.png" alt="Virtual Coach AI Logo" class="logo" />
+  <div class="hero">
+    <img src="virtualcoach-logo.png" alt="Virtual Coach AI Logo" class="logo" />
     <h1>Virtual Coach AI</h1>
-    <p>Upload your swing to get instant analysis and coaching</p>
-    <input type="file" id="upload" />
-    <label for="upload" class="upload-btn">UPLOAD SWING</label>
+    <p>Your Personal Golf Swing Analyzer</p>
+    <input type="file" id="fileUpload" />
+    <button onclick="upload()">Upload Swing</button>
   </div>
+
+  <script>
+    function upload() {
+      const fileInput = document.getElementById('fileUpload');
+      if (fileInput.files.length === 0) {
+        alert('Please select a swing file to upload.');
+        return;
+      }
+      alert('Swing uploaded successfully!');
+      // Add your upload logic here.
+    }
+  </script>
 </body>
 </html>
