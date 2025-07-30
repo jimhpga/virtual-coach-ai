@@ -1,56 +1,43 @@
 body, html {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
 .hero {
-    background: url('home%20page%20backrouind.png') no-repeat center center fixed;
-    background-size: cover;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: white;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-}
-
-h1 {
-    font-size: 2.5rem;
-    margin: 0;
-}
-
-p {
-    font-size: 1.2rem;
-    margin: 0.5rem 0 1.5rem;
-    max-width: 90%;
+  background: url('A_promotional_digital_image_for_"Virtual_Coach_AI".png') no-repeat center center fixed;
+  background-size: cover;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 input[type="file"] {
-    margin-top: 1rem;
-    padding: 10px;
-    font-size: 1rem;
-    background: rgba(255,255,255,0.8);
-    border: none;
-    border-radius: 5px;
-    max-width: 90%;
+  display: none;
 }
 
-button {
-    margin-top: 1rem;
-    padding: 10px 20px;
-    font-size: 1rem;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.upload-btn {
+  position: absolute;
+  bottom: 80px;
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  background-color: rgba(0, 128, 0, 0.85);
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: background-color 0.3s ease;
 }
 
-button:hover {
-    background-color: #218838;
+.upload-btn:hover {
+  background-color: rgba(0, 100, 0, 0.95);
 }
+
 
