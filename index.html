@@ -8,21 +8,12 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <div class="logo">Virtual Coach AI</div>
-    </header>
-    <main>
-        <section class="hero">
-            <h1>Virtual Coach AI</h1>
-            <p>Upload Your Swing. Get Instant Feedback. Train Smarter.</p>
-            <form id="uploadForm" enctype="multipart/form-data">
-                <input type="file" id="swingUpload" name="swing" accept="video/*" required>
-                <button type="submit">Upload Swing</button>
-            </form>
-        </section>
-    </main>
-    <footer>
-        <p>© 2025 Virtual Coach AI</p>
-    </footer>
+    <div class="hero">
+        <h1>Virtual Coach AI</h1>
+        <p>Upload your swing. Get smarter. Play better.</p>
+        <input type="file" id="swingUpload" accept="video/*">
+        <button onclick="uploadSwing()">Upload</button>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
