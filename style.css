@@ -17,7 +17,7 @@ body, html {
 }
 
 .logo {
-  max-width: 180px;
+  max-width: 360px;
   margin-bottom: 1rem;
 }
 
@@ -68,4 +68,22 @@ button:hover {
   font-size: 1rem;
   margin-top: 2rem;
   color: white;
+}
+.custom-upload {
+  display: inline-block;
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 2px solid white;
+  border-radius: 30px;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.3s ease, transform 0.2s ease;
+  text-shadow: 1px 1px 2px black;
+}
+
+.custom-upload:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
 }
