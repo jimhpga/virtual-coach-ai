@@ -9,21 +9,28 @@
 <body>
   <div class="hero">
     <img src="virtualcoach-logo.png" alt="Virtual Coach AI Logo" class="logo" />
-    <h1>Virtual Coach AI</h1>
-    <p>Your Personal Golf Swing Analyzer</p>
-    <input type="file" id="fileUpload" />
-    <button onclick="upload()">Upload Swing</button>
+
+    <h1>WELCOME</h1>
+    <p>
+      to the beta launch of Virtual Coach AI –<br>
+      the intelligent swing coach designed<br>
+      to help you find your golfing potential.
+    </p>
+
+    <input type="file" id="swingUpload" />
+    <button onclick="handleUpload()">Upload Swing</button>
+
+    <p class="contact">For inquiries, contact <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
   </div>
 
   <script>
-    function upload() {
-      const fileInput = document.getElementById('fileUpload');
-      if (fileInput.files.length === 0) {
-        alert('Please select a swing file to upload.');
-        return;
+    function handleUpload() {
+      const file = document.getElementById('swingUpload').files[0];
+      if (file) {
+        alert("Swing uploaded: " + file.name);
+      } else {
+        alert("Please select a file to upload.");
       }
-      alert('Swing uploaded successfully!');
-      // Add your upload logic here.
     }
   </script>
 </body>
