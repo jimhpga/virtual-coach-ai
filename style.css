@@ -1,20 +1,19 @@
 body, html {
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif;
   height: 100%;
-  width: 100%;
-  overflow: hidden;
+  font-family: Arial, sans-serif;
 }
 
 .hero {
-  background: url('A_promotional_digital_image_for_"Virtual_Coach_AI".png') no-repeat center center fixed;
+  background: url('home%20page%20backrouind.png') no-repeat center center fixed;
   background-size: cover;
   height: 100vh;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  flex-direction: column;
 }
 
 input[type="file"] {
@@ -22,22 +21,18 @@ input[type="file"] {
 }
 
 .upload-btn {
-  position: absolute;
-  bottom: 80px;
+  background-color: #28a745;
+  color: white;
   padding: 15px 30px;
   font-size: 1.2rem;
-  background-color: rgba(0, 128, 0, 0.85);
-  color: white;
+  border: none;
   border-radius: 8px;
   cursor: pointer;
   text-align: center;
-  text-transform: uppercase;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  transition: background-color 0.3s ease;
 }
 
 .upload-btn:hover {
-  background-color: rgba(0, 100, 0, 0.95);
+  background-color: #218838;
 }
 
 
