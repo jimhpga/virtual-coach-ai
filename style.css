@@ -6,7 +6,7 @@ body, html {
 }
 
 .hero {
-  background: url('home page backrouind.png') no-repeat center center fixed;
+  background: url('home%20page%20backrouind.png') no-repeat center center fixed;
   background-size: cover;
   height: 100vh;
   display: flex;
@@ -14,12 +14,11 @@ body, html {
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: white;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+  padding: 20px;
 }
 
 .logo {
-  max-width: 200px;
+  max-width: 180px;
   margin-bottom: 1rem;
 }
 
@@ -33,7 +32,7 @@ h1 {
 p {
   font-size: 1.5rem;
   color: white;
-  margin: 0.5rem 0 2rem;
+  margin: 0.5rem 0 1.5rem;
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
 }
 
@@ -41,9 +40,10 @@ input[type="file"] {
   margin-top: 1rem;
   padding: 10px;
   font-size: 1rem;
-  background: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.9);
   border: none;
   border-radius: 5px;
+  max-width: 90%;
 }
 
 button {
@@ -61,3 +61,8 @@ button:hover {
   background-color: #218838;
 }
 
+.contact {
+  font-size: 1rem;
+  margin-top: 2rem;
+  color: white;
+}
