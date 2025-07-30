@@ -16,14 +16,12 @@
       the intelligent swing coach designed<br>
       to help you reach your golfing potential.
     </p>
-    <!-- Invisible file input -->
-    <input type="file" id="swingUpload" style="display:none" onchange="handleUpload()" />
 
-    <!-- Pretty custom button that triggers the hidden file input -->
-    <label for="swingUpload" class="custom-upload">Upload Your Swing</label>
+    <!-- Hidden file input -->
+    <input type="file" id="swingUpload" style="display: none;" onchange="handleUpload()" />
 
-    <input type="file" id="swingUpload" />
-    <button onclick="handleUpload()">Upload Swing</button>
+    <!-- Sexy upload button -->
+    <label for="swingUpload" class="upload-button">⛳ Upload Your Swing</label>
 
     <p class="contact">For inquiries, contact <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
   </div>
@@ -32,13 +30,12 @@
     function handleUpload() {
       const file = document.getElementById('swingUpload').files[0];
       if (file) {
-        alert("Swing uploaded: " + file.name);
+        alert("✅ Swing uploaded: " + file.name);
       } else {
-        alert("Please select a file to upload.");
+        alert("⚠️ Please select a file to upload.");
       }
     }
   </script>
 </body>
 </html>
-
 
