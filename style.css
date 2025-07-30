@@ -4,9 +4,8 @@ body, html {
   font-family: Arial, sans-serif;
   height: 100%;
 }
-
 .hero {
-  background: url('home%20page%20backrouind.png') no-repeat center center fixed;
+  background: url('homepage-background.png') no-repeat center center fixed;
   background-size: cover;
   height: 100vh;
   display: flex;
