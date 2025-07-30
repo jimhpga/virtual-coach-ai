@@ -3,23 +3,19 @@ body, html {
     padding: 0;
     font-family: Arial, sans-serif;
     height: 100%;
-    width: 100%;
-    overflow-x: hidden;
 }
+
 .hero {
-    background: url('virtualcoach-bg.png') no-repeat center center fixed;
+    background: url('home%20page%20backrouind.png') no-repeat center center fixed;
     background-size: cover;
     height: 100vh;
-    color: white;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-}
-
-}
-
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
 }
 
 h1 {
