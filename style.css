@@ -17,12 +17,12 @@ body, html {
   padding: 20px;
 }
 
-/* BIGGER LOGO */
 .logo {
-  max-width: 450px;
+  max-width: 360px;
   margin-bottom: 1.5rem;
 }
 
+/* HEADINGS */
 h1 {
   font-size: 3rem;
   color: white;
@@ -37,48 +37,47 @@ p {
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
 }
 
-.custom-upload {
-  display: inline-block;
-  padding: 12px 24px;
-  font-size: 1.1rem;
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  border: 2px solid white;
-  border-radius: 30px;
-  cursor: pointer;
-  backdrop-filter: blur(4px);
-  transition: background 0.3s ease, transform 0.2s ease;
-  text-shadow: 1px 1px 2px black;
-}
-
-.custom-upload:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
-}
-
+/* CONTACT TEXT */
 .contact {
   font-size: 1rem;
   margin-top: 2rem;
   color: white;
 }
+
+/* CUSTOM UPLOAD BUTTON */
 .upload-button {
   display: inline-block;
-  padding: 16px 32px;
-  font-size: 1.3rem;
-  background: linear-gradient(to right, #28a745, #4cd964);
+  padding: 20px 40px;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
   color: white;
   border: none;
-  border-radius: 50px;
+  border-radius: 60px;
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
   transition: all 0.3s ease-in-out;
-  font-weight: bold;
-  margin-top: 1rem;
+  font-weight: 700;
+  margin: 1.5rem 0;
+  animation: pulse 2s infinite;
 }
 
 .upload-button:hover {
-  transform: scale(1.08);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+  transform: scale(1.1);
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+}
+
+/* PULSE ANIMATION */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 198, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(0, 198, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 198, 255, 0);
+  }
 }
 
