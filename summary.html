@@ -12,62 +12,6 @@
     --accent:#1F6F1F;
   }
   html,body{
-    <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Virtual Coach AI — Login</title>
-<style>
-  :root{ --fg:#f5f5f5; --bg:#0a0a0a; --line:rgba(255,255,255,0.16); --accent:#1F6F1F; }
-  html,body{height:100%;margin:0;padding:0;background:var(--bg) url("homepage-background.png") center/cover no-repeat fixed;color:var(--fg);
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;}
-  body{display:flex;align-items:center;justify-content:center;min-height:-webkit-fill-available;filter:brightness(1.08) contrast(1.03);}
-  .card{width:min(520px,92vw);border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,0.35);padding:20px 18px;text-align:center;
-        box-shadow:0 10px 30px rgba(0,0,0,0.25);}
-  h1{margin:6px 0 10px;font-size:24px}
-  p{margin:0 0 14px;color:rgba(255,255,255,0.75)}
-  input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,0.25);color:#fff;font-size:16px}
-  .btn{margin-top:12px;display:inline-block;padding:12px 16px;border-radius:12px;background:var(--accent);color:#fff;font-weight:700;
-       text-decoration:none;border:1px solid var(--line);cursor:pointer}
-  .err{color:#fecaca;margin-top:10px;min-height:18px;font-size:14px}
-  .muted{margin-top:10px;font-size:12px;color:rgba(255,255,255,0.65)}
-</style>
-</head>
-<body>
-  <div class="card">
-    <h1>Enter Passcode</h1>
-    <p>Tester access only.</p>
-    <form id="form">
-      <input id="code" type="password" inputmode="numeric" autocomplete="one-time-code" placeholder="Passcode" />
-      <button class="btn" type="submit">Continue</button>
-      <div id="err" class="err"></div>
-    </form>
-    <div class="muted">Lost your code? Email <a href="mailto:jimh@pga.com" style="color:#86efac;text-decoration:none">jimh@pga.com</a>.</div>
-  </div>
-
-<script>
-// ---- 5 allowed codes (edit later to add more) ----
-const ALLOWED = ["1001","1002","1003","1004","1005"];
-const DEST = "index.html"; // where to go after login
-
-document.getElementById('form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const code = (document.getElementById('code').value || "").trim();
-  const err = document.getElementById('err');
-
-  if (ALLOWED.includes(code)) {
-    localStorage.setItem('vc_auth', 'ok');    // simple session flag
-    localStorage.setItem('vc_user', code);    // optional: remember which tester
-    window.location.href = DEST;
-  } else {
-    err.textContent = "Invalid code. Try again.";
-  }
-});
-</script>
-</body>
-</html>
-
     height:100%; margin:0; padding:0; color:var(--fg);
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     background: var(--bg) url("homepage-background.png") center / cover no-repeat fixed;
@@ -79,10 +23,7 @@ document.getElementById('form').addEventListener('submit', (e) => {
   h1{ margin:0 0 6px; font-size:32px; }
   .muted{ color:var(--muted); }
 
-  .legend{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 18px; font-size:13px; }
-  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
-  .g{ background:var(--good); } .y{ background:var(--warn);} .r{ background:var(--bad);}
-
+  /* Accordion */
   .acc { margin-top: 10px; }
   details{
     border:1px solid var(--line); border-radius:12px; background:rgba(0,0,0,0.25);
@@ -95,7 +36,7 @@ document.getElementById('form').addEventListener('submit', (e) => {
 
   .chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
   .chip{ border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:13px; }
-  .chip.g{ border-color:var(--good); color:#d1fae5; } .chip.y{ border-color:var(--warn); color:#fef08a; } .chip.r{ border-color:var(--bad);  color:#fecaca; }
+  .chip.g{ border-color:var(--good); color:#d1fae5; } .chip.y{ border-color:var(--warn); color:#fef08a; } .chip.r{ border-color:var(--bad); color:#fecaca; }
 
   table{ width:100%; border-collapse: collapse; margin-top:10px; font-size:14px;}
   th, td{ padding:10px; border-bottom:1px solid var(--line); text-align:left; }
@@ -105,15 +46,15 @@ document.getElementById('form').addEventListener('submit', (e) => {
   .pill.y{ background:rgba(234,179,8,0.2); border-color:var(--warn); }
   .pill.r{ background:rgba(239,68,68,0.2); border-color:var(--bad); }
 
+  .legend{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 18px; font-size:13px; }
+  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
+  .g{ background:var(--good); } .y{ background:var(--warn);} .r{ background:var(--bad);}
+
   .cta{
     display:inline-block; margin-top:14px; padding:12px 18px; border-radius:12px;
     background:var(--accent); color:#fff; text-decoration:none; font-weight:700; border:1px solid var(--line);
   }
   .cta:hover{ opacity:.95; }
-
-  ul{ margin:8px 0; padding-left:18px; }
-  li{ margin:6px 0; }
-  ol{ margin:8px 0; padding-left:18px; }
 </style>
 </head>
 <body>
@@ -122,6 +63,7 @@ document.getElementById('form').addEventListener('submit', (e) => {
     <h1>Swing Reports</h1>
     <div class="muted">ID: <span id="rid">—</span></div>
 
+    <!-- Color Legend -->
     <div class="legend">
       <div><span class="dot g"></span>Good</div>
       <div><span class="dot y"></span>Okay</div>
@@ -150,7 +92,7 @@ document.getElementById('form').addEventListener('submit', (e) => {
         <p class="muted">Target a repeatable 3:1. Keep a tiny pause; don’t rush P4→P5.</p>
       </details>
 
-      <!-- P1–P9 Full Assessment -->
+      <!-- P1–P9 -->
       <details>
         <summary>P1–P9 Assessment <span class="chev"></span></summary>
         <table>
@@ -169,6 +111,26 @@ document.getElementById('form').addEventListener('submit', (e) => {
         </table>
       </details>
 
+      <!-- Top 3 Things to Work On -->
+      <details open>
+        <summary>Top 3 Things to Work On <span class="chev"></span></summary>
+        <ol>
+          <li><b>Hip Turn Depth @ P4</b> — Trail hip “back”; maintain tilt. Mirror/video check.</li>
+          <li><b>Forward Low Point</b> — 3-ball drill ahead of ball; compress down/forward.</li>
+          <li><b>Tempo Consistency</b> — Keep ~3:1 with a tiny pause; don’t rush P4→P5.</li>
+        </ol>
+      </details>
+
+      <!-- Top 3 Power Things to Work On -->
+      <details>
+        <summary>Top 3 Power Things to Work On <span class="chev"></span></summary>
+        <ol>
+          <li><b>Step-Through Speed Drill</b> — 10×3; step trail foot toward target in transition.</li>
+          <li><b>Overspeed Swings</b> — 6×3; 3 light implement, 3 gamer at 105–110% intent.</li>
+          <li><b>Med-Ball Rotational Throws</b> — 8×3; hips lead. Bands if no wall.</li>
+        </ol>
+      </details>
+
       <!-- Power Assessment -->
       <details>
         <summary>Power Assessment <span class="chev"></span></summary>
@@ -177,28 +139,6 @@ document.getElementById('form').addEventListener('submit', (e) => {
           <li><b>Launch:</b> Slightly high; de-loft via forward shaft lean</li>
           <li><b>Ground force:</b> Improve trail-leg pressure P3→P5</li>
         </ul>
-      </details>
-
-      <!-- NEW: Top 3 Things to Work On -->
-      <details open>
-        <summary>Top 3 Things to Work On <span class="chev"></span></summary>
-        <ol>
-          <li><b>Hip Turn Depth @ P4</b> — Feel trail hip “back”; maintain tilt. Check in mirror/video.</li>
-          <li><b>Forward Low Point</b> — 3-ball drill ahead of the ball; compress down/forward.</li>
-          <li><b>Tempo Consistency</b> — Keep ~3:1 with a tiny pause; don’t rush P4→P5.</li>
-        </ol>
-        <p class="muted">2–3 focused feels per session beats random buckets.</p>
-      </details>
-
-      <!-- NEW: Top 3 Power Adders -->
-      <details open>
-        <summary>Top 3 Power Adders <span class="chev"></span></summary>
-        <ol>
-          <li><b>Step-Through Speed Drill</b> — 10 reps × 3 sets; trail foot steps toward target in transition.</li>
-          <li><b>Overspeed Swings</b> — 6 reps × 3 sets; 3 with light stick/club, 3 with gamer @ 105–110% intent.</li>
-          <li><b>Med-Ball Rotational Throws</b> — 8 reps × 3 sets; hips lead, throw into wall/ground. Bands if no wall.</li>
-        </ol>
-        <p class="muted">2–3 days/week, non-consecutive. Warm up; stop if balance/form breaks.</p>
       </details>
 
       <!-- Goals -->
@@ -210,34 +150,16 @@ document.getElementById('form').addEventListener('submit', (e) => {
           <li>Low-Point Control — target <b>+2.0 in</b>, current <b>+1.2 in</b> <span class="pill y">Okay</span></li>
         </ul>
       </details>
-
-      <!-- Two-Week Practice Schedule -->
-      <details>
-        <summary>Two-Week Practice Schedule <span class="chev"></span></summary>
-        <div class="muted">3 sessions/week (40–50 min). Keep the same 2–3 feels; change targets/clubs.</div>
-        <table>
-          <thead><tr><th>Day</th><th>Focus</th><th>Notes</th></tr></thead>
-          <tbody>
-            <tr><td>Week 1 – S1</td><td>Hip Turn Depth @ P4</td><td>Mirror feels; trail hip “back”</td></tr>
-            <tr><td>Week 1 – S2</td><td>Forward Low Point</td><td>3-ball drill ahead; compress through</td></tr>
-            <tr><td>Week 1 – S3</td><td>Tempo Ladder</td><td>Build to 3:1; tiny pause at top</td></tr>
-            <tr><td>Week 2 – S1</td><td>Transfer Practice</td><td>Random clubs/targets; keep feels</td></tr>
-            <tr><td>Week 2 – S2</td><td>Hip Turn + Low Point</td><td>Blend both; add step drill</td></tr>
-            <tr><td>Week 2 – S3</td><td>On-Course Rehearsals</td><td>Pre-shot feel reps; tempo focus</td></tr>
-          </tbody>
-        </table>
-        <a class="cta" href="practice.html">Generate Detailed Schedule</a>
-      </details>
     </div>
   </div>
 </div>
 
 <script>
-  // Report ID
+  // Report ID from query string (safe default)
   const id = new URLSearchParams(location.search).get('id') || 'local-demo';
   document.getElementById('rid').textContent = id;
 
-  // Mock "Available Reports"
+  // Mock Available Reports
   const rows = document.getElementById('reportRows');
   const sample = [
     { date:'Aug 1, 2025', club:'7i', tempo:'3:1', p:'Good', href:'summary.html?id='+id },
