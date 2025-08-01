@@ -2,39 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!-- keep ONE viewport, with viewport-fit -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
   <title>Virtual Coach AI</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-
 <body>
-  <div class="hero">
-    <!-- LOGO -->
-    <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
+  <div class="safe-area">
+    <div class="hero">
+      <!-- LOGO -->
+      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
 
-    <!-- HEADLINE -->
-    <h1>WELCOME</h1>
-    <p>
-      to the beta launch of Virtual Coach AI –<br>
-      the intelligent swing coach designed<br>
-      to help you reach your golfing potential.
-    </p>
+      <!-- HEADLINE -->
+      <h1>WELCOME</h1>
+      <p>
+        to the beta launch of Virtual Coach AI –<br>
+        the intelligent swing coach designed<br>
+        to help you reach your golfing potential.
+      </p>
 
-    <!-- INVISIBLE FILE INPUT -->
-    <input type="file" id="swingUpload" style="display:none" onchange="handleUpload()" />
+      <!-- INVISIBLE FILE INPUT -->
+      <input type="file" id="swingUpload" style="display:none" onchange="handleUpload()" />
 
-    <!-- CUSTOM UPLOAD BUTTON -->
-    <label for="swingUpload" class="upload-button">⬆ Upload Your Swing</label>
+      <!-- CUSTOM UPLOAD BUTTON -->
+      <label for="swingUpload" class="upload-button">⬆ Upload Your Swing</label>
 
-    <!-- CONTACT -->
-    <p class="contact">For inquiries, contact <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
+      <!-- CONTACT -->
+      <p class="contact">For inquiries, contact <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
+    </div>
   </div>
 
   <script>
@@ -49,4 +47,5 @@
   </script>
 </body>
 </html>
+
 
