@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- keep ONE viewport, with viewport-fit -->
+  <!-- iPhone fullscreen + safe-area -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -25,7 +25,13 @@
       </p>
 
       <!-- INVISIBLE FILE INPUT -->
-      <input type="file" id="swingUpload" style="display:none" onchange="handleUpload()" />
+      <input
+        type="file"
+        id="swingUpload"
+        accept="video/mp4,video/quicktime,video/webm"
+        style="display:none"
+        onchange="uploadSwing()"
+      />
 
       <!-- CUSTOM UPLOAD BUTTON -->
       <label for="swingUpload" class="upload-button">⬆ Upload Your Swing</label>
@@ -35,16 +41,7 @@
     </div>
   </div>
 
-  <script>
-    function handleUpload() {
-      const file = document.getElementById('swingUpload').files[0];
-      if (file) {
-        alert("Swing uploaded: " + file.name);
-      } else {
-        alert("Please select a file to upload.");
-      }
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
 
