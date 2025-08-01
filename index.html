@@ -106,10 +106,12 @@
     async function uploadSwing() {
       // 1) Check login first
       try {
-        if (localStorage.getItem('vc_auth') !== 'ok') {
-          // Not logged in → bounce to simple passcode page
-          window.location.href = 'login.html';
-          return;
+        if // Gate uploads: require passcode first
+if (localStorage.getItem('vc_auth') !== 'ok') {
+  window.location.href = 'login.html';
+  return;
+}
+
         }
       } catch (e) {
         window.location.href = 'login.html';
