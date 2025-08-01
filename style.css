@@ -39,7 +39,7 @@ body { min-height: -webkit-fill-available; }
   content: "";
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.12); /* lower = brighter; remove block to disable overlay */
+  background: rgba(0,0,0,0.08); /* lower = brighter; remove block to disable overlay */
   pointer-events: none;
   z-index: 0;
 }
