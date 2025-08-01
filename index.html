@@ -2,80 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Virtual Coach AI</title>
-
   <style>
     /* ===== Global / Background ===== */
     html, body {
       height: 100%;
       margin: 0;
       padding: 0;
-      color: #f5f5f5;              /* make text visible */
+      color: #f5f5f5;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       background: #0a0a0a url("homepage-background.png") center / cover no-repeat fixed;
     }
     body { min-height: -webkit-fill-available; }
 
-    /* Safe-area for iPhone notch/home bar */
+    /* Safe-area for iPhone */
     .safe-area {
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
       padding-left: env(safe-area-inset-left);
       padding-right: env(safe-area-inset-right);
       position: relative;
-      z-index: 0; /* base layer */
     }
 
-    /* Subtle readable overlay ABOVE background, BELOW content */
-    .bg-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.35); /* lower/raise if needed */
-      z-index: 1; /* overlay sits behind content */
-      pointer-events: none;
-    }
-
-    /* ===== Content Wrapper ===== */
+    /* ===== Content ===== */
     .hero {
-      position: relative;
-      z-index: 2;            /* ensure content is above overlay */
       max-width: 760px;
       margin: 0 auto;
       padding: 48px 24px 72px;
       text-align: center;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.25); /* keeps text readable without dark overlay */
     }
 
+    /* Bigger + green logo */
     .logo {
-      width: 260px;
+      width: 420px;          /* bigger */
+      max-width: 90vw;       /* responsive */
       height: auto;
       margin: 8px auto 20px;
       display: block;
-      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.45));
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.25));
+    }
+    /* If using the transparent PNG, tint it green */
+    .logo-green {
+      filter:
+        brightness(0) saturate(100%)
+        invert(74%) sepia(64%)
+        saturate(630%) hue-rotate(85deg)
+        brightness(95%) contrast(92%)
+        drop-shadow(0 6px 16px rgba(0,0,0,0.25));
     }
 
-    h1 {
-      margin: 0 0 10px;
-      font-size: 36px;
-      letter-spacing: 0.04em;
-    }
-
-    p {
-      margin: 0 auto 16px;
-      line-height: 1.6;
-      max-width: 560px;
-    }
+    h1 { margin: 0 0 10px; font-size: 36px; letter-spacing: 0.04em; }
+    p  { margin: 0 auto 16px; line-height: 1.6; max-width: 560px; }
 
     .upload-button {
       display: inline-block;
       margin: 20px 0 10px;
       padding: 12px 18px;
-      background: #0f172a;  /* dark navy */
+      background: #0f172a;
       color: #fff;
       border-radius: 12px;
       cursor: pointer;
@@ -86,33 +73,34 @@
     }
     .upload-button:hover { opacity: 0.92; }
 
-    .contact a { color: #86efac; text-decoration: none; }
+    .contact a { color: #22c55e; text-decoration: none; }
     .contact a:hover { text-decoration: underline; }
 
-    /* Mobile tweaks */
     @media (max-width: 480px) {
-      .logo { width: 220px; }
       h1 { font-size: 30px; }
+      .logo { width: 300px; }
     }
   </style>
 </head>
 <body>
-  <!-- Overlay (below content, above background) -->
-  <div class="bg-overlay"></div>
-
   <div class="safe-area">
     <div class="hero">
-      <!-- LOGO -->
-      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
+      <!-- Use ONE of these: 
+           A) green file if you have it: virtualcoach-logo.png (no tint class)
+           B) transparent file with CSS tint: add class "logo-green" -->
+      <!-- A) -->
+      <!-- <img src="virtualcoach-logo.png" alt="Virtual Coach AI Logo" class="logo" /> -->
 
-      <!-- HEADLINE -->
+      <!-- B) (default here) -->
+      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo logo-green" />
+
       <h1>WELCOME</h1>
       <p>
         to the beta launch of Virtual Coach AI —<br>
         the intelligent swing coach designed to help you reach your golfing potential.
       </p>
 
-      <!-- HIDDEN FILE INPUT -->
+      <!-- Hidden file input -->
       <input
         type="file"
         id="swingUpload"
@@ -120,17 +108,14 @@
         style="display:none"
         onchange="uploadSwing()"
       />
-
-      <!-- BUTTON -->
       <label for="swingUpload" class="upload-button">⬆ Upload Your Swing</label>
 
-      <!-- CONTACT -->
       <p class="contact">Questions? <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
     </div>
   </div>
 
   <script>
-    // Simple: block clips > 10s; confirm success otherwise
+    // After a valid (≤10s) clip is chosen, redirect to report.html?id=...
     async function uploadSwing() {
       const input = document.getElementById('swingUpload');
       const file = input.files[0];
@@ -142,10 +127,9 @@
       v.src = url;
 
       v.onloadedmetadata = () => {
-        // Handle iOS Infinity duration quirk
         const finish = () => {
           URL.revokeObjectURL(url);
-          const seconds = v.duration;
+          let seconds = v.duration;
           if (!seconds || !isFinite(seconds)) {
             alert('Could not detect video length. Try a different clip.');
             input.value = '';
@@ -156,10 +140,12 @@
             input.value = '';
             return;
           }
-          alert('Swing uploaded successfully!');
-          // TODO: hook up real upload/process/status here.
+          // SUCCESS → go to simple report page
+          const id = Date.now().toString();
+          window.location.href = `report.html?id=${encodeURIComponent(id)}`;
         };
 
+        // iOS duration Infinity quirk
         if (!isFinite(v.duration) || v.duration === Infinity) {
           v.currentTime = Number.MAX_SAFE_INTEGER;
           v.ontimeupdate = () => { v.ontimeupdate = null; finish(); };
@@ -170,12 +156,14 @@
 
       v.onerror = () => {
         URL.revokeObjectURL(url);
-        alert('Could not read this video. Please try a different file.');
+        alert('Could not read this video file. Please try a different clip.');
         input.value = '';
       };
     }
   </script>
 </body>
 </html>
+
+
 
 
