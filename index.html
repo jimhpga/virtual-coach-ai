@@ -38,5 +38,153 @@
     /* Layout */
     .hero {
       max-width: 720px;
-      margin:
+      margin: 0 auto;
+      padding: 48px 24px;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    /* Optional dark overlay to improve text readability on bright images */
+    .hero::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35); /* tweak 0.25–0.45 to taste */
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .logo {
+      width: 300px;
+      height: auto;
+      margin: 8px auto 20px;
+      display: block;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 36px;
+      letter-spacing: 0.04em;
+    }
+
+    p {
+      margin: 0 auto 16px;
+      line-height: 1.5;
+      max-width: 560px;
+    }
+
+    /* Upload */
+    .upload-button {
+      display: inline-block;
+      margin: 20px 0 8px;
+      padding: 12px 18px;
+      background: #0f172a;      /* dark navy */
+      color: #fff;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      text-decoration: none;
+      user-select: none;
+    }
+    .upload-button:hover { opacity: 0.9; }
+
+    .contact a { color: #86efac; text-decoration: none; }
+    .contact a:hover { text-decoration: underline; }
+
+    /* Small screens */
+    @media (max-width: 420px) {
+      .logo { width: 220px; }
+      h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="safe-area">
+    <div class="hero">
+      <!-- LOGO (make sure this file exists in the same folder) -->
+      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
+
+      <!-- HEADLINE -->
+      <h1>WELCOME</h1>
+      <p>
+        to the beta launch of Virtual Coach AI –<br>
+        the intelligent swing coach designed<br>
+        to help you reach your golfing potential.
+      </p>
+
+      <!-- INVISIBLE FILE INPUT -->
+      <input
+        type="file"
+        id="swingUpload"
+        accept="video/mp4,video/quicktime,video/webm"
+        style="display:none"
+        onchange="uploadSwing()"
+      />
+
+      <!-- CUSTOM UPLOAD BUTTON -->
+      <label for="swingUpload" class="upload-button">⬆ Upload Your Swing</label>
+
+      <!-- CONTACT -->
+      <p class="contact">For inquiries, contact <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
+    </div>
+  </div>
+
+  <script>
+    // Reads video duration, blocks > 10s, confirms success for ≤ 10s
+    async function uploadSwing() {
+      const input = document.getElementById('swingUpload');
+      const file = input.files[0];
+      if (!file) { alert('Please select a swing file to upload.'); return; }
+
+      const url = URL.createObjectURL(file);
+      const v = document.createElement('video');
+      v.preload = 'metadata';
+      v.src = url;
+
+      v.onloadedmetadata = () => {
+        // Some iPhones report Infinity until we seek once
+        const checkDuration = () => {
+          URL.revokeObjectURL(url);
+          let seconds = v.duration;
+
+          if (!isFinite(seconds) || seconds === Infinity) {
+            v.currentTime = Number.MAX_SAFE_INTEGER;
+            v.ontimeupdate = () => {
+              v.ontimeupdate = null;
+              seconds = v.duration;
+              finalize(seconds);
+            };
+          } else {
+            finalize(seconds);
+          }
+        };
+        setTimeout(checkDuration, 0);
+      };
+
+      v.onerror = () => {
+        URL.revokeObjectURL(url);
+        alert('Could not read this video file. Please try a different clip.');
+        input.value = '';
+      };
+
+      function finalize(seconds) {
+        if (!seconds || isNaN(seconds)) {
+          alert('Could not detect video length. Try re-recording a short clip.');
+          input.value = '';
+          return;
+        }
+        if (seconds > 10) {
+          alert('Clip is too long. Please upload a clip that is 10 seconds or less.');
+          input.value = ''; // reset picker
+          return;
+        }
+
+        // Success path (≤ 10s). Replace this alert with your upload/processing flow later.
+        alert('Swing uploaded successfully!');
+        // TODO: fetch('/api/upload') → fetch('/api/process') → poll('/api/status') → redirect('/report/{id}')
+      }
+    }
+  </script>
+</body>
+</html>
 
