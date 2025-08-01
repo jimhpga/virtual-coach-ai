@@ -1,61 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Virtual Coach AI — Summary</title>
-  <style>
-    html, body {
-      height: 100%; margin: 0; padding: 0; color: #f5f5f5;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      background: #0a0a0a url("homepage-background.png") center / cover no-repeat fixed;
-    }
-    body { min-height: -webkit-fill-available; }
-    .safe-area {
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-      padding-left: env(safe-area-inset-left);
-      padding-right: env(safe-area-inset-right);
-    }
-    .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.25); }
-    .pill { display:inline-block; padding:6px 10px; border:1px solid rgba(255,255,255,0.15); border-radius:999px; font-size:12px; color: rgba(255,255,255,0.7); }
-    .card { margin: 18px auto; padding: 16px; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; background: rgba(0,0,0,0.25); text-align:left; }
-    .card h3 { margin: 0 0 8px; font-size: 18px; }
-    .btn { display:inline-block; margin-top: 14px; padding: 10px 16px; border-radius: 10px; background:#1F6F1F; color:#fff; text-decoration:none; font-weight:700; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Virtual Coach AI — Swing Reports</title>
+<style>
+  :root{
+    --fg:#f5f5f5; --bg:#0a0a0a; --line:rgba(255,255,255,0.16);
+    --muted:rgba(255,255,255,0.72);
+    --good:#16a34a;  /* green */
+    --warn:#eab308;  /* yellow */
+    --bad:#ef4444;   /* red */
+    --accent:#1F6F1F; /* darker forest green */
+  }
+  html,body{
+    height:100%; margin:0; padding:0; color:var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    background: var(--bg) url("homepage-background.png") center / cover no-repeat fixed;
+  }
+  body{ min-height:-webkit-fill-available; }
+  .safe-area{ padding:env(safe-area-inset-top) env(safe-area-inset-left) env(safe-area-inset-bottom) env(safe-area-inset-right); }
+  .wrap{ max-width: 900px; margin:0 auto; padding:48px 20px; text-shadow:0 1px 2px rgba(0,0,0,0.25); }
+  h1{ margin:0 0 6px; font-size:32px; }
+  .muted{ color:var(--muted); }
+
+  /* Legend */
+  .legend{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 18px; font-size:13px; }
+  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
+  .g{ background:var(--good); } .y{ background:var(--warn);} .r{ background:var(--bad);}
+
+  /* Accordion */
+  .acc { margin-top: 10px; }
+  details{
+    border:1px solid var(--line); border-radius:12px; background:rgba(0,0,0,0.25);
+    padding:14px 16px; margin-bottom:10px;
+  }
+  summary{
+    cursor:pointer; font-weight:700; list-style:none; outline:none; display:flex; align-items:center; justify-content:space-between;
+  }
+  summary::-webkit-details-marker{ display:none; }
+  .chev{ width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid var(--muted); transition: transform .15s; }
+  details[open] .chev{ transform: rotate(180deg); }
+
+  /* Chips / badges */
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .chip{ border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:13px; }
+  .chip.g{ border-color:var(--good); color:#d1fae5; }
+  .chip.y{ border-color:var(--warn); color:#fef08a; }
+  .chip.r{ border-color:var(--bad);  color:#fecaca; }
+
+  /* Tables */
+  table{ width:100%; border-collapse: collapse; margin-top:10px; font-size:14px;}
+  th, td{ padding:10px; border-bottom:1px solid var(--line); text-align:left; }
+  th{ font-weight:700; color:#fff; }
+  .stat{ display:inline-flex; align-items:center; gap:8px; }
+  .pill{ padding:3px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line);}
+  .pill.g{ background:rgba(22,163,74,0.2); border-color:var(--good); }
+  .pill.y{ background:rgba(234,179,8,0.2); border-color:var(--warn); }
+  .pill.r{ background:rgba(239,68,68,0.2); border-color:var(--bad); }
+
+  /* CTA */
+  .cta{
+    display:inline-block; margin-top:14px; padding:12px 18px; border-radius:12px;
+    background:var(--accent); color:#fff; text-decoration:none; font-weight:700; border:1px solid var(--line);
+  }
+  .cta:hover{ opacity:.95; }
+
+  /* Simple list spacing */
+  ul{ margin:8px 0; padding-left:18px; }
+  li{ margin:6px 0; }
+</style>
 </head>
 <body>
-  <div class="safe-area">
-    <div class="wrap">
-      <h1>Summary</h1>
-      <div id="rid" class="pill">ID: —</div>
+<div class="safe-area">
+  <div class="wrap">
+    <h1>Swing Reports</h1>
+    <div class="muted">ID: <span id="rid">—</span></div>
 
-      <div class="card">
-        <h3>Tempo</h3>
-        <p>Backswing ~0.70s • Pause ~0.06s • Downswing ~0.23s • Ratio ≈ <b>3:1</b></p>
-      </div>
+    <!-- Color Legend -->
+    <div class="legend">
+      <div><span class="dot g"></span>Good</div>
+      <div><span class="dot y"></span>Okay</div>
+      <div><span class="dot r"></span>Needs Work</div>
+    </div>
 
-      <div class="card">
-        <h3>P1–P9 Highlights</h3>
-        <p>P4 top: centered pivot; P6: lead wrist flexed; P7 impact: hands ahead.</p>
-      </div>
+    <div class="acc">
+      <!-- Available Reports -->
+      <details open>
+        <summary>Available Reports <span class="chev"></span></summary>
+        <table>
+          <thead><tr><th>Date</th><th>Club</th><th>Tempo</th><th>P1–P9</th><th>Open</th></tr></thead>
+          <tbody id="reportRows">
+            <!-- filled by script (mock data) -->
+          </tbody>
+        </table>
+      </details>
 
-      <div class="card">
-        <h3>Goals</h3>
+      <!-- Tempo -->
+      <details>
+        <summary>Tempo <span class="chev"></span></summary>
+        <div class="chips">
+          <span class="chip g">Backswing: 0.70s</span>
+          <span class="chip g">Pause: 0.06s</span>
+          <span class="chip g">Downswing: 0.23s</span>
+          <span class="chip g">Ratio: 3:1</span>
+        </div>
+        <p class="muted">Target a repeatable 3:1. Keep a **tiny** pause; don’t rush P4→P5.</p>
+      </details>
+
+      <!-- P1–P9 Full Monty -->
+      <details>
+        <summary>P1–P9 Assessment <span class="chev"></span></summary>
+        <table>
+          <thead><tr><th>Checkpoint</th><th>Observation</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>P1 Setup</td><td>Balanced posture; neutral grip</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P2 Shaft Parallel (BS)</td><td>Club slightly outside hands (ok)</td><td><span class="pill y">Okay</span></td></tr>
+            <tr><td>P3 Lead Arm Parallel</td><td>Good width; trail elbow soft</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P4 Top</td><td>Centered turn; minimal sway</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P5 Lead Arm Parallel (DS)</td><td>Shallowing present; chest open</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P6 Shaft Parallel (DS)</td><td>Lead wrist flexed; path neutral</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P7 Impact</td><td>Hands ahead; strike slightly thin at times</td><td><span class="pill y">Okay</span></td></tr>
+            <tr><td>P8 Trail Arm Parallel</td><td>Extends to target; balanced</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P9 Finish</td><td>Full rotation; stable</td><td><span class="pill g">Good</span></td></tr>
+          </tbody>
+        </table>
+      </details>
+
+      <!-- Power Assessment -->
+      <details>
+        <summary>Power Assessment <span class="chev"></span></summary>
         <ul>
-          <li>Hip Turn @ P4 — target 45°, current 42°</li>
-          <li>Face Angle @ P6 — target ±2°, current 1°</li>
-          <li>Low-Point Control — target 2.0in fwd, current 1.2in fwd</li>
+          <li><b>Sequencing:</b> Hips → torso → arms — solid</li>
+          <li><b>Launch tendencies:</b> Slightly high; de-loft via forward shaft lean</li>
+          <li><b>Speed builders:</b> Step drill, med-ball throws, tempo ladder</li>
+          <li><b>Ground force:</b> Improve trail-leg pressure P3→P5</li>
         </ul>
-      </div>
+      </details>
 
-      <a class="btn" href="index.html">Upload another swing</a>
+      <!-- Goals -->
+      <details>
+        <summary>Goals <span class="chev"></span></summary>
+        <ul>
+          <li>Hip Turn @ P4 — target <b>45°</b>, current <b>42°</b> <span class="pill r">Needs Work</span></li>
+          <li>Face Angle @ P6 — target <b>±2°</b>, current <b>1°</b> <span class="pill g">Good</span></li>
+          <li>Low-Point Control — target <b>+2.0 in</b>, current <b>+1.2 in</b> <span class="pill y">Okay</span></li>
+        </ul>
+      </details>
+
+      <!-- Two-Week Practice Schedule -->
+      <details>
+        <summary>Two-Week Practice Schedule <span class="chev"></span></summary>
+        <div class="muted">3 sessions/week (40–50 min). Keep the same 2–3 feels; change targets/clubs.</div>
+        <table>
+          <thead><tr><th>Day</th><th>Focus</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Week 1 – Session 1</td><td>Hip Turn Depth @ P4</td><td>Mirror feels; trail hip “back”</td></tr>
+            <tr><td>Week 1 – Session 2</td><td>Forward Low Point</td><td>3-ball drill ahead; compress through</td></tr>
+            <tr><td>Week 1 – Session 3</td><td>Tempo Ladder</td><td>Build to 3:1; tiny pause at top</td></tr>
+            <tr><td>Week 2 – Session 1</td><td>Transfer Practice</td><td>Random clubs/targets; keep feels</td></tr>
+            <tr><td>Week 2 – Session 2</td><td>Hip Turn + Low Point</td><td>Blend both; add step drill</td></tr>
+            <tr><td>Week 2 – Session 3</td><td>On-Course Rehearsals</td><td>Pre-shot feel reps; tempo focus</td></tr>
+          </tbody>
+        </table>
+        <a class="cta" href="practice.html">Generate Detailed Schedule</a>
+      </details>
     </div>
   </div>
+</div>
 
-  <script>
-    const id = new URLSearchParams(location.search).get('id') || 'local-demo';
-    document.getElementById('rid').textContent = 'ID: ' + id;
-  </script>
+<script>
+  // Report ID (mock)
+  const id = new URLSearchParams(location.search).get('id') || 'local-demo';
+  document.getElementById('rid').textContent = id;
+
+  // Mock "Available Reports"
+  const rows = document.getElementById('reportRows');
+  const sample = [
+    { date:'Aug 1, 2025', club:'7i', tempo:'3:1', p:'Good', href:'summary.html?id='+id },
+    { date:'Jul 28, 2025', club:'Driver', tempo:'3:1', p:'Okay', href:'summary.html?id='+id },
+    { date:'Jul 22, 2025', club:'PW', tempo:'3:1', p:'Good', href:'summary.html?id='+id },
+  ];
+  rows.innerHTML = sample.map(r => `
+    <tr>
+      <td>${r.date}</td>
+      <td>${r.club}</td>
+      <td><span class="pill g">${r.tempo}</span></td>
+      <td><span class="pill ${r.p==='Good'?'g':(r.p==='Okay'?'y':'r')}">${r.p}</span></td>
+      <td><a class="cta" style="padding:6px 10px; font-size:13px;" href="${r.href}">Open</a></td>
+    </tr>
+  `).join('');
+</script>
 </body>
 </html>
+
+
