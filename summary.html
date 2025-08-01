@@ -8,67 +8,56 @@
   :root{
     --fg:#f5f5f5; --bg:#0a0a0a; --line:rgba(255,255,255,0.16);
     --muted:rgba(255,255,255,0.72);
-    --good:#16a34a;  /* green */
-    --warn:#eab308;  /* yellow */
-    --bad:#ef4444;   /* red */
-    --accent:#1F6F1F; /* darker forest green */
+    --good:#16a34a;  --warn:#eab308;  --bad:#ef4444;
+    --accent:#1F6F1F;
   }
   html,body{
     height:100%; margin:0; padding:0; color:var(--fg);
     font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     background: var(--bg) url("homepage-background.png") center / cover no-repeat fixed;
+    filter: brightness(1.08) contrast(1.03);
   }
   body{ min-height:-webkit-fill-available; }
-  .safe-area{ padding:env(safe-area-inset-top) env(safe-area-inset-left) env(safe-area-inset-bottom) env(safe-area-inset-right); }
+  .safe-area{ padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
   .wrap{ max-width: 900px; margin:0 auto; padding:48px 20px; text-shadow:0 1px 2px rgba(0,0,0,0.25); }
   h1{ margin:0 0 6px; font-size:32px; }
   .muted{ color:var(--muted); }
 
-  /* Legend */
   .legend{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 18px; font-size:13px; }
   .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
   .g{ background:var(--good); } .y{ background:var(--warn);} .r{ background:var(--bad);}
 
-  /* Accordion */
   .acc { margin-top: 10px; }
   details{
     border:1px solid var(--line); border-radius:12px; background:rgba(0,0,0,0.25);
     padding:14px 16px; margin-bottom:10px;
   }
-  summary{
-    cursor:pointer; font-weight:700; list-style:none; outline:none; display:flex; align-items:center; justify-content:space-between;
-  }
+  summary{ cursor:pointer; font-weight:700; list-style:none; outline:none; display:flex; align-items:center; justify-content:space-between; }
   summary::-webkit-details-marker{ display:none; }
   .chev{ width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid var(--muted); transition: transform .15s; }
   details[open] .chev{ transform: rotate(180deg); }
 
-  /* Chips / badges */
   .chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
   .chip{ border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:13px; }
-  .chip.g{ border-color:var(--good); color:#d1fae5; }
-  .chip.y{ border-color:var(--warn); color:#fef08a; }
-  .chip.r{ border-color:var(--bad);  color:#fecaca; }
+  .chip.g{ border-color:var(--good); color:#d1fae5; } .chip.y{ border-color:var(--warn); color:#fef08a; } .chip.r{ border-color:var(--bad);  color:#fecaca; }
 
-  /* Tables */
   table{ width:100%; border-collapse: collapse; margin-top:10px; font-size:14px;}
   th, td{ padding:10px; border-bottom:1px solid var(--line); text-align:left; }
   th{ font-weight:700; color:#fff; }
-  .stat{ display:inline-flex; align-items:center; gap:8px; }
   .pill{ padding:3px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line);}
   .pill.g{ background:rgba(22,163,74,0.2); border-color:var(--good); }
   .pill.y{ background:rgba(234,179,8,0.2); border-color:var(--warn); }
   .pill.r{ background:rgba(239,68,68,0.2); border-color:var(--bad); }
 
-  /* CTA */
   .cta{
     display:inline-block; margin-top:14px; padding:12px 18px; border-radius:12px;
     background:var(--accent); color:#fff; text-decoration:none; font-weight:700; border:1px solid var(--line);
   }
   .cta:hover{ opacity:.95; }
 
-  /* Simple list spacing */
   ul{ margin:8px 0; padding-left:18px; }
   li{ margin:6px 0; }
+  ol{ margin:8px 0; padding-left:18px; }
 </style>
 </head>
 <body>
@@ -77,7 +66,6 @@
     <h1>Swing Reports</h1>
     <div class="muted">ID: <span id="rid">—</span></div>
 
-    <!-- Color Legend -->
     <div class="legend">
       <div><span class="dot g"></span>Good</div>
       <div><span class="dot y"></span>Okay</div>
@@ -90,9 +78,7 @@
         <summary>Available Reports <span class="chev"></span></summary>
         <table>
           <thead><tr><th>Date</th><th>Club</th><th>Tempo</th><th>P1–P9</th><th>Open</th></tr></thead>
-          <tbody id="reportRows">
-            <!-- filled by script (mock data) -->
-          </tbody>
+          <tbody id="reportRows"></tbody>
         </table>
       </details>
 
@@ -105,10 +91,10 @@
           <span class="chip g">Downswing: 0.23s</span>
           <span class="chip g">Ratio: 3:1</span>
         </div>
-        <p class="muted">Target a repeatable 3:1. Keep a **tiny** pause; don’t rush P4→P5.</p>
+        <p class="muted">Target a repeatable 3:1. Keep a tiny pause; don’t rush P4→P5.</p>
       </details>
 
-      <!-- P1–P9 Full Monty -->
+      <!-- P1–P9 Full Assessment -->
       <details>
         <summary>P1–P9 Assessment <span class="chev"></span></summary>
         <table>
@@ -132,10 +118,31 @@
         <summary>Power Assessment <span class="chev"></span></summary>
         <ul>
           <li><b>Sequencing:</b> Hips → torso → arms — solid</li>
-          <li><b>Launch tendencies:</b> Slightly high; de-loft via forward shaft lean</li>
-          <li><b>Speed builders:</b> Step drill, med-ball throws, tempo ladder</li>
+          <li><b>Launch:</b> Slightly high; de-loft via forward shaft lean</li>
           <li><b>Ground force:</b> Improve trail-leg pressure P3→P5</li>
         </ul>
+      </details>
+
+      <!-- NEW: Top 3 Things to Work On -->
+      <details open>
+        <summary>Top 3 Things to Work On <span class="chev"></span></summary>
+        <ol>
+          <li><b>Hip Turn Depth @ P4</b> — Feel trail hip “back”; maintain tilt. Check in mirror/video.</li>
+          <li><b>Forward Low Point</b> — 3-ball drill ahead of the ball; compress down/forward.</li>
+          <li><b>Tempo Consistency</b> — Keep ~3:1 with a tiny pause; don’t rush P4→P5.</li>
+        </ol>
+        <p class="muted">2–3 focused feels per session beats random buckets.</p>
+      </details>
+
+      <!-- NEW: Top 3 Power Adders -->
+      <details open>
+        <summary>Top 3 Power Adders <span class="chev"></span></summary>
+        <ol>
+          <li><b>Step-Through Speed Drill</b> — 10 reps × 3 sets; trail foot steps toward target in transition.</li>
+          <li><b>Overspeed Swings</b> — 6 reps × 3 sets; 3 with light stick/club, 3 with gamer @ 105–110% intent.</li>
+          <li><b>Med-Ball Rotational Throws</b> — 8 reps × 3 sets; hips lead, throw into wall/ground. Bands if no wall.</li>
+        </ol>
+        <p class="muted">2–3 days/week, non-consecutive. Warm up; stop if balance/form breaks.</p>
       </details>
 
       <!-- Goals -->
@@ -155,12 +162,12 @@
         <table>
           <thead><tr><th>Day</th><th>Focus</th><th>Notes</th></tr></thead>
           <tbody>
-            <tr><td>Week 1 – Session 1</td><td>Hip Turn Depth @ P4</td><td>Mirror feels; trail hip “back”</td></tr>
-            <tr><td>Week 1 – Session 2</td><td>Forward Low Point</td><td>3-ball drill ahead; compress through</td></tr>
-            <tr><td>Week 1 – Session 3</td><td>Tempo Ladder</td><td>Build to 3:1; tiny pause at top</td></tr>
-            <tr><td>Week 2 – Session 1</td><td>Transfer Practice</td><td>Random clubs/targets; keep feels</td></tr>
-            <tr><td>Week 2 – Session 2</td><td>Hip Turn + Low Point</td><td>Blend both; add step drill</td></tr>
-            <tr><td>Week 2 – Session 3</td><td>On-Course Rehearsals</td><td>Pre-shot feel reps; tempo focus</td></tr>
+            <tr><td>Week 1 – S1</td><td>Hip Turn Depth @ P4</td><td>Mirror feels; trail hip “back”</td></tr>
+            <tr><td>Week 1 – S2</td><td>Forward Low Point</td><td>3-ball drill ahead; compress through</td></tr>
+            <tr><td>Week 1 – S3</td><td>Tempo Ladder</td><td>Build to 3:1; tiny pause at top</td></tr>
+            <tr><td>Week 2 – S1</td><td>Transfer Practice</td><td>Random clubs/targets; keep feels</td></tr>
+            <tr><td>Week 2 – S2</td><td>Hip Turn + Low Point</td><td>Blend both; add step drill</td></tr>
+            <tr><td>Week 2 – S3</td><td>On-Course Rehearsals</td><td>Pre-shot feel reps; tempo focus</td></tr>
           </tbody>
         </table>
         <a class="cta" href="practice.html">Generate Detailed Schedule</a>
@@ -170,7 +177,7 @@
 </div>
 
 <script>
-  // Report ID (mock)
+  // Report ID
   const id = new URLSearchParams(location.search).get('id') || 'local-demo';
   document.getElementById('rid').textContent = id;
 
@@ -193,5 +200,3 @@
 </script>
 </body>
 </html>
-
-
