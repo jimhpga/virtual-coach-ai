@@ -10,42 +10,60 @@
     background:#0a0a0a url("homepage-background.png") center/cover no-repeat fixed;
     display:flex; align-items:center; justify-content:center;
     font-family:Arial, sans-serif; color:#fff;
+    filter: brightness(1.08) contrast(1.03);
   }
   .card {
     background:rgba(0,0,0,0.6); padding:20px; border-radius:12px; text-align:center;
-    width:300px;
+    width:min(360px,92vw); border:1px solid rgba(255,255,255,0.16);
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
   }
+  h2 { margin:0 0 10px; font-size:22px; }
   input {
-    width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ccc;
-    font-size:16px;
+    width:100%; padding:12px 14px; margin:8px 0 12px;
+    border-radius:10px; border:1px solid rgba(255,255,255,0.16);
+    background: rgba(0,0,0,0.35); color:#fff; font-size:16px;
   }
   button {
-    padding:10px 16px; border:none; border-radius:8px; background:#1F6F1F; color:#fff;
-    font-weight:bold; cursor:pointer;
+    padding:10px 16px; border:none; border-radius:10px;
+    background:#1F6F1F; color:#fff; font-weight:700; cursor:pointer;
   }
-  .error { color:#ffaaaa; height:18px; margin-top:8px; }
+  .muted { margin-top:10px; font-size:12px; color:rgba(255,255,255,0.75); }
 </style>
 </head>
 <body>
   <div class="card">
     <h2>Enter Passcode</h2>
     <input type="password" id="pass" placeholder="Passcode" />
-    <button onclick="checkCode()">Continue</button>
-    <div class="error" id="error"></div>
+    <button id="go">Continue</button>
+    <div class="muted">Tip: use <b>1234</b> to return to the opening screen.</div>
   </div>
 
 <script>
-  const PASSCODE = "1234"; // change or add more later
+  // Behavior:
+  // - If passcode === '1234' -> go back to opening screen (index.html)
+  // - Else (any other value, including empty) -> go to analyzing (report.html with demo ID)
 
-  function checkCode() {
-    const entered = document.getElementById('pass').value.trim();
-    if (entered === PASSCODE) {
-      localStorage.setItem('vc_auth', 'ok');
-      window.location.href = "index.html"; // send back to homepage
+  const OPENING = 'index.html';
+  const ANALYZING = 'report.html?id=demo-' + Date.now();
+
+  document.getElementById('go').addEventListener('click', () => {
+    const code = (document.getElementById('pass').value || '').trim();
+
+    if (code === '1234') {
+      // Set a small flag so upload is allowed afterward (optional)
+      try { localStorage.setItem('vc_auth', 'ok'); } catch (e) {}
+      window.location.href = OPENING;
     } else {
-      document.getElementById('error').textContent = "Invalid passcode";
+      // No flag; just move forward to analyzing
+      window.location.href = ANALYZING;
     }
-  }
+  });
+
+  // Press Enter to submit
+  document.getElementById('pass').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('go').click();
+  });
 </script>
 </body>
 </html>
+
