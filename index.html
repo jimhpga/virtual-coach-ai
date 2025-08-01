@@ -1,55 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Virtual Coach AI — Login</title>
-<style>
-  :root{ --fg:#f5f5f5; --bg:#0a0a0a; --line:rgba(255,255,255,0.16); --accent:#1F6F1F; }
-  html,body{height:100%;margin:0;padding:0;background:var(--bg) url("homepage-background.png") center/cover no-repeat fixed;color:var(--fg);
-            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;}
-  body{display:flex;align-items:center;justify-content:center;min-height:-webkit-fill-available;filter:brightness(1.08) contrast(1.03);}
-  .card{width:min(520px,92vw);border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,0.35);padding:20px 18px;text-align:center;
-        box-shadow:0 10px 30px rgba(0,0,0,0.25);}
-  h1{margin:6px 0 10px;font-size:24px}
-  p{margin:0 0 14px;color:rgba(255,255,255,0.75)}
-  input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,0.25);color:#fff;font-size:16px}
-  .btn{margin-top:12px;display:inline-block;padding:12px 16px;border-radius:12px;background:var(--accent);color:#fff;font-weight:700;
-       text-decoration:none;border:1px solid var(--line);cursor:pointer}
-  .err{color:#fecaca;margin-top:10px;min-height:18px;font-size:14px}
-  .muted{margin-top:10px;font-size:12px;color:rgba(255,255,255,0.65)}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Virtual Coach AI</title>
+  <style>
+    /* Global / Background */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      color: #f5f5f5;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: #0a0a0a url("homepage-background.png") center / cover no-repeat fixed;
+      filter: brightness(1.08) contrast(1.03); /* tweak if needed */
+    }
+    body { min-height: -webkit-fill-available; }
+
+    .safe-area {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
+    .hero {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 24px 72px;
+      text-align: center;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    }
+
+    /* Bigger + forest green logo */
+    .logo {
+      width: 420px; max-width: 90vw; height: auto;
+      margin: 8px auto 20px; display: block;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.25));
+    }
+    /* Darker forest green tint (#1F6F1F) */
+    .logo-green {
+      filter:
+        brightness(0) saturate(100%)
+        invert(26%) sepia(56%)
+        saturate(2350%) hue-rotate(79deg)
+        brightness(85%) contrast(90%)
+        drop-shadow(0 6px 16px rgba(0,0,0,0.25));
+    }
+
+    h1 { margin: 0 0 10px; font-size: 36px; letter-spacing: 0.04em; }
+    p  { margin: 0 auto 16px; line-height: 1.6; max-width: 560px; }
+
+    .btn {
+      display:inline-block; margin: 10px 8px 0; padding: 12px 18px;
+      border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);
+      text-decoration:none; font-weight:700; color:#fff; background:#0f172a; cursor:pointer;
+    }
+    .btn:hover { opacity:.92; }
+    .btn-secondary { background: transparent; border-color: rgba(255,255,255,0.25); }
+
+    .contact a { color: #22c55e; text-decoration: none; }
+    .contact a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 30px; }
+      .logo { width: 300px; }
+    }
+  </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Enter Passcode</h1>
-    <p>Tester access only.</p>
-    <form id="form">
-      <input id="code" type="password" inputmode="numeric" autocomplete="one-time-code" placeholder="Passcode" />
-      <button class="btn" type="submit">Continue</button>
-      <div id="err" class="err"></div>
-    </form>
-    <div class="muted">Lost your code? Email <a href="mailto:jimh@pga.com" style="color:#86efac;text-decoration:none">jimh@pga.com</a>.</div>
+  <div class="safe-area">
+    <div class="hero">
+      <!-- If you have a pre-green logo file, use it without logo-green -->
+      <!-- <img src="virtualcoach-logo.png" alt="Virtual Coach AI Logo" class="logo" /> -->
+      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo logo-green" />
+
+      <h1>WELCOME</h1>
+      <p>
+        to the beta launch of Virtual Coach AI —<br>
+        the intelligent swing coach designed to help you reach your golfing potential.
+      </p>
+
+      <!-- Hidden file input -->
+      <input
+        type="file"
+        id="swingUpload"
+        accept="video/mp4,video/quicktime,video/webm"
+        style="display:none"
+        onchange="uploadSwing()"
+      />
+
+      <!-- Actions -->
+      <label for="swingUpload" class="btn">⬆ Upload Your Swing</label>
+      <a href="/summary.html" class="btn btn-secondary">📊 Reports</a>
+
+      <p class="contact" style="margin-top:14px;">Questions? <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
+    </div>
   </div>
 
-<script>
-// ---- 5 allowed codes (edit later to add more) ----
-const ALLOWED = ["1001","1002","1003","1004","1005"];
-const DEST = "index.html"; // where to go after login
+  <script>
+    // Gate uploads: require a passcode before processing
+    // Expect login.html to set: localStorage.setItem('vc_auth', 'ok')
+    async function uploadSwing() {
+      // 1) Check login first
+      try {
+        if (localStorage.getItem('vc_auth') !== 'ok') {
+          // Not logged in → bounce to simple passcode page
+          window.location.href = 'login.html';
+          return;
+        }
+      } catch (e) {
+        window.location.href = 'login.html';
+        return;
+      }
 
-document.getElementById('form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const code = (document.getElementById('code').value || "").trim();
-  const err = document.getElementById('err');
+      // 2) Proceed with the existing upload/validation flow
+      const input = document.getElementById('swingUpload');
+      const file = input.files[0];
+      if (!file) { alert('Please select a swing file.'); return; }
 
-  if (ALLOWED.includes(code)) {
-    localStorage.setItem('vc_auth', 'ok');    // simple session flag
-    localStorage.setItem('vc_user', code);    // optional: remember which tester
-    window.location.href = DEST;
-  } else {
-    err.textContent = "Invalid code. Try again.";
-  }
-});
-</script>
+      const url = URL.createObjectURL(file);
+      const v = document.createElement('video');
+      v.preload = 'metadata';
+      v.src = url;
+
+      v.onloadedmetadata = () => {
+        const finish = () => {
+          URL.revokeObjectURL(url);
+          const seconds = v.duration;
+          if (!seconds || !isFinite(seconds)) {
+            alert('Could not detect video length. Try a different clip.');
+            input.value = '';
+            return;
+          }
+          if (seconds > 10) {
+            alert('Clip is too long. Please upload a clip ≤ 10 seconds.');
+            input.value = '';
+            return;
+          }
+          const id = Date.now().toString();
+          window.location.href = `report.html?id=${encodeURIComponent(id)}`;
+        };
+
+        // iOS duration Infinity quirk
+        if (!isFinite(v.duration) || v.duration === Infinity) {
+          v.currentTime = Number.MAX_SAFE_INTEGER;
+          v.ontimeupdate = () => { v.ontimeupdate = null; finish(); };
+        } else {
+          finish();
+        }
+      };
+
+      v.onerror = () => {
+        URL.revokeObjectURL(url);
+        alert('Could not read this video file. Please try a different file.');
+        input.value = '';
+      };
+    }
+  </script>
 </body>
 </html>
