@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Virtual Coach AI — Summary</title>
+  <style>
+    html, body {
+      height: 100%; margin: 0; padding: 0; color: #f5f5f5;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: #0a0a0a url("homepage-background.png") center / cover no-repeat fixed;
+    }
+    body { min-height: -webkit-fill-available; }
+    .safe-area {
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+    .pill { display:inline-block; padding:6px 10px; border:1px solid rgba(255,255,255,0.15); border-radius:999px; font-size:12px; color: rgba(255,255,255,0.7); }
+    .card { margin: 18px auto; padding: 16px; border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; background: rgba(0,0,0,0.25); text-align:left; }
+    .card h3 { margin: 0 0 8px; font-size: 18px; }
+    .btn { display:inline-block; margin-top: 14px; padding: 10px 16px; border-radius: 10px; background:#1F6F1F; color:#fff; text-decoration:none; font-weight:700; }
+  </style>
+</head>
+<body>
+  <div class="safe-area">
+    <div class="wrap">
+      <h1>Summary</h1>
+      <div id="rid" class="pill">ID: —</div>
+
+      <div class="card">
+        <h3>Tempo</h3>
+        <p>Backswing ~0.70s • Pause ~0.06s • Downswing ~0.23s • Ratio ≈ <b>3:1</b></p>
+      </div>
+
+      <div class="card">
+        <h3>P1–P9 Highlights</h3>
+        <p>P4 top: centered pivot; P6: lead wrist flexed; P7 impact: hands ahead.</p>
+      </div>
+
+      <div class="card">
+        <h3>Goals</h3>
+        <ul>
+          <li>Hip Turn @ P4 — target 45°, current 42°</li>
+          <li>Face Angle @ P6 — target ±2°, current 1°</li>
+          <li>Low-Point Control — target 2.0in fwd, current 1.2in fwd</li>
+        </ul>
+      </div>
+
+      <a class="btn" href="index.html">Upload another swing</a>
+    </div>
+  </div>
+
+  <script>
+    const id = new URLSearchParams(location.search).get('id') || 'local-demo';
+    document.getElementById('rid').textContent = 'ID: ' + id;
+  </script>
+</body>
+</html>
