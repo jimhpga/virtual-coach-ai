@@ -10,7 +10,7 @@
     background:#0a0a0a url("homepage-background.png") center/cover no-repeat fixed;
     display:flex; align-items:center; justify-content:center;
     font-family:Arial, sans-serif; color:#fff;
-    filter: brightness(1.08) contrast(1.03);
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
   }
   .card {
     background:rgba(0,0,0,0.6); padding:20px; border-radius:12px; text-align:center;
@@ -27,43 +27,37 @@
     padding:10px 16px; border:none; border-radius:10px;
     background:#1F6F1F; color:#fff; font-weight:700; cursor:pointer;
   }
-  .muted { margin-top:10px; font-size:12px; color:rgba(255,255,255,0.75); }
+  .error { color:#ffb4b4; min-height:18px; margin-top:8px; }
 </style>
 </head>
 <body>
   <div class="card">
     <h2>Enter Passcode</h2>
-    <input type="password" id="pass" placeholder="Passcode" />
-    <button id="go">Continue</button>
-    <div class="muted">Tip: use <b>1234</b> to return to the opening screen.</div>
+    <input type="password" id="pass" placeholder="Passcode" autocomplete="one-time-code" inputmode="numeric" />
+    <button id="go" type="button">Continue</button>
+    <div id="err" class="error"></div>
   </div>
 
 <script>
-  // Behavior:
-  // - If passcode === '1234' -> go back to opening screen (index.html)
-  // - Else (any other value, including empty) -> go to analyzing (report.html with demo ID)
+(function(){
+  const PASS = "1234";
+  const HOME = "index.html";
 
-  const OPENING = 'index.html';
-  const ANALYZING = 'report.html?id=demo-' + Date.now();
-
-  document.getElementById('go').addEventListener('click', () => {
-    const code = (document.getElementById('pass').value || '').trim();
-
-    if (code === '1234') {
-      // Set a small flag so upload is allowed afterward (optional)
-      try { localStorage.setItem('vc_auth', 'ok'); } catch (e) {}
-      window.location.href = OPENING;
+  function submit(){
+    var code = (document.getElementById('pass').value || "").trim();
+    if (code === PASS) {
+      try { localStorage.setItem('vc_auth','ok'); } catch(e){}
+      window.location.href = HOME;
     } else {
-      // No flag; just move forward to analyzing
-      window.location.href = ANALYZING;
+      document.getElementById('err').textContent = "Invalid passcode";
     }
-  });
+  }
 
-  // Press Enter to submit
-  document.getElementById('pass').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('go').click();
+  document.getElementById('go').addEventListener('click', submit);
+  document.getElementById('pass').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') submit();
   });
+})();
 </script>
 </body>
 </html>
-
