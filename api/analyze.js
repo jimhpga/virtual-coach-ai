@@ -1,4 +1,4 @@
-// /api/analyze.js
+// /api/analyze.js — calls OpenAI (GPT-4o) with 3–9 frame images and returns a structured report.
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST' });
 
@@ -16,9 +16,9 @@ export default async function handler(req, res) {
           type: "object",
           properties: {
             backswing: { type: "number" },
-            pause: { type: "number" },
+            pause:     { type: "number" },
             downswing: { type: "number" },
-            ratio: { type: "number" }
+            ratio:     { type: "number" }
           }, required: ["backswing","pause","downswing","ratio"]
         },
         pFlags: {
@@ -32,12 +32,11 @@ export default async function handler(req, res) {
       additionalProperties: false
     };
 
-    // Build an OpenAI Responses API request with images + JSON schema
     const messages = [
       { role: "system", content:
         "You are a golf swing analyst. Given 3–9 key frames of a single swing, estimate tempo (backswing, pause, downswing, ratio) " +
         "and set P1–P9 flags (g=Good, y=Okay, r=Needs Work). Provide Top 3 Things to Work On and Top 3 Power Things to Work On. " +
-        "Be consistent and conservative. Output MUST match the JSON schema." },
+        "Be conservative, consistent, and follow the JSON schema strictly." },
       { role: "user", content: [
           { type: "text", text:
             "Analyze these frames. Estimate seconds for backswing/pause/downswing and overall ratio. " +
@@ -54,9 +53,10 @@ export default async function handler(req, res) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4o",               // vision-capable
+        model: "gpt-4o",
+        temperature: 0.2,
         input: messages,
-        response_format: {             // structured JSON
+        response_format: {
           type: "json_schema",
           json_schema: { name: "SwingReport", schema, strict: true }
         }
@@ -69,7 +69,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: j.error || "OpenAI error" });
     }
 
-    // Extract structured output
     let payload = j.output?.[0]?.content?.[0]?.text
                || j.choices?.[0]?.message?.content;
     if (typeof payload === "string") payload = JSON.parse(payload);
