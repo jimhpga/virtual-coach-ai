@@ -35,12 +35,10 @@
     .contact a { color: #22c55e; text-decoration: none; }
     .contact a:hover { text-decoration: underline; }
 
-    /* Analyzing overlay */
     #analyzing {
       display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
       backdrop-filter: blur(2px); color:#fff; z-index:999;
       align-items:center; justify-content:center; flex-direction:column; text-align:center;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
     .spin { width:44px; height:44px; border:4px solid rgba(255,255,255,.25);
             border-top-color:#1F6F1F; border-radius:50%; animation:spin 1s linear infinite; }
@@ -66,30 +64,23 @@
       <a href="/summary.html" class="btn btn-secondary">📊 Reports</a>
 
       <p class="contact" style="margin-top:14px;">Questions? <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
-      <p style="opacity:.65;font-size:12px;margin-top:6px">v1.0 — live analysis + resume upload</p>
+      <p style="opacity:.65;font-size:12px;margin-top:6px">v1.1 — auth gate moved to startUpload only</p>
     </div>
   </div>
 
-  <!-- Analyzing overlay -->
   <div id="analyzing">
     <div class="spin"></div>
     <div style="margin-top:12px">Analyzing your swing…</div>
   </div>
 
   <script>
-    // ---------- auth helpers ----------
+    // ---------- auth gate only BEFORE opening picker ----------
     function isAuthed() { try { return localStorage.getItem('vc_auth') === 'ok'; } catch(e){ return false; } }
-
     function startUpload() {
-      if (!isAuthed()) {
-        // Pass intent so login returns here and auto-opens picker
-        window.location.href = '/login.html?next=upload';
-        return;
-      }
+      if (!isAuthed()) { window.location.href = '/login.html?next=upload'; return; }
       document.getElementById('swingUpload').click();
     }
-
-    // Auto-resume file picker if we just logged in
+    // Auto-resume after login
     window.addEventListener('DOMContentLoaded', () => {
       const resume = new URLSearchParams(location.search).get('resume');
       if (resume === 'upload' && isAuthed()) {
@@ -98,24 +89,18 @@
       }
     });
 
-    // ---------- frame extraction ----------
+    // ---------- extract frames ----------
     async function extractFrames(file) {
       const url = URL.createObjectURL(file);
       const video = document.createElement('video');
       video.src = url; video.muted = true; video.playsInline = true;
+      await new Promise((resolve, reject) => { video.onloadedmetadata = resolve; video.onerror = reject; });
 
-      await new Promise((resolve, reject) => {
-        video.onloadedmetadata = resolve;
-        video.onerror = reject;
-      });
-
-      // Sample first ~1.8s uniformly (or full duration if shorter)
       const duration = Math.max(0.6, Math.min(1.8, video.duration || 1.2));
       const steps = 9;
       const timestamps = Array.from({length: steps}, (_,i) => +(i * (duration / (steps - 1))).toFixed(2));
 
-      const canvas = document.createElement('canvas');
-      canvas.width = 480; canvas.height = 270;
+      const canvas = document.createElement('canvas'); canvas.width = 480; canvas.height = 270;
       const ctx = canvas.getContext('2d');
 
       const images = [];
@@ -129,7 +114,7 @@
       return images;
     }
 
-    // ---------- POST analyzer with spinner ----------
+    // ---------- POST to /api/analyze ----------
     async function analyzeFrames(id, frames) {
       const overlay = document.getElementById('analyzing');
       overlay.style.display = 'flex';
@@ -156,10 +141,8 @@
       }
     }
 
-    // ---------- main upload flow ----------
+    // ---------- main upload flow (NO auth check here) ----------
     async function uploadSwing() {
-      if (!isAuthed()) { window.location.href = '/login.html?next=upload'; return; }
-
       const input = document.getElementById('swingUpload');
       const file = input.files[0];
       if (!file) { alert('Please select a swing file.'); return; }
@@ -178,7 +161,7 @@
           try {
             const frames = await extractFrames(file);
             const report = await analyzeFrames(id, frames);
-            if (!report) return; // error already shown
+            if (!report) return;
             sessionStorage.setItem('vc_report_' + id, JSON.stringify(report));
             window.location.href = `/summary.html?id=${encodeURIComponent(id)}`;
           } catch (e) {
@@ -187,7 +170,6 @@
           }
         };
 
-        // iOS duration Infinity quirk
         if (!isFinite(v.duration) || v.duration === Infinity) {
           v.currentTime = Number.MAX_SAFE_INTEGER;
           v.ontimeupdate = () => { v.ontimeupdate = null; URL.revokeObjectURL(objUrl); proceed(v.duration); };
@@ -204,6 +186,10 @@
         input.value = '';
       };
     }
+
+    // Optional: surface silent errors
+    window.addEventListener('error', e => alert('Error: ' + (e.message || 'unknown')));
+    window.addEventListener('unhandledrejection', e => alert('Error: ' + (e.reason?.message || 'network/analysis')));
   </script>
 </body>
 </html>
