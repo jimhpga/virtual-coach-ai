@@ -1,18 +1,29 @@
 // /api/analyze.js
+export const config = { maxDuration: 20 };
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST' });
 
   try {
-    const { id, frames } = req.body || {};
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: 'OPENAI_API_KEY missing (Production). Redeploy after adding in Vercel.' });
+
+    // body may be object or string
+    let body = req.body;
+    if (typeof body === 'string') { try { body = JSON.parse(body); } catch {} }
+    const { id, frames } = body || {};
     if (!id || !Array.isArray(frames) || frames.length < 3) {
       return res.status(400).json({ error: 'missing id or frames (need >=3)' });
     }
+
+    const imgs = frames.slice(0, 6); // keep request small
 
     const schema = {
       type: "object",
       properties: {
         id: { type: "string" },
-        tempo: { type: "object",
+        tempo: {
+          type: "object",
           properties: {
             backswing: { type: "number" },
             pause: { type: "number" },
@@ -28,49 +39,48 @@ export default async function handler(req, res) {
       additionalProperties: false
     };
 
-    const messages = [
-      { role: "system", content:
-        "You are a golf swing analyst. Given 3–9 key frames of a single swing, estimate tempo (backswing, pause, downswing, ratio) " +
-        "and set P1–P9 flags (g=Good, y=Okay, r=Needs Work). Provide Top 3 Things to Work On and Top 3 Power Things to Work On. " +
-        "Be consistent and conservative. Output MUST match the JSON schema." },
-      { role: "user", content: [
-          { type: "text", text:
-            "Analyze these frames. Estimate seconds for backswing/pause/downswing and overall ratio. " +
-            "Assign 9 flags for P1..P9. Then list Top 3 Work-On and Top 3 Power items." },
-          ...frames.map(dataUrl => ({ type: "input_image", image_url: dataUrl }))
+    const input = [
+      {
+        role: "user",
+        content: [
+          { type: "input_text",
+            text:
+`Analyze these frames of a single golf swing.
+Return:
+- tempo (backswing, pause, downswing in seconds; ratio as a number like 3.0)
+- flags for P1..P9 using g/y/r (g=Good, y=Okay, r=Needs Work)
+- Top 3 Things to Work On (short phrases)
+- Top 3 Power Things to Work On (short phrases)
+Strictly match the JSON schema.` },
+          ...imgs.map((dataUrl) => ({ type: "input_image", image_url: { url: dataUrl } }))
         ]
       }
     ];
 
-    const r = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
-      },
+    const r = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: "gpt-4o",
-        input: messages,
-        response_format: { type: "json_schema", json_schema: { name: "SwingReport", schema, strict: true } }
+        model: 'gpt-4o',
+        input,
+        response_format: { type: 'json_schema', json_schema: { name: 'SwingReport', schema, strict: true } }
       })
     });
 
-    const j = await r.json();
-    if (!r.ok) {
-      console.error("OpenAI error:", j);
-      return res.status(500).json({ error: j.error || "OpenAI error" });
-    }
+    const data = await r.json();
+    if (!r.ok) return res.status(500).json({ error: data?.error || data || 'OpenAI error' });
 
-    let payload = j.output?.[0]?.content?.[0]?.text || j.choices?.[0]?.message?.content;
-    if (typeof payload === "string") payload = JSON.parse(payload);
+    let payload = data.output?.[0]?.content?.[0]?.text ?? data.choices?.[0]?.message?.content ?? null;
+    if (!payload) return res.status(500).json({ error: 'No JSON payload from OpenAI' });
 
-    const report = payload || {};
-    report.id = id;
+    let report;
+    try { report = typeof payload === 'string' ? JSON.parse(payload) : payload; }
+    catch (e) { return res.status(500).json({ error: 'Invalid JSON from OpenAI', detail: String(e) }); }
 
-    res.setHeader("Cache-Control","no-store");
+    report.id = String(id);
+    res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json(report);
   } catch (e) {
-    console.error(e);
-    return res.status(500).json({ error: String(e) });
+    return res.status(500).json({ error: 'Handler exception', detail: String(e) });
   }
 }
