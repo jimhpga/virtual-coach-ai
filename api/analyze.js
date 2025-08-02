@@ -1,11 +1,11 @@
-// /api/analyze.js — Chat Completions (vision) + JSON output, robust errors
+// /api/analyze.js — Chat Completions (vision) + forced JSON output
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    res.setHeader('Content-Type','application/json');
+    res.setHeader('Content-Type', 'application/json');
     return res.status(405).json({ error: 'Use POST' });
   }
 
-  // Read raw body (safer on Vercel)
+  // Read raw JSON body (safe on Vercel)
   let bodyText = '';
   try {
     await new Promise((resolve, reject) => {
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       req.on('end', resolve);
       req.on('error', reject);
     });
-  } catch (e) {
+  } catch {
     return res.status(400).json({ error: 'Failed to read request body' });
   }
 
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Missing OPENAI_API_KEY env var' });
   }
 
-  // Keep payload modest
+  // Keep payload modest to avoid 413
   const clipped = frames.slice(0, 6);
 
   const systemPrompt =
@@ -40,12 +40,13 @@ export default async function handler(req, res) {
     "Return ONLY valid JSON with keys: id, tempo {backswing, pause, downswing, ratio}, " +
     "pFlags[9], top3WorkOn[3], top3Power[3]. No extra text.";
 
-  // Build a single user message with text + multiple image parts
+  // Build user message with text + multiple images
   const userContent = [
     { type: "text", text:
       "Analyze these frames of a single swing. Return ONLY JSON with this shape:\n" +
       "{ \"id\": \"string\", \"tempo\": {\"backswing\": number, \"pause\": number, \"downswing\": number, \"ratio\": number}, " +
-      "\"pFlags\": [\"g\"|\"y\"|\"r\", x9], \"top3WorkOn\": [string, x3], \"top3Power\": [string, x3] }" }
+      "\"pFlags\": [\"g\"|\"y\"|\"r\", x9], \"top3WorkOn\": [string, x3], \"top3Power\": [string, x3] }"
+    }
   ];
   for (const dataUrl of clipped) {
     userContent.push({ type: "image_url", image_url: { url: dataUrl } });
@@ -61,18 +62,18 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "gpt-4o",
         temperature: 0.2,
-        response_format: { type: "json_object" }, // <-- stable JSON output
+        response_format: { type: "json_object" }, // <-- Chat Completions JSON mode
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user",   content: userContent }
         ],
-        // keep output small; we're only returning a small JSON
         max_tokens: 500
       })
     });
 
     const text = await r.text();
     if (!r.ok) {
+      // Bubble up exact OpenAI error to your browser & logs
       return res.status(500).json({ error: "OpenAI error", detail: text });
     }
 
@@ -88,13 +89,12 @@ export default async function handler(req, res) {
     let report;
     try { report = JSON.parse(content); }
     catch {
-      // Some SDKs return content as object already, but we guard anyway
       if (typeof content === 'object') report = content;
       else return res.status(500).json({ error: "Model did not return JSON", detail: content.slice(0, 500) });
     }
 
-    report.id = id; // ensure id present
-    res.setHeader("Cache-Control","no-store");
+    report.id = id;
+    res.setHeader("Cache-Control", "no-store");
     return res.status(200).json(report);
   } catch (e) {
     return res.status(500).json({ error: String(e) });
