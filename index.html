@@ -1,125 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Virtual Coach AI</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
-    h1 { font-size: 2rem; }
-    .upload-area { border: 2px dashed #aaa; padding: 2rem; cursor: pointer; margin: 2rem auto; max-width: 400px; }
-    .hidden { display: none; }
-    #status { font-size: 0.9rem; color: #666; margin-top: 10px; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI</title>
+<style>
+  html,body{
+    height:100%; margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    color:#f5f5f5;
+    background:#0a0a0a url("homepage-background.png") center/cover no-repeat fixed;
+  }
+  .wrap{min-height:100%; display:flex; align-items:center; justify-content:center; text-align:center;
+        padding:40px 16px; background:rgba(0,0,0,0.25);}
+  .logo{width:min(420px,80vw); height:auto; display:block; margin:0 auto 16px;
+        filter: drop-shadow(0 6px 16px rgba(0,0,0,0.4));}
+  .btn{display:inline-block; padding:12px 18px; border-radius:12px; border:1px solid rgba(255,255,255,0.2);
+       background:#0f172a; color:#fff; font-weight:700; text-decoration:none; cursor:pointer;}
+</style>
 </head>
 <body>
-  <h1>Virtual Coach AI</h1>
-  <div class="upload-area" onclick="document.getElementById('swingUpload').click()">
-    <p>📤 Press to Upload Your Swing</p>
-    <input type="file" id="swingUpload" accept="video/*" class="hidden" />
-    <div id="status"></div>
+  <div class="wrap">
+    <main>
+      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI" class="logo" />
+      <h1>Virtual Coach AI</h1>
+      <p>Upload a ≤10s swing to get a live report.</p>
+      <a class="btn" href="summary.html">📊 Reports</a>
+    </main>
   </div>
-  <script>
-    const uploadInput = document.getElementById('swingUpload');
-    const statusEl = document.getElementById('status');
-
-    function setStatus(msg) {
-      statusEl.textContent = msg;
-    }
-
-    uploadInput.addEventListener('change', async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      try {
-        const frames = await extractFrames(file);
-        setStatus('Uploading for analysis...');
-
-        const response = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ frames }),
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-          window.location.href = `/report.html?data=${encodeURIComponent(JSON.stringify(result))}`;
-        } else {
-          setStatus('❌ Error: ' + (result.error || 'Unknown'));
-        }
-      } catch (err) {
-        setStatus('❌ ' + err.message);
-      }
-    });
-
-    async function extractFrames(file) {
-      setStatus('Extracting frames...');
-
-      const url = URL.createObjectURL(file);
-      const video = document.createElement('video');
-      video.src = url;
-      video.muted = true;
-      video.playsInline = true;
-      video.preload = 'auto';
-      video.crossOrigin = 'anonymous';
-
-      await new Promise((resolve, reject) => {
-        video.oncanplay = resolve;
-        video.onerror = () => reject(new Error('Video load failed'));
-      });
-
-      const canvas = document.createElement('canvas');
-      canvas.width = 360;
-      canvas.height = 203;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-
-      const frames = [];
-      let stopped = false;
-
-      function grab() {
-        try { ctx.drawImage(video, 0, 0, canvas.width, canvas.height); }
-        catch { }
-        frames.push(canvas.toDataURL('image/jpeg', 0.6));
-      }
-
-      const useRVFC = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
-      const intervalMs = 140;
-      const targetFrames = 6;
-      const maxMs = 4000;
-
-      const done = new Promise(async (resolve) => {
-        const timerStop = setTimeout(() => { stopped = true; resolve(); }, maxMs);
-
-        if (useRVFC) {
-          let lastTs = 0;
-          const step = (now, meta) => {
-            if (stopped || frames.length >= targetFrames) { clearTimeout(timerStop); resolve(); return; }
-            if (!lastTs || (meta.mediaTime - lastTs) >= intervalMs / 1000) {
-              grab();
-              lastTs = meta.mediaTime;
-            }
-            video.requestVideoFrameCallback(step);
-          };
-          video.requestVideoFrameCallback(step);
-        } else {
-          const tick = setInterval(() => {
-            if (stopped || frames.length >= targetFrames || video.ended) {
-              clearInterval(tick); clearTimeout(timerStop); resolve();
-            } else {
-              grab();
-            }
-          }, intervalMs);
-        }
-
-        try { await video.play(); } catch {}
-      });
-
-      await done;
-      video.pause();
-      URL.revokeObjectURL(url);
-
-      if (frames.length === 0) throw new Error('Could not capture frames. Try another clip.');
-      return frames.slice(0, targetFrames);
-    }
-  </script>
 </body>
 </html>
