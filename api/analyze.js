@@ -1,14 +1,11 @@
-// /api/analyze.js
 export const config = { maxDuration: 20 };
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST' });
-
   try {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'OPENAI_API_KEY missing (Production). Redeploy after adding in Vercel.' });
 
-    // body may be object or string
     let body = req.body;
     if (typeof body === 'string') { try { body = JSON.parse(body); } catch {} }
     const { id, frames } = body || {};
@@ -16,21 +13,19 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'missing id or frames (need >=3)' });
     }
 
-    const imgs = frames.slice(0, 6); // keep request small
+    const imgs = frames.slice(0, 6); // small, reliable
 
     const schema = {
       type: "object",
       properties: {
         id: { type: "string" },
-        tempo: {
-          type: "object",
+        tempo: { type: "object",
           properties: {
             backswing: { type: "number" },
             pause: { type: "number" },
             downswing: { type: "number" },
             ratio: { type: "number" }
-          }, required: ["backswing","pause","downswing","ratio"]
-        },
+          }, required: ["backswing","pause","downswing","ratio"] },
         pFlags: { type: "array", items: { type: "string", enum: ["g","y","r"] }, minItems: 9, maxItems: 9 },
         top3WorkOn: { type: "array", items: { type: "string" }, minItems: 3, maxItems: 3 },
         top3Power:  { type: "array", items: { type: "string" }, minItems: 3, maxItems: 3 }
@@ -39,12 +34,10 @@ export default async function handler(req, res) {
       additionalProperties: false
     };
 
-    const input = [
-      {
-        role: "user",
-        content: [
-          { type: "input_text",
-            text:
+    const input = [{
+      role: "user",
+      content: [
+        { type: "input_text", text:
 `Analyze these frames of a single golf swing.
 Return:
 - tempo (backswing, pause, downswing in seconds; ratio as a number like 3.0)
@@ -52,10 +45,9 @@ Return:
 - Top 3 Things to Work On (short phrases)
 - Top 3 Power Things to Work On (short phrases)
 Strictly match the JSON schema.` },
-          ...imgs.map((dataUrl) => ({ type: "input_image", image_url: { url: dataUrl } }))
-        ]
-      }
-    ];
+        ...imgs.map((u) => ({ type: "input_image", image_url: { url: u } }))
+      ]
+    }];
 
     const r = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
