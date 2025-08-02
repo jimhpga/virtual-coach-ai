@@ -20,7 +20,7 @@
   }
   body{ min-height:-webkit-fill-available; }
   .safe-area{ padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
-  .wrap{ max-width: 900px; margin:0 auto; padding:48px 20px; text-shadow:0 1px 2px rgba(0,0,0,0.25); }
+  .wrap{ max-width: 1000px; margin:0 auto; padding:48px 20px; text-shadow:0 1px 2px rgba(0,0,0,0.25); }
   h1{ margin:0 0 6px; font-size:32px; }
   .muted{ color:var(--muted); }
 
@@ -43,7 +43,7 @@
   .chip.g{ border-color:var(--good); color:#d1fae5; } .chip.y{ border-color:var(--warn); color:#fef08a; } .chip.r{ border-color:var(--bad); color:#fecaca; }
 
   table{ width:100%; border-collapse: collapse; margin-top:10px; font-size:14px;}
-  th, td{ padding:10px; border-bottom:1px solid var(--line); text-align:left; }
+  th, td{ padding:10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
   th{ font-weight:700; color:#fff; }
   .pill{ padding:3px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line);}
   .pill.g{ background:rgba(22,163,74,0.2); border-color:var(--good); }
@@ -93,7 +93,7 @@
         </table>
       </details>
 
-      <!-- Tempo (expanded explanation) -->
+      <!-- Tempo -->
       <details open>
         <summary>Tempo <span class="chev"></span></summary>
         <div class="chips"></div>
@@ -113,49 +113,34 @@
         </div>
       </details>
 
-      <!-- P1–P9 (expanded explanation) -->
+      <!-- P1–P9 (expanded with WHY / WHAT TO IMPROVE) -->
       <details open>
         <summary>P1–P9 Assessment <span class="chev"></span></summary>
         <div class="muted" style="margin:6px 0 10px">
-          <b>What the flags mean:</b>
+          <b>Flags:</b>
           <span class="pill g">Good</span> = on model;
-          <span class="pill y">Okay</span> = playable but watch it;
-          <span class="pill r">Needs Work</span> = leaking speed/consistency.
+          <span class="pill y">Okay</span> = playable but watch it (minor drift);
+          <span class="pill r">Needs Work</span> = leaking speed/consistency (fix this soon).
         </div>
         <table>
-          <thead><tr><th>Checkpoint</th><th>What we’re checking</th><th>Status</th></tr></thead>
-          <tbody>
-            <tr><td>P1 — Setup</td><td>Posture, ball position, grip, pressure in feet.</td><td><span class="pill g">Good</span></td></tr>
-            <tr><td>P2 — Shaft Parallel (BS)</td><td>Club outside/inside hands, face orientation.</td><td><span class="pill y">Okay</span></td></tr>
-            <tr><td>P3 — Lead Arm Parallel</td><td>Width, trail elbow softness, club across line.</td><td><span class="pill g">Good</span></td></tr>
-            <tr><td>P4 — Top</td><td>Hip/torso depth, centered turn, wrist set.</td><td><span class="pill g">Good</span></td></tr>
-            <tr><td>P5 — Lead Arm Parallel (DS)</td><td>Shallowing, shaft pitch, chest open vs. ball.</td><td><span class="pill g">Good</span></td></tr>
-            <tr><td>P6 — Shaft Parallel (DS)</td><td>Lead wrist flexion, path/face, handle forward.</td><td><span class="pill g">Good</span></td></tr>
-            <tr><td>P7 — Impact</td><td>Low-point, shaft lean, face control, open hips.</td><td><span class="pill y">Okay</span></td></tr>
-            <tr><td>P8 — Trail Arm Parallel</td><td>Extension to target, face rotation, balance.</td><td><span class="pill g">Good</span></td></tr>
-            <tr><td>P9 — Finish</td><td>Full rotation, posted lead leg, stable balance.</td><td><span class="pill g">Good</span></td></tr>
+          <thead>
+            <tr>
+              <th>Checkpoint</th>
+              <th>What we’re checking</th>
+              <th>Status</th>
+              <th>Why / What to Improve</th>
+            </tr>
+          </thead>
+          <tbody id="pRows">
+            <!-- Rows are filled by script -->
           </tbody>
         </table>
-        <div class="muted" style="margin-top:8px">
-          <b>Coach cue:</b> Fix reds first (usually P2/P6/P7), protect greens, and re-check tempo after any change.
-        </div>
 
-        <!-- Optional image grid (uncomment when you add p1.jpg..p9.jpg)
-        <div class="frames">
-          <figure class="frame"><a href="p1.jpg" target="_blank" rel="noopener"><img src="p1.jpg" alt="P1 — Setup"><figcaption>P1 — Setup</figcaption></a></figure>
-          <figure class="frame"><a href="p2.jpg" target="_blank" rel="noopener"><img src="p2.jpg" alt="P2 — Shaft Parallel (BS)"><figcaption>P2 — Shaft Parallel (BS)</figcaption></a></figure>
-          <figure class="frame"><a href="p3.jpg" target="_blank" rel="noopener"><img src="p3.jpg" alt="P3 — Lead Arm Parallel"><figcaption>P3 — Lead Arm Parallel</figcaption></a></figure>
-          <figure class="frame"><a href="p4.jpg" target="_blank" rel="noopener"><img src="p4.jpg" alt="P4 — Top"><figcaption>P4 — Top</figcaption></a></figure>
-          <figure class="frame"><a href="p5.jpg" target="_blank" rel="noopener"><img src="p5.jpg" alt="P5 — Lead Arm Parallel (DS)"><figcaption>P5 — Lead Arm Parallel (DS)</figcaption></a></figure>
-          <figure class="frame"><a href="p6.jpg" target="_blank" rel="noopener"><img src="p6.jpg" alt="P6 — Shaft Parallel (DS)"><figcaption>P6 — Shaft Parallel (DS)</figcaption></a></figure>
-          <figure class="frame"><a href="p7.jpg" target="_blank" rel="noopener"><img src="p7.jpg" alt="P7 — Impact"><figcaption>P7 — Impact</figcaption></a></figure>
-          <figure class="frame"><a href="p8.jpg" target="_blank" rel="noopener"><img src="p8.jpg" alt="P8 — Trail Arm Parallel"><figcaption>P8 — Trail Arm Parallel</figcaption></a></figure>
-          <figure class="frame"><a href="p9.jpg" target="_blank" rel="noopener"><img src="p9.jpg" alt="P9 — Finish"><figcaption>P9 — Finish</figcaption></a></figure>
-        </div>
-        -->
+        <!-- Optional image grid (from session frames) -->
+        <div class="frames" id="pFrames"></div>
       </details>
 
-      <!-- Top 3 (expanded explanations) -->
+      <!-- Top 3 -->
       <details open>
         <summary>Top 3 Things to Work On <span class="chev"></span></summary>
         <p class="muted" style="margin:6px 0 10px">
@@ -178,7 +163,7 @@
         </div>
       </details>
 
-      <!-- Goals (expanded) -->
+      <!-- Goals -->
       <details>
         <summary>Goals <span class="chev"></span></summary>
         <p class="muted" style="margin:6px 0 10px">
@@ -195,7 +180,7 @@
         </div>
       </details>
 
-      <!-- Glossary (optional) -->
+      <!-- Glossary -->
       <details>
         <summary>Glossary <span class="chev"></span></summary>
         <ul class="muted">
@@ -210,10 +195,61 @@
 </div>
 
 <script>
-  // Read report ID from URL and render live data from sessionStorage
+  // ===== Read report =====
   const id = new URLSearchParams(location.search).get('id') || 'local-demo';
   document.getElementById('rid').textContent = id;
 
+  // P1–P9 labels and "what we're checking" copy
+  const P = [
+    { k:'P1 — Setup',  what:'Posture, ball position, grip, pressure in feet.' },
+    { k:'P2 — Shaft Parallel (BS)', what:'Club outside/inside hands, face orientation.' },
+    { k:'P3 — Lead Arm Parallel',   what:'Width, trail elbow softness, club across line.' },
+    { k:'P4 — Top',                 what:'Hip/torso depth, centered turn, wrist set.' },
+    { k:'P5 — Lead Arm Parallel (DS)', what:'Shallowing, shaft pitch, chest open vs. ball.' },
+    { k:'P6 — Shaft Parallel (DS)', what:'Lead wrist flexion, path/face, handle forward.' },
+    { k:'P7 — Impact',              what:'Low-point, shaft lean, face control, open hips.' },
+    { k:'P8 — Trail Arm Parallel',  what:'Extension to target, face rotation, balance.' },
+    { k:'P9 — Finish',              what:'Full rotation, posted lead leg, stable balance.' }
+  ];
+
+  // Explanations per status (Good / Okay / Needs Work)
+  const WHY = {
+    g: [
+      'Positions are on model. Protect this checkpoint; small wins compound.',
+      'Trajectory/build looks solid. Keep the feel; verify weekly.',
+      'Repeatable and efficient. Use as a reference when other parts move.',
+      'Depth and structure are sound. Maintain with one reminder cue.',
+      'Transition shape supports a neutral strike. Keep rehearsing.',
+      'Delivery is organized. Preserve lead wrist and handle position.',
+      'Impact parameters are playable. Maintain low-point control.',
+      'Release is matched to path. Good extension and balance.',
+      'Finish shows balance and rotation. Use it as your end pose.'
+    ],
+    y: [
+      'Slight posture/ball position drift. Rehearse setup checkpoints.',
+      'Club a bit outside/inside; face slightly open/closed. Mirror reps.',
+      'Width/trail elbow vary. Soft elbow and width rehearsals.',
+      'Top a touch long/short or swayed. Feel centered turn to P4.',
+      'Transition a hair steep/flat. Shallow with trail elbow feel.',
+      'Lead wrist not fully set; handle could be more forward.',
+      'Shaft lean/face a bit off; thin/fat risk. Low-point ladder drill.',
+      'Release timing variable. 9–3 drill for face control.',
+      'Finish balance inconsistent. Post to lead side and hold 2s.'
+    ],
+    r: [
+      'Setup hurting strike (posture/grip/ball pos). Lock a pre-shot routine.',
+      'Club way outside/inside; face mismatch. Stop-at-P2 checkpoint.',
+      'Loss of width/structure. Lead-arm-only to P3 with tempo.',
+      'Over-sway/over-tilt or under-set. “Turn in a barrel” + wrist set.',
+      'Steep transition/over-the-top. Pump drill for shallow and side bend.',
+      'Open face/flip risk. Bow lead wrist to P6; handle forward feels.',
+      'Early flip/no shaft lean; low-point behind. Impact bag & divot line.',
+      'Cast/roll mismatch; exit high. 9–3 with face awareness to neutral.',
+      'Off-balance finish. Post on lead leg, chest to target, hold finish.'
+    ]
+  };
+
+  // Render function
   (function load() {
     const raw = sessionStorage.getItem('vc_report_' + id);
     if (!raw) { console.warn('No cached report. Re-run analysis from Home.'); return; }
@@ -230,28 +266,59 @@
       `;
     }
 
-    // P1–P9 pills (assumes table rows are P1..P9)
-    const cells = document.querySelectorAll('tbody tr td:last-child .pill');
-    if (j.pFlags && cells.length >= 9) {
-      j.pFlags.slice(0,9).forEach((flag, i) => {
-        const el = cells[i]; if (!el) return;
-        el.classList.remove('g','y','r');
-        el.classList.add(flag);
-        el.textContent = flag === 'g' ? 'Good' : (flag === 'y' ? 'Okay' : 'Needs Work');
-      });
-    }
+    // P1–P9 table with WHY / WHAT TO IMPROVE
+    const rows = document.getElementById('pRows');
+    const flags = (j.pFlags && j.pFlags.length >= 9) ? j.pFlags.slice(0,9) : Array(9).fill('y');
+    rows.innerHTML = '';
+    flags.forEach((f, i) => {
+      const tr = document.createElement('tr');
+
+      const tdA = document.createElement('td'); tdA.textContent = P[i].k;
+      const tdB = document.createElement('td'); tdB.textContent = P[i].what;
+
+      const tdC = document.createElement('td');
+      const pill = document.createElement('span');
+      pill.className = 'pill ' + (f==='g'?'g':f==='y'?'y':'r');
+      pill.textContent = (f==='g'?'Good':f==='y'?'Okay':'Needs Work');
+      tdC.appendChild(pill);
+
+      const tdD = document.createElement('td');
+      const why = WHY[f]?.[i] || '—';
+      tdD.innerHTML = `<span class="muted">${why}</span>`;
+
+      tr.appendChild(tdA); tr.appendChild(tdB); tr.appendChild(tdC); tr.appendChild(tdD);
+      rows.appendChild(tr);
+    });
 
     // Top 3 lists
     const work = document.getElementById('top3work');
     const power = document.getElementById('top3power');
     if (work && j.top3WorkOn) work.innerHTML = j.top3WorkOn.map(x=>`<li><b>${x}</b></li>`).join('');
     if (power && j.top3Power) power.innerHTML = j.top3Power.map(x=>`<li><b>${x}</b></li>`).join('');
+
+    // Optional: render P1–P9 frames from session
+    const framesHost = document.getElementById('pFrames');
+    if (framesHost) {
+      framesHost.innerHTML = '';
+      let frames = [];
+      try { frames = JSON.parse(sessionStorage.getItem('vc_frames_' + id) || '[]'); } catch(_){}
+      const labels = P.map(x=>x.k);
+      for (let i=0;i<9;i++){
+        const fig = document.createElement('figure'); fig.className = 'frame';
+        const img = document.createElement('img');
+        img.src = frames[i] || `p${i+1}.jpg`;
+        img.alt = labels[i];
+        const cap = document.createElement('figcaption'); cap.textContent = labels[i];
+        const link = document.createElement('a'); link.href = img.src; link.target = '_blank'; link.rel='noopener';
+        link.appendChild(img); link.appendChild(cap); fig.appendChild(link); framesHost.appendChild(fig);
+      }
+    }
   })();
 
   // Show the current item in "Available Reports"
-  const rows = document.getElementById('reportRows');
-  if (rows) {
-    rows.innerHTML = `
+  const reportRows = document.getElementById('reportRows');
+  if (reportRows) {
+    reportRows.innerHTML = `
       <tr>
         <td>${new Date().toLocaleDateString()}</td>
         <td>7i</td>
