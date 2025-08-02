@@ -1,195 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>Virtual Coach AI</title>
-  <style>
-    html, body {
-      height: 100%; margin: 0; padding: 0; color: #f5f5f5;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      background: #0a0a0a url("homepage-background.png") center / cover no-repeat fixed;
-      filter: brightness(1.08) contrast(1.03);
-    }
-    body { min-height: -webkit-fill-available; }
-    .safe-area { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
-    .hero { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.25); }
-    .logo { width: 420px; max-width: 90vw; height: auto; margin: 8px auto 20px; display: block; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.25)); }
-    .logo-green {
-      filter: brightness(0) saturate(100%) invert(26%) sepia(56%) saturate(2350%)
-              hue-rotate(79deg) brightness(85%) contrast(90%)
-              drop-shadow(0 6px 16px rgba(0,0,0,0.25));
-    }
-    h1 { margin: 0 0 10px; font-size: 36px; letter-spacing: 0.04em; }
-    p  { margin: 0 auto 16px; line-height: 1.6; max-width: 560px; }
-    .btn {
-      display:inline-block; margin: 10px 8px 0; padding: 12px 18px;
-      border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);
-      text-decoration:none; font-weight:700; color:#fff; background:#0f172a; cursor:pointer;
-    }
-    .btn:hover { opacity:.92; }
-    .btn-secondary { background: transparent; border-color: rgba(255,255,255,0.25); }
-    .contact a { color: #22c55e; text-decoration: none; }
-    .contact a:hover { text-decoration: underline; }
-
-    #analyzing {
-      display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
-      backdrop-filter: blur(2px); color:#fff; z-index:999;
-      align-items:center; justify-content:center; flex-direction:column; text-align:center;
-    }
-    .spin { width:44px; height:44px; border:4px solid rgba(255,255,255,.25);
-            border-top-color:#1F6F1F; border-radius:50%; animation:spin 1s linear infinite; }
-    @keyframes spin{ to{ transform:rotate(360deg) } }
-
-    @media (max-width: 480px) { h1 { font-size: 30px; } .logo { width: 300px; } }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Virtual Coach AI</title>
+<style>
+  html,body{height:100%;margin:0;padding:0;color:#f5f5f5;background:#0a0a0a url("homepage-background.png") center/cover no-repeat fixed;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;filter:brightness(1.08) contrast(1.03)}
+  .safe{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  .hero{max-width:760px;margin:0 auto;padding:48px 24px 72px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+  .logo{width:420px;max-width:90vw;height:auto;margin:8px auto 20px;display:block;filter:drop-shadow(0 6px 16px rgba(0,0,0,.25))}
+  .btn{display:inline-block;margin:10px 8px 0;padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.12);text-decoration:none;font-weight:700;color:#fff;background:#0f172a;cursor:pointer}
+  .btn:hover{opacity:.92}
+  .tag{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:10px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.16);font-size:12px}
+  #analyzing{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);color:#fff;z-index:999;align-items:center;justify-content:center;flex-direction:column;text-align:center}
+  .spin{width:44px;height:44px;border:4px solid rgba(255,255,255,.25);border-top-color:#1F6F1F;border-radius:50%;animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
-  <div class="safe-area">
-    <div class="hero">
-      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo logo-green" />
-      <h1>WELCOME</h1>
-      <p>to the beta launch of Virtual Coach AI —<br>the intelligent swing coach designed to help you reach your golfing potential.</p>
+<div class="safe">
+  <div class="hero">
+    <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI" class="logo" />
+    <h1>WELCOME</h1>
+    <p>Upload a ≤10s swing to get a live report.</p>
 
-      <!-- Hidden file input -->
-      <input type="file" id="swingUpload"
-             accept="video/mp4,video/quicktime,video/webm"
-             style="display:none" onchange="uploadSwing()" />
+    <!-- Hidden file input (NOT inside a form) -->
+    <input type="file" id="swingUpload"
+           accept="video/mp4,video/quicktime,video/webm"
+           style="display:none" />
 
-      <!-- Actions -->
-      <button class="btn" type="button" onclick="startUpload()">⬆ Upload Your Swing</button>
-      <a href="/summary.html" class="btn btn-secondary">📊 Reports</a>
+    <!-- Buttons -->
+    <button class="btn" type="button" id="uploadBtn">⬆ Upload Your Swing</button>
+    <a class="btn" href="/summary.html">📊 Reports</a>
 
-      <p class="contact" style="margin-top:14px;">Questions? <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
-      <p style="opacity:.65;font-size:12px;margin-top:6px">v1.1 — auth gate moved to startUpload only</p>
-    </div>
+    <div id="status" class="tag">Ready.</div>
+    <p style="opacity:.65;font-size:12px;margin-top:6px">v1.2 debug — gate-before-picker, no re-check in upload</p>
   </div>
+</div>
 
-  <div id="analyzing">
-    <div class="spin"></div>
-    <div style="margin-top:12px">Analyzing your swing…</div>
-  </div>
+<!-- Analyzing overlay -->
+<div id="analyzing">
+  <div class="spin"></div>
+  <div style="margin-top:12px">Analyzing your swing…</div>
+</div>
 
-  <script>
-    // ---------- auth gate only BEFORE opening picker ----------
-    function isAuthed() { try { return localStorage.getItem('vc_auth') === 'ok'; } catch(e){ return false; } }
-    function startUpload() {
-      if (!isAuthed()) { window.location.href = '/login.html?next=upload'; return; }
-      document.getElementById('swingUpload').click();
+<script>
+  // --- Hard block any accidental form submits / reloads ---
+  document.addEventListener('submit', e => e.preventDefault());
+  window.addEventListener('beforeunload', e => { /* no-op: helps surface unexpected nav in some browsers */ });
+
+  const statusEl = document.getElementById('status');
+  const fileInput = document.getElementById('swingUpload');
+
+  function setStatus(s){ statusEl.textContent = s; console.log('[VC]', s); }
+
+  function isAuthed(){ try { return localStorage.getItem('vc_auth') === 'ok'; } catch(e){ return false; } }
+
+  // Only gate BEFORE opening the picker
+  document.getElementById('uploadBtn').addEventListener('click', () => {
+    if (!isAuthed()) {
+      setStatus('Auth required → sending to login…');
+      window.location.href = '/login.html?next=upload';
+      return;
     }
-    // Auto-resume after login
-    window.addEventListener('DOMContentLoaded', () => {
-      const resume = new URLSearchParams(location.search).get('resume');
-      if (resume === 'upload' && isAuthed()) {
-        history.replaceState({}, "", "index.html");
-        setTimeout(() => document.getElementById('swingUpload').click(), 150);
-      }
+    setStatus('Opening file picker…');
+    fileInput.click();
+  });
+
+  // Auto-resume after login
+  window.addEventListener('DOMContentLoaded', () => {
+    const resume = new URLSearchParams(location.search).get('resume');
+    if (resume === 'upload' && isAuthed()) {
+      setStatus('Resuming upload → opening picker…');
+      history.replaceState({}, "", "index.html");
+      setTimeout(() => fileInput.click(), 150);
+    }
+  });
+
+  // When a file is chosen, start upload flow (NO auth check here)
+  fileInput.addEventListener('change', () => {
+    if (!fileInput.files || !fileInput.files[0]) { setStatus('No file selected.'); return; }
+    uploadSwing(fileInput.files[0]).catch(err => {
+      alert('Upload failed: ' + (err?.message || err));
+      setStatus('Upload failed.');
     });
+  });
 
-    // ---------- extract frames ----------
-    async function extractFrames(file) {
-      const url = URL.createObjectURL(file);
-      const video = document.createElement('video');
-      video.src = url; video.muted = true; video.playsInline = true;
-      await new Promise((resolve, reject) => { video.onloadedmetadata = resolve; video.onerror = reject; });
+  async function extractFrames(file) {
+    setStatus('Extracting frames…');
+    const url = URL.createObjectURL(file);
+    const video = document.createElement('video');
+    video.src = url; video.muted = true; video.playsInline = true;
 
-      const duration = Math.max(0.6, Math.min(1.8, video.duration || 1.2));
-      const steps = 9;
-      const timestamps = Array.from({length: steps}, (_,i) => +(i * (duration / (steps - 1))).toFixed(2));
+    await new Promise((resolve, reject) => { video.onloadedmetadata = resolve; video.onerror = reject; });
 
-      const canvas = document.createElement('canvas'); canvas.width = 480; canvas.height = 270;
-      const ctx = canvas.getContext('2d');
+    const duration = Math.max(0.6, Math.min(1.8, video.duration || 1.2));
+    const steps = 6; // smaller payload for reliability
+    const timestamps = Array.from({length: steps}, (_,i) => +(i * (duration / (steps - 1))).toFixed(2));
 
-      const images = [];
-      for (const t of timestamps) {
-        video.currentTime = Math.min(t, (video.duration || duration) - 0.05);
-        await new Promise(r => video.onseeked = r);
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        images.push(canvas.toDataURL('image/jpeg', 0.7));
-      }
-      URL.revokeObjectURL(url);
-      return images;
+    const canvas = document.createElement('canvas'); canvas.width = 360; canvas.height = 203;
+    const ctx = canvas.getContext('2d');
+
+    const images = [];
+    for (const t of timestamps) {
+      video.currentTime = Math.min(t, (video.duration || duration) - 0.05);
+      await new Promise(r => video.onseeked = r);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      images.push(canvas.toDataURL('image/jpeg', 0.6));
     }
+    URL.revokeObjectURL(url);
+    return images;
+  }
 
-    // ---------- POST to /api/analyze ----------
-    async function analyzeFrames(id, frames) {
-      const overlay = document.getElementById('analyzing');
-      overlay.style.display = 'flex';
-      try {
-        const resp = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify({ id, frames })
-        });
-        if (!resp.ok) {
-          const text = await resp.text();
-          alert('Analysis error (' + resp.status + '): ' + text.slice(0, 200));
-          overlay.style.display = 'none';
-          return null;
-        }
-        const json = await resp.json();
+  async function analyzeFrames(id, frames) {
+    setStatus('Calling /api/analyze…');
+    const overlay = document.getElementById('analyzing');
+    overlay.style.display = 'flex';
+    try {
+      const resp = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ id, frames })
+      });
+      const text = await resp.text();
+      if (!resp.ok) {
         overlay.style.display = 'none';
-        return json;
-      } catch (e) {
-        overlay.style.display = 'none';
-        alert('Network/analysis failed. Please try again.');
-        console.error(e);
-        return null;
+        setStatus('API error ' + resp.status);
+        alert('Analysis error (' + resp.status + '): ' + text.slice(0, 400));
+        throw new Error('API ' + resp.status);
       }
+      let json;
+      try { json = JSON.parse(text); } catch(e){ overlay.style.display='none'; alert('Invalid JSON from API'); throw e; }
+      overlay.style.display = 'none';
+      return json;
+    } catch (e) {
+      overlay.style.display = 'none';
+      throw e;
     }
+  }
 
-    // ---------- main upload flow (NO auth check here) ----------
-    async function uploadSwing() {
-      const input = document.getElementById('swingUpload');
-      const file = input.files[0];
-      if (!file) { alert('Please select a swing file.'); return; }
+  async function uploadSwing(file) {
+    setStatus('Validating clip…');
+    const objUrl = URL.createObjectURL(file);
+    const v = document.createElement('video');
+    v.preload = 'metadata';
+    v.src = objUrl;
 
-      const objUrl = URL.createObjectURL(file);
-      const v = document.createElement('video');
-      v.preload = 'metadata';
-      v.src = objUrl;
+    v.onloadedmetadata = async () => {
+      const proceed = async (seconds) => {
+        if (!seconds || !isFinite(seconds)) { setStatus('Length unknown.'); alert('Could not detect video length.'); return; }
+        if (seconds > 10) { setStatus('Too long.'); alert('Clip too long. Please upload ≤ 10 seconds.'); return; }
 
-      v.onloadedmetadata = async () => {
-        const proceed = async (seconds) => {
-          if (!seconds || !isFinite(seconds)) { alert('Could not detect video length. Try another clip.'); input.value=''; return; }
-          if (seconds > 10) { alert('Clip too long. Please upload ≤ 10 seconds.'); input.value=''; return; }
-
-          const id = Date.now().toString();
-          try {
-            const frames = await extractFrames(file);
-            const report = await analyzeFrames(id, frames);
-            if (!report) return;
-            sessionStorage.setItem('vc_report_' + id, JSON.stringify(report));
-            window.location.href = `/summary.html?id=${encodeURIComponent(id)}`;
-          } catch (e) {
-            console.error(e);
-            alert('Analysis failed. Please try another clip.');
-          }
-        };
-
-        if (!isFinite(v.duration) || v.duration === Infinity) {
-          v.currentTime = Number.MAX_SAFE_INTEGER;
-          v.ontimeupdate = () => { v.ontimeupdate = null; URL.revokeObjectURL(objUrl); proceed(v.duration); };
-        } else {
-          const seconds = v.duration;
-          URL.revokeObjectURL(objUrl);
-          await proceed(seconds);
+        const id = Date.now().toString();
+        try {
+          const frames = await extractFrames(file);
+          const report = await analyzeFrames(id, frames);
+          sessionStorage.setItem('vc_report_' + id, JSON.stringify(report));
+          setStatus('Done → opening report…');
+          window.location.href = `/summary.html?id=${encodeURIComponent(id)}`;
+        } catch (e) {
+          setStatus('Analysis failed.');
+          console.error(e);
         }
       };
 
-      v.onerror = () => {
+      if (!isFinite(v.duration) || v.duration === Infinity) {
+        v.currentTime = Number.MAX_SAFE_INTEGER;
+        v.ontimeupdate = () => { v.ontimeupdate = null; URL.revokeObjectURL(objUrl); proceed(v.duration); };
+      } else {
+        const seconds = v.duration;
         URL.revokeObjectURL(objUrl);
-        alert('Could not read this video. Try a different file.');
-        input.value = '';
-      };
-    }
+        await proceed(seconds);
+      }
+    };
 
-    // Optional: surface silent errors
-    window.addEventListener('error', e => alert('Error: ' + (e.message || 'unknown')));
-    window.addEventListener('unhandledrejection', e => alert('Error: ' + (e.reason?.message || 'network/analysis')));
-  </script>
+    v.onerror = () => { URL.revokeObjectURL(objUrl); setStatus('Video read error.'); alert('Could not read this video.'); };
+  }
+
+  // Surface silent JS errors
+  window.addEventListener('error', e => { alert('JS Error: ' + (e.message || 'unknown')); setStatus('JS error'); });
+  window.addEventListener('unhandledrejection', e => { alert('Promise Error: ' + (e.reason?.message || 'network/analysis')); setStatus('Promise error'); });
+</script>
 </body>
 </html>
