@@ -55,6 +55,17 @@
     background:var(--accent); color:#fff; text-decoration:none; font-weight:700; border:1px solid var(--line);
   }
   .cta:hover{ opacity:.95; }
+
+  /* P1–P9 frames grid (optional if you add images later) */
+  .frames {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px; margin-top: 10px;
+  }
+  @media (max-width: 640px) { .frames { grid-template-columns: repeat(2, 1fr); } }
+  .frame { border:1px solid var(--line); border-radius:10px; background:rgba(0,0,0,0.25); overflow:hidden; text-align:center; font-size:13px; color:var(--muted); }
+  .frame a { display:block; text-decoration:none; color:inherit; }
+  .frame img { display:block; width:100%; height:auto; aspect-ratio:16/9; object-fit:cover; }
+  .frame figcaption { padding:6px 8px; }
 </style>
 </head>
 <body>
@@ -62,6 +73,9 @@
   <div class="wrap">
     <h1>Swing Reports</h1>
     <div class="muted">ID: <span id="rid">—</span></div>
+    <p class="muted" style="margin:6px 0 14px">
+      <b>How to use this:</b> Check tempo → scan P1–P9 flags → do the Top-3 drills. Re-upload after 2–3 practice sessions.
+    </p>
 
     <div class="legend">
       <div><span class="dot g"></span>Good</div>
@@ -75,54 +89,120 @@
         <summary>Available Reports <span class="chev"></span></summary>
         <table>
           <thead><tr><th>Date</th><th>Club</th><th>Tempo</th><th>P1–P9</th><th>Open</th></tr></thead>
-        <tbody id="reportRows"></tbody>
+          <tbody id="reportRows"></tbody>
         </table>
       </details>
 
-      <!-- Tempo -->
-      <details>
+      <!-- Tempo (expanded explanation) -->
+      <details open>
         <summary>Tempo <span class="chev"></span></summary>
         <div class="chips"></div>
-        <p class="muted">Target a repeatable 3:1. Keep a tiny pause; don’t rush P4→P5.</p>
+        <div class="muted" style="margin-top:10px">
+          <b>How to read this:</b> Backswing, Pause, Downswing show seconds. Most elite swings cluster near a
+          <b>~3:1 total backswing-to-downswing ratio</b>. A tiny pause (0.03–0.08s) helps sequence the change of
+          direction. If your ratio is <b>&lt;2.5</b>, you may be rushing from P4→P5; if it’s <b>&gt;3.5</b>,
+          you may be stalling at the top.
+        </div>
+        <ul class="muted" style="margin:8px 0 0 16px">
+          <li><b>Backswing:</b> Time from start (P1) to top (P4).</li>
+          <li><b>Pause:</b> Micro-pause at P4; too big = loss of speed, zero = yank.</li>
+          <li><b>Downswing:</b> P4 to impact (P7). Consistency here = strike control.</li>
+        </ul>
+        <div class="muted" style="margin-top:8px">
+          <b>Coach cue:</b> Keep the backswing smooth, feel a coin-flip pause at the top, then rip the downswing.
+        </div>
       </details>
 
-      <!-- P1–P9 -->
-      <details>
+      <!-- P1–P9 (expanded explanation) -->
+      <details open>
         <summary>P1–P9 Assessment <span class="chev"></span></summary>
+        <div class="muted" style="margin:6px 0 10px">
+          <b>What the flags mean:</b>
+          <span class="pill g">Good</span> = on model;
+          <span class="pill y">Okay</span> = playable but watch it;
+          <span class="pill r">Needs Work</span> = leaking speed/consistency.
+        </div>
         <table>
-          <thead><tr><th>Checkpoint</th><th>Observation</th><th>Status</th></tr></thead>
+          <thead><tr><th>Checkpoint</th><th>What we’re checking</th><th>Status</th></tr></thead>
           <tbody>
-            <tr><td>P1 Setup</td><td>Balanced posture; neutral grip</td><td><span class="pill g">Good</span></td></tr>
-            <tr><td>P2 Shaft Parallel (BS)</td><td>Club slightly outside hands (ok)</td><td><span class="pill y">Okay</span></td></tr>
-            <tr><td>P3 Lead Arm Parallel</td><td>Good width; trail elbow soft</td><td><span class="pill g">Good</span></td></tr>
-            <tr><td>P4 Top</td><td>Centered turn; minimal sway</td><td><span class="pill g">Good</span></td></tr>
-            <tr><td>P5 Lead Arm Parallel (DS)</td><td>Shallowing present; chest open</td><td><span class="pill g">Good</span></td></tr>
-            <tr><td>P6 Shaft Parallel (DS)</td><td>Lead wrist flexed; path neutral</td><td><span class="pill g">Good</span></td></tr>
-            <tr><td>P7 Impact</td><td>Hands ahead; strike slightly thin at times</td><td><span class="pill y">Okay</span></td></tr>
-            <tr><td>P8 Trail Arm Parallel</td><td>Extends to target; balanced</td><td><span class="pill g">Good</span></td></tr>
-            <tr><td>P9 Finish</td><td>Full rotation; stable</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P1 — Setup</td><td>Posture, ball position, grip, pressure in feet.</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P2 — Shaft Parallel (BS)</td><td>Club outside/inside hands, face orientation.</td><td><span class="pill y">Okay</span></td></tr>
+            <tr><td>P3 — Lead Arm Parallel</td><td>Width, trail elbow softness, club across line.</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P4 — Top</td><td>Hip/torso depth, centered turn, wrist set.</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P5 — Lead Arm Parallel (DS)</td><td>Shallowing, shaft pitch, chest open vs. ball.</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P6 — Shaft Parallel (DS)</td><td>Lead wrist flexion, path/face, handle forward.</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P7 — Impact</td><td>Low-point, shaft lean, face control, open hips.</td><td><span class="pill y">Okay</span></td></tr>
+            <tr><td>P8 — Trail Arm Parallel</td><td>Extension to target, face rotation, balance.</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P9 — Finish</td><td>Full rotation, posted lead leg, stable balance.</td><td><span class="pill g">Good</span></td></tr>
           </tbody>
         </table>
+        <div class="muted" style="margin-top:8px">
+          <b>Coach cue:</b> Fix reds first (usually P2/P6/P7), protect greens, and re-check tempo after any change.
+        </div>
+
+        <!-- Optional image grid (uncomment when you add p1.jpg..p9.jpg)
+        <div class="frames">
+          <figure class="frame"><a href="p1.jpg" target="_blank" rel="noopener"><img src="p1.jpg" alt="P1 — Setup"><figcaption>P1 — Setup</figcaption></a></figure>
+          <figure class="frame"><a href="p2.jpg" target="_blank" rel="noopener"><img src="p2.jpg" alt="P2 — Shaft Parallel (BS)"><figcaption>P2 — Shaft Parallel (BS)</figcaption></a></figure>
+          <figure class="frame"><a href="p3.jpg" target="_blank" rel="noopener"><img src="p3.jpg" alt="P3 — Lead Arm Parallel"><figcaption>P3 — Lead Arm Parallel</figcaption></a></figure>
+          <figure class="frame"><a href="p4.jpg" target="_blank" rel="noopener"><img src="p4.jpg" alt="P4 — Top"><figcaption>P4 — Top</figcaption></a></figure>
+          <figure class="frame"><a href="p5.jpg" target="_blank" rel="noopener"><img src="p5.jpg" alt="P5 — Lead Arm Parallel (DS)"><figcaption>P5 — Lead Arm Parallel (DS)</figcaption></a></figure>
+          <figure class="frame"><a href="p6.jpg" target="_blank" rel="noopener"><img src="p6.jpg" alt="P6 — Shaft Parallel (DS)"><figcaption>P6 — Shaft Parallel (DS)</figcaption></a></figure>
+          <figure class="frame"><a href="p7.jpg" target="_blank" rel="noopener"><img src="p7.jpg" alt="P7 — Impact"><figcaption>P7 — Impact</figcaption></a></figure>
+          <figure class="frame"><a href="p8.jpg" target="_blank" rel="noopener"><img src="p8.jpg" alt="P8 — Trail Arm Parallel"><figcaption>P8 — Trail Arm Parallel</figcaption></a></figure>
+          <figure class="frame"><a href="p9.jpg" target="_blank" rel="noopener"><img src="p9.jpg" alt="P9 — Finish"><figcaption>P9 — Finish</figcaption></a></figure>
+        </div>
+        -->
       </details>
 
-      <!-- Top 3 -->
+      <!-- Top 3 (expanded explanations) -->
       <details open>
         <summary>Top 3 Things to Work On <span class="chev"></span></summary>
+        <p class="muted" style="margin:6px 0 10px">
+          Your highest-leverage fixes for contact and curve. Do these first. One change at a time; keep the same feels for a week.
+        </p>
         <ol id="top3work"></ol>
+        <div class="muted" style="margin-top:8px">
+          <b>Coach cue:</b> If a drill cleans up P6 or P7, ball flight improves immediately—don’t chase five swing thoughts.
+        </div>
       </details>
 
       <details>
         <summary>Top 3 Power Things to Work On <span class="chev"></span></summary>
+        <p class="muted" style="margin:6px 0 10px">
+          Speed without chaos. These add mph by improving sequence and force direction, not just swinging harder.
+        </p>
         <ol id="top3power"></ol>
+        <div class="muted" style="margin-top:8px">
+          <b>Coach cue:</b> Stack speed work after a clean contact session. 15–20 quality reps beat 80 sloppy ones.
+        </div>
       </details>
 
-      <!-- Goals (static targets for now) -->
+      <!-- Goals (expanded) -->
       <details>
         <summary>Goals <span class="chev"></span></summary>
+        <p class="muted" style="margin:6px 0 10px">
+          Benchmarks to aim at. Hit these consistently and your dispersion shrinks while ball speed climbs.
+        </p>
         <ul>
-          <li>Hip Turn @ P4 — target <b>45°</b></li>
-          <li>Face Angle @ P6 — target <b>±2°</b></li>
-          <li>Low-Point Control — target <b>+2.0 in</b></li>
+          <li><b>Tempo:</b> Settle near <b>~3:1</b> with a micro-pause (&lt;0.08s).</li>
+          <li><b>P4 depth:</b> Hips turned ~<b>45°</b>, torso ~<b>70–90°</b>, weight still inside trail foot.</li>
+          <li><b>P6 face:</b> Within <b>±2°</b> of path; hands slightly ahead of clubhead.</li>
+          <li><b>Impact low-point:</b> Iron: <b>+2.0 in</b> ahead of ball; Driver: near 0 with upward AoA.</li>
+        </ul>
+        <div class="muted" style="margin-top:8px">
+          <b>Coach cue:</b> When in doubt, re-check setup and tempo—cheap fixes that move everything else the right way.
+        </div>
+      </details>
+
+      <!-- Glossary (optional) -->
+      <details>
+        <summary>Glossary <span class="chev"></span></summary>
+        <ul class="muted">
+          <li><b>BS/DS:</b> Backswing / Downswing</li>
+          <li><b>Shallowing:</b> Shaft pitch flattening from P4→P5</li>
+          <li><b>Low-point:</b> Lowest part of the swing arc relative to the ball</li>
+          <li><b>Face to path:</b> Difference between clubface angle and swing path</li>
         </ul>
       </details>
     </div>
@@ -130,6 +210,7 @@
 </div>
 
 <script>
+  // Read report ID from URL and render live data from sessionStorage
   const id = new URLSearchParams(location.search).get('id') || 'local-demo';
   document.getElementById('rid').textContent = id;
 
@@ -138,7 +219,7 @@
     if (!raw) { console.warn('No cached report. Re-run analysis from Home.'); return; }
     const j = JSON.parse(raw);
 
-    // Tempo
+    // Tempo chips
     const chips = document.querySelector('.chips');
     if (chips && j.tempo) {
       chips.innerHTML = `
@@ -167,7 +248,7 @@
     if (power && j.top3Power) power.innerHTML = j.top3Power.map(x=>`<li><b>${x}</b></li>`).join('');
   })();
 
-  // Optional: show the current item in Available Reports
+  // Show the current item in "Available Reports"
   const rows = document.getElementById('reportRows');
   if (rows) {
     rows.innerHTML = `
