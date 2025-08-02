@@ -57,14 +57,16 @@
       <p>to the beta launch of Virtual Coach AI —<br>the intelligent swing coach designed to help you reach your golfing potential.</p>
 
       <!-- Hidden file input -->
-      <input type="file" id="swingUpload" accept="video/mp4,video/quicktime,video/webm" style="display:none" onchange="uploadSwing()" />
+      <input type="file" id="swingUpload"
+             accept="video/mp4,video/quicktime,video/webm"
+             style="display:none" onchange="uploadSwing()" />
 
       <!-- Actions -->
-      <label for="swingUpload" class="btn">⬆ Upload Your Swing</label>
+      <button class="btn" type="button" onclick="startUpload()">⬆ Upload Your Swing</button>
       <a href="/summary.html" class="btn btn-secondary">📊 Reports</a>
 
       <p class="contact" style="margin-top:14px;">Questions? <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
-      <p style="opacity:.65;font-size:12px;margin-top:6px">v0.9 — live analysis</p>
+      <p style="opacity:.65;font-size:12px;margin-top:6px">v1.0 — live analysis + resume upload</p>
     </div>
   </div>
 
@@ -75,14 +77,28 @@
   </div>
 
   <script>
-    // ---- passcode: only required when uploading ----
-    // Set by login.html via: localStorage.setItem('vc_auth','ok') when passcode 1234 is entered.
-    function ensurePasscode() {
-      try { return localStorage.getItem('vc_auth') === 'ok'; }
-      catch(e){ return false; }
+    // ---------- auth helpers ----------
+    function isAuthed() { try { return localStorage.getItem('vc_auth') === 'ok'; } catch(e){ return false; } }
+
+    function startUpload() {
+      if (!isAuthed()) {
+        // Pass intent so login returns here and auto-opens picker
+        window.location.href = '/login.html?next=upload';
+        return;
+      }
+      document.getElementById('swingUpload').click();
     }
 
-    // ---- Extract ~9 frames from the video (client-side) ----
+    // Auto-resume file picker if we just logged in
+    window.addEventListener('DOMContentLoaded', () => {
+      const resume = new URLSearchParams(location.search).get('resume');
+      if (resume === 'upload' && isAuthed()) {
+        history.replaceState({}, "", "index.html");
+        setTimeout(() => document.getElementById('swingUpload').click(), 150);
+      }
+    });
+
+    // ---------- frame extraction ----------
     async function extractFrames(file) {
       const url = URL.createObjectURL(file);
       const video = document.createElement('video');
@@ -93,7 +109,7 @@
         video.onerror = reject;
       });
 
-      // Even if the clip is longer, sample the first ~1.8s uniformly (or full duration if shorter)
+      // Sample first ~1.8s uniformly (or full duration if shorter)
       const duration = Math.max(0.6, Math.min(1.8, video.duration || 1.2));
       const steps = 9;
       const timestamps = Array.from({length: steps}, (_,i) => +(i * (duration / (steps - 1))).toFixed(2));
@@ -113,7 +129,7 @@
       return images;
     }
 
-    // ---- POST to /api/analyze with spinner + error surfacing ----
+    // ---------- POST analyzer with spinner ----------
     async function analyzeFrames(id, frames) {
       const overlay = document.getElementById('analyzing');
       overlay.style.display = 'flex';
@@ -140,12 +156,10 @@
       }
     }
 
-    // ---- Main upload flow ----
+    // ---------- main upload flow ----------
     async function uploadSwing() {
-      // 1) Passcode gate
-      if (!ensurePasscode()) { window.location.href = '/login.html'; return; }
+      if (!isAuthed()) { window.location.href = '/login.html?next=upload'; return; }
 
-      // 2) Validate selection & length
       const input = document.getElementById('swingUpload');
       const file = input.files[0];
       if (!file) { alert('Please select a swing file.'); return; }
