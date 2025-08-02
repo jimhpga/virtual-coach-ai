@@ -53,106 +53,120 @@
     <div style="margin-top:12px">Analyzing your swing…</div>
   </div>
 
-  <script>
-    // Wire both inputs to the same handler
-    document.getElementById('swingRecord') .addEventListener('change', e => handlePick(e.target));
-    document.getElementById('swingLibrary').addEventListener('change', e => handlePick(e.target));
+ <script>
+  // ---- Tiny toast fallback (in case your toast lib isn't loaded) ----
+  function toast(msg){ try{ if (window.Toast) { Toast.show(msg); return; } }catch(_){} alert(msg); }
 
-    function handlePick(input){
-      const f = input.files && input.files[0];
-      if (!f) return;
-      if (!f.type || !f.type.startsWith('video/')) {
-        alert('Please select a VIDEO (≤10s).');
-        input.value = '';
+  // Robust frame extraction (Safari friendly)
+  async function extractFrames(file) {
+    const url = URL.createObjectURL(file);
+    const video = document.createElement('video');
+    video.src = url; video.muted = true; video.playsInline = true; video.preload = 'metadata';
+
+    await new Promise((resolve, reject) => {
+      video.onloadedmetadata = resolve;
+      video.onerror = () => reject(new Error('Could not load video metadata'));
+    });
+
+    // Some iOS builds need a play/pause poke before seeking works
+    try { await video.play(); } catch(_) {}
+    video.pause();
+
+    const dur = Math.max(0.6, Math.min(2.0, video.duration || 1.5));
+    const steps = 9;
+    const ts = Array.from({length: steps}, (_,i) => +(i * (dur / (steps - 1))).toFixed(2));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 480; canvas.height = 270;
+    const ctx = canvas.getContext('2d');
+
+    const images = [];
+    for (const t of ts) {
+      const target = Math.min(t, (video.duration || dur) - 0.05);
+      video.currentTime = target;
+      await new Promise((resolve) => {
+        let done = false;
+        const clear = () => { done = true; video.onseeked = null; };
+        video.onseeked = () => { if (!done){ clear(); resolve(); } };
+        // Safety timeout in case onseeked never fires
+        setTimeout(() => { if (!done){ clear(); resolve(); } }, 400);
+      });
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      images.push(canvas.toDataURL('image/jpeg', 0.7));
+    }
+    URL.revokeObjectURL(url);
+    return images;
+  }
+
+  async function uploadSwing() {
+    // 0) Sanity: handler wired
+    console.debug('[uploadSwing] fired');
+    // 1) Require passcode
+    try {
+      if (localStorage.getItem('vc_auth') !== 'ok') {
+        location.href = '/login.html';
         return;
       }
-      uploadSwing(f).catch(err => alert('Upload failed: ' + (err?.message || err)));
+    } catch (_) { location.href = '/login.html'; return; }
+
+    // 2) Get file
+    const input = document.getElementById('swingUpload');
+    const file = input?.files?.[0];
+    if (!file) { toast('Please select a swing file.'); return; }
+
+    // 3) Quick length check
+    const tmpUrl = URL.createObjectURL(file);
+    const v = document.createElement('video');
+    v.preload = 'metadata'; v.src = tmpUrl;
+    const duration = await new Promise((resolve) => {
+      v.onloadedmetadata = () => resolve(v.duration);
+      v.onerror = () => resolve(NaN);
+      // iOS Infinity workaround
+      setTimeout(() => {
+        if (!isFinite(v.duration)) { v.currentTime = Number.MAX_SAFE_INTEGER; v.ontimeupdate = () => resolve(v.duration); }
+      }, 250);
+    });
+    URL.revokeObjectURL(tmpUrl);
+
+    if (!duration || !isFinite(duration)) { toast('Could not read video length. Try another clip.'); input.value=''; return; }
+    if (duration > 10) { toast('Clip too long. Please upload ≤ 10 seconds.'); input.value=''; return; }
+
+    // 4) Extract frames
+    toast('Analyzing: extracting frames…');
+    let frames;
+    try {
+      frames = await extractFrames(file);
+    } catch (e) {
+      console.error(e);
+      toast('Could not extract frames. Try another clip.');
+      return;
     }
 
-    async function uploadSwing(file){
-      // Load video and validate length
-      const url = URL.createObjectURL(file);
-      const v = document.createElement('video');
-      v.src = url; v.muted = true; v.playsInline = true; v.preload = 'auto';
-
-      await new Promise((res, rej)=>{ v.oncanplay = res; v.onerror = ()=>rej(new Error('Video load failed')); });
-
-      const seconds = v.duration;
-      if (!seconds || !isFinite(seconds)) { URL.revokeObjectURL(url); throw new Error('Could not detect video length.'); }
-      if (seconds > 10) { URL.revokeObjectURL(url); throw new Error('Clip too long (max 10s).'); }
-
-      // Extract frames (iOS-safe: play-and-grab)
-      const frames = await extractFramesByPlayback(v);
-      URL.revokeObjectURL(url);
-
-      // Call analyzer
-      const overlay = document.getElementById('analyzing');
-      overlay.style.display='flex';
-      const id = Date.now().toString();
+    // 5) Call live analysis
+    const id = Date.now().toString();
+    toast('Analyzing: contacting model…');
+    try {
       const resp = await fetch('/api/analyze', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, frames })
       });
-      const txt = await resp.text();
-      overlay.style.display='none';
-
-      if (!resp.ok) { alert('Analysis error ('+resp.status+'): ' + txt.slice(0,300)); return; }
-
-      let report;
-      try { report = JSON.parse(txt); }
-      catch { alert('Invalid JSON from API'); return; }
-
-      sessionStorage.setItem('vc_report_'+id, JSON.stringify(report));
-      location.href = '/summary.html?id=' + encodeURIComponent(id);
+      if (!resp.ok) {
+        const txt = await resp.text();
+        console.error('analyze error', resp.status, txt);
+        toast('Analysis failed (server). Check API key or logs.');
+        return;
+      }
+      const report = await resp.json();
+      sessionStorage.setItem('vc_report_' + id, JSON.stringify(report));
+      location.href = `/summary.html?id=${encodeURIComponent(id)}`;
+    } catch (e) {
+      console.error(e);
+      toast('Analysis failed (network). Check connection and try again.');
     }
+  }
+</script>
 
-    // Play-and-grab: no 'seeked' (works well on iPhone)
-    async function extractFramesByPlayback(video){
-      const canvas = document.createElement('canvas');
-      canvas.width = 360; canvas.height = 203; // smaller = faster
-      const ctx = canvas.getContext('2d', { willReadFrequently:true });
-
-      const frames = [];
-      const target = 6;            // grab ~6 frames
-      const intervalMs = 140;      // ~7 fps sampling
-      const maxMs = 4000;          // hard stop after 4s
-
-      function grab(){ try{ ctx.drawImage(video,0,0,canvas.width,canvas.height);}catch{} frames.push(canvas.toDataURL('image/jpeg',0.6)); }
-
-      const useRVFC = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
-
-      await new Promise(async (resolve)=>{
-        const stop = setTimeout(resolve, maxMs);
-
-        if (useRVFC) {
-          let last=0;
-          const step = (now,meta)=>{
-            if (frames.length >= target) { clearTimeout(stop); return resolve(); }
-            if (!last || (meta.mediaTime - last) >= intervalMs/1000) {
-              grab(); last = meta.mediaTime;
-            }
-            video.requestVideoFrameCallback(step);
-          };
-          video.requestVideoFrameCallback(step);
-        } else {
-          const tick = setInterval(()=>{
-            if (frames.length >= target || video.ended) { clearInterval(tick); clearTimeout(stop); resolve(); }
-            else { grab(); }
-          }, intervalMs);
-        }
-
-        try { await video.play(); } catch {}
-      });
-
-      video.pause();
-      if (frames.length === 0) throw new Error('Could not capture frames. Try another clip.');
-      return frames.slice(0, target);
-    }
-
-    // Optional: surface unexpected JS errors while testing
-    // window.addEventListener('error', e => alert('JS Error: '+(e.message||'unknown')));
-    // window.addEventListener('unhandledrejection', e => alert('Promise Error: '+(e.reason?.message||'network/analysis')));
   </script>
 </body>
 </html>
