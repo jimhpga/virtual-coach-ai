@@ -1,186 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="robots" content="noindex, nofollow" />
-<title>Virtual Coach AI</title>
-<style>
-  html,body{height:100%;margin:0;padding:0;color:#f5f5f5;background:#0a0a0a url("homepage-background.png") center/cover no-repeat fixed;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;filter:brightness(1.08) contrast(1.03)}
-  .safe{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-  .hero{max-width:760px;margin:0 auto;padding:48px 24px 72px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.25)}
-  .logo{width:420px;max-width:90vw;height:auto;margin:8px auto 20px;display:block;filter:drop-shadow(0 6px 16px rgba(0,0,0,.25))}
-  .btn{display:inline-block;margin:10px 8px 0;padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.12);text-decoration:none;font-weight:700;color:#fff;background:#0f172a;cursor:pointer}
-  .btn:hover{opacity:.92}
-  .tag{display:inline-block;margin-top:8px;padding:6px 10px;border-radius:10px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.16);font-size:12px}
-  #analyzing{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);color:#fff;z-index:999;align-items:center;justify-content:center;flex-direction:column;text-align:center}
-  .spin{width:44px;height:44px;border:4px solid rgba(255,255,255,.25);border-top-color:#1F6F1F;border-radius:50%;animation:spin 1s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtual Coach AI</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
+    h1 { font-size: 2rem; }
+    .upload-area { border: 2px dashed #aaa; padding: 2rem; cursor: pointer; margin: 2rem auto; max-width: 400px; }
+    .hidden { display: none; }
+    #status { font-size: 0.9rem; color: #666; margin-top: 10px; }
+  </style>
 </head>
 <body>
-<div class="safe">
-  <div class="hero">
-    <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI" class="logo" />
-    <h1>WELCOME</h1>
-    <p>Upload a ≤10s swing to get a live report.</p>
-
-    <!-- Hidden file input (NOT inside a form) -->
-    <input type="file" id="swingUpload"
-           accept="video/mp4,video/quicktime,video/webm"
-           style="display:none" />
-
-    <!-- Buttons -->
-    <button class="btn" type="button" id="uploadBtn">⬆ Upload Your Swing</button>
-    <a class="btn" href="/summary.html">📊 Reports</a>
-
-    <div id="status" class="tag">Ready.</div>
-    <p style="opacity:.65;font-size:12px;margin-top:6px">v1.2 debug — gate-before-picker, no re-check in upload</p>
+  <h1>Virtual Coach AI</h1>
+  <div class="upload-area" onclick="document.getElementById('swingUpload').click()">
+    <p>📤 Press to Upload Your Swing</p>
+    <input type="file" id="swingUpload" accept="video/*" class="hidden" />
+    <div id="status"></div>
   </div>
-</div>
+  <script>
+    const uploadInput = document.getElementById('swingUpload');
+    const statusEl = document.getElementById('status');
 
-<!-- Analyzing overlay -->
-<div id="analyzing">
-  <div class="spin"></div>
-  <div style="margin-top:12px">Analyzing your swing…</div>
-</div>
-
-<script>
-  // --- Hard block any accidental form submits / reloads ---
-  document.addEventListener('submit', e => e.preventDefault());
-  window.addEventListener('beforeunload', e => { /* no-op: helps surface unexpected nav in some browsers */ });
-
-  const statusEl = document.getElementById('status');
-  const fileInput = document.getElementById('swingUpload');
-
-  function setStatus(s){ statusEl.textContent = s; console.log('[VC]', s); }
-
-  function isAuthed(){ try { return localStorage.getItem('vc_auth') === 'ok'; } catch(e){ return false; } }
-
-  // Only gate BEFORE opening the picker
-  document.getElementById('uploadBtn').addEventListener('click', () => {
-    if (!isAuthed()) {
-      setStatus('Auth required → sending to login…');
-      window.location.href = '/login.html?next=upload';
-      return;
+    function setStatus(msg) {
+      statusEl.textContent = msg;
     }
-    setStatus('Opening file picker…');
-    fileInput.click();
-  });
 
-  // Auto-resume after login
-  window.addEventListener('DOMContentLoaded', () => {
-    const resume = new URLSearchParams(location.search).get('resume');
-    if (resume === 'upload' && isAuthed()) {
-      setStatus('Resuming upload → opening picker…');
-      history.replaceState({}, "", "index.html");
-      setTimeout(() => fileInput.click(), 150);
-    }
-  });
+    uploadInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const frames = await extractFrames(file);
+        setStatus('Uploading for analysis...');
 
-  // When a file is chosen, start upload flow (NO auth check here)
-  fileInput.addEventListener('change', () => {
-    if (!fileInput.files || !fileInput.files[0]) { setStatus('No file selected.'); return; }
-    uploadSwing(fileInput.files[0]).catch(err => {
-      alert('Upload failed: ' + (err?.message || err));
-      setStatus('Upload failed.');
-    });
-  });
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ frames }),
+        });
 
-  async function extractFrames(file) {
-    setStatus('Extracting frames…');
-    const url = URL.createObjectURL(file);
-    const video = document.createElement('video');
-    video.src = url; video.muted = true; video.playsInline = true;
-
-    await new Promise((resolve, reject) => { video.onloadedmetadata = resolve; video.onerror = reject; });
-
-    const duration = Math.max(0.6, Math.min(1.8, video.duration || 1.2));
-    const steps = 6; // smaller payload for reliability
-    const timestamps = Array.from({length: steps}, (_,i) => +(i * (duration / (steps - 1))).toFixed(2));
-
-    const canvas = document.createElement('canvas'); canvas.width = 360; canvas.height = 203;
-    const ctx = canvas.getContext('2d');
-
-    const images = [];
-    for (const t of timestamps) {
-      video.currentTime = Math.min(t, (video.duration || duration) - 0.05);
-      await new Promise(r => video.onseeked = r);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      images.push(canvas.toDataURL('image/jpeg', 0.6));
-    }
-    URL.revokeObjectURL(url);
-    return images;
-  }
-
-  async function analyzeFrames(id, frames) {
-    setStatus('Calling /api/analyze…');
-    const overlay = document.getElementById('analyzing');
-    overlay.style.display = 'flex';
-    try {
-      const resp = await fetch('/api/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({ id, frames })
-      });
-      const text = await resp.text();
-      if (!resp.ok) {
-        overlay.style.display = 'none';
-        setStatus('API error ' + resp.status);
-        alert('Analysis error (' + resp.status + '): ' + text.slice(0, 400));
-        throw new Error('API ' + resp.status);
-      }
-      let json;
-      try { json = JSON.parse(text); } catch(e){ overlay.style.display='none'; alert('Invalid JSON from API'); throw e; }
-      overlay.style.display = 'none';
-      return json;
-    } catch (e) {
-      overlay.style.display = 'none';
-      throw e;
-    }
-  }
-
-  async function uploadSwing(file) {
-    setStatus('Validating clip…');
-    const objUrl = URL.createObjectURL(file);
-    const v = document.createElement('video');
-    v.preload = 'metadata';
-    v.src = objUrl;
-
-    v.onloadedmetadata = async () => {
-      const proceed = async (seconds) => {
-        if (!seconds || !isFinite(seconds)) { setStatus('Length unknown.'); alert('Could not detect video length.'); return; }
-        if (seconds > 10) { setStatus('Too long.'); alert('Clip too long. Please upload ≤ 10 seconds.'); return; }
-
-        const id = Date.now().toString();
-        try {
-          const frames = await extractFrames(file);
-          const report = await analyzeFrames(id, frames);
-          sessionStorage.setItem('vc_report_' + id, JSON.stringify(report));
-          setStatus('Done → opening report…');
-          window.location.href = `/summary.html?id=${encodeURIComponent(id)}`;
-        } catch (e) {
-          setStatus('Analysis failed.');
-          console.error(e);
+        const result = await response.json();
+        if (response.ok) {
+          window.location.href = `/report.html?data=${encodeURIComponent(JSON.stringify(result))}`;
+        } else {
+          setStatus('❌ Error: ' + (result.error || 'Unknown'));
         }
-      };
-
-      if (!isFinite(v.duration) || v.duration === Infinity) {
-        v.currentTime = Number.MAX_SAFE_INTEGER;
-        v.ontimeupdate = () => { v.ontimeupdate = null; URL.revokeObjectURL(objUrl); proceed(v.duration); };
-      } else {
-        const seconds = v.duration;
-        URL.revokeObjectURL(objUrl);
-        await proceed(seconds);
+      } catch (err) {
+        setStatus('❌ ' + err.message);
       }
-    };
+    });
 
-    v.onerror = () => { URL.revokeObjectURL(objUrl); setStatus('Video read error.'); alert('Could not read this video.'); };
-  }
+    async function extractFrames(file) {
+      setStatus('Extracting frames...');
 
-  // Surface silent JS errors
-  window.addEventListener('error', e => { alert('JS Error: ' + (e.message || 'unknown')); setStatus('JS error'); });
-  window.addEventListener('unhandledrejection', e => { alert('Promise Error: ' + (e.reason?.message || 'network/analysis')); setStatus('Promise error'); });
-</script>
+      const url = URL.createObjectURL(file);
+      const video = document.createElement('video');
+      video.src = url;
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'auto';
+      video.crossOrigin = 'anonymous';
+
+      await new Promise((resolve, reject) => {
+        video.oncanplay = resolve;
+        video.onerror = () => reject(new Error('Video load failed'));
+      });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 360;
+      canvas.height = 203;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+      const frames = [];
+      let stopped = false;
+
+      function grab() {
+        try { ctx.drawImage(video, 0, 0, canvas.width, canvas.height); }
+        catch { }
+        frames.push(canvas.toDataURL('image/jpeg', 0.6));
+      }
+
+      const useRVFC = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
+      const intervalMs = 140;
+      const targetFrames = 6;
+      const maxMs = 4000;
+
+      const done = new Promise(async (resolve) => {
+        const timerStop = setTimeout(() => { stopped = true; resolve(); }, maxMs);
+
+        if (useRVFC) {
+          let lastTs = 0;
+          const step = (now, meta) => {
+            if (stopped || frames.length >= targetFrames) { clearTimeout(timerStop); resolve(); return; }
+            if (!lastTs || (meta.mediaTime - lastTs) >= intervalMs / 1000) {
+              grab();
+              lastTs = meta.mediaTime;
+            }
+            video.requestVideoFrameCallback(step);
+          };
+          video.requestVideoFrameCallback(step);
+        } else {
+          const tick = setInterval(() => {
+            if (stopped || frames.length >= targetFrames || video.ended) {
+              clearInterval(tick); clearTimeout(timerStop); resolve();
+            } else {
+              grab();
+            }
+          }, intervalMs);
+        }
+
+        try { await video.play(); } catch {}
+      });
+
+      await done;
+      video.pause();
+      URL.revokeObjectURL(url);
+
+      if (frames.length === 0) throw new Error('Could not capture frames. Try another clip.');
+      return frames.slice(0, targetFrames);
+    }
+  </script>
 </body>
 </html>
