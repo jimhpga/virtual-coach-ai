@@ -1,16 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Virtual Coach AI — Swing Reports</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  :root{
+    --fg:#f5f5f5; --bg:#0a0a0a; --line:rgba(255,255,255,0.16);
+    --muted:rgba(255,255,255,0.72);
+    --good:#16a34a;  --warn:#eab308;  --bad:#ef4444;
+    --accent:#1F6F1F;
+  }
+  html,body{
+    height:100%; margin:0; padding:0; color:var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    background: var(--bg) url("homepage-background.png") center / cover no-repeat fixed;
+    filter: brightness(1.08) contrast(1.03);
+  }
+  body{ min-height:-webkit-fill-available; }
+  .safe-area{ padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  .wrap{ max-width: 900px; margin:0 auto; padding:48px 20px; text-shadow:0 1px 2px rgba(0,0,0,0.25); }
+  h1{ margin:0 0 6px; font-size:32px; }
+  .muted{ color:var(--muted); }
+
+  .acc { margin-top: 10px; }
+  details{
+    border:1px solid var(--line); border-radius:12px; background:rgba(0,0,0,0.25);
+    padding:14px 16px; margin-bottom:10px;
+  }
+  summary{ cursor:pointer; font-weight:700; list-style:none; outline:none; display:flex; align-items:center; justify-content:space-between; }
+  summary::-webkit-details-marker{ display:none; }
+  .chev{ width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid var(--muted); transition: transform .15s; }
+  details[open] .chev{ transform: rotate(180deg); }
+
+  .legend{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 18px; font-size:13px; }
+  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
+  .g{ background:var(--good); } .y{ background:var(--warn);} .r{ background:var(--bad);}
+
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .chip{ border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:13px; }
+  .chip.g{ border-color:var(--good); color:#d1fae5; } .chip.y{ border-color:var(--warn); color:#fef08a; } .chip.r{ border-color:var(--bad); color:#fecaca; }
+
+  table{ width:100%; border-collapse: collapse; margin-top:10px; font-size:14px;}
+  th, td{ padding:10px; border-bottom:1px solid var(--line); text-align:left; }
+  th{ font-weight:700; color:#fff; }
+  .pill{ padding:3px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line);}
+  .pill.g{ background:rgba(22,163,74,0.2); border-color:var(--good); }
+  .pill.y{ background:rgba(234,179,8,0.2); border-color:var(--warn); }
+  .pill.r{ background:rgba(239,68,68,0.2); border-color:var(--bad); }
+
+  .cta{
+    display:inline-block; margin-top:14px; padding:12px 18px; border-radius:12px;
+    background:var(--accent); color:#fff; text-decoration:none; font-weight:700; border:1px solid var(--line);
+  }
+  .cta:hover{ opacity:.95; }
+</style>
+</head>
+<body>
+<div class="safe-area">
+  <div class="wrap">
+    <h1>Swing Reports</h1>
+    <div class="muted">ID: <span id="rid">—</span></div>
+
+    <div class="legend">
+      <div><span class="dot g"></span>Good</div>
+      <div><span class="dot y"></span>Okay</div>
+      <div><span class="dot r"></span>Needs Work</div>
+    </div>
+
+    <div class="acc">
+      <!-- Available Reports -->
+      <details open>
+        <summary>Available Reports <span class="chev"></span></summary>
+        <table>
+          <thead><tr><th>Date</th><th>Club</th><th>Tempo</th><th>P1–P9</th><th>Open</th></tr></thead>
+        <tbody id="reportRows"></tbody>
+        </table>
+      </details>
+
+      <!-- Tempo -->
+      <details>
+        <summary>Tempo <span class="chev"></span></summary>
+        <div class="chips"></div>
+        <p class="muted">Target a repeatable 3:1. Keep a tiny pause; don’t rush P4→P5.</p>
+      </details>
+
+      <!-- P1–P9 -->
+      <details>
+        <summary>P1–P9 Assessment <span class="chev"></span></summary>
+        <table>
+          <thead><tr><th>Checkpoint</th><th>Observation</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>P1 Setup</td><td>Balanced posture; neutral grip</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P2 Shaft Parallel (BS)</td><td>Club slightly outside hands (ok)</td><td><span class="pill y">Okay</span></td></tr>
+            <tr><td>P3 Lead Arm Parallel</td><td>Good width; trail elbow soft</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P4 Top</td><td>Centered turn; minimal sway</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P5 Lead Arm Parallel (DS)</td><td>Shallowing present; chest open</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P6 Shaft Parallel (DS)</td><td>Lead wrist flexed; path neutral</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P7 Impact</td><td>Hands ahead; strike slightly thin at times</td><td><span class="pill y">Okay</span></td></tr>
+            <tr><td>P8 Trail Arm Parallel</td><td>Extends to target; balanced</td><td><span class="pill g">Good</span></td></tr>
+            <tr><td>P9 Finish</td><td>Full rotation; stable</td><td><span class="pill g">Good</span></td></tr>
+          </tbody>
+        </table>
+      </details>
+
+      <!-- Top 3 -->
+      <details open>
+        <summary>Top 3 Things to Work On <span class="chev"></span></summary>
+        <ol id="top3work"></ol>
+      </details>
+
+      <details>
+        <summary>Top 3 Power Things to Work On <span class="chev"></span></summary>
+        <ol id="top3power"></ol>
+      </details>
+
+      <!-- Goals (static targets for now) -->
+      <details>
+        <summary>Goals <span class="chev"></span></summary>
+        <ul>
+          <li>Hip Turn @ P4 — target <b>45°</b></li>
+          <li>Face Angle @ P6 — target <b>±2°</b></li>
+          <li>Low-Point Control — target <b>+2.0 in</b></li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</div>
+
 <script>
   const id = new URLSearchParams(location.search).get('id') || 'local-demo';
   document.getElementById('rid').textContent = id;
 
   (function load() {
     const raw = sessionStorage.getItem('vc_report_' + id);
-    if (!raw) {
-      console.warn('No cached report. Re-run analysis from home.');
-      return;
-    }
+    if (!raw) { console.warn('No cached report. Re-run analysis from Home.'); return; }
     const j = JSON.parse(raw);
 
-    // Tempo chips
+    // Tempo
     const chips = document.querySelector('.chips');
     if (chips && j.tempo) {
       chips.innerHTML = `
@@ -21,7 +149,7 @@
       `;
     }
 
-    // P1–P9 flags (assumes your table order is P1..P9)
+    // P1–P9 pills (assumes table rows are P1..P9)
     const cells = document.querySelectorAll('tbody tr td:last-child .pill');
     if (j.pFlags && cells.length >= 9) {
       j.pFlags.slice(0,9).forEach((flag, i) => {
@@ -39,7 +167,7 @@
     if (power && j.top3Power) power.innerHTML = j.top3Power.map(x=>`<li><b>${x}</b></li>`).join('');
   })();
 
-  // Fill Available Reports with the current item on top (optional)
+  // Optional: show the current item in Available Reports
   const rows = document.getElementById('reportRows');
   if (rows) {
     rows.innerHTML = `
@@ -53,4 +181,5 @@
     `;
   }
 </script>
-
+</body>
+</html>
