@@ -21,7 +21,6 @@
   <h1>WELCOME</h1>
   <p>Upload a <b>≤10s video</b> to get a live report.</p>
 
-  <!-- Hidden VIDEO-ONLY input -->
   <input type="file" id="swingUpload" accept="video/*" capture="environment" style="display:none" />
   <button class="btn" type="button" id="uploadBtn">⬆ Upload Your Swing</button>
   <a class="btn" href="/summary.html">📊 Reports</a>
@@ -33,20 +32,8 @@
   const fileInput = document.getElementById('swingUpload');
   const overlay   = document.getElementById('analyzing');
 
-  // Gate ONLY before opening picker (enable if using login.html)
-  function isAuthed(){ try { return localStorage.getItem('vc_auth')==='ok'; } catch(e){ return true; } }
-  document.getElementById('uploadBtn').addEventListener('click', ()=>{
-    if (!isAuthed()) { location.href='/login.html?next=upload'; return; }
-    fileInput.click();
-  });
+  document.getElementById('uploadBtn').addEventListener('click', ()=>fileInput.click());
 
-  // Resume after login
-  window.addEventListener('DOMContentLoaded', ()=>{
-    const resume = new URLSearchParams(location.search).get('resume');
-    if (resume==='upload' && isAuthed()) { history.replaceState({},'', 'index.html'); setTimeout(()=>fileInput.click(), 150); }
-  });
-
-  // Force video-only and start flow
   fileInput.addEventListener('change', ()=>{
     const f = fileInput.files && fileInput.files[0]; if (!f) return;
     if (!f.type || !f.type.startsWith('video/')) { alert('Please select a VIDEO (≤10s).'); fileInput.value=''; setTimeout(()=>fileInput.click(),150); return; }
@@ -57,7 +44,6 @@
     const url = URL.createObjectURL(file);
     const v = document.createElement('video');
     v.src = url; v.muted = true; v.playsInline = true; v.preload = 'auto';
-
     await new Promise((res, rej)=>{ v.oncanplay = res; v.onerror = ()=>rej(new Error('Video load failed')); });
 
     const seconds = v.duration;
@@ -82,7 +68,6 @@
     location.href = '/summary.html?id=' + encodeURIComponent(id);
   }
 
-  // Play-and-grab frames (reliable on iPhone)
   async function extractFramesByPlayback(video){
     const canvas = document.createElement('canvas');
     canvas.width = 360; canvas.height = 203;
