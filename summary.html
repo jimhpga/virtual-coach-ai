@@ -24,6 +24,7 @@
   h1{ margin:0 0 6px; font-size:32px; }
   .muted{ color:var(--muted); }
 
+  .acc { margin-top: 10px; }
   details{
     border:1px solid var(--line); border-radius:12px; background:rgba(0,0,0,0.25);
     padding:14px 16px; margin-bottom:10px;
@@ -41,28 +42,9 @@
   .chip{ border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:13px; }
   .chip.g{ border-color:var(--good); color:#d1fae5; } .chip.y{ border-color:var(--warn); color:#fef08a; } .chip.r{ border-color:var(--bad); color:#fecaca; }
 
-  /* Mobile table scroll wrapper */
-  .table-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin: 0 -8px;       /* edge-to-edge breathing room on phones */
-    padding: 0 8px;
-  }
-  table.responsive {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;  /* prevents columns from exploding */
-    min-width: 720px;     /* ensures columns don’t squish too much */
-    word-wrap: break-word;
-    white-space: normal;
-    font-size:14px;
-  }
+  table{ width:100%; border-collapse: collapse; margin-top:10px; font-size:14px;}
   th, td{ padding:10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
   th{ font-weight:700; color:#fff; }
-  @media (max-width: 480px) {
-    th, td { font-size: 13px; padding: 8px; }
-  }
-
   .pill{ padding:3px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line);}
   .pill.g{ background:rgba(22,163,74,0.2); border-color:var(--good); }
   .pill.y{ background:rgba(234,179,8,0.2); border-color:var(--warn); }
@@ -74,7 +56,7 @@
   }
   .cta:hover{ opacity:.95; }
 
-  /* P1–P9 frames grid */
+  /* P1–P9 frames grid (optional if you add images later) */
   .frames {
     display: grid; grid-template-columns: repeat(3, 1fr);
     gap: 10px; margin-top: 10px;
@@ -101,49 +83,46 @@
       <div><span class="dot r"></span>Needs Work</div>
     </div>
 
-    <!-- Available Reports -->
-    <details open>
-      <summary>Available Reports <span class="chev"></span></summary>
-      <div class="table-wrap">
-        <table class="responsive">
+    <div class="acc">
+      <!-- Available Reports -->
+      <details open>
+        <summary>Available Reports <span class="chev"></span></summary>
+        <table>
           <thead><tr><th>Date</th><th>Club</th><th>Tempo</th><th>P1–P9</th><th>Open</th></tr></thead>
           <tbody id="reportRows"></tbody>
         </table>
-      </div>
-    </details>
+      </details>
 
-    <!-- Tempo -->
-    <details open>
-      <summary>Tempo <span class="chev"></span></summary>
-      <div class="chips"></div>
-      <div class="muted" style="margin-top:10px">
-        <b>How to read this:</b> Backswing, Pause, Downswing show seconds. Most elite swings cluster near a
-        <b>~3:1 total backswing-to-downswing ratio</b>. A tiny pause (0.03–0.08s) helps sequence the change of
-        direction. If your ratio is <b>&lt;2.5</b>, you may be rushing from P4→P5; if it’s <b>&gt;3.5</b>,
-        you may be stalling at the top.
-      </div>
-      <ul class="muted" style="margin:8px 0 0 16px">
-        <li><b>Backswing:</b> Time from start (P1) to top (P4).</li>
-        <li><b>Pause:</b> Micro-pause at P4; too big = loss of speed, zero = yank.</li>
-        <li><b>Downswing:</b> P4 to impact (P7). Consistency here = strike control.</li>
-      </ul>
-      <div class="muted" style="margin-top:8px">
-        <b>Coach cue:</b> Keep the backswing smooth, feel a coin-flip pause at the top, then rip the downswing.
-      </div>
-    </details>
+      <!-- Tempo -->
+      <details open>
+        <summary>Tempo <span class="chev"></span></summary>
+        <div class="chips"></div>
+        <div class="muted" style="margin-top:10px">
+          <b>How to read this:</b> Backswing, Pause, Downswing show seconds. Most elite swings cluster near a
+          <b>~3:1 total backswing-to-downswing ratio</b>. A tiny pause (0.03–0.08s) helps sequence the change of
+          direction. If your ratio is <b>&lt;2.5</b>, you may be rushing from P4→P5; if it’s <b>&gt;3.5</b>,
+          you may be stalling at the top.
+        </div>
+        <ul class="muted" style="margin:8px 0 0 16px">
+          <li><b>Backswing:</b> Time from start (P1) to top (P4).</li>
+          <li><b>Pause:</b> Micro-pause at P4; too big = loss of speed, zero = yank.</li>
+          <li><b>Downswing:</b> P4 to impact (P7). Consistency here = strike control.</li>
+        </ul>
+        <div class="muted" style="margin-top:8px">
+          <b>Coach cue:</b> Keep the backswing smooth, feel a coin-flip pause at the top, then rip the downswing.
+        </div>
+      </details>
 
-    <!-- P1–P9 -->
-    <details open>
-      <summary>P1–P9 Assessment <span class="chev"></span></summary>
-      <div class="muted" style="margin:6px 0 10px">
-        <b>Flags:</b>
-        <span class="pill g">Good</span> = on model;
-        <span class="pill y">Okay</span> = playable but watch it (minor drift);
-        <span class="pill r">Needs Work</span> = leaking speed/consistency (fix this soon).
-      </div>
-
-      <div class="table-wrap">
-        <table class="responsive">
+      <!-- P1–P9 (expanded with WHY / WHAT TO IMPROVE) -->
+      <details open>
+        <summary>P1–P9 Assessment <span class="chev"></span></summary>
+        <div class="muted" style="margin:6px 0 10px">
+          <b>Flags:</b>
+          <span class="pill g">Good</span> = on model;
+          <span class="pill y">Okay</span> = playable but watch it (minor drift);
+          <span class="pill r">Needs Work</span> = leaking speed/consistency (fix this soon).
+        </div>
+        <table>
           <thead>
             <tr>
               <th>Checkpoint</th>
@@ -152,71 +131,75 @@
               <th>Why / What to Improve</th>
             </tr>
           </thead>
-          <tbody id="pRows"><!-- injected by script --></tbody>
+          <tbody id="pRows">
+            <!-- Rows are filled by script -->
+          </tbody>
         </table>
-      </div>
 
-      <!-- Optional image grid (from session frames) -->
-      <div class="frames" id="pFrames"></div>
-    </details>
+        <!-- Optional image grid (from session frames) -->
+        <div class="frames" id="pFrames"></div>
+      </details>
 
-    <!-- Top 3 -->
-    <details open>
-      <summary>Top 3 Things to Work On <span class="chev"></span></summary>
-      <p class="muted" style="margin:6px 0 10px">
-        Your highest-leverage fixes for contact and curve. Do these first. One change at a time; keep the same feels for a week.
-      </p>
-      <ol id="top3work"></ol>
-      <div class="muted" style="margin-top:8px">
-        <b>Coach cue:</b> If a drill cleans up P6 or P7, ball flight improves immediately—don’t chase five swing thoughts.
-      </div>
-    </details>
+      <!-- Top 3 -->
+      <details open>
+        <summary>Top 3 Things to Work On <span class="chev"></span></summary>
+        <p class="muted" style="margin:6px 0 10px">
+          Your highest-leverage fixes for contact and curve. Do these first. One change at a time; keep the same feels for a week.
+        </p>
+        <ol id="top3work"></ol>
+        <div class="muted" style="margin-top:8px">
+          <b>Coach cue:</b> If a drill cleans up P6 or P7, ball flight improves immediately—don’t chase five swing thoughts.
+        </div>
+      </details>
 
-    <details>
-      <summary>Top 3 Power Things to Work On <span class="chev"></span></summary>
-      <p class="muted" style="margin:6px 0 10px">
-        Speed without chaos. These add mph by improving sequence and force direction, not just swinging harder.
-      </p>
-      <ol id="top3power"></ol>
-      <div class="muted" style="margin-top:8px">
-        <b>Coach cue:</b> Stack speed work after a clean contact session. 15–20 quality reps beat 80 sloppy ones.
-      </div>
-    </details>
+      <details>
+        <summary>Top 3 Power Things to Work On <span class="chev"></span></summary>
+        <p class="muted" style="margin:6px 0 10px">
+          Speed without chaos. These add mph by improving sequence and force direction, not just swinging harder.
+        </p>
+        <ol id="top3power"></ol>
+        <div class="muted" style="margin-top:8px">
+          <b>Coach cue:</b> Stack speed work after a clean contact session. 15–20 quality reps beat 80 sloppy ones.
+        </div>
+      </details>
 
-    <!-- Goals -->
-    <details>
-      <summary>Goals <span class="chev"></span></summary>
-      <p class="muted" style="margin:6px 0 10px">
-        Benchmarks to aim at. Hit these consistently and your dispersion shrinks while ball speed climbs.
-      </p>
-      <ul>
-        <li><b>Tempo:</b> Settle near <b>~3:1</b> with a micro-pause (&lt;0.08s).</li>
-        <li><b>P4 depth:</b> Hips turned ~<b>45°</b>, torso ~<b>70–90°</b>, weight still inside trail foot.</li>
-        <li><b>P6 face:</b> Within <b>±2°</b> of path; hands slightly ahead of clubhead.</li>
-        <li><b>Impact low-point:</b> Iron: <b>+2.0 in</b> ahead of ball; Driver: near 0 with upward AoA.</li>
-      </ul>
-      <div class="muted" style="margin-top:8px">
-        <b>Coach cue:</b> When in doubt, re-check setup and tempo—cheap fixes that move everything else the right way.
-      </div>
-    </details>
+      <!-- Goals -->
+      <details>
+        <summary>Goals <span class="chev"></span></summary>
+        <p class="muted" style="margin:6px 0 10px">
+          Benchmarks to aim at. Hit these consistently and your dispersion shrinks while ball speed climbs.
+        </p>
+        <ul>
+          <li><b>Tempo:</b> Settle near <b>~3:1</b> with a micro-pause (&lt;0.08s).</li>
+          <li><b>P4 depth:</b> Hips turned ~<b>45°</b>, torso ~<b>70–90°</b>, weight still inside trail foot.</li>
+          <li><b>P6 face:</b> Within <b>±2°</b> of path; hands slightly ahead of clubhead.</li>
+          <li><b>Impact low-point:</b> Iron: <b>+2.0 in</b> ahead of ball; Driver: near 0 with upward AoA.</li>
+        </ul>
+        <div class="muted" style="margin-top:8px">
+          <b>Coach cue:</b> When in doubt, re-check setup and tempo—cheap fixes that move everything else the right way.
+        </div>
+      </details>
 
-    <!-- Glossary -->
-    <details>
-      <summary>Glossary <span class="chev"></span></summary>
-      <ul class="muted">
-        <li><b>BS/DS:</b> Backswing / Downswing</li>
-        <li><b>Shallowing:</b> Shaft pitch flattening from P4→P5</li>
-        <li><b>Low-point:</b> Lowest part of the swing arc relative to the ball</li>
-        <li><b>Face to path:</b> Difference between clubface angle and swing path</li>
-      </ul>
-    </details>
+      <!-- Glossary -->
+      <details>
+        <summary>Glossary <span class="chev"></span></summary>
+        <ul class="muted">
+          <li><b>BS/DS:</b> Backswing / Downswing</li>
+          <li><b>Shallowing:</b> Shaft pitch flattening from P4→P5</li>
+          <li><b>Low-point:</b> Lowest part of the swing arc relative to the ball</li>
+          <li><b>Face to path:</b> Difference between clubface angle and swing path</li>
+        </ul>
+      </details>
+    </div>
   </div>
 </div>
 
 <script>
+  // ===== Read report =====
   const id = new URLSearchParams(location.search).get('id') || 'local-demo';
   document.getElementById('rid').textContent = id;
 
+  // P1–P9 labels and "what we're checking" copy
   const P = [
     { k:'P1 — Setup',  what:'Posture, ball position, grip, pressure in feet.' },
     { k:'P2 — Shaft Parallel (BS)', what:'Club outside/inside hands, face orientation.' },
@@ -229,6 +212,7 @@
     { k:'P9 — Finish',              what:'Full rotation, posted lead leg, stable balance.' }
   ];
 
+  // Explanations per status (Good / Okay / Needs Work)
   const WHY = {
     g: [
       'Positions are on model. Protect this checkpoint; small wins compound.',
@@ -265,6 +249,7 @@
     ]
   };
 
+  // Render function
   (function load() {
     const raw = sessionStorage.getItem('vc_report_' + id);
     if (!raw) { console.warn('No cached report. Re-run analysis from Home.'); return; }
@@ -281,7 +266,7 @@
       `;
     }
 
-    // P1–P9 rows
+    // P1–P9 table with WHY / WHAT TO IMPROVE
     const rows = document.getElementById('pRows');
     const flags = (j.pFlags && j.pFlags.length >= 9) ? j.pFlags.slice(0,9) : Array(9).fill('y');
     rows.innerHTML = '';
