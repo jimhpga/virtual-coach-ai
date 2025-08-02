@@ -5,54 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="robots" content="noindex, nofollow" />
   <title>Virtual Coach AI</title>
   <style>
-    /* Global / Background */
     html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      color: #f5f5f5;
+      height: 100%; margin: 0; padding: 0; color: #f5f5f5;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       background: #0a0a0a url("homepage-background.png") center / cover no-repeat fixed;
-      filter: brightness(1.08) contrast(1.03); /* tweak if needed */
+      filter: brightness(1.08) contrast(1.03);
     }
     body { min-height: -webkit-fill-available; }
-
-    .safe-area {
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-      padding-left: env(safe-area-inset-left);
-      padding-right: env(safe-area-inset-right);
-    }
-
-    .hero {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 48px 24px 72px;
-      text-align: center;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.25);
-    }
-
-    /* Bigger + forest green logo */
-    .logo {
-      width: 420px; max-width: 90vw; height: auto;
-      margin: 8px auto 20px; display: block;
-      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.25));
-    }
-    /* Darker forest green tint (#1F6F1F) */
+    .safe-area { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+    .hero { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+    .logo { width: 420px; max-width: 90vw; height: auto; margin: 8px auto 20px; display: block; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.25)); }
     .logo-green {
-      filter:
-        brightness(0) saturate(100%)
-        invert(26%) sepia(56%)
-        saturate(2350%) hue-rotate(79deg)
-        brightness(85%) contrast(90%)
-        drop-shadow(0 6px 16px rgba(0,0,0,0.25));
+      filter: brightness(0) saturate(100%) invert(26%) sepia(56%) saturate(2350%)
+              hue-rotate(79deg) brightness(85%) contrast(90%)
+              drop-shadow(0 6px 16px rgba(0,0,0,0.25));
     }
-
     h1 { margin: 0 0 10px; font-size: 36px; letter-spacing: 0.04em; }
     p  { margin: 0 auto 16px; line-height: 1.6; max-width: 560px; }
-
     .btn {
       display:inline-block; margin: 10px 8px 0; padding: 12px 18px;
       border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);
@@ -60,104 +32,161 @@
     }
     .btn:hover { opacity:.92; }
     .btn-secondary { background: transparent; border-color: rgba(255,255,255,0.25); }
-
     .contact a { color: #22c55e; text-decoration: none; }
     .contact a:hover { text-decoration: underline; }
 
-    @media (max-width: 480px) {
-      h1 { font-size: 30px; }
-      .logo { width: 300px; }
+    /* Analyzing overlay */
+    #analyzing {
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,.6);
+      backdrop-filter: blur(2px); color:#fff; z-index:999;
+      align-items:center; justify-content:center; flex-direction:column; text-align:center;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
+    .spin { width:44px; height:44px; border:4px solid rgba(255,255,255,.25);
+            border-top-color:#1F6F1F; border-radius:50%; animation:spin 1s linear infinite; }
+    @keyframes spin{ to{ transform:rotate(360deg) } }
+
+    @media (max-width: 480px) { h1 { font-size: 30px; } .logo { width: 300px; } }
   </style>
 </head>
 <body>
   <div class="safe-area">
     <div class="hero">
-      <!-- If you have a pre-green logo file, use it without logo-green -->
-      <!-- <img src="virtualcoach-logo.png" alt="Virtual Coach AI Logo" class="logo" /> -->
       <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo logo-green" />
-
       <h1>WELCOME</h1>
-      <p>
-        to the beta launch of Virtual Coach AI —<br>
-        the intelligent swing coach designed to help you reach your golfing potential.
-      </p>
+      <p>to the beta launch of Virtual Coach AI —<br>the intelligent swing coach designed to help you reach your golfing potential.</p>
 
       <!-- Hidden file input -->
-      <input
-        type="file"
-        id="swingUpload"
-        accept="video/mp4,video/quicktime,video/webm"
-        style="display:none"
-        onchange="uploadSwing()"
-      />
+      <input type="file" id="swingUpload" accept="video/mp4,video/quicktime,video/webm" style="display:none" onchange="uploadSwing()" />
 
       <!-- Actions -->
       <label for="swingUpload" class="btn">⬆ Upload Your Swing</label>
       <a href="/summary.html" class="btn btn-secondary">📊 Reports</a>
 
       <p class="contact" style="margin-top:14px;">Questions? <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
+      <p style="opacity:.65;font-size:12px;margin-top:6px">v0.9 — live analysis</p>
     </div>
   </div>
 
+  <!-- Analyzing overlay -->
+  <div id="analyzing">
+    <div class="spin"></div>
+    <div style="margin-top:12px">Analyzing your swing…</div>
+  </div>
+
   <script>
-    // Gate uploads: require a passcode before processing
-    // Expect login.html to set: localStorage.setItem('vc_auth', 'ok')
-    async function uploadSwing() {
-      // 1) Check login first
-      try {
-        if // Gate uploads: require passcode first
-if (localStorage.getItem('vc_auth') !== 'ok') {
-  window.location.href = 'login.html';
-  return;
-}
+    // ---- passcode: only required when uploading ----
+    // Set by login.html via: localStorage.setItem('vc_auth','ok') when passcode 1234 is entered.
+    function ensurePasscode() {
+      try { return localStorage.getItem('vc_auth') === 'ok'; }
+      catch(e){ return false; }
+    }
 
-        }
-      } catch (e) {
-        window.location.href = 'login.html';
-        return;
+    // ---- Extract ~9 frames from the video (client-side) ----
+    async function extractFrames(file) {
+      const url = URL.createObjectURL(file);
+      const video = document.createElement('video');
+      video.src = url; video.muted = true; video.playsInline = true;
+
+      await new Promise((resolve, reject) => {
+        video.onloadedmetadata = resolve;
+        video.onerror = reject;
+      });
+
+      // Even if the clip is longer, sample the first ~1.8s uniformly (or full duration if shorter)
+      const duration = Math.max(0.6, Math.min(1.8, video.duration || 1.2));
+      const steps = 9;
+      const timestamps = Array.from({length: steps}, (_,i) => +(i * (duration / (steps - 1))).toFixed(2));
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 480; canvas.height = 270;
+      const ctx = canvas.getContext('2d');
+
+      const images = [];
+      for (const t of timestamps) {
+        video.currentTime = Math.min(t, (video.duration || duration) - 0.05);
+        await new Promise(r => video.onseeked = r);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        images.push(canvas.toDataURL('image/jpeg', 0.7));
       }
+      URL.revokeObjectURL(url);
+      return images;
+    }
 
-      // 2) Proceed with the existing upload/validation flow
+    // ---- POST to /api/analyze with spinner + error surfacing ----
+    async function analyzeFrames(id, frames) {
+      const overlay = document.getElementById('analyzing');
+      overlay.style.display = 'flex';
+      try {
+        const resp = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify({ id, frames })
+        });
+        if (!resp.ok) {
+          const text = await resp.text();
+          alert('Analysis error (' + resp.status + '): ' + text.slice(0, 200));
+          overlay.style.display = 'none';
+          return null;
+        }
+        const json = await resp.json();
+        overlay.style.display = 'none';
+        return json;
+      } catch (e) {
+        overlay.style.display = 'none';
+        alert('Network/analysis failed. Please try again.');
+        console.error(e);
+        return null;
+      }
+    }
+
+    // ---- Main upload flow ----
+    async function uploadSwing() {
+      // 1) Passcode gate
+      if (!ensurePasscode()) { window.location.href = '/login.html'; return; }
+
+      // 2) Validate selection & length
       const input = document.getElementById('swingUpload');
       const file = input.files[0];
       if (!file) { alert('Please select a swing file.'); return; }
 
-      const url = URL.createObjectURL(file);
+      const objUrl = URL.createObjectURL(file);
       const v = document.createElement('video');
       v.preload = 'metadata';
-      v.src = url;
+      v.src = objUrl;
 
-      v.onloadedmetadata = () => {
-        const finish = () => {
-          URL.revokeObjectURL(url);
-          const seconds = v.duration;
-          if (!seconds || !isFinite(seconds)) {
-            alert('Could not detect video length. Try a different clip.');
-            input.value = '';
-            return;
-          }
-          if (seconds > 10) {
-            alert('Clip is too long. Please upload a clip ≤ 10 seconds.');
-            input.value = '';
-            return;
-          }
+      v.onloadedmetadata = async () => {
+        const proceed = async (seconds) => {
+          if (!seconds || !isFinite(seconds)) { alert('Could not detect video length. Try another clip.'); input.value=''; return; }
+          if (seconds > 10) { alert('Clip too long. Please upload ≤ 10 seconds.'); input.value=''; return; }
+
           const id = Date.now().toString();
-          window.location.href = `report.html?id=${encodeURIComponent(id)}`;
+          try {
+            const frames = await extractFrames(file);
+            const report = await analyzeFrames(id, frames);
+            if (!report) return; // error already shown
+            sessionStorage.setItem('vc_report_' + id, JSON.stringify(report));
+            window.location.href = `/summary.html?id=${encodeURIComponent(id)}`;
+          } catch (e) {
+            console.error(e);
+            alert('Analysis failed. Please try another clip.');
+          }
         };
 
         // iOS duration Infinity quirk
         if (!isFinite(v.duration) || v.duration === Infinity) {
           v.currentTime = Number.MAX_SAFE_INTEGER;
-          v.ontimeupdate = () => { v.ontimeupdate = null; finish(); };
+          v.ontimeupdate = () => { v.ontimeupdate = null; URL.revokeObjectURL(objUrl); proceed(v.duration); };
         } else {
-          finish();
+          const seconds = v.duration;
+          URL.revokeObjectURL(objUrl);
+          await proceed(seconds);
         }
       };
 
       v.onerror = () => {
-        URL.revokeObjectURL(url);
-        alert('Could not read this video file. Please try a different file.');
+        URL.revokeObjectURL(objUrl);
+        alert('Could not read this video. Try a different file.');
         input.value = '';
       };
     }
