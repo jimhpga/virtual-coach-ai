@@ -1,97 +1,158 @@
-<!DOCTYPE html><html lang="en"><head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Virtual Coach AI</title>
-<style>
-  html,body{height:100%;margin:0;color:#f5f5f5;background:#0a0a0a url("homepage-background.png") center/cover no-repeat fixed;
-            font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;filter:brightness(1.08) contrast(1.03)}
-  .safe{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-  .hero{max-width:760px;margin:0 auto;padding:48px 24px 72px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.25)}
-  .logo{width:min(420px,90vw);height:auto;margin:8px auto 20px;display:block;filter:drop-shadow(0 6px 16px rgba(0,0,0,.25))}
-  .btn{display:inline-block;margin:10px 8px 0;padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
-       text-decoration:none;font-weight:700;color:#fff;background:#0f172a;cursor:pointer}
-  .btn:hover{opacity:.92}
-  #analyzing{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);color:#fff;z-index:999;
-             align-items:center;justify-content:center;flex-direction:column;text-align:center}
-  .spin{width:44px;height:44px;border:4px solid rgba(255,255,255,.25);border-top-color:#1F6F1F;border-radius:50%;animation:spin 1s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-</style></head><body>
-<div class="safe"><div class="hero">
-  <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI" class="logo" />
-  <h1>WELCOME</h1>
-  <p>Upload a <b>≤10s video</b> to get a live report.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Virtual Coach AI</title>
+  <style>
+    html,body{
+      height:100%; margin:0; color:#f5f5f5;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:#0a0a0a url("homepage-background.png") center/cover no-repeat fixed;
+      filter:brightness(1.08) contrast(1.03);
+    }
+    .safe{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+    .hero{max-width:760px;margin:0 auto;padding:48px 24px 72px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+    .logo{width:min(420px,90vw);height:auto;margin:8px auto 20px;display:block;filter:drop-shadow(0 6px 16px rgba(0,0,0,.25))}
+    .btn{
+      display:inline-block;margin:10px 8px 0;padding:12px 18px;border-radius:12px;
+      border:1px solid rgba(255,255,255,.12); text-decoration:none; font-weight:700;
+      color:#fff; background:#0f172a; cursor:pointer;
+    }
+    .btn:hover{opacity:.92}
+    #analyzing{
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(2px);
+      color:#fff; z-index:999; align-items:center; justify-content:center; flex-direction:column; text-align:center;
+    }
+    .spin{width:44px;height:44px;border:4px solid rgba(255,255,255,.25);border-top-color:#1F6F1F;border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <div class="safe">
+    <div class="hero">
+      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI" class="logo" />
+      <h1>WELCOME</h1>
+      <p>Upload a <b>≤10s video</b> to get a live report.</p>
 
-  <input type="file" id="swingUpload" accept="video/*" capture="environment" style="display:none" />
-  <button class="btn" type="button" id="uploadBtn">⬆ Upload Your Swing</button>
-  <a class="btn" href="/summary.html">📊 Reports</a>
-</div></div>
+      <!-- Hidden inputs (separate for iOS choice) -->
+      <input type="file" id="swingRecord"  accept="video/*" capture="environment" style="display:none" />
+      <input type="file" id="swingLibrary" accept="video/*,video/mp4,video/quicktime" style="display:none" />
 
-<div id="analyzing"><div class="spin"></div><div style="margin-top:12px">Analyzing your swing…</div></div>
+      <!-- Buttons -->
+      <button class="btn" type="button" onclick="document.getElementById('swingRecord').click()">🎥 Record Swing</button>
+      <button class="btn" type="button" onclick="document.getElementById('swingLibrary').click()">📁 Choose from Library</button>
 
-<script>
-  const fileInput = document.getElementById('swingUpload');
-  const overlay   = document.getElementById('analyzing');
+      <a class="btn" href="/summary.html">📊 Reports</a>
+    </div>
+  </div>
 
-  document.getElementById('uploadBtn').addEventListener('click', ()=>fileInput.click());
+  <!-- Analyzing overlay -->
+  <div id="analyzing">
+    <div class="spin"></div>
+    <div style="margin-top:12px">Analyzing your swing…</div>
+  </div>
 
-  fileInput.addEventListener('change', ()=>{
-    const f = fileInput.files && fileInput.files[0]; if (!f) return;
-    if (!f.type || !f.type.startsWith('video/')) { alert('Please select a VIDEO (≤10s).'); fileInput.value=''; setTimeout(()=>fileInput.click(),150); return; }
-    uploadSwing(f).catch(e=>alert('Upload failed: ' + (e?.message||e)));
-  });
+  <script>
+    // Wire both inputs to the same handler
+    document.getElementById('swingRecord') .addEventListener('change', e => handlePick(e.target));
+    document.getElementById('swingLibrary').addEventListener('change', e => handlePick(e.target));
 
-  async function uploadSwing(file){
-    const url = URL.createObjectURL(file);
-    const v = document.createElement('video');
-    v.src = url; v.muted = true; v.playsInline = true; v.preload = 'auto';
-    await new Promise((res, rej)=>{ v.oncanplay = res; v.onerror = ()=>rej(new Error('Video load failed')); });
-
-    const seconds = v.duration;
-    if (!seconds || !isFinite(seconds)) { URL.revokeObjectURL(url); throw new Error('Could not detect video length.'); }
-    if (seconds > 10) { URL.revokeObjectURL(url); throw new Error('Clip too long (max 10s).'); }
-
-    const frames = await extractFramesByPlayback(v);
-    URL.revokeObjectURL(url);
-
-    overlay.style.display='flex';
-    const id = Date.now().toString();
-    const resp = await fetch('/api/analyze', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ id, frames })
-    });
-    const txt = await resp.text();
-    overlay.style.display='none';
-    if (!resp.ok) { alert('Analysis error ('+resp.status+'): ' + txt.slice(0,300)); return; }
-
-    let report; try { report = JSON.parse(txt); } catch { alert('Invalid JSON from API'); return; }
-    sessionStorage.setItem('vc_report_'+id, JSON.stringify(report));
-    location.href = '/summary.html?id=' + encodeURIComponent(id);
-  }
-
-  async function extractFramesByPlayback(video){
-    const canvas = document.createElement('canvas');
-    canvas.width = 360; canvas.height = 203;
-    const ctx = canvas.getContext('2d', { willReadFrequently:true });
-
-    const frames = []; const target = 6; const intervalMs = 140; const maxMs = 4000;
-    function grab(){ try{ ctx.drawImage(video,0,0,canvas.width,canvas.height);}catch{} frames.push(canvas.toDataURL('image/jpeg',0.6)); }
-    const useRVFC = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
-
-    await new Promise(async (resolve)=>{
-      const stop = setTimeout(resolve, maxMs);
-      if (useRVFC) {
-        let last=0; const step = (now,meta)=>{ if(frames.length>=target){clearTimeout(stop);return resolve();}
-          if(!last || (meta.mediaTime-last)>=intervalMs/1000){ grab(); last=meta.mediaTime; }
-          video.requestVideoFrameCallback(step);
-        }; video.requestVideoFrameCallback(step);
-      } else {
-        const tick = setInterval(()=>{ if(frames.length>=target || video.ended){clearInterval(tick); clearTimeout(stop); resolve();} else { grab(); } }, intervalMs);
+    function handlePick(input){
+      const f = input.files && input.files[0];
+      if (!f) return;
+      if (!f.type || !f.type.startsWith('video/')) {
+        alert('Please select a VIDEO (≤10s).');
+        input.value = '';
+        return;
       }
-      try { await video.play(); } catch {}
-    });
-    video.pause();
-    if (frames.length===0) throw new Error('Could not capture frames. Try another clip.');
-    return frames.slice(0,target);
-  }
-</script>
-</body></html>
+      uploadSwing(f).catch(err => alert('Upload failed: ' + (err?.message || err)));
+    }
+
+    async function uploadSwing(file){
+      // Load video and validate length
+      const url = URL.createObjectURL(file);
+      const v = document.createElement('video');
+      v.src = url; v.muted = true; v.playsInline = true; v.preload = 'auto';
+
+      await new Promise((res, rej)=>{ v.oncanplay = res; v.onerror = ()=>rej(new Error('Video load failed')); });
+
+      const seconds = v.duration;
+      if (!seconds || !isFinite(seconds)) { URL.revokeObjectURL(url); throw new Error('Could not detect video length.'); }
+      if (seconds > 10) { URL.revokeObjectURL(url); throw new Error('Clip too long (max 10s).'); }
+
+      // Extract frames (iOS-safe: play-and-grab)
+      const frames = await extractFramesByPlayback(v);
+      URL.revokeObjectURL(url);
+
+      // Call analyzer
+      const overlay = document.getElementById('analyzing');
+      overlay.style.display='flex';
+      const id = Date.now().toString();
+      const resp = await fetch('/api/analyze', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ id, frames })
+      });
+      const txt = await resp.text();
+      overlay.style.display='none';
+
+      if (!resp.ok) { alert('Analysis error ('+resp.status+'): ' + txt.slice(0,300)); return; }
+
+      let report;
+      try { report = JSON.parse(txt); }
+      catch { alert('Invalid JSON from API'); return; }
+
+      sessionStorage.setItem('vc_report_'+id, JSON.stringify(report));
+      location.href = '/summary.html?id=' + encodeURIComponent(id);
+    }
+
+    // Play-and-grab: no 'seeked' (works well on iPhone)
+    async function extractFramesByPlayback(video){
+      const canvas = document.createElement('canvas');
+      canvas.width = 360; canvas.height = 203; // smaller = faster
+      const ctx = canvas.getContext('2d', { willReadFrequently:true });
+
+      const frames = [];
+      const target = 6;            // grab ~6 frames
+      const intervalMs = 140;      // ~7 fps sampling
+      const maxMs = 4000;          // hard stop after 4s
+
+      function grab(){ try{ ctx.drawImage(video,0,0,canvas.width,canvas.height);}catch{} frames.push(canvas.toDataURL('image/jpeg',0.6)); }
+
+      const useRVFC = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
+
+      await new Promise(async (resolve)=>{
+        const stop = setTimeout(resolve, maxMs);
+
+        if (useRVFC) {
+          let last=0;
+          const step = (now,meta)=>{
+            if (frames.length >= target) { clearTimeout(stop); return resolve(); }
+            if (!last || (meta.mediaTime - last) >= intervalMs/1000) {
+              grab(); last = meta.mediaTime;
+            }
+            video.requestVideoFrameCallback(step);
+          };
+          video.requestVideoFrameCallback(step);
+        } else {
+          const tick = setInterval(()=>{
+            if (frames.length >= target || video.ended) { clearInterval(tick); clearTimeout(stop); resolve(); }
+            else { grab(); }
+          }, intervalMs);
+        }
+
+        try { await video.play(); } catch {}
+      });
+
+      video.pause();
+      if (frames.length === 0) throw new Error('Could not capture frames. Try another clip.');
+      return frames.slice(0, target);
+    }
+
+    // Optional: surface unexpected JS errors while testing
+    // window.addEventListener('error', e => alert('JS Error: '+(e.message||'unknown')));
+    // window.addEventListener('unhandledrejection', e => alert('Promise Error: '+(e.reason?.message||'network/analysis')));
+  </script>
+</body>
+</html>
