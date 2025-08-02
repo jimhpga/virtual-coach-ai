@@ -1,82 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Virtual Coach AI</title>
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Login — Virtual Coach AI</title>
 <style>
-  html,body {
-    height: 100%; margin: 0;
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    color: #f5f5f5;
-    background: #0a0a0a url("homepage-background.png") center/cover no-repeat fixed;
-  }
-  .wrap {
-    min-height: 100%;
-    display: flex; align-items: center; justify-content: center;
-    text-align: center;
-    padding: 40px 16px;
-    background: rgba(0,0,0,0.25);
-    flex-direction: column;
-  }
-  .logo {
-    width: min(420px,80vw);
-    height: auto;
-    display: block;
-    margin: 0 auto 16px;
-    filter: drop-shadow(0 6px 16px rgba(0,0,0,0.4));
-  }
-  .btn {
-    display: inline-block;
-    padding: 12px 18px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.2);
-    background: #0f172a;
-    color: #fff;
-    font-weight: 700;
-    text-decoration: none;
-    cursor: pointer;
-  }
-  #spinner {
-    display: none;
-    margin-top: 20px;
-  }
-  .spin {
-    width: 44px; height: 44px;
-    border: 4px solid rgba(255,255,255,0.25);
-    border-top-color: #1F6F1F;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-</style>
-</head>
-<body>
-  <div class="wrap">
-    <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI" class="logo" />
-    <h1>Virtual Coach AI</h1>
-    <p>Upload a ≤10s swing to get a live report.</p>
-
-    <input type="file" id="fileInput" accept="video/*" style="display:none" />
-    <button class="btn" onclick="document.getElementById('fileInput').click()">⬆ Upload Your Swing</button>
-
-    <div id="spinner"><div class="spin"></div></div>
-  </div>
-
+  :root{--fg:#f5f5f5;--bg:#0a0a0a;--line:rgba(255,255,255,.16);--accent:#1F6F1F}
+  html,body{margin:0;color:var(--fg);background:var(--bg) url("homepage-background.png") center/cover no-repeat fixed;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;min-height:100dvh}
+  .safe{min-height:100dvh;padding:calc(env(safe-area-inset-top)+24px) 16px calc(env(safe-area-inset-bottom)+24px);display:flex;align-items:center;justify-content:center}
+  .card{width:min(520px,94vw);border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.50);box-shadow:0 10px 30px rgba(0,0,0,.28);padding:20px 18px 16px;text-align:center}
+  input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:#fff;font-size:16px}
+  button{margin-top:8px;padding:12px 16px;border:none;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer;min-width:120px}
+  .err{color:#ffb4b4;min-height:18px;margin-top:10px;font-size:14px}
+  .logo{width:min(280px,70vw);height:auto;margin:0 auto 8px;display:block;filter:drop-shadow(0 6px 16px rgba(0,0,0,.35))}
+</style></head><body>
+<div class="safe"><div class="card">
+  <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI" class="logo" />
+  <h2>Enter Passcode</h2><p>Tester access only.</p>
+  <input id="pass" type="password" inputmode="numeric" placeholder="Passcode (e.g., 1234)" />
+  <button id="go">Continue</button>
+  <div id="err" class="err"></div>
+</div></div>
 <script>
-document.getElementById('fileInput').addEventListener('change', function() {
-  if (!this.files.length) return;
-  const file = this.files[0];
-  if (!file.type.startsWith('video/')) {
-    alert('Please select a video file.');
-    return;
+  const PASS="1234";
+  function success(){
+    try{ localStorage.setItem('vc_auth','ok'); }catch(e){}
+    const next = new URLSearchParams(location.search).get('next')||"";
+    const dest = (next==="upload") ? "index.html?resume=upload" : "index.html";
+    location.href = dest;
   }
-  document.getElementById('spinner').style.display = 'block';
-  setTimeout(() => {
-    alert('Pretend analysis complete – wiring real backend tomorrow.');
-    document.getElementById('spinner').style.display = 'none';
-  }, 3000);
-});
-</script>
-</body>
-</html>
+  function submit(){
+    const code=(document.getElementById('pass').value||"").trim();
+    if(code===PASS){ document.getElementById('err').textContent=""; success(); }
+    else{ document.getElementById('err').textContent="Invalid passcode. Try again."; }
+  }
+  document.getElementById('go').onclick=submit;
+  document.getElementById('pass').addEventListener('keydown',e=>{if(e.key==='Enter')submit();});
+</script></body></html>
+
