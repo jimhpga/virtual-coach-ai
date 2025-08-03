@@ -59,11 +59,26 @@
   .legend{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 12px; font-size:13px; }
   .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
 
-  .cta{ display:inline-block; margin-top:14px; padding:10px 14px; border-radius:10px; background:var(--accent); color:#fff; text-decoration:none; font-weight:700; }
+  .cta{ display:inline-block; margin-top:14px; padding:10px 14px; border-radius:10px; background:var(--accent); color:#fff; text-decoration:none; font-weight:700; border:0; cursor:pointer; }
 
   /* Thumbs grid */
   .thumbs{ display:grid; grid-template-columns: repeat(auto-fill, minmax(80px,1fr)); gap:8px; }
   .thumbs img{ width:100%; height:auto; display:block; border-radius:8px; border:1px solid var(--line); }
+
+  /* Header actions */
+  .header-actions { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 0; }
+  .header-actions .cta { background:#214f21; }
+  .header-actions .ghost { background:transparent; border:1px solid var(--line); }
+
+  /* Print styles */
+  @media print {
+    :root { --bg:#fff; --fg:#000; --muted:#555; --line:rgba(0,0,0,0.15); --cardbg:#fff; }
+    html, body { background:#fff !important; filter:none !important; }
+    .wrap { max-width:none; padding:0; margin:0; }
+    .card { break-inside: avoid; background:#fff; }
+    .cta, #exportBtn, #downloadBtn { display:none !important; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
 </style>
 </head>
 <body>
@@ -72,12 +87,32 @@
   <div class="muted">ID: <span id="rid">—</span></div>
   <div class="muted">Profile: <span id="profile">—</span></div>
 
-  <!-- Consistency + summary bar -->
+  <div class="header-actions">
+    <button id="exportBtn" class="cta" onclick="exportReport()">Export Report (PDF)</button>
+    <button id="downloadBtn" class="cta ghost" onclick="downloadHTML()">Download HTML</button>
+    <a href="/" class="cta ghost">Upload Another Swing</a>
+  </div>
+
+  <!-- Totals -->
+  <div class="card" id="totalsCard" style="display:none">
+    <h3 style="margin:0 0 8px">Totals</h3>
+    <div class="chips" id="totalsChips"></div>
+    <div class="muted" id="totalsNotes"></div>
+  </div>
+
+  <!-- Overview -->
   <div class="card">
     <h3 style="margin:0 0 8px">Overview</h3>
     <div class="chips" id="ovChips"></div>
     <div class="sumbar" id="sumbar" style="margin-top:8px;"></div>
     <div class="muted" id="sumbarLegend" style="margin-top:6px;"></div>
+  </div>
+
+  <!-- Summary Categories -->
+  <div class="card" id="catCard" style="display:none">
+    <h3 style="margin:0 0 8px">Summary Categories</h3>
+    <div class="chips" id="catChips"></div>
+    <div class="muted" id="catNotes" style="margin-top:6px"></div>
   </div>
 
   <!-- Tempo -->
@@ -160,11 +195,36 @@
       <div class="acc-body" id="sched"></div>
     </details>
   </div>
-
-  <a href="/" class="cta">Upload Another Swing</a>
 </div>
 
 <script>
+  function exportReport(){
+    const btn = document.getElementById('exportBtn');
+    if (btn) btn.disabled = true;
+    const thumbAcc = document.getElementById('thumbAcc');
+    const wasOpen = !!thumbAcc?.open;
+    try { window.print(); }
+    finally {
+      if (btn) btn.disabled = false;
+      if (!wasOpen && thumbAcc) thumbAcc.open = false;
+    }
+  }
+
+  function downloadHTML(){
+    // Snapshot current DOM and trigger a download as .html
+    const doc = '<!DOCTYPE html>' + document.documentElement.outerHTML;
+    const blob = new Blob([doc], {type:'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const id = new URLSearchParams(location.search).get('id') || 'local-demo';
+    a.download = 'swing-report-' + id + '.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  }
+
   const id = new URLSearchParams(location.search).get('id') || 'local-demo';
   document.getElementById('rid').textContent = id;
 
@@ -172,7 +232,7 @@
   const handed = sessionStorage.getItem('vc_last_handed') || 'right';
   const eye    = sessionStorage.getItem('vc_last_eye') || 'unknown';
   document.getElementById('profile').textContent =
-    `${handed === 'left' ? 'Left' : 'Right'}-handed, ` +
+    (handed === 'left' ? 'Left' : 'Right') + '-handed, ' +
     (eye === 'left' ? 'Left-eye dominant' : eye === 'right' ? 'Right-eye dominant' : 'eye dominance: unknown');
 
   const raw = sessionStorage.getItem('vc_report_' + id);
@@ -203,39 +263,107 @@
         ['P1','P2','P3','P4','P5','P6','P7','P8','P9'].forEach(k=>{
           if (byId[k] && pById[k] && byId[k]!==pById[k]) diff++;
         });
-        consistency = Math.max(40, 100 - diff*7); // small swing changes knock score a bit
+        consistency = Math.max(40, 100 - diff*7);
       } catch(_) {}
     }
     document.getElementById('ovChips').innerHTML =
-      `<span class="chip"><b>Consistency:</b> ${consistency}/100</span>` +
-      `<span class="chip">Good: ${counts.g}</span>` +
-      `<span class="chip">Okay: ${counts.y}</span>` +
-      `<span class="chip">Needs Work: ${counts.r}</span>`;
+      '<span class="chip"><b>Consistency:</b> ' + consistency + '/100</span>' +
+      '<span class="chip">Good: ' + counts.g + '</span>' +
+      '<span class="chip">Okay: ' + counts.y + '</span>' +
+      '<span class="chip">Needs Work: ' + counts.r + '</span>';
     document.getElementById('sumbar').innerHTML =
-      `<div class="sb-g" style="width:${gPct}%"></div>`+
-      `<div class="sb-y" style="width:${yPct}%"></div>`+
-      `<div class="sb-r" style="width:${rPct}%"></div>`;
+      '<div class="sb-g" style="width:'+gPct+'%"></div>'+
+      '<div class="sb-y" style="width:'+yPct+'%"></div>'+
+      '<div class="sb-r" style="width:'+rPct+'%"></div>';
     document.getElementById('sumbarLegend').textContent =
-      `Good ${gPct}% • Okay ${yPct}% • Needs Work ${rPct}%`;
+      'Good ' + gPct + '% • Okay ' + yPct + '% • Needs Work ' + rPct + '%';
+
+    // ---- Totals (aggregated quick glance) ----
+    (function(){
+      const card = document.getElementById('totalsCard');
+      const chips = document.getElementById('totalsChips');
+      const notes = document.getElementById('totalsNotes');
+      const reds = counts.r;
+      const okays = counts.y;
+      const greens = counts.g;
+      const totalCk = total;
+      const redPct = rPct, greenPct = gPct, yellowPct = yPct;
+
+      const tr = j.tempo && j.tempo.ratio != null ? j.tempo.ratio : '—';
+      const chs = (j.powerAssessment && j.powerAssessment.clubheadSpeedEstimate) || '—';
+
+      chips.innerHTML =
+        '<span class="chip"><b>Total Checkpoints:</b> ' + totalCk + '</span>'+
+        '<span class="chip"><b>Reds:</b> ' + reds + ' (' + redPct + '%)</span>'+
+        '<span class="chip"><b>Yellows:</b> ' + okays + ' (' + yellowPct + '%)</span>'+
+        '<span class="chip"><b>Greens:</b> ' + greens + ' (' + greenPct + '%)</span>'+
+        '<span class="chip"><b>Tempo Ratio:</b> ' + tr + ':1</span>'+
+        '<span class="chip"><b>Speed (est):</b> ' + chs + '</span>';
+
+      notes.textContent = reds > 0
+        ? 'Focus on Reds first. Knock out one red, convert two yellows, then re-measure.'
+        : 'Great shape. Maintain greens and convert yellows with short, focused reps.';
+
+      card.style.display = '';
+    })();
 
     // Track history (for next comparison)
     const hist = JSON.parse(sessionStorage.getItem('vc_history')||'[]');
     if (!hist.includes(id)) { hist.push(id); sessionStorage.setItem('vc_history', JSON.stringify(hist.slice(-10))); }
 
+    // ---- Summary Categories ----
+    (function(){
+      const catCard  = document.getElementById('catCard');
+      const catChips = document.getElementById('catChips');
+      const catNotes = document.getElementById('catNotes');
+      const rank = s => (s==='r'?2:(s==='y'?1:0));
+      const worst = (a,b)=> rank(a)>=rank(b)?a:b;
+
+      let categories = Array.isArray(j.categories) ? j.categories.slice() : null;
+
+      if (!categories) {
+        const tagMap = {};
+        cps.forEach(cp=>{
+          const tags = Array.isArray(cp.tags) ? cp.tags : [];
+          tags.forEach(t=>{
+            const key = String(t).trim();
+            if (!key) return;
+            tagMap[key] = key in tagMap ? worst(tagMap[key], (cp.status||'y')) : (cp.status||'y');
+          });
+        });
+        const defaults = ['Face Control','Path','Low Point','Setup','Tempo'];
+        if (Object.keys(tagMap).length === 0) {
+          categories = defaults.map(n => ({ name:n, status:'y' }));
+        } else {
+          categories = Object.keys(tagMap).map(k => ({ name:k, status:tagMap[k] }));
+        }
+      }
+
+      if (categories && categories.length) {
+        catCard.style.display = '';
+        categories.sort((a,b)=> (b.status==='r')-(a.status==='r') || (b.status==='y')-(a.status==='y') || a.name.localeCompare(b.name));
+        catChips.innerHTML = categories.map(c=>{
+          const cls = c.status==='g'?'g':(c.status==='r'?'r':'y');
+          return '<span class="chip"><span class="pill ' + cls + '" style="margin-right:6px;"></span>' + c.name + '</span>';
+        }).join('');
+        const notes = categories.filter(c=>c.note).slice(0,2).map(c=>'<b>'+c.name+':</b> '+c.note);
+        catNotes.innerHTML = notes.length ? notes.join(' • ') : '';
+      }
+    })();
+
     // ---- Tempo ----
     const t = j.tempo || {};
-    document.getElementById('tempoChips').innerHTML = `
-      <span class="chip">Backswing: ${t.backswing ?? '—'}s</span>
-      <span class="chip">Pause: ${t.pause ?? '—'}s</span>
-      <span class="chip">Downswing: ${t.downswing ?? '—'}s</span>
-      <span class="chip">Ratio: ${t.ratio ?? '—'}:1</span>
-    `;
+    document.getElementById('tempoChips').innerHTML =
+      '<span class="chip">Backswing: ' + (t.backswing ?? '—') + 's</span>' +
+      '<span class="chip">Pause: ' + (t.pause ?? '—') + 's</span>' +
+      '<span class="chip">Downswing: ' + (t.downswing ?? '—') + 's</span>' +
+      '<span class="chip">Ratio: ' + (t.ratio ?? '—') + ':1</span>';
 
-    // ---- Quick Wins (2 bullets from Top-3 Work-On fallback to sensible tips) ----
+    // ---- Quick Wins ----
     const w = Array.isArray(j.top3WorkOn) ? j.top3WorkOn : [];
-    const qw = (w.slice(0,2).map(x => `• ${x.title || ''}: ${x.drill || x.why || ''}`));
+    const qw = (w.slice(0,2).map(x => '• ' + (x.title || '') + ': ' + (x.drill || x.why || '')));
     if (!qw.length) qw.push('• Count a 3:1 tempo (Back–Back–Down).', '• Hold finish for 2s to train balance.');
-    document.getElementById('quickWins').innerHTML = `<div class="muted">${qw.join('<br>')}</div>`;
+    document.getElementById('quickWins').innerHTML = '<div class="muted">' + qw.join('<br>') + '</div>';
 
     // ---- Thumbnails (lazy) ----
     const thumbAcc = document.getElementById('thumbAcc');
@@ -247,7 +375,7 @@
         try {
           const arr = JSON.parse(sessionStorage.getItem('vc_thumbs_'+id) || '[]');
           holder.innerHTML = arr.length
-            ? arr.map(src => `<img loading="lazy" alt="Frame" src="${src}">`).join('')
+            ? arr.map(src => '<img loading="lazy" alt="Frame" src="'+src+'">').join('')
             : '<div class="muted">No thumbnails available for this session.</div>';
         } catch {
           holder.innerHTML = '<div class="muted">No thumbnails available.</div>';
@@ -255,7 +383,7 @@
       }
     });
 
-    // ---- P1–P9 (dropdown per checkpoint). Summary = Status + Short. Body = Long. ----
+    // ---- P1–P9 (dropdown per checkpoint) ----
     const container = document.getElementById('cpAcc');
     const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
     const byId = Object.fromEntries(cps.map(x => [x.id, x]));
@@ -263,56 +391,55 @@
       const c = byId[pid] || { id: pid, title: pid, status: 'y', noteShort: '', noteLong: '' };
       const badge = c.status === 'g' ? 'g' : (c.status === 'r' ? 'r' : 'y');
       const badgeText = badge==='g'?'Good':badge==='y'?'Okay':'Needs Work';
-      return `
-        <details class="acc" data-status="${badge}">
-          <summary>
-            <div class="sum-title">
-              <b>${c.id}</b> — ${c.title || ''}<br>
-              <span class="sum-short">${c.noteShort || ''}</span>
-            </div>
-            <div class="sum-right">
-              <span class="pill ${badge}">${badgeText}</span>
-              <span class="chev"></span>
-            </div>
-          </summary>
-          <div class="acc-body">
-            <span class="long-label">Long Description</span>
-            ${c.noteLong || ''}
-          </div>
-        </details>
-      `;
+      return (
+        '<details class="acc" data-status="'+badge+'">'+
+          '<summary>'+
+            '<div class="sum-title">'+
+              '<b>'+c.id+'</b> — '+(c.title || '')+'<br>'+
+              '<span class="sum-short">'+(c.noteShort || '')+'</span>'+
+            '</div>'+
+            '<div class="sum-right">'+
+              '<span class="pill '+badge+'">'+badgeText+'</span>'+
+              '<span class="chev"></span>'+
+            '</div>'+
+          '</summary>'+
+          '<div class="acc-body">'+
+            '<span class="long-label">Long Description</span>'+
+            (c.noteLong || '')+
+          '</div>'+
+        '</details>'
+      );
     }).join('');
     // Auto-open Needs Work
     document.querySelectorAll('#cpAcc details.acc[data-status="r"]').forEach(d => d.open = true);
 
-    // ---- Top 3 Work-On (single dropdown content) ----
+    // ---- Top 3 Work-On ----
     document.getElementById('top3work').innerHTML =
       (w.length ? w : []).map(x =>
-        `<li><b>${x.title || ''}</b> — ${x.why || ''}${x.drill ? `<br><i>Drill:</i> ${x.drill}` : ''}</li>`
+        '<li><b>'+(x.title || '')+'</b> — '+(x.why || '')+(x.drill ? '<br><i>Drill:</i> '+x.drill : '')+'</li>'
       ).join('') || '<li>—</li>';
 
-    // ---- Top 3 Power (single dropdown content) ----
+    // ---- Top 3 Power ----
     const p = Array.isArray(j.top3Power) ? j.top3Power : [];
     document.getElementById('top3power').innerHTML =
       (p.length ? p : []).map(x =>
-        `<li><b>${x.title || ''}</b> — ${x.why || ''}${x.drill ? `<br><i>Drill:</i> ${x.drill}` : ''}</li>`
+        '<li><b>'+(x.title || '')+'</b> — '+(x.why || '')+(x.drill ? '<br><i>Drill:</i> '+x.drill : '')+'</li>'
       ).join('') || '<li>—</li>';
 
-    // ---- Power Assessment (single dropdown content) ----
+    // ---- Power Assessment ----
     const pa = j.powerAssessment || {};
     const seq = pa.kinematicSequence === 'g' ? 'Good' : pa.kinematicSequence === 'r' ? 'Needs Work' : 'Okay';
     const lbe = pa.lowerBodyEngagement === 'g' ? 'Good' : pa.lowerBodyEngagement === 'r' ? 'Needs Work' : 'Okay';
-    const notes = Array.isArray(pa.notes) ? pa.notes.map(n=>`<li>${n}</li>`).join('') : '';
-    document.getElementById('powerBody').innerHTML = `
-      <ul class="muted" style="margin:0; padding-left:18px">
-        <li><b>Clubhead Speed (est.):</b> ${pa.clubheadSpeedEstimate || '—'}</li>
-        <li><b>Kinematic Sequence:</b> ${seq}</li>
-        <li><b>Lower-Body Engagement:</b> ${lbe}</li>
-        ${notes ? `<li><b>Notes:</b><ul style="margin-top:6px; padding-left:18px">${notes}</ul></li>` : ''}
-      </ul>
-    `;
+    const notes = Array.isArray(pa.notes) ? pa.notes.map(n=>'<li>'+n+'</li>').join('') : '';
+    document.getElementById('powerBody').innerHTML =
+      '<ul class="muted" style="margin:0; padding-left:18px">'+
+        '<li><b>Clubhead Speed (est.):</b> ' + (pa.clubheadSpeedEstimate || '—') + '</li>'+
+        '<li><b>Kinematic Sequence:</b> ' + seq + '</li>'+
+        '<li><b>Lower-Body Engagement:</b> ' + lbe + '</li>'+
+        (notes ? '<li><b>Notes:</b><ul style="margin-top:6px; padding-left:18px">'+notes+'</ul></li>' : '')+
+      '</ul>';
 
-    // ---- 14-Day Practice Schedule (single dropdown content) ----
+    // ---- 14-Day Practice Schedule ----
     const sched = document.getElementById('sched');
     const work = w.length ? w : [{title:'Tempo & Transition', why:'Stability', drill:'3:1 metronome swings, 3x10'}];
     const pow  = p.length ? p : [{title:'Overspeed', why:'Speed', drill:'3x5 light-shaft swings'}];
@@ -321,34 +448,33 @@
       let items;
       if (d===7 || d===14) {
         items = [
-          `5 min warm-up: chips to 20–40y`,
-          `10 min review: P1–P9 notes`,
-          `10 min maintenance: ${(work[d%work.length].drill || 'Tempo ladders 2:1→3:1→4:1')}`
+          '5 min warm-up: chips to 20–40y',
+          '10 min review: P1–P9 notes',
+          '10 min maintenance: ' + (work[d%work.length].drill || 'Tempo ladders 2:1→3:1→4:1')
         ];
       } else if (d % 2 === 1) {
         const wItem = work[(d-1)%work.length];
         items = [
-          `Warm-up 5 min`,
-          `${wItem.title || 'Technical Focus'} — ${wItem.drill || 'Technique block 3x8 reps'}`,
-          `Constraint: slow rehearsals × 5 between sets`
+          'Warm-up 5 min',
+          (wItem.title || 'Technical Focus') + ' — ' + (wItem.drill || 'Technique block 3x8 reps'),
+          'Constraint: slow rehearsals × 5 between sets'
         ];
       } else {
         const pItem = pow[(d-1)%pow.length];
         items = [
-          `Mobilize 5 min (hips/thoracic)`,
-          `${pItem.title || 'Power Focus'} — ${pItem.drill || 'Overspeed 3x5 + step-through 3x5'}`,
-          `Finish: 6 balls at 70–80% focusing on balance`
+          'Mobilize 5 min (hips/thoracic)',
+          (pItem.title || 'Power Focus') + ' — ' + (pItem.drill || 'Overspeed 3x5 + step-through 3x5'),
+          'Finish: 6 balls at 70–80% focusing on balance'
         ];
       }
       days.push({ d, items });
     }
-    sched.innerHTML = `
-      <ol class="muted" style="margin:0; padding-left:18px">
-        ${days.map(k => `<li style="margin:8px 0"><b>Day ${k.d}:</b>
-            <ul style="margin:6px 0 0 0; padding-left:18px">${k.items.map(x=>`<li>${x}</li>`).join('')}</ul>
-          </li>`).join('')}
-      </ol>
-    `;
+    sched.innerHTML =
+      '<ol class="muted" style="margin:0; padding-left:18px">'+
+        days.map(k => '<li style="margin:8px 0"><b>Day '+k.d+':</b>'+
+          '<ul style="margin:6px 0 0 0; padding-left:18px">'+k.items.map(x=>'<li>'+x+'</li>').join('')+'</ul>'+
+        '</li>').join('')+
+      '</ol>';
   }
 </script>
 </body>
