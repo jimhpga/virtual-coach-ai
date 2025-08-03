@@ -1,18 +1,17 @@
-// /api/analyze.js — Chat Completions (vision) + forced JSON output
-// Env: Vercel Project → Settings → Environment Variables → OPENAI_API_KEY = sk-...
+// /api/analyze.js — Chat Completions (vision) → rich JSON with short+long notes per P1–P9
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Content-Type', 'application/json');
     return res.status(405).json({ error: 'Use POST' });
   }
 
-  // Read raw JSON body
+  // ---- read raw body ----
   let bodyText = '';
   try {
-    await new Promise((resolve, reject) => {
-      req.on('data', (c) => (bodyText += c));
-      req.on('end', resolve);
-      req.on('error', reject);
+    await new Promise((ok, err) => {
+      req.on('data', c => (bodyText += c));
+      req.on('end', ok);
+      req.on('error', err);
     });
   } catch {
     return res.status(400).json({ error: 'Failed to read request body' });
@@ -30,9 +29,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Missing OPENAI_API_KEY env var' });
   }
 
-  // Keep payload modest to avoid 413s and parsing issues
-  const clipped = frames.slice(0, 6);
-
   const handedness = (handed === 'left' || handed === 'right') ? handed : 'right';
   const eyeDom     = (eye === 'left' || eye === 'right') ? eye : 'unknown';
 
@@ -41,31 +37,62 @@ export default async function handler(req, res) {
     (eyeDom !== 'unknown' ? ` and ${eyeDom.toUpperCase()}-EYE DOMINANT.` : '.') +
     ' Adjust expectations accordingly: ' +
     (handedness === 'right'
-      ? 'for RIGHT-handed, reference standard P1–P9. '
-      : 'for LEFT-handed, mirror P1–P9 checkpoints. ') +
+      ? 'for RIGHT-handed, reference standard P1–P9; '
+      : 'for LEFT-handed, mirror P1–P9; ') +
     (eyeDom === 'right'
-      ? 'Right-eye dominant: shoulder turn ~≤90°, smaller head rotation on backswing, nose slightly in front of the ball at impact. '
+      ? 'Right-eye dominant: shoulder turn ≤~90°, smaller head rotation on backswing, nose slightly in front of the ball at impact. '
       : eyeDom === 'left'
-        ? 'Left-eye dominant: can tolerate larger shoulder turn and head rotation while maintaining ball focus. '
+        ? 'Left-eye dominant: tolerates larger shoulder turn/head rotation while maintaining ball focus. '
         : 'If eye dominance unknown, use neutral expectations. ');
 
-  const systemPrompt =
-    'You are a golf swing analyst. Given 3–9 key frames from ONE swing, estimate tempo in seconds (backswing, pause, downswing) ' +
-    'and overall ratio; set 9 flags for P1..P9 (g=Good, y=Okay, r=Needs Work); list Top 3 Things to Work On and Top 3 Power Things to Work On. ' +
-    'Be conservative and consistent. ' + contextLine +
-    'Return ONLY valid JSON with keys: id, tempo{backswing,pause,downswing,ratio}, pFlags[9], top3WorkOn[3], top3Power[3].';
+  // ---- schema hint (now with short+long notes per checkpoint) ----
+  const schemaHint = `
+Return ONLY valid JSON with this exact shape:
 
-  const userContent = [
-    {
-      type: 'text',
-      text:
-        'Analyze these frames of a single swing. Return ONLY JSON with this shape:\n' +
-        '{ "id": "string", "tempo": {"backswing": number, "pause": number, "downswing": number, "ratio": number}, ' +
-        '"pFlags": ["g"|"y"|"r", x9], "top3WorkOn": [string, x3], "top3Power": [string, x3] }'
-    }
-  ];
+{
+  "id": "string",
+  "tempo": { "backswing": number, "pause": number, "downswing": number, "ratio": number },
+  "checkpoints": [
+    { "id":"P1","title":"Setup","status":"g|y|r","noteShort":"≤12 words","noteLong":"1–2 sentences" },
+    { "id":"P2","title":"Shaft Parallel (BS)","status":"g|y|r","noteShort":"≤12 words","noteLong":"1–2 sentences" },
+    { "id":"P3","title":"Lead Arm Parallel","status":"g|y|r","noteShort":"≤12 words","noteLong":"1–2 sentences" },
+    { "id":"P4","title":"Top","status":"g|y|r","noteShort":"≤12 words","noteLong":"1–2 sentences" },
+    { "id":"P5","title":"Lead Arm Parallel (DS)","status":"g|y|r","noteShort":"≤12 words","noteLong":"1–2 sentences" },
+    { "id":"P6","title":"Shaft Parallel (DS)","status":"g|y|r","noteShort":"≤12 words","noteLong":"1–2 sentences" },
+    { "id":"P7","title":"Impact","status":"g|y|r","noteShort":"≤12 words","noteLong":"1–2 sentences" },
+    { "id":"P8","title":"Trail Arm Parallel","status":"g|y|r","noteShort":"≤12 words","noteLong":"1–2 sentences" },
+    { "id":"P9","title":"Finish","status":"g|y|r","noteShort":"≤12 words","noteLong":"1–2 sentences" }
+  ],
+  "top3WorkOn": [
+    { "title":"string","why":"one sentence","drill":"concise drill instruction" },
+    { "title":"string","why":"one sentence","drill":"concise drill instruction" },
+    { "title":"string","why":"one sentence","drill":"concise drill instruction" }
+  ],
+  "top3Power": [
+    { "title":"string","why":"one sentence","drill":"concise drill instruction" },
+    { "title":"string","why":"one sentence","drill":"concise drill instruction" },
+    { "title":"string","why":"one sentence","drill":"concise drill instruction" }
+  ],
+  "mostImportant": { "title":"string","why":"one sentence","drill":"concise drill instruction" },
+  "powerAssessment": {
+    "clubheadSpeedEstimate":"e.g., 84–90 mph (7i) or 95–102 mph (Driver)",
+    "kinematicSequence":"g|y|r",
+    "lowerBodyEngagement":"g|y|r",
+    "notes":["short","bullets"]
+  }
+}
+`;
+
+  const systemPrompt =
+    'You are a golf swing analyst. Use the provided frames from ONE swing to estimate tempo (seconds), assess P1–P9 with status + short + long notes, and produce concise, actionable coaching. ' +
+    'Flags: g=Good, y=Okay, r=Needs Work. Be conservative, specific, and consistent. ' +
+    contextLine + schemaHint +
+    'Do NOT include commentary outside the JSON. If uncertain, pick the closest flag and write short+long notes.';
+
+  // ---- user content (images) ----
+  const clipped = frames.slice(0, 6);
+  const userContent = [{ type: 'text', text: 'Analyze these frames and return ONLY the JSON described.' }];
   for (const dataUrl of clipped) {
-    // detail:"low" helps with small/compressed client frames
     userContent.push({ type: 'image_url', image_url: { url: dataUrl, detail: 'low' } });
   }
 
@@ -84,29 +111,25 @@ export default async function handler(req, res) {
           { role: 'system', content: systemPrompt },
           { role: 'user',   content: userContent }
         ],
-        max_tokens: 500
+        max_tokens: 1100
       })
     });
 
     const text = await r.text();
-    if (!r.ok) {
-      return res.status(500).json({ error: 'OpenAI error', detail: text });
-    }
+    if (!r.ok) return res.status(500).json({ error: 'OpenAI error', detail: text });
 
     let data;
     try { data = JSON.parse(text); }
-    catch { return res.status(500).json({ error: 'Invalid JSON from OpenAI', detail: text.slice(0, 500) }); }
+    catch { return res.status(500).json({ error: 'Invalid JSON from OpenAI', detail: text.slice(0, 600) }); }
 
     const content = data.choices?.[0]?.message?.content;
-    if (!content) {
-      return res.status(500).json({ error: 'No content from model', detail: JSON.stringify(data).slice(0, 500) });
-    }
+    if (!content) return res.status(500).json({ error: 'No content from model', detail: JSON.stringify(data).slice(0, 600) });
 
     let report;
     try { report = JSON.parse(content); }
     catch {
       if (typeof content === 'object') report = content;
-      else return res.status(500).json({ error: 'Model did not return JSON', detail: content.slice(0, 500) });
+      else return res.status(500).json({ error: 'Model did not return JSON', detail: content.slice(0, 600) });
     }
 
     report.id = id;
