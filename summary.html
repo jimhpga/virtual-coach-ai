@@ -6,238 +6,160 @@
 <title>Virtual Coach AI — Swing Report</title>
 <meta name="robots" content="noindex, nofollow" />
 <style>
-  :root{
-    --fg:#f5f5f5; --bg:#0a0a0a; --line:rgba(255,255,255,0.16);
-    --muted:rgba(255,255,255,0.75);
-    --good:#16a34a; --warn:#eab308; --bad:#ef4444; --accent:#1F6F1F;
-  }
-  html,body{
-    margin:0; color:var(--fg); background: var(--bg) url("homepage-background.png") center/cover no-repeat fixed;
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    filter: brightness(1.06) contrast(1.02); min-height:100%;
-  }
-  .wrap{ max-width:1000px; margin:0 auto; padding:32px 16px; text-shadow:0 1px 2px rgba(0,0,0,.25);}
-  h1{ margin:0 0 6px; font-size:28px;}
+  :root{ --fg:#f5f5f5; --bg:#0a0a0a; --line:rgba(255,255,255,0.16);
+         --muted:rgba(255,255,255,0.75);
+         --good:#16a34a; --warn:#eab308; --bad:#ef4444; --accent:#1F6F1F; }
+  html,body{ height:100%; margin:0; padding:0; color:var(--fg);
+             font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+             background: var(--bg) url("homepage-background.png") center / cover no-repeat fixed;
+             filter: brightness(1.08) contrast(1.03); }
+  body{ min-height:-webkit-fill-available; }
+  .wrap{ max-width: 1100px; margin:0 auto; padding:48px 20px; text-shadow:0 1px 2px rgba(0,0,0,0.25); }
+  h1{ margin:0 0 6px; font-size:32px; }
   .muted{ color:var(--muted); }
-
-  .cta{ display:inline-block; padding:10px 14px; border-radius:10px; background:var(--accent); color:#fff;
-        text-decoration:none; font-weight:700; border:1px solid var(--line); cursor:pointer; }
-  .cta:hover{ opacity:.92; }
-  #exportBar{ margin:14px 0 18px; display:flex; flex-wrap:wrap; gap:8px; }
-
-  details{ border:1px solid var(--line); border-radius:12px; background:rgba(0,0,0,.25); padding:14px 16px; margin:10px 0;}
-  summary{ cursor:pointer; font-weight:700; display:flex; justify-content:space-between; align-items:center; }
-
-  .chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
+  .card{ border:1px solid var(--line); border-radius:12px; background:rgba(0,0,0,0.25); padding:14px 16px; margin:14px 0; }
+  .chips{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 16px; }
   .chip{ border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:13px; }
-
   .pill{ padding:3px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line);}
-  .pill.g{ background:rgba(22,163,74,.2); border-color:var(--good);}
-  .pill.y{ background:rgba(234,179,8,.2); border-color:var(--warn);}
-  .pill.r{ background:rgba(239,68,68,.2); border-color:var(--bad);}
-
-  .table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 -8px; padding:0 8px;}
-  table{ width:100%; border-collapse:collapse; table-layout:fixed; min-width:520px;}
-  th,td{ padding:10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top;}
-
-  /* Frames grid (hidden until toggled) */
-  #framesBlock{ display:none; }
-  .frames{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px; }
-  @media (max-width:640px){ .frames{ grid-template-columns:repeat(2,1fr);} }
-  .frame{ border:1px solid var(--line); border-radius:10px; background:rgba(0,0,0,.25); overflow:hidden; font-size:13px; color:var(--muted); }
-  .frame img{ width:100%; aspect-ratio:16/9; object-fit:cover; display:block; }
-  .frame figcaption{ padding:6px 8px; }
-
-  @media print{
-    body{ filter:none !important; background:#fff !important; color:#000 !important;}
-    #exportBar, #toggleFramesBtn{ display:none !important;}
-    details{ background:#fff; border:1px solid #ddd;}
-    .pill.g{ background:#d9f2e4; border-color:#16a34a; color:#0a5a2e;}
-    .pill.y{ background:#fff2c2; border-color:#eab308; color:#6b5700;}
-    .pill.r{ background:#ffd9d9; border-color:#ef4444; color:#7a1b1b;}
-  }
+  .g{ background:rgba(22,163,74,0.18); border-color:var(--good); }
+  .y{ background:rgba(234,179,8,0.18);  border-color:var(--warn); }
+  .r{ background:rgba(239,68,68,0.18);  border-color:var(--bad); }
+  table{ width:100%; border-collapse:collapse; font-size:14px; }
+  th, td{ padding:10px; border-bottom:1px solid var(--line); vertical-align:top; text-align:left; }
+  th{ color:#fff; font-weight:700; }
+  .legend{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 12px; font-size:13px; }
+  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
+  .cta{ display:inline-block; margin-top:14px; padding:10px 14px; border-radius:10px; background:var(--accent); color:#fff; text-decoration:none; font-weight:700; }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Swing Reports</h1>
-    <div class="muted">ID: <span id="rid">—</span></div>
+<div class="wrap">
+  <h1>Swing Report</h1>
+  <div class="muted">ID: <span id="rid">—</span></div>
+  <div class="muted">Profile: <span id="profile">—</span></div>
 
-    <!-- Export / Share -->
-    <div id="exportBar">
-      <button class="cta" id="btnEmail" type="button">✉️ Email</button>
-      <button class="cta" id="btnSMS"   type="button">💬 Text</button>
-      <button class="cta" id="btnPrint" type="button">🖨️ Download / Print PDF</button>
-      <button class="cta" id="btnCopy"  type="button">📋 Copy</button>
-      <button class="cta" id="btnShare" type="button">🔗 Share Link</button>
-      <button class="cta" id="toggleFramesBtn" type="button">🖼 Show P1–P9 Images</button>
-    </div>
-
-    <details open>
-      <summary>Tempo</summary>
-      <div class="chips" id="chips"></div>
-      <p class="muted" style="margin-top:8px">
-        Target ~<b>3:1</b> backswing:downswing with a micro-pause (&lt;0.08s) at the top.
-      </p>
-    </details>
-
-    <details open>
-      <summary>P1–P9 Assessment</summary>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Checkpoint</th><th>Status</th></tr></thead>
-          <tbody id="pRows"></tbody>
-        </table>
-      </div>
-
-      <!-- Hidden frames block (toggle) -->
-      <div id="framesBlock">
-        <div class="frames" id="thumbs"></div>
-      </div>
-    </details>
-
-    <details open>
-      <summary>Top 3 Things to Work On</summary>
-      <ol id="top3work"></ol>
-    </details>
-
-    <details>
-      <summary>Top 3 Power Things</summary>
-      <ol id="top3power"></ol>
-    </details>
-
-    <p><a class="cta" href="/">⬅ Back to Home</a></p>
+  <div class="legend">
+    <div><span class="dot g" style="background:var(--good)"></span>Good</div>
+    <div><span class="dot y" style="background:var(--warn)"></span>Okay</div>
+    <div><span class="dot r" style="background:var(--bad)"></span>Needs Work</div>
   </div>
 
+  <div class="card">
+    <h3 style="margin:0 0 8px">Tempo</h3>
+    <div class="chips" id="tempoChips"></div>
+    <div class="muted">Target repeatable ~3:1. Keep a small pause; don’t rush P4→P5.</div>
+  </div>
+
+  <div class="card" id="miCard" style="border-color:#bae6fd;background:rgba(59,130,246,0.08)">
+    <h3 style="margin:0 0 8px">Most Important for Consistency</h3>
+    <div id="miBody" class="muted">—</div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 8px">P1–P9 Assessment</h3>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:22%">Checkpoint</th>
+          <th style="width:12%">Status</th>
+          <th style="width:28%">Short Description</th>
+          <th>Long Description</th>
+        </tr>
+      </thead>
+      <tbody id="cpRows"></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 8px">Top 3 Things to Work On</h3>
+    <ol id="top3work" class="muted"></ol>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 8px">Top 3 Power Builders</h3>
+    <ol id="top3power" class="muted"></ol>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 8px">Power Assessment</h3>
+    <div id="powerBody" class="muted">—</div>
+  </div>
+
+  <a href="/" class="cta">Upload Another Swing</a>
+</div>
+
 <script>
-(function(){
-  // Read ID
   const id = new URLSearchParams(location.search).get('id') || 'local-demo';
   document.getElementById('rid').textContent = id;
 
-  // Safe load report/frames
-  let report = null, framesAll = [];
-  try { report = JSON.parse(sessionStorage.getItem('vc_report_' + id) || 'null'); } catch(_) {}
-  try { framesAll = JSON.parse(sessionStorage.getItem('vc_frames_' + id) || '[]'); } catch(_) {}
+  // profile (from upload selections)
+  const handed = sessionStorage.getItem('vc_last_handed') || 'right';
+  const eye    = sessionStorage.getItem('vc_last_eye') || 'unknown';
+  document.getElementById('profile').textContent =
+    `${handed === 'left' ? 'Left' : 'Right'}-handed, ` +
+    (eye === 'left' ? 'Left-eye dominant' : eye === 'right' ? 'Right-eye dominant' : 'eye dominance: unknown');
 
-  if (!report) {
-    alert('No saved report found. Please upload a swing from the Home page.');
-    location.href = '/';
-    return;
+  const raw = sessionStorage.getItem('vc_report_' + id);
+  if (!raw) {
+    document.querySelector('.wrap').insertAdjacentHTML('beforeend',
+      '<div class="card">No report data. Please upload again from the homepage.</div>');
+  } else {
+    const j = JSON.parse(raw);
+
+    // Tempo
+    const t = j.tempo || {};
+    document.getElementById('tempoChips').innerHTML = `
+      <span class="chip">Backswing: ${t.backswing ?? '—'}s</span>
+      <span class="chip">Pause: ${t.pause ?? '—'}s</span>
+      <span class="chip">Downswing: ${t.downswing ?? '—'}s</span>
+      <span class="chip">Ratio: ${t.ratio ?? '—'}:1</span>
+    `;
+
+    // Most Important
+    const mi = j.mostImportant || {};
+    document.getElementById('miBody').innerHTML =
+      mi.title
+        ? `<b>${mi.title}</b><br>${mi.why || ''}${mi.drill ? `<br><i>Drill:</i> ${mi.drill}` : ''}`
+        : '—';
+
+    // P1–P9 rows (Status + Short + Long)
+    const rows = document.getElementById('cpRows');
+    const cps = Array.isArray(j.checkpoints) ? j.checkpoints : [];
+    const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
+    const byId = Object.fromEntries(cps.map(x => [x.id, x]));
+    rows.innerHTML = order.map(pid => {
+      const c = byId[pid] || { id: pid, title: pid, status: 'y', noteShort: '', noteLong: '' };
+      const badge = c.status === 'g' ? 'g' : (c.status === 'r' ? 'r' : 'y');
+      return `<tr>
+        <td><b>${c.id}</b> — ${c.title || ''}</td>
+        <td><span class="pill ${badge}">${badge==='g'?'Good':badge==='y'?'Okay':'Needs Work'}</span></td>
+        <td>${c.noteShort || ''}</td>
+        <td>${c.noteLong || ''}</td>
+      </tr>`;
+    }).join('');
+
+    // Top 3 Work-On
+    const w = Array.isArray(j.top3WorkOn) ? j.top3WorkOn : [];
+    document.getElementById('top3work').innerHTML =
+      w.map(x => `<li><b>${x.title || ''}</b> — ${x.why || ''}${x.drill ? `<br><i>Drill:</i> ${x.drill}` : ''}</li>`).join('');
+
+    // Top 3 Power
+    const p = Array.isArray(j.top3Power) ? j.top3Power : [];
+    document.getElementById('top3power').innerHTML =
+      p.map(x => `<li><b>${x.title || ''}</b> — ${x.why || ''}${x.drill ? `<br><i>Drill:</i> ${x.drill}` : ''}</li>`).join('');
+
+    // Power Assessment
+    const pa = j.powerAssessment || {};
+    const seq = pa.kinematicSequence === 'g' ? 'Good' : pa.kinematicSequence === 'r' ? 'Needs Work' : 'Okay';
+    const lbe = pa.lowerBodyEngagement === 'g' ? 'Good' : pa.lowerBodyEngagement === 'r' ? 'Needs Work' : 'Okay';
+    const notes = Array.isArray(pa.notes) ? pa.notes.map(n=>`• ${n}`).join('<br>') : '';
+    document.getElementById('powerBody').innerHTML = `
+      <div><b>Clubhead Speed (est.):</b> ${pa.clubheadSpeedEstimate || '—'}</div>
+      <div><b>Kinematic Sequence:</b> ${seq}</div>
+      <div><b>Lower-Body Engagement:</b> ${lbe}</div>
+      ${notes ? `<div style="margin-top:6px">${notes}</div>` : ''}
+    `;
   }
-
-  // Tempo
-  const t = report.tempo || {};
-  document.getElementById('chips').innerHTML = `
-    <span class="chip">Backswing: ${t.backswing ?? '-' }s</span>
-    <span class="chip">Pause: ${t.pause ?? '-' }s</span>
-    <span class="chip">Downswing: ${t.downswing ?? '-' }s</span>
-    <span class="chip">Ratio: ${t.ratio ?? '-' }:1</span>
-  `;
-
-  // P1–P9 flags
-  const map = { g:'Good', y:'Okay', r:'Needs Work' };
-  const rows = document.getElementById('pRows');
-  rows.innerHTML = '';
-  (report.pFlags || []).slice(0,9).forEach((f,i)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>P${i+1}</td><td><span class="pill ${f||'y'}">${map[f]||'Okay'}</span></td>`;
-    rows.appendChild(tr);
-  });
-
-  // Top 3 lists
-  document.getElementById('top3work').innerHTML  = (report.top3WorkOn||[]).map(x=>`<li><b>${x}</b></li>`).join('');
-  document.getElementById('top3power').innerHTML = (report.top3Power||[]).map(x=>`<li><b>${x}</b></li>`).join('');
-
-  // Toggle P1–P9 images
-  const toggleBtn = document.getElementById('toggleFramesBtn');
-  const framesBlock = document.getElementById('framesBlock');
-  const thumbs = document.getElementById('thumbs');
-  let framesVisible = false;
-
-  toggleBtn.addEventListener('click', ()=>{
-    framesVisible = !framesVisible;
-    if (framesVisible) {
-      toggleBtn.textContent = '🖼 Hide P1–P9 Images';
-      // render if empty
-      if (!thumbs.innerHTML.trim()) {
-        thumbs.innerHTML = (framesAll||[]).slice(0,9).map((src,i)=>`
-          <figure class="frame">
-            <img src="${src || `p${i+1}.jpg`}" alt="P${i+1}">
-            <figcaption>P${i+1}</figcaption>
-          </figure>
-        `).join('');
-      }
-      framesBlock.style.display = 'block';
-    } else {
-      toggleBtn.textContent = '🖼 Show P1–P9 Images';
-      framesBlock.style.display = 'none';
-    }
-  });
-
-  // ==== Export / Share wiring ====
-  function buildSummaryText(report, id) {
-    const tempo = report?.tempo || {};
-    const flags = (report?.pFlags || []).slice(0,9);
-    const map = { g:'Good', y:'Okay', r:'Needs Work' };
-    const pText = flags.map((f,i)=>`P${i+1}:${map[f]||'-'}`).join('  ');
-    const w3 = (report?.top3WorkOn||[]).map((x,i)=>`${i+1}. ${x}`).join('\n');
-    const p3 = (report?.top3Power||[]).map((x,i)=>`${i+1}. ${x}`).join('\n');
-
-    return [
-      `Virtual Coach AI — Swing Report ${id}`,
-      `Tempo: BS ${tempo.backswing||'-'}s  Pause ${tempo.pause||'-'}s  DS ${tempo.downswing||'-'}s  Ratio ${tempo.ratio||'-'}:1`,
-      `Checkpoints: ${pText}`,
-      ``,
-      `Top 3 Things to Work On:`,
-      w3 || '-',
-      ``,
-      `Top 3 Power Things:`,
-      p3 || '-',
-      ``,
-      `— Generated with Virtual Coach AI`
-    ].join('\n');
-  }
-  function mailtoEncode(s){ return encodeURIComponent(s).replace(/%0A/g,'%0D%0A'); }
-
-  const text = buildSummaryText(report, id);
-
-  // Email
-  document.getElementById('btnEmail').onclick = () => {
-    const subject = mailtoEncode(`Virtual Coach AI — Swing Report ${id}`);
-    const body    = mailtoEncode(text);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
-  };
-  // SMS
-  document.getElementById('btnSMS').onclick = () => {
-    const body = encodeURIComponent(text);
-    const url = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? `sms:&body=${body}` : `sms:?body=${body}`;
-    window.location.href = url;
-  };
-  // Print / PDF
-  document.getElementById('btnPrint').onclick = () => window.print();
-  // Copy
-  document.getElementById('btnCopy').onclick = async () => {
-    try { await navigator.clipboard.writeText(text); alert('Report copied.'); }
-    catch { prompt('Copy report text:', text); }
-  };
-  // Share Link (uses /api/save with Upstash creds)
-  document.getElementById('btnShare').onclick = async () => {
-    try {
-      const r = await fetch('/api/save', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ report, frames: (framesAll||[]).slice(0,3) })
-      });
-      const j = await r.json();
-      if (!r.ok || !j?.ok) throw new Error(j?.error || 'Save failed');
-      await navigator.clipboard.writeText(j.url);
-      alert('Share link copied:\n' + j.url);
-    } catch (e) {
-      alert('Error creating share link: ' + (e.message||e));
-    }
-  };
-})();
 </script>
 </body>
 </html>
