@@ -27,8 +27,7 @@
     .contact a:hover { text-decoration: underline; }
     @media (max-width: 480px) { h1 { font-size: 30px; } .logo { width: 300px; } }
 
-    /* Status overlay */
-    #vc-status { position:fixed; inset:0; background:rgba(0,0,0,.72); color:#fff; display:none; align-items:center; justify-content:center; z-index:9999 }
+    #vc-status { position:fixed; inset:0; background:rgba(0,0,0,.7); color:#fff; display:none; align-items:center; justify-content:center; z-index:9999 }
   </style>
 </head>
 <body>
@@ -36,26 +35,25 @@
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo logo-green" />
     <h1>WELCOME</h1>
     <p>to the beta launch of Virtual Coach AI — the intelligent swing coach designed to help you reach your golfing potential.</p>
-<div style="margin:12px 0; display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
-  <!-- Handedness -->
-  <label style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,.25); padding:8px 10px; border-radius:10px">
-    Handedness:
-    <select id="handed" style="padding:6px 8px; border-radius:8px;">
-      <option value="right" selected>Right-handed</option>
-      <option value="left">Left-handed</option>
-    </select>
-  </label>
 
-  <!-- Eye dominance -->
-  <label style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,.25); padding:8px 10px; border-radius:10px">
-    Eye Dominance:
-    <select id="eye" style="padding:6px 8px; border-radius:8px;">
-      <option value="right" selected>Right-eye</option>
-      <option value="left">Left-eye</option>
-      <option value="unknown">Not sure</option>
-    </select>
-  </label>
-</div>
+    <!-- Player profile selectors -->
+    <div style="margin:12px 0; display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
+      <label style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,.25); padding:8px 10px; border-radius:10px">
+        Handedness:
+        <select id="handed" style="padding:6px 8px; border-radius:8px;">
+          <option value="right" selected>Right-handed</option>
+          <option value="left">Left-handed</option>
+        </select>
+      </label>
+      <label style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,.25); padding:8px 10px; border-radius:10px">
+        Eye Dominance:
+        <select id="eye" style="padding:6px 8px; border-radius:8px;">
+          <option value="right" selected>Right-eye</option>
+          <option value="left">Left-eye</option>
+          <option value="unknown">Not sure</option>
+        </select>
+      </label>
+    </div>
 
     <!-- Hidden file input (wired) -->
     <input type="file" id="swingUpload"
@@ -78,10 +76,6 @@
   </div>
 
   <script>
-    // Safety: surface JS/network errors instead of silent failures
-    window.addEventListener('error', e => alert('App error: ' + (e.message || 'unknown')));
-    window.addEventListener('unhandledrejection', e => alert('Network/analysis error: ' + (e.reason?.message || e.reason || 'unknown')));
-
     // ===== Helpers =====
     const overlay = document.getElementById('vc-status');
     const ovText  = document.getElementById('vc-status-text');
@@ -95,19 +89,16 @@
       const video = document.createElement('video');
       video.src = url; video.muted = true; video.playsInline = true; video.preload = 'metadata';
 
-      // Load metadata
       await new Promise((resolve, reject) => {
         video.onloadedmetadata = resolve;
         video.onerror = () => reject(new Error('Could not load video metadata'));
       });
 
-      // iOS poke
       try { await video.play(); } catch(_) {}
       video.pause();
 
-      // 9 frames for display; we’ll send 5 to API
       const dur = Math.max(0.6, Math.min(2.0, video.duration || 1.5));
-      const steps = 9;
+      const steps = 6; // keep payload small
       const ts = Array.from({length: steps}, (_,i) => +(i * (dur / (steps - 1))).toFixed(2));
 
       const canvas = document.createElement('canvas');
@@ -117,16 +108,15 @@
       const images = [];
       for (const t of ts) {
         const target = Math.min(t, (video.duration || dur) - 0.05);
-        // Seek with longer timeout for iOS reliability
         const sought = new Promise(res => {
           let done=false;
           video.onseeked = () => { if(!done){ done=true; res(); } };
-          setTimeout(()=>{ if(!done){ done=true; res(); } }, 1200);
+          setTimeout(()=>{ if(!done){ done=true; res(); } }, 900);
         });
         video.currentTime = target;
         await sought;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        images.push(canvas.toDataURL('image/jpeg', 0.5));
+        images.push(canvas.toDataURL('image/jpeg', 0.6));
       }
       URL.revokeObjectURL(url);
       return images;
@@ -141,11 +131,8 @@
     // ===== Main upload handler =====
     async function uploadSwing() {
       try {
-        // Require passcode per-device
+        // Gate: passcode on THIS device
         if (localStorage.getItem('vc_auth') !== 'ok') { window.location.href = '/login.html'; return; }
-
-        // Online check (course Wi-Fi/1-bar issues)
-        if (!navigator.onLine) { toast('No internet. Try again when you’re online.'); return; }
 
         const input = document.getElementById('swingUpload');
         const file = input?.files?.[0];
@@ -153,7 +140,7 @@
 
         show('Reading video…');
 
-        // Quick duration check with iOS Infinity fix
+        // Quick duration check (iOS Infinity fix)
         const tmpUrl = URL.createObjectURL(file);
         const v = document.createElement('video');
         v.preload = 'metadata'; v.src = tmpUrl;
@@ -168,20 +155,21 @@
         if (duration > 10) { hide(); toast('Clip too long. Please upload ≤ 10 seconds.'); input.value=''; return; }
 
         show('Extracting frames…');
-        const framesAll = await extractFrames(file);           // 9 frames for thumbnails
-        const framesForApi = framesAll.slice(0,5);             // 5 frames for analysis
-        const id = Date.now().toString();
+        const frames = await extractFrames(file);
 
-        // save frames for summary thumbnails
-        try { sessionStorage.setItem('vc_frames_' + id, JSON.stringify(framesAll)); } catch(_) {}
-
-        if (!navigator.onLine) { hide(); toast('Connection dropped. Please retry.'); return; }
+        // Profile selections
+        const handed = (document.getElementById('handed')?.value || 'right');
+        const eye    = (document.getElementById('eye')?.value || 'unknown');
+        sessionStorage.setItem('vc_last_handed', handed);
+        sessionStorage.setItem('vc_last_eye', eye);
 
         show('Analyzing (10–30s)…');
+        const id = Date.now().toString();
+
         const resp = await withTimeout(fetch('/api/analyze', {
           method: 'POST',
           headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify({ id, frames: framesForApi })
+          body: JSON.stringify({ id, frames, handed, eye })
         }), 45000, 'analysis');
 
         if (!resp.ok) {
@@ -192,10 +180,7 @@
         }
 
         const report = await resp.json();
-        try { sessionStorage.setItem('vc_report_' + id, JSON.stringify(report)); } catch(_) {}
-
-        // Clean input so next upload is fresh
-        try { input.value = ''; } catch(_) {}
+        sessionStorage.setItem('vc_report_' + id, JSON.stringify(report));
 
         show('Building report…');
         window.location.href = `/summary.html?id=${encodeURIComponent(id)}`;
