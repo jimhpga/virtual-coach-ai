@@ -36,6 +36,26 @@
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo logo-green" />
     <h1>WELCOME</h1>
     <p>to the beta launch of Virtual Coach AI — the intelligent swing coach designed to help you reach your golfing potential.</p>
+<div style="margin:12px 0; display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
+  <!-- Handedness -->
+  <label style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,.25); padding:8px 10px; border-radius:10px">
+    Handedness:
+    <select id="handed" style="padding:6px 8px; border-radius:8px;">
+      <option value="right" selected>Right-handed</option>
+      <option value="left">Left-handed</option>
+    </select>
+  </label>
+
+  <!-- Eye dominance -->
+  <label style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,.25); padding:8px 10px; border-radius:10px">
+    Eye Dominance:
+    <select id="eye" style="padding:6px 8px; border-radius:8px;">
+      <option value="right" selected>Right-eye</option>
+      <option value="left">Left-eye</option>
+      <option value="unknown">Not sure</option>
+    </select>
+  </label>
+</div>
 
     <!-- Hidden file input (wired) -->
     <input type="file" id="swingUpload"
