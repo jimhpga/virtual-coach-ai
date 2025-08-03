@@ -25,6 +25,7 @@
   .muted{ color:var(--muted); }
 
   .card{ border:1px solid var(--line); border-radius:12px; background:var(--cardbg); padding:14px 16px; margin:14px 0; }
+
   .chips{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 16px; }
   .chip{ border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:13px; }
 
@@ -33,7 +34,7 @@
   .y{ background:rgba(234,179,8,0.18);  border-color:var(--warn); }
   .r{ background:rgba(239,68,68,0.18);  border-color:var(--bad); }
 
-  /* Accordion (dropdown) styles */
+  /* Accordion styles */
   details.acc { border:1px solid var(--line); border-radius:10px; background:rgba(0,0,0,0.22); margin:10px 0; overflow:hidden; }
   details.acc > summary{
     list-style:none; cursor:pointer; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;
@@ -46,13 +47,17 @@
   .sum-right{ flex: 0 0 auto; display:flex; gap:8px; align-items:center; }
   .chev{ width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid var(--muted); transition:.15s; }
   details[open] .chev{ transform: rotate(180deg); }
-
   .acc-body{ padding:12px 14px; border-top:1px solid var(--line); line-height:1.55; overflow-wrap:anywhere; }
 
   .legend{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 12px; font-size:13px; }
   .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
 
   .cta{ display:inline-block; margin-top:14px; padding:10px 14px; border-radius:10px; background:var(--accent); color:#fff; text-decoration:none; font-weight:700; }
+
+  /* Lists inside cards */
+  .bul{ margin:0; padding-left:18px; }
+  .bul li{ margin:6px 0; }
+  .long-label{ display:block; font-size:12px; opacity:.8; margin:8px 0 4px; text-transform:uppercase; letter-spacing:.04em; }
 </style>
 </head>
 <body>
@@ -80,34 +85,54 @@
     <div id="miBody" class="muted">—</div>
   </div>
 
-  <!-- P1–P9 as DROPDOWNS -->
+  <!-- P1–P9 (each item is a dropdown; Long description inside body = 3rd column) -->
   <div class="card">
     <h3 style="margin:0 0 8px">P1–P9 Assessment</h3>
     <div id="cpAcc"></div>
   </div>
 
-  <!-- Top 3 Work-On (each item dropdown) -->
+  <!-- Top 3 Work-On (ONE dropdown) -->
   <div class="card">
-    <h3 style="margin:0 0 8px">Top 3 Things to Work On</h3>
-    <div id="top3work" class="muted"></div>
+    <details class="acc" id="workAcc">
+      <summary>
+        <div class="sum-title"><b>Top 3 Things to Work On</b><br><span class="sum-short">Your priority list with drills</span></div>
+        <div class="sum-right"><span class="chev"></span></div>
+      </summary>
+      <div class="acc-body"><ol id="top3work" class="muted"></ol></div>
+    </details>
   </div>
 
-  <!-- Top 3 Power (each item dropdown) -->
+  <!-- Top 3 Power (ONE dropdown) -->
   <div class="card">
-    <h3 style="margin:0 0 8px">Top 3 Power Builders</h3>
-    <div id="top3power" class="muted"></div>
+    <details class="acc" id="powerAcc">
+      <summary>
+        <div class="sum-title"><b>Top 3 Power Builders</b><br><span class="sum-short">Speed work with purpose</span></div>
+        <div class="sum-right"><span class="chev"></span></div>
+      </summary>
+      <div class="acc-body"><ol id="top3power" class="muted"></ol></div>
+    </details>
   </div>
 
-  <!-- Power Assessment (each metric dropdown) -->
+  <!-- Power Assessment (ONE dropdown) -->
   <div class="card">
-    <h3 style="margin:0 0 8px">Power Assessment</h3>
-    <div id="powerBox"></div>
+    <details class="acc" id="pAssessAcc">
+      <summary>
+        <div class="sum-title"><b>Power Assessment</b><br><span class="sum-short">Speed estimate, sequence, lower body, notes</span></div>
+        <div class="sum-right"><span class="chev"></span></div>
+      </summary>
+      <div class="acc-body" id="powerBody">—</div>
+    </details>
   </div>
 
-  <!-- 14-Day Practice Schedule -->
+  <!-- 14-Day Practice Schedule (ONE dropdown) -->
   <div class="card">
-    <h3 style="margin:0 0 8px">14-Day Practice Schedule</h3>
-    <div id="sched"></div>
+    <details class="acc" id="schedAcc">
+      <summary>
+        <div class="sum-title"><b>14-Day Practice Schedule</b><br><span class="sum-short">Alternates technical and power focus</span></div>
+        <div class="sum-right"><span class="chev"></span></div>
+      </summary>
+      <div class="acc-body" id="sched"></div>
+    </details>
   </div>
 
   <a href="/" class="cta">Upload Another Swing</a>
@@ -147,7 +172,7 @@
         ? `<b>${mi.title}</b><br>${mi.why || ''}${mi.drill ? `<br><i>Drill:</i> ${mi.drill}` : ''}`
         : '—';
 
-    // P1–P9 DROPDOWNS (Status badge + Short in summary; Long in body)
+    // P1–P9 (dropdown per checkpoint). Summary = Status + Short. Body = Long (third column).
     const container = document.getElementById('cpAcc');
     const cps = Array.isArray(j.checkpoints) ? j.checkpoints : [];
     const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
@@ -168,146 +193,82 @@
               <span class="chev"></span>
             </div>
           </summary>
-          <div class="acc-body">${c.noteLong || ''}</div>
+          <div class="acc-body">
+            <span class="long-label">Long Description</span>
+            ${c.noteLong || ''}
+          </div>
         </details>
       `;
     }).join('');
 
-    // Top 3 Work-On → dropdowns
-    const workBox = document.getElementById('top3work');
+    // Top 3 Work-On (single dropdown content)
     const w = Array.isArray(j.top3WorkOn) ? j.top3WorkOn : [];
-    workBox.innerHTML = (w.length ? w : []).map((x,i) => `
-      <details class="acc">
-        <summary>
-          <div class="sum-title">
-            <b>${i+1}. ${x.title || 'Work Item'}</b><br>
-            <span class="sum-short">${x.why || ''}</span>
-          </div>
-          <div class="sum-right"><span class="chev"></span></div>
-        </summary>
-        <div class="acc-body">
-          ${x.why ? `<div><b>Why:</b> ${x.why}</div>` : ''}
-          ${x.drill ? `<div style="margin-top:6px"><b>Drill:</b> ${x.drill}</div>` : ''}
-        </div>
-      </details>
-    `).join('') || '<div class="muted">—</div>';
+    document.getElementById('top3work').innerHTML =
+      (w.length ? w : []).map(x =>
+        `<li><b>${x.title || ''}</b> — ${x.why || ''}${x.drill ? `<br><i>Drill:</i> ${x.drill}` : ''}</li>`
+      ).join('') || '<li>—</li>';
 
-    // Top 3 Power → dropdowns
-    const powerBoxList = document.getElementById('top3power');
+    // Top 3 Power (single dropdown content)
     const p = Array.isArray(j.top3Power) ? j.top3Power : [];
-    powerBoxList.innerHTML = (p.length ? p : []).map((x,i) => `
-      <details class="acc">
-        <summary>
-          <div class="sum-title">
-            <b>${i+1}. ${x.title || 'Power Item'}</b><br>
-            <span class="sum-short">${x.why || ''}</span>
-          </div>
-          <div class="sum-right"><span class="chev"></span></div>
-        </summary>
-        <div class="acc-body">
-          ${x.why ? `<div><b>Why:</b> ${x.why}</div>` : ''}
-          ${x.drill ? `<div style="margin-top:6px"><b>Drill:</b> ${x.drill}</div>` : ''}
-        </div>
-      </details>
-    `).join('') || '<div class="muted">—</div>';
+    document.getElementById('top3power').innerHTML =
+      (p.length ? p : []).map(x =>
+        `<li><b>${x.title || ''}</b> — ${x.why || ''}${x.drill ? `<br><i>Drill:</i> ${x.drill}` : ''}</li>`
+      ).join('') || '<li>—</li>';
 
-    // Power Assessment → dropdowns
-    const powerBox = document.getElementById('powerBox');
+    // Power Assessment (single dropdown content)
     const pa = j.powerAssessment || {};
     const seq = pa.kinematicSequence === 'g' ? 'Good' : pa.kinematicSequence === 'r' ? 'Needs Work' : 'Okay';
     const lbe = pa.lowerBodyEngagement === 'g' ? 'Good' : pa.lowerBodyEngagement === 'r' ? 'Needs Work' : 'Okay';
-    const notes = Array.isArray(pa.notes) ? pa.notes : [];
+    const notes = Array.isArray(pa.notes) ? pa.notes.map(n=>`<li>${n}</li>`).join('') : '';
 
-    powerBox.innerHTML = `
-      <details class="acc">
-        <summary>
-          <div class="sum-title"><b>Clubhead Speed (est.)</b><br><span class="sum-short">${pa.clubheadSpeedEstimate || '—'}</span></div>
-          <div class="sum-right"><span class="chev"></span></div>
-        </summary>
-        <div class="acc-body">${pa.clubheadSpeedEstimate || '—'}</div>
-      </details>
-
-      <details class="acc">
-        <summary>
-          <div class="sum-title"><b>Kinematic Sequence</b><br><span class="sum-short">${seq}</span></div>
-          <div class="sum-right"><span class="chev"></span></div>
-        </summary>
-        <div class="acc-body">Sequence quality: ${seq}. ${seq==='Good'?'Efficient energy transfer.':seq==='Okay'?'Usable but can improve.':'Out-of-order—fix lower-body lead and timing.'}</div>
-      </details>
-
-      <details class="acc">
-        <summary>
-          <div class="sum-title"><b>Lower-Body Engagement</b><br><span class="sum-short">${lbe}</span></div>
-          <div class="sum-right"><span class="chev"></span></div>
-        </summary>
-        <div class="acc-body">Lower-body engagement: ${lbe}. ${lbe==='Good'?'Solid pressure shift.':lbe==='Okay'?'Present but inconsistent.':'Insufficient—work on pressure shift and rotation.'}</div>
-      </details>
-
-      <details class="acc">
-        <summary>
-          <div class="sum-title"><b>Notes</b><br><span class="sum-short">${notes.length? notes[0] : '—'}</span></div>
-          <div class="sum-right"><span class="chev"></span></div>
-        </summary>
-        <div class="acc-body">
-          ${notes.length ? `<ul style="margin:0;padding-left:18px">${notes.map(n=>`<li>${n}</li>`).join('')}</ul>` : '—'}
-        </div>
-      </details>
+    document.getElementById('powerBody').innerHTML = `
+      <ul class="bul">
+        <li><b>Clubhead Speed (est.):</b> ${pa.clubheadSpeedEstimate || '—'}</li>
+        <li><b>Kinematic Sequence:</b> ${seq}</li>
+        <li><b>Lower-Body Engagement:</b> ${lbe}</li>
+        ${notes ? `<li><b>Notes:</b><ul class="bul" style="margin-top:6px">${notes}</ul></li>` : ''}
+      </ul>
     `;
 
-    // 14-Day Practice Schedule (auto-build from Top-3 Work-On + Top-3 Power)
+    // 14-Day Practice Schedule (single dropdown content; no per-day toggles)
     const sched = document.getElementById('sched');
     const work = w.length ? w : [{title:'Tempo & Transition', why:'Stability', drill:'3:1 metronome swings, 3x10'}];
     const pow  = p.length ? p : [{title:'Overspeed', why:'Speed', drill:'3x5 light-shaft swings'}];
 
     const days = [];
     for (let d=1; d<=14; d++){
-      let block;
+      let items;
       if (d===7 || d===14) {
-        block = {
-          hdr: `Day ${d}: Light Review & Feels`,
-          items: [
-            `5 min warm-up: chips to 20–40y`,
-            `10 min review: dropdown notes (P1–P9 above)`,
-            `10 min maintenance: ${work[d%work.length].drill || 'Tempo ladders 2:1→3:1→4:1'}`
-          ]
-        };
+        items = [
+          `5 min warm-up: chips to 20–40y`,
+          `10 min review: P1–P9 notes`,
+          `10 min maintenance: ${(work[d%work.length].drill || 'Tempo ladders 2:1→3:1→4:1')}`
+        ];
       } else if (d % 2 === 1) {
         const wItem = work[(d-1)%work.length];
-        block = {
-          hdr: `Day ${d}: ${wItem.title || 'Technical Focus'}`,
-          items: [
-            `Warm-up 5 min`,
-            `${wItem.drill || 'Technique block 3x8 reps'}`,
-            `Constraint: slow rehearsals × 5 between sets`
-          ]
-        };
+        items = [
+          `Warm-up 5 min`,
+          `${wItem.title || 'Technical Focus'} — ${wItem.drill || 'Technique block 3x8 reps'}`,
+          `Constraint: slow rehearsals × 5 between sets`
+        ];
       } else {
         const pItem = pow[(d-1)%pow.length];
-        block = {
-          hdr: `Day ${d}: ${pItem.title || 'Power Focus'}`,
-          items: [
-            `Mobilize 5 min (hips/thoracic)`,
-            `${pItem.drill || 'Overspeed 3x5 + step-through 3x5'}`,
-            `Finish: 6 balls at 70–80% focusing on balance`
-          ]
-        };
+        items = [
+          `Mobilize 5 min (hips/thoracic)`,
+          `${pItem.title || 'Power Focus'} — ${pItem.drill || 'Overspeed 3x5 + step-through 3x5'}`,
+          `Finish: 6 balls at 70–80% focusing on balance`
+        ];
       }
-      days.push(block);
+      days.push({ d, items });
     }
 
-    sched.innerHTML = days.map(d => `
-      <details class="acc">
-        <summary>
-          <div class="sum-title"><b>${d.hdr}</b><br><span class="sum-short">${d.items[0]}</span></div>
-          <div class="sum-right"><span class="chev"></span></div>
-        </summary>
-        <div class="acc-body">
-          <ul style="margin:0;padding-left:18px">
-            ${d.items.map(x=>`<li>${x}</li>`).join('')}
-          </ul>
-        </div>
-      </details>
-    `).join('');
+    sched.innerHTML = `
+      <ol class="muted" style="margin:0; padding-left:18px">
+        ${days.map(k => `<li style="margin:8px 0"><b>Day ${k.d}:</b>
+            <ul class="bul">${k.items.map(x=>`<li>${x}</li>`).join('')}</ul>
+          </li>`).join('')}
+      </ol>
+    `;
   }
 </script>
 </body>
