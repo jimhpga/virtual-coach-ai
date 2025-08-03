@@ -1,11 +1,13 @@
-// /api/analyze.js — Chat Completions (vision) → rich JSON with short+long notes per P1–P9
+// /api/analyze.js — robust JSON, retry on empty content, better errors
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Type','application/json');
     return res.status(405).json({ error: 'Use POST' });
   }
 
-  // ---- read raw body ----
+  const cid = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7);
+
+  // --- read raw body ---
   let bodyText = '';
   try {
     await new Promise((ok, err) => {
@@ -14,21 +16,22 @@ export default async function handler(req, res) {
       req.on('error', err);
     });
   } catch {
-    return res.status(400).json({ error: 'Failed to read request body' });
+    return res.status(400).json({ error: 'Failed to read request body', cid });
   }
 
   let payload;
   try { payload = JSON.parse(bodyText || '{}'); }
-  catch { return res.status(400).json({ error: 'Invalid JSON body' }); }
+  catch { return res.status(400).json({ error: 'Invalid JSON body', cid }); }
 
   const { id, frames, handed, eye } = payload || {};
   if (!id || !Array.isArray(frames) || frames.length < 3) {
-    return res.status(400).json({ error: 'missing id or frames (need >=3)' });
+    return res.status(400).json({ error: 'missing id or frames (need >=3)', cid });
   }
   if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({ error: 'Missing OPENAI_API_KEY env var' });
+    return res.status(500).json({ error: 'Missing OPENAI_API_KEY env var', cid });
   }
 
+  // ---- context ----
   const handedness = (handed === 'left' || handed === 'right') ? handed : 'right';
   const eyeDom     = (eye === 'left' || eye === 'right') ? eye : 'unknown';
 
@@ -36,16 +39,13 @@ export default async function handler(req, res) {
     `Player is ${handedness.toUpperCase()}-HANDED` +
     (eyeDom !== 'unknown' ? ` and ${eyeDom.toUpperCase()}-EYE DOMINANT.` : '.') +
     ' Adjust expectations accordingly: ' +
-    (handedness === 'right'
-      ? 'for RIGHT-handed, reference standard P1–P9; '
-      : 'for LEFT-handed, mirror P1–P9; ') +
+    (handedness === 'right' ? 'for RIGHT-handed, reference standard P1–P9; ' : 'for LEFT-handed, mirror P1–P9; ') +
     (eyeDom === 'right'
       ? 'Right-eye dominant: shoulder turn ≤~90°, smaller head rotation on backswing, nose slightly in front of the ball at impact. '
       : eyeDom === 'left'
         ? 'Left-eye dominant: tolerates larger shoulder turn/head rotation while maintaining ball focus. '
         : 'If eye dominance unknown, use neutral expectations. ');
 
-  // ---- schema hint (now with short+long notes per checkpoint) ----
   const schemaHint = `
 Return ONLY valid JSON with this exact shape:
 
@@ -83,20 +83,33 @@ Return ONLY valid JSON with this exact shape:
 }
 `;
 
-  const systemPrompt =
-    'You are a golf swing analyst. Use the provided frames from ONE swing to estimate tempo (seconds), assess P1–P9 with status + short + long notes, and produce concise, actionable coaching. ' +
-    'Flags: g=Good, y=Okay, r=Needs Work. Be conservative, specific, and consistent. ' +
-    contextLine + schemaHint +
-    'Do NOT include commentary outside the JSON. If uncertain, pick the closest flag and write short+long notes.';
-
-  // ---- user content (images) ----
-  const clipped = frames.slice(0, 6);
+  const clipped = frames.slice(0, 6); // keep payload modest
   const userContent = [{ type: 'text', text: 'Analyze these frames and return ONLY the JSON described.' }];
   for (const dataUrl of clipped) {
     userContent.push({ type: 'image_url', image_url: { url: dataUrl, detail: 'low' } });
   }
 
-  try {
+  // helper: parse possibly-messy JSON by extracting the first {...} block
+  function smartParseJSON(s) {
+    if (typeof s === 'object' && s) return s;
+    if (typeof s !== 'string') throw new Error('no-string');
+    const start = s.indexOf('{');
+    const end   = s.lastIndexOf('}');
+    if (start === -1 || end === -1 || end <= start) throw new Error('no-braces');
+    const core = s.slice(start, end + 1);
+    return JSON.parse(core);
+  }
+
+  async function callOpenAI({ simple = false }) {
+    const systemPrompt = (simple
+      ? // SIMPLER retry prompt
+        ('Return ONLY JSON. If uncertain, guess conservatively. ' + contextLine + schemaHint)
+      : // full prompt
+        ('You are a golf swing analyst. Use frames from ONE swing to estimate tempo (seconds), assess P1–P9 with status + short + long notes, and produce concise, actionable coaching. ' +
+         'Flags: g=Good, y=Okay, r=Needs Work. Be conservative, specific, and consistent. ' +
+         contextLine + schemaHint + 'Do NOT include commentary outside the JSON.')
+    );
+
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -106,36 +119,67 @@ Return ONLY valid JSON with this exact shape:
       body: JSON.stringify({
         model: 'gpt-4o',
         temperature: 0.2,
-        response_format: { type: 'json_object' },
+        // keep json_object for primary attempt; on retry we'll allow non-JSON and smart-parse
+        ...(simple ? {} : { response_format: { type: 'json_object' } }),
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user',   content: userContent }
         ],
-        max_tokens: 1100
+        max_tokens: simple ? 800 : 1000
       })
     });
 
     const text = await r.text();
-    if (!r.ok) return res.status(500).json({ error: 'OpenAI error', detail: text });
+    if (!r.ok) {
+      const out = { error: 'OpenAI error', status: r.status, detail: text, cid };
+      throw out;
+    }
 
     let data;
     try { data = JSON.parse(text); }
-    catch { return res.status(500).json({ error: 'Invalid JSON from OpenAI', detail: text.slice(0, 600) }); }
+    catch { throw { error: 'Invalid JSON from OpenAI', detail: text.slice(0,600), cid }; }
 
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) return res.status(500).json({ error: 'No content from model', detail: JSON.stringify(data).slice(0, 600) });
+    const msg = data.choices?.[0]?.message || {};
+    let content = msg.content;
 
-    let report;
-    try { report = JSON.parse(content); }
-    catch {
-      if (typeof content === 'object') report = content;
-      else return res.status(500).json({ error: 'Model did not return JSON', detail: content.slice(0, 600) });
+    // If empty content, attempt alternate places or signal retry
+    if (!content || (typeof content === 'string' && content.trim() === '')) {
+      // Sometimes models return nothing due to filtering/format. Trigger retry by throwing a marker.
+      const fr = data.choices?.[0]?.finish_reason || 'unknown';
+      throw { error: 'EMPTY_CONTENT', finish_reason: fr, raw: data, cid };
     }
 
+    // Try strict parse first; if it fails, smart-parse
+    try { return { report: JSON.parse(content), raw: data }; }
+    catch {
+      try { return { report: smartParseJSON(content), raw: data }; }
+      catch (e2) { throw { error: 'Parse failure', detail: content?.slice?.(0,600) || 'no content', cid }; }
+    }
+  }
+
+  try {
+    // First attempt: strict JSON mode
+    let result;
+    try {
+      result = await callOpenAI({ simple: false });
+    } catch (e) {
+      if (e?.error === 'EMPTY_CONTENT') {
+        // Retry once: simpler prompt, no response_format, we’ll smart-parse
+        try {
+          result = await callOpenAI({ simple: true });
+        } catch (e2) {
+          return res.status(500).json({ error: 'OpenAI (retry) failed', detail: e2, cid });
+        }
+      } else {
+        return res.status(500).json({ error: 'OpenAI failed', detail: e, cid });
+      }
+    }
+
+    const report = result.report || {};
     report.id = id;
     res.setHeader('Cache-Control', 'no-store');
     return res.status(200).json(report);
   } catch (e) {
-    return res.status(500).json({ error: String(e) });
+    return res.status(500).json({ error: 'Analyze failed', detail: e, cid });
   }
 }
