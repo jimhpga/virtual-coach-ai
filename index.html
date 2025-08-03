@@ -1,165 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-  <meta name="robots" content="noindex, nofollow"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="robots" content="noindex, nofollow" />
   <title>Virtual Coach AI</title>
   <style>
-    html,body{height:100%;margin:0;padding:0;background:#0a0a0a url("homepage-background.png") center/cover no-repeat fixed;color:#f5f5f5;
-      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-    .wrap{max-width:920px;margin:0 auto;padding:48px 20px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.25)}
-    .logo{width:360px;max-width:90vw;height:auto;margin:8px auto 20px;display:block;filter:drop-shadow(0 6px 16px rgba(0,0,0,.35))}
-    h1{margin:0 0 12px}
-    p{margin:0 0 12px}
-    .btn{display:inline-block;margin:10px 6px 0;padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.16);
-      background:#1F6F1F;color:#fff;font-weight:700;text-decoration:none;cursor:pointer}
-    .btn.secondary{background:transparent}
-    /* Progress overlay */
-    #vc-status{position:fixed;inset:0;background:rgba(0,0,0,.75);color:#fff;display:none;align-items:center;justify-content:center;z-index:9999}
-    #vc-status .box{padding:18px 22px;border:1px solid rgba(255,255,255,.2);border-radius:14px;background:rgba(0,0,0,.35)}
-    #vc-status .stage{font-weight:800;font-size:18px;margin:0 0 6px}
-    #vc-status .hint{opacity:.8;font-size:12px;margin:0 0 8px}
-    .spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.2);border-top-color:#1F6F1F;border-radius:50%;margin:10px auto;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
+    html, body {
+      height: 100%; margin: 0; padding: 0; color: #f5f5f5;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: #0a0a0a url("homepage-background.png") center / cover no-repeat fixed;
+      filter: brightness(1.08) contrast(1.03);
+    }
+    body { min-height: -webkit-fill-available; }
+    .hero { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+    .logo { width: 420px; max-width: 90vw; height: auto; margin: 8px auto 20px; display: block; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.25)); }
+    .logo-green { filter: brightness(0) saturate(100%) invert(26%) sepia(56%) saturate(2350%) hue-rotate(79deg) brightness(85%) contrast(90%) drop-shadow(0 6px 16px rgba(0,0,0,0.25)); }
+    h1 { margin: 0 0 10px; font-size: 36px; letter-spacing: 0.04em; }
+    p  { margin: 0 auto 16px; line-height: 1.6; max-width: 560px; }
+    .btn { display:inline-block; margin: 10px 8px 0; padding: 12px 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); text-decoration:none; font-weight:700; color:#fff; background:#0f172a; cursor:pointer; }
+    .btn:hover { opacity:.92; }
+    .btn-secondary { background: transparent; border-color: rgba(255,255,255,0.25); }
+    .contact a { color: #22c55e; text-decoration: none; }
+    .contact a:hover { text-decoration: underline; }
+    @media (max-width: 480px) { h1 { font-size: 30px; } .logo { width: 300px; } }
+
+    /* Status overlay */
+    #vc-status { position:fixed; inset:0; background:rgba(0,0,0,.72); color:#fff; display:none; align-items:center; justify-content:center; z-index:9999 }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI" class="logo"/>
+  <div class="hero">
+    <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo logo-green" />
     <h1>WELCOME</h1>
-    <p>Upload a short swing clip (2–10 seconds). We’ll analyze it and generate your live report.</p>
+    <p>to the beta launch of Virtual Coach AI — the intelligent swing coach designed to help you reach your golfing potential.</p>
 
-    <!-- Hidden file input -->
-    <input type="file" id="swingUpload" accept="video/mp4,video/quicktime,video/webm" style="display:none" onchange="uploadSwing()"/>
+    <!-- Hidden file input (wired) -->
+    <input type="file" id="swingUpload"
+           accept="video/mp4,video/quicktime,video/webm"
+           style="display:none"
+           onchange="uploadSwing()" />
 
     <!-- Buttons -->
     <label for="swingUpload" class="btn">⬆ Upload Your Swing</label>
-    <a href="/summary.html" class="btn secondary">📊 Reports</a>
+    <a href="/summary.html" class="btn btn-secondary">📊 Reports</a>
+    <p class="contact" style="margin-top:14px;">Questions? <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
   </div>
 
-  <!-- Progress overlay -->
+  <!-- Status overlay -->
   <div id="vc-status">
-    <div class="box">
-      <div class="stage" id="vc-stage">Starting…</div>
-      <div class="hint" id="vc-hint">If this stays here > 45s, we’ll show the error.</div>
-      <div class="spinner"></div>
+    <div style="text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto">
+      <div id="vc-status-text" style="font-weight:700;font-size:18px;margin-bottom:8px">Starting…</div>
+      <div style="font-size:13px;opacity:.8">If this stays here > 45s, we’ll show the error.</div>
     </div>
   </div>
 
   <script>
-    // --- helpers ---
+    // Safety: surface JS/network errors instead of silent failures
+    window.addEventListener('error', e => alert('App error: ' + (e.message || 'unknown')));
+    window.addEventListener('unhandledrejection', e => alert('Network/analysis error: ' + (e.reason?.message || e.reason || 'unknown')));
+
+    // ===== Helpers =====
     const overlay = document.getElementById('vc-status');
-    const stageEl = document.getElementById('vc-stage');
-    function show(msg){ stageEl.textContent = msg; overlay.style.display='flex'; }
-    function hide(){ overlay.style.display='none'; }
-    function guardLogin(){ try{ return localStorage.getItem('vc_auth') === 'ok'; }catch(_){ return false; } }
-    function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+    const ovText  = document.getElementById('vc-status-text');
+    function show(msg){ try{ ovText.textContent = msg; overlay.style.display='flex'; }catch(_){ alert(msg); } }
+    function hide(){ try{ overlay.style.display='none'; }catch(_){} }
+    function toast(m){ try{ alert(m); } catch(_){} }
 
-    // iOS-safe duration read
-    function readDuration(file){
-      return new Promise((resolve)=>{
-        const url = URL.createObjectURL(file);
-        const v = document.createElement('video');
-        v.preload = 'metadata'; v.src = url;
-        let done = false;
-        v.onloadedmetadata = () => { if(!done){ done=true; URL.revokeObjectURL(url); resolve(v.duration);} };
-        v.onerror = () => { if(!done){ done=true; URL.revokeObjectURL(url); resolve(NaN);} };
-        // iOS Infinity quirk
-        setTimeout(()=>{
-          if (!done && !isFinite(v.duration)) {
-            v.currentTime = Number.MAX_SAFE_INTEGER;
-            v.ontimeupdate = () => { if(!done){ done=true; URL.revokeObjectURL(url); resolve(v.duration);} };
-          }
-        }, 350);
-      });
-    }
-
-    // Extract 6 frames (JPEG 0.6), iOS-safe seeking
-    async function extractFrames(file){
+    // ===== iOS-friendly frame extraction =====
+    async function extractFrames(file) {
       const url = URL.createObjectURL(file);
       const video = document.createElement('video');
       video.src = url; video.muted = true; video.playsInline = true; video.preload = 'metadata';
-      await new Promise((res,rej)=>{ video.onloadedmetadata=res; video.onerror=()=>rej(new Error('metadata')); });
-      try{ await video.play(); }catch(_){} video.pause();
 
+      // Load metadata
+      await new Promise((resolve, reject) => {
+        video.onloadedmetadata = resolve;
+        video.onerror = () => reject(new Error('Could not load video metadata'));
+      });
+
+      // iOS poke
+      try { await video.play(); } catch(_) {}
+      video.pause();
+
+      // 9 frames for display; we’ll send 5 to API
       const dur = Math.max(0.6, Math.min(2.0, video.duration || 1.5));
-      const steps = 6;
-      const ts = Array.from({length:steps},(_,i)=> +(i*(dur/(steps-1))).toFixed(2));
+      const steps = 9;
+      const ts = Array.from({length: steps}, (_,i) => +(i * (dur / (steps - 1))).toFixed(2));
 
       const canvas = document.createElement('canvas');
       canvas.width = 480; canvas.height = 270;
       const ctx = canvas.getContext('2d');
 
       const images = [];
-      for (const t of ts){
+      for (const t of ts) {
         const target = Math.min(t, (video.duration || dur) - 0.05);
-        const sought = new Promise(res=>{
+        // Seek with longer timeout for iOS reliability
+        const sought = new Promise(res => {
           let done=false;
           video.onseeked = () => { if(!done){ done=true; res(); } };
-          setTimeout(()=>{ if(!done){ done=true; res(); } }, 900); // safety
+          setTimeout(()=>{ if(!done){ done=true; res(); } }, 1200);
         });
         video.currentTime = target;
         await sought;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        images.push(canvas.toDataURL('image/jpeg', 0.6));
+        images.push(canvas.toDataURL('image/jpeg', 0.5));
       }
       URL.revokeObjectURL(url);
       return images;
     }
 
-    // Watchdog to surface network stalls
+    // Promise watchdog
     function withTimeout(promise, ms, label='operation'){
       let t; const timeout = new Promise((_,rej)=> t=setTimeout(()=>rej(new Error(label+' timeout')), ms));
       return Promise.race([promise.finally(()=>clearTimeout(t)), timeout]);
     }
 
-    async function uploadSwing(){
-      if (!guardLogin()){ window.location.href = '/login.html'; return; }
+    // ===== Main upload handler =====
+    async function uploadSwing() {
+      try {
+        // Require passcode per-device
+        if (localStorage.getItem('vc_auth') !== 'ok') { window.location.href = '/login.html'; return; }
 
-      const input = document.getElementById('swingUpload');
-      const file = input?.files?.[0];
-      if (!file){ alert('Please select a swing file.'); return; }
+        // Online check (course Wi-Fi/1-bar issues)
+        if (!navigator.onLine) { toast('No internet. Try again when you’re online.'); return; }
 
-      show('Reading video…');
-      const duration = await readDuration(file);
-      if (!duration || !isFinite(duration)){ hide(); alert('Could not read video length. Try another clip.'); input.value=''; return; }
-      if (duration > 10){ hide(); alert('Clip too long. Please upload ≤ 10 seconds.'); input.value=''; return; }
+        const input = document.getElementById('swingUpload');
+        const file = input?.files?.[0];
+        if (!file) { toast('Please select a swing file.'); return; }
 
-      show('Extracting frames…');
-      let frames = [];
-      try { frames = await extractFrames(file); }
-      catch(e){ hide(); alert('Could not extract frames. Try another clip.'); return; }
+        show('Reading video…');
 
-      // Keep payload modest
-      frames = frames.slice(0,6);
+        // Quick duration check with iOS Infinity fix
+        const tmpUrl = URL.createObjectURL(file);
+        const v = document.createElement('video');
+        v.preload = 'metadata'; v.src = tmpUrl;
+        const duration = await new Promise((resolve) => {
+          v.onloadedmetadata = () => resolve(v.duration);
+          v.onerror = () => resolve(NaN);
+          setTimeout(()=>{ if (!isFinite(v.duration)) { v.currentTime = Number.MAX_SAFE_INTEGER; v.ontimeupdate=()=>resolve(v.duration);} }, 600);
+        });
+        URL.revokeObjectURL(tmpUrl);
 
-      show('Analyzing (10–30s)…');
-      const id = Date.now().toString();
-      try{
+        if (!duration || !isFinite(duration)) { hide(); toast('Could not read video length. Try another clip.'); input.value=''; return; }
+        if (duration > 10) { hide(); toast('Clip too long. Please upload ≤ 10 seconds.'); input.value=''; return; }
+
+        show('Extracting frames…');
+        const framesAll = await extractFrames(file);           // 9 frames for thumbnails
+        const framesForApi = framesAll.slice(0,5);             // 5 frames for analysis
+        const id = Date.now().toString();
+
+        // save frames for summary thumbnails
+        try { sessionStorage.setItem('vc_frames_' + id, JSON.stringify(framesAll)); } catch(_) {}
+
+        if (!navigator.onLine) { hide(); toast('Connection dropped. Please retry.'); return; }
+
+        show('Analyzing (10–30s)…');
         const resp = await withTimeout(fetch('/api/analyze', {
           method: 'POST',
           headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify({ id, frames })
+          body: JSON.stringify({ id, frames: framesForApi })
         }), 45000, 'analysis');
 
-        if (!resp.ok){
+        if (!resp.ok) {
           const txt = await resp.text();
           hide();
-          alert('Analysis failed:\n' + txt.slice(0,200));
+          toast('Analysis failed.\n' + txt.slice(0, 200));
           return;
         }
+
         const report = await resp.json();
-        sessionStorage.setItem('vc_report_'+id, JSON.stringify(report));
+        try { sessionStorage.setItem('vc_report_' + id, JSON.stringify(report)); } catch(_) {}
+
+        // Clean input so next upload is fresh
+        try { input.value = ''; } catch(_) {}
 
         show('Building report…');
-        await sleep(300);
         window.location.href = `/summary.html?id=${encodeURIComponent(id)}`;
-      }catch(e){
+      } catch (e) {
         hide();
-        alert('Analysis error: ' + (e?.message || e));
+        toast('Upload/analysis error: ' + (e?.message || e));
       }
     }
+    window.uploadSwing = uploadSwing;
   </script>
 </body>
 </html>
