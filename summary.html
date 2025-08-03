@@ -1,427 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Virtual Coach AI — Swing Reports</title>
-<meta name="robots" content="noindex, nofollow" />
-<style>
-  :root{
-    --fg:#f5f5f5; --bg:#0a0a0a; --line:rgba(255,255,255,0.16);
-    --muted:rgba(255,255,255,0.72);
-    --good:#16a34a;  --warn:#eab308;  --bad:#ef4444;
-    --accent:#1F6F1F;
-  }
-  html,body{
-    height:100%; margin:0; padding:0; color:var(--fg);
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    background: var(--bg) url("homepage-background.png") center / cover no-repeat fixed;
-    filter: brightness(1.08) contrast(1.03);
-  }
-  body{ min-height:-webkit-fill-available; }
-  .safe-area{ padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
-  .wrap{ max-width: 1000px; margin:0 auto; padding:48px 20px; text-shadow:0 1px 2px rgba(0,0,0,0.25); }
-  h1{ margin:0 0 6px; font-size:32px; }
-  .muted{ color:var(--muted); }
-
-  details{
-    border:1px solid var(--line); border-radius:12px; background:rgba(0,0,0,0.25);
-    padding:14px 16px; margin-bottom:10px;
-  }
-  summary{ cursor:pointer; font-weight:700; list-style:none; outline:none; display:flex; align-items:center; justify-content:space-between; }
-  summary::-webkit-details-marker{ display:none; }
-  .chev{ width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid var(--muted); transition: transform .15s; }
-  details[open] .chev{ transform: rotate(180deg); }
-
-  .legend{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 18px; font-size:13px; }
-  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
-  .g{ background:var(--good); } .y{ background:var(--warn);} .r{ background:var(--bad);}
-
-  .chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-  .chip{ border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:13px; }
-  .chip.g{ border-color:var(--good); color:#d1fae5; } .chip.y{ border-color:var(--warn); color:#fef08a; } .chip.r{ border-color:var(--bad); color:#fecaca; }
-
-  /* Mobile table scroll wrapper */
-  .table-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin: 0 -8px; padding: 0 8px;
-  }
-  table.responsive {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    min-width: 720px;
-    word-wrap: break-word;
-    white-space: normal;
-    font-size:14px;
-  }
-  th, td{ padding:10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
-  th{ font-weight:700; color:#fff; }
-  @media (max-width: 480px) { th, td { font-size: 13px; padding: 8px; } }
-
-  .pill{ padding:3px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line);}
-  .pill.g{ background:rgba(22,163,74,0.2); border-color:var(--good); }
-  .pill.y{ background:rgba(234,179,8,0.2); border-color:var(--warn); }
-  .pill.r{ background:rgba(239,68,68,0.2); border-color:var(--bad); }
-
-  .cta{
-    display:inline-block; margin-top:14px; padding:12px 18px; border-radius:12px;
-    background:var(--accent); color:#fff; text-decoration:none; font-weight:700; border:1px solid var(--line);
-  }
-  .cta:hover{ opacity:.95; }
-
-  /* P1–P9 frames grid */
-  .frames {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 10px; margin-top: 10px;
-  }
-  @media (max-width: 640px) { .frames { grid-template-columns: repeat(2, 1fr); } }
-  .frame { border:1px solid var(--line); border-radius:10px; background:rgba(0,0,0,0.25); overflow:hidden; text-align:center; font-size:13px; color:var(--muted); }
-  .frame a { display:block; text-decoration:none; color:inherit; }
-  .frame img { display:block; width:100%; height:auto; aspect-ratio:16/9; object-fit:cover; }
-  .frame figcaption { padding:6px 8px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Virtual Coach AI — Swing Report</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: #0a0a0a url("homepage-background.png") center/cover no-repeat fixed;
+      color: #f5f5f5;
+      filter: brightness(1.06) contrast(1.02);
+      min-height: 100vh;
+    }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 32px 16px; text-shadow: 0 1px 2px rgba(0,0,0,.25); }
+    h1 { margin: 0 0 6px; font-size: 28px; }
+    .muted { color: rgba(255,255,255,.75); }
+    details { border: 1px solid rgba(255,255,255,.16); border-radius: 12px; background: rgba(0,0,0,.25); padding: 14px 16px; margin: 10px 0; }
+    summary { cursor: pointer; font-weight: 700; display: flex; justify-content: space-between; }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .chip { border: 1px solid rgba(255,255,255,.16); border-radius: 999px; padding: 6px 10px; font-size: 13px; }
+    .pill { padding: 3px 8px; border-radius: 999px; font-size: 12px; border: 1px solid rgba(255,255,255,.16);}
+    .pill.g { background: rgba(22,163,74,0.2); border-color: #16a34a; }
+    .pill.y { background: rgba(234,179,8,0.2); border-color: #eab308; }
+    .pill.r { background: rgba(239,68,68,0.2); border-color: #ef4444; }
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -8px; padding: 0 8px; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 720px; }
+    th, td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,.16); text-align: left; vertical-align: top; }
+    .frames { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+    @media (max-width: 640px) { .frames { grid-template-columns: repeat(2, 1fr); } }
+    .frame { border: 1px solid rgba(255,255,255,.16); border-radius: 10px; background: rgba(0,0,0,.25); overflow: hidden; font-size: 13px; color: rgba(255,255,255,.75);}
+    .frame img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+    .frame figcaption { padding: 6px 8px; }
+    .cta { display: inline-block; padding: 10px 14px; border-radius: 10px; background: #1F6F1F; color: #fff; text-decoration: none; font-weight: 700; border: 1px solid rgba(255,255,255,.16); cursor: pointer; }
+    .cta:hover { opacity: .92; }
+    #exportBar { margin: 14px 0 18px; display: flex; flex-wrap: wrap; gap: 8px; }
+  </style>
 </head>
 <body>
-<div class="safe-area">
   <div class="wrap">
     <h1>Swing Reports</h1>
     <div class="muted">ID: <span id="rid">—</span></div>
-    <div id="exportBar" style="margin:14px 0 18px; display:flex; flex-wrap:wrap; gap:8px">
-  <button class="cta" id="btnEmail"   type="button">✉️ Email</button>
-  <button class="cta" id="btnSMS"     type="button">💬 Text</button>
-  <button class="cta" id="btnPrint"   type="button">🖨️ Download / Print PDF</button>
-  <button class="cta" id="btnCopy"    type="button">📋 Copy</button>
-  <button class="cta" id="btnJSON"    type="button">⬇️ JSON</button>
-      <button class="cta" id="btnShare" type="button">🔗 Share Link</button>
-</div>
-    <p class="muted" style="margin:6px 0 14px">
-      <b>How to use this:</b> Check tempo → scan P1–P9 flags → do the Top-3 drills. Re-upload after 2–3 practice sessions.
-    </p>
 
-    <div class="legend">
-      <div><span class="dot g"></span>Good</div>
-      <div><span class="dot y"></span>Okay</div>
-      <div><span class="dot r"></span>Needs Work</div>
+    <div id="exportBar">
+      <button class="cta" id="btnEmail" type="button">✉️ Email</button>
+      <button class="cta" id="btnSMS" type="button">💬 Text</button>
+      <button class="cta" id="btnPrint" type="button">🖨️ Download / Print PDF</button>
+      <button class="cta" id="btnCopy" type="button">📋 Copy</button>
+      <button class="cta" id="btnShare" type="button">🔗 Share Link</button>
     </div>
 
-    <!-- Available Reports -->
     <details open>
-      <summary>Available Reports <span class="chev"></span></summary>
+      <summary>Tempo</summary>
+      <div class="chips" id="chips"></div>
+    </details>
+
+    <details open>
+      <summary>P1–P9 Assessment</summary>
       <div class="table-wrap">
-        <table class="responsive">
-          <thead><tr><th>Date</th><th>Club</th><th>Tempo</th><th>P1–P9</th><th>Open</th></tr></thead>
-          <tbody id="reportRows"></tbody>
+        <table>
+          <thead><tr><th>Checkpoint</th><th>Status</th></tr></thead>
+          <tbody id="pRows"></tbody>
         </table>
       </div>
+      <div class="frames" id="thumbs"></div>
     </details>
 
-    <!-- Tempo -->
     <details open>
-      <summary>Tempo <span class="chev"></span></summary>
-      <div class="chips"></div>
-      <div class="muted" style="margin-top:10px">
-        <b>How to read this:</b> Backswing, Pause, Downswing show seconds. Most elite swings cluster near a
-        <b>~3:1 total backswing-to-downswing ratio</b>. A tiny pause (0.03–0.08s) helps sequence the change of
-        direction. If your ratio is <b>&lt;2.5</b>, you may be rushing from P4→P5; if it’s <b>&gt;3.5</b>,
-        you may be stalling at the top.
-      </div>
-      <ul class="muted" style="margin:8px 0 0 16px">
-        <li><b>Backswing:</b> Time from start (P1) to top (P4).</li>
-        <li><b>Pause:</b> Micro-pause at P4; too big = loss of speed, zero = yank.</li>
-        <li><b>Downswing:</b> P4 to impact (P7). Consistency here = strike control.</li>
-      </ul>
-      <div class="muted" style="margin-top:8px">
-        <b>Coach cue:</b> Keep the backswing smooth, feel a coin-flip pause at the top, then rip the downswing.
-      </div>
-    </details>
-
-    <!-- P1–P9 -->
-    <details open>
-      <summary>P1–P9 Assessment <span class="chev"></span></summary>
-      <div class="muted" style="margin:6px 0 10px">
-        <b>Flags:</b>
-        <span class="pill g">Good</span> = on model;
-        <span class="pill y">Okay</span> = playable but watch it (minor drift);
-        <span class="pill r">Needs Work</span> = leaking speed/consistency (fix this soon).
-      </div>
-
-      <div class="table-wrap">
-        <table class="responsive">
-          <thead>
-            <tr>
-              <th>Checkpoint</th>
-              <th>What we’re checking</th>
-              <th>Status</th>
-              <th>Why / What to Improve</th>
-            </tr>
-          </thead>
-          <tbody id="pRows"><!-- injected by script --></tbody>
-        </table>
-      </div>
-
-      <!-- Optional image grid (from session frames) -->
-      <div class="frames" id="pFrames"></div>
-    </details>
-
-    <!-- Top 3 -->
-    <details open>
-      <summary>Top 3 Things to Work On <span class="chev"></span></summary>
-      <p class="muted" style="margin:6px 0 10px">
-        Your highest-leverage fixes for contact and curve. Do these first. One change at a time; keep the same feels for a week.
-      </p>
+      <summary>Top 3 Things to Work On</summary>
       <ol id="top3work"></ol>
-      <div class="muted" style="margin-top:8px">
-        <b>Coach cue:</b> If a drill cleans up P6 or P7, ball flight improves immediately—don’t chase five swing thoughts.
-      </div>
     </details>
 
     <details>
-      <summary>Top 3 Power Things to Work On <span class="chev"></span></summary>
-      <p class="muted" style="margin:6px 0 10px">
-        Speed without chaos. These add mph by improving sequence and force direction, not just swinging harder.
-      </p>
+      <summary>Top 3 Power Things</summary>
       <ol id="top3power"></ol>
-      <div class="muted" style="margin-top:8px">
-        <b>Coach cue:</b> Stack speed work after a clean contact session. 15–20 quality reps beat 80 sloppy ones.
-      </div>
     </details>
 
-    <!-- Goals -->
-    <details>
-      <summary>Goals <span class="chev"></span></summary>
-      <p class="muted" style="margin:6px 0 10px">
-        Benchmarks to aim at. Hit these consistently and your dispersion shrinks while ball speed climbs.
-      </p>
-      <ul>
-        <li><b>Tempo:</b> Settle near <b>~3:1</b> with a micro-pause (&lt;0.08s).</li>
-        <li><b>P4 depth:</b> Hips turned ~<b>45°</b>, torso ~<b>70–90°</b>, weight still inside trail foot.</li>
-        <li><b>P6 face:</b> Within <b>±2°</b> of path; hands slightly ahead of clubhead.</li>
-        <li><b>Impact low-point:</b> Iron: <b>+2.0 in</b> ahead of ball; Driver: near 0 with upward AoA.</li>
-      </ul>
-      <div class="muted" style="margin-top:8px">
-        <b>Coach cue:</b> When in doubt, re-check setup and tempo—cheap fixes that move everything else the right way.
-      </div>
-    </details>
+    <p><a class="cta" href="/">⬅ Back to Home</a></p>
   </div>
-</div>
 
-<script>
-  // Read ID and safely load report (don’t crash)
-  const id = new URLSearchParams(location.search).get('id') || 'local-demo';
-  document.getElementById('rid').textContent = id;
+  <script>
+    const id = new URLSearchParams(location.search).get('id') || 'local-demo';
+    document.getElementById('rid').textContent = id;
 
-  let j = null;
-  try {
-    const raw = sessionStorage.getItem('vc_report_' + id);
-    if (raw) j = JSON.parse(raw);
-  } catch(_) {}
-  if (!j) {
-    alert('No saved report found. Please re-upload your swing from the home page.');
-    location.href = '/';
-  }
+    let report = null, framesAll = [];
+    try { report = JSON.parse(sessionStorage.getItem('vc_report_' + id) || 'null'); } catch(_) {}
+    try { framesAll = JSON.parse(sessionStorage.getItem('vc_frames_' + id) || '[]'); } catch(_) {}
 
-  const P = [
-    { k:'P1 — Setup',  what:'Posture, ball position, grip, pressure in feet.' },
-    { k:'P2 — Shaft Parallel (BS)', what:'Club outside/inside hands, face orientation.' },
-    { k:'P3 — Lead Arm Parallel',   what:'Width, trail elbow softness, club across line.' },
-    { k:'P4 — Top',                 what:'Hip/torso depth, centered turn, wrist set.' },
-    { k:'P5 — Lead Arm Parallel (DS)', what:'Shallowing, shaft pitch, chest open vs. ball.' },
-    { k:'P6 — Shaft Parallel (DS)', what:'Lead wrist flexion, path/face, handle forward.' },
-    { k:'P7 — Impact',              what:'Low-point, shaft lean, face control, open hips.' },
-    { k:'P8 — Trail Arm Parallel',  what:'Extension to target, face rotation, balance.' },
-    { k:'P9 — Finish',              what:'Full rotation, posted lead leg, stable balance.' }
-  ];
-
-  const WHY = {
-    g: [
-      'Positions are on model. Protect this checkpoint; small wins compound.',
-      'Trajectory/build looks solid. Keep the feel; verify weekly.',
-      'Repeatable and efficient. Use as a reference when other parts move.',
-      'Depth and structure are sound. Maintain with one reminder cue.',
-      'Transition shape supports a neutral strike. Keep rehearsing.',
-      'Delivery is organized. Preserve lead wrist and handle position.',
-      'Impact parameters are playable. Maintain low-point control.',
-      'Release is matched to path. Good extension and balance.',
-      'Finish shows balance and rotation. Use it as your end pose.'
-    ],
-    y: [
-      'Slight posture/ball position drift. Rehearse setup checkpoints.',
-      'Club a bit outside/inside; face slightly open/closed. Mirror reps.',
-      'Width/trail elbow vary. Soft elbow and width rehearsals.',
-      'Top a touch long/short or swayed. Feel centered turn to P4.',
-      'Transition a hair steep/flat. Shallow with trail elbow feel.',
-      'Lead wrist not fully set; handle could be more forward.',
-      'Shaft lean/face a bit off; thin/fat risk. Low-point ladder drill.',
-      'Release timing variable. 9–3 drill for face control.',
-      'Finish balance inconsistent. Post to lead side and hold 2s.'
-    ],
-    r: [
-      'Setup hurting strike (posture/grip/ball pos). Lock a pre-shot routine.',
-      'Club way outside/inside; face mismatch. Stop-at-P2 checkpoint.',
-      'Loss of width/structure. Lead-arm-only to P3 with tempo.',
-      'Over-sway/over-tilt or under-set. “Turn in a barrel” + wrist set.',
-      'Steep transition/over-the-top. Pump drill for shallow and side bend.',
-      'Open face/flip risk. Bow lead wrist to P6; handle forward feels.',
-      'Early flip/no shaft lean; low-point behind. Impact bag & divot line.',
-      'Cast/roll mismatch; exit high. 9–3 with face awareness to neutral.',
-      'Off-balance finish. Post on lead leg, chest to target, hold finish.'
-    ]
-  };
-
-  // Tempo chips
-  const chips = document.querySelector('.chips');
-  if (chips && j.tempo) {
-    chips.innerHTML = `
-      <span class="chip g">Backswing: ${j.tempo.backswing}s</span>
-      <span class="chip g">Pause: ${j.tempo.pause}s</span>
-      <span class="chip g">Downswing: ${j.tempo.downswing}s</span>
-      <span class="chip g">Ratio: ${j.tempo.ratio}:1</span>
+    // Fill Tempo
+    const t = report?.tempo || {};
+    document.getElementById('chips').innerHTML = `
+      <span class="chip">Backswing: ${t.backswing ?? '-' }s</span>
+      <span class="chip">Pause: ${t.pause ?? '-' }s</span>
+      <span class="chip">Downswing: ${t.downswing ?? '-' }s</span>
+      <span class="chip">Ratio: ${t.ratio ?? '-' }:1</span>
     `;
-  }
 
-  // P1–P9 rows
-  const rows = document.getElementById('pRows');
-  const flags = (j.pFlags && j.pFlags.length >= 9) ? j.pFlags.slice(0,9) : Array(9).fill('y');
-  rows.innerHTML = '';
-  flags.forEach((f, i) => {
-    const tr = document.createElement('tr');
+    // Fill P1–P9
+    const map = { g:'Good', y:'Okay', r:'Needs Work' };
+    const rows = document.getElementById('pRows');
+    (report?.pFlags || []).slice(0,9).forEach((f,i)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>P${i+1}</td><td><span class="pill ${f||'y'}">${map[f]||'Okay'}</span></td>`;
+      rows.appendChild(tr);
+    });
 
-    const tdA = document.createElement('td'); tdA.textContent = P[i].k;
-    const tdB = document.createElement('td'); tdB.textContent = P[i].what;
+    // Fill Top 3s
+    document.getElementById('top3work').innerHTML  = (report?.top3WorkOn||[]).map(x=>`<li><b>${x}</b></li>`).join('');
+    document.getElementById('top3power').innerHTML = (report?.top3Power||[]).map(x=>`<li><b>${x}</b></li>`).join('');
 
-    const tdC = document.createElement('td');
-    const pill = document.createElement('span');
-    pill.className = 'pill ' + (f==='g'?'g':f==='y'?'y':'r');
-    pill.textContent = (f==='g'?'Good':f==='y'?'Okay':'Needs Work');
-    tdC.appendChild(pill);
+    // Fill Thumbs
+    document.getElementById('thumbs').innerHTML = (framesAll||[]).slice(0,9).map((src,i)=>`
+      <figure class="frame"><img src="${src}" alt="Frame ${i+1}"><figcaption>Frame ${i+1}</figcaption></figure>
+    `).join('');
 
-    const tdD = document.createElement('td');
-    const why = WHY[f]?.[i] || '—';
-    tdD.innerHTML = `<span class="muted">${why}</span>`;
-
-    tr.appendChild(tdA); tr.appendChild(tdB); tr.appendChild(tdC); tr.appendChild(tdD);
-    rows.appendChild(tr);
-  });
-
-  // Top 3 lists
-  const work = document.getElementById('top3work');
-  const power = document.getElementById('top3power');
-  if (work && j.top3WorkOn) work.innerHTML = j.top3WorkOn.map(x=>`<li><b>${x}</b></li>`).join('');
-  if (power && j.top3Power) power.innerHTML = j.top3Power.map(x=>`<li><b>${x}</b></li>`).join('');
-
-  // P1–P9 frames from session
-  const framesHost = document.getElementById('pFrames');
-  if (framesHost) {
-    framesHost.innerHTML = '';
-    let frames = [];
-    try { frames = JSON.parse(sessionStorage.getItem('vc_frames_' + id) || '[]'); } catch(_){}
-    const labels = P.map(x=>x.k);
-    for (let i=0;i<9;i++){
-      const fig = document.createElement('figure'); fig.className = 'frame';
-      const img = document.createElement('img');
-      img.src = frames[i] || `p${i+1}.jpg`;
-      img.alt = labels[i];
-      const cap = document.createElement('figcaption'); cap.textContent = labels[i];
-      const link = document.createElement('a'); link.href = img.src; link.target = '_blank'; link.rel='noopener';
-      link.appendChild(img); link.appendChild(cap); fig.appendChild(link); framesHost.appendChild(fig);
-    }
-  }
-
-  // "Available Reports" sample row
-  const reportRows = document.getElementById('reportRows');
-  if (reportRows) {
-    reportRows.innerHTML = `
-      <tr>
-        <td>${new Date().toLocaleDateString()}</td>
-        <td>7i</td>
-        <td><span class="pill g">3:1</span></td>
-        <td><span class="pill g">Good</span></td>
-        <td><a class="cta" style="padding:6px 10px; font-size:13px;" href="summary.html?id=${id}">Open</a></td>
-      </tr>
-    `;
-  }
-  // Build a concise text summary for email/SMS/copy
-function buildSummaryText(report, id) {
-  const tempo = report?.tempo || {};
-  const flags = (report?.pFlags || []).slice(0,9);
-  const map = { g:'Good', y:'Okay', r:'Needs Work' };
-  const pText = flags.map((f,i)=>`P${i+1}:${map[f]||'-'}`).join('  ');
-  const w3 = (report?.top3WorkOn||[]).map((x,i)=>`${i+1}. ${x}`).join('\n');
-  const p3 = (report?.top3Power||[]).map((x,i)=>`${i+1}. ${x}`).join('\n');
-
-  return [
-    `Virtual Coach AI — Swing Report ${id}`,
-    `Tempo: BS ${tempo.backswing||'-'}s  Pause ${tempo.pause||'-'}s  DS ${tempo.downswing||'-'}s  Ratio ${tempo.ratio||'-'}:1`,
-    `Checkpoints: ${pText}`,
-    ``,
-    `Top 3 Things to Work On:`,
-    w3 || '-',
-    ``,
-    `Top 3 Power Things:`,
-    p3 || '-',
-    ``,
-    `— Generated with Virtual Coach AI`
-  ].join('\n');
-}
-
-function mailtoEncode(s){ return encodeURIComponent(s).replace(/%0A/g,'%0D%0A'); }
-
-// Hook up buttons after report loads
-(function wireExport(){
-  const id = new URLSearchParams(location.search).get('id') || 'local-demo';
-  let report = null;
-  try { report = JSON.parse(sessionStorage.getItem('vc_report_' + id) || 'null'); } catch(_) {}
-
-  const btnEmail = document.getElementById('btnEmail');
-  const btnSMS   = document.getElementById('btnSMS');
-  const btnPrint = document.getElementById('btnPrint');
-  const btnCopy  = document.getElementById('btnCopy');
-  const btnJSON  = document.getElementById('btnJSON');
-
-  if (!report) {
-    [btnEmail, btnSMS, btnPrint, btnCopy, btnJSON].forEach(b=> b && (b.disabled = true));
-    return;
-  }
-
-  const text = buildSummaryText(report, id);
-
-  btnEmail?.addEventListener('click', () => {
-    const subject = mailtoEncode(`Virtual Coach AI — Swing Report ${id}`);
-    const body    = mailtoEncode(text);
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
-  });
-
-  btnSMS?.addEventListener('click', () => {
-    const body = encodeURIComponent(text);
-    const url = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? `sms:&body=${body}` : `sms:?body=${body}`;
-    window.location.href = url;
-  });
-
-  btnPrint?.addEventListener('click', () => { window.print(); });
-
-  btnCopy?.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      alert('Report copied to clipboard.');
-    } catch {
-      prompt('Copy report text:', text);
-    }
-  });
-
-  btnJSON?.addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `virtual-coach-report-${id}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  });
-})();
-</script>
+    // Email
+    document.getElementById('btnEmail').onclick = () => {
+      const body = encodeURIComponent(JSON.stringify(report, null, 2));
+      window.location.href = `mailto:?subject=Virtual Coach AI Report ${id}&body=${body}`;
+    };
+    // SMS
+    document.getElementById('btnSMS').onclick = () => {
+      const body = encodeURIComponent(JSON.stringify(report, null, 2));
+      window.location.href = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? `sms:&body=${body}` : `sms:?body=${body}`;
+    };
+    // Print
+    document.getElementById('btnPrint').onclick = () => window.print();
+    // Copy
+    document.getElementById('btnCopy').onclick = async () => {
+      try { await navigator.clipboard.writeText(JSON.stringify(report, null, 2)); alert('Report copied.'); }
+      catch { prompt('Copy report:', JSON.stringify(report, null, 2)); }
+    };
+    // Share Link
+    document.getElementById('btnShare').onclick = async () => {
+      try {
+        const r = await fetch('/api/save', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ report, frames: framesAll.slice(0,3) })
+        });
+        const j = await r.json();
+        if (!r.ok || !j?.ok) throw new Error(j?.error || 'Save failed');
+        await navigator.clipboard.writeText(j.url);
+        alert('Share link copied:\n' + j.url);
+      } catch (e) {
+        alert('Error creating share link: ' + e.message);
+      }
+    };
+  </script>
 </body>
 </html>
