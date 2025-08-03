@@ -341,6 +341,86 @@
       </tr>
     `;
   }
+  // Build a concise text summary for email/SMS/copy
+function buildSummaryText(report, id) {
+  const tempo = report?.tempo || {};
+  const flags = (report?.pFlags || []).slice(0,9);
+  const map = { g:'Good', y:'Okay', r:'Needs Work' };
+  const pText = flags.map((f,i)=>`P${i+1}:${map[f]||'-'}`).join('  ');
+  const w3 = (report?.top3WorkOn||[]).map((x,i)=>`${i+1}. ${x}`).join('\n');
+  const p3 = (report?.top3Power||[]).map((x,i)=>`${i+1}. ${x}`).join('\n');
+
+  return [
+    `Virtual Coach AI — Swing Report ${id}`,
+    `Tempo: BS ${tempo.backswing||'-'}s  Pause ${tempo.pause||'-'}s  DS ${tempo.downswing||'-'}s  Ratio ${tempo.ratio||'-'}:1`,
+    `Checkpoints: ${pText}`,
+    ``,
+    `Top 3 Things to Work On:`,
+    w3 || '-',
+    ``,
+    `Top 3 Power Things:`,
+    p3 || '-',
+    ``,
+    `— Generated with Virtual Coach AI`
+  ].join('\n');
+}
+
+function mailtoEncode(s){ return encodeURIComponent(s).replace(/%0A/g,'%0D%0A'); }
+
+// Hook up buttons after report loads
+(function wireExport(){
+  const id = new URLSearchParams(location.search).get('id') || 'local-demo';
+  let report = null;
+  try { report = JSON.parse(sessionStorage.getItem('vc_report_' + id) || 'null'); } catch(_) {}
+
+  const btnEmail = document.getElementById('btnEmail');
+  const btnSMS   = document.getElementById('btnSMS');
+  const btnPrint = document.getElementById('btnPrint');
+  const btnCopy  = document.getElementById('btnCopy');
+  const btnJSON  = document.getElementById('btnJSON');
+
+  if (!report) {
+    [btnEmail, btnSMS, btnPrint, btnCopy, btnJSON].forEach(b=> b && (b.disabled = true));
+    return;
+  }
+
+  const text = buildSummaryText(report, id);
+
+  btnEmail?.addEventListener('click', () => {
+    const subject = mailtoEncode(`Virtual Coach AI — Swing Report ${id}`);
+    const body    = mailtoEncode(text);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
+  });
+
+  btnSMS?.addEventListener('click', () => {
+    const body = encodeURIComponent(text);
+    const url = /iPhone|iPad|iPod/i.test(navigator.userAgent) ? `sms:&body=${body}` : `sms:?body=${body}`;
+    window.location.href = url;
+  });
+
+  btnPrint?.addEventListener('click', () => { window.print(); });
+
+  btnCopy?.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Report copied to clipboard.');
+    } catch {
+      prompt('Copy report text:', text);
+    }
+  });
+
+  btnJSON?.addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `virtual-coach-report-${id}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  });
+})();
 </script>
 </body>
 </html>
