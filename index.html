@@ -26,6 +26,8 @@
     .contact a { color: #22c55e; text-decoration: none; }
     .contact a:hover { text-decoration: underline; }
     @media (max-width: 480px) { h1 { font-size: 30px; } .logo { width: 300px; } }
+
+    /* Status overlay */
     #vc-status { position:fixed; inset:0; background:rgba(0,0,0,.7); color:#fff; display:none; align-items:center; justify-content:center; z-index:9999 }
   </style>
 </head>
@@ -35,6 +37,7 @@
     <h1>WELCOME</h1>
     <p>to the beta launch of Virtual Coach AI — the intelligent swing coach designed to help you reach your golfing potential.</p>
 
+    <!-- Player profile selectors -->
     <div style="margin:12px 0; display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
       <label style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,.25); padding:8px 10px; border-radius:10px">
         Handedness:
@@ -53,16 +56,19 @@
       </label>
     </div>
 
+    <!-- Hidden file input (wired) -->
     <input type="file" id="swingUpload"
            accept="video/mp4,video/quicktime,video/webm"
            style="display:none"
            onchange="uploadSwing()" />
 
+    <!-- Buttons -->
     <label for="swingUpload" class="btn">⬆ Upload Your Swing</label>
     <a href="/summary.html" class="btn btn-secondary">📊 Reports</a>
     <p class="contact" style="margin-top:14px;">Questions? <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
   </div>
 
+  <!-- Status overlay -->
   <div id="vc-status">
     <div style="text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto">
       <div id="vc-status-text" style="font-weight:700;font-size:18px;margin-bottom:8px">Starting…</div>
@@ -71,52 +77,83 @@
   </div>
 
   <script>
+    // ===== Helpers =====
     const overlay = document.getElementById('vc-status');
     const ovText  = document.getElementById('vc-status-text');
     function show(msg){ try{ ovText.textContent = msg; overlay.style.display='flex'; }catch(_){ alert(msg); } }
     function hide(){ try{ overlay.style.display='none'; }catch(_){} }
     function toast(m){ try{ alert(m); } catch(_){} }
 
-    async function extractFrames(file) {
+    // ===== iOS-friendly frame & thumbnail extraction =====
+    async function extractFramesAndThumbs(file) {
       const url = URL.createObjectURL(file);
       const video = document.createElement('video');
       video.src = url; video.muted = true; video.playsInline = true; video.preload = 'metadata';
-      await new Promise((resolve, reject) => { video.onloadedmetadata = resolve; video.onerror = () => reject(new Error('Could not load video metadata')); });
-      try { await video.play(); } catch(_) {} video.pause();
 
+      // Load metadata
+      await new Promise((resolve, reject) => {
+        video.onloadedmetadata = resolve;
+        video.onerror = () => reject(new Error('Could not load video metadata'));
+      });
+
+      // iOS poke
+      try { await video.play(); } catch(_) {}
+      video.pause();
+
+      // Choose a short window to sample (keeps payload fast)
       const dur = Math.max(0.6, Math.min(2.0, video.duration || 1.5));
-      const steps = 6;
+      const steps = 6; // keep payload small
       const ts = Array.from({length: steps}, (_,i) => +(i * (dur / (steps - 1))).toFixed(2));
 
+      // Analysis frames (wider)
       const canvas = document.createElement('canvas');
-      const thumb = document.createElement('canvas');
       canvas.width = 480; canvas.height = 270;
-      thumb.width = 120; thumb.height = 68; // tiny thumbnail for summary
       const ctx = canvas.getContext('2d');
-      const tctx = thumb.getContext('2d');
 
-      const images = [], thumbs = [];
+      // Thumbnail frames (tiny, square)
+      const tCanvas = document.createElement('canvas');
+      tCanvas.width = 96; tCanvas.height = 96;
+      const tCtx = tCanvas.getContext('2d');
+
+      const images = [];
+      const thumbs = [];
       for (const t of ts) {
         const target = Math.min(t, (video.duration || dur) - 0.05);
-        const sought = new Promise(res => { let done=false; video.onseeked=()=>{ if(!done){done=true;res();} }; setTimeout(()=>{ if(!done){done=true;res();} }, 900); });
+        const sought = new Promise(res => {
+          let done=false;
+          video.onseeked = () => { if(!done){ done=true; res(); } };
+          setTimeout(()=>{ if(!done){ done=true; res(); } }, 900);
+        });
         video.currentTime = target;
         await sought;
+
+        // analysis frame
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        tctx.drawImage(video, 0, 0, thumb.width, thumb.height);
         images.push(canvas.toDataURL('image/jpeg', 0.6));
-        thumbs.push(thumb.toDataURL('image/jpeg', 0.6));
+
+        // square thumbnail (center-crop)
+        const vw = video.videoWidth, vh = video.videoHeight;
+        const size = Math.min(vw, vh);
+        const sx = Math.max(0, (vw - size) / 2);
+        const sy = Math.max(0, (vh - size) / 2);
+        tCtx.clearRect(0,0,96,96);
+        tCtx.drawImage(video, sx, sy, size, size, 0, 0, 96, 96);
+        thumbs.push(tCanvas.toDataURL('image/jpeg', 0.6));
       }
       URL.revokeObjectURL(url);
       return { images, thumbs };
     }
 
+    // Promise watchdog
     function withTimeout(promise, ms, label='operation'){
       let t; const timeout = new Promise((_,rej)=> t=setTimeout(()=>rej(new Error(label+' timeout')), ms));
       return Promise.race([promise.finally(()=>clearTimeout(t)), timeout]);
     }
 
+    // ===== Main upload handler =====
     async function uploadSwing() {
       try {
+        // Gate: passcode on THIS device
         if (localStorage.getItem('vc_auth') !== 'ok') { window.location.href = '/login.html'; return; }
 
         const input = document.getElementById('swingUpload');
@@ -125,7 +162,7 @@
 
         show('Reading video…');
 
-        // duration check with iOS fix
+        // Quick duration check (iOS Infinity fix)
         const tmpUrl = URL.createObjectURL(file);
         const v = document.createElement('video');
         v.preload = 'metadata'; v.src = tmpUrl;
@@ -140,15 +177,19 @@
         if (duration > 10) { hide(); toast('Clip too long. Please upload ≤ 10 seconds.'); input.value=''; return; }
 
         show('Extracting frames…');
-        const { images: frames, thumbs } = await extractFrames(file);
+        const { images: frames, thumbs } = await extractFramesAndThumbs(file);
 
+        // Profile selections
         const handed = (document.getElementById('handed')?.value || 'right');
         const eye    = (document.getElementById('eye')?.value || 'unknown');
+
+        // Save selections + thumbnails for summary page
+        const id = Date.now().toString();
         sessionStorage.setItem('vc_last_handed', handed);
         sessionStorage.setItem('vc_last_eye', eye);
+        sessionStorage.setItem('vc_thumbs_' + id, JSON.stringify(thumbs));
 
         show('Analyzing (10–30s)…');
-        const id = Date.now().toString();
 
         const resp = await withTimeout(fetch('/api/analyze', {
           method: 'POST',
@@ -165,7 +206,6 @@
 
         const report = await resp.json();
         sessionStorage.setItem('vc_report_' + id, JSON.stringify(report));
-        sessionStorage.setItem('vc_thumbs_' + id, JSON.stringify(thumbs));
 
         show('Building report…');
         window.location.href = `/summary.html?id=${encodeURIComponent(id)}`;
