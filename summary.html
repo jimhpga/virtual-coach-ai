@@ -25,7 +25,6 @@
   .muted{ color:var(--muted); }
 
   .card{ border:1px solid var(--line); border-radius:12px; background:var(--cardbg); padding:14px 16px; margin:14px 0; }
-
   .chips{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 16px; }
   .chip{ border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:13px; }
 
@@ -34,7 +33,7 @@
   .y{ background:rgba(234,179,8,0.18);  border-color:var(--warn); }
   .r{ background:rgba(239,68,68,0.18);  border-color:var(--bad); }
 
-  /* Accordion styles */
+  /* Accordion */
   details.acc { border:1px solid var(--line); border-radius:10px; background:rgba(0,0,0,0.22); margin:10px 0; overflow:hidden; }
   details.acc > summary{
     list-style:none; cursor:pointer; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;
@@ -48,16 +47,23 @@
   .chev{ width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid var(--muted); transition:.15s; }
   details[open] .chev{ transform: rotate(180deg); }
   .acc-body{ padding:12px 14px; border-top:1px solid var(--line); line-height:1.55; overflow-wrap:anywhere; }
+  .long-label{ display:block; font-size:12px; opacity:.8; margin:8px 0 4px; text-transform:uppercase; letter-spacing:.04em; }
+
+  /* Summary bar */
+  .sumbar{ display:flex; height:12px; border-radius:999px; overflow:hidden; border:1px solid var(--line); }
+  .sumbar > div{ height:100%; }
+  .sb-g{ background:var(--good); }
+  .sb-y{ background:var(--warn); }
+  .sb-r{ background:var(--bad); }
 
   .legend{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 12px; font-size:13px; }
   .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
 
   .cta{ display:inline-block; margin-top:14px; padding:10px 14px; border-radius:10px; background:var(--accent); color:#fff; text-decoration:none; font-weight:700; }
 
-  /* Lists inside cards */
-  .bul{ margin:0; padding-left:18px; }
-  .bul li{ margin:6px 0; }
-  .long-label{ display:block; font-size:12px; opacity:.8; margin:8px 0 4px; text-transform:uppercase; letter-spacing:.04em; }
+  /* Thumbs grid */
+  .thumbs{ display:grid; grid-template-columns: repeat(auto-fill, minmax(80px,1fr)); gap:8px; }
+  .thumbs img{ width:100%; height:auto; display:block; border-radius:8px; border:1px solid var(--line); }
 </style>
 </head>
 <body>
@@ -66,10 +72,12 @@
   <div class="muted">ID: <span id="rid">—</span></div>
   <div class="muted">Profile: <span id="profile">—</span></div>
 
-  <div class="legend">
-    <div><span class="dot" style="background:var(--good)"></span>Good</div>
-    <div><span class="dot" style="background:var(--warn)"></span>Okay</div>
-    <div><span class="dot" style="background:var(--bad)"></span>Needs Work</div>
+  <!-- Consistency + summary bar -->
+  <div class="card">
+    <h3 style="margin:0 0 8px">Overview</h3>
+    <div class="chips" id="ovChips"></div>
+    <div class="sumbar" id="sumbar" style="margin-top:8px;"></div>
+    <div class="muted" id="sumbarLegend" style="margin-top:6px;"></div>
   </div>
 
   <!-- Tempo -->
@@ -79,13 +87,31 @@
     <div class="muted">Target repeatable ~3:1. Keep a small pause; don’t rush P4→P5.</div>
   </div>
 
-  <!-- Most Important -->
-  <div class="card" id="miCard" style="border-color:#bae6fd;background:rgba(59,130,246,0.08)">
-    <h3 style="margin:0 0 8px">Most Important for Consistency</h3>
-    <div id="miBody" class="muted">—</div>
+  <!-- Quick Wins -->
+  <div class="card">
+    <details class="acc" open>
+      <summary>
+        <div class="sum-title"><b>Quick Wins (Do These First)</b><br><span class="sum-short">Two simple actions for your next session</span></div>
+        <div class="sum-right"><span class="chev"></span></div>
+      </summary>
+      <div class="acc-body" id="quickWins">—</div>
+    </details>
   </div>
 
-  <!-- P1–P9 (each item is a dropdown; Long description inside body = 3rd column) -->
+  <!-- P1–P9 Thumbnails (LAZY) -->
+  <div class="card">
+    <details class="acc" id="thumbAcc">
+      <summary>
+        <div class="sum-title"><b>P1–P9 Thumbnails</b><br><span class="sum-short">Open to load thumbnails (saves time on initial load)</span></div>
+        <div class="sum-right"><span class="chev"></span></div>
+      </summary>
+      <div class="acc-body">
+        <div id="thumbs" class="thumbs"></div>
+      </div>
+    </details>
+  </div>
+
+  <!-- P1–P9 (each item dropdown) -->
   <div class="card">
     <h3 style="margin:0 0 8px">P1–P9 Assessment</h3>
     <div id="cpAcc"></div>
@@ -93,9 +119,8 @@
 
   <!-- Top 3 Work-On (ONE dropdown) -->
   <div class="card">
+    <details class="acc" id="workAcc">
       <summary>
-        <details class="acc" data-status="${badge}">
-          document.querySelectorAll('#cpAcc details.acc[data-status="r"]').forEach(d => d.open = true);
         <div class="sum-title"><b>Top 3 Things to Work On</b><br><span class="sum-short">Your priority list with drills</span></div>
         <div class="sum-right"><span class="chev"></span></div>
       </summary>
@@ -157,7 +182,47 @@
   } else {
     const j = JSON.parse(raw);
 
-    // Tempo
+    // ---- Consistency Score + summary bar ----
+    const cps = Array.isArray(j.checkpoints) ? j.checkpoints : [];
+    const counts = cps.reduce((a,c)=>{
+      const k = (c.status==='g'?'g':c.status==='r'?'r':'y'); a[k]++; return a;
+    }, {g:0,y:0,r:0});
+    const total = counts.g + counts.y + counts.r || 1;
+    const gPct = Math.round(counts.g/total*100), yPct = Math.round(counts.y/total*100), rPct = 100 - gPct - yPct;
+
+    // Consistency vs previous report (very light heuristic)
+    const prevId = (JSON.parse(sessionStorage.getItem('vc_history')||'[]').filter(x=>x!==id).slice(-1)[0]) || null;
+    let consistency = 80; // base
+    if (prevId) {
+      try {
+        const p = JSON.parse(sessionStorage.getItem('vc_report_'+prevId)||'{}');
+        const prevCps = Array.isArray(p.checkpoints)?p.checkpoints:[];
+        const byId = Object.fromEntries(cps.map(x=>[x.id,x.status]));
+        const pById= Object.fromEntries(prevCps.map(x=>[x.id,x.status]));
+        let diff=0;
+        ['P1','P2','P3','P4','P5','P6','P7','P8','P9'].forEach(k=>{
+          if (byId[k] && pById[k] && byId[k]!==pById[k]) diff++;
+        });
+        consistency = Math.max(40, 100 - diff*7); // small swing changes knock score a bit
+      } catch(_) {}
+    }
+    document.getElementById('ovChips').innerHTML =
+      `<span class="chip"><b>Consistency:</b> ${consistency}/100</span>` +
+      `<span class="chip">Good: ${counts.g}</span>` +
+      `<span class="chip">Okay: ${counts.y}</span>` +
+      `<span class="chip">Needs Work: ${counts.r}</span>`;
+    document.getElementById('sumbar').innerHTML =
+      `<div class="sb-g" style="width:${gPct}%"></div>`+
+      `<div class="sb-y" style="width:${yPct}%"></div>`+
+      `<div class="sb-r" style="width:${rPct}%"></div>`;
+    document.getElementById('sumbarLegend').textContent =
+      `Good ${gPct}% • Okay ${yPct}% • Needs Work ${rPct}%`;
+
+    // Track history (for next comparison)
+    const hist = JSON.parse(sessionStorage.getItem('vc_history')||'[]');
+    if (!hist.includes(id)) { hist.push(id); sessionStorage.setItem('vc_history', JSON.stringify(hist.slice(-10))); }
+
+    // ---- Tempo ----
     const t = j.tempo || {};
     document.getElementById('tempoChips').innerHTML = `
       <span class="chip">Backswing: ${t.backswing ?? '—'}s</span>
@@ -166,16 +231,32 @@
       <span class="chip">Ratio: ${t.ratio ?? '—'}:1</span>
     `;
 
-    // Most Important
-    const mi = j.mostImportant || {};
-    document.getElementById('miBody').innerHTML =
-      mi.title
-        ? `<b>${mi.title}</b><br>${mi.why || ''}${mi.drill ? `<br><i>Drill:</i> ${mi.drill}` : ''}`
-        : '—';
+    // ---- Quick Wins (2 bullets from Top-3 Work-On fallback to sensible tips) ----
+    const w = Array.isArray(j.top3WorkOn) ? j.top3WorkOn : [];
+    const qw = (w.slice(0,2).map(x => `• ${x.title || ''}: ${x.drill || x.why || ''}`));
+    if (!qw.length) qw.push('• Count a 3:1 tempo (Back–Back–Down).', '• Hold finish for 2s to train balance.');
+    document.getElementById('quickWins').innerHTML = `<div class="muted">${qw.join('<br>')}</div>`;
 
-    // P1–P9 (dropdown per checkpoint). Summary = Status + Short. Body = Long (third column).
+    // ---- Thumbnails (lazy) ----
+    const thumbAcc = document.getElementById('thumbAcc');
+    let thumbsLoaded = false;
+    thumbAcc.addEventListener('toggle', () => {
+      if (thumbAcc.open && !thumbsLoaded) {
+        thumbsLoaded = true;
+        const holder = document.getElementById('thumbs');
+        try {
+          const arr = JSON.parse(sessionStorage.getItem('vc_thumbs_'+id) || '[]');
+          holder.innerHTML = arr.length
+            ? arr.map(src => `<img loading="lazy" alt="Frame" src="${src}">`).join('')
+            : '<div class="muted">No thumbnails available for this session.</div>';
+        } catch {
+          holder.innerHTML = '<div class="muted">No thumbnails available.</div>';
+        }
+      }
+    });
+
+    // ---- P1–P9 (dropdown per checkpoint). Summary = Status + Short. Body = Long. ----
     const container = document.getElementById('cpAcc');
-    const cps = Array.isArray(j.checkpoints) ? j.checkpoints : [];
     const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
     const byId = Object.fromEntries(cps.map(x => [x.id, x]));
     container.innerHTML = order.map(pid => {
@@ -183,7 +264,7 @@
       const badge = c.status === 'g' ? 'g' : (c.status === 'r' ? 'r' : 'y');
       const badgeText = badge==='g'?'Good':badge==='y'?'Okay':'Needs Work';
       return `
-        <details class="acc">
+        <details class="acc" data-status="${badge}">
           <summary>
             <div class="sum-title">
               <b>${c.id}</b> — ${c.title || ''}<br>
@@ -201,41 +282,40 @@
         </details>
       `;
     }).join('');
+    // Auto-open Needs Work
+    document.querySelectorAll('#cpAcc details.acc[data-status="r"]').forEach(d => d.open = true);
 
-    // Top 3 Work-On (single dropdown content)
-    const w = Array.isArray(j.top3WorkOn) ? j.top3WorkOn : [];
+    // ---- Top 3 Work-On (single dropdown content) ----
     document.getElementById('top3work').innerHTML =
       (w.length ? w : []).map(x =>
         `<li><b>${x.title || ''}</b> — ${x.why || ''}${x.drill ? `<br><i>Drill:</i> ${x.drill}` : ''}</li>`
       ).join('') || '<li>—</li>';
 
-    // Top 3 Power (single dropdown content)
+    // ---- Top 3 Power (single dropdown content) ----
     const p = Array.isArray(j.top3Power) ? j.top3Power : [];
     document.getElementById('top3power').innerHTML =
       (p.length ? p : []).map(x =>
         `<li><b>${x.title || ''}</b> — ${x.why || ''}${x.drill ? `<br><i>Drill:</i> ${x.drill}` : ''}</li>`
       ).join('') || '<li>—</li>';
 
-    // Power Assessment (single dropdown content)
+    // ---- Power Assessment (single dropdown content) ----
     const pa = j.powerAssessment || {};
     const seq = pa.kinematicSequence === 'g' ? 'Good' : pa.kinematicSequence === 'r' ? 'Needs Work' : 'Okay';
     const lbe = pa.lowerBodyEngagement === 'g' ? 'Good' : pa.lowerBodyEngagement === 'r' ? 'Needs Work' : 'Okay';
     const notes = Array.isArray(pa.notes) ? pa.notes.map(n=>`<li>${n}</li>`).join('') : '';
-
     document.getElementById('powerBody').innerHTML = `
-      <ul class="bul">
+      <ul class="muted" style="margin:0; padding-left:18px">
         <li><b>Clubhead Speed (est.):</b> ${pa.clubheadSpeedEstimate || '—'}</li>
         <li><b>Kinematic Sequence:</b> ${seq}</li>
         <li><b>Lower-Body Engagement:</b> ${lbe}</li>
-        ${notes ? `<li><b>Notes:</b><ul class="bul" style="margin-top:6px">${notes}</ul></li>` : ''}
+        ${notes ? `<li><b>Notes:</b><ul style="margin-top:6px; padding-left:18px">${notes}</ul></li>` : ''}
       </ul>
     `;
 
-    // 14-Day Practice Schedule (single dropdown content; no per-day toggles)
+    // ---- 14-Day Practice Schedule (single dropdown content) ----
     const sched = document.getElementById('sched');
     const work = w.length ? w : [{title:'Tempo & Transition', why:'Stability', drill:'3:1 metronome swings, 3x10'}];
     const pow  = p.length ? p : [{title:'Overspeed', why:'Speed', drill:'3x5 light-shaft swings'}];
-
     const days = [];
     for (let d=1; d<=14; d++){
       let items;
@@ -262,11 +342,10 @@
       }
       days.push({ d, items });
     }
-
     sched.innerHTML = `
       <ol class="muted" style="margin:0; padding-left:18px">
         ${days.map(k => `<li style="margin:8px 0"><b>Day ${k.d}:</b>
-            <ul class="bul">${k.items.map(x=>`<li>${x}</li>`).join('')}</ul>
+            <ul style="margin:6px 0 0 0; padding-left:18px">${k.items.map(x=>`<li>${x}</li>`).join('')}</ul>
           </li>`).join('')}
       </ol>
     `;
