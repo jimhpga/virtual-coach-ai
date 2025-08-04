@@ -1,109 +1,144 @@
-<script>
-  // Helpers
-  const overlay = document.getElementById('vc-status');
-  const ovText  = document.getElementById('vc-status-text');
-  function show(msg){ if (overlay){ ovText.textContent = msg; overlay.style.display='flex'; } }
-  function hide(){ if (overlay) overlay.style.display='none'; }
-  function toast(m){ try{alert(m);}catch(_){} }
+/* script.js — drop-in replacement
+   - Click #analyzeBtn to run analysis
+   - Reads #videoUrl (optional; uses placeholder if empty)
+   - Calls /api/analyze with a mock so P1–P9 show now
+   - Renders metrics into #metrics (table or list)
+   - Shows messages in #notice
+*/
 
-  // Safer frame extraction on iOS
-  async function extractFrames(file) {
-    const url = URL.createObjectURL(file);
-    const video = document.createElement('video');
-    video.src = url; video.muted = true; video.playsInline = true; video.preload = 'metadata';
+(function () {
+  // ---- Element getters (safe) ----
+  const $ = (sel) => document.querySelector(sel);
+  const analyzeBtn = $('#analyzeBtn');
+  const videoInput = $('#videoUrl');
+  const noticeBox  = $('#notice');
+  const metricsBox = $('#metrics');       // <div id="metrics"> or <table id="metrics">
 
-    await new Promise((resolve, reject) => {
-      video.onloadedmetadata = resolve;
-      video.onerror = () => reject(new Error('Could not load video metadata'));
-    });
-
-    // iOS poke
-    try { await video.play(); } catch(_) {}
-    video.pause();
-
-    const dur = Math.max(0.6, Math.min(2.0, video.duration || 1.5));
-    const steps = 6; // keep payload small
-    const ts = Array.from({length: steps}, (_,i) => +(i * (dur / (steps - 1))).toFixed(2));
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 480; canvas.height = 270;
-    const ctx = canvas.getContext('2d');
-
-    const images = [];
-    for (const t of ts) {
-      // seek with safety timeout
-      const target = Math.min(t, (video.duration || dur) - 0.05);
-      const sought = new Promise(res => {
-        let done=false;
-        video.onseeked = () => { if(!done){ done=true; res(); } };
-        setTimeout(()=>{ if(!done){ done=true; res(); } }, 600);
-      });
-      video.currentTime = target;
-      await sought;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      images.push(canvas.toDataURL('image/jpeg', 0.6));
+  // ---- Small helpers ----
+  function setNotice(msg, type = 'info') {
+    if (!noticeBox) {
+      console[type === 'error' ? 'error' : 'log']('[notice]', msg);
+      return;
     }
-    URL.revokeObjectURL(url);
-    return images;
+    noticeBox.textContent = msg;
+    noticeBox.style.display = msg ? 'block' : 'none';
+    noticeBox.setAttribute('data-type', type);
   }
 
-  // 45s watchdog for API call
-  function withTimeout(promise, ms, label='operation'){
-    let t; const timeout = new Promise((_,rej)=> t=setTimeout(()=>rej(new Error(label+' timeout')), ms));
-    return Promise.race([promise.finally(()=>clearTimeout(t)), timeout]);
+  function setBusy(isBusy) {
+    if (analyzeBtn) {
+      analyzeBtn.disabled = !!isBusy;
+      analyzeBtn.textContent = isBusy ? 'Analyzing…' : (analyzeBtn.getAttribute('data-label') || 'Analyze');
+    }
   }
 
-  async function uploadSwing() {
-    try {
-      // 0) Gate: are we logged in on THIS phone?
-      if (localStorage.getItem('vc_auth') !== 'ok') { window.location.href = '/login.html'; return; }
+  function clearMetrics() {
+    if (!metricsBox) return;
+    if (metricsBox.tagName === 'TABLE') {
+      const tbody = metricsBox.tBodies[0] || metricsBox.createTBody();
+      tbody.innerHTML = '';
+    } else {
+      metricsBox.innerHTML = '';
+    }
+  }
 
-      const input = document.getElementById('swingUpload');
-      const file = input?.files?.[0];
-      if (!file) { toast('Please select a swing file.'); return; }
+  function renderMetrics(metrics) {
+    // Expecting an object like { P1: number, ..., P9: number }
+    const keys = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
+    const rows = keys.map(k => ({ k, v: metrics?.[k] ?? null }));
 
-      show('Reading video…');
+    if (!metricsBox) {
+      console.table(rows);
+      return;
+    }
 
-      // Quick duration check
-      const tmpUrl = URL.createObjectURL(file);
-      const v = document.createElement('video');
-      v.preload = 'metadata'; v.src = tmpUrl;
-      const duration = await new Promise((resolve) => {
-        v.onloadedmetadata = () => resolve(v.duration);
-        v.onerror = () => resolve(NaN);
-        setTimeout(()=>{ if (!isFinite(v.duration)) { v.currentTime = Number.MAX_SAFE_INTEGER; v.ontimeupdate=()=>resolve(v.duration);} }, 250);
+    if (metricsBox.tagName === 'TABLE') {
+      const tbody = metricsBox.tBodies[0] || metricsBox.createTBody();
+      tbody.innerHTML = '';
+      rows.forEach(({ k, v }) => {
+        const tr = document.createElement('tr');
+        const tdK = document.createElement('td');
+        const tdV = document.createElement('td');
+        tdK.textContent = k;
+        tdV.textContent = (v ?? '—');
+        tr.appendChild(tdK);
+        tr.appendChild(tdV);
+        tbody.appendChild(tr);
       });
-      URL.revokeObjectURL(tmpUrl);
+    } else {
+      // Generic div: render simple list
+      metricsBox.innerHTML = '';
+      const ul = document.createElement('ul');
+      rows.forEach(({ k, v }) => {
+        const li = document.createElement('li');
+        li.textContent = `${k}: ${v ?? '—'}`;
+        ul.appendChild(li);
+      });
+      metricsBox.appendChild(ul);
+    }
+  }
 
-      if (!duration || !isFinite(duration)) { hide(); toast('Could not read video length. Try another clip.'); input.value=''; return; }
-      if (duration > 10) { hide(); toast('Clip too long. Please upload ≤ 10 seconds.'); input.value=''; return; }
+  async function runAnalyze(videoUrl) {
+    setNotice('', 'info');
+    clearMetrics();
+    setBusy(true);
 
-      show('Extracting frames…');
-      const frames = await extractFrames(file);
+    try {
+      const body = {
+        videoUrl: videoUrl || 'https://example.com/swing.mp4',
+        // MOCK so we see numbers now; remove this once real data flows
+        mock: { metrics: { P1:1, P2:2, P3:3, P4:4, P5:5, P6:6, P7:7, P8:8, P9:9 } }
+      };
 
-      show('Analyzing (10–30s)…');
-      const id = Date.now().toString();
-      const resp = await withTimeout(fetch('/api/analyze', {
+      const r = await fetch('/api/analyze', {
         method: 'POST',
-        headers: { 'Content-Type':'application/json' },
-        body: JSON.stringify({ id, frames })
-      }), 45000, 'analysis');
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
 
-      if (!resp.ok) {
-        const txt = await resp.text();
-        hide();
-        toast('Analysis failed.\n' + txt.slice(0, 160));
+      let resp;
+      try {
+        resp = await r.json();
+      } catch {
+        setNotice('Server returned non-JSON. Check Functions Logs.', 'error');
         return;
       }
 
-      const report = await resp.json();
-      sessionStorage.setItem('vc_report_' + id, JSON.stringify(report));
+      if (!r.ok) {
+        setNotice(resp?.error || `Analyze failed (${r.status})`, 'error');
+        return;
+      }
 
-      show('Building report…');
-      window.location.href = `/summary.html?id=${encodeURIComponent(id)}`;
+      if (!resp || !resp.metrics) {
+        setNotice('No metrics returned — check Functions Logs.', 'error');
+        return;
+      }
+
+      renderMetrics(resp.metrics);
+      setNotice('Report ready.', 'info');
     } catch (e) {
-      hide();
-      toast('Upload/analysis error: ' + (e?.message || e));
+      setNotice(`Network error: ${e?.message || e}`, 'error');
+    } finally {
+      setBusy(false);
     }
   }
-</script>
+
+  // ---- Wire up button ----
+  if (analyzeBtn) {
+    if (!analyzeBtn.getAttribute('data-label')) {
+      analyzeBtn.setAttribute('data-label', analyzeBtn.textContent || 'Analyze');
+    }
+    analyzeBtn.addEventListener('click', () => {
+      const url = videoInput ? (videoInput.value || '').trim() : '';
+      runAnalyze(url);
+    });
+  } else {
+    // Auto-run once if there is no button (for quick testing)
+    runAnalyze('');
+  }
+
+  // Minimal styles for notice (optional)
+  if (noticeBox && !noticeBox.hasChildNodes()) {
+    noticeBox.style.display = 'none';
+  }
+})();
