@@ -1,41 +1,28 @@
-// /api/get.js — fetch a saved report from Vercel KV by id
-export const config = { runtime: 'edge' };
+// /api/get.js — safe handler with mock data so Summary works now
+export default async function handler(req, res) {
+  try {
+    const { id } = req.query || {};
+    if (!id) {
+      return res.status(400).json({ error: 'Missing id parameter' });
+    }
 
-function json(status, obj) {
-  return new Response(JSON.stringify(obj), {
-    status,
-    headers: { 'content-type': 'application/json', 'cache-control': 'no-store' }
-  });
-}
+    // TODO: Replace this block with your real data fetch (DB/storage) later.
+    // For now, we return a stable mock so the UI renders.
+    const mock = {
+      id,
+      profile: 'Right-eye dominant, 7i baseline session',
+      tempo: '3:1 (backswing:downswing)',
+      totals: { fairways: 8, greens: 11, putts: 30, swingSpeedAvg: 101 },
+      metrics: { P1: 1, P2: 2, P3: 3, P4: 4, P5: 5, P6: 6, P7: 7, P8: 8, P9: 9 }
+    };
 
-export default async function handler(req) {
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get('id');
-  if (!id) return json(400, { error: 'Missing id' });
+    // Example: if you want the mock only for certain IDs, you could gate it:
+    // if (id !== 'test') return res.status(404).json({ error: 'Report not found' });
 
-  const { KV_REST_API_URL, KV_REST_API_TOKEN } = process.env;
-  if (!KV_REST_API_URL || !KV_REST_API_TOKEN) {
-    return json(500, { error: 'KV not configured' });
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json(mock);
+  } catch (e) {
+    console.error('[get] fail', e?.message || e);
+    return res.status(500).json({ error: 'Failed to load report' });
   }
-
-  const key = `vc:report:${id}`;
-  const getUrl = `${KV_REST_API_URL}/get/${encodeURIComponent(key)}`;
-
-  const r = await fetch(getUrl, {
-    headers: { Authorization: `Bearer ${KV_REST_API_TOKEN}` }
-  });
-
-  if (!r.ok) {
-    const text = await r.text();
-    return json(404, { error: 'Not found', detail: text });
-  }
-
-  // KV REST returns { result: "stringified-json" }
-  const { result } = await r.json();
-  if (!result) return json(404, { error: 'Not found' });
-
-  let doc;
-  try { doc = JSON.parse(result); } catch { return json(500, { error: 'Corrupt data' }); }
-
-  return json(200, { ok: true, doc });
 }
