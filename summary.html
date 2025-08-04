@@ -1,481 +1,117 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Virtual Coach AI — Swing Report</title>
-<meta name="robots" content="noindex, nofollow" />
-<style>
-  :root{
-    --fg:#f5f5f5; --bg:#0a0a0a; --line:rgba(255,255,255,0.16);
-    --muted:rgba(255,255,255,0.75);
-    --good:#16a34a; --warn:#eab308; --bad:#ef4444; --accent:#1F6F1F;
-    --cardbg: rgba(0,0,0,0.28);
-  }
-  html,body{
-    height:100%; margin:0; padding:0; color:var(--fg);
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-    background: var(--bg) url("homepage-background.png") center / cover no-repeat fixed;
-    filter: brightness(1.08) contrast(1.03);
-  }
-  body{ min-height:-webkit-fill-available; }
-  .wrap{ max-width: 980px; margin:0 auto; padding:48px 20px; text-shadow:0 1px 2px rgba(0,0,0,0.25); }
-
-  h1{ margin:0 0 6px; font-size:32px; }
-  .muted{ color:var(--muted); }
-
-  .card{ border:1px solid var(--line); border-radius:12px; background:var(--cardbg); padding:14px 16px; margin:14px 0; }
-  .chips{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 16px; }
-  .chip{ border:1px solid var(--line); border-radius:999px; padding:6px 10px; font-size:13px; }
-
-  .pill{ padding:3px 8px; border-radius:999px; font-size:12px; border:1px solid var(--line);}
-  .g{ background:rgba(22,163,74,0.18); border-color:var(--good); }
-  .y{ background:rgba(234,179,8,0.18);  border-color:var(--warn); }
-  .r{ background:rgba(239,68,68,0.18);  border-color:var(--bad); }
-
-  /* Accordion */
-  details.acc { border:1px solid var(--line); border-radius:10px; background:rgba(0,0,0,0.22); margin:10px 0; overflow:hidden; }
-  details.acc > summary{
-    list-style:none; cursor:pointer; padding:12px 14px; display:flex; align-items:flex-start; gap:10px;
-    font-weight:700; outline:none;
-  }
-  details.acc > summary::-webkit-details-marker{ display:none; }
-  .sum-title{ flex: 1 1 auto; min-width:0; overflow-wrap:anywhere; }
-  .sum-title b{ white-space:nowrap; }
-  .sum-short{ color:var(--muted); font-weight:400; overflow-wrap:anywhere; }
-  .sum-right{ flex: 0 0 auto; display:flex; gap:8px; align-items:center; }
-  .chev{ width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid var(--muted); transition:.15s; }
-  details[open] .chev{ transform: rotate(180deg); }
-  .acc-body{ padding:12px 14px; border-top:1px solid var(--line); line-height:1.55; overflow-wrap:anywhere; }
-  .long-label{ display:block; font-size:12px; opacity:.8; margin:8px 0 4px; text-transform:uppercase; letter-spacing:.04em; }
-
-  /* Summary bar */
-  .sumbar{ display:flex; height:12px; border-radius:999px; overflow:hidden; border:1px solid var(--line); }
-  .sumbar > div{ height:100%; }
-  .sb-g{ background:var(--good); }
-  .sb-y{ background:var(--warn); }
-  .sb-r{ background:var(--bad); }
-
-  .legend{ display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 12px; font-size:13px; }
-  .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
-
-  .cta{ display:inline-block; margin-top:14px; padding:10px 14px; border-radius:10px; background:var(--accent); color:#fff; text-decoration:none; font-weight:700; border:0; cursor:pointer; }
-
-  /* Thumbs grid */
-  .thumbs{ display:grid; grid-template-columns: repeat(auto-fill, minmax(80px,1fr)); gap:8px; }
-  .thumbs img{ width:100%; height:auto; display:block; border-radius:8px; border:1px solid var(--line); }
-
-  /* Header actions */
-  .header-actions { display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 0; }
-  .header-actions .cta { background:#214f21; }
-  .header-actions .ghost { background:transparent; border:1px solid var(--line); }
-
-  /* Print styles */
-  @media print {
-    :root { --bg:#fff; --fg:#000; --muted:#555; --line:rgba(0,0,0,0.15); --cardbg:#fff; }
-    html, body { background:#fff !important; filter:none !important; }
-    .wrap { max-width:none; padding:0; margin:0; }
-    .card { break-inside: avoid; background:#fff; }
-    .cta, #exportBtn, #downloadBtn { display:none !important; }
-    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Coach AI — Summary</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
+    .wrap { max-width: 820px; margin: 0 auto; }
+    h1 { margin-bottom: 4px; }
+    #notice[data-type="error"] { border-color:#c00; color:#c00; }
+    #notice[data-type="info"]  { border-color:#666; color:#333; }
+    .card { border:1px solid #ddd; padding:12px; border-radius:8px; margin:12px 0; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { border:1px solid #ccc; padding:8px; text-align:left; }
+    thead { background:#f6f6f6; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    @media (max-width: 720px){ .grid { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Swing Report</h1>
-  <div class="muted">ID: <span id="rid">—</span></div>
-  <div class="muted">Profile: <span id="profile">—</span></div>
+  <div class="wrap">
+    <h1>Virtual Coach AI — Swing Summary</h1>
+    <div id="report-id" class="card">ID: —</div>
+    <div id="notice" class="card" style="display:none;"></div>
 
-  <div class="header-actions">
-    <button id="exportBtn" class="cta" onclick="exportReport()">Export Report (PDF)</button>
-    <button id="downloadBtn" class="cta ghost" onclick="downloadHTML()">Download HTML</button>
-    <a href="/" class="cta ghost">Upload Another Swing</a>
-  </div>
-
-  <!-- Totals -->
-  <div class="card" id="totalsCard" style="display:none">
-    <h3 style="margin:0 0 8px">Totals</h3>
-    <div class="chips" id="totalsChips"></div>
-    <div class="muted" id="totalsNotes"></div>
-  </div>
-
-  <!-- Overview -->
-  <div class="card">
-    <h3 style="margin:0 0 8px">Overview</h3>
-    <div class="chips" id="ovChips"></div>
-    <div class="sumbar" id="sumbar" style="margin-top:8px;"></div>
-    <div class="muted" id="sumbarLegend" style="margin-top:6px;"></div>
-  </div>
-
-  <!-- Summary Categories -->
-  <div class="card" id="catCard" style="display:none">
-    <h3 style="margin:0 0 8px">Summary Categories</h3>
-    <div class="chips" id="catChips"></div>
-    <div class="muted" id="catNotes" style="margin-top:6px"></div>
-  </div>
-
-  <!-- Tempo -->
-  <div class="card">
-    <h3 style="margin:0 0 8px">Tempo</h3>
-    <div class="chips" id="tempoChips"></div>
-    <div class="muted">Target repeatable ~3:1. Keep a small pause; don’t rush P4→P5.</div>
-  </div>
-
-  <!-- Quick Wins -->
-  <div class="card">
-    <details class="acc" open>
-      <summary>
-        <div class="sum-title"><b>Quick Wins (Do These First)</b><br><span class="sum-short">Two simple actions for your next session</span></div>
-        <div class="sum-right"><span class="chev"></span></div>
-      </summary>
-      <div class="acc-body" id="quickWins">—</div>
-    </details>
-  </div>
-
-  <!-- P1–P9 Thumbnails (LAZY) -->
-  <div class="card">
-    <details class="acc" id="thumbAcc">
-      <summary>
-        <div class="sum-title"><b>P1–P9 Thumbnails</b><br><span class="sum-short">Open to load thumbnails (saves time on initial load)</span></div>
-        <div class="sum-right"><span class="chev"></span></div>
-      </summary>
-      <div class="acc-body">
-        <div id="thumbs" class="thumbs"></div>
+    <div class="grid">
+      <div class="card">
+        <h2>Profile</h2>
+        <div id="profile">—</div>
       </div>
-    </details>
+      <div class="card">
+        <h2>Tempo</h2>
+        <div id="tempo">—</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Totals</h2>
+      <div id="totals">—</div>
+    </div>
+
+    <div class="card">
+      <h2>P1–P9 Metrics</h2>
+      <table id="p-table">
+        <thead><tr><th>Position</th><th>Value</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- P1–P9 (each item dropdown) -->
-  <div class="card">
-    <h3 style="margin:0 0 8px">P1–P9 Assessment</h3>
-    <div id="cpAcc"></div>
-  </div>
+  <!-- Inline script keeps this page self-contained -->
+  <script>
+  (function () {
+    const $ = (s) => document.querySelector(s);
 
-  <!-- Top 3 Work-On (ONE dropdown) -->
-  <div class="card">
-    <details class="acc" id="workAcc">
-      <summary>
-        <div class="sum-title"><b>Top 3 Things to Work On</b><br><span class="sum-short">Your priority list with drills</span></div>
-        <div class="sum-right"><span class="chev"></span></div>
-      </summary>
-      <div class="acc-body"><ol id="top3work" class="muted"></ol></div>
-    </details>
-  </div>
-
-  <!-- Top 3 Power (ONE dropdown) -->
-  <div class="card">
-    <details class="acc" id="powerAcc">
-      <summary>
-        <div class="sum-title"><b>Top 3 Power Builders</b><br><span class="sum-short">Speed work with purpose</span></div>
-        <div class="sum-right"><span class="chev"></span></div>
-      </summary>
-      <div class="acc-body"><ol id="top3power" class="muted"></ol></div>
-    </details>
-  </div>
-
-  <!-- Power Assessment (ONE dropdown) -->
-  <div class="card">
-    <details class="acc" id="pAssessAcc">
-      <summary>
-        <div class="sum-title"><b>Power Assessment</b><br><span class="sum-short">Speed estimate, sequence, lower body, notes</span></div>
-        <div class="sum-right"><span class="chev"></span></div>
-      </summary>
-      <div class="acc-body" id="powerBody">—</div>
-    </details>
-  </div>
-
-  <!-- 14-Day Practice Schedule (ONE dropdown) -->
-  <div class="card">
-    <details class="acc" id="schedAcc">
-      <summary>
-        <div class="sum-title"><b>14-Day Practice Schedule</b><br><span class="sum-short">Alternates technical and power focus</span></div>
-        <div class="sum-right"><span class="chev"></span></div>
-      </summary>
-      <div class="acc-body" id="sched"></div>
-    </details>
-  </div>
-</div>
-
-<script>
-  function exportReport(){
-    const btn = document.getElementById('exportBtn');
-    if (btn) btn.disabled = true;
-    const thumbAcc = document.getElementById('thumbAcc');
-    const wasOpen = !!thumbAcc?.open;
-    try { window.print(); }
-    finally {
-      if (btn) btn.disabled = false;
-      if (!wasOpen && thumbAcc) thumbAcc.open = false;
+    const notice = $('#notice');
+    function setNotice(msg, type='info'){
+      if(!notice) return;
+      notice.textContent = msg || '';
+      notice.style.display = msg ? 'block' : 'none';
+      notice.setAttribute('data-type', type);
     }
-  }
 
-  function downloadHTML(){
-    // Snapshot current DOM and trigger a download as .html
-    const doc = '<!DOCTYPE html>' + document.documentElement.outerHTML;
-    const blob = new Blob([doc], {type:'text/html;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const id = new URLSearchParams(location.search).get('id') || 'local-demo';
-    a.download = 'swing-report-' + id + '.html';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 1000);
-  }
+    function setText(sel, val){ const el = $(sel); if (el) el.textContent = (val ?? '—'); }
 
-  const id = new URLSearchParams(location.search).get('id') || 'local-demo';
-  document.getElementById('rid').textContent = id;
+    // Read ?id= from URL
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    setText('#report-id', 'ID: ' + (id || '—'));
 
-  // profile
-  const handed = sessionStorage.getItem('vc_last_handed') || 'right';
-  const eye    = sessionStorage.getItem('vc_last_eye') || 'unknown';
-  document.getElementById('profile').textContent =
-    (handed === 'left' ? 'Left' : 'Right') + '-handed, ' +
-    (eye === 'left' ? 'Left-eye dominant' : eye === 'right' ? 'Right-eye dominant' : 'eye dominance: unknown');
+    if (!id) { setNotice('Missing report ID in the URL (?id=...).', 'error'); return; }
 
-  const raw = sessionStorage.getItem('vc_report_' + id);
-  if (!raw) {
-    document.querySelector('.wrap').insertAdjacentHTML('beforeend',
-      '<div class="card">No report data. Please upload again from the homepage.</div>');
-  } else {
-    const j = JSON.parse(raw);
-
-    // ---- Consistency Score + summary bar ----
-    const cps = Array.isArray(j.checkpoints) ? j.checkpoints : [];
-    const counts = cps.reduce((a,c)=>{
-      const k = (c.status==='g'?'g':c.status==='r'?'r':'y'); a[k]++; return a;
-    }, {g:0,y:0,r:0});
-    const total = counts.g + counts.y + counts.r || 1;
-    const gPct = Math.round(counts.g/total*100), yPct = Math.round(counts.y/total*100), rPct = 100 - gPct - yPct;
-
-    // Consistency vs previous report (very light heuristic)
-    const prevId = (JSON.parse(sessionStorage.getItem('vc_history')||'[]').filter(x=>x!==id).slice(-1)[0]) || null;
-    let consistency = 80; // base
-    if (prevId) {
+    // Fetch report JSON
+    (async () => {
       try {
-        const p = JSON.parse(sessionStorage.getItem('vc_report_'+prevId)||'{}');
-        const prevCps = Array.isArray(p.checkpoints)?p.checkpoints:[];
-        const byId = Object.fromEntries(cps.map(x=>[x.id,x.status]));
-        const pById= Object.fromEntries(prevCps.map(x=>[x.id,x.status]));
-        let diff=0;
-        ['P1','P2','P3','P4','P5','P6','P7','P8','P9'].forEach(k=>{
-          if (byId[k] && pById[k] && byId[k]!==pById[k]) diff++;
-        });
-        consistency = Math.max(40, 100 - diff*7);
-      } catch(_) {}
-    }
-    document.getElementById('ovChips').innerHTML =
-      '<span class="chip"><b>Consistency:</b> ' + consistency + '/100</span>' +
-      '<span class="chip">Good: ' + counts.g + '</span>' +
-      '<span class="chip">Okay: ' + counts.y + '</span>' +
-      '<span class="chip">Needs Work: ' + counts.r + '</span>';
-    document.getElementById('sumbar').innerHTML =
-      '<div class="sb-g" style="width:'+gPct+'%"></div>'+
-      '<div class="sb-y" style="width:'+yPct+'%"></div>'+
-      '<div class="sb-r" style="width:'+rPct+'%"></div>';
-    document.getElementById('sumbarLegend').textContent =
-      'Good ' + gPct + '% • Okay ' + yPct + '% • Needs Work ' + rPct + '%';
+        const r = await fetch('/api/get?id=' + encodeURIComponent(id), { cache: 'no-store' });
+        let data;
+        try { data = await r.json(); } catch (e) { setNotice('Server returned non-JSON.', 'error'); return; }
 
-    // ---- Totals (aggregated quick glance) ----
-    (function(){
-      const card = document.getElementById('totalsCard');
-      const chips = document.getElementById('totalsChips');
-      const notes = document.getElementById('totalsNotes');
-      const reds = counts.r;
-      const okays = counts.y;
-      const greens = counts.g;
-      const totalCk = total;
-      const redPct = rPct, greenPct = gPct, yellowPct = yPct;
+        if (!r.ok) {
+          setNotice((data && data.error) ? data.error : ('Failed to load report (' + r.status + ')'), 'error');
+          return;
+        }
+        if (!data || typeof data !== 'object') {
+          setNotice('Empty report payload.', 'error'); return;
+        }
 
-      const tr = j.tempo && j.tempo.ratio != null ? j.tempo.ratio : '—';
-      const chs = (j.powerAssessment && j.powerAssessment.clubheadSpeedEstimate) || '—';
+        // Render fields
+        setText('#profile', data.profile || '—');
+        setText('#tempo',   data.tempo   || '—');
+        setText('#totals',  data.totals ? JSON.stringify(data.totals) : '—');
 
-      chips.innerHTML =
-        '<span class="chip"><b>Total Checkpoints:</b> ' + totalCk + '</span>'+
-        '<span class="chip"><b>Reds:</b> ' + reds + ' (' + redPct + '%)</span>'+
-        '<span class="chip"><b>Yellows:</b> ' + okays + ' (' + yellowPct + '%)</span>'+
-        '<span class="chip"><b>Greens:</b> ' + greens + ' (' + greenPct + '%)</span>'+
-        '<span class="chip"><b>Tempo Ratio:</b> ' + tr + ':1</span>'+
-        '<span class="chip"><b>Speed (est):</b> ' + chs + '</span>';
-
-      notes.textContent = reds > 0
-        ? 'Focus on Reds first. Knock out one red, convert two yellows, then re-measure.'
-        : 'Great shape. Maintain greens and convert yellows with short, focused reps.';
-
-      card.style.display = '';
-    })();
-
-    // Track history (for next comparison)
-    const hist = JSON.parse(sessionStorage.getItem('vc_history')||'[]');
-    if (!hist.includes(id)) { hist.push(id); sessionStorage.setItem('vc_history', JSON.stringify(hist.slice(-10))); }
-
-    // ---- Summary Categories ----
-    (function(){
-      const catCard  = document.getElementById('catCard');
-      const catChips = document.getElementById('catChips');
-      const catNotes = document.getElementById('catNotes');
-      const rank = s => (s==='r'?2:(s==='y'?1:0));
-      const worst = (a,b)=> rank(a)>=rank(b)?a:b;
-
-      let categories = Array.isArray(j.categories) ? j.categories.slice() : null;
-
-      if (!categories) {
-        const tagMap = {};
-        cps.forEach(cp=>{
-          const tags = Array.isArray(cp.tags) ? cp.tags : [];
-          tags.forEach(t=>{
-            const key = String(t).trim();
-            if (!key) return;
-            tagMap[key] = key in tagMap ? worst(tagMap[key], (cp.status||'y')) : (cp.status||'y');
+        // Render P1–P9
+        const metrics = data.metrics || {};
+        const keys = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
+        const tbody = document.querySelector('#p-table tbody');
+        if (tbody) {
+          tbody.innerHTML = '';
+          keys.forEach(k => {
+            const tr = document.createElement('tr');
+            const tdK = document.createElement('td'); tdK.textContent = k;
+            const tdV = document.createElement('td'); tdV.textContent = (metrics[k] ?? '—');
+            tr.appendChild(tdK); tr.appendChild(tdV);
+            tbody.appendChild(tr);
           });
-        });
-        const defaults = ['Face Control','Path','Low Point','Setup','Tempo'];
-        if (Object.keys(tagMap).length === 0) {
-          categories = defaults.map(n => ({ name:n, status:'y' }));
-        } else {
-          categories = Object.keys(tagMap).map(k => ({ name:k, status:tagMap[k] }));
         }
-      }
 
-      if (categories && categories.length) {
-        catCard.style.display = '';
-        categories.sort((a,b)=> (b.status==='r')-(a.status==='r') || (b.status==='y')-(a.status==='y') || a.name.localeCompare(b.name));
-        catChips.innerHTML = categories.map(c=>{
-          const cls = c.status==='g'?'g':(c.status==='r'?'r':'y');
-          return '<span class="chip"><span class="pill ' + cls + '" style="margin-right:6px;"></span>' + c.name + '</span>';
-        }).join('');
-        const notes = categories.filter(c=>c.note).slice(0,2).map(c=>'<b>'+c.name+':</b> '+c.note);
-        catNotes.innerHTML = notes.length ? notes.join(' • ') : '';
+        setNotice('Summary loaded.');
+      } catch (e) {
+        setNotice('Error loading report: ' + (e && e.message ? e.message : e), 'error');
       }
     })();
-
-    // ---- Tempo ----
-    const t = j.tempo || {};
-    document.getElementById('tempoChips').innerHTML =
-      '<span class="chip">Backswing: ' + (t.backswing ?? '—') + 's</span>' +
-      '<span class="chip">Pause: ' + (t.pause ?? '—') + 's</span>' +
-      '<span class="chip">Downswing: ' + (t.downswing ?? '—') + 's</span>' +
-      '<span class="chip">Ratio: ' + (t.ratio ?? '—') + ':1</span>';
-
-    // ---- Quick Wins ----
-    const w = Array.isArray(j.top3WorkOn) ? j.top3WorkOn : [];
-    const qw = (w.slice(0,2).map(x => '• ' + (x.title || '') + ': ' + (x.drill || x.why || '')));
-    if (!qw.length) qw.push('• Count a 3:1 tempo (Back–Back–Down).', '• Hold finish for 2s to train balance.');
-    document.getElementById('quickWins').innerHTML = '<div class="muted">' + qw.join('<br>') + '</div>';
-
-    // ---- Thumbnails (lazy) ----
-    const thumbAcc = document.getElementById('thumbAcc');
-    let thumbsLoaded = false;
-    thumbAcc.addEventListener('toggle', () => {
-      if (thumbAcc.open && !thumbsLoaded) {
-        thumbsLoaded = true;
-        const holder = document.getElementById('thumbs');
-        try {
-          const arr = JSON.parse(sessionStorage.getItem('vc_thumbs_'+id) || '[]');
-          holder.innerHTML = arr.length
-            ? arr.map(src => '<img loading="lazy" alt="Frame" src="'+src+'">').join('')
-            : '<div class="muted">No thumbnails available for this session.</div>';
-        } catch {
-          holder.innerHTML = '<div class="muted">No thumbnails available.</div>';
-        }
-      }
-    });
-
-    // ---- P1–P9 (dropdown per checkpoint) ----
-    const container = document.getElementById('cpAcc');
-    const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
-    const byId = Object.fromEntries(cps.map(x => [x.id, x]));
-    container.innerHTML = order.map(pid => {
-      const c = byId[pid] || { id: pid, title: pid, status: 'y', noteShort: '', noteLong: '' };
-      const badge = c.status === 'g' ? 'g' : (c.status === 'r' ? 'r' : 'y');
-      const badgeText = badge==='g'?'Good':badge==='y'?'Okay':'Needs Work';
-      return (
-        '<details class="acc" data-status="'+badge+'">'+
-          '<summary>'+
-            '<div class="sum-title">'+
-              '<b>'+c.id+'</b> — '+(c.title || '')+'<br>'+
-              '<span class="sum-short">'+(c.noteShort || '')+'</span>'+
-            '</div>'+
-            '<div class="sum-right">'+
-              '<span class="pill '+badge+'">'+badgeText+'</span>'+
-              '<span class="chev"></span>'+
-            '</div>'+
-          '</summary>'+
-          '<div class="acc-body">'+
-            '<span class="long-label">Long Description</span>'+
-            (c.noteLong || '')+
-          '</div>'+
-        '</details>'
-      );
-    }).join('');
-    // Auto-open Needs Work
-    document.querySelectorAll('#cpAcc details.acc[data-status="r"]').forEach(d => d.open = true);
-
-    // ---- Top 3 Work-On ----
-    document.getElementById('top3work').innerHTML =
-      (w.length ? w : []).map(x =>
-        '<li><b>'+(x.title || '')+'</b> — '+(x.why || '')+(x.drill ? '<br><i>Drill:</i> '+x.drill : '')+'</li>'
-      ).join('') || '<li>—</li>';
-
-    // ---- Top 3 Power ----
-    const p = Array.isArray(j.top3Power) ? j.top3Power : [];
-    document.getElementById('top3power').innerHTML =
-      (p.length ? p : []).map(x =>
-        '<li><b>'+(x.title || '')+'</b> — '+(x.why || '')+(x.drill ? '<br><i>Drill:</i> '+x.drill : '')+'</li>'
-      ).join('') || '<li>—</li>';
-
-    // ---- Power Assessment ----
-    const pa = j.powerAssessment || {};
-    const seq = pa.kinematicSequence === 'g' ? 'Good' : pa.kinematicSequence === 'r' ? 'Needs Work' : 'Okay';
-    const lbe = pa.lowerBodyEngagement === 'g' ? 'Good' : pa.lowerBodyEngagement === 'r' ? 'Needs Work' : 'Okay';
-    const notes = Array.isArray(pa.notes) ? pa.notes.map(n=>'<li>'+n+'</li>').join('') : '';
-    document.getElementById('powerBody').innerHTML =
-      '<ul class="muted" style="margin:0; padding-left:18px">'+
-        '<li><b>Clubhead Speed (est.):</b> ' + (pa.clubheadSpeedEstimate || '—') + '</li>'+
-        '<li><b>Kinematic Sequence:</b> ' + seq + '</li>'+
-        '<li><b>Lower-Body Engagement:</b> ' + lbe + '</li>'+
-        (notes ? '<li><b>Notes:</b><ul style="margin-top:6px; padding-left:18px">'+notes+'</ul></li>' : '')+
-      '</ul>';
-
-    // ---- 14-Day Practice Schedule ----
-    const sched = document.getElementById('sched');
-    const work = w.length ? w : [{title:'Tempo & Transition', why:'Stability', drill:'3:1 metronome swings, 3x10'}];
-    const pow  = p.length ? p : [{title:'Overspeed', why:'Speed', drill:'3x5 light-shaft swings'}];
-    const days = [];
-    for (let d=1; d<=14; d++){
-      let items;
-      if (d===7 || d===14) {
-        items = [
-          '5 min warm-up: chips to 20–40y',
-          '10 min review: P1–P9 notes',
-          '10 min maintenance: ' + (work[d%work.length].drill || 'Tempo ladders 2:1→3:1→4:1')
-        ];
-      } else if (d % 2 === 1) {
-        const wItem = work[(d-1)%work.length];
-        items = [
-          'Warm-up 5 min',
-          (wItem.title || 'Technical Focus') + ' — ' + (wItem.drill || 'Technique block 3x8 reps'),
-          'Constraint: slow rehearsals × 5 between sets'
-        ];
-      } else {
-        const pItem = pow[(d-1)%pow.length];
-        items = [
-          'Mobilize 5 min (hips/thoracic)',
-          (pItem.title || 'Power Focus') + ' — ' + (pItem.drill || 'Overspeed 3x5 + step-through 3x5'),
-          'Finish: 6 balls at 70–80% focusing on balance'
-        ];
-      }
-      days.push({ d, items });
-    }
-    sched.innerHTML =
-      '<ol class="muted" style="margin:0; padding-left:18px">'+
-        days.map(k => '<li style="margin:8px 0"><b>Day '+k.d+':</b>'+
-          '<ul style="margin:6px 0 0 0; padding-left:18px">'+k.items.map(x=>'<li>'+x+'</li>').join('')+'</ul>'+
-        '</li>').join('')+
-      '</ol>';
-  }
-</script>
+  })();
+  </script>
 </body>
 </html>
