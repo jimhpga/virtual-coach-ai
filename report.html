@@ -1,34 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Analyzing — Virtual Coach AI</title>
-<meta name="robots" content="noindex, nofollow">
-<style>
-  html,body{height:100%;margin:0;background:#0a0a0a url("homepage-background.png") center/cover no-repeat fixed;color:#f5f5f5;
-            font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;filter:brightness(1.08) contrast(1.03)}
-  .wrap{max-width:800px;margin:0 auto;padding:48px 20px;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.25)}
-  .spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.2);border-top-color:#1F6F1F;border-radius:50%;margin:20px auto;animation:spin 1s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .muted{color:rgba(255,255,255,.7)}
-  .btn{display:inline-block;margin-top:14px;padding:10px 14px;border-radius:10px;background:#1F6F1F;color:#fff;text-decoration:none;font-weight:700}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Coach AI — Report</title>
+  <!-- Optional: keep if you already have a site stylesheet -->
+  <!-- <link rel="stylesheet" href="style.css" /> -->
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
+    .wrap { max-width: 760px; margin: 0 auto; }
+    #notice[data-type="error"] { border-color: #cc0000; color: #cc0000; }
+    #notice[data-type="info"]  { border-color: #666; color: #333; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    thead { background: #f6f6f6; }
+    button[disabled] { opacity: 0.6; cursor: not-allowed; }
+    .row { display: flex; gap: 8px; margin: 12px 0; }
+    input[type="text"] { flex: 1; padding: 8px; }
+  </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Analyzing your swing…</h1>
-    <div class="spinner"></div>
-    <div class="muted">This takes ~2–5 seconds. ID: <span id="rid">—</span></div>
-    <p><a class="btn" href="/index.html">Back to Home</a></p>
-  </div>
-<script>
-  const id = new URLSearchParams(location.search).get('id') || Date.now().toString();
-  document.getElementById('rid').textContent = id;
+    <h1>Virtual Coach AI — Report</h1>
 
-  // If you’re doing live analysis via /api/analyze directly from index.html,
-  // you can jump straight to summary. Otherwise, poll a status endpoint here.
-  // Minimal poll to give spinner time even if summary is ready:
-  setTimeout(()=>{ location.href = `/summary.html?id=${encodeURIComponent(id)}`; }, 1800);
-</script>
+    <!-- Notice area for messages -->
+    <div id="notice" style="margin:12px 0; padding:8px; border:1px solid #ccc; display:none;"></div>
+
+    <!-- Input + button -->
+    <div class="row">
+      <input id="videoUrl" type="text" placeholder="Video URL (optional)" />
+      <button id="analyzeBtn">Analyze</button>
+    </div>
+
+    <!-- Metrics table -->
+    <table id="metrics">
+      <thead>
+        <tr><th>Position</th><th>Value</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Load your script AFTER the HTML above -->
+  <script src="script.js"></script>
 </body>
 </html>
