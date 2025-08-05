@@ -4,12 +4,12 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Virtual Coach AI — Swing Report</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css?v=8"/>
 </head>
 <body>
   <div class="wrap">
     <header class="header">
-      <img class="logo" src="virtualcoach-logo.png" alt="Virtual Coach AI"/>
+      <img class="logo" src="virtualcoach-logo.png" onerror="this.src='virtualcoach-logo-transparent.png'" alt="Virtual Coach AI"/>
       <div>
         <h1 class="brand">Virtual Coach AI</h1>
         <p class="sub">Swing Report</p>
@@ -18,12 +18,11 @@
 
     <div id="notice" class="notice"></div>
 
-    <!-- Controls -->
+    <!-- Controls with three dropdowns -->
     <section class="card">
       <h2 class="section-title">Analyze a Swing</h2>
-      <div class="row" style="flex-wrap:wrap; gap:12px;">
+      <div class="row">
         <input id="videoUrl" type="text" placeholder="Video URL (optional)"/>
-
         <select id="selectClub" title="Club">
           <option value="Driver">Driver</option>
           <option value="3W">3W</option>
@@ -31,20 +30,17 @@
           <option value="7I" selected>7 Iron</option>
           <option value="PW">PW</option>
         </select>
-
         <select id="selectModel" title="Model">
           <option value="analysis-v1" selected>Analysis v1</option>
           <option value="analysis-v2">Analysis v2</option>
           <option value="fixer-v1">Fixer v1</option>
           <option value="power-v1">Power v1</option>
         </select>
-
         <select id="selectDataset" title="Dataset">
           <option value="baseline" selected>Baseline</option>
           <option value="range">Range</option>
           <option value="course">Course</option>
         </select>
-
         <button id="analyzeBtn">Analyze</button>
       </div>
     </section>
@@ -61,29 +57,43 @@
           <b>Dataset</b><span id="sumDataset">—</span>
         </div>
       </div>
+
       <div class="card">
-        <h3 class="section-title">Fixer Highlights</h3>
-        <div id="sumFixes">—</div>
+        <h3 class="section-title">3 Things to Improve</h3>
+        <ul id="fixTop3"><li>—</li></ul>
       </div>
+
       <div class="card">
-        <h3 class="section-title">Power</h3>
-        <div class="kv">
-          <b>Total Power</b><span id="sumPower">—</span>
-          <b>Swing Speed Avg</b><span id="sumSpeed">—</span>
-        </div>
+        <h3 class="section-title">Power Assessment</h3>
+        <div id="powerAssessment">—</div>
+        <h4 class="section-title" style="margin-top:12px;">Top 3 Power Priorities</h4>
+        <ul id="powerTop3"><li>—</li></ul>
       </div>
     </section>
 
-    <!-- Metrics -->
+    <!-- P1–P9 Metrics grid -->
     <section class="card">
       <h3 class="section-title">P1–P9 Metrics</h3>
-      <table id="metrics">
-        <thead><tr><th>Position</th><th>Value</th></tr></thead>
-        <tbody></tbody>
-      </table>
+      <div id="metricsGrid" class="metrics9"></div>
+    </section>
+
+    <!-- 14-Day Lesson Plan -->
+    <section class="card">
+      <h3 class="section-title">14-Day Lesson Plan</h3>
+      <ol id="lessons14"><li>—</li></ol>
+    </section>
+
+    <!-- Export & Share -->
+    <section class="card">
+      <h3 class="section-title">Export & Share</h3>
+      <div class="row">
+        <button id="btnExportJson">Export JSON</button>
+        <button id="btnExportPdf">Export PDF</button>
+        <button id="btnCopyLink">Copy Share Link</button>
+      </div>
     </section>
   </div>
 
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=8"></script>
 </body>
 </html>
