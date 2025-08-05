@@ -1,93 +1,88 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Virtual Coach AI – Swing Summary</title>
-  <link rel="stylesheet" href="style.css" />
-  <style>
-    body {
-      background: url('homepage-background.png') no-repeat center center fixed;
-      background-size: cover;
-      font-family: system-ui, sans-serif;
-      margin: 0;
-      padding: 0;
-      color: #fff;
-    }
-    .container {
-      background: rgba(0,0,0,0.7);
-      max-width: 960px;
-      margin: 40px auto;
-      padding: 30px;
-      border-radius: 12px;
-    }
-    h1, h2 {
-      margin-top: 0;
-      color: #00ffcc;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 16px;
-      background: rgba(255,255,255,0.1);
-    }
-    th, td {
-      border: 1px solid #888;
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background: rgba(0,0,0,0.4);
-    }
-  </style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Virtual Coach AI — Swing Summary</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <div class="container">
-    <h1>Virtual Coach AI – Swing Report</h1>
-    <p id="cid">Loading...</p>
+  <div class="wrap">
+    <header class="header">
+      <img class="logo" src="virtualcoach-logo.png" alt="Virtual Coach AI"/>
+      <div>
+        <h1 class="brand">Virtual Coach AI</h1>
+        <p class="sub">Swing Summary</p>
+      </div>
+    </header>
 
-    <h2>Summary</h2>
-    <table id="summaryTable">
-      <tr><th>Player</th><td id="player">-</td></tr>
-      <tr><th>Tempo</th><td id="tempo">-</td></tr>
-      <tr><th>Total Power</th><td id="power">-</td></tr>
-    </table>
+    <div id="notice" class="notice"></div>
+    <div class="card" id="report-id">ID: —</div>
 
-    <h2>P1–P9 Metrics</h2>
-    <table id="pMetrics">
-      <thead><tr><th>Position</th><th>Value</th></tr></thead>
-      <tbody></tbody>
-    </table>
+    <section class="grid two">
+      <div class="card">
+        <h3 class="section-title">Profile</h3>
+        <div id="profile">—</div>
+      </div>
+      <div class="card">
+        <h3 class="section-title">Tempo</h3>
+        <div id="tempo">—</div>
+      </div>
+    </section>
 
-    <h2>Fixer Report</h2>
-    <p>Coming soon...</p>
+    <section class="card">
+      <h3 class="section-title">Totals</h3>
+      <div id="totals">—</div>
+    </section>
 
-    <h2>Power Chart</h2>
-    <p>Coming soon...</p>
+    <section class="card">
+      <h3 class="section-title">P1–P9 Metrics</h3>
+      <table id="p-table">
+        <thead><tr><th>Position</th><th>Value</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
   </div>
 
   <script>
-    async function loadData() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const id = urlParams.get("id");
-      document.getElementById("cid").textContent = `Report ID: ${id}`;
+  (function(){
+    const $ = (s)=>document.querySelector(s);
+    const notice = $('#notice');
+    const setNotice=(m,t='info')=>{ if(!notice) return; notice.textContent=m||''; notice.style.display=m?'block':'none'; notice.setAttribute('data-type',t); };
+    const setText=(sel,val)=>{ const el=$(sel); if(el) el.textContent=(val??'—'); };
 
-      const res = await fetch(`/api/get?id=${id}`);
-      const json = await res.json();
-      if (!json.metrics) return;
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    setText('#report-id','ID: '+(id||'—'));
+    if(!id){ setNotice('Missing report ID (?id=...)','error'); return; }
 
-      document.getElementById("player").textContent = json.player || "Anonymous";
-      document.getElementById("tempo").textContent = json.tempo || "N/A";
-      document.getElementById("power").textContent = json.power || "N/A";
+    (async()=>{
+      try{
+        const r = await fetch('/api/get?id='+encodeURIComponent(id), { cache:'no-store' });
+        let data; try{ data = await r.json(); } catch { setNotice('Server returned non-JSON.','error'); return; }
+        if(!r.ok){ setNotice(data?.error || ('Failed to load report ('+r.status+')'),'error'); return; }
+        if(!data){ setNotice('Empty report payload.','error'); return; }
 
-      const tbody = document.querySelector("#pMetrics tbody");
-      Object.entries(json.metrics).forEach(([k, v]) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `<td>${k}</td><td>${v}</td>`;
-        tbody.appendChild(row);
-      });
-    }
-    loadData();
+        setText('#profile', data.profile || '—');
+        setText('#tempo',   data.tempo   || '—');
+        setText('#totals',  data.totals ? JSON.stringify(data.totals) : '—');
+
+        const tbody = document.querySelector('#p-table tbody');
+        const keys = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
+        if (tbody){
+          tbody.innerHTML='';
+          keys.forEach(k=>{
+            const tr=document.createElement('tr');
+            const tdK=document.createElement('td'); tdK.textContent=k;
+            const tdV=document.createElement('td'); tdV.textContent=(data.metrics?.[k] ?? '—');
+            tr.appendChild(tdK); tr.appendChild(tdV);
+            tbody.appendChild(tr);
+          });
+        }
+        setNotice('Summary loaded.');
+      } catch(e){ setNotice('Error loading report: '+(e?.message||e),'error'); }
+    })();
+  })();
   </script>
 </body>
 </html>
