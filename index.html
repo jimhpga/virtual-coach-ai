@@ -8,118 +8,117 @@
   <style>
     body {
       margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: 
-        linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0.3)),
-        url('homepage-background.png') no-repeat center center fixed;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0, 0, 0, 0.35); /* Tint overlay */
+      z-index: 0;
     }
 
     .container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 40px 20px;
-      background: rgba(255, 255, 255, 0.85); /* Light tint */
-      box-shadow: 0 0 20px rgba(0,0,0,0.1);
-      border-radius: 20px;
+      position: relative;
+      z-index: 1;
       text-align: center;
+      padding: 40px 20px;
     }
 
     .logo {
-      width: 280px;
+      width: 180px;
+      margin: 0 auto 20px;
       display: block;
-      margin: 40px auto 10px auto;
-      filter: drop-shadow(0 0 6px rgba(0,0,0,0.4));
     }
 
     h1 {
-      font-size: 2.75rem;
-      margin: 10px 0;
-      color: #222;
-    }
-
-    .tagline {
-      font-size: 1.2rem;
-      margin-bottom: 30px;
-      color: #444;
-    }
-
-    .form-section {
+      font-size: 3rem;
       margin-bottom: 30px;
     }
 
-    label {
-      margin: 0 10px;
-      font-weight: bold;
+    .dropdowns {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-width: 300px;
+      margin: 20px auto;
     }
 
     select {
       padding: 10px;
       font-size: 1rem;
       border-radius: 8px;
-      border: 1px solid #ccc;
-      margin: 0 10px;
+      border: none;
+      background-color: #fff;
+      color: #000;
     }
 
-    .cta-buttons {
+    .buttons {
       margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    .cta-buttons a {
-      display: inline-block;
-      background: #0077cc;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 8px;
+    a.button {
+      padding: 12px;
+      font-size: 1.1rem;
       text-decoration: none;
-      font-weight: bold;
-      transition: background 0.3s;
-      margin: 10px;
+      color: white;
+      background-color: #28a745;
+      border-radius: 8px;
+      transition: background-color 0.2s;
     }
 
-    .cta-buttons a:hover {
-      background: #005fa3;
+    a.button:hover {
+      background-color: #218838;
     }
 
-    footer {
-      margin-top: 40px;
-      font-size: 0.85rem;
-      color: #333;
+    @media (min-width: 600px) {
+      .dropdowns {
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      .buttons {
+        flex-direction: row;
+        justify-content: center;
+      }
     }
   </style>
 </head>
 <body>
-
-  <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
-
   <div class="container">
-    <h1>Virtual Coach AI</h1>
-    <p class="tagline">Smarter Golf Starts Here</p>
+    <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
 
-    <div class="form-section">
-      <label for="hand">Handedness:</label>
-      <select id="hand">
+    <h1>Virtual Coach AI</h1>
+
+    <div class="dropdowns">
+      <select id="handedness">
+        <option value="" disabled selected>Select Handedness</option>
         <option value="right">Right-Handed</option>
         <option value="left">Left-Handed</option>
       </select>
 
-      <label for="eye">Eye Dominance:</label>
-      <select id="eye">
-        <option value="right">Right-Eye Dominant</option>
-        <option value="left">Left-Eye Dominant</option>
-        <option value="unknown">Not Sure</option>
+      <select id="eyeDominance">
+        <option value="" disabled selected>Select Eye Dominance</option>
+        <option value="right">Right Eye Dominant</option>
+        <option value="left">Left Eye Dominant</option>
       </select>
     </div>
 
-    <div class="cta-buttons">
-      <a href="report.html">Upload Your Swing</a>
-      <a href="summary.html">View Reports</a>
+    <div class="buttons">
+      <a href="report.html" class="button">Upload Your Swing</a>
+      <a href="summary.html" class="button">View Reports</a>
     </div>
-
-    <footer>
-      &copy; 2025 Virtual Coach AI. All rights reserved.
-    </footer>
   </div>
 </body>
 </html>
