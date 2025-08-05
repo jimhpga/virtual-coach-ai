@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Virtual Coach AI - Beta</title>
+  <title>Virtual Coach AI - Upload</title>
   <link rel="stylesheet" href="style.css" />
   <style>
     body {
@@ -16,7 +16,7 @@
     }
     .container {
       padding: 60px 20px;
-      background-color: rgba(0, 0, 0, 0.4);
+      background-color: rgba(0, 0, 0, 0.3); /* lightened */
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -24,18 +24,21 @@
       justify-content: center;
     }
     img.logo {
-      width: 500px;
-      max-width: 90%;
+      width: 600px; /* 40 units wide */
+      max-width: 90vw;
+      aspect-ratio: 40 / 6;
       margin-bottom: 20px;
     }
     .tagline {
-      font-size: 1.2em;
-      margin-bottom: 10px;
+      font-size: 1.25em;
+      margin-bottom: 15px;
       font-style: italic;
+      color: #ccc;
     }
     h1 {
       margin: 10px 0;
       font-size: 2.5em;
+      color: #00ffcc;
     }
     .dropdowns {
       display: flex;
@@ -69,9 +72,7 @@
 <body>
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
-
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
-
     <h1>Virtual Coach AI</h1>
 
     <div class="dropdowns">
@@ -121,4 +122,3 @@
   </script>
 </body>
 </html>
-
