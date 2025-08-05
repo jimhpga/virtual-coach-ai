@@ -8,32 +8,39 @@
   <style>
     body {
       margin: 0;
+      padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-image: url('homepage-background.png');
+      background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
-      background-position: center;
       color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       text-align: center;
     }
 
-    .overlay {
-      background-color: rgba(0, 0, 0, 0.6);
-      padding: 60px 20px;
-      min-height: 100vh;
+    .container {
+      background: rgba(0, 0, 0, 0.65);
+      padding: 60px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      max-width: 800px;
+      width: 100%;
     }
 
     .logo img {
-      width: 340px;
-      margin-bottom: 25px;
+      width: 300px;
+      margin-bottom: 20px;
       filter: drop-shadow(0 0 10px white);
     }
 
     h1 {
-      font-size: 2.5rem;
+      font-size: 2.8rem;
       margin-bottom: 10px;
     }
 
-    p.tagline {
+    .tagline {
       font-size: 1.2rem;
       margin-bottom: 30px;
       color: #ddd;
@@ -41,6 +48,10 @@
 
     .form-section {
       margin-bottom: 30px;
+    }
+
+    label {
+      margin: 0 10px;
     }
 
     select {
@@ -79,7 +90,7 @@
   </style>
 </head>
 <body>
-  <div class="overlay">
+  <div class="container">
     <div class="logo">
       <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" />
     </div>
