@@ -12,7 +12,7 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
-      color: white;
+      background-color: #f2f2f2;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -21,29 +21,33 @@
     }
 
     .container {
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(255, 255, 255, 0.8);
       padding: 60px 40px;
       border-radius: 20px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
       max-width: 800px;
       width: 100%;
     }
 
-    .logo img {
-      width: 300px;
+    .logo-container {
       margin-bottom: 20px;
-      filter: drop-shadow(0 0 10px white);
+    }
+
+    .logo-container img {
+      width: 220px;
+      filter: drop-shadow(0 0 5px #000);
     }
 
     h1 {
-      font-size: 2.8rem;
-      margin-bottom: 10px;
+      font-size: 2.5rem;
+      margin: 10px 0;
+      color: #222;
     }
 
     .tagline {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       margin-bottom: 30px;
-      color: #ddd;
+      color: #444;
     }
 
     .form-section {
@@ -52,13 +56,14 @@
 
     label {
       margin: 0 10px;
+      font-weight: bold;
     }
 
     select {
       padding: 10px;
       font-size: 1rem;
       border-radius: 8px;
-      border: none;
+      border: 1px solid #ccc;
       margin: 0 10px;
     }
 
@@ -68,7 +73,7 @@
 
     .cta-buttons a {
       display: inline-block;
-      background: #00bfff;
+      background: #0077cc;
       color: white;
       padding: 12px 24px;
       border-radius: 8px;
@@ -79,24 +84,24 @@
     }
 
     .cta-buttons a:hover {
-      background: #0099cc;
+      background: #005fa3;
     }
 
     footer {
       margin-top: 40px;
-      font-size: 0.9rem;
-      color: #ccc;
+      font-size: 0.85rem;
+      color: #333;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logo">
-      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" />
+    <div class="logo-container">
+      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo">
     </div>
 
     <h1>Virtual Coach AI</h1>
-    <p class="tagline">Personalized Golf Instruction Backed by Data</p>
+    <p class="tagline">Smarter Golf Starts Here</p>
 
     <div class="form-section">
       <label for="hand">Handedness:</label>
