@@ -1,94 +1,76 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Virtual Coach AI</title>
+  <title>Virtual Coach AI - Home</title>
   <link rel="stylesheet" href="style.css" />
   <style>
     body {
       margin: 0;
-      padding: 0;
       font-family: Arial, sans-serif;
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
       color: white;
       text-align: center;
     }
-
-    .container {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: rgba(0, 0, 0, 0.3);
-    }
-
     .logo {
-      width: auto;
+      margin-top: 60px;
+      max-width: 420px;
       height: auto;
-      max-width: 40vw;
-      max-height: 20vh;
-      margin-bottom: 20px;
     }
-
     h1 {
-      font-size: 2.5rem;
-      font-weight: bold;
-      margin: 10px 0;
+      margin: 20px 0 10px;
+      font-size: 2.5em;
+      color: #00a651;
     }
-
-    .tagline {
-      font-size: 1.1rem;
-      margin-bottom: 40px;
+    p.tagline {
+      margin: 0;
+      font-size: 1.1em;
+      color: #ffffff;
     }
-
-    .buttons {
-      display: flex;
-      gap: 20px;
+    .button-container {
+      margin-top: 40px;
     }
-
-    .btn {
-      padding: 12px 24px;
-      font-size: 1rem;
+    .upload-button, .report-button {
+      margin: 10px;
+      padding: 14px 28px;
+      font-size: 1em;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
+    }
+    .upload-button {
       background-color: #001f3f;
       color: white;
-      transition: background-color 0.3s ease;
     }
-
-    .btn:hover {
-      background-color: #0074D9;
+    .report-button {
+      background-color: rgba(255, 255, 255, 0.8);
+      color: #001f3f;
     }
-
     .footer {
-      position: absolute;
-      bottom: 20px;
-      width: 100%;
-      text-align: center;
-      font-size: 0.9rem;
+      margin-top: 60px;
+      font-size: 0.9em;
+    }
+    .footer a {
+      color: #00ffcc;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <img src="virtualcoach-logo.png" alt="Virtual Coach AI Logo" class="logo" />
-    <h1 style="color: #00AA00;">VIRTUAL COACH AI</h1>
-    <p class="tagline">to the beta launch of Virtual Coach AI — the intelligent swing coach designed<br>to help you reach your golfing potential.</p>
+  <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
+  <h1>WELCOME</h1>
+  <p class="tagline">to the beta launch of Virtual Coach AI &mdash; the intelligent swing coach designed<br />
+    to help you reach your golfing potential.</p>
 
-    <div class="buttons">
-      <button class="btn" onclick="window.location.href='mov-upload-test.html'">⬆ Upload Your Swing</button>
-      <button class="btn" onclick="window.location.href='report.html'">📊 Reports</button>
-    </div>
+  <div class="button-container">
+    <button class="upload-button" onclick="window.location.href='mov-upload-test.html'">↑ Upload Your Swing</button>
+    <button class="report-button" onclick="window.location.href='report.html'">📊 Reports</button>
   </div>
 
   <div class="footer">
-    Questions? <a href="mailto:jimh@pga.com" style="color: #00ffff; text-decoration: none;">jimh@pga.com</a>
+    Questions? <a href="mailto:jimh@pga.com">jimh@pga.com</a>
   </div>
 </body>
 </html>
