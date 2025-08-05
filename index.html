@@ -12,25 +12,23 @@
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
       color: white;
-      text-align: center;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       min-height: 100vh;
     }
 
     .overlay {
       background: rgba(0, 0, 0, 0.75);
-      padding: 60px 20px;
-      border-radius: 16px;
+      margin: auto;
+      padding: 60px 30px;
+      border-radius: 20px;
       max-width: 900px;
-      width: 90%;
-      margin: 40px auto;
+      text-align: center;
     }
 
     .logo img {
-      width: 280px;
-      margin-bottom: 20px;
+      width: 260px;
+      margin-bottom: 25px;
     }
 
     h1 {
@@ -40,7 +38,6 @@
 
     .tagline {
       font-style: italic;
-      font-size: 1.2rem;
       color: #ccc;
       margin-bottom: 30px;
     }
@@ -48,28 +45,27 @@
     .selectors {
       display: flex;
       justify-content: center;
-      gap: 40px;
-      margin-bottom: 30px;
       flex-wrap: wrap;
+      gap: 40px;
+      margin: 20px 0;
     }
 
-    .selectors label {
+    label {
       font-size: 1rem;
-      color: #eee;
     }
 
     select {
-      font-size: 1rem;
+      margin-left: 10px;
       padding: 6px 10px;
+      font-size: 1rem;
       border-radius: 6px;
       border: none;
-      margin-left: 10px;
     }
 
     .button-group {
       display: flex;
-      flex-wrap: wrap;
       justify-content: center;
+      flex-wrap: wrap;
       gap: 20px;
       margin-top: 30px;
     }
@@ -77,11 +73,10 @@
     .cta-button {
       background-color: #28a745;
       color: white;
-      padding: 15px 30px;
+      padding: 14px 28px;
       font-size: 1.1rem;
       border: none;
       border-radius: 8px;
-      cursor: pointer;
       text-decoration: none;
       transition: background 0.3s ease;
     }
@@ -93,8 +88,9 @@
     footer {
       margin-top: auto;
       padding: 20px;
-      font-size: 0.85rem;
+      text-align: center;
       color: #bbb;
+      font-size: 0.85rem;
     }
 
     @media (max-width: 600px) {
@@ -102,8 +98,8 @@
         font-size: 2rem;
       }
       .cta-button {
-        padding: 12px 20px;
         font-size: 1rem;
+        padding: 10px 20px;
       }
       .selectors {
         flex-direction: column;
@@ -120,20 +116,20 @@
     </div>
 
     <h1>Virtual Coach AI</h1>
-    <div class="tagline">For the right eye, the right hand, and the right swing.</div>
+    <div class="tagline">The smarter way to train. For coaches, players, and future champions.</div>
 
     <div class="selectors">
       <label for="eye-dominance">Eye Dominance:
         <select id="eye-dominance">
-          <option value="right">Right</option>
-          <option value="left">Left</option>
+          <option value="right">Right Eye</option>
+          <option value="left">Left Eye</option>
         </select>
       </label>
 
       <label for="hand-dominance">Handedness:
         <select id="hand-dominance">
-          <option value="right">Right</option>
-          <option value="left">Left</option>
+          <option value="right">Right Handed</option>
+          <option value="left">Left Handed</option>
         </select>
       </label>
     </div>
@@ -141,12 +137,12 @@
     <div class="button-group">
       <a class="cta-button" href="mov-upload-test.html">Upload Swing</a>
       <a class="cta-button" href="coach-dashboard.html">Coach Portal</a>
-      <a class="cta-button" href="summary.html">View Reports</a>
+      <a class="cta-button" href="summary.html">View Report</a>
     </div>
   </div>
 
   <footer>
-    &copy; 2025 Virtual Coach AI. All rights reserved.
+    &copy; 2025 Virtual Coach AI. Built to elevate your game.
   </footer>
 
 </body>
