@@ -18,45 +18,72 @@
 
     <div id="notice" class="notice"></div>
 
+    <!-- Controls -->
     <section class="card">
       <h2 class="section-title">Analyze a Swing</h2>
-      <div class="row">
+      <div class="row" style="flex-wrap:wrap; gap:12px;">
         <input id="videoUrl" type="text" placeholder="Video URL (optional)"/>
+
+        <select id="selectClub" title="Club">
+          <option value="Driver">Driver</option>
+          <option value="3W">3W</option>
+          <option value="5I">5 Iron</option>
+          <option value="7I" selected>7 Iron</option>
+          <option value="PW">PW</option>
+        </select>
+
+        <select id="selectModel" title="Model">
+          <option value="analysis-v1" selected>Analysis v1</option>
+          <option value="analysis-v2">Analysis v2</option>
+          <option value="fixer-v1">Fixer v1</option>
+          <option value="power-v1">Power v1</option>
+        </select>
+
+        <select id="selectDataset" title="Dataset">
+          <option value="baseline" selected>Baseline</option>
+          <option value="range">Range</option>
+          <option value="course">Course</option>
+        </select>
+
         <button id="analyzeBtn">Analyze</button>
       </div>
     </section>
 
-    <section class="grid two">
+    <!-- Three-column Swing Summary -->
+    <section class="grid three">
       <div class="card">
-        <h3 class="section-title">P1–P9 Metrics</h3>
-        <table id="metrics">
-          <thead><tr><th>Position</th><th>Value</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <div class="card">
-        <h3 class="section-title">Models</h3>
+        <h3 class="section-title">Swing Summary</h3>
         <div class="kv">
-          <b>Analysis Model</b><span>—</span>
-          <b>Fixer Model</b><span>—</span>
-          <b>Power Model</b><span>—</span>
+          <b>Tempo</b><span id="sumTempo">—</span>
+          <b>Consistency</b><span id="sumConsistency">—</span>
+          <b>Club</b><span id="sumClub">—</span>
+          <b>Model</b><span id="sumModel">—</span>
+          <b>Dataset</b><span id="sumDataset">—</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 class="section-title">Fixer Highlights</h3>
+        <div id="sumFixes">—</div>
+      </div>
+      <div class="card">
+        <h3 class="section-title">Power</h3>
+        <div class="kv">
+          <b>Total Power</b><span id="sumPower">—</span>
+          <b>Swing Speed Avg</b><span id="sumSpeed">—</span>
         </div>
       </div>
     </section>
 
-    <section class="grid two">
-      <div class="card">
-        <h3 class="section-title">Fixer Report</h3>
-        <div style="opacity:.9;">Coming soon…</div>
-      </div>
-      <div class="card">
-        <h3 class="section-title">Power</h3>
-        <div style="opacity:.9;">Coming soon…</div>
-      </div>
+    <!-- Metrics -->
+    <section class="card">
+      <h3 class="section-title">P1–P9 Metrics</h3>
+      <table id="metrics">
+        <thead><tr><th>Position</th><th>Value</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </section>
   </div>
 
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>
