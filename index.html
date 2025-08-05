@@ -1,220 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>Virtual Coach AI</title>
-  <style>
-    html, body {
-      height: 100%; margin: 0; padding: 0; color: #f5f5f5;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      background: #0a0a0a url("homepage-background.png") center / cover no-repeat fixed;
-      filter: brightness(1.08) contrast(1.03);
-    }
-    body { min-height: -webkit-fill-available; }
-    .hero { max-width: 760px; margin: 0 auto; padding: 48px 24px 72px; text-align: center; text-shadow: 0 1px 2px rgba(0,0,0,0.25); }
-    .logo { width: 420px; max-width: 90vw; height: auto; margin: 8px auto 20px; display: block; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.25)); }
-    .logo-green { filter: brightness(0) saturate(100%) invert(26%) sepia(56%) saturate(2350%) hue-rotate(79deg) brightness(85%) contrast(90%) drop-shadow(0 6px 16px rgba(0,0,0,0.25)); }
-    h1 { margin: 0 0 10px; font-size: 36px; letter-spacing: 0.04em; }
-    p  { margin: 0 auto 16px; line-height: 1.6; max-width: 560px; }
-    .btn { display:inline-block; margin: 10px 8px 0; padding: 12px 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); text-decoration:none; font-weight:700; color:#fff; background:#0f172a; cursor:pointer; }
-    .btn:hover { opacity:.92; }
-    .btn-secondary { background: transparent; border-color: rgba(255,255,255,0.25); }
-    .contact a { color: #22c55e; text-decoration: none; }
-    .contact a:hover { text-decoration: underline; }
-    @media (max-width: 480px) { h1 { font-size: 30px; } .logo { width: 300px; } }
-
-    /* Status overlay */
-    #vc-status { position:fixed; inset:0; background:rgba(0,0,0,.7); color:#fff; display:none; align-items:center; justify-content:center; z-index:9999 }
-  </style>
+  <title>Virtual Coach AI – Upload</title>
 </head>
-<body>
-  <div class="hero">
-    <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo logo-green" />
-    <h1>WELCOME</h1>
-    <p>to the beta launch of Virtual Coach AI — the intelligent swing coach designed to help you reach your golfing potential.</p>
+<body style="font-family: sans-serif; padding: 30px;">
+  <h1>Virtual Coach AI – Upload Your Swing</h1>
 
-    <!-- Player profile selectors -->
-    <div style="margin:12px 0; display:flex; gap:12px; justify-content:center; flex-wrap:wrap">
-      <label style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,.25); padding:8px 10px; border-radius:10px">
-        Handedness:
-        <select id="handed" style="padding:6px 8px; border-radius:8px;">
-          <option value="right" selected>Right-handed</option>
-          <option value="left">Left-handed</option>
-        </select>
-      </label>
-      <label style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,.25); padding:8px 10px; border-radius:10px">
-        Eye Dominance:
-        <select id="eye" style="padding:6px 8px; border-radius:8px;">
-          <option value="right" selected>Right-eye</option>
-          <option value="left">Left-eye</option>
-          <option value="unknown">Not sure</option>
-        </select>
-      </label>
-    </div>
+  <input type="file" id="videoInput" accept="video/*"><br><br>
+  <button onclick="handleSubmit()">Analyze Swing</button>
 
-    <!-- Hidden file input (wired) -->
-    <input type="file" id="swingUpload"
-           accept="video/mp4,video/quicktime,video/webm"
-           style="display:none"
-           onchange="uploadSwing()" />
-
-    <!-- Buttons -->
-    <label for="swingUpload" class="btn">⬆ Upload Your Swing</label>
-    <a href="/summary.html" class="btn btn-secondary">📊 Reports</a>
-    <p class="contact" style="margin-top:14px;">Questions? <a href="mailto:jimh@pga.com">jimh@pga.com</a></p>
-  </div>
-
-  <!-- Status overlay -->
-  <div id="vc-status">
-    <div style="text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto">
-      <div id="vc-status-text" style="font-weight:700;font-size:18px;margin-bottom:8px">Starting…</div>
-      <div style="font-size:13px;opacity:.8">If this stays here > 45s, we’ll show the error.</div>
-    </div>
-  </div>
+  <p id="status" style="margin-top: 20px;"></p>
 
   <script>
-    // ===== Helpers =====
-    const overlay = document.getElementById('vc-status');
-    const ovText  = document.getElementById('vc-status-text');
-    function show(msg){ try{ ovText.textContent = msg; overlay.style.display='flex'; }catch(_){ alert(msg); } }
-    function hide(){ try{ overlay.style.display='none'; }catch(_){} }
-    function toast(m){ try{ alert(m); } catch(_){} }
+    async function handleSubmit() {
+      const videoInput = document.getElementById('videoInput');
+      const status = document.getElementById('status');
 
-    // ===== iOS-friendly frame & thumbnail extraction =====
-    async function extractFramesAndThumbs(file) {
-      const url = URL.createObjectURL(file);
-      const video = document.createElement('video');
-      video.src = url; video.muted = true; video.playsInline = true; video.preload = 'metadata';
-
-      // Load metadata
-      await new Promise((resolve, reject) => {
-        video.onloadedmetadata = resolve;
-        video.onerror = () => reject(new Error('Could not load video metadata'));
-      });
-
-      // iOS poke
-      try { await video.play(); } catch(_) {}
-      video.pause();
-
-      // Choose a short window to sample (keeps payload fast)
-      const dur = Math.max(0.6, Math.min(2.0, video.duration || 1.5));
-      const steps = 6; // keep payload small
-      const ts = Array.from({length: steps}, (_,i) => +(i * (dur / (steps - 1))).toFixed(2));
-
-      // Analysis frames (wider)
-      const canvas = document.createElement('canvas');
-      canvas.width = 480; canvas.height = 270;
-      const ctx = canvas.getContext('2d');
-
-      // Thumbnail frames (tiny, square)
-      const tCanvas = document.createElement('canvas');
-      tCanvas.width = 96; tCanvas.height = 96;
-      const tCtx = tCanvas.getContext('2d');
-
-      const images = [];
-      const thumbs = [];
-      for (const t of ts) {
-        const target = Math.min(t, (video.duration || dur) - 0.05);
-        const sought = new Promise(res => {
-          let done=false;
-          video.onseeked = () => { if(!done){ done=true; res(); } };
-          setTimeout(()=>{ if(!done){ done=true; res(); } }, 900);
-        });
-        video.currentTime = target;
-        await sought;
-
-        // analysis frame
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        images.push(canvas.toDataURL('image/jpeg', 0.6));
-
-        // square thumbnail (center-crop)
-        const vw = video.videoWidth, vh = video.videoHeight;
-        const size = Math.min(vw, vh);
-        const sx = Math.max(0, (vw - size) / 2);
-        const sy = Math.max(0, (vh - size) / 2);
-        tCtx.clearRect(0,0,96,96);
-        tCtx.drawImage(video, sx, sy, size, size, 0, 0, 96, 96);
-        thumbs.push(tCanvas.toDataURL('image/jpeg', 0.6));
+      if (!videoInput.files.length) {
+        status.textContent = '❌ No video selected.';
+        return;
       }
-      URL.revokeObjectURL(url);
-      return { images, thumbs };
-    }
 
-    // Promise watchdog
-    function withTimeout(promise, ms, label='operation'){
-      let t; const timeout = new Promise((_,rej)=> t=setTimeout(()=>rej(new Error(label+' timeout')), ms));
-      return Promise.race([promise.finally(()=>clearTimeout(t)), timeout]);
-    }
+      status.textContent = '⏳ Uploading video...';
 
-    // ===== Main upload handler =====
-    async function uploadSwing() {
+      const videoFile = videoInput.files[0];
+
+      // Step 1: Upload to Cloudinary or replace with your own storage
+      const formData = new FormData();
+      formData.append('file', videoFile);
+      formData.append('upload_preset', 'demo'); // Public demo for testing
+
+      let videoUrl;
       try {
-        // Gate: passcode on THIS device
-        if (localStorage.getItem('vc_auth') !== 'ok') { window.location.href = '/login.html'; return; }
-
-        const input = document.getElementById('swingUpload');
-        const file = input?.files?.[0];
-        if (!file) { toast('Please select a swing file.'); return; }
-
-        show('Reading video…');
-
-        // Quick duration check (iOS Infinity fix)
-        const tmpUrl = URL.createObjectURL(file);
-        const v = document.createElement('video');
-        v.preload = 'metadata'; v.src = tmpUrl;
-        const duration = await new Promise((resolve) => {
-          v.onloadedmetadata = () => resolve(v.duration);
-          v.onerror = () => resolve(NaN);
-          setTimeout(()=>{ if (!isFinite(v.duration)) { v.currentTime = Number.MAX_SAFE_INTEGER; v.ontimeupdate=()=>resolve(v.duration);} }, 600);
-        });
-        URL.revokeObjectURL(tmpUrl);
-
-        if (!duration || !isFinite(duration)) { hide(); toast('Could not read video length. Try another clip.'); input.value=''; return; }
-        if (duration > 10) { hide(); toast('Clip too long. Please upload ≤ 10 seconds.'); input.value=''; return; }
-
-        show('Extracting frames…');
-        const { images: frames, thumbs } = await extractFramesAndThumbs(file);
-
-        // Profile selections
-        const handed = (document.getElementById('handed')?.value || 'right');
-        const eye    = (document.getElementById('eye')?.value || 'unknown');
-
-        // Save selections + thumbnails for summary page
-        const id = Date.now().toString();
-        sessionStorage.setItem('vc_last_handed', handed);
-        sessionStorage.setItem('vc_last_eye', eye);
-        sessionStorage.setItem('vc_thumbs_' + id, JSON.stringify(thumbs));
-
-        show('Analyzing (10–30s)…');
-
-        const resp = await withTimeout(fetch('/api/analyze', {
+        const uploadRes = await fetch('https://api.cloudinary.com/v1_1/demo/video/upload', {
           method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify({ id, frames, handed, eye })
-        }), 45000, 'analysis');
+          body: formData
+        });
+        const data = await uploadRes.json();
+        videoUrl = data.secure_url;
+      } catch (err) {
+        status.textContent = '❌ Video upload failed.';
+        return;
+      }
 
-        if (!resp.ok) {
-          const txt = await resp.text();
-          hide();
-          toast('Analysis failed.\n' + txt.slice(0, 200));
-          return;
+      // Step 2: Send to your analyze API
+      try {
+        const analyzeRes = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            videoUrl,
+            selections: {
+              club: '7I',
+              model: 'analysis-v1',
+              dataset: 'baseline'
+            }
+          })
+        });
+
+        const result = await analyzeRes.json();
+
+        if (!analyzeRes.ok) {
+          throw new Error(result.error || 'Unknown error');
         }
 
-        const report = await resp.json();
-        sessionStorage.setItem('vc_report_' + id, JSON.stringify(report));
-
-        show('Building report…');
-        window.location.href = `/summary.html?id=${encodeURIComponent(id)}`;
-      } catch (e) {
-        hide();
-        toast('Upload/analysis error: ' + (e?.message || e));
+        status.textContent = '✅ Success! Report created. CID: ' + result._cid;
+      } catch (err) {
+        status.textContent = '❌ Analysis failed: ' + err.message;
       }
     }
-    window.uploadSwing = uploadSwing;
   </script>
 </body>
 </html>
