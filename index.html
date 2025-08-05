@@ -1,4 +1,3 @@
-<!-- Virtual Coach AI - Clean Homepage (Original Morning Look) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,23 +9,34 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
       background: url('golf-course-bg.jpg') no-repeat center center fixed;
       background-size: cover;
       color: #fff;
       text-align: center;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      align-items: center;
+      justify-content: flex-start;
       min-height: 100vh;
     }
 
+    .logo {
+      margin-top: 40px;
+      margin-bottom: 20px;
+    }
+
+    .logo img {
+      width: 160px;
+      max-width: 90%;
+    }
+
     .overlay {
-      background: rgba(0, 0, 0, 0.6);
-      padding: 60px 40px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 50px 30px;
       border-radius: 12px;
-      max-width: 800px;
-      margin: auto;
+      max-width: 900px;
+      margin: 20px auto;
     }
 
     h1 {
@@ -35,20 +45,30 @@
     }
 
     p {
-      font-size: 1.25rem;
-      margin-bottom: 40px;
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      color: #ddd;
+    }
+
+    .tagline {
+      font-size: 1.1rem;
+      font-style: italic;
+      margin-bottom: 30px;
+      color: #bbb;
     }
 
     .cta-button {
       background: #28a745;
       color: #fff;
-      padding: 15px 30px;
-      font-size: 1.2rem;
+      padding: 14px 28px;
+      font-size: 1.1rem;
       text-decoration: none;
       border: none;
       border-radius: 8px;
+      margin: 10px;
       cursor: pointer;
       transition: background 0.3s ease;
+      display: inline-block;
     }
 
     .cta-button:hover {
@@ -56,10 +76,8 @@
     }
 
     footer {
-      position: fixed;
-      bottom: 10px;
-      width: 100%;
-      text-align: center;
+      margin-top: auto;
+      padding: 20px;
       font-size: 0.9rem;
       color: #aaa;
     }
@@ -68,11 +86,11 @@
       h1 {
         font-size: 2rem;
       }
-      p {
+      p, .tagline {
         font-size: 1rem;
       }
       .cta-button {
-        padding: 12px 24px;
+        padding: 12px 20px;
         font-size: 1rem;
       }
     }
@@ -80,10 +98,20 @@
 </head>
 <body>
 
+  <div class="logo">
+    <img src="virtualcoach-logo.png" alt="Virtual Coach AI Logo" />
+  </div>
+
   <div class="overlay">
     <h1>Welcome to Virtual Coach AI</h1>
-    <p>Your personal swing coach powered by real-time AI analysis. Upload your swing. Get better instantly.</p>
-    <a class="cta-button" href="mov-upload-test.html">Test Your Swing Now</a>
+    <p>The future of golf instruction — real-time AI swing coaching, made for players and coaches.</p>
+    <div class="tagline">Designed for the right eye, right hand, and the right swing.</div>
+
+    <div>
+      <a class="cta-button" href="mov-upload-test.html">Launch Swing Test</a>
+      <a class="cta-button" href="summary.html">View Reports</a>
+      <a class="cta-button" href="coach-dashboard.html">Coach Portal</a>
+    </div>
   </div>
 
   <footer>
