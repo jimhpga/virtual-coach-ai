@@ -13,28 +13,23 @@
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
       background-color: #f2f2f2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
     }
 
     .container {
-      background: rgba(255, 255, 255, 0.8);
-      padding: 60px 40px;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
       border-radius: 20px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.3);
-      max-width: 800px;
-      width: 100%;
+      margin-top: 40px;
+      text-align: center;
     }
 
-    .logo-container {
-      margin-bottom: 20px;
-    }
-
-    .logo-container img {
-      width: 220px;
+    .logo {
+      width: 180px;
+      display: block;
+      margin: 30px auto 10px auto;
       filter: drop-shadow(0 0 5px #000);
     }
 
@@ -95,11 +90,10 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="logo-container">
-      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo">
-    </div>
 
+  <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
+
+  <div class="container">
     <h1>Virtual Coach AI</h1>
     <p class="tagline">Smarter Golf Starts Here</p>
 
