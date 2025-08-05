@@ -2,24 +2,83 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Virtual Coach AI - Upload</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Virtual Coach AI - Swing Upload</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 0 auto;
       padding: 20px;
-      max-width: 600px;
-      margin: auto;
+      background: #f2f2f2;
     }
+
     h1 {
       text-align: center;
+      color: #222;
     }
+
+    input[type="file"] {
+      display: block;
+      margin: 20px auto;
+    }
+
     video {
+      display: block;
       width: 100%;
-      margin-top: 20px;
+      max-height: 400px;
+      margin: 20px auto;
+      border: 2px solid #333;
+      background: #000;
     }
-    #status {
-      margin-top: 15px;
+
+    #uploadStatus {
+      text-align: center;
+      margin-top: 10px;
       font-weight: bold;
+    }
+
+    #report {
+      margin-top: 30px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section h3 {
+      margin-bottom: 5px;
+      color: #005c99;
+    }
+
+    .quick-wins {
+      background: #e6f9e6;
+      padding: 10px;
+      border-left: 5px solid #28a745;
+    }
+
+    .p-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .p-strip img {
+      width: 70px;
+      height: auto;
+      border: 1px solid #ccc;
+    }
+
+    #loader {
+      text-align: center;
+      margin-top: 20px;
+      font-style: italic;
+      color: #555;
     }
   </style>
 </head>
@@ -28,59 +87,92 @@
   <h1>Upload Your Swing</h1>
 
   <input type="file" id="fileInput" accept="video/*" />
-  <button onclick="uploadVideo()">Upload Video</button>
-
-  <div id="status"></div>
-
   <video id="preview" controls></video>
 
+  <div id="uploadStatus"></div>
+  <div id="loader"></div>
+
+  <div id="report" style="display:none;">
+    <div class="section">
+      <h3>Fixer Report</h3>
+      <p id="fixerText"></p>
+    </div>
+
+    <div class="section">
+      <h3>Power Report</h3>
+      <p id="powerText"></p>
+    </div>
+
+    <div class="section">
+      <h3>Efficiency Report</h3>
+      <p id="efficiencyText"></p>
+    </div>
+
+    <div class="section">
+      <h3>P1–P9 Swing Strip</h3>
+      <div class="p-strip" id="pStrip"></div>
+    </div>
+
+    <div class="section quick-wins">
+      <strong>Quick Wins:</strong>
+      <ul>
+        <li>Soften grip pressure</li>
+        <li>Improve trail elbow fold</li>
+        <li>Activate glutes at transition</li>
+      </ul>
+    </div>
+  </div>
+
   <script>
-    async function uploadVideo() {
-      const fileInput = document.getElementById('fileInput');
-      const status = document.getElementById('status');
-      const preview = document.getElementById('preview');
+    const fileInput = document.getElementById('fileInput');
+    const preview = document.getElementById('preview');
+    const uploadStatus = document.getElementById('uploadStatus');
+    const loader = document.getElementById('loader');
+    const reportDiv = document.getElementById('report');
 
-      if (!fileInput.files.length) {
-        status.textContent = 'Please choose a video file first.';
-        return;
-      }
+    fileInput.onchange = function (evt) {
+      const file = evt.target.files[0];
+      if (!file) return;
 
-      const file = fileInput.files[0];
-      status.textContent = 'Uploading to Cloudinary...';
+      // Show video preview
+      const url = URL.createObjectURL(file);
+      preview.src = url;
+      preview.load();
+      preview.play();
 
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', 'virtualcoachai'); // ✅ Your unsigned preset
-      formData.append('folder', 'videos');
+      uploadStatus.innerText = 'Processing swing video...';
+      loader.innerText = 'Generating AI report... please wait.';
 
-      try {
-        const res = await fetch('https://api.cloudinary.com/v1_1/virtualcoachai/video/upload', {
-          method: 'POST',
-          body: formData
-        });
+      // Simulate API delay
+      setTimeout(() => {
+        loader.innerText = '';
+        uploadStatus.innerText = 'Report generated successfully.';
+        displayReport();
+      }, 2000);
+    };
 
-        const data = await res.json();
+    function displayReport() {
+      // Dummy data
+      const fixer = "Trail elbow flying; open clubface at takeaway.";
+      const power = "Excellent coil, weak lead leg brace.";
+      const efficiency = "Sequence delay between hips and shoulders.";
+      const pImages = ["p1.png", "p2.png", "p3.png", "p4.png", "p5.png", "p6.png", "p7.png", "p8.png", "p9.png"];
 
-        if (data.secure_url) {
-          status.textContent = '✅ Upload successful!';
-          preview.src = data.secure_url;
+      document.getElementById('fixerText').innerText = fixer;
+      document.getElementById('powerText').innerText = power;
+      document.getElementById('efficiencyText').innerText = efficiency;
 
-          // Optional: Send to your backend for analysis
-          await fetch('/api/analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ videoUrl: data.secure_url })
-          });
+      const stripDiv = document.getElementById('pStrip');
+      stripDiv.innerHTML = '';
+      pImages.forEach(img => {
+        const image = document.createElement('img');
+        image.src = `images/${img}`;
+        image.alt = img;
+        stripDiv.appendChild(image);
+      });
 
-        } else {
-          throw new Error(data.error?.message || 'Upload failed');
-        }
-      } catch (err) {
-        console.error(err);
-        status.textContent = '❌ Upload failed: ' + err.message;
-      }
+      reportDiv.style.display = 'block';
     }
   </script>
-
 </body>
 </html>
