@@ -1,74 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Virtual Coach AI – Upload</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Virtual Coach AI - Swing Upload</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+    input, button {
+      margin: 1rem 0;
+      display: block;
+      width: 100%;
+      padding: 0.5rem;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 1rem;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
-<body style="font-family: sans-serif; padding: 30px;">
-  <h1>Virtual Coach AI – Upload Your Swing</h1>
-
-  <input type="file" id="videoInput" accept="video/*"><br><br>
-  <button onclick="handleSubmit()">Analyze Swing</button>
-
-  <p id="status" style="margin-top: 20px;"></p>
+<body>
+  <h1>Virtual Coach AI</h1>
+  <input type="file" id="videoInput" accept="video/*" />
+  <button id="uploadBtn">Analyze My Swing</button>
+  <div id="status"></div>
+  <pre id="resultBox"></pre>
 
   <script>
-    async function handleSubmit() {
-      const videoInput = document.getElementById('videoInput');
-      const status = document.getElementById('status');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const videoInput = document.getElementById('videoInput');
+    const statusDiv = document.getElementById('status');
+    const resultBox = document.getElementById('resultBox');
 
-      if (!videoInput.files.length) {
-        status.textContent = '❌ No video selected.';
-        return;
-      }
+    uploadBtn.onclick = async () => {
+      const file = videoInput.files[0];
+      if (!file) return alert('Please choose a video.');
 
-      status.textContent = '⏳ Uploading video...';
-
-      const videoFile = videoInput.files[0];
-
-      // Step 1: Upload to Cloudinary or replace with your own storage
+      statusDiv.innerText = 'Uploading video...';
+      
+      // Step 1: Upload to Cloudinary (or your own endpoint)
       const formData = new FormData();
-      formData.append('file', videoFile);
-      formData.append('upload_preset', 'demo'); // Public demo for testing
+      formData.append('file', file);
+      formData.append('upload_preset', 'demo'); // replace with your actual preset
 
-      let videoUrl;
-      try {
-        const uploadRes = await fetch('https://api.cloudinary.com/v1_1/demo/video/upload', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await uploadRes.json();
-        videoUrl = data.secure_url;
-      } catch (err) {
-        status.textContent = '❌ Video upload failed.';
+      const cloudResp = await fetch('https://api.cloudinary.com/v1_1/demo/video/upload', {
+        method: 'POST',
+        body: formData
+      });
+
+      const cloudData = await cloudResp.json();
+      const videoUrl = cloudData.secure_url;
+      if (!videoUrl) {
+        statusDiv.innerText = 'Video upload failed.';
         return;
       }
 
-      // Step 2: Send to your analyze API
-      try {
-        const analyzeRes = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            videoUrl,
-            selections: {
-              club: '7I',
-              model: 'analysis-v1',
-              dataset: 'baseline'
-            }
-          })
-        });
+      statusDiv.innerText = 'Analyzing swing...';
 
-        const result = await analyzeRes.json();
-
-        if (!analyzeRes.ok) {
-          throw new Error(result.error || 'Unknown error');
+      // Step 2: Send to API
+      const payload = {
+        videoUrl,
+        selections: {
+          club: "7I",
+          model: "analysis-v1",
+          dataset: "baseline"
         }
+      };
 
-        status.textContent = '✅ Success! Report created. CID: ' + result._cid;
-      } catch (err) {
-        status.textContent = '❌ Analysis failed: ' + err.message;
-      }
-    }
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+      statusDiv.innerText = 'Analysis complete!';
+      resultBox.innerText = JSON.stringify(result, null, 2);
+    };
   </script>
 </body>
 </html>
