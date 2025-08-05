@@ -39,7 +39,13 @@
     .logo {
       width: 500px;
       max-width: 90%;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      font-size: 1.2rem;
+      color: #eee;
+      margin-bottom: 10px;
     }
 
     h1 {
@@ -55,22 +61,22 @@
     }
 
     .dropdown-container {
-      margin-top: 30px;
+      margin-top: 20px;
       margin-bottom: 30px;
     }
 
     label {
       display: block;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
       margin: 5px 0 2px;
       color: #ddd;
     }
 
     select {
-      width: 200px;
-      padding: 8px;
-      font-size: 0.9rem;
-      border-radius: 6px;
+      width: 160px;
+      padding: 5px;
+      font-size: 0.8rem;
+      border-radius: 5px;
       border: none;
       background-color: #fff;
       color: #000;
@@ -98,16 +104,6 @@
       color: #aaa;
     }
 
-    .tagline {
-      position: absolute;
-      bottom: 30px;
-      text-align: center;
-      color: #eee;
-      font-size: 1.1rem;
-      width: 100%;
-      padding: 0 20px;
-    }
-
     @media (max-width: 600px) {
       .overlay {
         padding: 20px 15px;
@@ -128,7 +124,7 @@
 
       select {
         width: 100%;
-        font-size: 1rem;
+        font-size: 0.9rem;
       }
 
       .logo {
@@ -137,7 +133,6 @@
 
       .tagline {
         font-size: 1rem;
-        bottom: 20px;
       }
     }
   </style>
@@ -145,6 +140,7 @@
 <body>
   <div class="overlay">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
+    <div class="tagline">The AI Revolution in Golf Begins Here</div>
     <h1>Virtual Coach AI</h1>
     <p class="subtext">Welcome to the Beta Test. Let’s make your swing better.</p>
 
@@ -167,7 +163,5 @@
     <button onclick="location.href='mov-upload-test.html'">Upload Your Swing</button>
     <div class="footer">© 2025 Virtual Coach AI™</div>
   </div>
-
-  <div class="tagline">The AI Revolution in Golf Begins Here</div>
 </body>
 </html>
