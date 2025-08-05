@@ -4,22 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Virtual Coach AI</title>
-  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      color: #fff;
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
       position: relative;
+      color: #ffffff;
     }
 
     body::before {
       content: '';
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-color: rgba(0, 0, 0, 0.35); /* Tint overlay */
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.25); /* Lighter tint overlay */
       z-index: 0;
     }
 
@@ -27,49 +26,59 @@
       position: relative;
       z-index: 1;
       text-align: center;
-      padding: 40px 20px;
+      padding: 60px 20px;
     }
 
     .logo {
-      width: 180px;
-      margin: 0 auto 20px;
+      width: 260px;
+      max-width: 80%;
       display: block;
+      margin: 0 auto 20px;
     }
 
     h1 {
-      font-size: 3rem;
-      margin-bottom: 30px;
+      font-size: 3.2rem;
+      margin: 10px 0 5px;
+    }
+
+    h1 span {
+      font-size: 1rem;
+      vertical-align: super;
+    }
+
+    .beta-message {
+      font-size: 1.2rem;
+      margin-top: 5px;
+      color: #f0f0f0;
     }
 
     .dropdowns {
       display: flex;
       flex-direction: column;
       gap: 15px;
-      max-width: 300px;
-      margin: 20px auto;
+      max-width: 320px;
+      margin: 40px auto;
     }
 
     select {
-      padding: 10px;
+      padding: 12px;
       font-size: 1rem;
       border-radius: 8px;
       border: none;
-      background-color: #fff;
-      color: #000;
+      background-color: #ffffff;
+      color: #000000;
     }
 
     .buttons {
-      margin-top: 30px;
       display: flex;
       flex-direction: column;
       gap: 15px;
-      max-width: 300px;
-      margin-left: auto;
-      margin-right: auto;
+      max-width: 320px;
+      margin: 20px auto;
     }
 
     a.button {
-      padding: 12px;
+      padding: 14px;
       font-size: 1.1rem;
       text-decoration: none;
       color: white;
@@ -83,12 +92,7 @@
     }
 
     @media (min-width: 600px) {
-      .dropdowns {
-        flex-direction: row;
-        justify-content: center;
-      }
-
-      .buttons {
+      .dropdowns, .buttons {
         flex-direction: row;
         justify-content: center;
       }
@@ -98,8 +102,9 @@
 <body>
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
-
-    <h1>Virtual Coach AI</h1>
+    
+    <h1>Virtual Coach AI<span>™</span></h1>
+    <p class="beta-message">Welcome to the beta test – we appreciate your feedback!</p>
 
     <div class="dropdowns">
       <select id="handedness">
