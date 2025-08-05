@@ -1,47 +1,62 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Coach AI — Report</title>
-  <!-- Optional: keep if you already have a site stylesheet -->
-  <!-- <link rel="stylesheet" href="style.css" /> -->
-  <style>
-    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
-    .wrap { max-width: 760px; margin: 0 auto; }
-    #notice[data-type="error"] { border-color: #cc0000; color: #cc0000; }
-    #notice[data-type="info"]  { border-color: #666; color: #333; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    thead { background: #f6f6f6; }
-    button[disabled] { opacity: 0.6; cursor: not-allowed; }
-    .row { display: flex; gap: 8px; margin: 12px 0; }
-    input[type="text"] { flex: 1; padding: 8px; }
-  </style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Virtual Coach AI — Swing Report</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <div class="wrap">
-    <h1>Virtual Coach AI — Report</h1>
+    <header class="header">
+      <img class="logo" src="virtualcoach-logo.png" alt="Virtual Coach AI"/>
+      <div>
+        <h1 class="brand">Virtual Coach AI</h1>
+        <p class="sub">Swing Report</p>
+      </div>
+    </header>
 
-    <!-- Notice area for messages -->
-    <div id="notice" style="margin:12px 0; padding:8px; border:1px solid #ccc; display:none;"></div>
+    <div id="notice" class="notice"></div>
 
-    <!-- Input + button -->
-    <div class="row">
-      <input id="videoUrl" type="text" placeholder="Video URL (optional)" />
-      <button id="analyzeBtn">Analyze</button>
-    </div>
+    <section class="card">
+      <h2 class="section-title">Analyze a Swing</h2>
+      <div class="row">
+        <input id="videoUrl" type="text" placeholder="Video URL (optional)"/>
+        <button id="analyzeBtn">Analyze</button>
+      </div>
+    </section>
 
-    <!-- Metrics table -->
-    <table id="metrics">
-      <thead>
-        <tr><th>Position</th><th>Value</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <section class="grid two">
+      <div class="card">
+        <h3 class="section-title">P1–P9 Metrics</h3>
+        <table id="metrics">
+          <thead><tr><th>Position</th><th>Value</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 class="section-title">Models</h3>
+        <div class="kv">
+          <b>Analysis Model</b><span>—</span>
+          <b>Fixer Model</b><span>—</span>
+          <b>Power Model</b><span>—</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid two">
+      <div class="card">
+        <h3 class="section-title">Fixer Report</h3>
+        <div style="opacity:.9;">Coming soon…</div>
+      </div>
+      <div class="card">
+        <h3 class="section-title">Power</h3>
+        <div style="opacity:.9;">Coming soon…</div>
+      </div>
+    </section>
   </div>
 
-  <!-- Load your script AFTER the HTML above -->
-  <script src="script.js"></script>
+  <script src="script.js?v=4"></script>
 </body>
 </html>
