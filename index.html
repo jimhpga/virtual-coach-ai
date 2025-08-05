@@ -4,146 +4,112 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Virtual Coach AI</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       margin: 0;
-      padding: 0;
-      font-family: 'Arial', sans-serif;
-      background: url('homepage-background.png') no-repeat center center fixed;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-image: url('homepage-background.png');
       background-size: cover;
+      background-position: center;
       color: white;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+      text-align: center;
     }
 
     .overlay {
-      background: rgba(0, 0, 0, 0.75);
-      margin: auto;
-      padding: 60px 30px;
-      border-radius: 20px;
-      max-width: 900px;
-      text-align: center;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 60px 20px;
+      min-height: 100vh;
     }
 
     .logo img {
-      width: 260px;
+      width: 340px;
       margin-bottom: 25px;
+      filter: drop-shadow(0 0 10px white);
     }
 
     h1 {
-      font-size: 3rem;
+      font-size: 2.5rem;
       margin-bottom: 10px;
     }
 
-    .tagline {
-      font-style: italic;
-      color: #ccc;
+    p.tagline {
+      font-size: 1.2rem;
+      margin-bottom: 30px;
+      color: #ddd;
+    }
+
+    .form-section {
       margin-bottom: 30px;
     }
 
-    .selectors {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 40px;
-      margin: 20px 0;
-    }
-
-    label {
-      font-size: 1rem;
-    }
-
     select {
-      margin-left: 10px;
-      padding: 6px 10px;
+      padding: 10px;
       font-size: 1rem;
-      border-radius: 6px;
+      border-radius: 8px;
       border: none;
+      margin: 0 10px;
     }
 
-    .button-group {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 20px;
+    .cta-buttons {
       margin-top: 30px;
     }
 
-    .cta-button {
-      background-color: #28a745;
+    .cta-buttons a {
+      display: inline-block;
+      background: #00bfff;
       color: white;
-      padding: 14px 28px;
-      font-size: 1.1rem;
-      border: none;
+      padding: 12px 24px;
       border-radius: 8px;
       text-decoration: none;
-      transition: background 0.3s ease;
+      font-weight: bold;
+      transition: background 0.3s;
+      margin: 10px;
     }
 
-    .cta-button:hover {
-      background-color: #1e7e34;
+    .cta-buttons a:hover {
+      background: #0099cc;
     }
 
     footer {
-      margin-top: auto;
-      padding: 20px;
-      text-align: center;
-      color: #bbb;
-      font-size: 0.85rem;
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2rem;
-      }
-      .cta-button {
-        font-size: 1rem;
-        padding: 10px 20px;
-      }
-      .selectors {
-        flex-direction: column;
-        gap: 20px;
-      }
+      margin-top: 40px;
+      font-size: 0.9rem;
+      color: #ccc;
     }
   </style>
 </head>
 <body>
-
   <div class="overlay">
     <div class="logo">
-      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo">
+      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" />
     </div>
 
     <h1>Virtual Coach AI</h1>
-    <div class="tagline">The smarter way to train. For coaches, players, and future champions.</div>
+    <p class="tagline">Personalized Golf Instruction Backed by Data</p>
 
-    <div class="selectors">
-      <label for="eye-dominance">Eye Dominance:
-        <select id="eye-dominance">
-          <option value="right">Right Eye</option>
-          <option value="left">Left Eye</option>
-        </select>
-      </label>
+    <div class="form-section">
+      <label for="hand">Handedness:</label>
+      <select id="hand">
+        <option value="right">Right-Handed</option>
+        <option value="left">Left-Handed</option>
+      </select>
 
-      <label for="hand-dominance">Handedness:
-        <select id="hand-dominance">
-          <option value="right">Right Handed</option>
-          <option value="left">Left Handed</option>
-        </select>
-      </label>
+      <label for="eye">Eye Dominance:</label>
+      <select id="eye">
+        <option value="right">Right-Eye Dominant</option>
+        <option value="left">Left-Eye Dominant</option>
+        <option value="unknown">Not Sure</option>
+      </select>
     </div>
 
-    <div class="button-group">
-      <a class="cta-button" href="mov-upload-test.html">Upload Swing</a>
-      <a class="cta-button" href="coach-dashboard.html">Coach Portal</a>
-      <a class="cta-button" href="summary.html">View Report</a>
+    <div class="cta-buttons">
+      <a href="report.html">Upload Your Swing</a>
+      <a href="summary.html">View Reports</a>
     </div>
+
+    <footer>
+      &copy; 2025 Virtual Coach AI. All rights reserved.
+    </footer>
   </div>
-
-  <footer>
-    &copy; 2025 Virtual Coach AI. Built to elevate your game.
-  </footer>
-
 </body>
 </html>
