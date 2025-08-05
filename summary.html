@@ -4,13 +4,28 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Virtual Coach AI — Swing Summary</title>
-  <!-- cache-bust to ensure latest styles load -->
-  <link rel="stylesheet" href="style.css?v=6"/>
+  <link rel="stylesheet" href="style.css?v=8"/>
+  <style>
+    /* Tile/accordion styling layered on top of style.css */
+    .tile { background: var(--card); border:1px solid var(--border); border-radius:14px; margin:10px 0; overflow:hidden; }
+    .tile > button { width:100%; text-align:left; display:flex; justify-content:space-between; align-items:center;
+      padding:14px 16px; background:transparent; border:none; color:var(--text); cursor:pointer; font-size:1.05rem; }
+    .tile > button:hover { background: rgba(255,255,255,.06); }
+    .tile-body { display:none; padding:14px 16px; border-top:1px solid var(--border); }
+    .chip-grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
+    .chip { padding:10px; border:1px solid var(--border); border-radius:10px; background: rgba(255,255,255,.05); }
+    @media (max-width: 900px){ .chip-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 600px){ .chip-grid { grid-template-columns: 1fr; } }
+    .list { margin:0; padding-left:18px; }
+    .bar { height:10px; background: rgba(255,255,255,.1); border-radius:10px; overflow:hidden; }
+    .bar > span { display:block; height:100%; background: var(--accent); width:0%; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; }
+  </style>
 </head>
 <body>
   <div class="wrap">
     <header class="header">
-      <img class="logo" src="virtualcoach-logo.png" alt="Virtual Coach AI"/>
+      <img class="logo" src="virtualcoach-logo.png" onerror="this.src='virtualcoach-logo-transparent.png'" alt="Virtual Coach AI"/>
       <div>
         <h1 class="brand">Virtual Coach AI</h1>
         <p class="sub">Swing Summary</p>
@@ -18,97 +33,177 @@
     </header>
 
     <div id="notice" class="notice"></div>
-    <div class="card" id="report-id">ID: —</div>
 
-    <section class="grid two">
-      <div class="card">
-        <h3 class="section-title">Profile</h3>
-        <div id="profile">—</div>
-      </div>
-      <div class="card">
-        <h3 class="section-title">Tempo</h3>
-        <div id="tempo">—</div>
+    <!-- Top bar: ID + Actions -->
+    <section class="card" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+      <div id="reportId">ID: —</div>
+      <div class="actions">
+        <button id="exportJsonBtn" title="Download JSON">Export JSON</button>
+        <button id="printBtn" title="Print or Save as PDF">Print / PDF</button>
       </div>
     </section>
 
-    <section class="card">
-      <h3 class="section-title">Totals</h3>
-      <div id="totals">—</div>
+    <!-- Tiles -->
+    <section class="tile">
+      <button data-acc="summary"><span>Swing Summary</span><span>▾</span></button>
+      <div class="tile-body" id="tile-summary">
+        <div class="grid two">
+          <div class="card">
+            <h3 class="section-title">Profile</h3>
+            <div id="profile">—</div>
+          </div>
+          <div class="card">
+            <h3 class="section-title">Tempo</h3>
+            <div id="tempo">—</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:10px;">
+          <h3 class="section-title">Totals</h3>
+          <div id="totals">—</div>
+        </div>
+      </div>
     </section>
 
-    <section class="card">
-      <h3 class="section-title">P1–P9 Metrics</h3>
-      <table id="p-table">
-        <thead><tr><th>Position</th><th>Value</th></tr></thead>
-        <tbody></tbody>
-      </table>
+    <section class="tile">
+      <button data-acc="p-metrics"><span>P1–P9 Metrics</span><span>▾</span></button>
+      <div class="tile-body" id="tile-metrics">
+        <div class="chip-grid" id="pChips"></div>
+      </div>
+    </section>
+
+    <section class="tile">
+      <button data-acc="improve"><span>3 Things to Improve</span><span>▾</span></button>
+      <div class="tile-body">
+        <ol class="list" id="tips3"></ol>
+      </div>
+    </section>
+
+    <section class="tile">
+      <button data-acc="power"><span>Power Assessment</span><span>▾</span></button>
+      <div class="tile-body" id="tile-power">
+        <div style="margin-bottom:8px;">Overall Power: <b id="powerScore">—</b></div>
+        <div class="bar"><span id="powerBar"></span></div>
+        <ul class="list" id="powerNotes" style="margin-top:10px;"></ul>
+      </div>
+    </section>
+
+    <section class="tile">
+      <button data-acc="power-tips"><span>3 Power Things to Improve</span><span>▾</span></button>
+      <div class="tile-body">
+        <ol class="list" id="powerTips3"></ol>
+      </div>
+    </section>
+
+    <section class="tile">
+      <button data-acc="lessons"><span>14-Day Lesson Plan</span><span>▾</span></button>
+      <div class="tile-body">
+        <ol class="list" id="lessons14"></ol>
+      </div>
     </section>
   </div>
 
   <script>
-    // --- ID fallback so the page never shows blanks ---
-    (function ensureId() {
-      const params = new URLSearchParams(location.search);
-      if (!params.get('id')) {
-        const demo = '1754322283691';
-        location.replace(`${location.pathname}?id=${demo}`);
-      }
-    })();
+  (function(){
+    // Accordion
+    document.querySelectorAll('.tile > button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const body = btn.parentElement.querySelector('.tile-body');
+        const open = body.style.display === 'block';
+        body.style.display = open ? 'none' : 'block';
+        btn.lastElementChild.textContent = open ? '▾' : '▴';
+      });
+    });
+  })();
   </script>
 
   <script>
   (function(){
     const $ = (s)=>document.querySelector(s);
     const notice = $('#notice');
-    const setNotice=(m,t='info')=>{
-      if(!notice) return;
-      notice.textContent=m||'';
-      notice.style.display=m?'block':'none';
-      notice.setAttribute('data-type',t);
-    };
+    const setNotice=(m,t='info')=>{ if(!notice) return; notice.textContent=m||''; notice.style.display=m?'block':'none'; notice.setAttribute('data-type',t); };
     const setText=(sel,val)=>{ const el=$(sel); if(el) el.textContent=(val??'—'); };
 
+    // Read ID (fallback demo)
     const params = new URLSearchParams(location.search);
-    const id = params.get('id');
-    setText('#report-id','ID: '+(id||'—'));
+    let id = params.get('id') || '1754322283691';
+    $('#reportId').textContent = 'ID: ' + id;
 
-    // Fetch and render
+    // Export / Print hooks
+    let lastData = null;
+    $('#exportJsonBtn').onclick = () => {
+      if (!lastData) return setNotice('Nothing to export yet.', 'error');
+      const blob = new Blob([JSON.stringify(lastData, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `swing-summary-${id}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    };
+    $('#printBtn').onclick = () => window.print();
+
+    // Fetch data
     (async()=>{
       try{
-        const url = '/api/get?id='+encodeURIComponent(id);
-        const r = await fetch(url, { cache:'no-store' });
-        let data;
-        try { data = await r.json(); } catch {
-          setNotice('Server returned non-JSON. Check Functions Logs.', 'error'); return;
-        }
+        const r = await fetch('/api/get?id='+encodeURIComponent(id), { cache:'no-store' });
+        let data; try { data = await r.json(); } catch { setNotice('Server returned non-JSON.', 'error'); return; }
+        if (!r.ok) { setNotice(data?.error || ('Failed to load report ('+r.status+')'),'error'); return; }
+        if (!data) { setNotice('Empty report payload.','error'); return; }
+        lastData = data;
 
-        if (!r.ok) { setNotice(data?.error || ('Failed to load report ('+r.status+')'), 'error'); return; }
-        if (!data || typeof data!=='object') { setNotice('Empty report payload.', 'error'); return; }
-
+        // Summary
         setText('#profile', data.profile || '—');
-        setText('#tempo',   data.tempo   || '—');
-        setText('#totals',  data.totals ? JSON.stringify(data.totals) : '—');
+        setText('#tempo', data.tempo || '—');
+        setText('#totals', data.totals ? JSON.stringify(data.totals) : '—');
 
-        const tbody = document.querySelector('#p-table tbody');
+        // P1–P9 tiles
+        const chips = $('#pChips'); chips.innerHTML = '';
         const keys = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
-        if (tbody){
-          tbody.innerHTML='';
-          keys.forEach(k=>{
-            const tr=document.createElement('tr');
-            const tdK=document.createElement('td'); tdK.textContent=k;
-            const tdV=document.createElement('td'); tdV.textContent=(data.metrics?.[k] ?? '—');
-            tr.appendChild(tdK); tr.appendChild(tdV);
-            tbody.appendChild(tr);
-          });
-        }
+        keys.forEach(k=>{
+          const d = document.createElement('div');
+          d.className='chip';
+          d.innerHTML = `<div style="opacity:.8">${k}</div><div style="font-size:1.15rem;font-weight:700">${data.metrics?.[k] ?? '—'}</div>`;
+          chips.appendChild(d);
+        });
 
-        setNotice('Summary loaded.');
+        // 3 to improve
+        const tips3 = $('#tips3'); tips3.innerHTML = '';
+        (data.tips3 || []).slice(0,3).forEach(t=>{
+          const li=document.createElement('li'); li.textContent=t; tips3.appendChild(li);
+        });
+        if (!tips3.children.length) tips3.innerHTML = '<li>—</li>';
+
+        // Power assessment
+        const power = data.power || { score: 0, notes: [] };
+        setText('#powerScore', (power.score ?? 0) + '/100');
+        const bar = $('#powerBar'); bar.style.width = Math.max(0, Math.min(100, power.score || 0)) + '%';
+        const pNotes = $('#powerNotes'); pNotes.innerHTML='';
+        (power.notes || []).forEach(n=>{ const li=document.createElement('li'); li.textContent=n; pNotes.appendChild(li); });
+        if (!pNotes.children.length) pNotes.innerHTML = '<li>—</li>';
+
+        // 3 power tips
+        const powerTips3 = $('#powerTips3'); powerTips3.innerHTML='';
+        (data.powerTips3 || []).slice(0,3).forEach(t=>{
+          const li=document.createElement('li'); li.textContent=t; powerTips3.appendChild(li);
+        });
+        if (!powerTips3.children.length) powerTips3.innerHTML = '<li>—</li>';
+
+        // 14-day lessons
+        const lessons = $('#lessons14'); lessons.innerHTML='';
+        (data.lessons14 || []).slice(0,14).forEach((d,i)=>{
+          const li=document.createElement('li');
+          li.innerHTML = `<b>Day ${i+1}:</b> ${d}`;
+          lessons.appendChild(li);
+        });
+        if (!lessons.children.length) lessons.innerHTML = '<li>—</li>';
+
+        // Open Summary + Metrics by default
+        document.querySelector('#tile-summary').style.display = 'block';
+        document.querySelector('#tile-metrics').style.display = 'block';
       } catch(e){
-        setNotice('Error loading report: '+(e?.message||e), 'error');
+        setNotice('Error loading report: '+(e?.message||e),'error');
       }
     })();
   })();
   </script>
 </body>
 </html>
-
