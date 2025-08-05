@@ -4,7 +4,8 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Virtual Coach AI — Swing Summary</title>
-  <link rel="stylesheet" href="style.css"/>
+  <!-- cache-bust to ensure latest styles load -->
+  <link rel="stylesheet" href="style.css?v=6"/>
 </head>
 <body>
   <div class="wrap">
@@ -45,23 +46,44 @@
   </div>
 
   <script>
+    // --- ID fallback so the page never shows blanks ---
+    (function ensureId() {
+      const params = new URLSearchParams(location.search);
+      if (!params.get('id')) {
+        const demo = '1754322283691';
+        location.replace(`${location.pathname}?id=${demo}`);
+      }
+    })();
+  </script>
+
+  <script>
   (function(){
     const $ = (s)=>document.querySelector(s);
     const notice = $('#notice');
-    const setNotice=(m,t='info')=>{ if(!notice) return; notice.textContent=m||''; notice.style.display=m?'block':'none'; notice.setAttribute('data-type',t); };
+    const setNotice=(m,t='info')=>{
+      if(!notice) return;
+      notice.textContent=m||'';
+      notice.style.display=m?'block':'none';
+      notice.setAttribute('data-type',t);
+    };
     const setText=(sel,val)=>{ const el=$(sel); if(el) el.textContent=(val??'—'); };
 
     const params = new URLSearchParams(location.search);
     const id = params.get('id');
     setText('#report-id','ID: '+(id||'—'));
-    if(!id){ setNotice('Missing report ID (?id=...)','error'); return; }
 
+    // Fetch and render
     (async()=>{
       try{
-        const r = await fetch('/api/get?id='+encodeURIComponent(id), { cache:'no-store' });
-        let data; try{ data = await r.json(); } catch { setNotice('Server returned non-JSON.','error'); return; }
-        if(!r.ok){ setNotice(data?.error || ('Failed to load report ('+r.status+')'),'error'); return; }
-        if(!data){ setNotice('Empty report payload.','error'); return; }
+        const url = '/api/get?id='+encodeURIComponent(id);
+        const r = await fetch(url, { cache:'no-store' });
+        let data;
+        try { data = await r.json(); } catch {
+          setNotice('Server returned non-JSON. Check Functions Logs.', 'error'); return;
+        }
+
+        if (!r.ok) { setNotice(data?.error || ('Failed to load report ('+r.status+')'), 'error'); return; }
+        if (!data || typeof data!=='object') { setNotice('Empty report payload.', 'error'); return; }
 
         setText('#profile', data.profile || '—');
         setText('#tempo',   data.tempo   || '—');
@@ -79,10 +101,14 @@
             tbody.appendChild(tr);
           });
         }
+
         setNotice('Summary loaded.');
-      } catch(e){ setNotice('Error loading report: '+(e?.message||e),'error'); }
+      } catch(e){
+        setNotice('Error loading report: '+(e?.message||e), 'error');
+      }
     })();
   })();
   </script>
 </body>
 </html>
+
