@@ -12,43 +12,64 @@
       background-size: cover;
       font-family: Arial, sans-serif;
       color: white;
-      text-align: center;
       display: flex;
-      flex-direction: column;
       justify-content: center;
+      align-items: center;
       min-height: 100vh;
     }
 
     .overlay {
       background-color: rgba(0, 0, 0, 0.4);
-      padding: 40px 20px;
-      border-radius: 10px;
+      padding: 40px 30px;
+      border-radius: 15px;
+      text-align: center;
       max-width: 600px;
-      margin: auto;
+      width: 90%;
     }
 
     .logo {
       width: 500px;
       max-width: 90%;
-      margin: 0 auto 20px auto;
+      margin-bottom: 20px;
     }
 
     h1 {
-      font-size: 2.8rem;
-      margin-bottom: 10px;
+      font-size: 2.5rem;
+      margin: 10px 0;
     }
 
     .subtext {
-      font-size: 1.1rem;
-      margin-bottom: 30px;
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      color: #ccc;
+    }
+
+    .dropdown-container {
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      font-size: 1rem;
+      margin: 10px 0 5px;
       color: #ddd;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: none;
+      background-color: #fff;
+      color: #000;
     }
 
     button {
       background-color: #28a745;
       color: white;
       border: none;
-      padding: 15px 30px;
+      padding: 14px 28px;
       font-size: 1.2rem;
       border-radius: 8px;
       cursor: pointer;
@@ -59,18 +80,32 @@
       background-color: #218838;
     }
 
+    .footer {
+      margin-top: 25px;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
     @media (max-width: 600px) {
       .overlay {
-        padding: 20px 10px;
+        padding: 20px 15px;
       }
 
       h1 {
         font-size: 2rem;
       }
 
+      .subtext {
+        font-size: 1rem;
+      }
+
       button {
         width: 100%;
-        padding: 15px 0;
+        padding: 14px 0;
+      }
+
+      select {
+        font-size: 1rem;
       }
     }
   </style>
@@ -80,8 +115,25 @@
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
     <h1>Virtual Coach AI</h1>
     <p class="subtext">Welcome to the Beta Test. Let’s make your swing better.</p>
+
+    <div class="dropdown-container">
+      <label for="eye-dominance">Eye Dominance</label>
+      <select id="eye-dominance">
+        <option value="right">Right Eye Dominant</option>
+        <option value="left">Left Eye Dominant</option>
+        <option value="unknown">Not Sure</option>
+      </select>
+
+      <label for="handedness">Handedness</label>
+      <select id="handedness">
+        <option value="right">Right-Handed</option>
+        <option value="left">Left-Handed</option>
+        <option value="ambi">Ambidextrous</option>
+      </select>
+    </div>
+
     <button onclick="location.href='mov-upload-test.html'">Upload Your Swing</button>
-    <p style="margin-top: 20px; font-size: 0.9rem; color: #aaa;">© 2025 Virtual Coach AI™</p>
+    <div class="footer">© 2025 Virtual Coach AI™</div>
   </div>
 </body>
 </html>
