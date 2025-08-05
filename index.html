@@ -5,21 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Virtual Coach AI - Beta</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       font-family: Arial, sans-serif;
-      background: url('homepage-background.png') no-repeat center center fixed;
-      background-size: cover;
     }
 
     body {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      box-sizing: border-box;
+      background: url('homepage-background.png') no-repeat center center fixed;
+      background-size: cover;
+      overflow-x: hidden;
     }
 
     .overlay {
@@ -40,6 +45,7 @@
     h1 {
       font-size: 2.5rem;
       margin: 10px 0;
+      color: white;
     }
 
     .subtext {
@@ -49,7 +55,7 @@
     }
 
     .dropdown-container {
-      margin-top: 40px;
+      margin-top: 30px;
       margin-bottom: 30px;
     }
 
@@ -92,6 +98,16 @@
       color: #aaa;
     }
 
+    .tagline {
+      position: absolute;
+      bottom: 30px;
+      text-align: center;
+      color: #eee;
+      font-size: 1.1rem;
+      width: 100%;
+      padding: 0 20px;
+    }
+
     @media (max-width: 600px) {
       .overlay {
         padding: 20px 15px;
@@ -117,6 +133,11 @@
 
       .logo {
         width: 90%;
+      }
+
+      .tagline {
+        font-size: 1rem;
+        bottom: 20px;
       }
     }
   </style>
@@ -146,5 +167,7 @@
     <button onclick="location.href='mov-upload-test.html'">Upload Your Swing</button>
     <div class="footer">© 2025 Virtual Coach AI™</div>
   </div>
+
+  <div class="tagline">The AI Revolution in Golf Begins Here</div>
 </body>
 </html>
