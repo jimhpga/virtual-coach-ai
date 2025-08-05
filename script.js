@@ -1,121 +1,119 @@
-/* script.js — drop-in replacement
-   - Click #analyzeBtn to run analysis
-   - Reads #videoUrl (optional; uses placeholder if empty)
-   - Calls /api/analyze with a mock so P1–P9 show now
-   - Renders metrics into #metrics (table or list)
-   - Shows messages in #notice
-*/
-
+/* script.js v5 — three dropdowns + three-column summary + metrics */
 (function () {
-  // ---- Element getters (safe) ----
-  const $ = (sel) => document.querySelector(sel);
+  const $ = (s) => document.querySelector(s);
+
+  const notice = $('#notice');
   const analyzeBtn = $('#analyzeBtn');
   const videoInput = $('#videoUrl');
-  const noticeBox  = $('#notice');
-  const metricsBox = $('#metrics');       // <div id="metrics"> or <table id="metrics">
+  const selClub = $('#selectClub');
+  const selModel = $('#selectModel');
+  const selDataset = $('#selectDataset');
 
-  // ---- Small helpers ----
-  function setNotice(msg, type = 'info') {
-    if (!noticeBox) {
-      console[type === 'error' ? 'error' : 'log']('[notice]', msg);
-      return;
-    }
-    noticeBox.textContent = msg;
-    noticeBox.style.display = msg ? 'block' : 'none';
-    noticeBox.setAttribute('data-type', type);
+  const metricsTable = $('#metrics');
+
+  // Summary slots
+  const sumTempo = $('#sumTempo');
+  const sumConsistency = $('#sumConsistency');
+  const sumClub = $('#sumClub');
+  const sumModel = $('#sumModel');
+  const sumDataset = $('#sumDataset');
+  const sumFixes = $('#sumFixes');
+  const sumPower = $('#sumPower');
+  const sumSpeed = $('#sumSpeed');
+
+  // ---- helpers ----
+  function setNotice(msg, type='info'){
+    if (!notice) return console[type==='error'?'error':'log']('[notice]', msg);
+    notice.textContent = msg || '';
+    notice.style.display = msg ? 'block' : 'none';
+    notice.setAttribute('data-type', type);
   }
 
-  function setBusy(isBusy) {
-    if (analyzeBtn) {
-      analyzeBtn.disabled = !!isBusy;
-      analyzeBtn.textContent = isBusy ? 'Analyzing…' : (analyzeBtn.getAttribute('data-label') || 'Analyze');
+  function setBusy(isBusy){
+    if (!analyzeBtn) return;
+    if (!analyzeBtn.getAttribute('data-label')) {
+      analyzeBtn.setAttribute('data-label', analyzeBtn.textContent || 'Analyze');
     }
+    analyzeBtn.disabled = !!isBusy;
+    analyzeBtn.textContent = isBusy ? 'Analyzing…' : analyzeBtn.getAttribute('data-label');
   }
 
-  function clearMetrics() {
-    if (!metricsBox) return;
-    if (metricsBox.tagName === 'TABLE') {
-      const tbody = metricsBox.tBodies[0] || metricsBox.createTBody();
-      tbody.innerHTML = '';
-    } else {
-      metricsBox.innerHTML = '';
-    }
+  function clearMetrics(){
+    if (!metricsTable) return;
+    const tbody = metricsTable.tBodies[0] || metricsTable.createTBody();
+    tbody.innerHTML = '';
   }
 
-  function renderMetrics(metrics) {
-    // Expecting an object like { P1: number, ..., P9: number }
+  function renderMetrics(metrics){
     const keys = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
-    const rows = keys.map(k => ({ k, v: metrics?.[k] ?? null }));
-
-    if (!metricsBox) {
-      console.table(rows);
-      return;
-    }
-
-    if (metricsBox.tagName === 'TABLE') {
-      const tbody = metricsBox.tBodies[0] || metricsBox.createTBody();
-      tbody.innerHTML = '';
-      rows.forEach(({ k, v }) => {
-        const tr = document.createElement('tr');
-        const tdK = document.createElement('td');
-        const tdV = document.createElement('td');
-        tdK.textContent = k;
-        tdV.textContent = (v ?? '—');
-        tr.appendChild(tdK);
-        tr.appendChild(tdV);
-        tbody.appendChild(tr);
-      });
-    } else {
-      // Generic div: render simple list
-      metricsBox.innerHTML = '';
-      const ul = document.createElement('ul');
-      rows.forEach(({ k, v }) => {
-        const li = document.createElement('li');
-        li.textContent = `${k}: ${v ?? '—'}`;
-        ul.appendChild(li);
-      });
-      metricsBox.appendChild(ul);
-    }
+    const tbody = metricsTable?.tBodies?.[0] || metricsTable?.createTBody?.();
+    if (!tbody) return console.table(keys.map(k=>({k, v:metrics?.[k]??'—'})));
+    tbody.innerHTML = '';
+    keys.forEach(k=>{
+      const tr=document.createElement('tr');
+      const tdK=document.createElement('td'); tdK.textContent=k;
+      const tdV=document.createElement('td'); tdV.textContent=(metrics?.[k] ?? '—');
+      tr.appendChild(tdK); tr.appendChild(tdV);
+      tbody.appendChild(tr);
+    });
   }
 
-  async function runAnalyze(videoUrl) {
-    setNotice('', 'info');
+  function renderSummary(payload, data){
+    // Dropdown echoes
+    sumClub && (sumClub.textContent = payload?.selections?.club || '—');
+    sumModel && (sumModel.textContent = payload?.selections?.model || '—');
+    sumDataset && (sumDataset.textContent = payload?.selections?.dataset || '—');
+
+    // From server (mock for now)
+    sumTempo && (sumTempo.textContent = data?.tempo || '—');
+
+    // Derive simple placeholders until real scoring is wired
+    const consistency = (() => {
+      const vals = Object.values(data?.metrics || {});
+      if (!vals.length) return '—';
+      const avg = vals.reduce((a,b)=>a+(+b||0),0)/vals.length;
+      return `${Math.round(80 + (avg % 20))}/100`;
+    })();
+    sumConsistency && (sumConsistency.textContent = consistency);
+
+    sumPower && (sumPower.textContent = data?.totals?.power ?? '—');
+    sumSpeed && (sumSpeed.textContent = (data?.totals?.swingSpeedAvg != null ? data.totals.swingSpeedAvg : '—'));
+
+    sumFixes && (sumFixes.textContent = data?.fixes || 'Maintain posture, smooth transition (placeholder)');
+  }
+
+  // ---- analyze flow ----
+  async function runAnalyze() {
+    setNotice('');
     clearMetrics();
     setBusy(true);
 
-    try {
-      const body = {
-        videoUrl: videoUrl || 'https://example.com/swing.mp4',
-        // MOCK so we see numbers now; remove this once real data flows
-        mock: { metrics: { P1:1, P2:2, P3:3, P4:4, P5:5, P6:6, P7:7, P8:8, P9:9 } }
-      };
+    const payload = {
+      videoUrl: (videoInput?.value || '').trim() || 'https://example.com/swing.mp4',
+      selections: {
+        club: selClub?.value || '7I',
+        model: selModel?.value || 'analysis-v1',
+        dataset: selDataset?.value || 'baseline'
+      }
+    };
 
+    try {
       const r = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        body: JSON.stringify(payload)
       });
 
-      let resp;
-      try {
-        resp = await r.json();
-      } catch {
-        setNotice('Server returned non-JSON. Check Functions Logs.', 'error');
-        return;
-      }
+      let data;
+      try { data = await r.json(); }
+      catch { setNotice('Server returned non-JSON. Check Functions Logs.', 'error'); return; }
 
-      if (!r.ok) {
-        setNotice(resp?.error || `Analyze failed (${r.status})`, 'error');
-        return;
-      }
+      if (!r.ok) { setNotice(data?.error || `Analyze failed (${r.status})`, 'error'); return; }
+      if (!data?.metrics) { setNotice('No metrics returned — check Functions Logs.', 'error'); return; }
 
-      if (!resp || !resp.metrics) {
-        setNotice('No metrics returned — check Functions Logs.', 'error');
-        return;
-      }
-
-      renderMetrics(resp.metrics);
-      setNotice('Report ready.', 'info');
+      renderSummary(payload, data);
+      renderMetrics(data.metrics);
+      setNotice('Report ready.');
     } catch (e) {
       setNotice(`Network error: ${e?.message || e}`, 'error');
     } finally {
@@ -123,22 +121,5 @@
     }
   }
 
-  // ---- Wire up button ----
-  if (analyzeBtn) {
-    if (!analyzeBtn.getAttribute('data-label')) {
-      analyzeBtn.setAttribute('data-label', analyzeBtn.textContent || 'Analyze');
-    }
-    analyzeBtn.addEventListener('click', () => {
-      const url = videoInput ? (videoInput.value || '').trim() : '';
-      runAnalyze(url);
-    });
-  } else {
-    // Auto-run once if there is no button (for quick testing)
-    runAnalyze('');
-  }
-
-  // Minimal styles for notice (optional)
-  if (noticeBox && !noticeBox.hasChildNodes()) {
-    noticeBox.style.display = 'none';
-  }
+  if (analyzeBtn) analyzeBtn.onclick = runAnalyze;
 })();
