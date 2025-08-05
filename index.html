@@ -6,22 +6,13 @@
   <title>Virtual Coach AI - Beta</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow-x: hidden;
-    background-color: black;
-  }
-
-  body {
-    font-family: Arial, sans-serif;
-    background: url('homepage-background.png') no-repeat center center fixed;
-    background-size: cover;
-    color: white;
-    text-align: center;
-  }
-
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('homepage-background.png') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      text-align: center;
     }
     .container {
       padding: 60px 20px;
@@ -37,21 +28,14 @@
       max-width: 90%;
       margin-bottom: 20px;
     }
+    .tagline {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      font-style: italic;
+    }
     h1 {
       margin: 10px 0;
       font-size: 2.5em;
-    }
-    .tagline {
-      font-size: 1.2em;
-      margin-bottom: 20px;
-      font-style: italic;
-    }
-    select, input[type="file"], button {
-      margin: 10px;
-      padding: 10px;
-      font-size: 1em;
-      border-radius: 5px;
-      border: none;
     }
     .dropdowns {
       display: flex;
@@ -59,6 +43,13 @@
       flex-wrap: wrap;
       justify-content: center;
       margin-bottom: 20px;
+    }
+    select, input[type="file"], button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
     }
     button.upload {
       background-color: #00bfff;
@@ -97,7 +88,7 @@
     </div>
 
     <input type="file" id="fileInput" accept="video/*" />
-   onclick="window.location.href='mov-upload-test.html'"  
+    <button class="upload" onclick="uploadVideo()">Upload Your Swing</button>
   </div>
 
   <script>
