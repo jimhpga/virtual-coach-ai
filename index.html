@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Virtual Coach AI - Beta</title>
   <link rel="stylesheet" href="style.css" />
   <style>
@@ -26,7 +26,7 @@
     img.logo {
       width: 500px;
       max-width: 90%;
-      margin-bottom: 10px;
+      margin-bottom: 20px;
     }
     .tagline {
       font-size: 1.2em;
@@ -34,7 +34,7 @@
       font-style: italic;
     }
     h1 {
-      margin: 10px 0 20px;
+      margin: 10px 0;
       font-size: 2.5em;
     }
     .dropdowns {
@@ -46,8 +46,8 @@
     }
     select, input[type="file"], button {
       margin: 10px;
-      padding: 8px;
-      font-size: 0.9em;
+      padding: 10px;
+      font-size: 1em;
       border-radius: 5px;
       border: none;
     }
@@ -109,8 +109,6 @@
         });
 
         if (res.ok) {
-          const videoURL = URL.createObjectURL(file);
-          sessionStorage.setItem("uploadedVideoUrl", videoURL);
           window.location.href = "/report.html";
         } else {
           alert("Upload failed. Please try again.");
@@ -123,3 +121,4 @@
   </script>
 </body>
 </html>
+
