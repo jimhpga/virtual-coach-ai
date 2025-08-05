@@ -4,126 +4,68 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Virtual Coach AI</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
-      position: relative;
-      color: #ffffff;
-    }
-
-    body::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.25); /* Lighter tint overlay */
-      z-index: 0;
-    }
-
-    .container {
-      position: relative;
-      z-index: 1;
+      color: white;
       text-align: center;
-      padding: 60px 20px;
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.4); /* light tint */
+      min-height: 100vh;
+      padding: 60px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     .logo {
       width: 500px;
-      max-width: 80%;
-      display: block;
-      margin: 0 auto 20px;
+      max-width: 90%;
+      margin-bottom: 20px;
     }
 
     h1 {
-      font-size: 3.2rem;
-      margin: 10px 0 5px;
+      font-size: 2.5em;
+      margin: 10px 0 20px;
     }
 
-    h1 span {
-      font-size: 1rem;
-      vertical-align: super;
+    .trademark {
+      font-size: 0.85em;
+      color: #ddd;
+      margin-bottom: 40px;
     }
 
-    .beta-message {
-      font-size: 1.2rem;
-      margin-top: 5px;
-      color: #f0f0f0;
-    }
-
-    .dropdowns {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      max-width: 320px;
-      margin: 40px auto;
-    }
-
-    select {
-      padding: 12px;
-      font-size: 1rem;
-      border-radius: 8px;
+    .upload-btn {
+      padding: 15px 30px;
+      background-color: #00aaff;
       border: none;
-      background-color: #ffffff;
-      color: #000000;
-    }
-
-    .buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      max-width: 320px;
-      margin: 20px auto;
-    }
-
-    a.button {
-      padding: 14px;
-      font-size: 1.1rem;
-      text-decoration: none;
+      border-radius: 6px;
+      font-size: 1.2em;
+      font-weight: bold;
+      cursor: pointer;
       color: white;
-      background-color: #28a745;
-      border-radius: 8px;
-      transition: background-color 0.2s;
+      transition: background-color 0.3s ease;
+      text-decoration: none;
     }
 
-    a.button:hover {
-      background-color: #218838;
-    }
-
-    @media (min-width: 600px) {
-      .dropdowns, .buttons {
-        flex-direction: row;
-        justify-content: center;
-      }
+    .upload-btn:hover {
+      background-color: #008ecc;
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="overlay">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
-    
-    <h1>Virtual Coach AI<span>™</span></h1>
-    <p class="beta-message">Welcome to the beta test – we appreciate your feedback!</p>
-
-    <div class="dropdowns">
-      <select id="handedness">
-        <option value="" disabled selected>Select Handedness</option>
-        <option value="right">Right-Handed</option>
-        <option value="left">Left-Handed</option>
-      </select>
-
-      <select id="eyeDominance">
-        <option value="" disabled selected>Select Eye Dominance</option>
-        <option value="right">Right Eye Dominant</option>
-        <option value="left">Left Eye Dominant</option>
-      </select>
-    </div>
-
-    <div class="buttons">
-      <a href="report.html" class="button">Upload Your Swing</a>
-      <a href="summary.html" class="button">View Reports</a>
-    </div>
+    <h1>Virtual Coach AI</h1>
+    <div class="trademark">© 2025 Virtual Coach AI™ | Welcome to the Beta Test</div>
+    <a href="report.html" class="upload-btn">Upload Swing</a>
   </div>
 </body>
 </html>
