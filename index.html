@@ -9,7 +9,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Arial', sans-serif;
-      background: url('golf-course-bg.jpg') no-repeat center center fixed;
+      background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
       color: white;
       text-align: center;
@@ -29,8 +29,11 @@
     }
 
     .logo img {
-      width: 200px;
+      width: 280px;
       margin-bottom: 20px;
+      border-radius: 12px;
+      background: white;
+      padding: 10px;
     }
 
     h1 {
@@ -43,6 +46,27 @@
       font-size: 1.2rem;
       color: #ccc;
       margin-bottom: 30px;
+    }
+
+    .selectors {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .selectors label {
+      font-size: 1rem;
+      color: #eee;
+    }
+
+    select {
+      font-size: 1rem;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      margin-left: 10px;
     }
 
     .button-group {
@@ -84,6 +108,10 @@
         padding: 12px 20px;
         font-size: 1rem;
       }
+      .selectors {
+        flex-direction: column;
+        gap: 20px;
+      }
     }
   </style>
 </head>
@@ -96,6 +124,22 @@
 
     <h1>Virtual Coach AI</h1>
     <div class="tagline">For the right eye, the right hand, and the right swing.</div>
+
+    <div class="selectors">
+      <label for="eye-dominance">Eye Dominance:
+        <select id="eye-dominance">
+          <option value="right">Right</option>
+          <option value="left">Left</option>
+        </select>
+      </label>
+
+      <label for="hand-dominance">Handedness:
+        <select id="hand-dominance">
+          <option value="right">Right</option>
+          <option value="left">Left</option>
+        </select>
+      </label>
+    </div>
 
     <div class="button-group">
       <a class="cta-button" href="mov-upload-test.html">Upload Swing</a>
