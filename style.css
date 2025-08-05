@@ -1,4 +1,4 @@
-/* style.css — polished theme for Virtual Coach AI */
+/* style.css — polished layout with background, cards, grids, print */
 :root{
   --bg-tint: rgba(0,0,0,.65);
   --card: rgba(20,20,20,.85);
@@ -19,25 +19,17 @@ body{
 }
 
 .wrap{
-  max-width: 1100px;
+  max-width: 1140px;
   margin: 0 auto;
   padding: 24px;
   min-height: 100%;
   background: linear-gradient(to bottom, var(--bg-tint) 0%, rgba(0,0,0,.35) 100%);
 }
 
-.header{
-  display:flex; align-items:center; gap:16px; margin-bottom:16px;
-}
-.logo{
-  height:48px; width:auto; display:block;
-}
-.brand{
-  font-weight:700; letter-spacing:.3px; margin:0;
-}
-.sub{
-  margin:4px 0 0; color:var(--muted); font-size:.95rem;
-}
+.header{ display:flex; align-items:center; gap:16px; margin-bottom:16px; }
+.logo{ height:48px; width:auto; display:block; }
+.brand{ font-weight:700; letter-spacing:.3px; margin:0; }
+.sub{ margin:4px 0 0; color:var(--muted); font-size:.95rem; }
 
 .card{
   background: var(--card);
@@ -48,39 +40,49 @@ body{
   backdrop-filter: blur(2px);
 }
 
-.grid{
-  display:grid; gap:14px;
-}
+.grid{ display:grid; gap:14px; }
 .grid.two{ grid-template-columns: 1fr 1fr; }
 .grid.three{ grid-template-columns: repeat(3, 1fr); }
-@media (max-width: 900px){
-  .grid.two, .grid.three{ grid-template-columns: 1fr; }
-}
+@media (max-width: 1000px){ .grid.three{ grid-template-columns: 1fr; } }
+@media (max-width: 800px){ .grid.two{ grid-template-columns: 1fr; } }
 
-.section-title{
-  margin: 0 0 10px; color: var(--accent); font-size: 1.25rem;
-}
-
+.section-title{ margin:0 0 10px; color:var(--accent); font-size:1.25rem; }
 .notice{
-  display:none; border:1px solid var(--border); border-radius:10px; padding:10px; margin:10px 0;
-  background: rgba(0,0,0,.35); color: var(--text);
+  display:none; border:1px solid var(--border); border-radius:10px;
+  padding:10px; margin:10px 0; background: rgba(0,0,0,.35); color:var(--text);
 }
 .notice[data-type="error"]{ border-color:#c44; color:#ffd7d7; }
 
-.row{ display:flex; gap:8px; align-items:center; }
-input[type="text"]{
-  flex:1; min-width: 200px;
+.row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+input[type="text"], select{
   padding:10px 12px; border-radius:10px; border:1px solid var(--border);
   background: rgba(255,255,255,.06); color:var(--text);
 }
+input[type="text"]{ flex:1; min-width:220px; }
 button{
   padding:10px 14px; border-radius:10px; border:1px solid var(--border);
   background: rgba(255,255,255,.08); color:var(--text); cursor:pointer;
 }
 button[disabled]{ opacity:.6; cursor:not-allowed; }
 
-table{ width:100%; border-collapse: collapse; }
-th, td{ border:1px solid var(--border); padding:10px; text-align:left; }
-thead{ background: rgba(255,255,255,.06); }
 .kv{ display:grid; grid-template-columns: 160px 1fr; gap:8px; }
 .kv b{ color:var(--muted); font-weight:600; }
+
+/* 3×3 metrics grid */
+.metrics9{
+  display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;
+}
+.metric-card{
+  border:1px solid var(--border); border-radius:10px; padding:12px;
+  background: rgba(0,0,0,.35); text-align:center;
+}
+.metric-card .label{ color:var(--muted); font-size:.9rem; }
+.metric-card .value{ font-size:1.6rem; font-weight:700; margin-top:4px; }
+
+/* print */
+@media print{
+  body{ background:#fff !important; color:#000; }
+  .wrap{ background:#fff; }
+  .card{ background:#fff; border:1px solid #ddd; }
+  .notice{ display:none !important; }
+}
