@@ -2,61 +2,76 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Virtual Coach AI</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtual Coach AI - Beta</title>
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      padding: 0;
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
+      font-family: Arial, sans-serif;
       color: white;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 100vh;
     }
 
     .overlay {
       background-color: rgba(0, 0, 0, 0.4);
-      min-height: 100vh;
-      padding: 60px 20px 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      padding: 40px 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
     }
 
     .logo {
       width: 500px;
       max-width: 90%;
-      margin-bottom: 20px;
+      margin: 0 auto 20px auto;
     }
 
     h1 {
-      font-size: 2.5em;
-      margin: 10px 0 20px;
+      font-size: 2.8rem;
+      margin-bottom: 10px;
     }
 
-    .trademark {
-      font-size: 0.85em;
+    .subtext {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
       color: #ddd;
-      margin-bottom: 40px;
     }
 
-    .upload-btn {
-      padding: 15px 30px;
-      background-color: #00aaff;
-      border: none;
-      border-radius: 6px;
-      font-size: 1.2em;
-      font-weight: bold;
-      cursor: pointer;
+    button {
+      background-color: #28a745;
       color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
       transition: background-color 0.3s ease;
-      text-decoration: none;
     }
 
-    .upload-btn:hover {
-      background-color: #008ecc;
+    button:hover {
+      background-color: #218838;
+    }
+
+    @media (max-width: 600px) {
+      .overlay {
+        padding: 20px 10px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      button {
+        width: 100%;
+        padding: 15px 0;
+      }
     }
   </style>
 </head>
@@ -64,8 +79,9 @@
   <div class="overlay">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
     <h1>Virtual Coach AI</h1>
-    <div class="trademark">© 2025 Virtual Coach AI™ | Welcome to the Beta Test</div>
-    <a href="mov-upload-test.html" class="upload-btn">Upload Swing</a>
+    <p class="subtext">Welcome to the Beta Test. Let’s make your swing better.</p>
+    <button onclick="location.href='mov-upload-test.html'">Upload Your Swing</button>
+    <p style="margin-top: 20px; font-size: 0.9rem; color: #aaa;">© 2025 Virtual Coach AI™</p>
   </div>
 </body>
 </html>
