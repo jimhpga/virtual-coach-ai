@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload Your Swing - Virtual Coach AI</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Upload - Virtual Coach AI</title>
+  <link rel="stylesheet" href="style.css">
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background-color: #f3f3f3;
       color: #222;
+      text-align: center;
     }
     .topbar {
       background-color: #004d26;
@@ -22,32 +23,25 @@
     .topbar a {
       color: white;
       text-decoration: none;
-      margin-right: 20px;
+      margin: 0 15px;
     }
     .container {
-      max-width: 700px;
-      margin: 40px auto;
-      padding: 30px;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      text-align: center;
+      margin-top: 60px;
     }
     input[type="file"] {
-      margin-top: 20px;
+      padding: 10px;
+      margin: 20px 0;
     }
     button {
-      margin-top: 20px;
-      padding: 10px 20px;
       background-color: #004d26;
       color: white;
+      padding: 10px 20px;
       border: none;
-      border-radius: 5px;
-      font-size: 1em;
       cursor: pointer;
+      font-size: 16px;
     }
     button:hover {
-      background-color: #006633;
+      background-color: #00351a;
     }
   </style>
 </head>
@@ -55,28 +49,29 @@
   <div class="topbar">
     <a href="index.html">Home</a>
     <a href="about.html">About</a>
-    <a href="upload.html" style="text-decoration: underline;">Upload</a>
     <a href="coming-soon.html">Coming Soon</a>
+    <a href="upload.html" style="text-decoration: underline;">Upload</a>
   </div>
 
   <div class="container">
     <h1>Upload Your Swing</h1>
-    <p>Select a swing video to upload. Supported formats: .mp4, .mov</p>
-    <input type="file" id="fileInput" accept="video/*" />
-    <br />
+    <input type="file" id="videoInput" accept="video/*">
+    <br>
     <button onclick="uploadVideo()">Upload Video</button>
     <p id="status"></p>
   </div>
 
   <script>
     function uploadVideo() {
-      const input = document.getElementById('fileInput');
-      const file = input.files[0];
-      if (!file) {
-        alert("Please select a file first.");
+      const input = document.getElementById('videoInput');
+      const status = document.getElementById('status');
+
+      if (!input.files.length) {
+        status.textContent = 'Please select a video file to upload.';
         return;
       }
-      document.getElementById("status").textContent = "Upload started... (Functionality coming soon)";
+
+      status.textContent = 'Video uploaded (simulated).'; // Replace with actual logic later.
     }
   </script>
 </body>
