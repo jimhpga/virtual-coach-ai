@@ -47,12 +47,38 @@
       justify-content: center;
       margin-bottom: 20px;
     }
-    select, input[type="file"], button {
+    select, button {
       margin: 10px;
       padding: 10px;
       font-size: 1em;
       border-radius: 5px;
       border: none;
+    }
+    input[type="file"] {
+      margin: 10px;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
+      background-color: #004d00; /* dark green */
+      color: white;
+      cursor: pointer;
+    }
+    input[type="file"]::-webkit-file-upload-button {
+      background-color: #004d00;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    input[type="file"]::file-selector-button {
+      background-color: #004d00;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
     }
     button.upload {
       background-color: #006400;
