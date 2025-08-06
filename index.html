@@ -14,17 +14,6 @@
       color: white;
       text-align: center;
     }
-    nav {
-      background-color: #004d26; /* dark green */
-      padding: 15px;
-      display: flex;
-      justify-content: space-around;
-    }
-    nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
     .container {
       padding: 60px 20px;
       background-color: rgba(0, 0, 0, 0.3);
@@ -36,26 +25,22 @@
     }
     img.logo {
       width: clamp(250px, 60vw, 600px);
+      height: auto;
       max-width: 90vw;
-      aspect-ratio: 40 / 12;
-      margin-bottom: 10px;
-      filter: brightness(0) saturate(100%) invert(24%) sepia(90%) saturate(490%) hue-rotate(82deg) brightness(95%) contrast(85%); /* dark green */
+      aspect-ratio: 40 / 12; /* doubled height ratio */
+      margin-bottom: 20px;
+      filter: none !important;
     }
     .tagline {
       font-size: 1.25em;
       margin-bottom: 10px;
       font-style: italic;
-      color: white;
+      color: #ccc;
     }
     h1 {
       margin: 10px 0;
       font-size: 2.5em;
       color: white;
-    }
-    .subtitle {
-      margin-bottom: 20px;
-      color: white;
-      font-size: 1em;
     }
     .dropdowns {
       display: flex;
@@ -70,11 +55,11 @@
       font-size: 1em;
       border-radius: 5px;
       border: none;
-      background-color: #004d26; /* dark green */
+      background-color: #004d00; /* dark green */
       color: white;
     }
     input[type="file"]::file-selector-button {
-      background-color: #004d26;
+      background-color: #004d00;
       color: white;
       padding: 6px 12px;
       border-radius: 4px;
@@ -85,9 +70,25 @@
       font-size: 0.9em;
     }
     button.upload {
-      background-color: #004d26;
+      background-color: #004d00;
       color: white;
       cursor: pointer;
+    }
+    .top-nav {
+      background-color: #004d00;
+      padding: 10px;
+      text-align: center;
+    }
+    .top-nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .subtitle {
+      font-size: 1em;
+      color: #ccc;
+      margin-bottom: 20px;
     }
     @media (max-width: 768px) {
       .container {
@@ -100,16 +101,17 @@
   </style>
 </head>
 <body>
-  <nav>
+  <div class="top-nav">
     <a href="#">Home</a>
-    <a href="#">About Us</a>
+    <a href="#">About</a>
     <a href="#">Coming Soon</a>
-  </nav>
+  </div>
+
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
-    <h1>Virtual Coach AI</h1>
     <div class="subtitle">Where the Future of Golf Instruction Begins with AI</div>
+    <h1>Virtual Coach AI</h1>
 
     <div class="dropdowns">
       <select id="handedness">
