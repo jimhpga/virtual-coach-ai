@@ -24,22 +24,21 @@
       justify-content: center;
     }
     img.logo {
-      width: auto;
       height: 400px;
       max-width: 90%;
       margin-bottom: 10px;
-      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.7); /* shadow added */
+      filter: drop-shadow(0 0 10px #000);
+    }
+    .tagline {
+      font-size: 1.1em;
+      margin-bottom: 10px;
+      font-style: italic;
+      color: #ffffff;
     }
     h1 {
       margin: 0 0 15px;
       font-size: 2.4em;
       color: white;
-    }
-    .tagline {
-      font-size: 1.1em;
-      margin-bottom: 20px;
-      font-style: italic;
-      color: #ffffff;
     }
     .dropdowns {
       display: flex;
@@ -48,42 +47,51 @@
       justify-content: center;
       margin-bottom: 20px;
     }
-    select, button {
+    select {
       margin: 10px;
       padding: 10px;
       font-size: 1em;
       border-radius: 5px;
       border: none;
     }
-    button.upload {
-      background-color: #006400;
-      color: white;
-      cursor: pointer;
-    }
-    input[type="file"]::-webkit-file-upload-button {
-      visibility: hidden;
-    }
-    input[type="file"]::before {
-      content: 'Select Swing File';
+    .file-upload-wrapper {
+      position: relative;
+      overflow: hidden;
       display: inline-block;
+    }
+    .file-upload-wrapper input[type="file"] {
+      font-size: 100px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+    }
+    .file-upload-button {
       background-color: #006400;
       color: white;
       padding: 10px 20px;
       font-size: 1em;
       border-radius: 5px;
+      border: none;
       cursor: pointer;
-    }
-    input[type="file"] {
       margin: 10px;
-      text-align: center;
-      color: transparent;
+    }
+    .upload {
+      background-color: #006400;
+      color: white;
+      padding: 10px 20px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      margin: 10px;
     }
     @media (max-width: 768px) {
       .container {
         padding: 40px 10px;
       }
       img.logo {
-        height: 120px;
+        height: 200px;
       }
     }
   </style>
@@ -107,11 +115,18 @@
       </select>
     </div>
 
-    <input type="file" id="fileInput" accept="video/*" />
+    <div class="file-upload-wrapper">
+      <button class="file-upload-button">Select Swing File</button>
+      <input type="file" id="fileInput" accept="video/*" />
+    </div>
     <button class="upload" onclick="uploadVideo()">Upload Your Swing</button>
   </div>
 
   <script>
+    document.querySelector('.file-upload-button').addEventListener('click', function() {
+      document.getElementById('fileInput').click();
+    });
+
     async function uploadVideo() {
       const file = document.getElementById('fileInput').files[0];
       if (!file) {
