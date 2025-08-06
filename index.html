@@ -14,6 +14,16 @@
       color: white;
       text-align: center;
     }
+    nav {
+      background-color: #004d26;
+      padding: 10px 0;
+    }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
     .container {
       padding: 60px 20px;
       background-color: rgba(0, 0, 0, 0.3);
@@ -25,23 +35,26 @@
     }
     img.logo {
       width: auto;
-      height: auto;
-      max-height: 12vw; /* Twice as big while maintaining aspect ratio */
-      max-width: 80vw;
-      aspect-ratio: 40 / 6;
-      margin-bottom: 20px;
+      height: clamp(100px, 30vh, 300px);
+      max-width: 90vw;
+      margin-bottom: 10px;
       filter: none !important;
     }
     .tagline {
-      font-size: 1.25em;
-      margin-bottom: 15px;
+      font-size: 1em;
+      margin-bottom: 10px;
       font-style: italic;
-      color: #ccc;
+      color: white;
     }
     h1 {
-      margin: 10px 0;
-      font-size: 2.5em;
-      color: #00ffcc;
+      margin: 5px 0;
+      font-size: 2.2em;
+      color: white;
+    }
+    .subtagline {
+      font-size: 1.1em;
+      margin-bottom: 20px;
+      color: #ccc;
     }
     .dropdowns {
       display: flex;
@@ -58,23 +71,23 @@
       border: none;
     }
     select {
-      background-color: #0a3f2e;
+      background-color: #004d26;
       color: white;
     }
     input[type="file"]::file-selector-button {
-      background-color: #0a3f2e;
+      background-color: #004d26;
       color: white;
-      padding: 4px 8px;
-      font-size: 0.8em;
+      padding: 6px 12px;
       border-radius: 4px;
       border: none;
+      font-size: 0.8em;
     }
     input[type="file"] {
       color: #ccc;
-      font-size: 0.8em;
+      font-size: 0.9em;
     }
     button.upload {
-      background-color: #0a3f2e;
+      background-color: #004d26;
       color: white;
       cursor: pointer;
     }
@@ -83,17 +96,25 @@
         padding: 40px 10px;
       }
       img.logo {
-        max-height: 20vw;
-        max-width: 90vw;
+        width: 90vw;
+        height: auto;
       }
     }
   </style>
 </head>
 <body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="about.html">About Us</a>
+    <a href="coming-soon.html">Coming Soon</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
     <h1>Virtual Coach AI</h1>
+    <div class="subtagline">Where the future of golf instruction begins with AI</div>
 
     <div class="dropdowns">
       <select id="handedness">
