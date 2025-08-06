@@ -6,66 +6,56 @@
   <title>Virtual Coach AI - Upload</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    :root {
-      --dark-green: #014421;
-      --text-white: #ffffff;
-    }
-
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
-      color: var(--text-white);
+      color: white;
       text-align: center;
     }
     nav {
-      width: 100%;
-      background-color: var(--dark-green);
+      background-color: #004d26; /* dark green */
+      padding: 15px;
       display: flex;
-      justify-content: center;
-      padding: 10px 0;
-      position: fixed;
-      top: 0;
-      z-index: 10;
+      justify-content: space-around;
     }
     nav a {
       color: white;
       text-decoration: none;
-      margin: 0 20px;
       font-weight: bold;
     }
     .container {
-      padding: 120px 20px 60px; /* account for fixed nav */
+      padding: 60px 20px;
       background-color: rgba(0, 0, 0, 0.3);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: start;
+      justify-content: center;
     }
     img.logo {
-      width: clamp(280px, 60vw, 600px);
-      aspect-ratio: 40 / 6;
+      width: clamp(250px, 60vw, 600px);
+      max-width: 90vw;
+      aspect-ratio: 40 / 12;
       margin-bottom: 10px;
-      filter: brightness(0) saturate(100%) invert(21%) sepia(78%) saturate(398%) hue-rotate(75deg) brightness(93%) contrast(93%);
+      filter: brightness(0) saturate(100%) invert(24%) sepia(90%) saturate(490%) hue-rotate(82deg) brightness(95%) contrast(85%); /* dark green */
     }
     .tagline {
-      font-size: 1em;
-      font-style: italic;
-      color: #ccc;
+      font-size: 1.25em;
       margin-bottom: 10px;
+      font-style: italic;
+      color: white;
     }
     h1 {
-      margin: 5px 0 15px;
-      font-size: 2.2em;
-      color: var(--text-white);
+      margin: 10px 0;
+      font-size: 2.5em;
+      color: white;
     }
-    .future {
-      font-size: 1.2em;
-      font-weight: bold;
+    .subtitle {
       margin-bottom: 20px;
-      color: var(--text-white);
+      color: white;
+      font-size: 1em;
     }
     .dropdowns {
       display: flex;
@@ -80,14 +70,12 @@
       font-size: 1em;
       border-radius: 5px;
       border: none;
-    }
-    select {
-      background-color: var(--dark-green);
-      color: var(--text-white);
+      background-color: #004d26; /* dark green */
+      color: white;
     }
     input[type="file"]::file-selector-button {
-      background-color: var(--dark-green);
-      color: var(--text-white);
+      background-color: #004d26;
+      color: white;
       padding: 6px 12px;
       border-radius: 4px;
       border: none;
@@ -97,16 +85,16 @@
       font-size: 0.9em;
     }
     button.upload {
-      background-color: var(--dark-green);
-      color: var(--text-white);
+      background-color: #004d26;
+      color: white;
       cursor: pointer;
     }
     @media (max-width: 768px) {
       .container {
-        padding: 100px 10px;
+        padding: 40px 10px;
       }
       img.logo {
-        width: 85vw;
+        width: 90vw;
       }
     }
   </style>
@@ -114,14 +102,14 @@
 <body>
   <nav>
     <a href="#">Home</a>
-    <a href="#">About</a>
+    <a href="#">About Us</a>
     <a href="#">Coming Soon</a>
   </nav>
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
     <h1>Virtual Coach AI</h1>
-    <div class="future">Where the Future of Golf Instruction Begins with AI</div>
+    <div class="subtitle">Where the Future of Golf Instruction Begins with AI</div>
 
     <div class="dropdowns">
       <select id="handedness">
@@ -171,3 +159,4 @@
   </script>
 </body>
 </html>
+
