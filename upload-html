@@ -1,13 +1,13 @@
+<!-- Add this to your upload.html or upload page -->
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Virtual Coach AI - Upload</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
   <header>
     <nav>
@@ -16,21 +16,50 @@
         <li><a href="about.html">About</a></li>
         <li><a href="coming-soon.html">Coming Soon</a></li>
         <li><a href="contact.html">Contact</a></li>
+        <li><a href="upload.html">Upload</a></li>
+        <li><a href="#" onclick="runDiagnostics()">Run Diagnostics</a></li>
       </ul>
     </nav>
   </header>
 
   <main>
     <h1>Upload Your Swing</h1>
-
     <input type="file" id="fileInput" accept="video/*" />
     <button onclick="uploadVideo()">Upload Video</button>
-
     <div id="status"></div>
     <video id="preview" controls style="display: none;"></video>
   </main>
 
   <script src="script.js"></script>
+  <script>
+    async function runDiagnostics() {
+      const log = (msg) => console.log('%c[DIAG]', 'color: green', msg);
+      const error = (msg) => console.error('%c[ERROR]', 'color: red', msg);
+      try {
+        log('Running Upload Diagnostics...');
+        const fileInput = document.getElementById('fileInput');
+        if (!fileInput) return error('Missing #fileInput element');
+        log('✔ File input exists.');
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoUrl: 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4' })
+        });
+        if (!response.ok) return error(`/api/analyze failed. Status ${response.status}`);
+        const json = await response.json();
+        if (!json || !json.id || !json.totals) return error('Invalid response structure from /api/analyze');
+        log('✔ /api/analyze responded successfully.');
+        if (json._saved) {
+          log('✔ Data was saved to Supabase successfully.');
+        } else {
+          error('⚠ Supabase save failed or was not confirmed.');
+        }
+        console.log('📦 Full API Response:', json);
+        log('All systems GO. ✅ Upload pipeline seems functional.');
+      } catch (err) {
+        error(`Unexpected error: ${err.message}`);
+      }
+    }
+  </script>
 </body>
-
 </html>
