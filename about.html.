@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About - Virtual Coach AI</title>
   <link rel="stylesheet" href="style.css">
@@ -9,64 +9,56 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #111;
+      background-color: #0f1f0f;
       color: white;
     }
-    header {
-      background-color: #004d26;
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .navbar {
+      background-color: #144d14;
+      padding: 15px;
+      text-align: center;
     }
-    .logo {
-      height: 50px;
-    }
-    nav a {
+    .navbar a {
       color: white;
-      margin-left: 15px;
+      margin: 0 15px;
       text-decoration: none;
       font-weight: bold;
     }
-    .content {
+    .container {
       padding: 40px 20px;
-      max-width: 900px;
+      max-width: 800px;
       margin: auto;
-      line-height: 1.6;
     }
     h1 {
-      color: #00ffcc;
+      color: #00ff99;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 1.2em;
+      line-height: 1.6;
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo">
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="#">Coming Soon</a>
-      <a href="#">Contact</a>
-    </nav>
-  </header>
+  <div class="navbar">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="#features">Features</a>
+    <a href="#contact">Contact</a>
+  </div>
 
-  <div class="content">
+  <div class="container">
     <h1>About Virtual Coach AI</h1>
-    <p>
-      Virtual Coach AI is pioneering the future of golf instruction. By blending cutting-edge artificial intelligence with deep biomechanical analysis, we deliver personalized coaching that adapts to your swing, your goals, and your game.
-    </p>
-    <p>
-      Founded by golf professionals and tech innovators, our platform helps golfers at every level—whether you're chasing the Tour or breaking 100—to unlock their full potential.
-    </p>
-    <p>
-      From real-time swing analysis and pro comparisons to mental game training and mobility-based coaching, Virtual Coach AI gives you a complete toolbox for long-term improvement. This isn't just an app—it's your new swing coach.
-    </p>
-    <p>
-      Our mission is simple: to make world-class golf instruction accessible, affordable, and obsessively effective.
-    </p>
-    <p style="color:#ccc; font-style: italic;">
-      "Better swings. Smarter minds. Lower scores."
-    </p>
+    <p><strong>Virtual Coach AI</strong> is a revolutionary golf instruction system built by PGA professional Jim Hartnett and OpenAI's assistance to bring tour-level coaching to the everyday golfer. Our mission is simple: make elite performance accessible, understandable, and actionable—regardless of your location, skill level, or resources.</p>
+
+    <p>With over 25 years of experience coaching at premier facilities like Kapalua in Maui, Sahalee Country Club in Washington, PGA West in California, and working alongside top instructors such as Jim McLean, Jim Hartnett has trained players ranging from beginners to major championship winners. That depth of experience is now combined with advanced AI to guide your improvement swing by swing.</p>
+
+    <p>This platform was built to answer a core question: <em>How do we deliver truly personalized golf instruction at scale?</em> With AI-powered swing analysis, biomechanics insights, practice plans, and instant feedback tools, Virtual Coach AI is that answer.</p>
+
+    <p>Upcoming features include real-time motion tracking, 3D swing comparison tools, mental game training modules, and personalized improvement plans that evolve with you. And this is just the beginning.</p>
+
+    <p>Whether you're chasing your first birdie or fine-tuning your scoring game, Virtual Coach AI is here to make sure you're not practicing in the dark. Welcome to the future of golf improvement.</p>
   </div>
 </body>
 </html>
