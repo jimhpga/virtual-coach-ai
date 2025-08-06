@@ -1,78 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload - Virtual Coach AI</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f3f3f3;
-      color: #222;
-      text-align: center;
-    }
-    .topbar {
-      background-color: #004d26;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 1.2em;
-    }
-    .topbar a {
-      color: white;
-      text-decoration: none;
-      margin: 0 15px;
-    }
-    .container {
-      margin-top: 60px;
-    }
-    input[type="file"] {
-      padding: 10px;
-      margin: 20px 0;
-    }
-    button {
-      background-color: #004d26;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    button:hover {
-      background-color: #00351a;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtual Coach AI - Upload</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <div class="topbar">
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="coming-soon.html">Coming Soon</a>
-    <a href="upload.html" style="text-decoration: underline;">Upload</a>
-  </div>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="coming-soon.html">Coming Soon</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
 
-  <div class="container">
+  <main>
     <h1>Upload Your Swing</h1>
-    <input type="file" id="videoInput" accept="video/*">
-    <br>
+
+    <input type="file" id="fileInput" accept="video/*" />
     <button onclick="uploadVideo()">Upload Video</button>
-    <p id="status"></p>
-  </div>
 
-  <script>
-    function uploadVideo() {
-      const input = document.getElementById('videoInput');
-      const status = document.getElementById('status');
+    <div id="status"></div>
+    <video id="preview" controls style="display: none;"></video>
+  </main>
 
-      if (!input.files.length) {
-        status.textContent = 'Please select a video file to upload.';
-        return;
-      }
-
-      status.textContent = 'Video uploaded (simulated).'; // Replace with actual logic later.
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
+
 </html>
