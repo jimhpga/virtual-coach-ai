@@ -1,13 +1,13 @@
-<!-- Add this to your upload.html or upload page -->
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Virtual Coach AI - Upload</title>
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <header>
     <nav>
@@ -16,8 +16,6 @@
         <li><a href="about.html">About</a></li>
         <li><a href="coming-soon.html">Coming Soon</a></li>
         <li><a href="contact.html">Contact</a></li>
-        <li><a href="upload.html">Upload</a></li>
-        <li><a href="#" onclick="runDiagnostics()">Run Diagnostics</a></li>
       </ul>
     </nav>
   </header>
@@ -28,10 +26,46 @@
     <button onclick="uploadVideo()">Upload Video</button>
     <div id="status"></div>
     <video id="preview" controls style="display: none;"></video>
+    <br /><br />
+    <button onclick="runDiagnostics()">Run Diagnostics</button>
   </main>
 
-  <script src="script.js"></script>
   <script>
+    async function uploadVideo() {
+      const fileInput = document.getElementById('fileInput');
+      const statusDiv = document.getElementById('status');
+      const videoPreview = document.getElementById('preview');
+
+      if (!fileInput.files.length) {
+        statusDiv.textContent = 'Please select a video file.';
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('video', file);
+
+      try {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          statusDiv.textContent = 'Upload failed. Please try again.';
+          return;
+        }
+
+        const result = await response.json();
+        statusDiv.textContent = 'Upload successful!';
+        videoPreview.src = result.videoUrl;
+        videoPreview.style.display = 'block';
+      } catch (error) {
+        console.error('Upload error:', error);
+        statusDiv.textContent = 'Upload failed. Please try again.';
+      }
+    }
+
     async function runDiagnostics() {
       const log = (msg) => console.log('%c[DIAG]', 'color: green', msg);
       const error = (msg) => console.error('%c[ERROR]', 'color: red', msg);
@@ -49,11 +83,8 @@
         const json = await response.json();
         if (!json || !json.id || !json.totals) return error('Invalid response structure from /api/analyze');
         log('✔ /api/analyze responded successfully.');
-        if (json._saved) {
-          log('✔ Data was saved to Supabase successfully.');
-        } else {
-          error('⚠ Supabase save failed or was not confirmed.');
-        }
+        if (json._saved) log('✔ Data saved to Supabase successfully.');
+        else error('⚠ Supabase save failed or was not confirmed.');
         console.log('📦 Full API Response:', json);
         log('All systems GO. ✅ Upload pipeline seems functional.');
       } catch (err) {
@@ -62,4 +93,5 @@
     }
   </script>
 </body>
+
 </html>
