@@ -1,51 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About - Virtual Coach AI</title>
+  <link rel="stylesheet" href="style.css">
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: url('homepage-background.png') no-repeat center center fixed;
-      background-size: cover;
+      background-color: #111;
       color: white;
-      text-align: center;
-      padding: 60px 20px;
+    }
+    header {
+      background-color: #004d26;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      height: 50px;
+    }
+    nav a {
+      color: white;
+      margin-left: 15px;
+      text-decoration: none;
+      font-weight: bold;
     }
     .content {
-      background-color: rgba(0, 0, 0, 0.5);
-      padding: 40px;
-      border-radius: 10px;
-      max-width: 800px;
+      padding: 40px 20px;
+      max-width: 900px;
       margin: auto;
+      line-height: 1.6;
     }
     h1 {
-      font-size: 3em;
-      margin-bottom: 20px;
-    }
-    p {
-      font-size: 1.2em;
-      line-height: 1.6em;
-    }
-    a {
-      color: #90ee90;
-      text-decoration: underline;
+      color: #00ffcc;
     }
   </style>
 </head>
 <body>
+  <header>
+    <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="#">Coming Soon</a>
+      <a href="#">Contact</a>
+    </nav>
+  </header>
+
   <div class="content">
     <h1>About Virtual Coach AI</h1>
     <p>
-      Virtual Coach AI is the future of swing analysis and personalized coaching. Built by golf professionals, tech experts, and biomechanics nerds, our platform gives you real-time feedback, AI-driven breakdowns, and a roadmap to measurable improvement.
+      Virtual Coach AI is pioneering the future of golf instruction. By blending cutting-edge artificial intelligence with deep biomechanical analysis, we deliver personalized coaching that adapts to your swing, your goals, and your game.
     </p>
     <p>
-      Whether you're a weekend warrior or a competitive junior, we're here to help you train smarter, not just harder. This beta test is just the beginning. Coming soon: live voice coaching, ball flight prediction, force plate integration, and more.
+      Founded by golf professionals and tech innovators, our platform helps golfers at every level—whether you're chasing the Tour or breaking 100—to unlock their full potential.
     </p>
     <p>
-      <a href="index.html">Return to Homepage</a>
+      From real-time swing analysis and pro comparisons to mental game training and mobility-based coaching, Virtual Coach AI gives you a complete toolbox for long-term improvement. This isn't just an app—it's your new swing coach.
+    </p>
+    <p>
+      Our mission is simple: to make world-class golf instruction accessible, affordable, and obsessively effective.
+    </p>
+    <p style="color:#ccc; font-style: italic;">
+      "Better swings. Smarter minds. Lower scores."
     </p>
   </div>
 </body>
