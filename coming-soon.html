@@ -1,61 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Coming Soon - Virtual Coach AI</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: url('homepage-background.png') no-repeat center center fixed;
-      background-size: cover;
+      background-color: #f3f3f3;
+      color: #222;
+      line-height: 1.6;
+    }
+    .topbar {
+      background-color: #004d26;
       color: white;
+      padding: 15px;
       text-align: center;
+      font-size: 1.2em;
+    }
+    .topbar a {
+      color: white;
+      text-decoration: none;
+      margin-right: 20px;
+    }
+    .topbar a:last-child {
+      margin-right: 0;
     }
     .container {
-      padding: 60px 20px;
-      background-color: rgba(0, 0, 0, 0.4);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     h1 {
-      margin-top: 60px;
-      font-size: 2.8em;
-      color: #ffffff;
+      color: #004d26;
+      text-align: center;
+    }
+    h2 {
+      color: #004d26;
+      margin-top: 40px;
     }
     ul {
-      list-style: none;
-      padding: 0;
-      max-width: 800px;
-      margin: 30px auto;
-      text-align: left;
-    }
-    li {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 15px;
-      margin: 10px 0;
-      border-radius: 10px;
-    }
-    .phase {
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #00ff99;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
+  <div class="topbar">
+    <a href="index.html">Home</a>
+    <a href="upload.html">Upload</a>
+    <a href="about.html">About</a>
+    <a href="comingsoon.html" style="text-decoration: underline;">Coming Soon</a>
+  </div>
+
   <div class="container">
-    <h1>Coming Soon to Virtual Coach AI</h1>
+    <h1>Coming Soon</h1>
+
+    <p>Once upon a time, golf instruction scoffed at video. Teachers said it was a gimmick. Then slowly, begrudgingly, they started using it. And now? You’re not a serious teacher if you don’t use it. AI is heading the same way—but this time, we’re ahead of the curve.</p>
+
+    <p>Virtual Coach AI is what happens when 25+ years of hands-on teaching experience meets the power of modern machine learning, markerless tracking, and biomechanics. No more dragging a giant camera or plugging in laptops and cables at the range. This is where the future of instruction begins—faster, smarter, smaller.</p>
+
+    <p>Force plates? Built in. Pose estimation? Real-time. Pressure mapping? Automatically inferred. Club data? Captured or estimated. Swing syncing, voice feedback, tournament prep, player tracking, mental coaching? All of it—automated, personalized, and done better than the competition. Why? Because we’re not just talking—we’ve filed provisional patents on how this system works.</p>
+
+    <h2>Upcoming Technologies</h2>
     <ul>
-      <li><span class="phase">Phase 2:</span> Real-time voice feedback, tempo tracking, and drill prescription engine</li>
-      <li><span class="phase">Phase 3:</span> Full biomechanical overlay system including force vectors and swing efficiency scores</li>
-      <li><span class="phase">Phase 4:</span> Coach/Student login portal with saved history and improvement tracking</li>
-      <li><span class="phase">Phase 5:</span> Live motion capture, multiplayer swing challenges, leaderboard, and app gamification features</li>
+      <li>Real-time markerless body tracking (pose estimation)</li>
+      <li>Dynamic pressure mapping and force vector visualization</li>
+      <li>Club path and face angle detection via AI</li>
+      <li>Ball data inference (launch, spin, speed)</li>
+      <li>Voice-guided swing correction with smart cue logic</li>
+      <li>Instant swing report generation with coaching feedback</li>
+      <li>Pro comparison overlays and avatar syncing</li>
+      <li>Personalized tempo and kinematic sequencing analysis</li>
+      <li>Mobile-first, cable-free swing training</li>
+      <li>Coach dashboard with student tracking and challenge modes</li>
     </ul>
+
+    <p>Other companies might be ahead in hype. We’re ahead in substance. The AI revolution in golf starts right here.</p>
   </div>
 </body>
 </html>
