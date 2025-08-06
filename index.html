@@ -24,24 +24,23 @@
       justify-content: center;
     }
     img.logo {
+      width: clamp(250px, 60vw, 600px);
       height: auto;
-      width: auto;
-      max-width: 100%;
-      max-height: 180px;
-      aspect-ratio: 40 / 6;
-      margin-bottom: 20px;
-      filter: brightness(0) saturate(100%) invert(25%) sepia(45%) saturate(333%) hue-rotate(70deg) brightness(95%) contrast(85%);
+      max-width: 90vw;
+      aspect-ratio: 3 / 1;
+      margin-bottom: 10px;
+      filter: brightness(0) saturate(100%) invert(28%) sepia(100%) saturate(345%) hue-rotate(75deg) brightness(95%) contrast(92%);
     }
     .tagline {
-      font-size: 1.25em;
-      margin-bottom: 15px;
+      font-size: 1.2em;
+      margin-bottom: 10px;
       font-style: italic;
       color: #ffffff;
     }
     h1 {
       margin: 10px 0;
       font-size: 2.5em;
-      color: #ffffff;
+      color: white;
     }
     .dropdowns {
       display: flex;
@@ -58,11 +57,11 @@
       border: none;
     }
     select {
-      background-color: #004d26;
+      background-color: #014421;
       color: white;
     }
     input[type="file"]::file-selector-button {
-      background-color: #004d26;
+      background-color: #014421;
       color: white;
       padding: 6px 12px;
       border-radius: 4px;
@@ -73,39 +72,21 @@
       font-size: 0.9em;
     }
     button.upload {
-      background-color: #004d26;
+      background-color: #014421;
       color: white;
       cursor: pointer;
-    }
-    nav {
-      background-color: #004d26;
-      color: white;
-      padding: 10px;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-    }
-    nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
     }
     @media (max-width: 768px) {
       .container {
         padding: 40px 10px;
       }
       img.logo {
-        max-height: 140px;
+        width: 90vw;
       }
     }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="/index.html">Home</a>
-    <a href="/about.html">About</a>
-    <a href="/comingsoon.html">Coming Soon</a>
-  </nav>
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
