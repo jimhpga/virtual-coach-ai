@@ -14,22 +14,8 @@
       color: white;
       text-align: center;
     }
-    .navbar {
-      width: 100%;
-      background-color: #004d26;
-      padding: 10px 0;
-      position: fixed;
-      top: 0;
-      z-index: 999;
-    }
-    .navbar a {
-      color: white;
-      margin: 0 15px;
-      text-decoration: none;
-      font-weight: bold;
-    }
     .container {
-      padding: 100px 20px 60px; /* Adjusted for nav bar */
+      padding: 60px 20px;
       background-color: rgba(0, 0, 0, 0.3);
       min-height: 100vh;
       display: flex;
@@ -38,19 +24,20 @@
       justify-content: center;
     }
     img.logo {
-      height: auto;
-      width: clamp(250px, 50vw, 500px);
+      width: clamp(250px, 60vw, 600px);
       max-width: 90vw;
-      margin-bottom: 10px;
+      aspect-ratio: 40 / 6;
+      margin-bottom: 20px;
+      filter: brightness(0) saturate(100%) invert(19%) sepia(94%) saturate(598%) hue-rotate(72deg) brightness(86%) contrast(92%);
     }
     .tagline {
       font-size: 1.25em;
-      margin-bottom: 8px;
+      margin-bottom: 15px;
       font-style: italic;
-      color: #ccc;
+      color: white;
     }
     h1 {
-      margin: 8px 0;
+      margin: 10px 0;
       font-size: 2.5em;
       color: white;
     }
@@ -90,24 +77,18 @@
     }
     @media (max-width: 768px) {
       .container {
-        padding: 80px 10px 40px;
+        padding: 40px 10px;
       }
       img.logo {
-        width: 80vw;
+        width: 90vw;
       }
     }
   </style>
 </head>
 <body>
-  <div class="navbar">
-    <a href="/">Home</a>
-    <a href="/about.html">About</a>
-    <a href="/coming-soon.html">Coming Soon</a>
-  </div>
-
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
-    <div class="tagline">Where the future of golf instruction begins with AI</div>
+    <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
     <h1>Virtual Coach AI</h1>
 
     <div class="dropdowns">
