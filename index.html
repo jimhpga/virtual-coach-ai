@@ -24,9 +24,9 @@
       justify-content: center;
     }
     img.logo {
-      width: clamp(250px, 50vw, 500px); /* Reduced width */
-      height: auto;
-      aspect-ratio: 5 / 1; /* Adjusted for better proportions */
+      width: 7.5in;
+      height: 3in;
+      object-fit: contain;
       margin-bottom: 20px;
       filter: none !important;
     }
@@ -37,25 +37,14 @@
       color: #ccc;
     }
     .slogan {
-      font-size: 1em;
+      font-size: 1.1em;
       margin-bottom: 30px;
-      font-style: italic;
       color: #ccc;
     }
     h1 {
       margin: 10px 0;
       font-size: 2.5em;
       color: white;
-    }
-    nav {
-      background-color: #004d26; /* Darker green */
-      padding: 10px;
-    }
-    nav a {
-      color: white;
-      margin: 0 15px;
-      text-decoration: none;
-      font-weight: bold;
     }
     .dropdowns {
       display: flex;
@@ -70,8 +59,6 @@
       font-size: 1em;
       border-radius: 5px;
       border: none;
-    }
-    select {
       background-color: #004d26;
       color: white;
     }
@@ -87,8 +74,6 @@
       font-size: 0.9em;
     }
     button.upload {
-      background-color: #004d26;
-      color: white;
       cursor: pointer;
     }
     @media (max-width: 768px) {
@@ -96,23 +81,18 @@
         padding: 40px 10px;
       }
       img.logo {
-        width: 80vw;
+        width: 90vw;
+        height: auto;
       }
     }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="/index.html">Home</a>
-    <a href="/about.html">About</a>
-    <a href="/comingsoon.html">Coming Soon</a>
-  </nav>
-
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
-    <h1>Virtual Coach AI</h1>
     <div class="slogan">Where the future of golf instruction begins with AI</div>
+    <h1>Virtual Coach AI</h1>
 
     <div class="dropdowns">
       <select id="handedness">
