@@ -6,10 +6,8 @@
   <title>Virtual Coach AI - Upload</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      height: 100%;
       font-family: Arial, sans-serif;
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
@@ -17,29 +15,31 @@
       text-align: center;
     }
     .container {
+      padding: 40px 20px 20px 20px;
+      background-color: rgba(0, 0, 0, 0.3);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      padding: 60px 20px;
-      background-color: rgba(0, 0, 0, 0.3);
+      justify-content: flex-start;
     }
     img.logo {
       width: clamp(250px, 60vw, 600px);
-      max-width: 90vw;
       height: auto;
+      max-width: 90vw;
       aspect-ratio: 40 / 6;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
+      filter: brightness(0) saturate(100%) invert(30%) sepia(90%) saturate(500%) hue-rotate(75deg); /* dark green tint */
     }
     .tagline {
-      font-size: 1.25em;
-      margin-bottom: 15px;
+      font-size: 1em;
+      margin-top: 0;
+      margin-bottom: 5px;
       font-style: italic;
       color: #ccc;
     }
     h1 {
-      margin: 10px 0;
+      margin: 5px 0 10px;
       font-size: 2.5em;
       color: white;
     }
@@ -48,7 +48,7 @@
       gap: 10px;
       flex-wrap: wrap;
       justify-content: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
     select, input[type="file"], button {
       margin: 10px;
@@ -58,7 +58,7 @@
       border: none;
     }
     select {
-      background-color: rgba(0, 0, 0, 0.6);
+      background-color: rgba(34, 34, 34, 0.6);
       color: white;
     }
     input[type="file"]::file-selector-button {
@@ -73,13 +73,13 @@
       font-size: 0.9em;
     }
     button.upload {
-      background-color: #222;
+      background-color: green;
       color: white;
       cursor: pointer;
     }
     @media (max-width: 768px) {
       .container {
-        padding: 40px 10px;
+        padding: 30px 10px 10px;
       }
       img.logo {
         width: 90vw;
@@ -90,6 +90,7 @@
 <body>
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
+    <div class="tagline">Where the future of golf instruction begins with AI</div>
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
     <h1>Virtual Coach AI</h1>
 
