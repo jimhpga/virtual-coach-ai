@@ -16,7 +16,7 @@
     }
     .container {
       padding: 60px 20px;
-      background-color: rgba(0, 0, 0, 0.25);
+      background-color: rgba(0, 0, 0, 0.18); /* Lightened again */
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -25,7 +25,7 @@
     }
     img.logo {
       width: auto;
-      height: 400px;
+      height: 400px; /* Final confirmed logo height */
       max-width: 90%;
       margin-bottom: 10px;
     }
@@ -54,24 +54,14 @@
       border-radius: 5px;
       border: none;
     }
-    input[type="file"]::-webkit-file-upload-button {
-      background-color: #006400;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    input[type="file"]::file-selector-button {
-      background-color: #006400;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
+    input[type="file"] {
+      display: block;
+      margin: 0 auto 20px auto; /* Centered horizontally */
+      background-color: #ffffff;
+      color: black;
     }
     button.upload {
-      background-color: #006400;
+      background-color: #006400; /* Dark green */
       color: white;
       cursor: pointer;
     }
@@ -80,7 +70,7 @@
         padding: 40px 10px;
       }
       img.logo {
-        height: 240px;
+        height: 120px;
       }
     }
   </style>
