@@ -6,8 +6,10 @@
   <title>Virtual Coach AI - Upload</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
       font-family: Arial, sans-serif;
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
@@ -15,21 +17,20 @@
       text-align: center;
     }
     .container {
-      padding: 60px 20px;
-      background-color: rgba(0, 0, 0, 0.3);
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 60px 20px;
+      background-color: rgba(0, 0, 0, 0.3);
     }
     img.logo {
       width: clamp(250px, 60vw, 600px);
       max-width: 90vw;
       height: auto;
-      aspect-ratio: auto;
+      aspect-ratio: 40 / 6;
       margin-bottom: 20px;
-      filter: none !important;
     }
     .tagline {
       font-size: 1.25em;
@@ -57,7 +58,7 @@
       border: none;
     }
     select {
-      background-color: rgba(34, 34, 34, 0.8);
+      background-color: rgba(0, 0, 0, 0.6);
       color: white;
     }
     input[type="file"]::file-selector-button {
@@ -72,7 +73,7 @@
       font-size: 0.9em;
     }
     button.upload {
-      background-color: #00bfff;
+      background-color: #222;
       color: white;
       cursor: pointer;
     }
