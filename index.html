@@ -12,34 +12,68 @@
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
       color: white;
-      text-align: center;
     }
+
+    .sidebar {
+      height: 100vh;
+      width: 220px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: rgba(0, 0, 0, 0.75);
+      padding-top: 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 2;
+    }
+
+    .sidebar a {
+      padding: 12px 20px;
+      text-decoration: none;
+      font-size: 1em;
+      color: #00ffcc;
+      transition: 0.3s;
+    }
+
+    .sidebar a:hover {
+      background-color: #00ffcc;
+      color: black;
+    }
+
     .container {
+      margin-left: 240px;
       padding: 60px 20px;
-      background-color: rgba(0, 0, 0, 0.2);
+      background-color: rgba(0, 0, 0, 0.25);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      text-align: center;
     }
+
     img.logo {
+      width: auto;
       height: 400px;
       max-width: 90%;
       margin-bottom: 10px;
       filter: drop-shadow(0 0 10px #000);
     }
+
     .tagline {
       font-size: 1.1em;
       margin-bottom: 10px;
       font-style: italic;
       color: #ffffff;
     }
+
     h1 {
       margin: 0 0 15px;
       font-size: 2.4em;
       color: white;
     }
+
     .dropdowns {
       display: flex;
       gap: 10px;
@@ -47,56 +81,50 @@
       justify-content: center;
       margin-bottom: 20px;
     }
-    select {
+
+    select, input[type="file"], button {
       margin: 10px;
       padding: 10px;
       font-size: 1em;
       border-radius: 5px;
       border: none;
     }
-    .file-upload-wrapper {
-      position: relative;
-      overflow: hidden;
-      display: inline-block;
-    }
-    .file-upload-wrapper input[type="file"] {
-      font-size: 100px;
-      position: absolute;
-      left: 0;
-      top: 0;
-      opacity: 0;
-    }
-    .file-upload-button {
+
+    button.upload {
       background-color: #006400;
       color: white;
-      padding: 10px 20px;
-      font-size: 1em;
-      border-radius: 5px;
-      border: none;
       cursor: pointer;
-      margin: 10px;
     }
-    .upload {
-      background-color: #006400;
-      color: white;
-      padding: 10px 20px;
-      font-size: 1em;
-      border-radius: 5px;
-      border: none;
-      cursor: pointer;
-      margin: 10px;
-    }
+
     @media (max-width: 768px) {
       .container {
+        margin-left: 0;
         padding: 40px 10px;
       }
       img.logo {
-        height: 200px;
+        height: 120px;
+      }
+      .sidebar {
+        position: relative;
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-around;
+        padding-top: 10px;
+        height: auto;
       }
     }
   </style>
 </head>
 <body>
+  <div class="sidebar">
+    <a href="index.html">Home</a>
+    <a href="coming-soon.html">About Us</a>
+    <a href="coming-soon.html">Our Team</a>
+    <a href="coming-soon.html">Courses</a>
+    <a href="coming-soon.html">FAQ</a>
+    <a href="coming-soon.html">Contact</a>
+  </div>
+
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
     <h1>Virtual Coach AI</h1>
@@ -115,18 +143,11 @@
       </select>
     </div>
 
-    <div class="file-upload-wrapper">
-      <button class="file-upload-button">Select Swing File</button>
-      <input type="file" id="fileInput" accept="video/*" />
-    </div>
+    <input type="file" id="fileInput" accept="video/*" />
     <button class="upload" onclick="uploadVideo()">Upload Your Swing</button>
   </div>
 
   <script>
-    document.querySelector('.file-upload-button').addEventListener('click', function() {
-      document.getElementById('fileInput').click();
-    });
-
     async function uploadVideo() {
       const file = document.getElementById('fileInput').files[0];
       if (!file) {
