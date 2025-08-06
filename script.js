@@ -1,46 +1,47 @@
-// ===== script.js =====
-document.getElementById('uploadButton').addEventListener('click', async () => {
+// script.js - Handles video upload for upload-html
+
+function uploadVideo() {
   const fileInput = document.getElementById('fileInput');
   const status = document.getElementById('status');
+  const preview = document.getElementById('preview');
 
-  if (!fileInput.files.length) {
-    status.textContent = 'Please select a video file first.';
+  const file = fileInput.files[0];
+
+  if (!file) {
+    status.textContent = 'Please select a video file.';
     return;
   }
 
-  const file = fileInput.files[0];
+  // Show video preview
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    preview.src = e.target.result;
+    preview.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+
+  // Start upload process
+  status.textContent = 'Uploading...';
+
   const formData = new FormData();
   formData.append('video', file);
 
-  status.textContent = 'Uploading...';
-
-  try {
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData
+  fetch('/api/upload', {
+    method: 'POST',
+    body: formData
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Upload failed.');
+      }
+      return response.json();
+    })
+    .then(data => {
+      status.textContent = 'Upload successful!';
+      // If you want to redirect or update the page, do it here
+    })
+    .catch(error => {
+      console.error('Upload error:', error);
+      status.textContent = 'Upload failed. Please try again.';
     });
-
-    if (!response.ok) throw new Error('Upload failed.');
-
-    const result = await response.json();
-    status.textContent = `Upload successful: ${result.message}`;
-  } catch (error) {
-    status.textContent = 'Upload failed. Please try again.';
-    console.error(error);
-  }
-});
-
-// Optional: Show video preview
-const fileInput = document.getElementById('fileInput');
-fileInput.addEventListener('change', () => {
-  const preview = document.getElementById('preview');
-  preview.innerHTML = '';
-
-  const file = fileInput.files[0];
-  if (file) {
-    const video = document.createElement('video');
-    video.controls = true;
-    video.src = URL.createObjectURL(file);
-    preview.appendChild(video);
-  }
-});
+}
