@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About - Virtual Coach AI</title>
   <style>
     body {
@@ -11,44 +11,42 @@
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
       color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
       text-align: center;
+      padding: 60px 20px;
     }
     .content {
       background-color: rgba(0, 0, 0, 0.5);
-      padding: 30px;
+      padding: 40px;
       border-radius: 10px;
       max-width: 800px;
+      margin: auto;
     }
     h1 {
-      margin-bottom: 10px;
+      font-size: 3em;
+      margin-bottom: 20px;
     }
     p {
       font-size: 1.2em;
-      line-height: 1.6;
+      line-height: 1.6em;
     }
-    a.button {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 10px 20px;
-      background-color: #006400;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
+    a {
+      color: #90ee90;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
   <div class="content">
     <h1>About Virtual Coach AI</h1>
-    <p>Virtual Coach AI is a cutting-edge sports training platform combining biomechanics, artificial intelligence, and real-time feedback to improve athletic performance. We started in golf — and we’re just getting warmed up.</p>
-    <p>Our mission is to help every athlete — from weekend warrior to elite pro — improve smarter, faster, and with total clarity.</p>
-    <a class="button" href="index.html">Back to Home</a>
+    <p>
+      Virtual Coach AI is the future of swing analysis and personalized coaching. Built by golf professionals, tech experts, and biomechanics nerds, our platform gives you real-time feedback, AI-driven breakdowns, and a roadmap to measurable improvement.
+    </p>
+    <p>
+      Whether you're a weekend warrior or a competitive junior, we're here to help you train smarter, not just harder. This beta test is just the beginning. Coming soon: live voice coaching, ball flight prediction, force plate integration, and more.
+    </p>
+    <p>
+      <a href="index.html">Return to Homepage</a>
+    </p>
   </div>
 </body>
 </html>
