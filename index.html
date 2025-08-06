@@ -24,21 +24,15 @@
       justify-content: center;
     }
     img.logo {
-      width: 7.5in;
-      height: 3in;
-      object-fit: contain;
+      width: clamp(500px, 80vw, 1200px);
+      aspect-ratio: 40 / 6;
       margin-bottom: 20px;
       filter: none !important;
     }
     .tagline {
       font-size: 1.25em;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
       font-style: italic;
-      color: #ccc;
-    }
-    .slogan {
-      font-size: 1.1em;
-      margin-bottom: 30px;
       color: #ccc;
     }
     h1 {
@@ -74,6 +68,8 @@
       font-size: 0.9em;
     }
     button.upload {
+      background-color: #004d26;
+      color: white;
       cursor: pointer;
     }
     @media (max-width: 768px) {
@@ -82,7 +78,6 @@
       }
       img.logo {
         width: 90vw;
-        height: auto;
       }
     }
   </style>
@@ -90,8 +85,7 @@
 <body>
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
-    <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
-    <div class="slogan">Where the future of golf instruction begins with AI</div>
+    <div class="tagline">Where the future of golf instruction begins with AI</div>
     <h1>Virtual Coach AI</h1>
 
     <div class="dropdowns">
