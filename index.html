@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Virtual Coach AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Virtual Coach AI - Upload</title>
   <link rel="stylesheet" href="style.css" />
   <style>
     body {
@@ -26,8 +26,10 @@
     img.logo {
       width: clamp(250px, 60vw, 600px);
       max-width: 90vw;
-      aspect-ratio: 40 / 6;
+      height: auto;
+      aspect-ratio: auto;
       margin-bottom: 20px;
+      filter: none !important;
     }
     .tagline {
       font-size: 1.25em;
@@ -38,7 +40,7 @@
     h1 {
       margin: 10px 0;
       font-size: 2.5em;
-      color: #00ffcc;
+      color: white;
     }
     .dropdowns {
       display: flex;
@@ -55,7 +57,7 @@
       border: none;
     }
     select {
-      background-color: rgba(0, 0, 0, 0.6);
+      background-color: rgba(34, 34, 34, 0.8);
       color: white;
     }
     input[type="file"]::file-selector-button {
@@ -70,7 +72,7 @@
       font-size: 0.9em;
     }
     button.upload {
-      background-color: #228B22;
+      background-color: #00bfff;
       color: white;
       cursor: pointer;
     }
