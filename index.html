@@ -25,17 +25,17 @@
     }
     img.logo {
       width: clamp(250px, 60vw, 600px);
-      height: auto;
       max-width: 90vw;
-      aspect-ratio: 3 / 1;
-      margin-bottom: 10px;
-      filter: brightness(0) saturate(100%) invert(28%) sepia(100%) saturate(345%) hue-rotate(75deg) brightness(95%) contrast(92%);
+      height: auto;
+      aspect-ratio: 2 / 1;
+      margin-bottom: 20px;
+      filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(95%) contrast(85%);
     }
     .tagline {
-      font-size: 1.2em;
-      margin-bottom: 10px;
+      font-size: 1.25em;
+      margin-bottom: 15px;
       font-style: italic;
-      color: #ffffff;
+      color: white;
     }
     h1 {
       margin: 10px 0;
@@ -57,11 +57,11 @@
       border: none;
     }
     select {
-      background-color: #014421;
+      background-color: #003300;
       color: white;
     }
     input[type="file"]::file-selector-button {
-      background-color: #014421;
+      background-color: #003300;
       color: white;
       padding: 6px 12px;
       border-radius: 4px;
@@ -72,9 +72,24 @@
       font-size: 0.9em;
     }
     button.upload {
-      background-color: #014421;
+      background-color: #003300;
       color: white;
       cursor: pointer;
+    }
+    nav {
+      width: 100%;
+      background-color: #003300;
+      padding: 10px 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      text-align: center;
+    }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
     }
     @media (max-width: 768px) {
       .container {
@@ -87,10 +102,16 @@
   </style>
 </head>
 <body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="comingsoon.html">Coming Soon</a>
+  </nav>
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
     <h1>Virtual Coach AI</h1>
+    <p>Where the future of golf instruction begins with AI</p>
 
     <div class="dropdowns">
       <select id="handedness">
