@@ -16,7 +16,7 @@
     }
     .container {
       padding: 60px 20px;
-      background-color: rgba(0, 0, 0, 0.18); /* Lightened again */
+      background-color: rgba(0, 0, 0, 0.2);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -25,20 +25,21 @@
     }
     img.logo {
       width: auto;
-      height: 400px; /* Final confirmed logo height */
+      height: 400px;
       max-width: 90%;
       margin-bottom: 10px;
-    }
-    .tagline {
-      font-size: 1.1em;
-      margin-bottom: 10px;
-      font-style: italic;
-      color: #ffffff;
+      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.7); /* shadow added */
     }
     h1 {
       margin: 0 0 15px;
       font-size: 2.4em;
       color: white;
+    }
+    .tagline {
+      font-size: 1.1em;
+      margin-bottom: 20px;
+      font-style: italic;
+      color: #ffffff;
     }
     .dropdowns {
       display: flex;
@@ -47,23 +48,35 @@
       justify-content: center;
       margin-bottom: 20px;
     }
-    select, input[type="file"], button {
+    select, button {
       margin: 10px;
       padding: 10px;
       font-size: 1em;
       border-radius: 5px;
       border: none;
     }
-    input[type="file"] {
-      display: block;
-      margin: 0 auto 20px auto; /* Centered horizontally */
-      background-color: #ffffff;
-      color: black;
-    }
     button.upload {
-      background-color: #006400; /* Dark green */
+      background-color: #006400;
       color: white;
       cursor: pointer;
+    }
+    input[type="file"]::-webkit-file-upload-button {
+      visibility: hidden;
+    }
+    input[type="file"]::before {
+      content: 'Select Swing File';
+      display: inline-block;
+      background-color: #006400;
+      color: white;
+      padding: 10px 20px;
+      font-size: 1em;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    input[type="file"] {
+      margin: 10px;
+      text-align: center;
+      color: transparent;
     }
     @media (max-width: 768px) {
       .container {
@@ -78,7 +91,6 @@
 <body>
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
-
     <h1>Virtual Coach AI</h1>
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
 
