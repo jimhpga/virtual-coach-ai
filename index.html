@@ -6,39 +6,38 @@
   <title>Virtual Coach AI - Beta</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    html, body {
+    body {
       margin: 0;
-      padding: 0;
-      height: 100%;
       font-family: Arial, sans-serif;
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
       color: white;
+      text-align: center;
+      min-height: 100vh;
     }
     .container {
-      min-height: 100vh;
+      padding: 60px 20px 100px; /* Stretch page height a bit more */
+      background-color: rgba(0, 0, 0, 0.3);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 60px 20px;
-      background-color: rgba(0, 0, 0, 0.5);
-      box-sizing: border-box;
+      justify-content: flex-start;
     }
-    .logo {
-      width: 500px;
-      max-width: 90%;
+    img.logo {
+      width: 600px;
+      max-width: 95%;
+      margin-top: 40px;
       margin-bottom: 10px;
-    }
-    h1.label {
-      font-size: 2em;
-      margin: 0 0 10px;
-      color: white;
     }
     .tagline {
       font-size: 1.2em;
       font-style: italic;
-      margin-bottom: 20px;
+      margin-bottom: 5px;
+      color: white;
+    }
+    h1.title {
+      margin: 10px 0;
+      font-size: 2.5em;
       color: white;
     }
     .dropdowns {
@@ -46,27 +45,35 @@
       gap: 10px;
       flex-wrap: wrap;
       justify-content: center;
-      margin-bottom: 20px;
+      margin: 20px 0;
     }
-    select, input[type="file"], button {
-      padding: 10px;
+    select, input[type="file"], button.upload {
+      margin: 10px;
+      padding: 12px;
       font-size: 1em;
       border-radius: 5px;
       border: none;
-      margin: 5px;
     }
     button.upload {
       background-color: #00bfff;
       color: white;
       cursor: pointer;
     }
+    @media (max-width: 768px) {
+      img.logo {
+        width: 90%;
+      }
+      .container {
+        padding: 40px 10px 80px;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
-    <h1 class="label">Virtual Coach AI</h1>
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
+    <h1 class="title">Virtual Coach AI</h1>
 
     <div class="dropdowns">
       <select id="handedness">
