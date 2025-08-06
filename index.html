@@ -13,33 +13,41 @@
       background-size: cover;
       color: white;
       text-align: center;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
     .container {
-      padding: 40px 20px 20px 20px;
+      padding: 50px 20px;
       background-color: rgba(0, 0, 0, 0.3);
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
+      flex: 1;
     }
     img.logo {
-      width: clamp(250px, 60vw, 600px);
+      width: clamp(300px, 65vw, 700px);
+      max-width: 95vw;
       height: auto;
-      max-width: 90vw;
       aspect-ratio: 40 / 6;
-      margin-bottom: 10px;
-      filter: brightness(0) saturate(100%) invert(30%) sepia(90%) saturate(500%) hue-rotate(75deg); /* dark green tint */
+      margin-bottom: 15px;
+      filter: brightness(0) saturate(100%) invert(23%) sepia(96%) saturate(751%) hue-rotate(81deg) brightness(93%) contrast(105%);
     }
     .tagline {
-      font-size: 1em;
-      margin-top: 0;
-      margin-bottom: 5px;
+      font-size: 1.2em;
+      margin-bottom: 8px;
       font-style: italic;
       color: #ccc;
     }
+    .beta-tag {
+      font-size: 1.1em;
+      margin-bottom: 20px;
+      color: #ccc;
+    }
     h1 {
-      margin: 5px 0 10px;
+      margin: 10px 0 15px;
       font-size: 2.5em;
       color: white;
     }
@@ -48,7 +56,7 @@
       gap: 10px;
       flex-wrap: wrap;
       justify-content: center;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
     select, input[type="file"], button {
       margin: 10px;
@@ -58,7 +66,7 @@
       border: none;
     }
     select {
-      background-color: rgba(34, 34, 34, 0.6);
+      background-color: rgba(34, 34, 34, 0.7);
       color: white;
     }
     input[type="file"]::file-selector-button {
@@ -73,13 +81,13 @@
       font-size: 0.9em;
     }
     button.upload {
-      background-color: green;
+      background-color: #008000;
       color: white;
       cursor: pointer;
     }
     @media (max-width: 768px) {
       .container {
-        padding: 30px 10px 10px;
+        padding: 30px 10px;
       }
       img.logo {
         width: 90vw;
@@ -91,7 +99,7 @@
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
     <div class="tagline">Where the future of golf instruction begins with AI</div>
-    <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
+    <div class="beta-tag">Welcome to the Beta Test of Virtual Coach AI</div>
     <h1>Virtual Coach AI</h1>
 
     <div class="dropdowns">
