@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Virtual Coach AI - Upload</title>
   <link rel="stylesheet" href="style.css" />
   <style>
@@ -14,8 +14,21 @@
       color: white;
       text-align: center;
     }
+    nav {
+      background-color: #003300;
+      padding: 10px 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.1em;
+    }
     .container {
-      padding: 60px 20px;
+      padding: 40px 20px;
       background-color: rgba(0, 0, 0, 0.3);
       min-height: 100vh;
       display: flex;
@@ -24,22 +37,21 @@
       justify-content: center;
     }
     img.logo {
-      width: clamp(250px, 60vw, 600px);
-      max-width: 90vw;
-      aspect-ratio: 40 / 6;
+      width: clamp(200px, 40vw, 450px);
+      height: auto;
       margin-bottom: 10px;
-      filter: brightness(0) saturate(100%) invert(33%) sepia(95%) saturate(443%) hue-rotate(74deg) brightness(90%) contrast(92%);
+      filter: brightness(0) saturate(100%) invert(30%) sepia(80%) saturate(700%) hue-rotate(75deg) brightness(90%) contrast(90%);
     }
     .tagline {
-      font-size: 1.25em;
-      margin-bottom: 10px;
+      font-size: 1.2em;
       font-style: italic;
       color: white;
+      margin-bottom: 10px;
     }
     h1 {
-      margin: 10px 0;
       font-size: 2.5em;
       color: white;
+      margin: 10px 0;
     }
     .dropdowns {
       display: flex;
@@ -48,19 +60,21 @@
       justify-content: center;
       margin-bottom: 20px;
     }
-    select, input[type="file"], button {
+    select, input[type="file"], button.upload {
       margin: 10px;
-      padding: 10px;
+      padding: 10px 20px;
       font-size: 1em;
       border-radius: 5px;
       border: none;
+      background-color: #006400;
+      color: white;
+      cursor: pointer;
     }
     select {
-      background-color: #154734;
-      color: white;
+      background-color: #004d00;
     }
     input[type="file"]::file-selector-button {
-      background-color: #154734;
+      background-color: #004d00;
       color: white;
       padding: 6px 12px;
       border-radius: 4px;
@@ -70,22 +84,20 @@
       color: #ccc;
       font-size: 0.9em;
     }
-    button.upload {
-      background-color: #154734;
-      color: white;
-      cursor: pointer;
-    }
     @media (max-width: 768px) {
-      .container {
-        padding: 40px 10px;
-      }
       img.logo {
-        width: 90vw;
+        width: 80vw;
       }
     }
   </style>
 </head>
 <body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="comingsoon.html">Coming Soon</a>
+  </nav>
+
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
