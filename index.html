@@ -54,36 +54,22 @@
       border-radius: 5px;
       border: none;
     }
-    input[type="file"] {
-      margin: 10px;
-      padding: 10px;
-      font-size: 1em;
-      border-radius: 5px;
-      border: none;
-      background-color: #004d00; /* dark green */
-      color: white;
-      cursor: pointer;
-    }
-    input[type="file"]::-webkit-file-upload-button {
-      background-color: #004d00;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    input[type="file"]::file-selector-button {
-      background-color: #004d00;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
     button.upload {
       background-color: #006400;
       color: white;
       cursor: pointer;
+    }
+    .hidden-file-input {
+      display: none;
+    }
+    .custom-file-button {
+      background-color: #006400;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px;
+      font-size: 1em;
     }
     @media (max-width: 768px) {
       .container {
@@ -112,10 +98,13 @@
         <option value="">Select Eye Dominance</option>
         <option value="right">Right Eye</option>
         <option value="left">Left Eye</option>
+        <option value="unknown">Unknown</option>
       </select>
     </div>
 
-    <input type="file" id="fileInput" accept="video/*" />
+    <input type="file" id="fileInput" accept="video/*" class="hidden-file-input" />
+    <label for="fileInput" class="custom-file-button">Select Swing</label>
+
     <button class="upload" onclick="uploadVideo()">Upload Your Swing</button>
   </div>
 
