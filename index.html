@@ -12,37 +12,9 @@
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
       color: white;
+      text-align: center;
     }
-
-    .sidebar {
-      height: 100vh;
-      width: 220px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      background-color: rgba(0, 0, 0, 0.75);
-      padding-top: 60px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      z-index: 2;
-    }
-
-    .sidebar a {
-      padding: 12px 20px;
-      text-decoration: none;
-      font-size: 1em;
-      color: #00ffcc;
-      transition: 0.3s;
-    }
-
-    .sidebar a:hover {
-      background-color: #00ffcc;
-      color: black;
-    }
-
     .container {
-      margin-left: 240px;
       padding: 60px 20px;
       background-color: rgba(0, 0, 0, 0.25);
       min-height: 100vh;
@@ -50,30 +22,24 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      text-align: center;
     }
-
     img.logo {
       width: auto;
       height: 400px;
       max-width: 90%;
       margin-bottom: 10px;
-      filter: drop-shadow(0 0 10px #000);
     }
-
     .tagline {
       font-size: 1.1em;
       margin-bottom: 10px;
       font-style: italic;
       color: #ffffff;
     }
-
     h1 {
       margin: 0 0 15px;
       font-size: 2.4em;
       color: white;
     }
-
     .dropdowns {
       display: flex;
       gap: 10px;
@@ -81,7 +47,6 @@
       justify-content: center;
       margin-bottom: 20px;
     }
-
     select, input[type="file"], button {
       margin: 10px;
       padding: 10px;
@@ -89,44 +54,25 @@
       border-radius: 5px;
       border: none;
     }
-
     button.upload {
       background-color: #006400;
       color: white;
       cursor: pointer;
     }
-
     @media (max-width: 768px) {
       .container {
-        margin-left: 0;
         padding: 40px 10px;
       }
       img.logo {
         height: 120px;
       }
-      .sidebar {
-        position: relative;
-        width: 100%;
-        flex-direction: row;
-        justify-content: space-around;
-        padding-top: 10px;
-        height: auto;
-      }
     }
   </style>
 </head>
 <body>
-  <div class="sidebar">
-    <a href="index.html">Home</a>
-    <a href="coming-soon.html">About Us</a>
-    <a href="coming-soon.html">Our Team</a>
-    <a href="coming-soon.html">Courses</a>
-    <a href="coming-soon.html">FAQ</a>
-    <a href="coming-soon.html">Contact</a>
-  </div>
-
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
+
     <h1>Virtual Coach AI</h1>
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
 
