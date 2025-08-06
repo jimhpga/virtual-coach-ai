@@ -12,10 +12,26 @@
       background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
       color: white;
-      text-align: center;
+    }
+    header {
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+    }
+    nav select {
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 5px;
+      border: none;
+      background-color: #006400;
+      color: white;
+      cursor: pointer;
     }
     .container {
       padding: 60px 20px;
+      text-align: center;
       background-color: rgba(0, 0, 0, 0.25);
       min-height: 100vh;
       display: flex;
@@ -54,22 +70,20 @@
       border-radius: 5px;
       border: none;
     }
-    button.upload {
-      background-color: #006400;
-      color: white;
-      cursor: pointer;
-    }
-    .hidden-file-input {
+    input[type="file"] {
       display: none;
     }
-    .custom-file-button {
+    .file-label {
       background-color: #006400;
       color: white;
       padding: 10px;
       border-radius: 5px;
       cursor: pointer;
-      margin: 10px;
-      font-size: 1em;
+    }
+    button.upload {
+      background-color: #006400;
+      color: white;
+      cursor: pointer;
     }
     @media (max-width: 768px) {
       .container {
@@ -82,9 +96,21 @@
   </style>
 </head>
 <body>
+  <header>
+    <div style="color:white; font-size: 1.2em; font-weight:bold">Virtual Coach AI</div>
+    <nav>
+      <select onchange="navigateToPage(this)">
+        <option value="">Navigate</option>
+        <option value="index.html">Home</option>
+        <option value="about.html">About</option>
+        <option value="features.html">Features</option>
+        <option value="coming-soon.html">Coming Soon</option>
+      </select>
+    </nav>
+  </header>
+
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
-
     <h1>Virtual Coach AI</h1>
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
 
@@ -102,13 +128,17 @@
       </select>
     </div>
 
-    <input type="file" id="fileInput" accept="video/*" class="hidden-file-input" />
-    <label for="fileInput" class="custom-file-button">Select Swing</label>
-
+    <label class="file-label" for="fileInput">Select Swing</label>
+    <input type="file" id="fileInput" accept="video/*" />
     <button class="upload" onclick="uploadVideo()">Upload Your Swing</button>
   </div>
 
   <script>
+    function navigateToPage(select) {
+      const page = select.value;
+      if (page) window.location.href = page;
+    }
+
     async function uploadVideo() {
       const file = document.getElementById('fileInput').files[0];
       if (!file) {
