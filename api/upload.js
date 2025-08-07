@@ -1,7 +1,8 @@
-// 📁 File: api/upload.js
+/ /api/upload.js
 
-import formidable from 'formidable';
 import fs from 'fs';
+import path from 'path';
+import formidable from 'formidable';
 
 export const config = {
   api: {
@@ -10,32 +11,22 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  const form = new formidable.IncomingForm();
+  form.uploadDir = path.join(process.cwd(), 'public/uploads');
+  form.keepExtensions = true;
 
-  const form = new formidable.IncomingForm({
-    keepExtensions: true,
-    maxFileSize: 50 * 1024 * 1024, // 50MB
-    uploadDir: './uploads',
-  });
-
-  await fs.promises.mkdir('./uploads', { recursive: true });
-
-  form.parse(req, async (err, fields, files) => {
+  form.parse(req, (err, fields, files) => {
     if (err) {
       console.error('Form parse error:', err);
-      return res.status(500).json({ error: 'Failed to parse form' });
+      res.status(500).json({ error: 'Upload failed' });
+      return;
     }
 
-    if (!files.video) {
-      return res.status(400).json({ error: 'No video file received' });
+    const file = files.video;
+    if (!file) {
+      return res.status(400).json({ error: 'No video file provided' });
     }
 
-    const uploadedFile = files.video[0];
-    console.log('✅ Uploaded video file:', uploadedFile.filepath);
-
-    // Success response
-    return res.status(200).json({ success: true, filepath: uploadedFile.filepath });
+    res.status(200).json({ message: 'File uploaded', filename: path.basename(file.filepath) });
   });
 }
