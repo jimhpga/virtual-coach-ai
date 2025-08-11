@@ -14,8 +14,25 @@
       color: white;
       text-align: center;
     }
+    nav {
+      width: 100%;
+      background-color: #003300;
+      padding: 10px 0;
+      position: sticky; /* was absolute — sticky keeps it usable on scroll */
+      top: 0;
+      left: 0;
+      text-align: center;
+      z-index: 10;
+    }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 6px 4px; /* bigger tap target */
+    }
     .container {
-      padding: 60px 20px;
+      padding: 80px 20px; /* give room under sticky nav */
       background-color: rgba(0, 0, 0, 0.3);
       min-height: 100vh;
       display: flex;
@@ -31,82 +48,33 @@
       margin-bottom: 20px;
       filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(95%) contrast(85%);
     }
-    .tagline {
-      font-size: 1.25em;
-      margin-bottom: 15px;
-      font-style: italic;
-      color: white;
-    }
-    h1 {
-      margin: 10px 0;
-      font-size: 2.5em;
-      color: white;
-    }
+    .tagline { font-size: 1.25em; margin-bottom: 15px; font-style: italic; color: white; }
+    h1 { margin: 10px 0; font-size: 2.5em; color: white; }
     .dropdowns {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 20px;
+      display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
     }
     select, input[type="file"], button {
-      margin: 10px;
-      padding: 10px;
-      font-size: 1em;
-      border-radius: 5px;
-      border: none;
+      margin: 10px; padding: 10px; font-size: 1em; border-radius: 5px; border: none;
     }
-    select {
-      background-color: #003300;
-      color: white;
-    }
+    select { background-color: #003300; color: white; }
     input[type="file"]::file-selector-button {
-      background-color: #003300;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 4px;
-      border: none;
+      background-color: #003300; color: white; padding: 6px 12px; border-radius: 4px; border: none;
     }
-    input[type="file"] {
-      color: #ccc;
-      font-size: 0.9em;
-    }
-    button.upload {
-      background-color: #003300;
-      color: white;
-      cursor: pointer;
-    }
-    nav {
-      width: 100%;
-      background-color: #003300;
-      padding: 10px 0;
-      position: absolute;
-      top: 0;
-      left: 0;
-      text-align: center;
-    }
-    nav a {
-      color: white;
-      margin: 0 15px;
-      text-decoration: none;
-      font-weight: bold;
-    }
+    input[type="file"] { color: #ccc; font-size: 0.9em; }
+    button.upload { background-color: #003300; color: white; cursor: pointer; }
     @media (max-width: 768px) {
-      .container {
-        padding: 40px 10px;
-      }
-      img.logo {
-        width: 90vw;
-      }
+      .container { padding: 70px 10px; }
+      img.logo { width: 90vw; }
     }
   </style>
 </head>
 <body>
   <nav>
-    <a href="index.html">Home</a>
+    <a href="index.html" aria-current="page">Home</a>
     <a href="about.html">About</a>
-    <a href="comingsoon.html">Coming Soon</a>
+    <a href="coming-soon.html">Coming Soon</a> <!-- fixed filename -->
   </nav>
+
   <div class="container">
     <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
     <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
@@ -114,12 +82,12 @@
     <p>Where the future of golf instruction begins with AI</p>
 
     <div class="dropdowns">
-      <select id="handedness">
+      <select id="handedness" aria-label="Select handedness">
         <option value="">Select Handedness</option>
         <option value="right">Right-Handed</option>
         <option value="left">Left-Handed</option>
       </select>
-      <select id="eyeDominance">
+      <select id="eyeDominance" aria-label="Select eye dominance">
         <option value="">Select Eye Dominance</option>
         <option value="right">Right Eye</option>
         <option value="left">Left Eye</option>
@@ -143,7 +111,7 @@
       formData.append("file", file);
 
       try {
-        const res = await fetch('/api/frames', {
+        const res = await fetch('/api/upload', { // was /api/frames
           method: 'POST',
           body: formData
         });
@@ -151,7 +119,8 @@
         if (res.ok) {
           window.location.href = "/report.html";
         } else {
-          alert("Upload failed. Please try again.");
+          const msg = await res.text().catch(() => "");
+          alert("Upload failed. " + (msg || "Please try again."));
         }
       } catch (err) {
         console.error(err);
@@ -161,3 +130,4 @@
   </script>
 </body>
 </html>
+
