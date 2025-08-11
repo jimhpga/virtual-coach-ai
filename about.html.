@@ -2,63 +2,45 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>About - Virtual Coach AI</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="description" content="About Virtual Coach AI — AI-powered swing analysis, mental game scoring, and personalized practice plans." />
+  <link rel="stylesheet" href="style.css" />
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #0f1f0f;
-      color: white;
-    }
-    .navbar {
-      background-color: #144d14;
-      padding: 15px;
-      text-align: center;
-    }
-    .navbar a {
-      color: white;
-      margin: 0 15px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .container {
-      padding: 40px 20px;
-      max-width: 800px;
-      margin: auto;
-    }
-    h1 {
-      color: #00ff99;
-      font-size: 2.5em;
-      margin-bottom: 20px;
-    }
-    p {
-      font-size: 1.2em;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
+    body { margin:0; font-family: Arial, sans-serif; background:#0f1f0f; color:#fff; }
+    .navbar { background:#144d14; padding:15px; text-align:center; position:sticky; top:0; z-index:10; }
+    .navbar a { color:#fff; margin:0 15px; text-decoration:none; font-weight:bold; }
+    .container { padding:40px 20px; max-width: 900px; margin:auto; }
+    h1 { color:#00ff99; font-size:2.4rem; margin:0 0 16px; }
+    p  { font-size:1.05rem; line-height:1.7; margin:0 0 16px; }
+    .hero { margin-top:8px; padding:16px; border:1px solid #1f5e1f; border-radius:10px; background:#102b10; }
   </style>
 </head>
 <body>
-  <div class="navbar">
+  <nav class="navbar">
     <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="#features">Features</a>
-    <a href="#contact">Contact</a>
-  </div>
+    <a href="about.html" aria-current="page">About</a>
+    <a href="features.html">Features</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="contact.html">Contact</a>
+    <a href="coming-soon.html">Coming Soon</a>
+  </nav>
 
-  <div class="container">
-    <h1>About Virtual Coach AI</h1>
-    <p><strong>Virtual Coach AI</strong> is a revolutionary golf instruction system built by PGA professional Jim Hartnett and OpenAI's assistance to bring tour-level coaching to the everyday golfer. Our mission is simple: make elite performance accessible, understandable, and actionable—regardless of your location, skill level, or resources.</p>
+  <main class="container">
+    <header class="hero">
+      <h1>About Virtual Coach AI</h1>
+      <p><strong>Virtual Coach AI</strong> brings tour-level coaching to everyday golfers with AI-powered swing analysis, mental game scoring, and personalized practice plans.</p>
+    </header>
 
-    <p>With over 25 years of experience coaching at premier facilities like Kapalua in Maui, Sahalee Country Club in Washington, PGA West in California, and working alongside top instructors such as Jim McLean, Jim Hartnett has trained players ranging from beginners to major championship winners. That depth of experience is now combined with advanced AI to guide your improvement swing by swing.</p>
+    <p>Built by PGA professional <strong>Jim Hartnett</strong> with modern AI, the platform makes elite performance accessible, understandable, and actionable—regardless of location or skill level.</p>
 
-    <p>This platform was built to answer a core question: <em>How do we deliver truly personalized golf instruction at scale?</em> With AI-powered swing analysis, biomechanics insights, practice plans, and instant feedback tools, Virtual Coach AI is that answer.</p>
+    <p>Jim’s experience spans premier facilities like Kapalua (Maui), Sahalee (WA), and PGA West (CA), plus time with top instructors like Jim McLean. That depth is now fused with AI to guide improvement swing by swing.</p>
 
-    <p>Upcoming features include real-time motion tracking, 3D swing comparison tools, mental game training modules, and personalized improvement plans that evolve with you. And this is just the beginning.</p>
+    <p>Core focus: deliver truly personalized instruction at scale. Virtual Coach AI combines biomechanics insights, instant feedback tools, and an easy workflow so you can learn faster and smarter.</p>
 
-    <p>Whether you're chasing your first birdie or fine-tuning your scoring game, Virtual Coach AI is here to make sure you're not practicing in the dark. Welcome to the future of golf improvement.</p>
-  </div>
+    <p><strong>What’s next:</strong> real-time motion tracking, 3D comparisons, a full Mental IQ system, and adaptive practice plans that evolve with your progress.</p>
+
+    <p>Whether you’re chasing your first birdie or dialing in your scoring game potential, Virtual Coach AI keeps you out of the dark and on a plan. Welcome to the future of golf improvement.</p>
+  </main>
 </body>
 </html>
