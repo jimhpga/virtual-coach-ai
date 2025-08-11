@@ -1,74 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Coming Soon - Virtual Coach AI</title>
+  <meta name="description" content="New features launching soon for Virtual Coach AI." />
   <link rel="stylesheet" href="style.css" />
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #f3f3f3;
-      color: #222;
-      line-height: 1.6;
-    }
-    .topbar {
-      background-color: #004d26;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 1.2em;
-    }
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 20px;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1 {
-      color: #004d26;
-      text-align: center;
-    }
-    p {
-      margin-bottom: 20px;
-    }
-    ul {
-      padding-left: 20px;
-    }
+    body { margin:0; font-family: Arial, sans-serif; background:#0f1f0f; color:#fff; }
+    .navbar { background:#144d14; padding:15px; text-align:center; position:sticky; top:0; z-index:10; }
+    .navbar a { color:#fff; margin:0 15px; text-decoration:none; font-weight:bold; }
+    .container { padding:40px 20px; max-width: 900px; margin:auto; }
+    h1 { color:#00ff99; font-size:2.4rem; margin:0 0 16px; }
+    p  { font-size:1.05rem; line-height:1.7; margin:0 0 16px; }
+    ul { line-height:1.7; margin:0 0 24px 20px; }
+    .card { padding:18px; border:1px solid #1f5e1f; border-radius:10px; background:#102b10; }
+    .cta { display:inline-block; margin-top:8px; color:#00ff99; text-decoration:underline; }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <a href="index.html" style="color:white; text-decoration:none; margin-right:20px;">Home</a>
-    <a href="upload.html" style="color:white; text-decoration:none; margin-right:20px;">Upload</a>
-    <a href="about.html" style="color:white; text-decoration:none; margin-right:20px;">About</a>
-    <a href="comingsoon.html" style="color:white; text-decoration:underline;">Coming Soon</a>
-  </div>
+  <nav class="navbar">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="features.html">Features</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="contact.html">Contact</a>
+    <a href="coming-soon.html" aria-current="page">Coming Soon</a>
+  </nav>
 
-  <div class="container">
-    <h1>The Evolution Continues...</h1>
-    <p>There was a time when using video in golf instruction was seen as radical. Now it’s standard. Just like that revolution, AI is about to become the new norm. Any coach not using it will be left behind. We’re not here to follow trends — we’re here to set them.</p>
-
-    <p><strong>Virtual Coach AI</strong> is doing what no one else can: combining markerless motion capture, pose estimation, and intelligent diagnostics with true real-time instruction. No cables. No clunky setups. No BS. Just powerful feedback from anywhere, anytime, on any device.</p>
-
-    <p>We’ve filed patents on our AI logic, real-time feedback engine, biomechanical profiling system, and swing comparison technology — because no one else is doing it this way. And they won’t be able to copy it either.</p>
-
-    <p>Here’s just a taste of what’s coming soon:</p>
-    <ul>
-      <li>Live Pose Estimation with Instant AI Voice Feedback</li>
-      <li>Auto-Generated Swing Reports and Power Efficiency Charts</li>
-      <li>Ground Force Mapping Without Force Plates</li>
-      <li>Kinematic Sequence Visualizations with Coaching Insights</li>
-      <li>Personalized Drill Prescriptions from Real Swings</li>
-      <li>Side-by-Side Comparisons to Elite Players</li>
-      <li>Progress Tracking, Scoring, and Gamification</li>
-      <li>Full Mental Training Academy with Guided Routines</li>
-    </ul>
-
-    <p>If you thought golf instruction was advanced now, you haven’t seen anything yet. <strong>We’re not just improving the game — we’re reinventing how it’s taught.</strong></p>
-  </div>
+  <main class="container">
+    <h1>Coming Soon</h1>
+    <div class="card">
+      <p>We’re polishing key modules and rolling them out in stages so you can start using Virtual Coach AI immediately and see steady upgrades.</p>
+      <ul>
+        <li><strong>Mental Game Scoring + Final Report</strong> — shot-by-shot process scoring, end-of-round review, and coaching drills.</li>
+        <li><strong>Upload & Pro Comparison</strong> — side-by-side with elite swings, checkpoints P1–P9.</li>
+        <li><strong>Power / Efficiency / Fixer Reports</strong> — visualize leaks and get targeted fixes.</li>
+        <li><strong>Trend Dashboard</strong> — Mental IQ vs. scoring correlation over multiple rounds.</li>
+      </ul>
+      <p>Early access opens soon. Want in?</p>
+      <a class="cta" href="contact.html">Get on the early access list →</a>
+    </div>
+  </main>
 </body>
 </html>
