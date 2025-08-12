@@ -4,40 +4,95 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Coming Soon - Virtual Coach AI</title>
-  <meta name="description" content="New features launching soon for Virtual Coach AI." />
+  <meta name="description" content="What’s launching next for Virtual Coach AI: mental game scoring, reports, trend dashboards, pro comparisons, and more." />
   <style>
-    body{margin:0;font-family:Arial,sans-serif;background:url('homepage-background.png') no-repeat center center fixed;background-size:cover;color:#fff}
-    .navbar{background:rgba(0,0,0,0.6);padding:15px;text-align:center;position:sticky;top:0;z-index:10}
-    .navbar a{color:#fff;margin:0 15px;text-decoration:none;font-weight:bold}
-    .container{padding:40px 20px;max-width:900px;margin:auto;background:rgba(0,0,0,0.6);border-radius:10px}
-    h1{color:#00ff99;font-size:2.4rem;margin:0 0 16px}
-    p{font-size:1.05rem;line-height:1.7;margin:0 0 16px}
-    ul{line-height:1.7;margin:0 0 24px 20px}
-    .cta{display:inline-block;margin-top:8px;color:#00ff99;text-decoration:underline}
+    /* --- Base --- */
+    :root{
+      --bg-scrim: rgba(0,0,0,0.55);
+      --panel: rgba(0,0,0,0.6);
+      --panel-strong: rgba(16,43,16,0.85);
+      --brand: #00ff99;
+      --line: #1f5e1f;
+      --text-dim: #d7e7d7;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; font-family: Arial, sans-serif; color:#fff;
+      background:url('homepage-background.png') no-repeat center center fixed;
+      background-size:cover;
+    }
+    .scrim{min-height:100%; background:var(--bg-scrim); display:flex; flex-direction:column}
+
+    /* --- Nav --- */
+    .navbar{
+      background:rgba(0,51,0,0.92); padding:12px 0; text-align:center; position:sticky; top:0; z-index:10
+    }
+    .navbar a{color:#fff; margin:0 14px; text-decoration:none; font-weight:bold}
+    .navbar a[aria-current="page"]{text-decoration:underline}
+
+    /* --- Layout --- */
+    .container{width:min(1100px,92%); margin:0 auto; padding:36px 0 56px}
+    .hero{padding:18px 18px 2px; border:1px solid var(--line); border-radius:12px; background:var(--panel-strong)}
+    h1{margin:0 0 4px; font-size:2.2rem; color:var(--brand)}
+    .tag{display:inline-block; margin:8px 8px 16px 0; padding:6px 10px; border:1px solid var(--line); border-radius:999px; font-size:0.9rem; background:rgba(0,0,0,0.35)}
+    p.lead{color:var(--text-dim); margin:8px 0 18px; line-height:1.7}
+
+    /* --- Sections --- */
+    section{margin-top:26px}
+    .section-title{display:flex; align-items:center; gap:10px; margin:0 0 12px}
+    .section-title h2{margin:0; font-size:1.35rem}
+    .section-title .badge{font-size:0.85rem; padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:rgba(0,0,0,0.35); color:var(--text-dim)}
+
+    /* --- Grids --- */
+    .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+    @media (max-width: 980px){ .grid{grid-template-columns:repeat(2,1fr)} }
+    @media (max-width: 640px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px;
+      backdrop-filter: blur(2px);
+    }
+    .card h3{margin:0 0 6px; font-size:1.05rem}
+    .card p{margin:6px 0 0; color:var(--text-dim); line-height:1.6; font-size:0.98rem}
+    .pill{display:inline-block; margin-top:8px; font-size:0.8rem; padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:#cfeacf}
+
+    /* --- Lists --- */
+    ul.clean{margin:8px 0 0 18px; line-height:1.7; color:var(--text-dim)}
+
+    /* --- CTA --- */
+    .cta{
+      display:inline-block; margin-top:10px; padding:10px 14px; border-radius:10px;
+      border:1px solid var(--line); background:rgba(0,0,0,0.35); color:var(--brand);
+      text-decoration:none; font-weight:bold;
+    }
+    .note{font-size:0.9rem; color:#cfeacf; opacity:0.9; margin-top:8px}
+
+    /* --- Footer --- */
+    footer{text-align:center; color:#cbd5cb; font-size:12px; padding:18px 0 26px}
   </style>
 </head>
 <body>
-  <nav class="navbar">
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="features.html">Features</a>
-    <a href="pricing.html">Pricing</a>
-    <a href="contact.html">Contact</a>
-    <a href="coming-soon.html" aria-current="page">Coming Soon</a>
-  </nav>
+  <div class="scrim">
+    <nav class="navbar">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="features.html">Features</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="contact.html">Contact</a>
+      <a href="coming-soon.html" aria-current="page">Coming Soon</a>
+    </nav>
 
-  <main class="container">
-    <h1>Coming Soon</h1>
-    <p>We’re shipping fast and clean. If it doesn’t help your golf, it doesn’t ship. Simple.</p>
-    <h2>Next Drops</h2>
-    <ul>
-      <li><strong>Mental Game Scoring + Final Report</strong> — decision/setup/execution/review, end-of-round insights, and drills.</li>
-      <li><strong>Upload & Pro Comparison</strong> — side-by-side with elite swings, P1–P9 checkpoints.</li>
-      <li><strong>Power / Efficiency / Fixer Reports</strong> — find leaks, apply targeted fixes.</li>
-      <li><strong>Trend Dashboard</strong> — Mental IQ vs. score correlation across rounds.</li>
-    </ul>
-    <p>Want early access? We’ll tap you in when it’s ready (no spam, no fluff).</p>
-    <a class="cta" href="contact.html">Get on the early access list →</a>
-  </main>
-</body>
-</html>
+    <main class="container">
+      <!-- Hero -->
+      <section class="hero">
+        <h1>Coming Soon</h1>
+        <span class="tag">Shipping weekly</span>
+        <span class="tag">Public beta</span>
+        <p class="lead">No fluff—just upgrades that lower scores. Here’s what’s dropping next and what’s cooking after that.</p>
+      </section>
+
+      <!-- Next Drops (immediate) -->
+      <section>
+        <div class="section-title">
+          <h2>Next Drops (2–4 weeks)</h2>
+          <span class="badge">High priority</span>
