@@ -8,25 +8,22 @@
   <style>
     :root{
       --bg-image: url('/homepage-background.png');
-      --nav-height: 56px;
       --bg-brightness: 1.0;
     }
 
     html, body { height: 100%; margin: 0; padding: 0; }
-    html { height: -webkit-fill-available; }
     body {
-      min-height: 100dvh; min-height: -webkit-fill-available;
       font-family: Arial, sans-serif;
       color: #fff;
       text-align: center;
       background: #000;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
     }
 
     .homepage {
-      min-height: 100dvh; min-height: -webkit-fill-available;
-      display: flex; flex-direction: column; position: relative;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
     }
     .homepage::before{
       content: "";
@@ -38,78 +35,115 @@
       filter: brightness(var(--bg-brightness));
       z-index: -1;
     }
-    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px){
-      .homepage::before{
-        background-size: contain;
-        background-position: center bottom;
-        background-color: #000;
-      }
-    }
 
     nav {
-      width: 100%; background-color: #003300; padding: 10px 0;
-      position: sticky; top: 0; text-align: center; z-index: 10;
+      width: 100%;
+      background-color: #003300;
+      padding: 8px 0;
+      text-align: center;
     }
-    nav a { color: #fff; margin: 0 15px; text-decoration: none; font-weight: bold; }
+    nav a {
+      color: #fff;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+    }
 
-    .container{
-      padding: 80px 20px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      margin: 0 auto; max-width: 1100px;
-      background: transparent;
+    .container {
+      padding: 40px 20px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      max-width: 1100px;
+      margin: 0 auto;
     }
 
     /* Logo dark green */
     img.logo {
-      width: clamp(250px, 60vw, 600px); max-width: 90vw; height: auto; margin-bottom: 20px;
+      width: clamp(220px, 50vw, 500px);
+      height: auto;
       filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(95%) contrast(85%);
     }
 
-    h1 { margin: 10px 0; font-size: 2.5em; }
-    .tagline { 
-      font-size: 1.25em; 
-      font-style: italic; 
-      margin-bottom: 20px; 
-      color: #ffffff; /* force pure white tagline */
+    .welcome {
+      font-size: 1.1em;
+      font-style: italic;
+      margin-top: 5px;
+      margin-bottom: 5px;
+      color: #fff;
+    }
+
+    h1 {
+      margin: 5px 0;
+      font-size: 2.2em;
+    }
+
+    .tagline {
+      font-size: 1.15em;
+      font-style: italic;
+      margin-bottom: 10px;
+      color: #ffffff;
     }
 
     .dropdowns {
-      display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 10px;
     }
-    .dropdowns select{
-      width: 180px; max-width: 180px;
+    .dropdowns select {
+      width: 170px;
       background-color: rgba(0, 51, 0, 0.5);
       color: #fff;
       border: 1px solid rgba(255,255,255,0.35);
       border-radius: 6px;
-      padding: 8px;
+      padding: 6px;
     }
 
     .controls {
-      display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
     }
-    input[type="file"]{
-      width: 220px;
+    input[type="file"] {
+      width: 210px;
       background-color: rgba(0, 0, 0, 0.3);
       color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.35);
       border-radius: 6px;
-      padding: 6px;
+      padding: 5px;
     }
-    input[type="file"]::file-selector-button{
+    input[type="file"]::file-selector-button {
       background-color: rgba(0, 51, 0, 0.6);
-      color: #fff; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
     }
-    input[type="file"]::file-selector-button:hover{
+    input[type="file"]::file-selector-button:hover {
       background-color: rgba(0, 51, 0, 0.8);
     }
 
-    button.upload{
-      width: 180px; background-color: #003300; color: #fff;
-      cursor: pointer; padding: 8px 14px; border-radius: 6px; border: none;
+    button.upload {
+      width: 170px;
+      background-color: #003300;
+      color: #fff;
+      cursor: pointer;
+      padding: 7px 12px;
+      border-radius: 6px;
+      border: none;
     }
 
-    .footer{ background: transparent !important; color: #fff; padding: 10px 0; margin-top: auto; }
+    .footer {
+      background: transparent;
+      color: #fff;
+      padding: 6px 0;
+      margin-top: auto;
+    }
   </style>
 </head>
 
@@ -123,6 +157,7 @@
 
     <div class="container">
       <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
+      <div class="welcome">Welcome Beta Testers</div>
       <h1>Virtual Coach AI</h1>
       <div class="tagline">Where the future of golf instruction begins with AI</div>
 
@@ -154,7 +189,10 @@
   <script>
     async function uploadVideo() {
       const file = document.getElementById('fileInput').files[0];
-      if (!file) { alert("Please select a video file first."); return; }
+      if (!file) {
+        alert("Please select a video file first.");
+        return;
+      }
 
       const formData = new FormData();
       formData.append("file", file);
