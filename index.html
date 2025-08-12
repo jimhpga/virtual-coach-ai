@@ -9,23 +9,21 @@
     :root{
       --bg-image: url('/homepage-background.png');
       --nav-height: 56px;
-      --bg-brightness: 1.0; /* keep background as-is (not darkened) */
+      --bg-brightness: 1.0;
     }
 
-    /* Baseline + iOS viewport sanity */
     html, body { height: 100%; margin: 0; padding: 0; }
     html { height: -webkit-fill-available; }
     body {
       min-height: 100dvh; min-height: -webkit-fill-available;
       font-family: Arial, sans-serif;
-      color: #fff;                       /* ALL TEXT WHITE */
+      color: #fff;
       text-align: center;
-      background: #000;                  /* avoids any white strip at bottom */
+      background: #000;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Full-viewport background layer */
     .homepage {
       min-height: 100dvh; min-height: -webkit-fill-available;
       display: flex; flex-direction: column; position: relative;
@@ -40,7 +38,6 @@
       filter: brightness(var(--bg-brightness));
       z-index: -1;
     }
-    /* iPad: ensure full image visible, anchored to bottom (letterbox with black if needed) */
     @media only screen and (min-device-width: 768px) and (max-device-width: 1024px){
       .homepage::before{
         background-size: contain;
@@ -49,14 +46,12 @@
       }
     }
 
-    /* Nav */
     nav {
       width: 100%; background-color: #003300; padding: 10px 0;
       position: sticky; top: 0; text-align: center; z-index: 10;
     }
     nav a { color: #fff; margin: 0 15px; text-decoration: none; font-weight: bold; }
 
-    /* Content */
     .container{
       padding: 80px 20px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -64,57 +59,56 @@
       background: transparent;
     }
 
-    /* Logo: DARK GREEN tint */
+    /* Logo dark green */
     img.logo {
       width: clamp(250px, 60vw, 600px); max-width: 90vw; height: auto; margin-bottom: 20px;
-      /* tint to dark green */
       filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(95%) contrast(85%);
     }
 
-    /* Headline + tagline (white text already via body color) */
     h1 { margin: 10px 0; font-size: 2.5em; }
-    .tagline { font-size: 1.25em; font-style: italic; margin-bottom: 20px; }
+    .tagline { 
+      font-size: 1.25em; 
+      font-style: italic; 
+      margin-bottom: 20px; 
+      color: #ffffff; /* force pure white tagline */
+    }
 
-    /* SELECT boxes — translucent + narrower */
     .dropdowns {
       display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
     }
     .dropdowns select{
       width: 180px; max-width: 180px;
-      background-color: rgba(0, 51, 0, 0.5);   /* translucent green */
+      background-color: rgba(0, 51, 0, 0.5);
       color: #fff;
       border: 1px solid rgba(255,255,255,0.35);
       border-radius: 6px;
       padding: 8px;
     }
 
-    /* File chooser (kept a little translucent to match) */
     .controls {
       display: flex; flex-direction: column; gap: 10px; align-items: center; margin-top: 10px;
     }
     input[type="file"]{
       width: 220px;
-      background-color: rgba(0, 0, 0, 0.3);   /* translucent */
+      background-color: rgba(0, 0, 0, 0.3);
       color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.35);
       border-radius: 6px;
       padding: 6px;
     }
     input[type="file"]::file-selector-button{
-      background-color: rgba(0, 51, 0, 0.6);  /* translucent button */
+      background-color: rgba(0, 51, 0, 0.6);
       color: #fff; padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer;
     }
     input[type="file"]::file-selector-button:hover{
       background-color: rgba(0, 51, 0, 0.8);
     }
 
-    /* Upload button */
     button.upload{
       width: 180px; background-color: #003300; color: #fff;
       cursor: pointer; padding: 8px 14px; border-radius: 6px; border: none;
     }
 
-    /* Footer stays transparent to avoid any white bar */
     .footer{ background: transparent !important; color: #fff; padding: 10px 0; margin-top: auto; }
   </style>
 </head>
@@ -162,7 +156,6 @@
       const file = document.getElementById('fileInput').files[0];
       if (!file) { alert("Please select a video file first."); return; }
 
-      // NOTE: Large files will hit platform limits. We'll switch to direct-to-S3 later.
       const formData = new FormData();
       formData.append("file", file);
 
