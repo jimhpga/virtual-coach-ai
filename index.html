@@ -5,84 +5,90 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Virtual Coach AI - Upload</title>
 
-  <link rel="stylesheet" href="style.css" />
-
   <style>
     :root{
       --bg-image: url('/homepage-background.png');
       --nav-height: 56px;
-      --bg-brightness: 1.00;
+      --bg-brightness: 1.0;
     }
 
     html, body { height: 100%; margin: 0; padding: 0; }
     html { height: -webkit-fill-available; }
     body {
-      min-height: 100dvh; min-height: 100svh; min-height: -webkit-fill-available;
-      font-family: Arial, sans-serif; color: white; text-align: center;
+      min-height: 100dvh;
+      min-height: -webkit-fill-available;
+      font-family: Arial, sans-serif;
+      color: white;
+      text-align: center;
       background: #000;
-      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
     }
 
     .homepage {
-      min-height: 100dvh; min-height: 100svh; min-height: -webkit-fill-available;
-      display: flex; flex-direction: column; position: relative;
+      min-height: 100dvh;
+      min-height: -webkit-fill-available;
+      display: flex;
+      flex-direction: column;
+      position: relative;
     }
     .homepage::before{
       content: "";
-      position: fixed; inset: 0;
+      position: fixed;
+      inset: 0;
       background-image: var(--bg-image);
       background-repeat: no-repeat;
       background-size: cover;
       background-position: center center;
       filter: brightness(var(--bg-brightness));
-      -webkit-filter: brightness(var(--bg-brightness));
       z-index: -1;
-    }
-    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px){
-      .homepage::before{
-        background-size: contain;
-        background-position: center bottom;
-        background-color: #000;
-      }
     }
 
     nav {
-      width: 100%; background-color: #003300; padding: 10px 0;
-      position: sticky; top: 0; left: 0; text-align: center; z-index: 10;
+      width: 100%;
+      background-color: #003300;
+      padding: 10px 0;
+      position: sticky;
+      top: 0;
+      text-align: center;
+      z-index: 10;
     }
     nav a {
-      color: white; margin: 0 15px; text-decoration: none; font-weight: bold; padding: 6px 4px;
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
     }
 
     .container{
       padding: 80px 20px;
-      min-height: calc(100dvh - var(--nav-height) - 40px);
-      min-height: calc(100svh - var(--nav-height) - 40px);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      margin: 0 auto; max-width: 1100px;
-      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      max-width: 1100px;
     }
 
-    /* Keep dark green logo */
     img.logo {
       width: clamp(250px, 60vw, 600px);
       max-width: 90vw;
       height: auto;
-      aspect-ratio: 2 / 1;
       margin-bottom: 20px;
     }
 
-    /* Tagline white */
+    /* Tagline under H1 white */
+    h1 {
+      margin: 10px 0;
+      font-size: 2.5em;
+      color: white;
+    }
     .tagline {
       font-size: 1.25em;
-      margin-bottom: 15px;
       font-style: italic;
       color: #ffffff;
+      margin-bottom: 20px;
     }
 
-    h1 { margin: 10px 0; font-size: 2.5em; color: white; }
-
-    /* Narrower & translucent dropdowns */
+    /* Dropdowns translucent */
     .dropdowns {
       display: flex;
       gap: 10px;
@@ -92,14 +98,14 @@
     }
     .dropdowns select{
       width: 180px;
-      background-color: rgba(0, 51, 0, 0.6);
+      background-color: rgba(0, 51, 0, 0.5); /* translucent */
       color: #fff;
       border: 1px solid rgba(255,255,255,0.35);
       border-radius: 6px;
       padding: 8px;
     }
 
-    /* Smaller & translucent file chooser */
+    /* File chooser translucent */
     .controls {
       display: flex;
       flex-direction: column;
@@ -111,7 +117,6 @@
       width: 220px;
       background-color: rgba(0, 0, 0, 0.3);
       color: #fff;
-      font-size: 0.9em;
       border: 1px solid rgba(255, 255, 255, 0.35);
       border-radius: 6px;
       padding: 6px;
@@ -128,7 +133,6 @@
       background-color: rgba(0, 51, 0, 0.8);
     }
 
-    /* Upload button */
     button.upload{
       width: 180px;
       background-color: #003300;
@@ -139,11 +143,11 @@
       border: none;
     }
 
-    /* Footer transparent */
     .footer{
       background: transparent !important;
-      border: none !important;
       color: #fff;
+      margin-top: auto;
+      padding: 10px 0;
     }
   </style>
 </head>
@@ -158,9 +162,8 @@
 
     <div class="container">
       <img src="virtualcoach-logo-darkgreen.png" alt="Virtual Coach AI Logo" class="logo" />
-      <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
       <h1>Virtual Coach AI</h1>
-      <p>Where the future of golf instruction begins with AI</p>
+      <div class="tagline">Where the future of golf instruction begins with AI</div>
 
       <div class="dropdowns">
         <select id="handedness" aria-label="Select handedness">
