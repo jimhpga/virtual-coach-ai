@@ -11,14 +11,18 @@
       --bg-brightness: 1.0;
     }
 
+    /* Baseline + iOS sanity */
     html, body { height: 100%; margin: 0; padding: 0; }
     body {
       font-family: Arial, sans-serif;
       color: #fff;
       text-align: center;
-      background: #000;
+      background: #000;              /* prevents white bar at bottom */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
+    /* Full-viewport background */
     .homepage {
       min-height: 100dvh;
       display: flex;
@@ -35,115 +39,106 @@
       filter: brightness(var(--bg-brightness));
       z-index: -1;
     }
+    /* iPad: show whole image, anchor bottom */
+    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px){
+      .homepage::before{
+        background-size: contain;
+        background-position: center bottom;
+        background-color: #000;
+      }
+    }
 
+    /* Compact nav */
     nav {
       width: 100%;
       background-color: #003300;
-      padding: 8px 0;
-      text-align: center;
+      padding: 6px 0;
+      position: sticky; top: 0; z-index: 10;
     }
-    nav a {
-      color: #fff;
-      margin: 0 15px;
-      text-decoration: none;
-      font-weight: bold;
+    nav a { color: #fff; margin: 0 12px; text-decoration: none; font-weight: bold; }
+
+    /* Tighter layout */
+    .container{
+      padding: 20px 16px 12px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px;
+      max-width: 1100px; margin: 0 auto;
+      background: transparent;
     }
 
-    .container {
-      padding: 40px 20px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    /* Logo dark green */
-    img.logo {
-      width: clamp(220px, 50vw, 500px);
+    /* Logo: DARK GREEN tint, smaller */
+    img.logo{
+      width: clamp(180px, 28vw, 340px);
       height: auto;
+      margin: 4px 0 6px;
       filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(95%) contrast(85%);
     }
 
-    .welcome {
-      font-size: 1.1em;
-      font-style: italic;
-      margin-top: 5px;
-      margin-bottom: 5px;
+    /* Welcome line — back, compact, white */
+    .welcome{
+      font-size: 1rem;
+      margin: 2px 0 4px;
       color: #fff;
-    }
-
-    h1 {
-      margin: 5px 0;
-      font-size: 2.2em;
-    }
-
-    .tagline {
-      font-size: 1.15em;
       font-style: italic;
-      margin-bottom: 10px;
-      color: #ffffff;
     }
 
-    .dropdowns {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 10px;
+    /* Headline + tagline (white) with tighter spacing */
+    h1{ margin: 4px 0; font-size: 1.9em; }
+    .tagline{
+      font-size: 1.05em;
+      font-style: italic;
+      color: #ffffff;   /* lock to white */
+      margin: 2px 0 8px;
     }
-    .dropdowns select {
-      width: 170px;
+
+    /* Narrow, translucent selects */
+    .dropdowns{
+      display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 6px 0 8px;
+    }
+    .dropdowns select{
+      width: 160px; max-width: 160px;
       background-color: rgba(0, 51, 0, 0.5);
       color: #fff;
       border: 1px solid rgba(255,255,255,0.35);
       border-radius: 6px;
-      padding: 6px;
+      padding: 6px 8px;
+      font-size: 0.95rem;
     }
 
-    .controls {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      align-items: center;
+    /* Controls: smaller, translucent file input */
+    .controls{
+      display: flex; flex-direction: column; gap: 8px; align-items: center; margin-top: 4px;
     }
-    input[type="file"] {
-      width: 210px;
-      background-color: rgba(0, 0, 0, 0.3);
+    input[type="file"]{
+      width: 200px;
+      background-color: rgba(0,0,0,0.28);
       color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.35);
+      border: 1px solid rgba(255,255,255,0.35);
       border-radius: 6px;
       padding: 5px;
+      font-size: 0.9rem;
     }
-    input[type="file"]::file-selector-button {
+    input[type="file"]::file-selector-button{
       background-color: rgba(0, 51, 0, 0.6);
       color: #fff;
       padding: 6px 10px;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
+      border-radius: 4px; border: none; cursor: pointer;
     }
-    input[type="file"]::file-selector-button:hover {
+    input[type="file"]::file-selector-button:hover{
       background-color: rgba(0, 51, 0, 0.8);
     }
 
-    button.upload {
-      width: 170px;
-      background-color: #003300;
-      color: #fff;
-      cursor: pointer;
-      padding: 7px 12px;
-      border-radius: 6px;
-      border: none;
+    /* Compact upload button */
+    button.upload{
+      width: 160px;
+      background-color: #003300; color: #fff;
+      cursor: pointer; padding: 7px 12px;
+      border-radius: 6px; border: none;
+      font-size: 0.95rem;
     }
 
-    .footer {
-      background: transparent;
-      color: #fff;
-      padding: 6px 0;
-      margin-top: auto;
-    }
+    /* Footer stays invisible */
+    .footer{ background: transparent; color: #fff; padding: 6px 0; margin-top: auto; font-size: 0.9rem; }
   </style>
 </head>
 
@@ -189,11 +184,9 @@
   <script>
     async function uploadVideo() {
       const file = document.getElementById('fileInput').files[0];
-      if (!file) {
-        alert("Please select a video file first.");
-        return;
-      }
+      if (!file) { alert("Please select a video file first."); return; }
 
+      // NOTE: For big files we'll switch to direct-to-S3 later.
       const formData = new FormData();
       formData.append("file", file);
 
