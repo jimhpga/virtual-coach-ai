@@ -5,20 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Virtual Coach AI - Upload</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Page-specific background vars -->
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: url('homepage-background.png') no-repeat center center fixed;
-      background-size: cover;
-      color: white;
-      text-align: center;
+    :root{
+      --bg-image: url('/homepage-background.png'); /* change if you prefer /virtualcoach-bg.png or /golf-course-bg.jpg */
+      --bg-brightness: 0.85;
     }
+
+    html, body { height: 100%; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; color: white; text-align: center; }
+
+    /* Fullscreen background layer (fixes iPad cutoff) */
+    .homepage {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .homepage::before {
+      content: "";
+      position: fixed;
+      inset: 0; /* top/right/bottom/left: 0 */
+      background-image: var(--bg-image);
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      background-attachment: scroll;   /* iOS/Safari safe */
+      filter: brightness(var(--bg-brightness));
+      -webkit-filter: brightness(var(--bg-brightness));
+      z-index: -1; /* sit behind content */
+    }
+
     nav {
       width: 100%;
       background-color: #003300;
       padding: 10px 0;
-      position: sticky; /* was absolute — sticky keeps it usable on scroll */
+      position: sticky;
       top: 0;
       left: 0;
       text-align: center;
@@ -29,17 +51,23 @@
       margin: 0 15px;
       text-decoration: none;
       font-weight: bold;
-      padding: 6px 4px; /* bigger tap target */
+      padding: 6px 4px;
     }
+
     .container {
-      padding: 80px 20px; /* give room under sticky nav */
-      background-color: rgba(0, 0, 0, 0.3);
-      min-height: 100vh;
+      padding: 80px 20px;            /* room under sticky nav */
+      min-height: calc(100vh - 60px); /* keep content tall even if short */
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      /* optional subtle readability mask; was too dark before */
+      background-color: rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      margin: 0 auto;
+      max-width: 1100px;
     }
+
     img.logo {
       width: clamp(250px, 60vw, 600px);
       max-width: 90vw;
@@ -50,6 +78,7 @@
     }
     .tagline { font-size: 1.25em; margin-bottom: 15px; font-style: italic; color: white; }
     h1 { margin: 10px 0; font-size: 2.5em; color: white; }
+
     .dropdowns {
       display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
     }
@@ -62,41 +91,54 @@
     }
     input[type="file"] { color: #ccc; font-size: 0.9em; }
     button.upload { background-color: #003300; color: white; cursor: pointer; }
+
     @media (max-width: 768px) {
       .container { padding: 70px 10px; }
       img.logo { width: 90vw; }
     }
+
+    /* Landscape iPad: force-fit background to avoid bottom crop */
+    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (orientation: landscape) {
+      .homepage::before { background-size: 100% 100%; }
+    }
   </style>
 </head>
+
 <body>
-  <nav>
-    <a href="index.html" aria-current="page">Home</a>
-    <a href="about.html">About</a>
-    <a href="coming-soon.html">Coming Soon</a> <!-- fixed filename -->
-  </nav>
+  <div class="homepage">
+    <nav>
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="about.html">About</a>
+      <a href="coming-soon.html">Coming Soon</a>
+    </nav>
 
-  <div class="container">
-    <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
-    <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
-    <h1>Virtual Coach AI</h1>
-    <p>Where the future of golf instruction begins with AI</p>
+    <div class="container">
+      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
+      <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
+      <h1>Virtual Coach AI</h1>
+      <p>Where the future of golf instruction begins with AI</p>
 
-    <div class="dropdowns">
-      <select id="handedness" aria-label="Select handedness">
-        <option value="">Select Handedness</option>
-        <option value="right">Right-Handed</option>
-        <option value="left">Left-Handed</option>
-      </select>
-      <select id="eyeDominance" aria-label="Select eye dominance">
-        <option value="">Select Eye Dominance</option>
-        <option value="right">Right Eye</option>
-        <option value="left">Left Eye</option>
-        <option value="unknown">Unknown</option>
-      </select>
+      <div class="dropdowns">
+        <select id="handedness" aria-label="Select handedness">
+          <option value="">Select Handedness</option>
+          <option value="right">Right-Handed</option>
+          <option value="left">Left-Handed</option>
+        </select>
+        <select id="eyeDominance" aria-label="Select eye dominance">
+          <option value="">Select Eye Dominance</option>
+          <option value="right">Right Eye</option>
+          <option value="left">Left Eye</option>
+          <option value="unknown">Unknown</option>
+        </select>
+      </div>
+
+      <input type="file" id="fileInput" accept="video/*" />
+      <button class="upload" onclick="uploadVideo()">Upload Your Swing</button>
     </div>
 
-    <input type="file" id="fileInput" accept="video/*" />
-    <button class="upload" onclick="uploadVideo()">Upload Your Swing</button>
+    <footer class="footer">
+      <p>&copy; 2025 Virtual Coach AI. All rights reserved.</p>
+    </footer>
   </div>
 
   <script>
@@ -111,7 +153,7 @@
       formData.append("file", file);
 
       try {
-        const res = await fetch('/api/upload', { // was /api/frames
+        const res = await fetch('/api/upload', {
           method: 'POST',
           body: formData
         });
@@ -130,4 +172,3 @@
   </script>
 </body>
 </html>
-
