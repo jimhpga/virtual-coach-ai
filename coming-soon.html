@@ -4,70 +4,89 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Coming Soon - Virtual Coach AI</title>
-  <meta name="description" content="What’s launching next for Virtual Coach AI: mental game scoring, reports, trend dashboards, pro comparisons, and more." />
+  <meta name="description" content="What’s launching next for Virtual Coach AI: junior program, mental training, FAIR MVP, torque measure, scoring, reports, dashboards, and more." />
   <style>
-    /* --- Base --- */
     :root{
       --bg-scrim: rgba(0,0,0,0.55);
       --panel: rgba(0,0,0,0.6);
       --panel-strong: rgba(16,43,16,0.85);
       --brand: #00ff99;
       --line: #1f5e1f;
-      --text-dim: #d7e7d7;
+      --dim: #d7e7d7;
     }
     html,body{height:100%}
     body{
       margin:0; font-family: Arial, sans-serif; color:#fff;
-      background:url('homepage-background.png') no-repeat center center fixed;
-      background-size:cover;
+      background:url('homepage-background.png') no-repeat center center fixed; background-size:cover;
     }
     .scrim{min-height:100%; background:var(--bg-scrim); display:flex; flex-direction:column}
 
-    /* --- Nav --- */
-    .navbar{
-      background:rgba(0,51,0,0.92); padding:12px 0; text-align:center; position:sticky; top:0; z-index:10
-    }
+    /* Nav */
+    .navbar{background:rgba(0,51,0,0.92); padding:12px 0; text-align:center; position:sticky; top:0; z-index:20}
     .navbar a{color:#fff; margin:0 14px; text-decoration:none; font-weight:bold}
     .navbar a[aria-current="page"]{text-decoration:underline}
 
-    /* --- Layout --- */
-    .container{width:min(1100px,92%); margin:0 auto; padding:36px 0 56px}
+    /* Layout */
+    .page{
+      display:grid;
+      grid-template-columns: 1fr min(1100px,92%) 80px;
+      gap: 16px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 28px 0 56px;
+    }
+    @media (max-width: 980px){
+      .page{ grid-template-columns: 1fr min(1100px,92%) 1fr; }
+    }
+    @media (max-width: 680px){
+      .page{ grid-template-columns: 1fr; }
+      .trophies{ display:none; }
+    }
+
+    /* Hero + sections */
     .hero{padding:18px 18px 2px; border:1px solid var(--line); border-radius:12px; background:var(--panel-strong)}
     h1{margin:0 0 4px; font-size:2.2rem; color:var(--brand)}
     .tag{display:inline-block; margin:8px 8px 16px 0; padding:6px 10px; border:1px solid var(--line); border-radius:999px; font-size:0.9rem; background:rgba(0,0,0,0.35)}
-    p.lead{color:var(--text-dim); margin:8px 0 18px; line-height:1.7}
+    .lead{color:var(--dim); margin:8px 0 18px; line-height:1.7}
 
-    /* --- Sections --- */
     section{margin-top:26px}
     .section-title{display:flex; align-items:center; gap:10px; margin:0 0 12px}
     .section-title h2{margin:0; font-size:1.35rem}
-    .section-title .badge{font-size:0.85rem; padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:rgba(0,0,0,0.35); color:var(--text-dim)}
+    .badge{font-size:0.85rem; padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:rgba(0,0,0,0.35); color:var(--dim)}
 
-    /* --- Grids --- */
+    /* Grid */
     .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
     @media (max-width: 980px){ .grid{grid-template-columns:repeat(2,1fr)} }
     @media (max-width: 640px){ .grid{grid-template-columns:1fr} }
 
     .card{
-      background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px;
-      backdrop-filter: blur(2px);
+      background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; backdrop-filter: blur(2px);
+      position: relative;
     }
     .card h3{margin:0 0 6px; font-size:1.05rem}
-    .card p{margin:6px 0 0; color:var(--text-dim); line-height:1.6; font-size:0.98rem}
+    .card p{margin:6px 0 0; color:var(--dim); line-height:1.6; font-size:0.98rem}
     .pill{display:inline-block; margin-top:8px; font-size:0.8rem; padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:#cfeacf}
 
-    /* --- Lists --- */
-    ul.clean{margin:8px 0 0 18px; line-height:1.7; color:var(--text-dim)}
+    /* Trophy icon in cards */
+    .card .t{ position:absolute; right:10px; top:10px; opacity:.8; }
+    .t svg{ width:18px; height:18px; }
 
-    /* --- CTA --- */
-    .cta{
-      display:inline-block; margin-top:10px; padding:10px 14px; border-radius:10px;
-      border:1px solid var(--line); background:rgba(0,0,0,0.35); color:var(--brand);
-      text-decoration:none; font-weight:bold;
-    }
+    /* CTA */
+    .cta{display:inline-block; margin-top:10px; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:rgba(0,0,0,0.35); color:var(--brand); text-decoration:none; font-weight:bold}
     .note{font-size:0.9rem; color:#cfeacf; opacity:0.9; margin-top:8px}
 
-    /* --- Footer --- */
+    /* Trophy rail */
+    .trophies{
+      position: sticky; top:72px; align-self: start;
+      display:flex; flex-direction:column; gap:14px; padding-right:8px;
+      height: calc(100vh - 92px); overflow:hidden;
+    }
+    .trophy{
+      background:rgba(0,0,0,0.38); border:1px solid var(--line); border-radius:12px;
+      padding:10px; text-align:center;
+    }
+    .trophy .big{ font-size:28px; line-height:1; display:block; margin-bottom:6px; }
+    .trophy .label{ font-size:12px; color:var(--dim) }
     footer{text-align:center; color:#cbd5cb; font-size:12px; padding:18px 0 26px}
   </style>
 </head>
@@ -82,17 +101,145 @@
       <a href="coming-soon.html" aria-current="page">Coming Soon</a>
     </nav>
 
-    <main class="container">
-      <!-- Hero -->
-      <section class="hero">
-        <h1>Coming Soon</h1>
-        <span class="tag">Shipping weekly</span>
-        <span class="tag">Public beta</span>
-        <p class="lead">No fluff—just upgrades that lower scores. Here’s what’s dropping next and what’s cooking after that.</p>
-      </section>
+    <div class="page">
+      <!-- spacer -->
+      <div></div>
 
-      <!-- Next Drops (immediate) -->
-      <section>
-        <div class="section-title">
-          <h2>Next Drops (2–4 weeks)</h2>
-          <span class="badge">High priority</span>
+      <!-- main content -->
+      <main>
+        <!-- Hero -->
+        <section class="hero">
+          <h1>Coming Soon</h1>
+          <span class="tag">Shipping weekly</span>
+          <span class="tag">Public beta</span>
+          <p class="lead">No fluff—just upgrades that lower scores. Here’s what’s dropping next and what’s cooking after that.</p>
+        </section>
+
+        <!-- Next Drops -->
+        <section>
+          <div class="section-title">
+            <h2>Next Drops (2–4 weeks)</h2><span class="badge">High priority</span>
+          </div>
+          <div class="grid">
+            <article class="card">
+              <div class="t" aria-hidden="true">
+                <!-- trophy svg -->
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1ZM7 5V4h2v3.9A3 3 0 0 1 7 5Zm10 0a3 3 0 0 1-2 2.9V4h2v1Z"/></svg>
+              </div>
+              <h3>🧠 Mental Game Scoring v1</h3>
+              <p>Scientist / Setup / Execution / Review flow with 10-second inputs and 30/45-min catch-up prompts.</p>
+              <span class="pill">Hole + round totals</span>
+            </article>
+
+            <article class="card">
+              <div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>📊 End-of-Round Report</h3>
+              <p>Decision vs. outcome heatmap, “Coach Note” summary, and auto-recommended drills for your biggest leak.</p>
+              <span class="pill">Auto summary</span>
+            </article>
+
+            <article class="card">
+              <div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>📈 Trend Dashboard (v0)</h3>
+              <p>Unlocks after 3 rounds: Mental IQ trend vs. scoring; tee/approach/specialty/putting sub-scores.</p>
+              <span class="pill">Unlock @ 3 rounds</span>
+            </article>
+
+            <article class="card">
+              <div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>🎯 Junior Program (v1)</h3>
+              <p>Age-appropriate goals, simplified scoring, sticker-style progress, and coach/parent sharing.</p>
+              <span class="pill">Ages 7–17</span>
+            </article>
+
+            <article class="card">
+              <div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>🧘 Mental Training Program (Core)</h3>
+              <p>Focus reps, 10–14s routine timer, fear-filter prompts, and post-shot detachment drills.</p>
+              <span class="pill">Daily 6–8 min</span>
+            </article>
+
+            <article class="card">
+              <div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>🧪 FAIR MVP</h3>
+              <p><strong>F</strong>oundations, <strong>A</strong>lignment, <strong>I</strong>mpact, <strong>R</strong>ecovery — a fast baseline screen that feeds your practice plan.</p>
+              <span class="pill">Onboarding test</span>
+            </article>
+          </div>
+        </section>
+
+        <!-- In Progress -->
+        <section>
+          <div class="section-title">
+            <h2>In Progress</h2><span class="badge">Design + build</span>
+          </div>
+          <div class="grid">
+            <article class="card">
+              <div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>🎥 Pro Comparison (P1–P9)</h3>
+              <p>Side-by-side checkpoints with overlays and one actionable cue per checkpoint.</p>
+              <span class="pill">Upload → Compare</span>
+            </article>
+            <article class="card">
+              <div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>⚙️ Torque Measure (Alpha)</h3>
+              <p>Camera-based estimate of rotational speed/sequence to flag power leaks and early extension.</p>
+              <span class="pill">Phone cam only</span>
+            </article>
+            <article class="card">
+              <div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>🗺️ Course Management</h3>
+              <p>Target lines by lie/wind/pin with “fear vs. common sense” sanity checks baked in.</p>
+              <span class="pill">Common-sense first</span>
+            </article>
+          </div>
+        </section>
+
+        <!-- On the Horizon -->
+        <section>
+          <div class="section-title">
+            <h2>On the Horizon</h2><span class="badge">Roadmap</span>
+          </div>
+          <div class="grid">
+            <article class="card"><div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>📱 Live Capture Assist</h3><p>Guided camera angles, auto-trim, instant upload, fps/distance pre-checks.</p><span class="pill">Mobile-friendly</span></article>
+            <article class="card"><div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>🤝 Coach Mode</h3><p>Share reports privately; coach comments appear inline with your round review.</p><span class="pill">Invite-only</span></article>
+            <article class="card"><div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>🧩 Practice Blocks</h3><p>Block/Random/Transfer presets with reps, constraints, and “stop when … ” rules.</p><span class="pill">Range → Course</span></article>
+            <article class="card"><div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>🏷️ Personal Baselines</h3><p>Benchmarks by handicap & shot pattern; alerts when you drift from your DNA.</p><span class="pill">Adaptive goals</span></article>
+            <article class="card"><div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>🛰️ Wind & Lie Estimator</h3><p>Factor wind/lie/temp—stop guessing club by feel alone.</p><span class="pill">Lightweight</span></article>
+            <article class="card"><div class="t" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-2V1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1H6a1 1 0 0 0-1 1v2a5 5 0 0 0 4 4.9V12a3 3 0 0 1-3 3H5v2h14v-2h-1a3 3 0 0 1-3-3V9.9A5 5 0 0 0 19 5V3a1 1 0 0 0-1-1Z"/></svg></div>
+              <h3>🔒 Offline Mode</h3><p>Log on-course with spotty service; sync when you’re back online.</p><span class="pill">Sync-safe</span></article>
+          </div>
+        </section>
+
+        <!-- Early Access -->
+        <section>
+          <div class="section-title"><h2>Early Access</h2><span class="badge">Limited slots</span></div>
+          <div class="card">
+            <p>Want to test features early and steer the build? Join the early access list—no spam, just meaningful updates and priority invites.</p>
+            <a class="cta" href="contact.html">Get on the early access list →</a>
+            <div class="note">We ship weekly. If it doesn’t help your golf, it doesn’t ship.</div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Trophy rail -->
+      <aside class="trophies" aria-hidden="true">
+        <div class="trophy"><span class="big">🏆</span><div class="label">Lower Scores</div></div>
+        <div class="trophy"><span class="big">🥇</span><div class="label">Mental IQ</div></div>
+        <div class="trophy"><span class="big">🥈</span><div class="label">Power/Eff</div></div>
+        <div class="trophy"><span class="big">🥉</span><div class="label">Short Game</div></div>
+        <div class="trophy"><span class="big">🏅</span><div class="label">Consistency</div></div>
+        <div class="trophy"><span class="big">🏆</span><div class="label">Coach Mode</div></div>
+      </aside>
+    </div>
+
+    <footer>© <span id="y"></span> Virtual Coach AI — Better decisions, better swings.</footer>
+  </div>
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+</body>
+</html>
