@@ -6,20 +6,29 @@
   <title>Coming Soon - Virtual Coach AI</title>
   <meta name="description" content="New features launching soon for Virtual Coach AI." />
   <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="virtualcoach-logo.png" />
+  <!-- Open Graph -->
+  <meta property="og:title" content="Coming Soon - Virtual Coach AI" />
+  <meta property="og:description" content="Early access features rolling out: Mental Game scoring, reports, and more." />
+  <meta property="og:image" content="virtualcoach-bg.png" />
+  <meta property="og:type" content="website" />
   <style>
     body { margin:0; font-family: Arial, sans-serif; background:#0f1f0f; color:#fff; }
-    .navbar { background:#144d14; padding:15px; text-align:center; position:sticky; top:0; z-index:10; }
-    .navbar a { color:#fff; margin:0 15px; text-decoration:none; font-weight:bold; }
-    .container { padding:40px 20px; max-width: 900px; margin:auto; }
-    h1 { color:#00ff99; font-size:2.4rem; margin:0 0 16px; }
+    nav { background:#003300; padding:12px 0; position:sticky; top:0; text-align:center; z-index:10; }
+    nav a { color:#fff; margin:0 14px; text-decoration:none; font-weight:bold; }
+    nav a[aria-current="page"] { text-decoration:underline; }
+    .container { width:min(900px,92%); margin:0 auto; padding:40px 0; }
+    h1 { color:#00ff99; font-size:2.2rem; margin:8px 0 16px; }
     p  { font-size:1.05rem; line-height:1.7; margin:0 0 16px; }
     ul { line-height:1.7; margin:0 0 24px 20px; }
     .card { padding:18px; border:1px solid #1f5e1f; border-radius:10px; background:#102b10; }
     .cta { display:inline-block; margin-top:8px; color:#00ff99; text-decoration:underline; }
+    .hero { margin-top:8px; padding:16px; border:1px solid #1f5e1f; border-radius:10px; background:#102b10; }
+    footer { text-align:center; color:#9aa; font-size:12px; padding:24px 0; }
   </style>
 </head>
 <body>
-  <nav class="navbar">
+  <nav>
     <a href="index.html">Home</a>
     <a href="about.html">About</a>
     <a href="features.html">Features</a>
@@ -29,18 +38,28 @@
   </nav>
 
   <main class="container">
-    <h1>Coming Soon</h1>
-    <div class="card">
-      <p>We’re polishing key modules and rolling them out in stages so you can start using Virtual Coach AI immediately and see steady upgrades.</p>
+    <section class="hero">
+      <h1>Coming Soon</h1>
+      <p>We’re shipping fast and clean. If it doesn’t help your golf, it doesn’t ship. Simple.</p>
+    </section>
+
+    <section class="card" style="margin-top:18px;">
+      <h2 style="margin-top:0;">Next Drops</h2>
       <ul>
-        <li><strong>Mental Game Scoring + Final Report</strong> — shot-by-shot process scoring, end-of-round review, and coaching drills.</li>
-        <li><strong>Upload & Pro Comparison</strong> — side-by-side with elite swings, checkpoints P1–P9.</li>
-        <li><strong>Power / Efficiency / Fixer Reports</strong> — visualize leaks and get targeted fixes.</li>
-        <li><strong>Trend Dashboard</strong> — Mental IQ vs. scoring correlation over multiple rounds.</li>
+        <li><strong>Mental Game Scoring + Final Report</strong> — decision/setup/execution/review, end-of-round insights, and drills.</li>
+        <li><strong>Upload & Pro Comparison</strong> — side-by-side with elite swings, P1–P9 checkpoints.</li>
+        <li><strong>Power / Efficiency / Fixer Reports</strong> — find leaks, apply targeted fixes.</li>
+        <li><strong>Trend Dashboard</strong> — Mental IQ vs. score correlation across rounds.</li>
       </ul>
-      <p>Early access opens soon. Want in?</p>
+      <p>Want early access? We’ll tap you in when it’s ready (no spam, no fluff).</p>
       <a class="cta" href="contact.html">Get on the early access list →</a>
-    </div>
+    </section>
   </main>
+
+  <footer>
+    © <span id="y"></span> Virtual Coach AI — Better decisions, better swings.
+  </footer>
+
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 </body>
 </html>
