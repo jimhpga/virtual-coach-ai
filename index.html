@@ -2,22 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Important: fixes iOS viewport height weirdness -->
+  <!-- Critical for iOS height correctness -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Virtual Coach AI - Upload</title>
 
-  <!-- Optional: keep if you want global styles too -->
+  <!-- Keep your global styles if you want -->
   <link rel="stylesheet" href="style.css" />
 
   <style>
     :root{
-      /* Swap to /virtualcoach-bg.png or /golf-course-bg.jpg if you prefer */
+      /* Swap if you prefer /virtualcoach-bg.png or /golf-course-bg.jpg */
       --bg-image: url('/homepage-background.png');
-      --bg-brightness: 0.85;
-      --nav-height: 56px; /* adjust if your nav is taller */
+      --nav-height: 56px; /* adjust if your nav height changes */
+      --bg-brightness: 1.00; /* 1.00 = normal, try 1.05 if you want slightly brighter */
     }
 
-    /* Robust height baseline */
+    /* Robust height baseline (handles iOS Safari) */
     html, body { height: 100%; margin: 0; padding: 0; }
     html { height: -webkit-fill-available; } /* iOS fallback */
     body {
@@ -25,34 +25,36 @@
       min-height: 100svh;                 /* small viewport height fallback */
       min-height: -webkit-fill-available; /* iOS fallback */
       font-family: Arial, sans-serif;
-      color: white; text-align: center;
-      background: transparent;            /* background handled by ::before */
+      color: white;
+      text-align: center;
+      background: transparent;            /* background handled by ::before layer */
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      /* No global filters here to avoid darkening */
     }
 
-    /* Fullscreen background layer (bulletproof on iPad & desktop) */
+    /* Fullscreen background layer (bulletproof across iPad/desktop) */
     .homepage {
       min-height: 100dvh;
       min-height: 100svh;
       min-height: -webkit-fill-available;
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
+      position: relative;
     }
     .homepage::before{
       content: "";
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;      /* fill viewport */
+      top: 0; left: 0; right: 0; bottom: 0;   /* fill viewport */
       width: 100%;
-      height: 100dvh;                             /* dynamic height */
+      height: 100dvh;                          /* dynamic height */
       height: 100svh;
       height: -webkit-fill-available;
       background-image: var(--bg-image);
       background-repeat: no-repeat;
-      background-size: cover;                     /* cover both axes */
+      background-size: cover;                  /* cover both axes */
       background-position: center;
       /* DO NOT use background-attachment: fixed on iOS */
-      filter: brightness(var(--bg-brightness));
+      filter: brightness(var(--bg-brightness)); /* keep or bump to 1.05 to brighten */
       -webkit-filter: brightness(var(--bg-brightness));
       z-index: -1;
     }
@@ -66,30 +68,24 @@
       text-align: center; z-index: 10;
     }
     nav a {
-      color: white;
-      margin: 0 15px;
-      text-decoration: none;
-      font-weight: bold;
-      padding: 6px 4px; /* bigger tap target */
+      color: white; margin: 0 15px;
+      text-decoration: none; font-weight: bold; padding: 6px 4px;
     }
 
-    /* Content box */
+    /* Content area — transparent so background isn’t dimmed */
     .container{
-      /* Fill remaining viewport without causing scroll jumps */
       min-height: calc(100dvh - var(--nav-height) - 40px);
       min-height: calc(100svh - var(--nav-height) - 40px);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding: 80px 20px; margin: 0 auto; max-width: 1100px;
-      background-color: rgba(0,0,0,0.08); border-radius: 12px;
+      background: transparent;         /* no overlay */
     }
 
     img.logo {
       width: clamp(250px, 60vw, 600px);
-      max-width: 90vw;
-      height: auto;
-      aspect-ratio: 2 / 1;
+      max-width: 90vw; height: auto; aspect-ratio: 2 / 1;
       margin-bottom: 20px;
-      /* your green tint */
+      /* green tint on transparent logo, keep if you like the effect */
       filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(95%) contrast(85%);
     }
     .tagline { font-size: 1.25em; margin-bottom: 15px; font-style: italic; color: white; }
@@ -160,17 +156,12 @@
         return;
       }
 
-      // CURRENT: posts to your API — will 413 if the file is large.
-      // Next step (when you're ready): switch to direct-to-S3 presigned upload.
+      // NOTE: This posts to your API. For big files, switch to direct-to-S3 when ready.
       const formData = new FormData();
       formData.append("file", file);
 
       try {
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData
-        });
-
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
         if (res.ok) {
           window.location.href = "/report.html";
         } else {
