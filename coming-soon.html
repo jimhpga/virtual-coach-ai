@@ -7,59 +7,86 @@
   <meta name="description" content="New features launching soon for Virtual Coach AI." />
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="virtualcoach-logo.png" />
-  <!-- Open Graph -->
-  <meta property="og:title" content="Coming Soon - Virtual Coach AI" />
-  <meta property="og:description" content="Early access features rolling out: Mental Game scoring, reports, and more." />
-  <meta property="og:image" content="virtualcoach-bg.png" />
-  <meta property="og:type" content="website" />
   <style>
-    body { margin:0; font-family: Arial, sans-serif; background:#0f1f0f; color:#fff; }
-    nav { background:#003300; padding:12px 0; position:sticky; top:0; text-align:center; z-index:10; }
-    nav a { color:#fff; margin:0 14px; text-decoration:none; font-weight:bold; }
-    nav a[aria-current="page"] { text-decoration:underline; }
-    .container { width:min(900px,92%); margin:0 auto; padding:40px 0; }
-    h1 { color:#00ff99; font-size:2.2rem; margin:8px 0 16px; }
-    p  { font-size:1.05rem; line-height:1.7; margin:0 0 16px; }
-    ul { line-height:1.7; margin:0 0 24px 20px; }
-    .card { padding:18px; border:1px solid #1f5e1f; border-radius:10px; background:#102b10; }
-    .cta { display:inline-block; margin-top:8px; color:#00ff99; text-decoration:underline; }
-    .hero { margin-top:8px; padding:16px; border:1px solid #1f5e1f; border-radius:10px; background:#102b10; }
-    footer { text-align:center; color:#9aa; font-size:12px; padding:24px 0; }
+    :root { --overlay: rgba(0,0,0,0.45); }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      color: #fff;
+      background: url('golf-course-bg.jpg') no-repeat center center fixed; /* <-- your image */
+      background-size: cover;
+    }
+    /* translucent overlay so text is readable on top of the photo */
+    .scrim {
+      min-height: 100%;
+      background: var(--overlay);
+      display: flex;
+      flex-direction: column;
+    }
+    nav {
+      background: rgba(0, 51, 0, 0.9);
+      padding: 12px 0;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    nav a {
+      color: #fff;
+      margin: 0 14px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    nav a[aria-current="page"] { text-decoration: underline; }
+    .container { width: min(900px, 92%); margin: 0 auto; padding: 40px 0 56px; }
+    h1 { color: #00ff99; font-size: 2.2rem; margin: 8px 0 16px; }
+    p  { font-size: 1.05rem; line-height: 1.7; margin: 0 0 16px; }
+    ul { line-height: 1.7; margin: 0 0 24px 20px; }
+    .hero, .card {
+      padding: 18px;
+      border: 1px solid #1f5e1f;
+      border-radius: 10px;
+      background: rgba(16, 43, 16, 0.9);
+      backdrop-filter: blur(2px);
+    }
+    .cta { display: inline-block; margin-top: 8px; color: #00ff99; text-decoration: underline; }
+    footer { text-align: center; color: #cbd5cb; font-size: 12px; padding: 18px 0 24px; }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="features.html">Features</a>
-    <a href="pricing.html">Pricing</a>
-    <a href="contact.html">Contact</a>
-    <a href="coming-soon.html" aria-current="page">Coming Soon</a>
-  </nav>
+  <div class="scrim">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="features.html">Features</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="contact.html">Contact</a>
+      <a href="coming-soon.html" aria-current="page">Coming Soon</a>
+    </nav>
 
-  <main class="container">
-    <section class="hero">
-      <h1>Coming Soon</h1>
-      <p>We’re shipping fast and clean. If it doesn’t help your golf, it doesn’t ship. Simple.</p>
-    </section>
+    <main class="container">
+      <section class="hero">
+        <h1>Coming Soon</h1>
+        <p>We’re shipping fast and clean. If it doesn’t help your golf, it doesn’t ship. Simple.</p>
+      </section>
 
-    <section class="card" style="margin-top:18px;">
-      <h2 style="margin-top:0;">Next Drops</h2>
-      <ul>
-        <li><strong>Mental Game Scoring + Final Report</strong> — decision/setup/execution/review, end-of-round insights, and drills.</li>
-        <li><strong>Upload & Pro Comparison</strong> — side-by-side with elite swings, P1–P9 checkpoints.</li>
-        <li><strong>Power / Efficiency / Fixer Reports</strong> — find leaks, apply targeted fixes.</li>
-        <li><strong>Trend Dashboard</strong> — Mental IQ vs. score correlation across rounds.</li>
-      </ul>
-      <p>Want early access? We’ll tap you in when it’s ready (no spam, no fluff).</p>
-      <a class="cta" href="contact.html">Get on the early access list →</a>
-    </section>
-  </main>
+      <section class="card" style="margin-top:18px;">
+        <h2 style="margin-top:0;">Next Drops</h2>
+        <ul>
+          <li><strong>Mental Game Scoring + Final Report</strong> — decision/setup/execution/review, end-of-round insights, and drills.</li>
+          <li><strong>Upload & Pro Comparison</strong> — side-by-side with elite swings, P1–P9 checkpoints.</li>
+          <li><strong>Power / Efficiency / Fixer Reports</strong> — find leaks, apply targeted fixes.</li>
+          <li><strong>Trend Dashboard</strong> — Mental IQ vs. score correlation across rounds.</li>
+        </ul>
+        <p>Want early access? We’ll tap you in when it’s ready (no spam, no fluff).</p>
+        <a class="cta" href="contact.html">Get on the early access list →</a>
+      </section>
+    </main>
 
-  <footer>
-    © <span id="y"></span> Virtual Coach AI — Better decisions, better swings.
-  </footer>
-
+    <footer>
+      © <span id="y"></span> Virtual Coach AI — Better decisions, better swings.
+    </footer>
+  </div>
   <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 </body>
 </html>
