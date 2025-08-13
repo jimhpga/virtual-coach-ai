@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
     const publicUrl = `${process.env.S3_PUBLIC_URL_BASE}/${key}`; // e.g. https://virtualcoachai-swings.s3.us-west-1.amazonaws.com
     return res.status(200).json({ url, fields, key, publicUrl });
-  } catch (err) {
+  }} catch (err) {
   console.error("[s3-presign] error", {
     name: err?.name,
     message: err?.message,
@@ -42,5 +42,3 @@ export default async function handler(req, res) {
   });
 }
 
-  }
-}
