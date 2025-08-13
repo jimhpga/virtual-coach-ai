@@ -17,14 +17,15 @@ export default async function handler(req, res) {
 
   try {
     const { url, fields } = await createPresignedPost(client, {
-      Bucket: process.env.S3_BUCKET,
+      Bucket: process.env.S3_BUCKET,                    // e.g. virtualcoachai-swings
       Key: key,
       Conditions: [
         ["starts-with", "$key", "uploads/"],
-        ["content-length-range", 0, 200000000] // up to ~200MB
+        ["content-length-range", 0, 200000000]          // up to ~200MB
       ],
-      Fields: { "Content-Type": contentType }, // no ACL
-      Expires: 60
+      // Do NOT set ACL if your bucket has Object Ownership = Bucket owner enforced
+      Fields: { "Content-Type": contentType },
+      Expires: 300
     });
 
     const publicUrl = `${process.env.S3_PUBLIC_URL_BASE}/${key}`;
