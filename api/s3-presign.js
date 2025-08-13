@@ -17,21 +17,20 @@ export default async function handler(req, res) {
 
   try {
     const { url, fields } = await createPresignedPost(client, {
-      Bucket: process.env.S3_BUCKET,                    // e.g. virtualcoachai-swings
+      Bucket: process.env.S3_BUCKET,        // e.g. virtualcoachai-swings
       Key: key,
       Conditions: [
         ["starts-with", "$key", "uploads/"],
-        ["content-length-range", 0, 200000000]          // up to ~200MB
+        ["content-length-range", 0, 200000000] // up to ~200MB
       ],
-      // Do NOT set ACL if your bucket has Object Ownership = Bucket owner enforced
-      Fields: { "Content-Type": contentType },
-      Expires: 300
+      Fields: { "Content-Type": contentType, "acl": "public-read" },
+      Expires: 60
     });
 
-    const publicUrl = `${process.env.S3_PUBLIC_URL_BASE}/${key}`;
-    res.status(200).json({ url, fields, key, publicUrl });
+    const publicUrl = `${process.env.S3_PUBLIC_URL_BASE}/${key}`; // e.g. https://virtualcoachai-swings.s3.us-west-1.amazonaws.com
+    return res.status(200).json({ url, fields, key, publicUrl });
   } catch (err) {
     console.error("[s3-presign] error", err);
-    res.status(500).json({ error: "Failed to create presigned post" });
+    return res.status(500).json({ error: "Failed to create presigned post" });
   }
 }
