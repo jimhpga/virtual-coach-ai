@@ -180,29 +180,53 @@
       <p>&copy; 2025 Virtual Coach AI. All rights reserved.</p>
     </footer>
   </div>
+<script>
+  async function uploadVideo() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    if (!file) { alert("Please select a video file first."); return; }
 
-  <script>
-    async function uploadVideo() {
-      const file = document.getElementById('fileInput').files[0];
-      if (!file) { alert("Please select a video file first."); return; }
+    try {
+      // 1) Ask your backend for a presigned POST (tiny JSON request)
+      const presignRes = await fetch('/api/s3-presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: file.name,
+          // iPhone .MOV often reports video/quicktime
+          contentType: file.type || 'video/quicktime'
+        })
+      });
 
-      // NOTE: For big files we'll switch to direct-to-S3 later.
-      const formData = new FormData();
-      formData.append("file", file);
-
-      try {
-        const res = await fetch('/api/upload', { method: 'POST', body: formData });
-        if (res.ok) {
-          window.location.href = "/report.html";
-        } else {
-          const msg = await res.text().catch(() => "");
-          alert("Upload failed. " + (msg || "Please try again."));
-        }
-      } catch (err) {
-        console.error(err);
-        alert("An error occurred while uploading.");
+      if (!presignRes.ok) {
+        const t = await presignRes.text().catch(()=> '');
+        alert("Failed to get upload URL. " + t);
+        return;
       }
+
+      const { url, fields, publicUrl } = await presignRes.json();
+
+      // 2) Upload the actual file directly to S3 (big upload goes here)
+      const formData = new FormData();
+      Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
+      formData.append('file', file);
+
+      const s3Res = await fetch(url, { method: 'POST', body: formData });
+      if (!s3Res.ok) {
+        const txt = await s3Res.text().catch(()=> '');
+        console.error('S3 error:', s3Res.status, txt);
+        alert("Upload failed. Please try again.");
+        return;
+      }
+
+      // 3) Hand off the S3 URL to the report page
+      sessionStorage.setItem('uploadedVideoUrl', publicUrl);
+      window.location.href = "report.html";
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred while uploading.");
     }
-  </script>
+  }
+</script>
 </body>
 </html>
