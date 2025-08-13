@@ -1,47 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Virtual Coach AI – Swing Report</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Coach AI – Report</title>
   <style>
-    main{max-width:960px;margin:40px auto;padding:16px;background:rgba(0,0,0,.35);border-radius:12px}
-    nav ul{list-style:none;display:flex;gap:12px;padding:10px;margin:0}
-    nav a{color:#fff;text-decoration:none}
-    video{width:100%;max-height:500px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:#000}
-    .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
-    button{padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:#0a5f37;color:#fff;cursor:pointer}
+    body { margin:0; font-family: Arial, sans-serif; color:#fff; background:#001a00; }
+    header { background:#003300; padding:8px 0; text-align:center; }
+    header a { color:#fff; text-decoration:none; font-weight:700; margin:0 12px; }
+    main { max-width:980px; margin:24px auto; padding:16px; }
+    .card { background:#0d0d0d; border:1px solid rgba(255,255,255,.15); border-radius:12px; padding:16px; margin-bottom:16px; }
+    video { width:100%; max-height:480px; background:#000; }
+    .muted { color:#cfd3d8; }
   </style>
 </head>
 <body>
-<header>
-  <nav>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="upload.html">Upload</a></li>
-      <li><a href="about.html">About</a></li>
-      <li><a href="coming-soon.html">Coming Soon</a></li>
-    </ul>
-  </nav>
-</header>
+  <header>
+    <a href="index.html">Home</a>
+    <a href="upload.html">Upload Another Swing</a>
+  </header>
+  <main>
+    <h1>Your Swing Report</h1>
 
-<main>
-  <h1>Your Swing Report</h1>
-  <video id="swing" controls></video>
-  <div class="row">
-    <button onclick="window.location.href='upload.html'">Upload Another Swing</button>
-  </div>
-</main>
+    <div class="card">
+      <h3>Video</h3>
+      <video id="video" controls></video>
+      <div class="muted" id="src"></div>
+    </div>
 
-<script>
-  const url = sessionStorage.getItem('uploadedVideoUrl');
-  const el = document.getElementById('swing');
-  if (url) {
-    el.src = url;
-  } else {
-    el.outerHTML = '<p style="color:#fff">No video found. <a href="upload.html">Upload a swing</a>.</p>';
-  }
-</script>
+    <div class="card">
+      <h3>Highlights</h3>
+      <div class="muted">Profile —</div>
+      <div class="muted">Tempo —</div>
+      <div class="muted">Power —</div>
+      <div class="muted">Quick Wins —</div>
+    </div>
+  </main>
+
+  <script>
+    const url = sessionStorage.getItem('uploadedVideoUrl');
+    const v = document.getElementById('video');
+    const src = document.getElementById('src');
+    if (url) {
+      v.src = url;
+      src.textContent = 'Source URL: ' + url;
+    } else {
+      src.textContent = 'No uploaded video was found for this session.';
+    }
+  </script>
 </body>
 </html>
