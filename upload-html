@@ -10,10 +10,10 @@
     .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
     input[type="file"] { padding:10px; }
     button { padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:#0a5f37; color:#fff; cursor:pointer; }
-    #status { margin-top:10px; font-weight:600; }
+    #status { margin-top:10px; font-weight:600; white-space:pre-wrap; }
     video { width:100%; max-height:400px; margin-top:16px; display:none; }
-    /* Hidden iframe target so the page doesn’t navigate to S3 */
-    iframe#s3Target { display:none; width:0; height:0; border:0; }
+    .muted { color:#cfd3d8; font-size:.95rem; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
   </style>
 </head>
 <body>
@@ -30,36 +30,35 @@
 
   <main>
     <h1>Upload Your Swing</h1>
+    <p class="muted">iPhone MOV files are supported. They’ll upload directly to our secure cloud bucket.</p>
 
     <div class="row">
       <input type="file" id="fileInput" accept="video/*" />
       <button id="uploadBtn">Upload Video</button>
+      <button id="probeBtn" title="Tiny test upload (1 byte) to isolate issues">1-Byte Test</button>
     </div>
 
     <div id="status"></div>
     <video id="preview" controls></video>
-
-    <!-- Hidden form that will be populated with S3 fields and submitted -->
-    <form id="s3Form" method="POST" enctype="multipart/form-data" target="s3Target" style="display:none;">
-      <!-- action is set at runtime to the S3 URL -->
-      <!-- S3 required fields inserted dynamically as hidden inputs -->
-      <input type="file" name="file" id="s3FileInput" />
-    </form>
-
-    <!-- Hidden iframe target prevents navigation to S3 -->
-    <iframe id="s3Target" name="s3Target"></iframe>
   </main>
 
   <script>
-    const fileInput   = document.getElementById('fileInput');
-    const statusDiv   = document.getElementById('status');
-    const preview     = document.getElementById('preview');
-    const uploadBtn   = document.getElementById('uploadBtn');
-    const s3Form      = document.getElementById('s3Form');
-    const s3FileInput = document.getElementById('s3FileInput');
-    const s3Target    = document.getElementById('s3Target');
+    const fileInput = document.getElementById('fileInput');
+    const statusDiv = document.getElementById('status');
+    const preview = document.getElementById('preview');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const probeBtn = document.getElementById('probeBtn');
 
-    // Show a preview (optional)
+    function showStatus(msg) {
+      statusDiv.textContent = msg;
+      console.log('[UPLOAD]', msg);
+    }
+    function showError(prefix, res, text) {
+      const details = `\nStatus: ${res?.status ?? '—'}\nStatusText: ${res?.statusText ?? '—'}\nBody:\n${text ?? '(empty)'}`;
+      statusDiv.textContent = `${prefix}${details}`;
+      console.error(prefix, { status: res?.status, statusText: res?.statusText, body: text });
+    }
+
     fileInput.addEventListener('change', () => {
       const f = fileInput.files[0];
       if (!f) return;
@@ -68,75 +67,75 @@
       preview.style.display = 'block';
     });
 
-    // When the hidden iframe finishes loading, assume success if we just posted
-    s3Target.addEventListener('load', () => {
-      // S3 returns 204 with an empty doc, which still triggers 'load'
-      // If we reached here after a submission, move on to the report page
-      const publicUrl = sessionStorage.getItem('uploadedVideoUrl');
-      if (publicUrl) {
-        statusDiv.textContent = "Upload complete. Generating report…";
-        window.location.href = "report.html";
+    async function presign(filename, contentType) {
+      showStatus('Requesting upload link…');
+      const r = await fetch('/api/s3-presign', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ filename, contentType })
+      });
+      if (!r.ok) throw new Error(`presign failed: ${r.status} ${r.statusText}`);
+      return r.json();
+    }
+
+    async function postToS3(url, fields, fileOrBlob, explicitContentType) {
+      const formData = new FormData();
+      Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
+      if (explicitContentType) {
+        // Ensure S3 sees Content-Type exactly as in policy/fields
+        formData.set('Content-Type', explicitContentType);
       }
-    });
+      formData.append('file', fileOrBlob);
+      const res = await fetch(url, { method: 'POST', body: formData });
+      return res;
+    }
+
+    async function doUpload(file) {
+      try {
+        const contentType = file.type || 'video/quicktime';
+        const { url, fields, key, publicUrl } = await presign(file.name, contentType);
+
+        showStatus('Uploading to cloud…');
+        const s3Res = await postToS3(url, fields, file, fields['Content-Type']);
+        if (!s3Res.ok) {
+          const txt = await s3Res.text().catch(()=> '');
+          return showError('Upload failed. S3 said:', s3Res, txt);
+        }
+
+        // Success — send to report
+        showStatus('Upload complete. Generating report…');
+        // Prefer query param so report works even if sessionStorage is cleared
+        location.href = 'report.html?v=' + encodeURIComponent(publicUrl);
+      } catch (e) {
+        statusDiv.textContent = `Upload failed.\n${e.message}`;
+        console.error(e);
+      }
+    }
 
     uploadBtn.addEventListener('click', async () => {
       const file = fileInput.files[0];
-      if (!file) { statusDiv.textContent = "Please select a video file."; return; }
+      if (!file) return showStatus('Please select a video file first.');
+      await doUpload(file);
+    });
 
-      statusDiv.textContent = "Requesting upload link…";
+    // 1-byte probe to isolate S3/CORS/policy issues without big files
+    probeBtn.addEventListener('click', async () => {
+      try {
+        const blob = new Blob([new Uint8Array([0x00])], { type: 'video/quicktime' });
+        const { url, fields, key, publicUrl } = await presign('probe.mov', 'video/quicktime');
 
-      // Ask our API for a presigned POST
-      const presignRes = await fetch('/api/s3-presign', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ filename: file.name, contentType: file.type || 'video/quicktime' })
-      });
-
-      if (!presignRes.ok) {
-        statusDiv.textContent = "Failed to get upload URL.";
-        return;
+        showStatus('Posting 1-byte probe to S3…');
+        const s3Res = await postToS3(url, fields, blob, fields['Content-Type']);
+        if (!s3Res.ok) {
+          const txt = await s3Res.text().catch(()=> '');
+          return showError('Probe failed. S3 said:', s3Res, txt);
+        }
+        showStatus('Probe OK. Redirecting to report…');
+        location.href = 'report.html?v=' + encodeURIComponent(publicUrl);
+      } catch (e) {
+        statusDiv.textContent = `Probe failed.\n${e.message}`;
+        console.error(e);
       }
-
-      const { url, fields, key, publicUrl } = await presignRes.json();
-
-      // Remember the public URL for the report page
-      sessionStorage.setItem('uploadedVideoUrl', publicUrl);
-
-      // Prepare the hidden form for S3 POST
-      s3Form.action = url;
-
-      // Clear previous hidden inputs (if any)
-      [...s3Form.querySelectorAll('input[type=hidden]')].forEach(n => n.remove());
-
-      // Insert all S3-required fields as hidden inputs
-      Object.entries(fields).forEach(([k, v]) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = k;
-        input.value = v;
-        s3Form.appendChild(input);
-      });
-
-      // Put the chosen file into the hidden form's file input
-      // Note: We can't programmatically set .files; instead, reuse the visible input via cloning workaround
-      // Simpler: temporarily show the hidden file input and assign the same File object by user gesture
-      // But to avoid extra clicks, we directly append the visible input into the form, submit, then put it back.
-
-      const visibleParent = fileInput.parentNode;
-      const placeholder = document.createElement('span');
-      visibleParent.replaceChild(placeholder, fileInput);   // pull out
-      fileInput.name = 'file';
-      s3Form.appendChild(fileInput);                        // move into form
-
-      statusDiv.textContent = "Uploading to cloud…";
-
-      // Submit to S3 in the hidden iframe
-      s3Form.submit();
-
-      // After submit, put the file input back where it was so UI stays normal
-      s3Form.removeChild(fileInput);
-      fileInput.name = ''; // not needed outside form
-      visibleParent.replaceChild(fileInput, placeholder);
     });
   </script>
 </body>
