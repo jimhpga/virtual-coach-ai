@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Virtual Coach AI – Upload</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    main { max-width: 840px; margin: 40px auto; padding: 16px; background: rgba(0,0,0,.35); border-radius: 12px; }
-    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-    input[type="file"] { padding:10px; }
-    button { padding:10px 14px; border-radius:10px; border:1px solid rgba(255,255,255,.15); background:#0a5f37; color:#fff; cursor:pointer; }
-    #status { margin-top:10px; font-weight:600; white-space:pre-wrap; }
-    video { width:100%; max-height:400px; margin-top:16px; display:none; }
-    .muted { color:#cfd3d8; font-size:.95rem; }
-    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    main{max-width:840px;margin:40px auto;padding:16px;background:rgba(0,0,0,.35);border-radius:12px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    input[type="file"]{padding:10px}
+    button{padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:#0a5f37;color:#fff;cursor:pointer}
+    #status{margin-top:10px;font-weight:600}
+    video{width:100%;max-height:400px;margin-top:16px;display:none}
+    nav ul{list-style:none;display:flex;gap:12px;padding:10px;margin:0}
+    nav a{color:#fff;text-decoration:none}
   </style>
 </head>
 <body>
@@ -23,21 +23,17 @@
         <li><a href="index.html">Home</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="coming-soon.html">Coming Soon</a></li>
-        <li><a href="contact.html">Contact</a></li>
+        <li><a href="upload.html">Upload</a></li>
       </ul>
     </nav>
   </header>
 
   <main>
     <h1>Upload Your Swing</h1>
-    <p class="muted">iPhone MOV files are supported. They’ll upload directly to our secure cloud bucket.</p>
-
     <div class="row">
       <input type="file" id="fileInput" accept="video/*" />
       <button id="uploadBtn">Upload Video</button>
-      <button id="probeBtn" title="Tiny test upload (1 byte) to isolate issues">1-Byte Test</button>
     </div>
-
     <div id="status"></div>
     <video id="preview" controls></video>
   </main>
@@ -47,17 +43,6 @@
     const statusDiv = document.getElementById('status');
     const preview = document.getElementById('preview');
     const uploadBtn = document.getElementById('uploadBtn');
-    const probeBtn = document.getElementById('probeBtn');
-
-    function showStatus(msg) {
-      statusDiv.textContent = msg;
-      console.log('[UPLOAD]', msg);
-    }
-    function showError(prefix, res, text) {
-      const details = `\nStatus: ${res?.status ?? '—'}\nStatusText: ${res?.statusText ?? '—'}\nBody:\n${text ?? '(empty)'}`;
-      statusDiv.textContent = `${prefix}${details}`;
-      console.error(prefix, { status: res?.status, statusText: res?.statusText, body: text });
-    }
 
     fileInput.addEventListener('change', () => {
       const f = fileInput.files[0];
@@ -67,75 +52,41 @@
       preview.style.display = 'block';
     });
 
-    async function presign(filename, contentType) {
-      showStatus('Requesting upload link…');
-      const r = await fetch('/api/s3-presign', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ filename, contentType })
-      });
-      if (!r.ok) throw new Error(`presign failed: ${r.status} ${r.statusText}`);
-      return r.json();
-    }
-
-    async function postToS3(url, fields, fileOrBlob, explicitContentType) {
-      const formData = new FormData();
-      Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
-      if (explicitContentType) {
-        // Ensure S3 sees Content-Type exactly as in policy/fields
-        formData.set('Content-Type', explicitContentType);
-      }
-      formData.append('file', fileOrBlob);
-      const res = await fetch(url, { method: 'POST', body: formData });
-      return res;
-    }
-
-    async function doUpload(file) {
-      try {
-        const contentType = file.type || 'video/quicktime';
-        const { url, fields, key, publicUrl } = await presign(file.name, contentType);
-
-        showStatus('Uploading to cloud…');
-        const s3Res = await postToS3(url, fields, file, fields['Content-Type']);
-        if (!s3Res.ok) {
-          const txt = await s3Res.text().catch(()=> '');
-          return showError('Upload failed. S3 said:', s3Res, txt);
-        }
-
-        // Success — send to report
-        showStatus('Upload complete. Generating report…');
-        // Prefer query param so report works even if sessionStorage is cleared
-        location.href = 'report.html?v=' + encodeURIComponent(publicUrl);
-      } catch (e) {
-        statusDiv.textContent = `Upload failed.\n${e.message}`;
-        console.error(e);
-      }
-    }
-
     uploadBtn.addEventListener('click', async () => {
       const file = fileInput.files[0];
-      if (!file) return showStatus('Please select a video file first.');
-      await doUpload(file);
-    });
+      if (!file) { statusDiv.textContent = "Please select a video file."; return; }
 
-    // 1-byte probe to isolate S3/CORS/policy issues without big files
-    probeBtn.addEventListener('click', async () => {
-      try {
-        const blob = new Blob([new Uint8Array([0x00])], { type: 'video/quicktime' });
-        const { url, fields, key, publicUrl } = await presign('probe.mov', 'video/quicktime');
+      statusDiv.textContent = "Requesting upload link…";
 
-        showStatus('Posting 1-byte probe to S3…');
-        const s3Res = await postToS3(url, fields, blob, fields['Content-Type']);
-        if (!s3Res.ok) {
-          const txt = await s3Res.text().catch(()=> '');
-          return showError('Probe failed. S3 said:', s3Res, txt);
-        }
-        showStatus('Probe OK. Redirecting to report…');
-        location.href = 'report.html?v=' + encodeURIComponent(publicUrl);
-      } catch (e) {
-        statusDiv.textContent = `Probe failed.\n${e.message}`;
-        console.error(e);
+      // Ask backend for presigned S3 POST
+      const presignRes = await fetch('/api/s3-presign', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ filename: file.name, contentType: file.type || 'video/quicktime' })
+      });
+
+      if (!presignRes.ok) { statusDiv.textContent = "Failed to get upload URL."; return; }
+      const { url, fields, key, publicUrl } = await presignRes.json();
+
+      statusDiv.textContent = "Uploading to cloud…";
+
+      // Post file directly to S3
+      const formData = new FormData();
+      Object.entries(fields).forEach(([k,v]) => formData.append(k, v));
+      formData.append('file', file);
+
+      const s3Res = await fetch(url, { method: 'POST', body: formData });
+      if (!s3Res.ok) {
+        const txt = await s3Res.text().catch(()=> '');
+        console.error('S3 error:', s3Res.status, txt);
+        statusDiv.textContent = "Upload failed. Please try again.";
+        return;
       }
+
+      // hand the video URL to the report page
+      sessionStorage.setItem('uploadedVideoUrl', publicUrl);
+      statusDiv.textContent = "Upload complete. Generating report…";
+      window.location.href = "report.html";
     });
   </script>
 </body>
