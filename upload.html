@@ -42,7 +42,7 @@
       <input type="file" id="fileInput" accept="video/*" />
       <button id="uploadBtn">Upload</button>
     </div>
-    <small class="muted">iPhone videos (.mov) are fine — we upload them as-is to the cloud.</small>
+    <small class="muted">iPhone videos (.mov) are fine — uploaded as-is to the cloud.</small>
 
     <div id="status">Idle</div>
     <video id="preview" controls></video>
@@ -54,7 +54,6 @@
     const statusBox = document.getElementById('status');
     const preview = document.getElementById('preview');
 
-    // Preview on select
     fileInput.addEventListener('change', () => {
       const f = fileInput.files[0];
       if (!f) return;
@@ -70,7 +69,7 @@
     }
 
     function guessContentType(file) {
-      if (file.type) return file.type; // use browser's
+      if (file.type) return file.type;
       const name = file.name.toLowerCase();
       if (name.endsWith('.mp4')) return 'video/mp4';
       if (name.endsWith('.mov')) return 'video/quicktime';
@@ -81,7 +80,6 @@
       const file = fileInput.files[0];
       if (!file) { setStatus('Please select a video file first.', true); return; }
 
-      // 1) Ask backend for presigned POST
       const contentType = guessContentType(file);
       setStatus(`Requesting upload link…\nfilename=${file.name}\ncontentType=${contentType}`);
 
@@ -94,20 +92,20 @@
         });
         if (!res.ok) {
           const t = await res.text().catch(()=> '');
-          setStatus(`Failed to get upload URL. Status ${res.status}\n${t}`, true);
+          setStatus(\`Failed to get upload URL. Status \${res.status}\n\${t}\`, true);
           return;
         }
         presign = await res.json();
       } catch (e) {
-        setStatus(`Error contacting /api/s3-presign: ${e.message}`, true);
+        setStatus(\`Error contacting /api/s3-presign: \${e.message}\`, true);
         return;
       }
 
       const { url, fields, publicUrl } = presign || {};
       if (!url || !fields) { setStatus('Bad presign response from server.', true); return; }
 
-      // 2) Upload directly to S3
       setStatus('Uploading to S3…');
+
       const formData = new FormData();
       Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
       formData.append('file', file);
@@ -117,21 +115,17 @@
         s3Res = await fetch(url, { method: 'POST', body: formData });
         s3Text = await s3Res.text().catch(()=> '');
       } catch (e) {
-        setStatus(`Network error posting to S3: ${e.message}`, true);
+        setStatus(\`Network error posting to S3: \${e.message}\`, true);
         return;
       }
 
       if (!s3Res.ok) {
-        // Show EXACT error from S3 (XML). This tells us if it's 403 signature, 400 policy, 404 region, etc.
-        setStatus(`S3 upload failed: ${s3Res.status} ${s3Res.statusText}\n---\n${s3Text}`, true);
+        setStatus(\`S3 upload failed: \${s3Res.status} \${s3Res.statusText}\n---\n\${s3Text}\`, true);
         return;
       }
 
-      // 204 success expected
+      try { sessionStorage.setItem('uploadedVideoUrl', publicUrl); } catch {}
       setStatus('Upload complete. Redirecting to report…');
-      try {
-        sessionStorage.setItem('uploadedVideoUrl', publicUrl);
-      } catch {}
       window.location.href = 'report.html';
     });
   </script>
