@@ -3,221 +3,136 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Virtual Coach AI - Upload</title>
-
+  <title>Virtual Coach AI – Upload</title>
   <style>
-    :root{
-      --bg-image: url('/homepage-background.png');
-      --bg-brightness: 1.0;
-    }
-
-    html, body { height: 100%; margin: 0; padding: 0; }
-    body {
-      font-family: Arial, sans-serif;
-      color: #fff;
-      text-align: center;
-      background: #000;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    .homepage {
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-    .homepage::before{
-      content: "";
-      position: fixed; inset: 0;
-      background-image: var(--bg-image);
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: center center;
-      filter: brightness(var(--bg-brightness));
-      z-index: -1;
-    }
-    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px){
-      .homepage::before{
-        background-size: contain;
-        background-position: center bottom;
-        background-color: #000;
-      }
-    }
-
-    nav {
-      width: 100%;
-      background-color: #003300;
-      padding: 6px 0;
-      position: sticky; top: 0; z-index: 10;
-    }
-    nav a { color: #fff; margin: 0 12px; text-decoration: none; font-weight: bold; }
-
-    .container{
-      padding: 20px 16px 12px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px;
-      max-width: 1100px; margin: 0 auto;
-      background: transparent;
-    }
-
-    img.logo{
-      width: clamp(180px, 28vw, 340px);
-      height: auto;
-      margin: 4px 0 6px;
-      /* dark green tint via CSS filter */
-      filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(95%) contrast(85%);
-    }
-
-    .welcome{
-      font-size: 1rem;
-      margin: 2px 0 4px;
-      color: #fff;
-      font-style: italic;
-    }
-
-    h1{ margin: 4px 0; font-size: 1.9em; }
-    .tagline{
-      font-size: 1.05em;
-      font-style: italic;
-      color: #ffffff;
-      margin: 2px 0 8px;
-    }
-
-    .dropdowns{
-      display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 6px 0 8px;
-    }
-    .dropdowns select{
-      width: 160px; max-width: 160px;
-      background-color: rgba(0, 51, 0, 0.5);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.35);
-      border-radius: 6px;
-      padding: 6px 8px;
-      font-size: 0.95rem;
-    }
-
-    .controls{
-      display: flex; flex-direction: column; gap: 8px; align-items: center; margin-top: 4px;
-    }
+    body { margin:0; font-family: Arial, sans-serif; color:#fff; text-align:center;
+           background:#000 url('homepage-background.png') no-repeat center/cover fixed; }
+    header { background:#003300; position:sticky; top:0; padding:8px 0; }
+    header a { color:#fff; text-decoration:none; font-weight:700; margin:0 12px; }
+    main { max-width:840px; margin:30px auto; padding:16px;
+           background:rgba(0,0,0,.35); border-radius:12px; }
+    h1 { margin-top:0; }
+    .row { display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
     input[type="file"]{
-      width: 200px;
-      background-color: rgba(0,0,0,0.28);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.35);
-      border-radius: 6px;
-      padding: 5px;
-      font-size: 0.9rem;
+      background: rgba(0,0,0,0.28);
+      color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:6px; padding:6px;
     }
     input[type="file"]::file-selector-button{
-      background-color: rgba(0, 51, 0, 0.6);
-      color: #fff;
-      padding: 6px 10px;
-      border-radius: 4px; border: none; cursor: pointer;
+      background:#003300; color:#fff; border:none; border-radius:4px; padding:6px 10px; cursor:pointer;
     }
-    input[type="file"]::file-selector-button:hover{
-      background-color: rgba(0, 51, 0, 0.8);
-    }
-
-    button.upload{
-      width: 160px;
-      background-color: #003300; color: #fff;
-      cursor: pointer; padding: 7px 12px;
-      border-radius: 6px; border: none;
-      font-size: 0.95rem;
-    }
-
-    #status{ margin-top:8px; font-weight:600; }
-
-    .footer{ background: transparent; color: #fff; padding: 6px 0; margin-top: auto; font-size: 0.9rem; }
+    button { background:#003300; color:#fff; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; }
+    #status { margin-top:12px; font-weight:600; white-space:pre-wrap; text-align:left; background:#1118; padding:10px; border-radius:8px; }
+    #status.ok { color:#bfffc7; }
+    #status.err { color:#ffd7d7; }
+    video { width:100%; max-height:400px; margin-top:16px; display:none; }
+    small { display:block; color:#ccc; margin-top:6px; }
+    .muted { color:#aaa; font-size:.9em; }
   </style>
 </head>
-
 <body>
-  <div class="homepage">
-    <nav>
-      <a href="index.html" aria-current="page">Home</a>
-      <a href="about.html">About</a>
-      <a href="coming-soon.html">Coming Soon</a>
-      <a href="upload.html">Upload</a>
-    </nav>
+  <header>
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="coming-soon.html">Coming Soon</a>
+  </header>
 
-    <div class="container">
-      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
-      <div class="welcome">Welcome Beta Testers</div>
-      <h1>Virtual Coach AI</h1>
-      <div class="tagline">Where the future of golf instruction begins with AI</div>
-
-      <div class="dropdowns">
-        <select id="handedness" aria-label="Select handedness">
-          <option value="">Select Handedness</option>
-          <option value="right">Right-Handed</option>
-          <option value="left">Left-Handed</option>
-        </select>
-        <select id="eyeDominance" aria-label="Select eye dominance">
-          <option value="">Select Eye Dominance</option>
-          <option value="right">Right Eye</option>
-          <option value="left">Left Eye</option>
-          <option value="unknown">Unknown</option>
-        </select>
-      </div>
-
-      <div class="controls">
-        <input type="file" id="fileInput" accept="video/*" />
-        <button class="upload" id="uploadBtn">Upload Your Swing</button>
-        <div id="status"></div>
-      </div>
+  <main>
+    <h1>Upload Your Swing</h1>
+    <div class="row">
+      <input type="file" id="fileInput" accept="video/*" />
+      <button id="uploadBtn">Upload</button>
     </div>
+    <small class="muted">iPhone videos (.mov) are fine — we upload them as-is to the cloud.</small>
 
-    <footer class="footer">
-      <p>&copy; 2025 Virtual Coach AI. All rights reserved.</p>
-    </footer>
-  </div>
+    <div id="status">Idle</div>
+    <video id="preview" controls></video>
+  </main>
 
   <script>
     const fileInput = document.getElementById('fileInput');
     const uploadBtn = document.getElementById('uploadBtn');
-    const statusDiv = document.getElementById('status');
+    const statusBox = document.getElementById('status');
+    const preview = document.getElementById('preview');
+
+    // Preview on select
+    fileInput.addEventListener('change', () => {
+      const f = fileInput.files[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f);
+      preview.src = url;
+      preview.style.display = 'block';
+    });
+
+    function setStatus(text, isError=false) {
+      statusBox.textContent = text;
+      statusBox.classList.toggle('err', isError);
+      statusBox.classList.toggle('ok', !isError);
+    }
+
+    function guessContentType(file) {
+      if (file.type) return file.type; // use browser's
+      const name = file.name.toLowerCase();
+      if (name.endsWith('.mp4')) return 'video/mp4';
+      if (name.endsWith('.mov')) return 'video/quicktime';
+      return 'application/octet-stream';
+    }
 
     uploadBtn.addEventListener('click', async () => {
       const file = fileInput.files[0];
-      if (!file) { alert("Please select a video file first."); return; }
+      if (!file) { setStatus('Please select a video file first.', true); return; }
 
-      statusDiv.textContent = "Requesting upload link…";
+      // 1) Ask backend for presigned POST
+      const contentType = guessContentType(file);
+      setStatus(`Requesting upload link…\nfilename=${file.name}\ncontentType=${contentType}`);
 
-      // 1) Get presigned POST from your backend
-      const presignRes = await fetch('/api/s3-presign', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ filename: file.name, contentType: file.type || 'video/quicktime' })
-      });
-
-      if (!presignRes.ok) {
-        statusDiv.textContent = "Failed to get upload URL.";
+      let presign;
+      try {
+        const res = await fetch('/api/s3-presign', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ filename: file.name, contentType })
+        });
+        if (!res.ok) {
+          const t = await res.text().catch(()=> '');
+          setStatus(`Failed to get upload URL. Status ${res.status}\n${t}`, true);
+          return;
+        }
+        presign = await res.json();
+      } catch (e) {
+        setStatus(`Error contacting /api/s3-presign: ${e.message}`, true);
         return;
       }
 
-      const { url, fields, key, publicUrl } = await presignRes.json();
+      const { url, fields, publicUrl } = presign || {};
+      if (!url || !fields) { setStatus('Bad presign response from server.', true); return; }
 
-      statusDiv.textContent = "Uploading to cloud…";
-
-      // 2) Upload the file directly to S3
+      // 2) Upload directly to S3
+      setStatus('Uploading to S3…');
       const formData = new FormData();
       Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
       formData.append('file', file);
 
-      const s3Res = await fetch(url, { method: 'POST', body: formData });
-      if (!s3Res.ok) {
-        const txt = await s3Res.text().catch(()=>'');
-        console.error('S3 error:', s3Res.status, txt);
-        statusDiv.textContent = "Upload failed. Please try again.";
+      let s3Res, s3Text = '';
+      try {
+        s3Res = await fetch(url, { method: 'POST', body: formData });
+        s3Text = await s3Res.text().catch(()=> '');
+      } catch (e) {
+        setStatus(`Network error posting to S3: ${e.message}`, true);
         return;
       }
 
-      // 3) Hand off to report page with the S3 URL
-      sessionStorage.setItem('uploadedVideoUrl', publicUrl);
-      statusDiv.textContent = "Upload complete. Generating report…";
-      window.location.href = "report.html";
+      if (!s3Res.ok) {
+        // Show EXACT error from S3 (XML). This tells us if it's 403 signature, 400 policy, 404 region, etc.
+        setStatus(`S3 upload failed: ${s3Res.status} ${s3Res.statusText}\n---\n${s3Text}`, true);
+        return;
+      }
+
+      // 204 success expected
+      setStatus('Upload complete. Redirecting to report…');
+      try {
+        sessionStorage.setItem('uploadedVideoUrl', publicUrl);
+      } catch {}
+      window.location.href = 'report.html';
     });
   </script>
 </body>
