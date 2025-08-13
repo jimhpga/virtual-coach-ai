@@ -23,7 +23,7 @@ export default async function handler(req, res) {
         ["starts-with", "$key", "uploads/"],
         ["content-length-range", 0, 200000000] // up to ~200MB
       ],
-      Fields: { "Content-Type": contentType, "acl": "public-read" },
+      Fields: { "Content-Type": contentType }, // ← no ACL here
       Expires: 60
     });
 
