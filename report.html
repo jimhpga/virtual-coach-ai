@@ -2,65 +2,146 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Virtual Coach AI - Swing Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Virtual Coach AI – Swing Report</title>
   <link rel="stylesheet" href="style.css" />
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: url('report-background.png') no-repeat center center fixed;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: #fff;
+      background: url('homepage-background.png') no-repeat center center fixed;
       background-size: cover;
-      color: white;
-      text-align: center;
     }
-    .report-container {
-      padding: 60px 20px;
-      background-color: rgba(0, 0, 0, 0.6);
+    .wrap {
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      background: linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,.35));
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
     }
-    h1 {
-      margin: 0 0 20px;
-      font-size: 2.5em;
-      color: #00ffcc;
+    .card {
+      width: 100%;
+      max-width: 960px;
+      background: rgba(20,20,20,.85);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      padding: 16px;
     }
-    video {
-      width: 90%;
-      max-width: 800px;
-      border: 2px solid #00bfff;
-      border-radius: 10px;
-      margin-top: 20px;
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+    header .brand { display:flex; align-items:center; gap:12px; }
+    header img { height: 42px; width:auto; }
+    header a.btn {
+      text-decoration:none; color:#fff; border:1px solid rgba(255,255,255,.2);
+      padding:8px 12px; border-radius:10px; background:#0a5f37;
     }
-    .back-button {
-      margin-top: 30px;
-      padding: 10px 20px;
-      font-size: 1em;
-      border: none;
-      border-radius: 5px;
-      background-color: #00bfff;
-      color: white;
-      cursor: pointer;
-    }
+    h1 { margin:8px 0 6px; font-size:1.4rem; }
+    .muted { color:#cfd3d8; font-size:.95rem; margin:0 0 12px; }
+    .grid { display:grid; gap:12px; grid-template-columns: 1fr 1fr; }
+    @media (max-width:900px){ .grid { grid-template-columns: 1fr; } }
+    .panel { background: rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:12px; }
+    .panel h3 { margin:0 0 8px; color:#00ffcc; font-size:1.05rem; }
+
+    video { width:100%; max-height:480px; border-radius:10px; border:1px solid rgba(255,255,255,.12); background:#000; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .kv { display:grid; grid-template-columns: 140px 1fr; gap:6px; }
+    .kv b { color:#cfd3d8; }
+    .notice { margin-top:10px; font-weight:600; }
+    .error { color:#ffb3b3; }
+    .ok { color:#91ffb3; }
   </style>
 </head>
 <body>
-  <div class="report-container">
-    <h1>Your Swing Report</h1>
-    <video id="swingVideo" controls></video>
-    <button class="back-button" onclick="window.location.href='index.html'">Upload Another Swing</button>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="brand">
+          <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI" />
+          <div>
+            <h1>Virtual Coach AI</h1>
+            <p class="muted">Your Swing Report</p>
+          </div>
+        </div>
+        <div class="row">
+          <a class="btn" href="index.html">Home</a>
+          <a class="btn" href="upload-html">Upload Another Swing</a>
+        </div>
+      </header>
+
+      <div id="notice" class="notice"></div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Video</h3>
+          <video id="swingVideo" controls playsinline></video>
+          <div class="kv" style="margin-top:10px;">
+            <b>Source URL</b><span id="srcUrl">—</span>
+            <b>Saved</b><span id="savedFlag">—</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Highlights</h3>
+          <div class="kv">
+            <b>Profile</b><span id="prof">—</span>
+            <b>Tempo</b><span id="tempo">—</span>
+            <b>Power</b><span id="power">—</span>
+          </div>
+          <div style="margin-top:10px;">
+            <b>Quick Wins</b>
+            <ul id="tips"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    const videoUrl = sessionStorage.getItem('uploadedVideoUrl');
-    if (videoUrl) {
-      document.getElementById('swingVideo').src = videoUrl;
-    } else {
-      document.getElementById('swingVideo').textContent = "No video available.";
-    }
+    (async function init() {
+      const videoUrl = new URLSearchParams(location.search).get('v') || sessionStorage.getItem('uploadedVideoUrl');
+      const notice = document.getElementById('notice');
+      const swingVideo = document.getElementById('swingVideo');
+      const srcSpan = document.getElementById('srcUrl');
+
+      if (!videoUrl) {
+        notice.className = 'notice error';
+        notice.textContent = 'No video URL found. Please upload a swing first.';
+        return;
+      }
+
+      // show video
+      swingVideo.src = videoUrl;
+      srcSpan.textContent = videoUrl;
+
+      // ask analyzer to generate stub data (works even while real analyzer is WIP)
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ videoUrl })
+        });
+        const json = await res.json();
+
+        document.getElementById('prof').textContent = json.profile || '—';
+        document.getElementById('tempo').textContent = json.tempo || '—';
+        document.getElementById('power').textContent = (json.power && (json.power.score ?? json.totals?.power)) ?? '—';
+
+        const ul = document.getElementById('tips');
+        ul.innerHTML = '';
+        (json.tips3 || json.powerTips3 || []).forEach(t => {
+          const li = document.createElement('li'); li.textContent = t; ul.appendChild(li);
+        });
+
+        const saved = json._saved ? 'Yes (cloud)' : 'No / not confirmed';
+        document.getElementById('savedFlag').textContent = saved;
+
+        notice.className = 'notice ok';
+        notice.textContent = 'Upload successful. Report generated.';
+      } catch (e) {
+        notice.className = 'notice error';
+        notice.textContent = 'Upload OK, but report generation failed. You can still play the video.';
+        console.error(e);
+      }
+    })();
   </script>
 </body>
 </html>
