@@ -1,6 +1,10 @@
 {
-  "routes": [
-    { "src": "/(features|pricing|contact)(?:\\.html)?", "dest": "/coming-soon.html" },
-    { "src": "/comingsoon(?:\\.html)?", "dest": "/coming-soon.html" }
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/upload", "destination": "/upload.html" },
+    { "source": "/about", "destination": "/about.html" },
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/coming-soon", "destination": "/coming-soon.html" }
   ]
 }
