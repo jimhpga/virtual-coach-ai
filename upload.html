@@ -4,86 +4,65 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Virtual Coach AI – Upload</title>
-
   <style>
-    :root{ --green:#003300; --bg-brightness:1.0; }
-
-    html,body{height:100%;margin:0;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}
-    .page{min-height:100dvh; display:flex; flex-direction:column; position:relative;}
-    .page::before{
-      content:""; position:fixed; inset:0; z-index:-1;
-      background:url('homepage-background.png') no-repeat center/cover fixed;
-      filter:brightness(var(--bg-brightness));
+    :root{ --green:#003300; }
+    html,body{ height:100%; margin:0; }
+    body{
+      font-family: Arial, sans-serif; color:#fff; text-align:center;
+      background:#000 url('homepage-background.png') no-repeat center/cover fixed;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
-
-    nav{position:sticky; top:0; width:100%; background:var(--green); padding:8px 10px; text-align:center;}
-    nav a{color:#fff; text-decoration:none; font-weight:700; margin:0 12px;}
-
-    main{max-width:900px; margin:28px auto; padding:16px; background:rgba(0,0,0,.35); border-radius:12px;}
-    h1{margin:0 0 12px; text-align:center;}
-    .row{display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap;}
+    nav{position:sticky;top:0;background:var(--green);padding:8px 0}
+    nav a{color:#fff;text-decoration:none;font-weight:700;margin:0 12px}
+    main{max-width:840px;margin:30px auto;padding:16px;background:rgba(0,0,0,.35);border-radius:12px}
+    h1{margin-top:0}
+    .row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
     input[type="file"]{
-      background: rgba(0,0,0,.28); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:6px; padding:6px;
+      background: rgba(0,0,0,0.28); color:#fff;
+      border:1px solid rgba(255,255,255,.35); border-radius:6px; padding:6px;
     }
     input[type="file"]::file-selector-button{
       background:var(--green); color:#fff; border:none; border-radius:4px; padding:6px 10px; cursor:pointer;
     }
-    .btn{background:var(--green); color:#fff; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; font-weight:700;}
-    .hint{color:#ddd; text-align:center; margin:8px 0 0; font-size:.95rem;}
-
-    #status{margin-top:12px; white-space:pre-wrap; background:#1118; padding:10px; border-radius:8px; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;}
-    #status.ok{color:#bfffc7;}
-    #status.err{color:#ffd7d7;}
-
-    video{width:100%; max-height:420px; margin-top:16px; display:none; border-radius:8px; border:1px solid rgba(255,255,255,.2);}
-    footer{margin-top:auto; text-align:center; padding:8px 0;}
+    button{ background:var(--green); color:#fff; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; }
+    #status{ margin-top:12px; font-weight:600; white-space:pre-wrap; text-align:left; background:#1118; padding:10px; border-radius:8px; }
+    video{ width:100%; max-height:400px; margin-top:16px; display:none; }
+    small{ display:block; color:#ccc; margin-top:6px; }
   </style>
 </head>
 <body>
-  <div class="page">
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="about.html">About</a>
-      <a href="coming-soon.html">Coming Soon</a>
-      <a href="contact.html">Contact</a>
-    </nav>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="coming-soon.html">Coming Soon</a>
+    <a href="contact.html">Contact</a>
+    <a href="/upload.html" aria-current="page">Upload</a>
+  </nav>
 
-    <main>
-      <h1>Upload Your Swing</h1>
+  <main>
+    <h1>Upload Your Swing</h1>
+    <div class="row">
+      <input type="file" id="fileInput" accept="video/*" />
+      <button id="uploadBtn">Upload</button>
+    </div>
+    <small>iPhone videos (.mov) are fine — uploaded as-is to the cloud.</small>
 
-      <div class="row">
-        <input type="file" id="fileInput" accept="video/*" />
-        <button class="btn" id="uploadBtn">Upload</button>
-      </div>
-      <p class="hint">iPhone .MOV files are supported. We upload directly to the cloud.</p>
-
-      <div id="status">Idle</div>
-      <video id="preview" controls></video>
-    </main>
-
-    <footer>&copy; 2025 Virtual Coach AI</footer>
-  </div>
+    <div id="status">Idle</div>
+    <video id="preview" controls></video>
+  </main>
 
   <script>
+    // --- Element refs
     const fileInput = document.getElementById('fileInput');
     const uploadBtn = document.getElementById('uploadBtn');
     const statusBox = document.getElementById('status');
     const preview = document.getElementById('preview');
 
-    fileInput.addEventListener('change', () => {
-      const f = fileInput.files[0];
-      if (!f) return;
-      const url = URL.createObjectURL(f);
-      preview.src = url;
-      preview.style.display = 'block';
-    });
-
-    function setStatus(msg, isError=false){
-      statusBox.textContent = msg;
-      statusBox.classList.toggle('err', isError);
-      statusBox.classList.toggle('ok', !isError);
+    // --- Helpers used by the bottom block
+    function setStatus(text, isError=false){
+      statusBox.textContent = text;
+      statusBox.style.color = isError ? '#ffd7d7' : '#bfffc7';
     }
-
     function guessContentType(file){
       if (file.type) return file.type;
       const n = (file.name||'').toLowerCase();
@@ -92,6 +71,16 @@
       return 'application/octet-stream';
     }
 
+    // live preview when a file is chosen
+    fileInput.addEventListener('change', () => {
+      const f = fileInput.files[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f);
+      preview.src = url;
+      preview.style.display = 'block';
+    });
+
+    // --- YOUR BOTTOM BLOCK (unchanged) ---
     uploadBtn.addEventListener('click', async () => {
       const file = fileInput.files[0];
       if (!file){ setStatus('Please select a video file first.', true); return; }
@@ -129,7 +118,7 @@
       let s3Res, s3Text='';
       try{
         s3Res = await fetch(url, { method:'POST', body: formData });
-        // S3 often returns 204 No Content; still safe to read text()
+        // S3 may return 204 No Content, we still read text() in case of error
         s3Text = await s3Res.text().catch(()=> '');
       }catch(e){
         setStatus(`Network error posting to S3: ${e.message}`, true);
