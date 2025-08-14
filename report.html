@@ -1,280 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Virtual Coach AI — Swing Report</title>
-  <style>
-    :root{
-      --bg:#000;
-      --panel: rgba(0,0,0,.45);
-      --border: rgba(255,255,255,.16);
-      --green:#27ae60; /* good */
-      --yellow:#f1c40f; /* okay */
-      --red:#e74c3c; /* need */
-      --accent:#00ffcc;
-    }
-    html,body{height:100%;margin:0}
-    body{
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:#fff; background: var(--bg) url('homepage-background.png') no-repeat center/cover fixed;
-    }
-    nav{position:sticky;top:0;z-index:10;background:#003300;padding:8px 0;text-align:center}
-    nav a{color:#fff;text-decoration:none;font-weight:700;margin:0 12px}
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI – Swing Report</title>
+<style>
+  :root{
+    --green:#003300;
+    --card: rgba(0,0,0,.35);
+    --border: rgba(255,255,255,.18);
+    --muted:#cfd3d8;
+    --good:#2ecc71;
+    --okay:#f1c40f;
+    --need:#e74c3c;
+  }
+  html,body{height:100%;margin:0}
+  body{
+    font-family: Arial, sans-serif;
+    color:#fff;
+    background:#000 url('homepage-background.png') no-repeat center/cover fixed;
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  }
+  nav{position:sticky;top:0;background:var(--green);padding:8px 0;z-index:5;text-align:center}
+  nav a{color:#fff;text-decoration:none;font-weight:700;margin:0 12px}
 
-    .wrap{max-width:1100px;margin:18px auto;padding:16px}
-    .card{
-      background:var(--panel); border:1px solid var(--border);
-      border-radius:14px; padding:16px; margin-bottom:14px; backdrop-filter: blur(2px);
-    }
-    h1{margin:8px 0 6px; font-size:1.8rem}
-    .subtle{color:#cfd3d8; font-size:.95rem; margin:.25rem 0 1rem}
+  main{max-width:1100px;margin:28px auto;padding:16px}
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px;
+    margin-bottom:14px;
+  }
+  h1{margin:8px 0 12px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .row.right{justify-content:flex-end}
+  select,button{
+    border:none;border-radius:8px;padding:8px 12px;font-size:14px;
+  }
+  select{
+    background: rgba(0,0,0,.28);
+    border:1px solid var(--border);
+    color:#fff;
+  }
+  button{
+    background:var(--green); color:#fff; cursor:pointer;
+    border:1px solid var(--border);
+  }
 
-    .grid{display:grid; gap:12px}
-    .grid.two{grid-template-columns: 1fr 1fr}
-    .grid.three{grid-template-columns: repeat(3, 1fr)}
-    @media (max-width: 900px){ .grid.two,.grid.three{grid-template-columns: 1fr} }
+  .kv{display:grid;grid-template-columns:160px 1fr;gap:8px}
+  .kv strong{color:var(--muted)}
+  .video-wrap video{width:100%;max-height:520px;border-radius:10px;border:1px solid var(--border)}
 
-    .video{
-      width:100%; border-radius:12px; border:1px solid var(--border); background:#000;
-    }
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media (max-width:900px){ .grid3{grid-template-columns:1fr} }
 
-    .kv{display:grid; grid-template-columns: 140px 1fr; gap:8px}
-    .kv b{color:#cfd3d8; font-weight:600}
+  .metric{
+    background:rgba(0,0,0,.25);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px;
+  }
+  .metric .label{color:var(--muted);font-size:.95rem}
+  .metric .value{font-size:1.4rem;font-weight:700;margin-top:4px}
 
-    .p9{
-      display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;
-    }
-    @media (max-width: 700px){ .p9{grid-template-columns: 1fr} }
+  .p-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media (max-width:900px){ .p-grid{grid-template-columns:1fr} }
+  .p-card{
+    background:rgba(0,0,0,.25);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px;
+  }
+  .p-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .pill{
+    padding:4px 8px;border-radius:999px;font-size:.85rem;font-weight:700;border:1px solid var(--border)
+  }
+  .good{background:rgba(46,204,113,.18);color:#c6f7da}
+  .okay{background:rgba(241,196,15,.18);color:#fff0b3}
+  .need{background:rgba(231,76,60,.18);color:#ffd0cc}
+  details{margin-top:6px}
+  summary{cursor:pointer;color:#bfe5ff}
+  ul{margin:6px 0 0 18px}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width:900px){ .two-col{grid-template-columns:1fr} }
 
-    .pbox{
-      border:1px solid var(--border); border-radius:12px; padding:12px; background:rgba(0,0,0,.35);
-    }
-    .prow{display:flex; align-items:center; justify-content:space-between; gap:12px}
-    .badge{
-      font-size:.8rem; padding:4px 8px; border-radius:999px; border:1px solid var(--border);
-      background:#1119;
-    }
-    .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px}
-    .dot.good{background:var(--green)}
-    .dot.okay{background:var(--yellow)}
-    .dot.need{background:var(--red)}
-    details{margin-top:8px}
-    summary{cursor:pointer;color:#cfd3d8}
-
-    ul.clean{margin:.5rem 0 0 1.2rem}
-    .pill{display:inline-block;background:#003300;color:#fff;border:1px solid var(--border);padding:6px 10px;border-radius:999px}
-
-    .notice{display:none; border:1px solid var(--border); border-radius:10px; padding:10px; margin:10px 0; background:#1118}
-    .notice.err{display:block; color:#ffd7d7; border-color:#c44}
-    .notice.ok{display:block; color:#bfffc7; border-color:#2a5}
-
-    .btn{background:#003300;color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer}
-    .center{text-align:center}
-  </style>
+  .muted{color:var(--muted)}
+  .hint{font-size:.9rem;color:#d9fdd3}
+</style>
 </head>
 <body>
   <nav>
     <a href="index.html">Home</a>
+    <a href="upload.html">Upload</a>
     <a href="about.html">About</a>
     <a href="coming-soon.html">Coming Soon</a>
-    <a href="upload-html">Upload</a>
+    <a href="contact.html">Contact</a>
   </nav>
 
-  <div class="wrap">
-    <div class="card center">
-      <h1>Your Swing Report</h1>
-      <div class="subtle" id="subtitle">Loading…</div>
-      <video id="player" class="video" controls playsinline></video>
-      <div style="margin-top:10px">
-        <button class="btn" onclick="window.location.href='index.html'">Upload Another Swing</button>
-      </div>
-    </div>
-
-    <div id="alert" class="notice"></div>
-
-    <div class="grid two">
-      <div class="card">
-        <h3 style="margin:0 0 8px;color:var(--accent)">Profile</h3>
-        <div class="kv">
-          <b>Profile</b><div id="profileVal">—</div>
-          <b>Tempo</b><div id="tempoVal">—</div>
-          <b>Power</b><div id="powerVal">—</div>
+  <main>
+    <!-- Header / Controls -->
+    <div class="card">
+      <div class="row" style="justify-content:space-between;align-items:flex-end">
+        <div>
+          <h1>Your Swing Report</h1>
+          <div class="muted">Auto-generated from your latest upload.</div>
+        </div>
+        <div class="row right">
+          <select id="reportType">
+            <option value="consistency" selected>Consistency (Fixer)</option>
+            <option value="power">Power (Speed)</option>
+          </select>
+          <select id="clubSel">
+            <option value="auto" selected>Club: Auto</option>
+            <option value="D">Driver</option>
+            <option value="7I">7-Iron</option>
+            <option value="PW">Pitching Wedge</option>
+          </select>
+          <button id="printBtn">Print / Save PDF</button>
         </div>
       </div>
-
-      <div class="card">
-        <h3 style="margin:0 0 8px;color:var(--accent)">Quick Wins</h3>
-        <ul id="quickWins" class="clean"></ul>
-      </div>
     </div>
 
-    <div class="grid two">
-      <div class="card">
-        <h3 style="margin:0 0 8px;color:var(--accent)">Consistency: Top 3</h3>
-        <ul id="consistency3" class="clean"></ul>
-      </div>
-      <div class="card">
-        <h3 style="margin:0 0 8px;color:var(--accent)">Power: Top 3</h3>
-        <ul id="power3" class="clean"></ul>
-      </div>
-    </div>
-
+    <!-- Video + Key Info -->
     <div class="card">
-      <h3 style="margin:0 0 8px;color:var(--accent)">P1–P9 Analysis</h3>
-      <div class="p9" id="pGrid"></div>
+      <div class="two-col">
+        <div class="video-wrap">
+          <video id="uploadedVideo" controls></video>
+          <div class="hint" id="videoHint" style="display:none;margin-top:6px">
+            No video found — use <a href="upload.html" style="color:#bfe5ff">Upload</a> to add one, or click “Load Sample” below.
+          </div>
+        </div>
+        <div>
+          <div class="kv">
+            <strong>Profile</strong><div id="profileTxt">—</div>
+            <strong>Tempo</strong><div id="tempoTxt">—</div>
+            <strong>Power</strong><div id="powerTxt">—</div>
+            <strong>Saved</strong><div id="savedTxt">—</div>
+          </div>
+          <div class="grid3" style="margin-top:10px">
+            <div class="metric"><div class="label">Fairways</div><div class="value" id="mFairways">—</div></div>
+            <div class="metric"><div class="label">Greens</div><div class="value" id="mGreens">—</div></div>
+            <div class="metric"><div class="label">Putts</div><div class="value" id="mPutts">—</div></div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button id="loadSampleBtn">Load Sample Data</button>
+            <button id="backBtn" onclick="location.href='upload.html'">Upload Another Swing</button>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <script>
-    // —— Utilities
-    const $ = (id) => document.getElementById(id);
-    const alertBox = $('alert');
-    function showAlert(text, ok=false){
-      alertBox.className = 'notice ' + (ok ? 'ok' : 'err');
-      alertBox.textContent = text;
-    }
+    <!-- Quick Wins / Power Tips -->
+    <div class="two-col">
+      <div class="card">
+        <h3 style="margin:0 0 8px">Top 3 Consistency Fixes</h3>
+        <ul id="tips3"></ul>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 8px">Top 3 Power Boosters</h3>
+        <ul id="powerTips3"></ul>
+      </div>
+    </div>
 
-    // —— Video URL from upload step
-    const videoUrl = sessionStorage.getItem('uploadedVideoUrl') || '';
-    const player = $('player');
-    if (videoUrl) {
-      player.src = videoUrl;
-      $('subtitle').textContent = 'Source: ' + videoUrl;
-    } else {
-      $('subtitle').textContent = 'No video found (upload first).';
-      showAlert('No uploaded video URL in session. Go back and upload a swing.', false);
-    }
+    <!-- P1 – P9 stack -->
+    <div class="card">
+      <h3 style="margin:0 0 8px">P1 – P9 Swing Breakdown</h3>
+      <div class="p-grid" id="pGrid"></div>
+    </div>
+  </main>
 
-    // —— Render helpers
-    function statusDot(cls){
-      const dot = document.createElement('span');
-      dot.className = 'dot ' + (cls || 'okay');
-      return dot;
-    }
+<script>
+/* ========= Helpers & Sample ========= */
+const byId = (id)=>document.getElementById(id);
 
-    function renderList(el, arr){
-      el.innerHTML = '';
-      (arr || []).forEach(t=>{
-        const li = document.createElement('li');
-        li.textContent = t;
-        el.appendChild(li);
-      });
-    }
+const sampleData = {
+  id: "demo-abc123",
+  profile: "Athletic baseline • Neutral grip • Slightly open stance",
+  tempo: "3:1",
+  totals: { fairways: 8, greens: 12, putts: 30, swingSpeedAvg: 98, power: 82 },
+  pstack: {
+    P1:{ condition:"Setup",       rating:"7/10", status:"okay", short:"Posture tall; trail hand a touch strong.",
+         long:"Good athletic posture. Nudge trail hand weaker; square feet/hips to target. Keep neck long." },
+    P2:{ condition:"Takeaway",    rating:"6/10", status:"need", short:"Clubface opens early; trail elbow flares.",
+         long:"Synchronize arms/torso. Maintain face angle with one-piece takeaway; feel width with soft wrists." },
+    P3:{ condition:"Lead Arm",    rating:"7/10", status:"okay", short:"Lead arm good; shaft slightly inside.",
+         long:"Keep the shaft on hand-line; small alignment stick drill to keep width." },
+    P4:{ condition:"Top",         rating:"8/10", status:"good", short:"Excellent coil; stable lower body.",
+         long:"Great depth and structure. Maintain head height to avoid late lift." },
+    P5:{ condition:"Transition",  rating:"6/10", status:"need", short:"Hips start late; early arm throw.",
+         long:"Bump pressure left sooner; feel lead hip opening before the hands drop." },
+    P6:{ condition:"Delivery",    rating:"7/10", status:"okay", short:"Shaft a hair steep.",
+         long:"Shallow earlier with trail elbow leading; pump drill x3 from P5 to P6." },
+    P7:{ condition:"Impact",      rating:"6/10", status:"need", short:"Lead wrist extends; loft adds.",
+         long:"Bow lead wrist; handle forward. Impact bag: 3 sets of 8 with hold." },
+    P8:{ condition:"Extension",   rating:"8/10", status:"good", short:"Great rotation through.",
+         long:"Keep chest covering ball longer; push divot forward." },
+    P9:{ condition:"Finish",      rating:"8/10", status:"good", short:"Balanced, tall, held pose.",
+         long:"Hold finish 3s; let trail foot roll to laces for full release." }
+  },
+  tips3: ["Square takeaway (towel under arms)", "Earlier pressure left", "Hold bow in lead wrist at impact"],
+  power: { score: 82, notes: ["Solid base", "Good coil", "Add width at P4"] },
+  powerTips3: ["Step-change drill", "Medicine-ball wall throw", "Three-ball whip"],
+};
 
-    function renderP9(container, pstack){
-      container.innerHTML = '';
-      const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
-      order.forEach(p=>{
-        const data = pstack?.[p];
-        const box = document.createElement('div');
-        box.className = 'pbox';
+function statusClass(s){
+  if(s==="good") return "good";
+  if(s==="okay") return "okay";
+  return "need";
+}
 
-        const row = document.createElement('div');
-        row.className = 'prow';
+/* ========= Load video from session ========= */
+(function initVideo(){
+  const videoUrl = sessionStorage.getItem('uploadedVideoUrl');
+  const vid = byId('uploadedVideo');
+  const hint = byId('videoHint');
+  if (videoUrl){
+    vid.src = videoUrl;
+    hint.style.display = 'none';
+  }else{
+    hint.style.display = 'block';
+  }
+})();
 
-        const left = document.createElement('div');
-        const title = document.createElement('div');
-        title.style.fontWeight = '700';
-        title.textContent = p + (data?.condition ? ` – ${data.condition}` : '');
-        const short = document.createElement('div');
-        short.className = 'subtle';
-        short.textContent = data?.short || '—';
-        left.appendChild(title);
-        left.appendChild(short);
+/* ========= Renderers ========= */
+function renderAll(data){
+  // Key info
+  byId('profileTxt').textContent = data.profile || "—";
+  byId('tempoTxt').textContent   = data.tempo   || "—";
+  byId('powerTxt').textContent   = (data.power?.score ? data.power.score+" / 100" : "—");
+  byId('savedTxt').textContent   = data.id || "—";
 
-        const right = document.createElement('div');
-        const badge = document.createElement('span');
-        badge.className = 'badge';
-        badge.textContent = (data?.rating || '—');
-        right.appendChild(badge);
+  byId('mFairways').textContent  = data.totals?.fairways ?? "—";
+  byId('mGreens').textContent    = data.totals?.greens   ?? "—";
+  byId('mPutts').textContent     = data.totals?.putts    ?? "—";
 
-        const dot = statusDot(data?.status);
-        right.prepend(dot);
+  // Lists
+  const t3 = byId('tips3'); t3.innerHTML = '';
+  (data.tips3||[]).forEach(t => { const li=document.createElement('li'); li.textContent=t; t3.appendChild(li); });
 
-        row.appendChild(left);
-        row.appendChild(right);
+  const p3 = byId('powerTips3'); p3.innerHTML = '';
+  (data.powerTips3||[]).forEach(t => { const li=document.createElement('li'); li.textContent=t; p3.appendChild(li); });
 
-        const details = document.createElement('details');
-        const summary = document.createElement('summary');
-        summary.textContent = 'Details';
-        const long = document.createElement('div');
-        long.style.marginTop = '6px';
-        long.textContent = data?.long || '—';
-        details.appendChild(summary);
-        details.appendChild(long);
+  // P1–P9
+  const pgrid = byId('pGrid'); pgrid.innerHTML = '';
+  const order = ["P1","P2","P3","P4","P5","P6","P7","P8","P9"];
+  order.forEach(k=>{
+    const p = data.pstack?.[k];
+    if(!p){ return; }
+    const card = document.createElement('div');
+    card.className = 'p-card';
+    card.innerHTML = `
+      <div class="p-top">
+        <div><strong>${k}</strong> — ${p.condition} <span class="muted">(${p.rating||"—"})</span></div>
+        <span class="pill ${statusClass(p.status)}">${p.status||"—"}</span>
+      </div>
+      <div>${p.short||""}</div>
+      <details>
+        <summary>Details</summary>
+        <div style="margin-top:6px">${p.long||""}</div>
+      </details>
+    `;
+    pgrid.appendChild(card);
+  });
+}
 
-        box.appendChild(row);
-        box.appendChild(details);
-        container.appendChild(box);
-      });
-    }
+/* ========= Controls ========= */
+byId('printBtn').addEventListener('click', ()=> window.print());
+byId('loadSampleBtn').addEventListener('click', ()=> renderAll(sampleData));
 
-    // —— Fetch analysis
-    async function fetchAnalysis(){
-      if (!videoUrl) return;
+/* Default: try to render blank placeholders first; user can click “Load Sample Data” */
+renderAll({ pstack:{}, totals:{} });
 
-      try {
-        const res = await fetch('/api/analyze', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            videoUrl,
-            selections: {
-              club: sessionStorage.getItem('vc_hand') || '7I',
-              model: 'v1'
-            }
-          })
-        });
-        if (!res.ok) {
-          const t = await res.text().catch(()=> '');
-          throw new Error(`Analyze failed (${res.status}) ${t}`);
-        }
-        const ai = await res.json();
-
-        $('profileVal').textContent = ai.profile || '—';
-        $('tempoVal').textContent = ai.tempo || '—';
-        $('powerVal').textContent = (ai.power?.score ?? ai.totals?.power ?? '—');
-
-        renderList($('quickWins'), ai.tips3 || []);
-        renderList($('consistency3'), ai.tips3 || []); // use same for now if separate not provided
-        renderList($('power3'), ai.powerTips3 || []);
-
-        renderP9($('pGrid'), ai.pstack);
-
-        showAlert('Analysis loaded.', true);
-      } catch (e) {
-        // Fallback demo data if /api/analyze hiccups
-        console.error(e);
-        showAlert('Using demo data (analysis service unavailable).');
-        const demo = {
-          profile:'Auto profile',
-          tempo:'3:1',
-          totals:{ power:82 },
-          tips3:['Soften grip pressure','Earlier weight shift','Hold balanced finish'],
-          powerTips3:['Step drill','3-ball whip','Med ball wall throw'],
-          pstack: Object.fromEntries(Array.from({length:9},(_,i)=>{
-            const P = 'P'+(i+1);
-            return [P,{
-              condition:['Setup','Takeaway','Lead Arm','Top','Transition','Delivery','Impact','Extension','Finish'][i],
-              rating:`${6+(i%4)}/10`,
-              status:['good','okay','need'][i%3],
-              short:`Auto short for ${P}`,
-              long:`Auto long explanation for ${P}`
-            }];
-          }))
-        };
-        $('profileVal').textContent = demo.profile;
-        $('tempoVal').textContent = demo.tempo;
-        $('powerVal').textContent = demo.totals.power;
-        renderList($('quickWins'), demo.tips3);
-        renderList($('consistency3'), demo.tips3);
-        renderList($('power3'), demo.powerTips3);
-        renderP9($('pGrid'), demo.pstack);
-      }
-    }
-
-    fetchAnalysis();
-  </script>
+/* Optional: switch between Consistency/Power views (minimal UI for now)
+   We keep both tips visible; this can be expanded to filter cards later. */
+byId('reportType').addEventListener('change', (e)=>{
+  // Hook to filter content later if you’d like.
+});
+</script>
 </body>
 </html>
