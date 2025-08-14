@@ -7,64 +7,106 @@
 
   <style>
     :root{
-      --green:#003300;             /* nav + buttons */
-      --bg-brightness:1.0;         /* lighten/darken background */
+      --bg-image: url('homepage-background.png');
+      --nav: #003300;       /* dark green used everywhere */
+      --border: rgba(255,255,255,.35);
     }
 
-    /* iOS/viewport sanity */
-    html,body{height:100%;margin:0;padding:0;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif;}
-    *{box-sizing:border-box}
+    /* Baseline + iOS sanity */
+    html, body { height: 100%; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      color: #fff;
+      text-align: center;
+      background: #000;              /* prevents iOS white bar */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-    /* Full-viewport background image without white gap on iPhone */
-    .page{
-      min-height:100dvh; display:flex; flex-direction:column; position:relative;
+    /* Full-viewport background (stable on iPhone) */
+    .page {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
     }
     .page::before{
-      content:""; position:fixed; inset:0; z-index:-1;
-      background:url('homepage-background.png') no-repeat center/cover fixed;
-      filter:brightness(var(--bg-brightness));
+      content: "";
+      position: fixed; inset: 0;
+      background-image: var(--bg-image);
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center center;
+      filter: brightness(1.0);        /* lighter bg (not too dark) */
+      z-index: -1;
     }
-    /* iPad: keep whole image visible and anchored bottom */
-    @media (min-device-width:768px) and (max-device-width:1024px){
-      .page::before{ background-size:contain; background-position:center bottom; }
+    /* iPad: show whole image, anchor bottom */
+    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px){
+      .page::before{
+        background-size: contain;
+        background-position: center bottom;
+        background-color: #000;
+      }
     }
 
-    /* Top nav */
-    nav{position:sticky; top:0; width:100%; background:var(--green); padding:8px 10px; z-index:10; text-align:center;}
-    nav a{color:#fff; text-decoration:none; font-weight:700; margin:0 12px;}
+    /* Top navigation */
+    nav {
+      width: 100%;
+      background-color: var(--nav);
+      padding: 8px 0;
+      position: sticky; top: 0; z-index: 10;
+    }
+    nav a {
+      color: #fff; text-decoration: none; font-weight: 700; margin: 0 12px;
+    }
 
-    /* Main container */
-    .wrap{max-width:1100px; margin:0 auto; padding:20px 16px 28px; display:flex; flex-direction:column; align-items:center; gap:10px;}
+    /* Main hero block */
+    .container{
+      padding: 28px 16px 18px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px;
+      max-width: 1100px; margin: 0 auto;
+      background: transparent;
+      flex: 1;
+    }
 
-    /* Logo (transparent PNG), tinted dark green but keep proportions */
+    /* Transparent logo, centered, with optional dark-green tint */
     .logo{
-      width: clamp(220px, 36vw, 520px);
-      height:auto;
-      margin:6px 0 4px;
-      /* dark-green tint without distorting aspect ratio */
-      filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(85%) contrast(90%);
+      width: clamp(220px, 46vw, 560px);   /* scales nicely desktop→phone */
+      height: auto;
+      margin: 6px 0 8px;
+      /* dark-green tint to match brand; remove this line if you want original colors */
+      filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(95%) contrast(85%);
     }
 
-    .welcome{font-size:1rem; font-style:italic; margin:2px 0 4px; color:#fff;}
-    h1{margin:6px 0 6px; font-size:2.1rem; color:#fff;}
-    .tagline{font-size:1.05rem; margin:2px 0 10px; color:#fff; font-style:italic;}
+    .welcome{ font-size: 1.0rem; margin: 2px 0 4px; color: #fff; font-style: italic; }
+    h1{ margin: 4px 0; font-size: 2.1rem; color:#fff; }
+    .tagline{ font-size: 1.05rem; font-style: italic; color: #fff; margin: 2px 0 10px; }
 
-    /* Handedness / Eye selects */
-    .row{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:8px 0 12px;}
+    /* Small translucent dropdowns */
+    .dropdowns{
+      display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 6px 0 10px;
+    }
     select{
-      width:180px; max-width:180px; padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,.35);
-      background: rgba(0,51,0,.5); color:#fff; font-size:.95rem;
+      width: 170px;
+      background-color: rgba(0, 51, 0, 0.5);
+      color: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.95rem;
     }
 
-    /* Controls */
-    .controls{display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:6px;}
+    /* CTA */
+    .actions{ margin-top: 6px; }
     .btn{
-      display:inline-block; min-width:180px; text-align:center; padding:10px 14px; border:none; border-radius:6px;
-      background:var(--green); color:#fff; font-weight:700; cursor:pointer;
+      background-color: var(--nav); color:#fff; border:none; border-radius:8px;
+      padding: 9px 16px; font-size: 1rem; cursor:pointer;
     }
-    .subtle{font-size:.9rem; color:#e7e7e7; margin-top:6px;}
+    .btn:hover{ filter: brightness(1.08); }
 
-    footer{margin-top:auto; text-align:center; padding:8px 0; color:#fff;}
+    /* Footer */
+    footer{ background: transparent; color:#fff; padding: 8px 0 14px; font-size: .9rem; }
   </style>
 </head>
 <body>
@@ -74,15 +116,16 @@
       <a href="about.html">About</a>
       <a href="coming-soon.html">Coming Soon</a>
       <a href="contact.html">Contact</a>
+      <a href="upload-html">Upload</a>
     </nav>
 
-    <main class="wrap">
-      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI" class="logo" />
+    <main class="container">
+      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
       <div class="welcome">Welcome Beta Testers</div>
       <h1>Virtual Coach AI</h1>
       <div class="tagline">Where the future of golf instruction begins with AI</div>
 
-      <div class="row">
+      <div class="dropdowns">
         <select id="handedness" aria-label="Select handedness">
           <option value="">Select Handedness</option>
           <option value="right">Right-Handed</option>
@@ -96,14 +139,40 @@
         </select>
       </div>
 
-      <!-- Go to dedicated upload page -->
-      <a class="btn" href="upload.html">Upload Your Swing</a>
-      <div class="subtle">iPhone videos (.mov) are supported.</div>
+      <div class="actions">
+        <!-- Sends users to the dedicated upload page -->
+        <button class="btn" id="goUpload">Upload Your Swing</button>
+      </div>
     </main>
 
     <footer>
-      &copy; 2025 Virtual Coach AI. All rights reserved.
+      <div>&copy; 2025 Virtual Coach AI. All rights reserved.</div>
     </footer>
   </div>
+
+  <script>
+    // Persist selections for later use on report/analyze
+    const handSel = document.getElementById('handedness');
+    const eyeSel  = document.getElementById('eyeDominance');
+    // load saved
+    try {
+      const savedHand = sessionStorage.getItem('vc_handedness');
+      const savedEye  = sessionStorage.getItem('vc_eye');
+      if (savedHand) handSel.value = savedHand;
+      if (savedEye)  eyeSel.value  = savedEye;
+    } catch {}
+
+    handSel.addEventListener('change', ()=> {
+      try { sessionStorage.setItem('vc_handedness', handSel.value); } catch {}
+    });
+    eyeSel.addEventListener('change', ()=> {
+      try { sessionStorage.setItem('vc_eye', eyeSel.value); } catch {}
+    });
+
+    // Route to the dedicated upload page
+    document.getElementById('goUpload').addEventListener('click', ()=>{
+      window.location.href = 'upload-html';
+    });
+  </script>
 </body>
 </html>
