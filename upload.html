@@ -32,10 +32,10 @@
 </head>
 <body>
   <nav>
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="coming-soon.html">Coming Soon</a>
-    <a href="contact.html">Contact</a>
+    <a href="/index.html">Home</a>
+    <a href="/about.html">About</a>
+    <a href="/coming-soon.html">Coming Soon</a>
+    <a href="/contact.html">Contact</a>
     <a href="/upload.html" aria-current="page">Upload</a>
   </nav>
 
@@ -52,13 +52,11 @@
   </main>
 
   <script>
-    // --- Element refs
     const fileInput = document.getElementById('fileInput');
     const uploadBtn = document.getElementById('uploadBtn');
     const statusBox = document.getElementById('status');
     const preview = document.getElementById('preview');
 
-    // --- Helpers used by the bottom block
     function setStatus(text, isError=false){
       statusBox.textContent = text;
       statusBox.style.color = isError ? '#ffd7d7' : '#bfffc7';
@@ -71,7 +69,6 @@
       return 'application/octet-stream';
     }
 
-    // live preview when a file is chosen
     fileInput.addEventListener('change', () => {
       const f = fileInput.files[0];
       if (!f) return;
@@ -80,7 +77,6 @@
       preview.style.display = 'block';
     });
 
-    // --- YOUR BOTTOM BLOCK (unchanged) ---
     uploadBtn.addEventListener('click', async () => {
       const file = fileInput.files[0];
       if (!file){ setStatus('Please select a video file first.', true); return; }
@@ -118,7 +114,6 @@
       let s3Res, s3Text='';
       try{
         s3Res = await fetch(url, { method:'POST', body: formData });
-        // S3 may return 204 No Content, we still read text() in case of error
         s3Text = await s3Res.text().catch(()=> '');
       }catch(e){
         setStatus(`Network error posting to S3: ${e.message}`, true);
@@ -132,7 +127,7 @@
 
       try{ sessionStorage.setItem('uploadedVideoUrl', publicUrl); }catch{}
       setStatus('Upload complete. Redirecting…');
-      window.location.href = 'report.html';
+      window.location.href = '/report.html';
     });
   </script>
 </body>
