@@ -3,160 +3,86 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Virtual Coach AI - Upload</title>
+  <title>Virtual Coach AI</title>
 
   <style>
     :root{
-      --bg-image: url('/homepage-background.png');
-      --bg-brightness: 1.0;
+      --green:#003300;             /* nav + buttons */
+      --bg-brightness:1.0;         /* lighten/darken background */
     }
 
-    /* Baseline + iOS sanity */
-    html, body { height: 100%; margin: 0; padding: 0; }
-    body {
-      font-family: Arial, sans-serif;
-      color: #fff;
-      text-align: center;
-      background: #000;              /* prevents white bar at bottom */
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+    /* iOS/viewport sanity */
+    html,body{height:100%;margin:0;padding:0;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif;}
+    *{box-sizing:border-box}
+
+    /* Full-viewport background image without white gap on iPhone */
+    .page{
+      min-height:100dvh; display:flex; flex-direction:column; position:relative;
+    }
+    .page::before{
+      content:""; position:fixed; inset:0; z-index:-1;
+      background:url('homepage-background.png') no-repeat center/cover fixed;
+      filter:brightness(var(--bg-brightness));
+    }
+    /* iPad: keep whole image visible and anchored bottom */
+    @media (min-device-width:768px) and (max-device-width:1024px){
+      .page::before{ background-size:contain; background-position:center bottom; }
     }
 
-    /* Full-viewport background */
-    .homepage {
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-    }
-    .homepage::before{
-      content: "";
-      position: fixed; inset: 0;
-      background-image: var(--bg-image);
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: center center;
-      filter: brightness(var(--bg-brightness));
-      z-index: -1;
-    }
-    /* iPad: show whole image, anchor bottom */
-    @media only screen and (min-device-width: 768px) and (max-device-width: 1024px){
-      .homepage::before{
-        background-size: contain;
-        background-position: center bottom;
-        background-color: #000;
-      }
+    /* Top nav */
+    nav{position:sticky; top:0; width:100%; background:var(--green); padding:8px 10px; z-index:10; text-align:center;}
+    nav a{color:#fff; text-decoration:none; font-weight:700; margin:0 12px;}
+
+    /* Main container */
+    .wrap{max-width:1100px; margin:0 auto; padding:20px 16px 28px; display:flex; flex-direction:column; align-items:center; gap:10px;}
+
+    /* Logo (transparent PNG), tinted dark green but keep proportions */
+    .logo{
+      width: clamp(220px, 36vw, 520px);
+      height:auto;
+      margin:6px 0 4px;
+      /* dark-green tint without distorting aspect ratio */
+      filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(85%) contrast(90%);
     }
 
-    /* Compact nav */
-    nav {
-      width: 100%;
-      background-color: #003300;
-      padding: 6px 0;
-      position: sticky; top: 0; z-index: 10;
-    }
-    nav a { color: #fff; margin: 0 12px; text-decoration: none; font-weight: bold; }
+    .welcome{font-size:1rem; font-style:italic; margin:2px 0 4px; color:#fff;}
+    h1{margin:6px 0 6px; font-size:2.1rem; color:#fff;}
+    .tagline{font-size:1.05rem; margin:2px 0 10px; color:#fff; font-style:italic;}
 
-    /* Tighter layout */
-    .container{
-      padding: 20px 16px 12px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 8px;
-      max-width: 1100px; margin: 0 auto;
-      background: transparent;
+    /* Handedness / Eye selects */
+    .row{display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:8px 0 12px;}
+    select{
+      width:180px; max-width:180px; padding:8px 10px; border-radius:6px; border:1px solid rgba(255,255,255,.35);
+      background: rgba(0,51,0,.5); color:#fff; font-size:.95rem;
     }
 
-    /* Logo: DARK GREEN tint, smaller */
-    img.logo{
-      width: clamp(180px, 28vw, 340px);
-      height: auto;
-      margin: 4px 0 6px;
-      filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(95%) contrast(85%);
+    /* Controls */
+    .controls{display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:6px;}
+    .btn{
+      display:inline-block; min-width:180px; text-align:center; padding:10px 14px; border:none; border-radius:6px;
+      background:var(--green); color:#fff; font-weight:700; cursor:pointer;
     }
+    .subtle{font-size:.9rem; color:#e7e7e7; margin-top:6px;}
 
-    /* Welcome line — back, compact, white */
-    .welcome{
-      font-size: 1rem;
-      margin: 2px 0 4px;
-      color: #fff;
-      font-style: italic;
-    }
-
-    /* Headline + tagline (white) with tighter spacing */
-    h1{ margin: 4px 0; font-size: 1.9em; }
-    .tagline{
-      font-size: 1.05em;
-      font-style: italic;
-      color: #ffffff;   /* lock to white */
-      margin: 2px 0 8px;
-    }
-
-    /* Narrow, translucent selects */
-    .dropdowns{
-      display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 6px 0 8px;
-    }
-    .dropdowns select{
-      width: 160px; max-width: 160px;
-      background-color: rgba(0, 51, 0, 0.5);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.35);
-      border-radius: 6px;
-      padding: 6px 8px;
-      font-size: 0.95rem;
-    }
-
-    /* Controls: smaller, translucent file input */
-    .controls{
-      display: flex; flex-direction: column; gap: 8px; align-items: center; margin-top: 4px;
-    }
-    input[type="file"]{
-      width: 200px;
-      background-color: rgba(0,0,0,0.28);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.35);
-      border-radius: 6px;
-      padding: 5px;
-      font-size: 0.9rem;
-    }
-    input[type="file"]::file-selector-button{
-      background-color: rgba(0, 51, 0, 0.6);
-      color: #fff;
-      padding: 6px 10px;
-      border-radius: 4px; border: none; cursor: pointer;
-    }
-    input[type="file"]::file-selector-button:hover{
-      background-color: rgba(0, 51, 0, 0.8);
-    }
-
-    /* Compact upload button */
-    button.upload{
-      width: 160px;
-      background-color: #003300; color: #fff;
-      cursor: pointer; padding: 7px 12px;
-      border-radius: 6px; border: none;
-      font-size: 0.95rem;
-    }
-
-    /* Footer stays invisible */
-    .footer{ background: transparent; color: #fff; padding: 6px 0; margin-top: auto; font-size: 0.9rem; }
+    footer{margin-top:auto; text-align:center; padding:8px 0; color:#fff;}
   </style>
 </head>
-
 <body>
-  <div class="homepage">
+  <div class="page">
     <nav>
       <a href="index.html" aria-current="page">Home</a>
       <a href="about.html">About</a>
       <a href="coming-soon.html">Coming Soon</a>
+      <a href="contact.html">Contact</a>
     </nav>
 
-    <div class="container">
-      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo" />
+    <main class="wrap">
+      <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI" class="logo" />
       <div class="welcome">Welcome Beta Testers</div>
       <h1>Virtual Coach AI</h1>
       <div class="tagline">Where the future of golf instruction begins with AI</div>
 
-      <div class="dropdowns">
+      <div class="row">
         <select id="handedness" aria-label="Select handedness">
           <option value="">Select Handedness</option>
           <option value="right">Right-Handed</option>
@@ -170,63 +96,14 @@
         </select>
       </div>
 
-      <div class="controls">
-        <input type="file" id="fileInput" accept="video/*" />
-        <button class="upload" onclick="uploadVideo()">Upload Your Swing</button>
-      </div>
-    </div>
+      <!-- Go to dedicated upload page -->
+      <a class="btn" href="upload.html">Upload Your Swing</a>
+      <div class="subtle">iPhone videos (.mov) are supported.</div>
+    </main>
 
-    <footer class="footer">
-      <p>&copy; 2025 Virtual Coach AI. All rights reserved.</p>
+    <footer>
+      &copy; 2025 Virtual Coach AI. All rights reserved.
     </footer>
   </div>
-<script>
-  async function uploadVideo() {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-    if (!file) { alert("Please select a video file first."); return; }
-
-    try {
-      // 1) Ask your backend for a presigned POST (tiny JSON request)
-      const presignRes = await fetch('/api/s3-presign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filename: file.name,
-          // iPhone .MOV often reports video/quicktime
-          contentType: file.type || 'video/quicktime'
-        })
-      });
-
-      if (!presignRes.ok) {
-        const t = await presignRes.text().catch(()=> '');
-        alert("Failed to get upload URL. " + t);
-        return;
-      }
-
-      const { url, fields, publicUrl } = await presignRes.json();
-
-      // 2) Upload the actual file directly to S3 (big upload goes here)
-      const formData = new FormData();
-      Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
-      formData.append('file', file);
-
-      const s3Res = await fetch(url, { method: 'POST', body: formData });
-      if (!s3Res.ok) {
-        const txt = await s3Res.text().catch(()=> '');
-        console.error('S3 error:', s3Res.status, txt);
-        alert("Upload failed. Please try again.");
-        return;
-      }
-
-      // 3) Hand off the S3 URL to the report page
-      sessionStorage.setItem('uploadedVideoUrl', publicUrl);
-      window.location.href = "report.html";
-    } catch (err) {
-      console.error(err);
-      alert("An error occurred while uploading.");
-    }
-  }
-</script>
 </body>
 </html>
