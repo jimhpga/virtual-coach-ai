@@ -2,51 +2,279 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Coach AI – Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Virtual Coach AI — Swing Report</title>
   <style>
-    body { margin:0; font-family: Arial, sans-serif; color:#fff; background:#001a00; }
-    header { background:#003300; padding:8px 0; text-align:center; }
-    header a { color:#fff; text-decoration:none; font-weight:700; margin:0 12px; }
-    main { max-width:980px; margin:24px auto; padding:16px; }
-    .card { background:#0d0d0d; border:1px solid rgba(255,255,255,.15); border-radius:12px; padding:16px; margin-bottom:16px; }
-    video { width:100%; max-height:480px; background:#000; }
-    .muted { color:#cfd3d8; }
+    :root{
+      --bg:#000;
+      --panel: rgba(0,0,0,.45);
+      --border: rgba(255,255,255,.16);
+      --green:#27ae60; /* good */
+      --yellow:#f1c40f; /* okay */
+      --red:#e74c3c; /* need */
+      --accent:#00ffcc;
+    }
+    html,body{height:100%;margin:0}
+    body{
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:#fff; background: var(--bg) url('homepage-background.png') no-repeat center/cover fixed;
+    }
+    nav{position:sticky;top:0;z-index:10;background:#003300;padding:8px 0;text-align:center}
+    nav a{color:#fff;text-decoration:none;font-weight:700;margin:0 12px}
+
+    .wrap{max-width:1100px;margin:18px auto;padding:16px}
+    .card{
+      background:var(--panel); border:1px solid var(--border);
+      border-radius:14px; padding:16px; margin-bottom:14px; backdrop-filter: blur(2px);
+    }
+    h1{margin:8px 0 6px; font-size:1.8rem}
+    .subtle{color:#cfd3d8; font-size:.95rem; margin:.25rem 0 1rem}
+
+    .grid{display:grid; gap:12px}
+    .grid.two{grid-template-columns: 1fr 1fr}
+    .grid.three{grid-template-columns: repeat(3, 1fr)}
+    @media (max-width: 900px){ .grid.two,.grid.three{grid-template-columns: 1fr} }
+
+    .video{
+      width:100%; border-radius:12px; border:1px solid var(--border); background:#000;
+    }
+
+    .kv{display:grid; grid-template-columns: 140px 1fr; gap:8px}
+    .kv b{color:#cfd3d8; font-weight:600}
+
+    .p9{
+      display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;
+    }
+    @media (max-width: 700px){ .p9{grid-template-columns: 1fr} }
+
+    .pbox{
+      border:1px solid var(--border); border-radius:12px; padding:12px; background:rgba(0,0,0,.35);
+    }
+    .prow{display:flex; align-items:center; justify-content:space-between; gap:12px}
+    .badge{
+      font-size:.8rem; padding:4px 8px; border-radius:999px; border:1px solid var(--border);
+      background:#1119;
+    }
+    .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px}
+    .dot.good{background:var(--green)}
+    .dot.okay{background:var(--yellow)}
+    .dot.need{background:var(--red)}
+    details{margin-top:8px}
+    summary{cursor:pointer;color:#cfd3d8}
+
+    ul.clean{margin:.5rem 0 0 1.2rem}
+    .pill{display:inline-block;background:#003300;color:#fff;border:1px solid var(--border);padding:6px 10px;border-radius:999px}
+
+    .notice{display:none; border:1px solid var(--border); border-radius:10px; padding:10px; margin:10px 0; background:#1118}
+    .notice.err{display:block; color:#ffd7d7; border-color:#c44}
+    .notice.ok{display:block; color:#bfffc7; border-color:#2a5}
+
+    .btn{background:#003300;color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer}
+    .center{text-align:center}
   </style>
 </head>
 <body>
-  <header>
+  <nav>
     <a href="index.html">Home</a>
-    <a href="upload.html">Upload Another Swing</a>
-  </header>
-  <main>
-    <h1>Your Swing Report</h1>
+    <a href="about.html">About</a>
+    <a href="coming-soon.html">Coming Soon</a>
+    <a href="upload-html">Upload</a>
+  </nav>
 
-    <div class="card">
-      <h3>Video</h3>
-      <video id="video" controls></video>
-      <div class="muted" id="src"></div>
+  <div class="wrap">
+    <div class="card center">
+      <h1>Your Swing Report</h1>
+      <div class="subtle" id="subtitle">Loading…</div>
+      <video id="player" class="video" controls playsinline></video>
+      <div style="margin-top:10px">
+        <button class="btn" onclick="window.location.href='index.html'">Upload Another Swing</button>
+      </div>
+    </div>
+
+    <div id="alert" class="notice"></div>
+
+    <div class="grid two">
+      <div class="card">
+        <h3 style="margin:0 0 8px;color:var(--accent)">Profile</h3>
+        <div class="kv">
+          <b>Profile</b><div id="profileVal">—</div>
+          <b>Tempo</b><div id="tempoVal">—</div>
+          <b>Power</b><div id="powerVal">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px;color:var(--accent)">Quick Wins</h3>
+        <ul id="quickWins" class="clean"></ul>
+      </div>
+    </div>
+
+    <div class="grid two">
+      <div class="card">
+        <h3 style="margin:0 0 8px;color:var(--accent)">Consistency: Top 3</h3>
+        <ul id="consistency3" class="clean"></ul>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 8px;color:var(--accent)">Power: Top 3</h3>
+        <ul id="power3" class="clean"></ul>
+      </div>
     </div>
 
     <div class="card">
-      <h3>Highlights</h3>
-      <div class="muted">Profile —</div>
-      <div class="muted">Tempo —</div>
-      <div class="muted">Power —</div>
-      <div class="muted">Quick Wins —</div>
+      <h3 style="margin:0 0 8px;color:var(--accent)">P1–P9 Analysis</h3>
+      <div class="p9" id="pGrid"></div>
     </div>
-  </main>
+  </div>
 
   <script>
-    const url = sessionStorage.getItem('uploadedVideoUrl');
-    const v = document.getElementById('video');
-    const src = document.getElementById('src');
-    if (url) {
-      v.src = url;
-      src.textContent = 'Source URL: ' + url;
-    } else {
-      src.textContent = 'No uploaded video was found for this session.';
+    // —— Utilities
+    const $ = (id) => document.getElementById(id);
+    const alertBox = $('alert');
+    function showAlert(text, ok=false){
+      alertBox.className = 'notice ' + (ok ? 'ok' : 'err');
+      alertBox.textContent = text;
     }
+
+    // —— Video URL from upload step
+    const videoUrl = sessionStorage.getItem('uploadedVideoUrl') || '';
+    const player = $('player');
+    if (videoUrl) {
+      player.src = videoUrl;
+      $('subtitle').textContent = 'Source: ' + videoUrl;
+    } else {
+      $('subtitle').textContent = 'No video found (upload first).';
+      showAlert('No uploaded video URL in session. Go back and upload a swing.', false);
+    }
+
+    // —— Render helpers
+    function statusDot(cls){
+      const dot = document.createElement('span');
+      dot.className = 'dot ' + (cls || 'okay');
+      return dot;
+    }
+
+    function renderList(el, arr){
+      el.innerHTML = '';
+      (arr || []).forEach(t=>{
+        const li = document.createElement('li');
+        li.textContent = t;
+        el.appendChild(li);
+      });
+    }
+
+    function renderP9(container, pstack){
+      container.innerHTML = '';
+      const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
+      order.forEach(p=>{
+        const data = pstack?.[p];
+        const box = document.createElement('div');
+        box.className = 'pbox';
+
+        const row = document.createElement('div');
+        row.className = 'prow';
+
+        const left = document.createElement('div');
+        const title = document.createElement('div');
+        title.style.fontWeight = '700';
+        title.textContent = p + (data?.condition ? ` – ${data.condition}` : '');
+        const short = document.createElement('div');
+        short.className = 'subtle';
+        short.textContent = data?.short || '—';
+        left.appendChild(title);
+        left.appendChild(short);
+
+        const right = document.createElement('div');
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.textContent = (data?.rating || '—');
+        right.appendChild(badge);
+
+        const dot = statusDot(data?.status);
+        right.prepend(dot);
+
+        row.appendChild(left);
+        row.appendChild(right);
+
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.textContent = 'Details';
+        const long = document.createElement('div');
+        long.style.marginTop = '6px';
+        long.textContent = data?.long || '—';
+        details.appendChild(summary);
+        details.appendChild(long);
+
+        box.appendChild(row);
+        box.appendChild(details);
+        container.appendChild(box);
+      });
+    }
+
+    // —— Fetch analysis
+    async function fetchAnalysis(){
+      if (!videoUrl) return;
+
+      try {
+        const res = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            videoUrl,
+            selections: {
+              club: sessionStorage.getItem('vc_hand') || '7I',
+              model: 'v1'
+            }
+          })
+        });
+        if (!res.ok) {
+          const t = await res.text().catch(()=> '');
+          throw new Error(`Analyze failed (${res.status}) ${t}`);
+        }
+        const ai = await res.json();
+
+        $('profileVal').textContent = ai.profile || '—';
+        $('tempoVal').textContent = ai.tempo || '—';
+        $('powerVal').textContent = (ai.power?.score ?? ai.totals?.power ?? '—');
+
+        renderList($('quickWins'), ai.tips3 || []);
+        renderList($('consistency3'), ai.tips3 || []); // use same for now if separate not provided
+        renderList($('power3'), ai.powerTips3 || []);
+
+        renderP9($('pGrid'), ai.pstack);
+
+        showAlert('Analysis loaded.', true);
+      } catch (e) {
+        // Fallback demo data if /api/analyze hiccups
+        console.error(e);
+        showAlert('Using demo data (analysis service unavailable).');
+        const demo = {
+          profile:'Auto profile',
+          tempo:'3:1',
+          totals:{ power:82 },
+          tips3:['Soften grip pressure','Earlier weight shift','Hold balanced finish'],
+          powerTips3:['Step drill','3-ball whip','Med ball wall throw'],
+          pstack: Object.fromEntries(Array.from({length:9},(_,i)=>{
+            const P = 'P'+(i+1);
+            return [P,{
+              condition:['Setup','Takeaway','Lead Arm','Top','Transition','Delivery','Impact','Extension','Finish'][i],
+              rating:`${6+(i%4)}/10`,
+              status:['good','okay','need'][i%3],
+              short:`Auto short for ${P}`,
+              long:`Auto long explanation for ${P}`
+            }];
+          }))
+        };
+        $('profileVal').textContent = demo.profile;
+        $('tempoVal').textContent = demo.tempo;
+        $('powerVal').textContent = demo.totals.power;
+        renderList($('quickWins'), demo.tips3);
+        renderList($('consistency3'), demo.tips3);
+        renderList($('power3'), demo.powerTips3);
+        renderP9($('pGrid'), demo.pstack);
+      }
+    }
+
+    fetchAnalysis();
   </script>
 </body>
 </html>
