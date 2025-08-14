@@ -4,49 +4,65 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Virtual Coach AI – Upload</title>
+
   <style>
-    body { margin:0; font-family: Arial, sans-serif; color:#fff; text-align:center;
-           background:#000 url('homepage-background.png') no-repeat center/cover fixed; }
-    header { background:#003300; position:sticky; top:0; padding:8px 0; }
-    header a { color:#fff; text-decoration:none; font-weight:700; margin:0 12px; }
-    main { max-width:840px; margin:30px auto; padding:16px;
-           background:rgba(0,0,0,.35); border-radius:12px; }
-    h1 { margin-top:0; }
-    .row { display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
+    :root{ --green:#003300; --bg-brightness:1.0; }
+
+    html,body{height:100%;margin:0;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif}
+    .page{min-height:100dvh; display:flex; flex-direction:column; position:relative;}
+    .page::before{
+      content:""; position:fixed; inset:0; z-index:-1;
+      background:url('homepage-background.png') no-repeat center/cover fixed;
+      filter:brightness(var(--bg-brightness));
+    }
+
+    nav{position:sticky; top:0; width:100%; background:var(--green); padding:8px 10px; text-align:center;}
+    nav a{color:#fff; text-decoration:none; font-weight:700; margin:0 12px;}
+
+    main{max-width:900px; margin:28px auto; padding:16px; background:rgba(0,0,0,.35); border-radius:12px;}
+    h1{margin:0 0 12px; text-align:center;}
+    .row{display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap;}
     input[type="file"]{
-      background: rgba(0,0,0,0.28);
-      color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:6px; padding:6px;
+      background: rgba(0,0,0,.28); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:6px; padding:6px;
     }
     input[type="file"]::file-selector-button{
-      background:#003300; color:#fff; border:none; border-radius:4px; padding:6px 10px; cursor:pointer;
+      background:var(--green); color:#fff; border:none; border-radius:4px; padding:6px 10px; cursor:pointer;
     }
-    button { background:#003300; color:#fff; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; }
-    #status { margin-top:12px; font-weight:600; white-space:pre-wrap; text-align:left; background:#1118; padding:10px; border-radius:8px; }
-    #status.ok { color:#bfffc7; }
-    #status.err { color:#ffd7d7; }
-    video { width:100%; max-height:400px; margin-top:16px; display:none; }
-    small { display:block; color:#ccc; margin-top:6px; }
-    .muted { color:#aaa; font-size:.9em; }
+    .btn{background:var(--green); color:#fff; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; font-weight:700;}
+    .hint{color:#ddd; text-align:center; margin:8px 0 0; font-size:.95rem;}
+
+    #status{margin-top:12px; white-space:pre-wrap; background:#1118; padding:10px; border-radius:8px; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;}
+    #status.ok{color:#bfffc7;}
+    #status.err{color:#ffd7d7;}
+
+    video{width:100%; max-height:420px; margin-top:16px; display:none; border-radius:8px; border:1px solid rgba(255,255,255,.2);}
+    footer{margin-top:auto; text-align:center; padding:8px 0;}
   </style>
 </head>
 <body>
-  <header>
-    <a href="index.html">Home</a>
-    <a href="about.html">About</a>
-    <a href="coming-soon.html">Coming Soon</a>
-  </header>
+  <div class="page">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="coming-soon.html">Coming Soon</a>
+      <a href="contact.html">Contact</a>
+    </nav>
 
-  <main>
-    <h1>Upload Your Swing</h1>
-    <div class="row">
-      <input type="file" id="fileInput" accept="video/*" />
-      <button id="uploadBtn">Upload</button>
-    </div>
-    <small class="muted">iPhone videos (.mov) are fine — uploaded as-is to the cloud.</small>
+    <main>
+      <h1>Upload Your Swing</h1>
 
-    <div id="status">Idle</div>
-    <video id="preview" controls></video>
-  </main>
+      <div class="row">
+        <input type="file" id="fileInput" accept="video/*" />
+        <button class="btn" id="uploadBtn">Upload</button>
+      </div>
+      <p class="hint">iPhone .MOV files are supported. We upload directly to the cloud.</p>
+
+      <div id="status">Idle</div>
+      <video id="preview" controls></video>
+    </main>
+
+    <footer>&copy; 2025 Virtual Coach AI</footer>
+  </div>
 
   <script>
     const fileInput = document.getElementById('fileInput');
@@ -62,70 +78,71 @@
       preview.style.display = 'block';
     });
 
-    function setStatus(text, isError=false) {
-      statusBox.textContent = text;
+    function setStatus(msg, isError=false){
+      statusBox.textContent = msg;
       statusBox.classList.toggle('err', isError);
       statusBox.classList.toggle('ok', !isError);
     }
 
-    function guessContentType(file) {
+    function guessContentType(file){
       if (file.type) return file.type;
-      const name = file.name.toLowerCase();
-      if (name.endsWith('.mp4')) return 'video/mp4';
-      if (name.endsWith('.mov')) return 'video/quicktime';
+      const n = (file.name||'').toLowerCase();
+      if (n.endsWith('.mp4')) return 'video/mp4';
+      if (n.endsWith('.mov')) return 'video/quicktime';
       return 'application/octet-stream';
     }
 
     uploadBtn.addEventListener('click', async () => {
       const file = fileInput.files[0];
-      if (!file) { setStatus('Please select a video file first.', true); return; }
+      if (!file){ setStatus('Please select a video file first.', true); return; }
 
-      const contentType = guessContentType(file);
-      setStatus(`Requesting upload link…\nfilename=${file.name}\ncontentType=${contentType}`);
-
+      setStatus('Requesting upload link…');
       let presign;
-      try {
+      try{
         const res = await fetch('/api/s3-presign', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ filename: file.name, contentType })
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            filename: file.name,
+            contentType: guessContentType(file)
+          })
         });
-        if (!res.ok) {
+        if (!res.ok){
           const t = await res.text().catch(()=> '');
-          setStatus(\`Failed to get upload URL. Status \${res.status}\n\${t}\`, true);
+          setStatus(`Failed to get upload URL. Status ${res.status}\n${t}`, true);
           return;
         }
         presign = await res.json();
-      } catch (e) {
-        setStatus(\`Error contacting /api/s3-presign: \${e.message}\`, true);
+      }catch(e){
+        setStatus(`Error contacting /api/s3-presign: ${e.message}`, true);
         return;
       }
 
       const { url, fields, publicUrl } = presign || {};
-      if (!url || !fields) { setStatus('Bad presign response from server.', true); return; }
+      if (!url || !fields){ setStatus('Bad presign response from server.', true); return; }
 
       setStatus('Uploading to S3…');
-
       const formData = new FormData();
-      Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
+      Object.entries(fields).forEach(([k,v]) => formData.append(k,v));
       formData.append('file', file);
 
-      let s3Res, s3Text = '';
-      try {
-        s3Res = await fetch(url, { method: 'POST', body: formData });
+      let s3Res, s3Text='';
+      try{
+        s3Res = await fetch(url, { method:'POST', body: formData });
+        // S3 often returns 204 No Content; still safe to read text()
         s3Text = await s3Res.text().catch(()=> '');
-      } catch (e) {
-        setStatus(\`Network error posting to S3: \${e.message}\`, true);
+      }catch(e){
+        setStatus(`Network error posting to S3: ${e.message}`, true);
         return;
       }
 
-      if (!s3Res.ok) {
-        setStatus(\`S3 upload failed: \${s3Res.status} \${s3Res.statusText}\n---\n\${s3Text}\`, true);
+      if (!s3Res.ok){
+        setStatus(`S3 upload failed: ${s3Res.status} ${s3Res.statusText}\n---\n${s3Text}`, true);
         return;
       }
 
-      try { sessionStorage.setItem('uploadedVideoUrl', publicUrl); } catch {}
-      setStatus('Upload complete. Redirecting to report…');
+      try{ sessionStorage.setItem('uploadedVideoUrl', publicUrl); }catch{}
+      setStatus('Upload complete. Redirecting…');
       window.location.href = 'report.html';
     });
   </script>
