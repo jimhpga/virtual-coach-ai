@@ -1,341 +1,317 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Virtual Coach AI – Swing Report</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Coach AI — Swing Report</title>
   <style>
     :root{
-      --panel:#111111e6; --border:rgba(255,255,255,.12); --text:#fff; --muted:#cfd3d8;
-      --brand:#003300; --ok:#f9c846; --good:#24d07b; --need:#ff5f60;
+      --bg:#0e1a22;           /* deep navy */
+      --panel:#16242e;        /* card background */
+      --muted:#8aa5b5;        /* secondary text */
+      --text:#ecf3f7;         /* primary text */
+      --accent:#5eb3ff;       /* blue accent */
+      --ok:#19c37d;           /* green */
+      --warn:#f6c453;         /* yellow */
+      --bad:#ff6b6b;          /* red */
+      --chip:#1d2f3b;         /* chip bg */
+      --radius:16px;
+      --shadow:0 8px 24px rgba(0,0,0,.35);
     }
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
-    body{ margin:0; color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-          background:#000 url('homepage-background.png') center/cover fixed no-repeat; }
-    .wrap{ min-height:100%; padding:16px; background:linear-gradient(180deg, rgba(0,0,0,.70), rgba(0,0,0,.55)); }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}
+    a{color:var(--accent)}
+    .container{max-width:1080px;margin:32px auto;padding:0 16px}
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
+    .title{font-size:28px;font-weight:750;letter-spacing:.3px}
+    .subtitle{color:var(--muted);font-size:14px}
 
-    header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:6px auto 12px; max-width:1200px;
-            padding:8px 10px; border:1px solid var(--border); background:var(--panel); border-radius:14px; }
-    .brand{ display:flex; gap:10px; align-items:center; }
-    .brand img{ height:42px; width:auto; filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(95%) contrast(85%); }
-    .brand h1{ font-size:1.2rem; margin:0; letter-spacing:.2px; }
-    .actions{ display:flex; gap:8px; flex-wrap:wrap; }
-    .btn{ background:var(--brand); color:#fff; border:1px solid var(--border); border-radius:10px; padding:8px 12px; cursor:pointer; text-decoration:none; }
-    .btn.secondary{ background:transparent; }
+    .toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+    .select, .btn{background:var(--panel);border:1px solid #223743;border-radius:12px;color:var(--text);padding:10px 12px;box-shadow:var(--shadow)}
+    .select{appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');background-repeat:no-repeat;background-position:right 10px center;padding-right:36px}
+    .badge{background:var(--chip);border:1px solid #263b48;color:var(--muted);padding:6px 10px;border-radius:999px;font-size:12px}
 
-    main{ max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 1.1fr .9fr; gap:14px; }
-    @media (max-width: 980px){ main{ grid-template-columns:1fr; } }
-    .card{ background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:14px; }
-    .card h2{ margin:0 0 10px; font-size:1.1rem; color:#bfeecf; }
-    video{ width:100%; border-radius:12px; border:1px solid var(--border); background:#000; }
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
 
-    .stats{ display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; }
-    @media (max-width:900px){ .stats{ grid-template-columns: repeat(2, 1fr); } }
-    .stat{ text-align:center; padding:12px; border:1px solid var(--border); border-radius:12px; background:#0e0e0eee; }
-    .stat .label{ color:var(--muted); font-size:.9rem; }
-    .stat .value{ font-size:1.5rem; font-weight:700; margin-top:4px; }
+    .card{background:var(--panel);border:1px solid #223743;border-radius:var(--radius);box-shadow:var(--shadow)}
+    .card h3{margin:0;padding:16px 18px;border-bottom:1px solid #1f3340;font-weight:700}
+    .card .content{padding:14px 18px}
 
-    /* P1–P9 gallery + details */
-    .pgrid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
-    @media (max-width:980px){ .pgrid{ grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width:600px){ .pgrid{ grid-template-columns: 1fr; } }
-    .pbox{ border:1px solid var(--border); border-radius:12px; padding:10px; background:#0e0e0eee; display:flex; gap:10px; }
-    .pthumb{ width:120px; min-width:120px; height:90px; border-radius:8px; border:1px solid var(--border); object-fit:cover; background:#000; }
-    .pmeta{ flex:1; min-width:0; }
-    .prow{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .ptitle{ font-weight:700; }
-    .badge{ font-size:.8rem; padding:4px 8px; border-radius:999px; border:1px solid var(--border); }
-    .good{ background: color-mix(in srgb, var(--good) 25%, transparent); }
-    .ok{ background: color-mix(in srgb, var(--ok) 25%, transparent); }
-    .need{ background: color-mix(in srgb, var(--need) 25%, transparent); }
-    .pshort{ margin:6px 0 6px; color:var(--muted); }
-    details{ background:#0b0b0b; border:1px dashed var(--border); border-radius:10px; padding:8px 10px; }
-    details summary{ cursor:pointer; color:#bfeecf; }
+    details.panel{background:var(--panel);border:1px solid #223743;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    details.panel+details.panel{margin-top:12px}
+    summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:16px 18px}
+    summary::-webkit-details-marker{display:none}
+    .tag{font-size:12px;color:var(--muted);padding:4px 8px;border-radius:8px;border:1px solid #27404f;background:var(--chip)}
+    .pnum{width:36px;height:36px;border-radius:10px;background:#0c1820;display:grid;place-items:center;font-weight:800;border:1px solid #223743}
+    .pname{font-weight:700}
+    .caret{margin-left:auto;transition:transform .2s ease}
+    details[open] .caret{transform:rotate(180deg)}
 
-    .twocol{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-    @media (max-width:700px){ .twocol{ grid-template-columns:1fr; } }
-    ul.clean{ margin:8px 0 0 18px; }
-    ul.clean li{ margin:6px 0; }
+    .row{display:flex;flex-wrap:wrap;gap:16px}
+    .col{flex:1 1 260px}
+    .media{aspect-ratio:16/9;background:#0b151b;border:1px dashed #29424f;border-radius:12px;display:grid;place-items:center;color:var(--muted)}
 
-    .kv{ display:grid; grid-template-columns: 160px 1fr; gap:8px; }
-    .kv b{ color:var(--muted); font-weight:600; }
+    /* metric list */
+    .metric{display:flex;align-items:center;gap:10px;margin:10px 0}
+    .metric .name{flex:0 0 210px;color:#cfe3ee}
+    .bar{flex:1;height:10px;border-radius:999px;background:#10222c;position:relative;border:1px solid #22404f;overflow:hidden}
+    .bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
+    .pct{width:52px;text-align:right;color:#cfe3ee}
+    .ok{background:linear-gradient(90deg,var(--ok),#2bd897)}
+    .warn{background:linear-gradient(90deg,var(--warn),#ffd479)}
+    .bad{background:linear-gradient(90deg,var(--bad),#ff8f8f)}
 
-    @media print{
-      body{ background:#fff !important; }
-      .wrap{ background:#fff; padding:0; }
-      header, .actions .btn{ display:none !important; }
-      .card{ background:#fff; border:1px solid #ddd; }
-      .pbox{ break-inside: avoid; }
-    }
+    /* highlight for focus filter */
+    .focus-dim{opacity:.35;filter:saturate(.5)}
+
+    .footnote{color:var(--muted);font-size:12px;margin-top:6px}
+
+    .chips{display:flex;flex-wrap:wrap;gap:8px}
+    /* --- Progress UI --- */
+    .overlay{position:fixed;inset:0;background:rgba(8,16,22,.72);backdrop-filter:saturate(120%) blur(2px);display:grid;place-items:center;z-index:9999}
+    .overlay-card{width:min(720px,92vw);background:var(--panel);border:1px solid #224355;border-radius:18px;box-shadow:var(--shadow);padding:22px}
+    .overlay h2{margin:0 0 8px 0;font-size:22px}
+    .overlay .sub{color:var(--muted);margin-bottom:14px}
+    .progress{height:14px;border-radius:999px;background:#0f2230;border:1px solid #22404f;overflow:hidden;position:relative}
+    .progress>span{position:absolute;left:0;top:0;bottom:0;width:0%}
+    .progress>span.ok{background:linear-gradient(90deg,#4aa3ff,#19c37d)}
+    .status-list{margin:14px 0 0 0;padding:0;list-style:none;display:grid;gap:8px}
+    .status-item{display:flex;align-items:center;gap:10px;color:#cfe3ee}
+    .status-item .dot{width:10px;height:10px;border-radius:50%;background:#2a3f4d;border:1px solid #3a5566}
+    .status-item.active .dot{background:#4aa3ff;border-color:#4aa3ff}
+    .status-item.done .dot{background:#19c37d;border-color:#19c37d}
+    .eta{color:var(--muted);font-size:12px}
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="container">
     <header>
-      <div class="brand">
-        <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI" />
-        <h1>Virtual Coach AI – Swing Report</h1>
+      <div>
+        <div class="title">Swing Report — P1–P9</div>
+        <div class="subtitle">Club: 7‑iron • Date: <span id="date"></span> • View: Human</div>
       </div>
-      <div class="actions">
-        <a href="index.html" class="btn secondary">Home</a>
-        <a href="upload.html" class="btn">Upload Another Swing</a>
-        <a href="reports.html" class="btn secondary">All Reports</a>
-        <button class="btn secondary" onclick="window.print()">Print</button>
+      <div class=\"toolbar\">$1
+        <button id=\"analyzeBtn\" class=\"btn\" type=\"button\">Analyze Video</button>
       </div>
     </header>
 
-    <main>
-      <section class="left-col">
-        <div class="card">
-          <h2>Video</h2>
-          <video id="vid" controls playsinline></video>
-          <div id="vsrc" style="margin-top:8px; font-size:.9rem; color:var(--muted)"></div>
-        </div>
+    <!-- Progress Overlay -->
+    <div id=\"progressOverlay\" class=\"overlay\" hidden>
+      <div class=\"overlay-card\">
+        <h2>Analyzing your swing…</h2>
+        <div class=\"sub\" id=\"progressSub\">Preparing</div>
+        <div class=\"progress\"><span id=\"progressFill\" class=\"ok\"></span></div>
+        <ul class=\"status-list\" id=\"statusList\"></ul>
+        <div class=\"eta\" id=\"eta\"></div>
+      </div>
+    </div>
 
-        <div class="card">
-          <h2>Positions (P1–P9)</h2>
-          <div class="pgrid" id="pgrid"></div>
-        </div>
-      </section>
+    <section class="grid" aria-label="Top Summary">
+      <div class="card">
+        <h3>Swing Consistency</h3>
+        <div class="content" id="swingConsistency"></div>
+      </div>
+      <div class="card">
+        <h3>Position Consistency</h3>
+        <div class="content" id="positionConsistency"></div>
+      </div>
+    </section>
 
-      <section class="right-col">
-        <div class="card">
-          <h2>Overview</h2>
-          <div class="stats" id="stats"></div>
-        </div>
+    <section style="margin-top:22px">
+      <div class="chips footnote">Tip: Click a P‑section to expand. Use the Focus filter to highlight only the components you care about. Video is a placeholder — your real clip drops in via the uploader.</div>
 
-        <div class="card">
-          <h2>Kinematic Sequence</h2>
-          <div class="kv" id="kin"></div>
-        </div>
-
-        <div class="card">
-          <h2>Estimated Vertical Force</h2>
-          <div class="kv" id="evf"></div>
-        </div>
-
-        <div class="twocol">
-          <div class="card">
-            <h2>Top 3 – Consistency</h2>
-            <ul class="clean" id="tips3"></ul>
-          </div>
-          <div class="card">
-            <h2>Top 3 – Power</h2>
-            <ul class="clean" id="powertips3"></ul>
-          </div>
-        </div>
-
-        <div class="card">
-          <h2>14-Day Practice Plan</h2>
-          <ul class="clean" id="plan14"></ul>
-        </div>
-      </section>
-    </main>
+      <div id="pList"></div>
+    </section>
   </div>
 
   <script>
-    const $ = s => document.querySelector(s);
-    const el = (t,c,txt)=>{ const n=document.createElement(t); if(c) n.className=c; if(txt!=null) n.textContent=txt; return n; };
-    const statusClass = s => (s==='good'?'good':(s==='need'?'need':'ok'));
+    // ------------ Mock data (replace with real analytics payload) ------------
+    const swingMetrics = [
+      { key:'right-arm-angle', label:'Right Arm Angle', value:85, tags:['arm-bend'] },
+      { key:'face-angle',      label:'Club Face Angle', value:83, tags:['face-angle'] },
+      { key:'shoulder-turn',   label:'Shoulder Turn',   value:77, tags:['shoulder-turn'] },
+      { key:'pelvis-turn',     label:'Pelvis Turn',     value:71, tags:['hip-movement'] },
+      { key:'hand-path',       label:'Hand Path',       value:70, tags:['hand-path'] },
+      { key:'club-path',       label:'Club Path',       value:67, tags:['club-path'] },
+      { key:'pressure-shift',  label:'Pressure Shift',  value:54, tags:['foot-movement'] },
+      { key:'hip-sway',        label:'Hip Sway',        value:50, tags:['hip-movement'] },
+      { key:'lead-leg-brake',  label:'Lead Leg Braking',value:44, tags:['lead-leg-brake'] }
+    ];
 
-    function getParam(name){
-      try { return new URL(location.href).searchParams.get(name) || ''; } catch { return ''; }
-    }
-    function getVideoUrl(){
-      const urlParam = getParam('v');
-      if (urlParam) return urlParam;
-      try{
-        const ss = sessionStorage.getItem('uploadedVideoUrl');
-        if (ss) return ss;
-      }catch{}
-      return '';
-    }
-    function getFrames(){
-      // 1) prefer data.frames.* (from /api/analyze)
-      // 2) else sessionStorage.vc_frames (JSON with {P1:'https://...', ...})
-      try{
-        const raw = sessionStorage.getItem('vc_frames');
-        if (raw) return JSON.parse(raw);
-      }catch{}
-      return null;
-    }
+    const positionMetrics = [
+      {p:'P1', value:89}, {p:'P2', value:72}, {p:'P3', value:53}, {p:'P4', value:61},
+      {p:'P5', value:55}, {p:'P6', value:59}, {p:'P7', value:77}, {p:'P8', value:85}, {p:'P9', value:73}
+    ];
 
-    function stat(label, value){
-      const d = el('div','stat');
-      d.append(el('div','label',label));
-      d.append(el('div','value', String(value ?? '—')));
-      return d;
-    }
+    const phases = [
+      { id:'P1', name:'Setup', tags:['hand-path','arm-bend','right-wrist','left-wrist','foot-movement'] },
+      { id:'P2', name:'Shaft Parallel (Backswing)', tags:['hand-path','shoulder-turn','hip-movement','knee-movement'] },
+      { id:'P3', name:'Lead Arm Parallel (Backswing)', tags:['arm-bend','shoulder-turn','hip-movement'] },
+      { id:'P4', name:'Top of Swing', tags:['shoulder-turn','hip-movement','right-wrist','left-wrist'] },
+      { id:'P5', name:'Lead Arm Parallel (Downswing)', tags:['club-path','face-angle','lead-leg-brake'] },
+      { id:'P6', name:'Shaft Parallel (Downswing)', tags:['club-path','face-angle','lead-leg-brake','knee-movement'] },
+      { id:'P7', name:'Impact', tags:['club-path','face-angle','lead-leg-brake','foot-movement'] },
+      { id:'P8', name:'Trail Arm Parallel (Follow‑Through)', tags:['arm-bend','hand-path','tempo'] },
+      { id:'P9', name:'Finish', tags:['balance','tempo','arm-bend'] }
+    ];
 
-    function renderOverview(d={}){
-      const box = $('#stats'); box.innerHTML='';
-      const swingSpeed = d?.totals?.swingSpeedAvg ?? '—';
-      const powerScore = d?.power?.score ?? '—';
-      box.append(
-        stat('Profile', d.profile ?? '—'),
-        stat('Tempo', d.tempo ?? '—'),
-        stat('Swing Speed (avg)', swingSpeed),
-        stat('Power', powerScore)
-      );
+    // ------------ Helpers ------------
+    const fmt = v => `${v}%`;
+    const band = v => v>=75? 'ok' : v>=55? 'warn' : 'bad';
+
+    function metricRow(m){
+      const cls = band(m.value);
+      return `<div class="metric" data-tags="${(m.tags||[]).join(' ')}">
+        <div class="name">${m.label}</div>
+        <div class="bar"><span class="${cls}" style="width:${m.value}%"></span></div>
+        <div class="pct">${fmt(m.value)}</div>
+      </div>`;
     }
 
-    function renderTips(list, sel){
-      const ul = $(sel); ul.innerHTML = '';
-      (list||[]).forEach(t => ul.append(el('li', null, t)));
-      if (!ul.children.length) ul.append(el('li', null, '—'));
+    function posRow(p){
+      const cls = band(p.value);
+      return `<div class="metric"><div class="name">${p.p}</div>
+        <div class="bar"><span class="${cls}" style="width:${p.value}%"></span></div>
+        <div class="pct">${fmt(p.value)}</div>
+      </div>`;
     }
 
-    function renderPlan(list){
-      const ul = $('#plan14'); ul.innerHTML = '';
-      (list||[]).forEach(t => ul.append(el('li', null, t)));
-      if (!ul.children.length) ul.append(el('li', null, '—'));
+    function renderTop(){
+      document.getElementById('swingConsistency').innerHTML = swingMetrics.map(metricRow).join('');
+      document.getElementById('positionConsistency').innerHTML = positionMetrics.map(posRow).join('');
     }
 
-    // NEW: P1–P9 gallery + details (image + short/long + badge)
-    function renderPstack(ps, frames){
-      const grid = $('#pgrid'); grid.innerHTML='';
-      const order = [
-        ['P1','Setup'],
-        ['P2','Shaft Parallel (BS)'],
-        ['P3','Lead Arm Parallel (BS)'],
-        ['P4','Top of Swing'],
-        ['P5','Lead Arm Parallel (DS)'],
-        ['P6','Shaft Parallel (DS)'],
-        ['P7','Impact'],
-        ['P8','Trail Arm Parallel (FT)'],
-        ['P9','Finish']
-      ];
-      order.forEach(([key, fallbackCond])=>{
-        const p = ps?.[key] || {};
-        const url = frames?.[key] || p?.image || ''; // support data.frames.P1 or pstack.P1.image
-        const box = el('div','pbox');
+    function renderPhases(){
+      const wrapper = document.getElementById('pList');
+      wrapper.innerHTML = phases.map((ph,i)=>{
+        return `<details class="panel" data-phase="${ph.id}" ${i===0?'open':''}>
+          <summary>
+            <div class="pnum">${ph.id}</div>
+            <div class="pname">${ph.name}</div>
+            <span class="tag">Checkpoint ${i+1}/9</span>
+            <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="content">
+            <div class="row">
+              <div class="col">
+                <div class="media" id="video-${ph.id}">Video ${ph.id}<br><span class="footnote">(drop-in container)</span></div>
+                <div class="footnote">Coaching Notes: keep labels & dropdowns — replace this lorem with your AI output.</div>
+              </div>
+              <div class="col">
+                <div class="chips" aria-label="Key focus areas">
+                  ${(ph.tags||[]).map(t=>`<span class="badge">${t.replace(/-/g,' ')}</span>`).join('')}
+                </div>
+                <div style="margin-top:10px">${[
+                  {label:'Right Wrist Angle', value: 72, tags:['right-wrist']},
+                  {label:'Left Wrist Angle',  value: 69, tags:['left-wrist']},
+                  {label:'Arm Bend',         value: 81, tags:['arm-bend']},
+                  {label:'Hip Movement',     value: 64, tags:['hip-movement']},
+                  {label:'Knee Movement',    value: 58, tags:['knee-movement']},
+                  {label:'Foot Pressure',    value: 71, tags:['foot-movement']},
+                  {label:'Club Path',        value: 66, tags:['club-path']}
+                ].map(metricRow).join('')}</div>
+              </div>
+            </div>
+          </div>
+        </details>`;
+      }).join('');
+    }
 
-        // thumbnail
-        const img = document.createElement('img');
-        img.className = 'pthumb';
-        if (url) img.src = url; else img.style.opacity = .35;
-        img.alt = key;
-
-        // meta
-        const meta = el('div','pmeta');
-        const top = el('div','prow');
-        const title = el('div','ptitle', `${key} – ${p.condition || fallbackCond}`);
-        const badge = el('div',`badge ${statusClass(p.status)}`,(p.status || '—').toUpperCase());
-        top.append(title, badge);
-
-        const short = el('div','pshort', p.short || '');
-        const det = el('details');
-        det.append(el('summary',null,'Details'));
-        det.append(el('div',null,p.long || ''));
-
-        meta.append(top, short, det);
-        box.append(img, meta);
-        grid.append(box);
+    function applyFocus(value){
+      const blocks = document.querySelectorAll('.metric');
+      blocks.forEach(el=>{
+        el.classList.remove('focus-dim');
+        if(value==='all') return;
+        const tags = (el.getAttribute('data-tags')||'').split(' ');
+        if(!tags.includes(value)) el.classList.add('focus-dim');
       });
     }
 
-    function renderKinematics(kin){
-      const kv = $('#kin'); kv.innerHTML='';
-      if (!kin){ kv.innerHTML = '<div class="muted">—</div>'; return; }
-      const add = (k,v)=>{ kv.append(el('div',null, k)); kv.append(el('div',null, v ?? '—')); };
-      add('Peak Order', Array.isArray(kin.peakOrder)? kin.peakOrder.join(' → ') : kin.peakOrder);
-      add('Pelvis Peak (ms)', kin.pelvisPeakMs);
-      add('Torso Peak (ms)', kin.torsoPeakMs);
-      add('Lead Arm Peak (ms)', kin.leadArmPeakMs);
-      add('Club Peak (ms)', kin.clubPeakMs);
-      add('Notes', Array.isArray(kin.notes)? kin.notes.join('; ') : kin.notes);
+    // ------------ Init ------------$1// Focus filter$1// Expand/Collapse controls
+    const expandAllBtn = document.getElementById('expandAll');
+    const collapseAllBtn = document.getElementById('collapseAll');
+    expandAllBtn.addEventListener('click',()=>{
+      document.querySelectorAll('details.panel').forEach(d=>d.open=true);
+    });
+    collapseAllBtn.addEventListener('click',()=>{
+      document.querySelectorAll('details.panel').forEach(d=>d.open=false);
+    });
+
+    // Placeholder: insert real video element per phase here
+    // Example hook: replace #video-P1 with <video src="yourfile.mp4" controls></video>
+    // document.getElementById('video-P1').replaceWith(Object.assign(document.createElement('video'),{src:'swing.mp4',controls:true,style:'width:100%;border-radius:12px;border:1px solid #223743'}));
+      
+    // ---------- Progress / Meter logic ----------
+    const steps = [
+      {key:'upload', label:'Uploading video'},
+      {key:'extract', label:'Extracting frames (P1–P9)'},
+      {key:'pose', label:'Pose estimation'},
+      {key:'analyze', label:'Biomechanics + club math'},
+      {key:'report', label:'Building reports & thumbnails'}
+    ];
+
+    const Overlay = {
+      root: document.getElementById('progressOverlay'),
+      fill: document.getElementById('progressFill'),
+      sub:  document.getElementById('progressSub'),
+      eta:  document.getElementById('eta'),
+      list: document.getElementById('statusList'),
+      percent: 0,
+      timer: null,
+      start(){
+        this.root.hidden = false;
+        this.percent = 0;
+        this.renderList();
+        this.tick('Uploading video…');
+      },
+      set(p, sub){
+        this.percent = Math.max(0, Math.min(100, p));
+        this.fill.style.width = this.percent + '%';
+        if(sub) this.sub.textContent = sub;
+      },
+      complete(){
+        this.set(100, 'Done');
+        setTimeout(()=>{ this.root.hidden = true; }, 450);
+      },
+      renderList(activeIndex=0){
+        this.list.innerHTML = steps.map((s,i)=>`<li class='status-item ${i<activeIndex?"done":i===activeIndex?"active":""}'>
+          <span class='dot'></span><span>${s.label}</span></li>`).join('');
+      },
+      tick(sub){ this.sub.textContent = sub || this.sub.textContent; }
+    };
+
+    // Demo/Hook: simulate analysis with realistic stages
+    function simulateAnalysis(){
+      Overlay.start();
+      let i = 0;
+      const stageDur = [800, 1200, 1400, 1200, 900]; // ms per step (tweak as needed)
+      const stagePct = [15, 40, 70, 88, 100];
+      function run(){
+        if(i>=steps.length){ Overlay.complete(); return; }
+        Overlay.renderList(i);
+        const label = steps[i].label + '…';
+        const startPct = i===0?0:stagePct[i-1];
+        const endPct = stagePct[i];
+        const start = performance.now();
+        const dur = stageDur[i];
+        (function loop(now){
+          const t = Math.min(1, (now - start)/dur);
+          const pct = Math.round(startPct + (endPct-startPct)*t);
+          Overlay.set(pct, label);
+          if(t<1){ requestAnimationFrame(loop); } else { i++; setTimeout(run, 120); }
+        })(start);
+      }
+      run();
     }
 
-    function renderEVF(vf){
-      const kv = $('#evf'); kv.innerHTML='';
-      if (!vf){ kv.innerHTML = '<div class="muted">—</div>'; return; }
-      const add = (k,v)=>{ kv.append(el('div',null, k)); kv.append(el('div',null, v ?? '—')); };
-      add('Estimated Vertical Force', vf.value ?? vf.percentBW ?? '—');
-      add('Peak Time (ms)', vf.peakMs);
-      add('Side (L/R)', vf.side);
-      add('Notes', Array.isArray(vf.notes)? vf.notes.join('; ') : vf.notes);
-    }
+    // Public hook: call window.AnalysisProgress.start() from your uploader once the file is received
+    window.AnalysisProgress = { start: simulateAnalysis, set: (p,msg)=>Overlay.set(p,msg), done: ()=>Overlay.complete() }
 
-    async function fetchById(id){
-      try{
-        const r = await fetch(`/api/get?id=${encodeURIComponent(id)}`);
-        if (r.ok) return await r.json(); // { id, data:{...}, created_at, ... }
-      }catch(e){ console.warn('get by id failed', e); }
-      return null;
-    }
+    // Wire demo button
+    document.getElementById('analyzeBtn').addEventListener('click', simulateAnalysis);
 
-    (async function init(){
-      const vUrl = getVideoUrl();
-      const id = getParam('id');
-
-      const vid = $('#vid'), vsrc = $('#vsrc');
-      if (vUrl){ vid.src = vUrl; vsrc.textContent = 'Source: ' + vUrl; }
-      else { vsrc.textContent = id ? ('Report ID: '+id) : 'No video URL detected.'; }
-
-      let row, data;
-      if (id){
-        row = await fetchById(id);
-        data = row?.data || null;
-      }
-
-      if (!data){
-        try{
-          const res = await fetch('/api/analyze', {
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ videoUrl: vUrl, selections:{} })
-          });
-          if (!res.ok) throw new Error('Analyze failed: ' + res.status);
-          data = await res.json();
-        }catch(err){
-          console.error('[analyze error]', err);
-          data = null;
-        }
-      }
-
-      // Fallback sample if still empty
-      if (!data){
-        data = {
-          profile:'Auto Profile', tempo:'3:1',
-          totals:{ swingSpeedAvg: 97 },
-          power:{ score: 81 },
-          tips3:['Narrow-to-wide tempo','Preset trail wrist','Hold finish'],
-          powerTips3:['Step change drill','Pump to P6 & fire','Med-ball wall throw'],
-          lessons14: Array.from({length:14},(_,i)=>`Day ${i+1} – Practice block`),
-          kinematics:{
-            peakOrder:['Pelvis','Torso','Lead Arm','Club'],
-            pelvisPeakMs:150, torsoPeakMs:190, leadArmPeakMs:220, clubPeakMs:250,
-            notes:['Sequence slightly late from torso → arm']
-          },
-          verticalForce:{ value:'165% BW', peakMs:110, side:'Lead', notes:['Peak timing good into P6–P7'] },
-          pstack:{
-            P1:{condition:'Setup',status:'ok',short:'Neutral posture',long:'Athletic stance; small chin tuck.'},
-            P2:{condition:'Shaft Parallel (BS)',status:'good',short:'One-piece start',long:'Clubhead outside hands.'},
-            P3:{condition:'Lead Arm Parallel (BS)',status:'ok',short:'Width maintained',long:'Trail wrist set.'},
-            P4:{condition:'Top',status:'need',short:'Slight across-line',long:'Feel more depth; left arm across chest.'},
-            P5:{condition:'Lead Arm Parallel (DS)',status:'ok',short:'Lower leads',long:'Start from the ground up.'},
-            P6:{condition:'Shaft Parallel (DS)',status:'ok',short:'Shallow the shaft',long:'Maintain side-bend.'},
-            P7:{condition:'Impact',status:'good',short:'Forward shaft lean',long:'Weight forward, face square.'},
-            P8:{condition:'Trail Arm Parallel (FT)',status:'ok',short:'Arms extend',long:'Post-impact width.'},
-            P9:{condition:'Finish',status:'good',short:'Balanced',long:'Hold your pose.'}
-          },
-          frames:{} // optional images
-        };
-      }
-
-      // Merge any session-stored frames if present
-      const ssFrames = getFrames();
-      const frames = Object.assign({}, data.frames||{}, ssFrames||{});
-
-      renderOverview(data);
-      renderPstack(data.pstack, frames);
-      renderKinematics(data.kinematics);
-      renderEVF(data.verticalForce);
-      renderTips(data.tips3, '#tips3');
-      renderTips(data.powerTips3, '#powertips3');
-      renderPlan(data.lessons14);
-    })();
   </script>
 </body>
 </html>
