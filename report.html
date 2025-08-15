@@ -33,7 +33,7 @@
     .badge{background:var(--chip);border:1px solid #263b48;color:var(--muted);padding:6px 10px;border-radius:999px;font-size:12px}
 
     .grid{display:grid;grid-template-columns:1fr;gap:16px}
-    @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+    @media(min-width:900px){.grid{grid-template-columns:1fr}}
 
     .card{background:rgba(22,36,46,.86);border:1px solid #223743;border-radius:var(--radius);box-shadow:var(--shadow)}
     .card h3{margin:0;padding:16px 18px;border-bottom:1px solid #1f3340;font-weight:700}
@@ -97,6 +97,8 @@
   .phase-tab .t{font-size:12px;color:var(--muted)}
   .phase-tab.active{outline:2px solid var(--accent)}
   #powerTop{display:none}
+    .shortdesc{color:var(--muted);font-size:13px}
+  .longdesc{color:#d9e7f2;margin:0 0 8px 0}
   </style>
 </head>
 <body>
@@ -175,101 +177,7 @@
       </div>
     </section>
 
-    <section class="grid" aria-label="Full Monty Extras" style="margin-top:16px">
-      <div class="card">
-        <h3 style="display:none">P1–P9 Table</h3>
-        <details class="panel"><summary><div class="pname">P1–P9 Table (Summary)</div><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
-        <div class="content">
-          <table class="pgrid" role="table">
-            <thead>
-              <tr>
-                <th>Checkpoint</th>
-                <th>Position Name</th>
-                <th>Description (Short)</th>
-                <th>Description (Long)</th>
-                <th>Grade</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>P1</td>
-                <td>Setup</td>
-                <td>Athletic stance, posture aligned</td>
-                <td>Neutral spine with balanced pressure (~55/45 trail→lead), relaxed arms, square clubface, eyes level, and a stable base to load from.</td>
-                <td class="grade good">🟢 Good</td>
-              </tr>
-              <tr>
-                <td>P2</td>
-                <td>Shaft Parallel (Backswing)</td>
-                <td>Club parallel, early width</td>
-                <td>Shaft parallel to ground and on plane; hands move in with width, minimal wrist set, pelvis begins loading without lateral sway.</td>
-                <td class="grade ok">🟡 Okay</td>
-              </tr>
-              <tr>
-                <td>P3</td>
-                <td>Lead Arm Parallel (Backswing)</td>
-                <td>Good extension, slight flat</td>
-                <td>Lead arm parallel; trail elbow under the shaft; lead wrist near flat to slightly flexed; torso keeps turning while lower body stays braced.</td>
-                <td class="grade ok">🟡 Okay</td>
-              </tr>
-              <tr>
-                <td>P4</td>
-                <td>Top of Swing</td>
-                <td>Full coil, face a touch open</td>
-                <td>Complete coil with depth; lead shoulder under chin; trail knee retains some flex; if face is open, reduce trail wrist extension or add lead wrist flex.</td>
-                <td class="grade bad">🔴 Needs Work</td>
-              </tr>
-              <tr>
-                <td>P5</td>
-                <td>Lead Arm Parallel (Downswing)</td>
-                <td>Arm drops inside, solid wrist</td>
-                <td>Arm shallows as pelvis opens; lead wrist flexes to stabilize face; hands in front of trail thigh; pressure shifting forward decisively.</td>
-                <td class="grade good">🟢 Good</td>
-              </tr>
-              <tr>
-                <td>P6</td>
-                <td>Shaft Parallel (Downswing)</td>
-                <td>Shallowing, trail elbow leads</td>
-                <td>Shaft parallel with the hands ahead; lead hip clearing; trail elbow in front of ribcage; face-to-path relationship managed (no early roll).</td>
-                <td class="grade good">🟢 Good</td>
-              </tr>
-              <tr>
-                <td>P7</td>
-                <td>Impact</td>
-                <td>Hips open, shaft lean</td>
-                <td>Lead side braced with handle forward; dynamic loft and low‑point ahead; chest slightly open; pressure ~80–90% lead foot for compression.</td>
-                <td class="grade ok">🟡 Okay</td>
-              </tr>
-              <tr>
-                <td>P8</td>
-                <td>Trail Arm Parallel (Follow‑Through)</td>
-                <td>Balanced extension</td>
-                <td>Arms extend through; wrists unhinge gradually; face stays stable post‑impact; rotation continues without stalling.</td>
-                <td class="grade good">🟢 Good</td>
-              </tr>
-              <tr>
-                <td>P9</td>
-                <td>Finish</td>
-                <td>Upright, balanced</td>
-                <td>Full balance on lead side; belt buckle at target; spine tall; club wraps around naturally with no excess tension.</td>
-                <td class="grade good">🟢 Good</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        </details>
-      </div>
-      <div class="card">
-        <h3 style="display:none">Power & Efficiency</h3>
-        <details class="panel"><summary><div class="pname">Power & Efficiency</div><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
-        <div class="content">
-          <div class="metric"><div class="name">Power Efficiency Score</div><div class="bar"><span class="ok" style="width:82%"></span></div><div class="pct">82%</div></div>
-          <div class="metric"><div class="name">Kinematic Flow</div><div class="bar"><span class="warn" style="width:68%"></span></div><div class="pct">68%</div></div>
-          <div class="footnote">Placeholder values — will fill from your analysis engine.</div>
-        </div>
-        </details>
-      </div>
-    </section>
+    
 
     <details class="panel" aria-label="Coaching Card">
       <summary>
@@ -305,17 +213,31 @@
 
     <!-- Power Summary moved under P1–P9 -->
     <section class="grid" aria-label="Power Summary (Bottom)" style="margin-top:16px">
-      <div class="card">
-        <h3>Power Score Summary</h3>
-        <div class="content">
-          <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="ok" style="width:82%"></span></div><div class="pct">82%</div></div>
-          <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">3.2:1</div></div>
-          <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="warn" style="width:64%"></span></div><div class="pct">On-time</div></div>
-          <div class="footnote">Placeholder — wire to engine.</div>
-        </div>
-      </div>
-    </section>
+  <div class="card">
+    <h3>Power Score Summary</h3>
+    <div class="content">
+      <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="ok" style="width:82%"></span></div><div class="pct">82%</div></div>
+      <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">3.2:1</div></div>
+      <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="warn" style="width:64%"></span></div><div class="pct">On-time</div></div>
+      <div class="footnote">Placeholder — wire to engine.</div>
+    </div>
   </div>
+</section>
+
+<details class="panel" aria-label="Power & Efficiency">
+  <summary>
+    <div class="pname">Power & Efficiency (Breakdown)</div>
+    <span class="tag">Tap to expand</span>
+    <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </summary>
+  <div class="content">
+    <div class="metric"><div class="name">Power Efficiency Score</div><div class="bar"><span class="ok" style="width:82%"></span></div><div class="pct">82%</div></div>
+    <div class="metric"><div class="name">Kinematic Flow</div><div class="bar"><span class="warn" style="width:68%"></span></div><div class="pct">68%</div></div>
+    <div class="metric"><div class="name">Ground Use</div><div class="bar"><span class="ok" style="width:74%"></span></div><div class="pct">74%</div></div>
+    <div class="footnote">Placeholder values — will fill from your analysis engine.</div>
+  </div>
+</details>
+</div>
 
   <script>
     // ------------ Mock data (replace with real analytics payload) ------------
@@ -337,16 +259,16 @@
     ];
 
     const phases = [
-      { id:'P1', name:'Setup', tags:['hand-path','arm-bend','right-wrist','left-wrist','foot-movement'] },
-      { id:'P2', name:'Shaft Parallel (Backswing)', tags:['hand-path','shoulder-turn','hip-movement','knee-movement'] },
-      { id:'P3', name:'Lead Arm Parallel (Backswing)', tags:['arm-bend','shoulder-turn','hip-movement'] },
-      { id:'P4', name:'Top of Swing', tags:['shoulder-turn','hip-movement','right-wrist','left-wrist'] },
-      { id:'P5', name:'Lead Arm Parallel (Downswing)', tags:['club-path','face-angle','lead-leg-brake'] },
-      { id:'P6', name:'Shaft Parallel (Downswing)', tags:['club-path','face-angle','lead-leg-brake','knee-movement'] },
-      { id:'P7', name:'Impact', tags:['club-path','face-angle','lead-leg-brake','foot-movement'] },
-      { id:'P8', name:'Trail Arm Parallel (Follow‑Through)', tags:['arm-bend','hand-path','tempo'] },
-      { id:'P9', name:'Finish', tags:['balance','tempo','arm-bend'] }
-    ];
+  { id:'P1', name:'Setup', short:'Athletic stance, posture aligned', long:'Neutral spine with balanced pressure (~55/45 trail→lead), relaxed arms, square clubface, eyes level, and a stable base to load from.', tags:['hand-path','arm-bend','right-wrist','left-wrist','foot-movement'] },
+  { id:'P2', name:'Shaft Parallel (Backswing)', short:'Club parallel, early width', long:'Shaft parallel to ground and on plane; hands move in with width, minimal wrist set; pelvis begins loading without lateral sway.', tags:['hand-path','shoulder-turn','hip-movement','knee-movement'] },
+  { id:'P3', name:'Lead Arm Parallel (Backswing)', short:'Good extension, slight flat', long:'Lead arm parallel; trail elbow under shaft; lead wrist near flat to slightly flexed; torso keeps turning while lower body stays braced.', tags:['arm-bend','shoulder-turn','hip-movement'] },
+  { id:'P4', name:'Top of Swing', short:'Full coil, face a touch open', long:'Complete coil with depth; lead shoulder under chin; trail knee retains some flex. If face is open, reduce trail wrist extension or add lead wrist flex.', tags:['shoulder-turn','hip-movement','right-wrist','left-wrist'] },
+  { id:'P5', name:'Lead Arm Parallel (Downswing)', short:'Arm drops inside, solid wrist', long:'Arm shallows as pelvis opens; lead wrist flexes to stabilize face; hands in front of trail thigh; pressure shifting forward decisively.', tags:['club-path','face-angle','lead-leg-brake'] },
+  { id:'P6', name:'Shaft Parallel (Downswing)', short:'Shallowing, trail elbow leads', long:'Shaft parallel with the hands ahead; lead hip clearing; trail elbow in front of ribcage; manage face-to-path (no early roll).', tags:['club-path','face-angle','lead-leg-brake','knee-movement'] },
+  { id:'P7', name:'Impact', short:'Hips open, shaft lean', long:'Lead side braced with handle forward; dynamic loft and low‑point ahead; chest slightly open; pressure ~80–90% lead foot for compression.', tags:['club-path','face-angle','lead-leg-brake','foot-movement'] },
+  { id:'P8', name:'Trail Arm Parallel (Follow‑Through)', short:'Balanced extension', long:'Arms extend through; wrists unhinge gradually; face stays stable post‑impact; rotation continues without stalling.', tags:['arm-bend','hand-path','tempo'] },
+  { id:'P9', name:'Finish', short:'Upright, balanced', long:'Full balance on lead side; belt buckle at target; spine tall; club wraps around naturally with no excess tension.', tags:['balance','tempo','arm-bend'] }
+];
 
     // ------------ Helpers ------------
     const fmt = v => `${v}%`;
@@ -375,9 +297,45 @@
     }
 
     function renderPhases(){
-      const wrapper = document.getElementById('pList');
-      wrapper.innerHTML = phases.map((ph,i)=>{
-        return `<details class="panel" data-phase="${ph.id}" ${i===0?'open':''}>
+  const wrapper = document.getElementById('pList');
+  wrapper.innerHTML = phases.map((ph,i)=>{
+    return `<details class="panel" data-phase="${ph.id}" ${i===0?'open':''}>
+      <summary>
+        <div class="pnum">${ph.id}</div>
+        <div class="pname">${ph.name}</div>
+        <span class="shortdesc">${ph.short}</span>
+        <span class="tag">Checkpoint ${i+1}/9</span>
+        <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
+      <div class="content">
+        <p class="longdesc">${ph.long}</p>
+        <div class="row">
+          <div class="col">
+            <div class="media" id="video-${ph.id}">Video ${ph.id}<br><span class="footnote">(drop-in container)</span></div>
+            <div class="media pro" id="pro-${ph.id}" hidden>Hogan Overlay ${ph.id}<br><span class="footnote">(toggle via Pro Overlay switch)</span></div>
+            <div class="footnote">Coaching Notes: replace with AI output.</div>
+          </div>
+          <div class="col">
+            <div class="chips" aria-label="Key focus areas">
+              ${(ph.tags||[]).map(t=>`<span class="badge">${t.replace(/-/g,' ')}</span>`).join('')}
+            </div>
+            <div style="margin-top:10px">
+              ${[
+                {label:'Right Wrist Angle', value: 72, tags:['right-wrist']},
+                {label:'Left Wrist Angle',  value: 69, tags:['left-wrist']},
+                {label:'Arm Bend',         value: 81, tags:['arm-bend']},
+                {label:'Hip Movement',     value: 64, tags:['hip-movement']},
+                {label:'Knee Movement',    value: 58, tags:['knee-movement']},
+                {label:'Foot Pressure',    value: 71, tags:['foot-movement']},
+                {label:'Club Path',        value: 66, tags:['club-path']}
+              ].map(metricRow).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>`;
+  }).join('');
+}" ${i===0?'open':''}>
           <summary>
             <div class="pnum">${ph.id}</div>
             <div class="pname">${ph.name}</div>
