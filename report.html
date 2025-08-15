@@ -1,73 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Virtual Coach AI – Swing Report</title>
   <style>
     :root{
-      --bg:#0a0a0a;
-      --panel:#111111e6;
-      --border:rgba(255,255,255,.12);
-      --text:#fff;
-      --muted:#cfd3d8;
-      --brand:#003300; /* dark green */
-      --ok:#f9c846;    /* yellow */
-      --good:#24d07b;  /* green */
-      --need:#ff5f60;  /* red */
+      --panel:#111111e6; --border:rgba(255,255,255,.12); --text:#fff; --muted:#cfd3d8;
+      --brand:#003300; --ok:#f9c846; --good:#24d07b; --need:#ff5f60;
     }
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
-    body{
-      margin:0; color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background: #000 url('homepage-background.png') center/cover fixed no-repeat;
-    }
-    .wrap{
-      background: linear-gradient(180deg, rgba(0,0,0,.70), rgba(0,0,0,.55));
-      min-height:100%;
-      padding:16px;
-    }
-    header{
-      display:flex; align-items:center; justify-content:space-between;
-      gap:12px; margin:6px auto 12px; max-width:1200px;
-      padding:8px 10px; border:1px solid var(--border); background:var(--panel); border-radius:14px;
-    }
-    .brand{
-      display:flex; gap:10px; align-items:center;
-    }
+    body{ margin:0; color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+          background:#000 url('homepage-background.png') center/cover fixed no-repeat; }
+    .wrap{ min-height:100%; padding:16px; background:linear-gradient(180deg, rgba(0,0,0,.70), rgba(0,0,0,.55)); }
+
+    header{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:6px auto 12px; max-width:1200px;
+            padding:8px 10px; border:1px solid var(--border); background:var(--panel); border-radius:14px; }
+    .brand{ display:flex; gap:10px; align-items:center; }
     .brand img{ height:42px; width:auto; filter: brightness(0) saturate(100%) invert(26%) sepia(88%) saturate(214%) hue-rotate(66deg) brightness(95%) contrast(85%); }
     .brand h1{ font-size:1.2rem; margin:0; letter-spacing:.2px; }
     .actions{ display:flex; gap:8px; flex-wrap:wrap; }
-    .btn{
-      background:var(--brand); color:#fff; border:1px solid var(--border); border-radius:10px;
-      padding:8px 12px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px;
-    }
+    .btn{ background:var(--brand); color:#fff; border:1px solid var(--border); border-radius:10px; padding:8px 12px; cursor:pointer; text-decoration:none; }
     .btn.secondary{ background:transparent; }
+
     main{ max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 1.1fr .9fr; gap:14px; }
     @media (max-width: 980px){ main{ grid-template-columns:1fr; } }
-
-    .card{
-      background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:14px;
-    }
+    .card{ background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:14px; }
     .card h2{ margin:0 0 10px; font-size:1.1rem; color:#bfeecf; }
     video{ width:100%; border-radius:12px; border:1px solid var(--border); background:#000; }
 
-    /* Key totals */
-    .totals{ display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; }
-    @media (max-width:700px){ .totals{ grid-template-columns: repeat(2, 1fr); } }
-    .total{
-      text-align:center; padding:12px; border:1px solid var(--border); border-radius:12px; background:#0e0e0eee;
-    }
-    .total .label{ color:var(--muted); font-size:.9rem; }
-    .total .value{ font-size:1.5rem; font-weight:700; margin-top:4px; }
+    .stats{ display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; }
+    @media (max-width:900px){ .stats{ grid-template-columns: repeat(2, 1fr); } }
+    .stat{ text-align:center; padding:12px; border:1px solid var(--border); border-radius:12px; background:#0e0e0eee; }
+    .stat .label{ color:var(--muted); font-size:.9rem; }
+    .stat .value{ font-size:1.5rem; font-weight:700; margin-top:4px; }
 
-    /* P1–P9 grid */
     .pgrid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
     @media (max-width:980px){ .pgrid{ grid-template-columns: repeat(2, 1fr); } }
     @media (max-width:600px){ .pgrid{ grid-template-columns: 1fr; } }
-    .pbox{
-      border:1px solid var(--border); border-radius:12px; padding:12px; background:#0e0e0eee;
-    }
+    .pbox{ border:1px solid var(--border); border-radius:12px; padding:12px; background:#0e0e0eee; }
     .prow{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
     .ptitle{ font-weight:700; }
     .badge{ font-size:.8rem; padding:4px 8px; border-radius:999px; border:1px solid var(--border); }
@@ -78,13 +50,14 @@
     details{ background:#0b0b0b; border:1px dashed var(--border); border-radius:10px; padding:8px 10px; }
     details summary{ cursor:pointer; color:#bfeecf; }
 
-    /* Tips columns */
     .twocol{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
     @media (max-width:700px){ .twocol{ grid-template-columns:1fr; } }
     ul.clean{ margin:8px 0 0 18px; }
     ul.clean li{ margin:6px 0; }
 
-    /* Footer/print */
+    .kv{ display:grid; grid-template-columns: 160px 1fr; gap:8px; }
+    .kv b{ color:var(--muted); font-weight:600; }
+
     @media print{
       body{ background:#fff !important; }
       .wrap{ background:#fff; padding:0; }
@@ -103,12 +76,12 @@
       <div class="actions">
         <a href="index.html" class="btn secondary">Home</a>
         <a href="upload.html" class="btn">Upload Another Swing</a>
+        <a href="reports.html" class="btn secondary">All Reports</a>
         <button class="btn secondary" onclick="window.print()">Print</button>
       </div>
     </header>
 
     <main>
-      <!-- Left: Video + Overview + P-stack -->
       <section class="left-col">
         <div class="card">
           <h2>Video</h2>
@@ -116,195 +89,208 @@
           <div id="vsrc" style="margin-top:8px; font-size:.9rem; color:var(--muted)"></div>
         </div>
 
-        <div class="card" id="overview">
-          <h2>Overview</h2>
-          <div class="totals" id="totals">
-            <!-- totals injected -->
-          </div>
-          <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; color:var(--muted)" id="meta">
-            <!-- profile/tempo injected -->
-          </div>
-        </div>
-
         <div class="card">
           <h2>Positions (P1–P9)</h2>
-          <div class="pgrid" id="pgrid">
-            <!-- P1..P9 injected -->
-          </div>
+          <div class="pgrid" id="pgrid"></div>
         </div>
       </section>
 
-      <!-- Right: Quick Wins + Power + Plan -->
       <section class="right-col">
         <div class="card">
-          <h2>Top 3 – Consistency</h2>
-          <ul class="clean" id="tips3">
-            <!-- tips injected -->
-          </ul>
+          <h2>Overview</h2>
+          <div class="stats" id="stats"></div>
         </div>
 
         <div class="card">
-          <h2>Top 3 – Power</h2>
-          <ul class="clean" id="powertips3">
-            <!-- power tips injected -->
-          </ul>
+          <h2>Kinematic Sequence</h2>
+          <div class="kv" id="kin"></div>
+        </div>
+
+        <div class="card">
+          <h2>Estimated Vertical Force</h2>
+          <div class="kv" id="evf"></div>
+        </div>
+
+        <div class="twocol">
+          <div class="card">
+            <h2>Top 3 – Consistency</h2>
+            <ul class="clean" id="tips3"></ul>
+          </div>
+          <div class="card">
+            <h2>Top 3 – Power</h2>
+            <ul class="clean" id="powertips3"></ul>
+          </div>
         </div>
 
         <div class="card">
           <h2>14-Day Practice Plan</h2>
-          <ul class="clean" id="plan14">
-            <!-- lessons injected -->
-          </ul>
+          <ul class="clean" id="plan14"></ul>
         </div>
       </section>
     </main>
   </div>
 
   <script>
-    // --- helpers ---
-    const $ = (sel) => document.querySelector(sel);
-    const el = (tag, cls, txt) => {
-      const n = document.createElement(tag);
-      if (cls) n.className = cls;
-      if (txt != null) n.textContent = txt;
-      return n;
-    };
-    const statusClass = (s) => (s === 'good' ? 'good' : (s === 'need' ? 'need' : 'ok'));
+    const $ = s => document.querySelector(s);
+    const el = (t,c,txt)=>{ const n=document.createElement(t); if(c) n.className=c; if(txt!=null) n.textContent=txt; return n; };
+    const statusClass = s => (s==='good'?'good':(s==='need'?'need':'ok'));
 
-    // 1) Load video URL from sessionStorage or ?v=
-    function getVideoUrl() {
-      try {
+    function getParam(name){
+      try { return new URL(location.href).searchParams.get(name) || ''; } catch { return ''; }
+    }
+    function getVideoUrl(){
+      const urlParam = getParam('v');
+      if (urlParam) return urlParam;
+      try{
         const ss = sessionStorage.getItem('uploadedVideoUrl');
         if (ss) return ss;
-      } catch {}
-      const u = new URL(location.href);
-      return u.searchParams.get('v') || '';
+      }catch{}
+      return '';
     }
 
-    // 2) Render helpers
-    function renderTotals(totals){
-      const tbox = $('#totals'); tbox.innerHTML = '';
-      const items = [
-        ['Fairways', totals?.fairways ?? '—'],
-        ['Greens', totals?.greens ?? '—'],
-        ['Putts', totals?.putts ?? '—'],
-        ['Swing Speed (avg)', totals?.swingSpeedAvg ?? '—']
-      ];
-      items.forEach(([label,value])=>{
-        const d = el('div','total');
-        d.appendChild(el('div','label',label));
-        d.appendChild(el('div','value', String(value)));
-        tbox.appendChild(d);
-      });
+    function stat(label, value){
+      const d = el('div','stat');
+      d.append(el('div','label',label));
+      d.append(el('div','value', String(value ?? '—')));
+      return d;
     }
 
-    function renderMeta(profile, tempo, powerScore){
-      const m = $('#meta'); m.innerHTML = '';
-      const bits = [];
-      if (profile) bits.push(`Profile: ${profile}`);
-      if (tempo) bits.push(`Tempo: ${tempo}`);
-      if (powerScore != null) bits.push(`Power: ${powerScore}`);
-      m.textContent = bits.join('  ·  ');
+    function renderOverview(d={}){
+      const box = $('#stats'); box.innerHTML='';
+      const swingSpeed = d?.totals?.swingSpeedAvg ?? '—';
+      const powerScore = d?.power?.score ?? '—';
+      box.append(
+        stat('Profile', d.profile ?? '—'),
+        stat('Tempo', d.tempo ?? '—'),
+        stat('Swing Speed (avg)', swingSpeed),
+        stat('Power', powerScore)
+      );
     }
 
-    function renderTips(list, targetSel){
-      const ul = $(targetSel); ul.innerHTML = '';
-      (list || []).forEach(t => {
-        const li = el('li', null, t);
-        ul.appendChild(li);
-      });
-      if (!ul.children.length) {
-        ul.appendChild(el('li', null, '—'));
-      }
+    function renderTips(list, sel){
+      const ul = $(sel); ul.innerHTML = '';
+      (list||[]).forEach(t => ul.append(el('li', null, t)));
+      if (!ul.children.length) ul.append(el('li', null, '—'));
     }
 
     function renderPlan(list){
       const ul = $('#plan14'); ul.innerHTML = '';
-      (list || []).forEach(t => ul.appendChild(el('li', null, t)));
-      if (!ul.children.length) ul.appendChild(el('li', null, '—'));
+      (list||[]).forEach(t => ul.append(el('li', null, t)));
+      if (!ul.children.length) ul.append(el('li', null, '—'));
     }
 
-    function renderPstack(pstack){
-      const grid = $('#pgrid'); grid.innerHTML = '';
+    function renderPstack(ps){
+      const grid = $('#pgrid'); grid.innerHTML='';
       const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
       order.forEach(k=>{
-        const p = pstack?.[k];
+        const p = ps?.[k] || {};
         const box = el('div','pbox');
         const top = el('div','prow');
-        const title = el('div','ptitle', `${k} – ${p?.condition || ''}`);
-        const badge = el('div', `badge ${statusClass(p?.status)}`, (p?.status || '—').toUpperCase());
-        top.appendChild(title); top.appendChild(badge);
-        box.appendChild(top);
-        box.appendChild(el('div','pshort', p?.short || ''));
-        const det = el('details');
-        const sum = el('summary', null, 'Details');
-        det.appendChild(sum);
-        det.appendChild(el('div', null, p?.long || ''));
-        box.appendChild(det);
-        grid.appendChild(box);
+        top.append(el('div','ptitle', `${k} – ${p.condition||''}`));
+        top.append(el('div',`badge ${statusClass(p.status)}`,(p.status||'—').toUpperCase()));
+        box.append(top);
+        box.append(el('div','pshort', p.short || ''));
+        const det = el('details'); det.append(el('summary',null,'Details')); det.append(el('div',null,p.long||'')); box.append(det);
+        grid.append(box);
       });
     }
 
-    // 3) Boot sequence
+    function renderKinematics(kin){
+      const kv = $('#kin'); kv.innerHTML='';
+      if (!kin){ kv.innerHTML = '<div class="muted">—</div>'; return; }
+      const add = (k,v)=>{ kv.append(el('div',null, k)); kv.append(el('div',null, v ?? '—')); };
+      // expected fields (use whatever is present)
+      add('Peak Order', Array.isArray(kin.peakOrder)? kin.peakOrder.join(' → ') : kin.peakOrder);
+      add('Pelvis Peak (ms)', kin.pelvisPeakMs);
+      add('Torso Peak (ms)', kin.torsoPeakMs);
+      add('Lead Arm Peak (ms)', kin.leadArmPeakMs);
+      add('Club Peak (ms)', kin.clubPeakMs);
+      add('Notes', Array.isArray(kin.notes)? kin.notes.join('; ') : kin.notes);
+    }
+
+    function renderEVF(vf){
+      const kv = $('#evf'); kv.innerHTML='';
+      if (!vf){ kv.innerHTML = '<div class="muted">—</div>'; return; }
+      const add = (k,v)=>{ kv.append(el('div',null, k)); kv.append(el('div',null, v ?? '—')); };
+      add('Estimated Vertical Force', vf.value ?? vf.percentBW ?? '—');
+      add('Peak Time (ms)', vf.peakMs);
+      add('Side (L/R)', vf.side);
+      add('Notes', Array.isArray(vf.notes)? vf.notes.join('; ') : vf.notes);
+    }
+
+    async function fetchById(id){
+      // server-side proxy to Supabase would be safer; for now, reuse analyze/get if you have one.
+      // If you already have /api/get?id=... use that. Otherwise this tries Supabase REST directly if envs allow.
+      try{
+        const base = (typeof window !== 'undefined' ? location.origin : '');
+        const r = await fetch(`/api/get?id=${encodeURIComponent(id)}`);
+        if (r.ok) return await r.json(); // { id, data:{...}, created_at, ... }
+      }catch(e){ console.warn('get by id failed', e); }
+      return null;
+    }
+
     (async function init(){
-      // Video
       const vUrl = getVideoUrl();
+      const id = getParam('id');
+
       const vid = $('#vid'), vsrc = $('#vsrc');
-      if (vUrl){
-        vid.src = vUrl;
-        vsrc.textContent = 'Source: ' + vUrl;
-      } else {
-        vsrc.textContent = 'No video URL detected.';
+      if (vUrl){ vid.src = vUrl; vsrc.textContent = 'Source: ' + vUrl; }
+      else { vsrc.textContent = id ? ('Report ID: '+id) : 'No video URL detected.'; }
+
+      let data;
+      if (id){
+        const row = await fetchById(id);
+        data = row?.data || null;
       }
 
-      // Build selections from saved prefs
-      let selections = {};
-      try{
-        const hand = sessionStorage.getItem('vc_handedness');
-        const eye  = sessionStorage.getItem('vc_eye');
-        if (hand) selections.handed = hand;
-        if (eye) selections.eye = eye;
-      }catch{}
+      if (!data){
+        try{
+          const res = await fetch('/api/analyze', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ videoUrl: vUrl, selections:{} })
+          });
+          if (!res.ok) throw new Error('Analyze failed: ' + res.status);
+          data = await res.json();
+        }catch(err){
+          console.error('[analyze error]', err);
+          data = null;
+        }
+      }
 
-      // Fetch analysis JSON
-      let data;
-      try{
-        const res = await fetch('/api/analyze', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ videoUrl: vUrl, selections })
-        });
-        if (!res.ok) throw new Error('Analyze failed: ' + res.status);
-        data = await res.json();
-      }catch(err){
-        console.error('[analyze error]', err);
-        // Fallback minimal
+      // Fallback sample if still empty
+      if (!data){
         data = {
-          profile: 'Auto',
-          tempo: '3:1',
-          totals: { fairways: '—', greens: '—', putts: '—', swingSpeedAvg: '—' },
-          pstack: {
-            P1:{condition:'Setup',status:'ok',short:'Neutral posture',long:'Maintain athletic posture, slight knee flex.'},
-            P2:{condition:'Takeaway',status:'good',short:'One-piece start',long:'Clubhead outside hands, face square.'},
-            P3:{condition:'Lead Arm Parallel',status:'ok',short:'Width looks good',long:'Keep trail wrist set gradually.'},
-            P4:{condition:'Top',status:'need',short:'Slight across-line',long:'Feel more left arm depth, club parallel to target.'},
-            P5:{condition:'Transition',status:'ok',short:'Sequencing close',long:'Start from ground up, pressure left early.'},
-            P6:{condition:'Delivery',status:'ok',short:'Shaft shallow',long:'Maintain side-bend, trail elbow in front of hip.'},
-            P7:{condition:'Impact',status:'good',short:'Forward shaft lean',long:'Weight left, handle ahead, face square.'},
-            P8:{condition:'Extension',status:'ok',short:'Post-impact width',long:'Extend arms, chest up and left.'},
-            P9:{condition:'Finish',status:'good',short:'Balanced finish',long:'Belt buckle to target, hold pose.'}
+          profile:'Auto Profile', tempo:'3:1',
+          totals:{ swingSpeedAvg: 97 },
+          power:{ score: 81 },
+          tips3:['Narrow-to-wide tempo','Preset trail wrist','Hold finish'],
+          powerTips3:['Step change drill','Pump to P6 & fire','Med-ball wall throw'],
+          lessons14: Array.from({length:14},(_,i)=>`Day ${i+1} – Practice block`),
+          kinematics:{
+            peakOrder:['Pelvis','Torso','Lead Arm','Club'],
+            pelvisPeakMs:150, torsoPeakMs:190, leadArmPeakMs:220, clubPeakMs:250,
+            notes:['Sequence slightly late from torso → arm']
           },
-          tips3: ['Narrow-to-wide tempo', 'Preset trail wrist', 'Hold balanced finish'],
-          power: { score: 80 },
-          powerTips3: ['Step-change drill', 'Pump to P6, rip', 'Medicine ball throw'],
-          lessons14: Array.from({length:14},(_,i)=>`Day ${i+1} – Practice block`)
+          verticalForce:{ value:'165% BW', peakMs:110, side:'Lead', notes:['Peak timing good into P6–P7'] },
+          pstack:{
+            P1:{condition:'Setup',status:'ok',short:'Neutral posture',long:'Athletic stance; small chin tuck.'},
+            P2:{condition:'Takeaway',status:'good',short:'One-piece start',long:'Clubhead outside hands.'},
+            P3:{condition:'Lead Arm Parallel',status:'ok',short:'Width maintained',long:'Trail wrist set.'},
+            P4:{condition:'Top',status:'need',short:'Slight across-line',long:'Feel more depth; left arm across chest.'},
+            P5:{condition:'Transition',status:'ok',short:'Lower leads',long:'Start from the ground up.'},
+            P6:{condition:'Delivery',status:'ok',short:'Shallow the shaft',long:'Maintain side-bend.'},
+            P7:{condition:'Impact',status:'good',short:'Forward shaft lean',long:'Weight forward, face square.'},
+            P8:{condition:'Extension',status:'ok',short:'Arms extend',long:'Post-impact width.'},
+            P9:{condition:'Finish',status:'good',short:'Balanced',long:'Hold your pose.'}
+          }
         };
       }
 
-      // Render
-      renderTotals(data.totals);
-      renderMeta(data.profile, data.tempo, data.power?.score);
+      renderOverview(data);
       renderPstack(data.pstack);
+      renderKinematics(data.kinematics);
+      renderEVF(data.verticalForce);
       renderTips(data.tips3, '#tips3');
       renderTips(data.powerTips3, '#powertips3');
       renderPlan(data.lessons14);
