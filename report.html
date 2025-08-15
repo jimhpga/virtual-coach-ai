@@ -36,17 +36,20 @@
     .stat .label{ color:var(--muted); font-size:.9rem; }
     .stat .value{ font-size:1.5rem; font-weight:700; margin-top:4px; }
 
+    /* P1–P9 gallery + details */
     .pgrid{ display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; }
     @media (max-width:980px){ .pgrid{ grid-template-columns: repeat(2, 1fr); } }
     @media (max-width:600px){ .pgrid{ grid-template-columns: 1fr; } }
-    .pbox{ border:1px solid var(--border); border-radius:12px; padding:12px; background:#0e0e0eee; }
+    .pbox{ border:1px solid var(--border); border-radius:12px; padding:10px; background:#0e0e0eee; display:flex; gap:10px; }
+    .pthumb{ width:120px; min-width:120px; height:90px; border-radius:8px; border:1px solid var(--border); object-fit:cover; background:#000; }
+    .pmeta{ flex:1; min-width:0; }
     .prow{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
     .ptitle{ font-weight:700; }
     .badge{ font-size:.8rem; padding:4px 8px; border-radius:999px; border:1px solid var(--border); }
     .good{ background: color-mix(in srgb, var(--good) 25%, transparent); }
     .ok{ background: color-mix(in srgb, var(--ok) 25%, transparent); }
     .need{ background: color-mix(in srgb, var(--need) 25%, transparent); }
-    .pshort{ margin:8px 0 6px; color:var(--muted); }
+    .pshort{ margin:6px 0 6px; color:var(--muted); }
     details{ background:#0b0b0b; border:1px dashed var(--border); border-radius:10px; padding:8px 10px; }
     details summary{ cursor:pointer; color:#bfeecf; }
 
@@ -63,6 +66,7 @@
       .wrap{ background:#fff; padding:0; }
       header, .actions .btn{ display:none !important; }
       .card{ background:#fff; border:1px solid #ddd; }
+      .pbox{ break-inside: avoid; }
     }
   </style>
 </head>
@@ -147,6 +151,15 @@
       }catch{}
       return '';
     }
+    function getFrames(){
+      // 1) prefer data.frames.* (from /api/analyze)
+      // 2) else sessionStorage.vc_frames (JSON with {P1:'https://...', ...})
+      try{
+        const raw = sessionStorage.getItem('vc_frames');
+        if (raw) return JSON.parse(raw);
+      }catch{}
+      return null;
+    }
 
     function stat(label, value){
       const d = el('div','stat');
@@ -179,18 +192,45 @@
       if (!ul.children.length) ul.append(el('li', null, '—'));
     }
 
-    function renderPstack(ps){
+    // NEW: P1–P9 gallery + details (image + short/long + badge)
+    function renderPstack(ps, frames){
       const grid = $('#pgrid'); grid.innerHTML='';
-      const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
-      order.forEach(k=>{
-        const p = ps?.[k] || {};
+      const order = [
+        ['P1','Setup'],
+        ['P2','Shaft Parallel (BS)'],
+        ['P3','Lead Arm Parallel (BS)'],
+        ['P4','Top of Swing'],
+        ['P5','Lead Arm Parallel (DS)'],
+        ['P6','Shaft Parallel (DS)'],
+        ['P7','Impact'],
+        ['P8','Trail Arm Parallel (FT)'],
+        ['P9','Finish']
+      ];
+      order.forEach(([key, fallbackCond])=>{
+        const p = ps?.[key] || {};
+        const url = frames?.[key] || p?.image || ''; // support data.frames.P1 or pstack.P1.image
         const box = el('div','pbox');
+
+        // thumbnail
+        const img = document.createElement('img');
+        img.className = 'pthumb';
+        if (url) img.src = url; else img.style.opacity = .35;
+        img.alt = key;
+
+        // meta
+        const meta = el('div','pmeta');
         const top = el('div','prow');
-        top.append(el('div','ptitle', `${k} – ${p.condition||''}`));
-        top.append(el('div',`badge ${statusClass(p.status)}`,(p.status||'—').toUpperCase()));
-        box.append(top);
-        box.append(el('div','pshort', p.short || ''));
-        const det = el('details'); det.append(el('summary',null,'Details')); det.append(el('div',null,p.long||'')); box.append(det);
+        const title = el('div','ptitle', `${key} – ${p.condition || fallbackCond}`);
+        const badge = el('div',`badge ${statusClass(p.status)}`,(p.status || '—').toUpperCase());
+        top.append(title, badge);
+
+        const short = el('div','pshort', p.short || '');
+        const det = el('details');
+        det.append(el('summary',null,'Details'));
+        det.append(el('div',null,p.long || ''));
+
+        meta.append(top, short, det);
+        box.append(img, meta);
         grid.append(box);
       });
     }
@@ -199,7 +239,6 @@
       const kv = $('#kin'); kv.innerHTML='';
       if (!kin){ kv.innerHTML = '<div class="muted">—</div>'; return; }
       const add = (k,v)=>{ kv.append(el('div',null, k)); kv.append(el('div',null, v ?? '—')); };
-      // expected fields (use whatever is present)
       add('Peak Order', Array.isArray(kin.peakOrder)? kin.peakOrder.join(' → ') : kin.peakOrder);
       add('Pelvis Peak (ms)', kin.pelvisPeakMs);
       add('Torso Peak (ms)', kin.torsoPeakMs);
@@ -219,10 +258,7 @@
     }
 
     async function fetchById(id){
-      // server-side proxy to Supabase would be safer; for now, reuse analyze/get if you have one.
-      // If you already have /api/get?id=... use that. Otherwise this tries Supabase REST directly if envs allow.
       try{
-        const base = (typeof window !== 'undefined' ? location.origin : '');
         const r = await fetch(`/api/get?id=${encodeURIComponent(id)}`);
         if (r.ok) return await r.json(); // { id, data:{...}, created_at, ... }
       }catch(e){ console.warn('get by id failed', e); }
@@ -237,9 +273,9 @@
       if (vUrl){ vid.src = vUrl; vsrc.textContent = 'Source: ' + vUrl; }
       else { vsrc.textContent = id ? ('Report ID: '+id) : 'No video URL detected.'; }
 
-      let data;
+      let row, data;
       if (id){
-        const row = await fetchById(id);
+        row = await fetchById(id);
         data = row?.data || null;
       }
 
@@ -275,20 +311,25 @@
           verticalForce:{ value:'165% BW', peakMs:110, side:'Lead', notes:['Peak timing good into P6–P7'] },
           pstack:{
             P1:{condition:'Setup',status:'ok',short:'Neutral posture',long:'Athletic stance; small chin tuck.'},
-            P2:{condition:'Takeaway',status:'good',short:'One-piece start',long:'Clubhead outside hands.'},
-            P3:{condition:'Lead Arm Parallel',status:'ok',short:'Width maintained',long:'Trail wrist set.'},
+            P2:{condition:'Shaft Parallel (BS)',status:'good',short:'One-piece start',long:'Clubhead outside hands.'},
+            P3:{condition:'Lead Arm Parallel (BS)',status:'ok',short:'Width maintained',long:'Trail wrist set.'},
             P4:{condition:'Top',status:'need',short:'Slight across-line',long:'Feel more depth; left arm across chest.'},
-            P5:{condition:'Transition',status:'ok',short:'Lower leads',long:'Start from the ground up.'},
-            P6:{condition:'Delivery',status:'ok',short:'Shallow the shaft',long:'Maintain side-bend.'},
+            P5:{condition:'Lead Arm Parallel (DS)',status:'ok',short:'Lower leads',long:'Start from the ground up.'},
+            P6:{condition:'Shaft Parallel (DS)',status:'ok',short:'Shallow the shaft',long:'Maintain side-bend.'},
             P7:{condition:'Impact',status:'good',short:'Forward shaft lean',long:'Weight forward, face square.'},
-            P8:{condition:'Extension',status:'ok',short:'Arms extend',long:'Post-impact width.'},
+            P8:{condition:'Trail Arm Parallel (FT)',status:'ok',short:'Arms extend',long:'Post-impact width.'},
             P9:{condition:'Finish',status:'good',short:'Balanced',long:'Hold your pose.'}
-          }
+          },
+          frames:{} // optional images
         };
       }
 
+      // Merge any session-stored frames if present
+      const ssFrames = getFrames();
+      const frames = Object.assign({}, data.frames||{}, ssFrames||{});
+
       renderOverview(data);
-      renderPstack(data.pstack);
+      renderPstack(data.pstack, frames);
       renderKinematics(data.kinematics);
       renderEVF(data.verticalForce);
       renderTips(data.tips3, '#tips3');
