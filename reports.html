@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Virtual Coach AI – Reports</title>
+  <style>
+    :root{ --green:#003300; --border:rgba(255,255,255,.15); }
+    html,body{ margin:0; height:100%; color:#fff; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; }
+    body{ background:#000 url('homepage-background.png') center/cover fixed no-repeat; }
+    header{ position:sticky; top:0; background:var(--green); padding:8px 12px; display:flex; gap:12px; align-items:center; }
+    header a{ color:#fff; text-decoration:none; font-weight:700; }
+    main{ max-width:1100px; margin:24px auto; padding:12px; background:#111a; border:1px solid var(--border); border-radius:14px; }
+    h1{ margin:0 0 12px; }
+    .toolbar{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    input[type="search"]{ padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:#0008; color:#fff; }
+    table{ width:100%; border-collapse:collapse; }
+    th,td{ padding:10px; border-bottom:1px solid var(--border); text-align:left; }
+    tr:hover{ background:#ffffff12; }
+    .muted{ color:#cfd3d8; }
+    .btn{ background:var(--green); color:#fff; border:none; border-radius:8px; padding:8px 12px; cursor:pointer; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html">Home</a>
+    <a href="upload.html">Upload</a>
+    <a href="reports.html" aria-current="page">Reports</a>
+    <a href="about.html">About</a>
+    <a href="coming-soon.html">Coming Soon</a>
+    <a href="contact.html">Contact</a>
+  </header>
+
+  <main>
+    <h1>Saved Reports</h1>
+    <div class="toolbar">
+      <input id="q" type="search" placeholder="Search profile / id…"/>
+      <button class="btn" id="refresh">Refresh</button>
+    </div>
+
+    <table id="tbl">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Profile</th>
+          <th>Tempo</th>
+          <th>Swing Speed</th>
+          <th>Power</th>
+          <th>ID</th>
+          <th>Open</th>
+        </tr>
+      </thead>
+      <tbody id="rows">
+        <tr><td colspan="7" class="muted">Loading…</td></tr>
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    const rows = $('#rows');
+    const q = $('#q');
+    const refreshBtn = $('#refresh');
+
+    async function load(){
+      rows.innerHTML = `<tr><td colspan="7" class="muted">Loading…</td></tr>`;
+      try{
+        const res = await fetch('/api/reports-list');
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const list = await res.json(); // [{id, created_at, data:{...}}]
+        render(list);
+      }catch(e){
+        rows.innerHTML = `<tr><td colspan="7">Failed to load: ${e.message}</td></tr>`;
+      }
+    }
+
+    function render(list){
+      const term = (q.value||'').toLowerCase();
+      const filtered = list.filter(r=>{
+        const s = (r.id+' '+(r.data?.profile||'')).toLowerCase();
+        return !term || s.includes(term);
+      });
+
+      if (!filtered.length){
+        rows.innerHTML = `<tr><td colspan="7" class="muted">No results.</td></tr>`;
+        return;
+      }
+
+      rows.innerHTML = '';
+      filtered.forEach(r=>{
+        const tr = document.createElement('tr');
+        const d  = r.data || {};
+        const spd = d?.totals?.swingSpeedAvg ?? '—';
+        const pow = d?.power?.score ?? '—';
+        tr.innerHTML = `
+          <td>${new Date(r.created_at).toLocaleString()}</td>
+          <td>${d.profile ?? '—'}</td>
+          <td>${d.tempo ?? '—'}</td>
+          <td>${spd}</td>
+          <td>${pow}</td>
+          <td class="muted">${r.id}</td>
+          <td><a class="btn" href="report.html?id=${encodeURIComponent(r.id)}">Open</a></td>
+        `;
+        rows.appendChild(tr);
+      });
+    }
+
+    q.addEventListener('input', load);
+    refreshBtn.addEventListener('click', load);
+    load();
+  </script>
+</body>
+</html>
