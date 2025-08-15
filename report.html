@@ -20,7 +20,7 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}
+    body{margin:0;color:var(--text);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,rgba(10,18,24,.65),rgba(10,18,24,.65)), url('https://images.unsplash.com/photo-1518593923141-142d9f4d13e7?q=80&w=1920&auto=format&fit=crop') center/cover fixed}
     a{color:var(--accent)}
     .container{max-width:1080px;margin:32px auto;padding:0 16px}
     header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
@@ -35,11 +35,11 @@
     .grid{display:grid;grid-template-columns:1fr;gap:16px}
     @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
 
-    .card{background:var(--panel);border:1px solid #223743;border-radius:var(--radius);box-shadow:var(--shadow)}
+    .card{background:rgba(22,36,46,.86);border:1px solid #223743;border-radius:var(--radius);box-shadow:var(--shadow)}
     .card h3{margin:0;padding:16px 18px;border-bottom:1px solid #1f3340;font-weight:700}
     .card .content{padding:14px 18px}
 
-    details.panel{background:var(--panel);border:1px solid #223743;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+    details.panel{background:rgba(22,36,46,.86);border:1px solid #223743;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
     details.panel+details.panel{margin-top:12px}
     summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:16px 18px}
     summary::-webkit-details-marker{display:none}
@@ -91,6 +91,12 @@
     .grade.good{color:var(--ok)}
     .grade.ok{color:var(--warn)}
     .grade.bad{color:var(--bad)}
+    .phase-nav{display:grid;grid-template-columns:repeat(9,1fr);gap:8px;margin:8px 0 4px}
+  .phase-tab{background:rgba(22,36,46,.9);border:1px solid #223743;border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);cursor:pointer;display:flex;gap:8px;align-items:center}
+  .phase-tab .n{font-weight:800;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:#0c1820;border:1px solid #223743}
+  .phase-tab .t{font-size:12px;color:var(--muted)}
+  .phase-tab.active{outline:2px solid var(--accent)}
+  #powerTop{display:none}
   </style>
 </head>
 <body>
@@ -130,6 +136,11 @@
       </div>
     </header>
 
+    <!-- Phase Navigation Row -->
+    <section class="card" aria-label="Phase Navigation">
+      <div id="phaseNav" class="phase-nav"></div>
+    </section>
+
     <!-- Progress Overlay -->
     <div id=\"progressOverlay\" class=\"overlay\" hidden>
       <div class=\"overlay-card\">
@@ -152,7 +163,7 @@
       </div>
     </section>
 
-    <section class="grid" aria-label="Power Summary" style="margin-top:16px">
+    <section id="powerTop" class="grid" aria-label="Power Summary" style="margin-top:16px">
       <div class="card">
         <h3>Power Score Summary</h3>
         <div class="content">
@@ -291,6 +302,19 @@
 
       <div id="pList"></div>
     </section>
+
+    <!-- Power Summary moved under P1–P9 -->
+    <section class="grid" aria-label="Power Summary (Bottom)" style="margin-top:16px">
+      <div class="card">
+        <h3>Power Score Summary</h3>
+        <div class="content">
+          <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="ok" style="width:82%"></span></div><div class="pct">82%</div></div>
+          <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">3.2:1</div></div>
+          <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="warn" style="width:64%"></span></div><div class="pct">On-time</div></div>
+          <div class="footnote">Placeholder — wire to engine.</div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script>
@@ -365,11 +389,54 @@
               <div class="col">
                 <div class="media" id="video-${ph.id}">Video ${ph.id}<br><span class="footnote">(drop-in container)</span></div>
                 <div class="media pro" id="pro-${ph.id}" hidden>Hogan Overlay ${ph.id}<br><span class="footnote">(toggle via Pro Overlay switch)</span></div>
-                <div class="footnote">Coaching Notes: keep labels & dropdowns — replace this lorem with your AI output.</div>
+                <div class="footnote">Coaching Notes: replace with AI output.</div>
               </div>
               <div class="col">
                 <div class="chips" aria-label="Key focus areas">
                   ${(ph.tags||[]).map(t=>`<span class="badge">${t.replace(/-/g,' ')}</span>`).join('')}
+                </div>
+                <div style="margin-top:10px">
+                  ${[
+                    {label:'Right Wrist Angle', value: 72, tags:['right-wrist']},
+                    {label:'Left Wrist Angle',  value: 69, tags:['left-wrist']},
+                    {label:'Arm Bend',         value: 81, tags:['arm-bend']},
+                    {label:'Hip Movement',     value: 64, tags:['hip-movement']},
+                    {label:'Knee Movement',    value: 58, tags:['knee-movement']},
+                    {label:'Foot Pressure',    value: 71, tags:['foot-movement']},
+                    {label:'Club Path',        value: 66, tags:['club-path']}
+                  ].map(metricRow).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>`;
+      }).join('');
+    }
+
+    function renderPhaseNav(){
+      const nav = document.getElementById('phaseNav');
+      nav.innerHTML = phases.map(p=>`<button class='phase-tab' data-target='${p.id}'>
+        <span class='n'>${p.id}</span>
+        <div>
+          <div>${p.name}</div>
+          <div class='t'>Tap to open</div>
+        </div>
+      </button>`).join('');
+      nav.addEventListener('click', (e)=>{
+        const btn = e.target.closest('.phase-tab');
+        if(!btn) return;
+        openPhase(btn.getAttribute('data-target'));
+      });
+    }
+
+    function openPhase(id){
+      document.querySelectorAll('.phase-tab').forEach(b=>b.classList.toggle('active', b.getAttribute('data-target')===id));
+      const det = document.querySelector(`details[data-phase='${id}']`);
+      if(!det) return;
+      document.querySelectorAll('details.panel').forEach(d=>d.open=false);
+      det.open = true;
+      det.scrollIntoView({behavior:'smooth', block:'start'});
+    }
 
     function applyFocus(value){
       const blocks = document.querySelectorAll('.metric');
@@ -385,6 +452,7 @@
     document.getElementById('date').textContent = new Date().toLocaleDateString();
     renderTop();
     renderPhases();
+    renderPhaseNav();
     applyFocus('all');
 
     // Focus filter
