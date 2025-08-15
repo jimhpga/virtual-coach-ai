@@ -20,9 +20,9 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;color:var(--text);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:#0e1a22}
+    body{margin:0;color:var(--text);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;background:transparent}
     a{color:var(--accent)}
-    .container{max-width:1080px;margin:32px auto;padding:0 16px}
+    .container{max-width:1080px;margin:32px auto;padding:0 16px;position:relative;z-index:1}
     header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:20px}
     .title{font-size:28px;font-weight:750;letter-spacing:.3px}
     .subtitle{color:var(--muted);font-size:14px}
@@ -137,19 +137,19 @@
         </select>
         <button id="expandAll" class="btn" type="button">Expand All</button>
         <button id="collapseAll" class="btn" type="button">Collapse All</button>
-        <button id="analyzeBtn" class="btn" type="button">Analyze Video<\/button>
+        <button id="analyzeBtn" class="btn" type="button">Analyze Video</button>
         <label class="badge"><input id="proToggle" type="checkbox" style="vertical-align:middle;margin-right:6px"> Pro Overlay: Hogan</label>
       </div>
     </header>
 
     <!-- Progress Overlay -->
-    <div id=\"progressOverlay\" class=\"overlay\" hidden>
-      <div class=\"overlay-card\">
+    <div id="progressOverlay" class="overlay" hidden>
+      <div class="overlay-card">
         <h2>Analyzing your swing…</h2>
-        <div class=\"sub\" id=\"progressSub\">Preparing</div>
-        <div class=\"progress\"><span id=\"progressFill\" class=\"ok\"></span></div>
-        <ul class=\"status-list\" id=\"statusList\"></ul>
-        <div class=\"eta\" id=\"eta\"></div>
+        <div class="sub" id="progressSub">Preparing</div>
+        <div class="progress"><span id="progressFill" class="ok"></span></div>
+        <ul class="status-list" id="statusList"></ul>
+        <div class="eta" id="eta"></div>
       </div>
     </div>
 
