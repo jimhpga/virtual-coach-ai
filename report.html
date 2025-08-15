@@ -152,9 +152,22 @@
       </div>
     </section>
 
+    <section class="grid" aria-label="Power Summary" style="margin-top:16px">
+      <div class="card">
+        <h3>Power Score Summary</h3>
+        <div class="content">
+          <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="ok" style="width:82%"></span></div><div class="pct">82%</div></div>
+          <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">3.2:1</div></div>
+          <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="warn" style="width:64%"></span></div><div class="pct">On-time</div></div>
+          <div class="footnote">Placeholder — wire to engine.</div>
+        </div>
+      </div>
+    </section>
+
     <section class="grid" aria-label="Full Monty Extras" style="margin-top:16px">
       <div class="card">
-        <h3>P1–P9 Table</h3>
+        <h3 style="display:none">P1–P9 Table</h3>
+        <details class="panel"><summary><div class="pname">P1–P9 Table (Summary)</div><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
         <div class="content">
           <table class="pgrid" role="table">
             <thead>
@@ -233,41 +246,45 @@
             </tbody>
           </table>
         </div>
+        </details>
       </div>
       <div class="card">
-        <h3>Power & Efficiency</h3>
+        <h3 style="display:none">Power & Efficiency</h3>
+        <details class="panel"><summary><div class="pname">Power & Efficiency</div><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
         <div class="content">
           <div class="metric"><div class="name">Power Efficiency Score</div><div class="bar"><span class="ok" style="width:82%"></span></div><div class="pct">82%</div></div>
           <div class="metric"><div class="name">Kinematic Flow</div><div class="bar"><span class="warn" style="width:68%"></span></div><div class="pct">68%</div></div>
           <div class="footnote">Placeholder values — will fill from your analysis engine.</div>
         </div>
+        </details>
       </div>
     </section>
 
-    <section class="card" aria-label="Coaching Card" style="margin:16px 0 0 0">
-      <h3>Coaching Card — Top 3 Priority Fixes</h3>
+    <details class="panel" aria-label="Coaching Card">
+      <summary>
+        <div class="pname">Coaching Card — Top 3 Priority Fixes</div>
+        <span class="tag">Tap to expand</span>
+        <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
       <div class="content">
-        <ol style="margin:0 0 0 18px">
-          <li><strong>Trail wrist set earlier (P3→P4):</strong> firm up extension to control face.
-          </li>
-          <li><strong>Lead leg brake sooner (P5→P6):</strong> stop the slide, pop the rotation to boost speed.
-          </li>
-          <li><strong>Face control at P6–P7:</strong> match path/face; quiet the roll to tighten start line.
-          </li>
-        </ol>
+        <details class="panel"><summary>1) Trail wrist set earlier (P3→P4)</summary><div class="content">Firm up extension to control face. <em>Drill:</em> toe-up checkpoints, flat lead wrist to P4.</div></details>
+        <details class="panel"><summary>2) Lead leg brake sooner (P5→P6)</summary><div class="content">Stop the slide, pop the rotation. <em>Drill:</em> stick-at-hip, step-change of direction.</div></details>
+        <details class="panel"><summary>3) Face control at P6–P7</summary><div class="content">Match path/face to tighten start line. <em>Drill:</em> quarter-release punch to 9 o'clock.</div></details>
       </div>
-    </section>
+    </details>
 
-    <section class="card" aria-label="Power Fixes" style="margin:16px 0 0 0">
-      <h3>Top 3 Power Fixes</h3>
+    <details class="panel" aria-label="Power Fixes">
+      <summary>
+        <div class="pname">Top 3 Power Fixes</div>
+        <span class="tag">Tap to expand</span>
+        <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
       <div class="content">
-        <ol style="margin:0 0 0 18px">
-          <li><strong>Lead‑leg brake timing (P5→P6):</strong> firm the lead side sooner to convert linear shift into rotational speed and boost ball speed.</li>
-          <li><strong>Sequence: pelvis → torso → arm → club:</strong> clean up the kinematic handoff so peak speed happens after impact, not before.</li>
-          <li><strong>Pressure shift map:</strong> arrive ~80–90% lead foot by P7 and keep the trail heel light; eliminate hang‑back and early release.</li>
-        </ol>
+        <details class="panel"><summary>1) Lead‑leg brake timing (P5→P6)</summary><div class="content">Convert linear shift into rotational speed. <em>Cue:</em> stomp → post → turn.</div></details>
+        <details class="panel"><summary>2) Sequence: pelvis → torso → arm → club</summary><div class="content">Clean kinematic handoff so peak speed is post‑impact. <em>Drill:</em> step‑sequence swings.</div></details>
+        <details class="panel"><summary>3) Pressure shift map (→ P7)</summary><div class="content">Arrive ~80–90% lead foot by impact; kill hang‑back. <em>Drill:</em> pump swings with pressure cue.</div></details>
       </div>
-    </section>
+    </details>
 
     <section style="margin-top:22px">
       <div class="chips footnote">Tip: Click a P‑section to expand. Use the Focus filter to highlight only the components you care about. Video is a placeholder — your real clip drops in via the uploader.</div>
@@ -353,38 +370,6 @@
               <div class="col">
                 <div class="chips" aria-label="Key focus areas">
                   ${(ph.tags||[]).map(t=>`<span class="badge">${t.replace(/-/g,' ')}</span>`).join('')}
-                </div>
-                <div style="margin-top:10px">${[
-                  {label:'Right Wrist Angle', value: 72, tags:['right-wrist']},
-                  {label:'Left Wrist Angle',  value: 69, tags:['left-wrist']},
-                  {label:'Arm Bend',         value: 81, tags:['arm-bend']},
-                  {label:'Hip Movement',     value: 64, tags:['hip-movement']},
-                  {label:'Knee Movement',    value: 58, tags:['knee-movement']},
-                  {label:'Foot Pressure',    value: 71, tags:['foot-movement']},
-                  {label:'Club Path',        value: 66, tags:['club-path']}
-                ].map(metricRow).join('')}</div>
-              </div>
-            </div>
-          </div>
-        </details>`;
-      }).join('');
-    }
-                </div>
-                <div style="margin-top:10px">${[
-                  {label:'Right Wrist Angle', value: 72, tags:['right-wrist']},
-                  {label:'Left Wrist Angle',  value: 69, tags:['left-wrist']},
-                  {label:'Arm Bend',         value: 81, tags:['arm-bend']},
-                  {label:'Hip Movement',     value: 64, tags:['hip-movement']},
-                  {label:'Knee Movement',    value: 58, tags:['knee-movement']},
-                  {label:'Foot Pressure',    value: 71, tags:['foot-movement']},
-                  {label:'Club Path',        value: 66, tags:['club-path']}
-                ].map(metricRow).join('')}</div>
-              </div>
-            </div>
-          </div>
-        </details>`;
-      }).join('');
-    }
 
     function applyFocus(value){
       const blocks = document.querySelectorAll('.metric');
