@@ -91,6 +91,11 @@
     .grade.good{color:var(--ok)}
     .grade.ok{color:var(--warn)}
     .grade.bad{color:var(--bad)}
+    /* grade chip for P1–P9 headers */
+    .gchip{font-weight:700;font-size:12px;padding:4px 8px;border-radius:8px;border:1px solid #27404f;background:var(--chip)}
+    .g-good{color:var(--ok);border-color:rgba(25,195,125,.6)}
+    .g-ok{color:var(--warn);border-color:rgba(246,196,83,.6)}
+    .g-bad{color:var(--bad);border-color:rgba(255,107,107,.6)}
     .phase-nav{display:grid;grid-template-columns:repeat(9,1fr);gap:8px;margin:8px 0 4px}
   .phase-tab{background:rgba(22,36,46,.9);border:1px solid #223743;border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);cursor:pointer;display:flex;gap:8px;align-items:center}
   .phase-tab .n{font-weight:800;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:#0c1820;border:1px solid #223743}
@@ -258,15 +263,15 @@
   ];
 
   const phases = [
-    { id:'P1', name:'Setup', short:'Athletic stance, posture aligned', long:'Neutral spine with balanced pressure (~55/45 trail→lead), relaxed arms, square clubface, eyes level, and a stable base to load from.', tags:['hand-path','arm-bend','right-wrist','left-wrist','foot-movement'] },
-    { id:'P2', name:'Shaft Parallel (Backswing)', short:'Club parallel, early width', long:'Shaft parallel to ground and on plane; hands move in with width, minimal wrist set; pelvis begins loading without lateral sway.', tags:['hand-path','shoulder-turn','hip-movement','knee-movement'] },
-    { id:'P3', name:'Lead Arm Parallel (Backswing)', short:'Good extension, slight flat', long:'Lead arm parallel; trail elbow under shaft; lead wrist near flat to slightly flexed; torso keeps turning while lower body stays braced.', tags:['arm-bend','shoulder-turn','hip-movement'] },
-    { id:'P4', name:'Top of Swing', short:'Full coil, face a touch open', long:'Complete coil with depth; lead shoulder under chin; trail knee retains some flex. If face is open, reduce trail wrist extension or add lead wrist flex.', tags:['shoulder-turn','hip-movement','right-wrist','left-wrist'] },
-    { id:'P5', name:'Lead Arm Parallel (Downswing)', short:'Arm drops inside, solid wrist', long:'Arm shallows as pelvis opens; lead wrist flexes to stabilize face; hands in front of trail thigh; pressure shifting forward decisively.', tags:['club-path','face-angle','lead-leg-brake'] },
-    { id:'P6', name:'Shaft Parallel (Downswing)', short:'Shallowing, trail elbow leads', long:'Shaft parallel with the hands ahead; lead hip clearing; trail elbow in front of ribcage; manage face-to-path (no early roll).', tags:['club-path','face-angle','lead-leg-brake','knee-movement'] },
-    { id:'P7', name:'Impact', short:'Hips open, shaft lean', long:'Lead side braced with handle forward; dynamic loft and low‑point ahead; chest slightly open; pressure ~80–90% lead foot for compression.', tags:['club-path','face-angle','lead-leg-brake','foot-movement'] },
-    { id:'P8', name:'Trail Arm Parallel (Follow‑Through)', short:'Balanced extension', long:'Arms extend through; wrists unhinge gradually; face stays stable post‑impact; rotation continues without stalling.', tags:['arm-bend','hand-path','tempo'] },
-    { id:'P9', name:'Finish', short:'Upright, balanced', long:'Full balance on lead side; belt buckle at target; spine tall; club wraps around naturally with no excess tension.', tags:['balance','tempo','arm-bend'] }
+    { id:'P1', grade:'good', gradeText:'Good', name:'Setup', short:'Athletic stance, posture aligned', long:'Neutral spine with balanced pressure (~55/45 trail→lead), relaxed arms, square clubface, eyes level, and a stable base to load from.', tags:['hand-path','arm-bend','right-wrist','left-wrist','foot-movement'] },
+    { id:'P2', grade:'ok', gradeText:'OK', name:'Shaft Parallel (Backswing)', short:'Club parallel, early width', long:'Shaft parallel to ground and on plane; hands move in with width, minimal wrist set; pelvis begins loading without lateral sway.', tags:['hand-path','shoulder-turn','hip-movement','knee-movement'] },
+    { id:'P3', grade:'ok', gradeText:'OK', name:'Lead Arm Parallel (Backswing)', short:'Good extension, slight flat', long:'Lead arm parallel; trail elbow under shaft; lead wrist near flat to slightly flexed; torso keeps turning while lower body stays braced.', tags:['arm-bend','shoulder-turn','hip-movement'] },
+    { id:'P4', grade:'bad', gradeText:'Needs Help', name:'Top of Swing', short:'Full coil, face a touch open', long:'Complete coil with depth; lead shoulder under chin; trail knee retains some flex. If face is open, reduce trail wrist extension or add lead wrist flex.', tags:['shoulder-turn','hip-movement','right-wrist','left-wrist'] },
+    { id:'P5', grade:'good', gradeText:'Good', name:'Lead Arm Parallel (Downswing)', short:'Arm drops inside, solid wrist', long:'Arm shallows as pelvis opens; lead wrist flexes to stabilize face; hands in front of trail thigh; pressure shifting forward decisively.', tags:['club-path','face-angle','lead-leg-brake'] },
+    { id:'P6', grade:'good', gradeText:'Good', name:'Shaft Parallel (Downswing)', short:'Shallowing, trail elbow leads', long:'Shaft parallel with the hands ahead; lead hip clearing; trail elbow in front of ribcage; manage face-to-path (no early roll).', tags:['club-path','face-angle','lead-leg-brake','knee-movement'] },
+    { id:'P7', grade:'ok', gradeText:'OK', name:'Impact', short:'Hips open, shaft lean', long:'Lead side braced with handle forward; dynamic loft and low‑point ahead; chest slightly open; pressure ~80–90% lead foot for compression.', tags:['club-path','face-angle','lead-leg-brake','foot-movement'] },
+    { id:'P8', grade:'good', gradeText:'Good', name:'Trail Arm Parallel (Follow‑Through)', short:'Balanced extension', long:'Arms extend through; wrists unhinge gradually; face stays stable post‑impact; rotation continues without stalling.', tags:['arm-bend','hand-path','tempo'] },
+    { id:'P9', grade:'good', gradeText:'Good', name:'Finish', short:'Upright, balanced', long:'Full balance on lead side; belt buckle at target; spine tall; club wraps around naturally with no excess tension.', tags:['balance','tempo','arm-bend'] }
   ];
 
   // ------------ Helpers ------------
@@ -302,6 +307,7 @@
         <summary>
           <div class="pnum">${ph.id}</div>
           <div class="pname">${ph.name}</div>
+          <span class="gchip g-${ph.grade}">${ph.gradeText}</span>
           <span class="shortdesc">${ph.short}</span>
           <span class="tag">Checkpoint ${i+1}/9</span>
           <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
