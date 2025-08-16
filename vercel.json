@@ -1,10 +1,10 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
-    { "source": "/upload", "destination": "/upload.html" },
-    { "source": "/about", "destination": "/about.html" },
-    { "source": "/contact", "destination": "/contact.html" },
-    { "source": "/coming-soon", "destination": "/coming-soon.html" }
+    { "source": "/report",     "destination": "/report.html" },
+    { "source": "/report.htm", "destination": "/report.html" }
+  ],
+  "headers": [
+    { "source": "/report.html",   "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
+    { "source": "/reports/(.*)",  "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
   ]
 }
