@@ -71,6 +71,7 @@
     .chips{display:flex;flex-wrap:wrap;gap:8px}
     /* --- Progress UI --- */
     .overlay{position:fixed;inset:0;background:rgba(8,16,22,.72);backdrop-filter:saturate(120%) blur(2px);display:grid;place-items:center;z-index:9999}
+    .overlay[hidden]{display:none !important}
     .overlay-card{width:min(720px,92vw);background:var(--panel);border:1px solid #224355;border-radius:18px;box-shadow:var(--shadow);padding:22px}
     .overlay h2{margin:0 0 8px 0;font-size:22px}
     .overlay .sub{color:var(--muted);margin-bottom:14px}
@@ -83,6 +84,10 @@
     .status-item.active .dot{background:#4aa3ff;border-color:#4aa3ff}
     .status-item.done .dot{background:#19c37d;border-color:#19c37d}
     .eta{color:var(--muted);font-size:12px}
+    .overlay .notice{color:var(--warn)}
+    .overlay .error{color:var(--bad)}
+    .overlay-actions{display:none;margin-top:10px}
+    .overlay-actions.show{display:flex;gap:8px;flex-wrap:wrap}
       /* P1–P9 summary table */
     .pgrid{width:100%;border-collapse:collapse}
     .pgrid th,.pgrid td{border-bottom:1px solid #1f3340;padding:8px 10px;text-align:left}
@@ -115,7 +120,7 @@
   .busy-text{font-size:13px;color:#d6e6ef}
   </style>
 </head>
-<body>
+<body data-report-src="/reports/demo/report.json">
   <div class="bg-course" aria-hidden="true"></div>
   <div id="busyIndicator" class="busy-indicator" hidden aria-live="polite"><span class="spinner" aria-hidden="true"></span><span class="busy-text">Processing…</span></div>
   <div class="container">
@@ -160,11 +165,13 @@
         </select>
         <button id="expandAll" class="btn" type="button">Expand All</button>
         <button id="collapseAll" class="btn" type="button">Collapse All</button>
-        <button id="analyzeBtn" class="btn" type="button">Analyze Video</button>
-        
-      </div>
+        <button id="analyzeBtn" class="btn" type="button">Analyze Video$1
+        <button id="loadSample" class="btn" type="button">Load Sample Data</button>
+        <button id="killOverlays" class="btn" type="button">Hide Overlay</button>
+        </div>
     </header>
-
+    <div id="loadStatus" class="footnote"></div>
+    <div id="errorStatus" class="footnote" style="color:#ff9a9a"></div>
     <!-- Progress Overlay -->
     <div id="progressOverlay" class="overlay" hidden>
       <div class="overlay-card">
@@ -173,6 +180,11 @@
         <div class="progress"><span id="progressFill" class="ok"></span></div>
         <ul class="status-list" id="statusList"></ul>
         <div class="eta" id="eta"></div>
+        <div class="eta" id="overlayMsg"></div>
+        <div id="overlayActions" class="overlay-actions">
+          <button id="overlayRetry" class="btn" type="button">Retry</button>
+          <button id="overlayCancel" class="btn" type="button">Cancel</button>
+        </div>
       </div>
     </div>
 
@@ -181,7 +193,8 @@
       <div class="overlay-card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <h2 id="videoTitle">Swing Video</h2>
-          <button id="videoClose" class="btn" type="button">Close</button>
+          <button id="videoClose" class="btn" type="button"
+            onclick="(function(){try{const v=document.querySelector('#videoMount video'); if(v){v.pause()} }catch(e){}; document.getElementById('videoOverlay').hidden=true; document.getElementById('videoMount').innerHTML=''; })()">Close</button>
         </div>
         <div id="videoMount" class="media" style="width:100%"></div>
       </div>
@@ -273,7 +286,8 @@
 </div>
 
   <script>
-  // ------------ Mock data (replace with real analytics payload) ------------
+  // Define 'busy' immediately so earlier code can safely reference it
+  const busy = document.getElementById('busyIndicator');
   let swingMetrics = [
     { key:'right-arm-angle', label:'Right Arm Angle', value:85, tags:['arm-bend'] },
     { key:'face-angle',      label:'Club Face Angle', value:83, tags:['face-angle'] },
@@ -422,44 +436,6 @@
       document.querySelector('details[aria-label="Power & Efficiency"]')
     ];
     els.forEach(el=>{ if(el){ el.style.display = show ? '' : 'none'; }});
-  }" ${i===0?'open':''}>
-        <summary>
-          <div class="pnum">${ph.id}</div>
-          <div class="pname">${ph.name}</div>
-          <span class="gchip g-${ph.grade}">${ph.gradeText}</span>
-          <span class="shortdesc">${ph.short}</span>
-          <span class="tag">Checkpoint ${i+1}/9</span>
-          <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </summary>
-        <div class="content">
-          <p class="longdesc">${ph.long}</p>
-          <div class="row">
-            <div class="col">
-              <button class="btn view-video" data-phase="${ph.id}" type="button">View Video</button>
-              <div class="footnote">Opens in a popup; video is not preloaded.</div>
-              
-              <div class="footnote">Coaching Notes: replace with AI output.</div>
-            </div>
-            <div class="col">
-              <div class="chips" aria-label="Key focus areas">
-                ${(ph.tags||[]).map(t=>`<span class="badge">${t.replace(/-/g,' ')}</span>`).join('')}
-              </div>
-              <div style="margin-top:10px">
-                ${[
-                  {label:'Right Wrist Angle', value: 72, tags:['right-wrist']},
-                  {label:'Left Wrist Angle',  value: 69, tags:['left-wrist']},
-                  {label:'Arm Bend',         value: 81, tags:['arm-bend']},
-                  {label:'Hip Movement',     value: 64, tags:['hip-movement']},
-                  {label:'Knee Movement',    value: 58, tags:['knee-movement']},
-                  {label:'Foot Pressure',    value: 71, tags:['foot-movement']},
-                  {label:'Club Path',        value: 66, tags:['club-path']}
-                ].map(metricRow).join('')}
-              </div>
-            </div>
-          </div>
-        </div>
-      </details>`;
-    }).join('');
   }
 
   function applyFocus(value){
@@ -472,19 +448,57 @@
     });
   }
 
-  // ------------ Init ------------
+  // --------- Data Ingestion Hook (REAL VALUES) ---------
+  window.applyReport = function(data){
+    try{
+      if(data.swings!=null){ document.getElementById('swingCount').textContent = String(data.swings); }
+      if(data.power){
+        power = {
+          score: Number(data.power.score)||0,
+          tempo: data.power.tempo ?? '—',
+          release_timing: typeof data.power.release_timing==='number' ? data.power.release_timing : Number(data.power.release_timing)||0
+        };
+      }
+      if(Array.isArray(data.swing_metrics)){
+        swingMetrics = data.swing_metrics.map(m=>({ key:m.key, label:m.label ?? m.key, value:Number(m.value)||0, tags:m.tags||[] }));
+      }
+      if(Array.isArray(data.position_metrics)){
+        positionMetrics = data.position_metrics.map(p=>({ p:p.p, value:Number(p.value)||0 }));
+      }
+      if(Array.isArray(data.phases)){
+        const mapGrade = g => (g==='good'||g==='ok'||g==='bad') ? g : (Number(g)>=75?'good':Number(g)>=55?'ok':'bad');
+        phas
   document.getElementById('date').textContent = new Date().toLocaleDateString();
+  // Ensure overlays are hidden on load
+  document.getElementById('progressOverlay').hidden = true;
+  document.getElementById('videoOverlay').hidden = true;
+  if(busy){ busy.hidden = true; }
   renderTop();
   renderPhases();
   applyFocus('all');
   document.getElementById('modeLabel').textContent = disciplineLabel(discipline);
 
-  // Optional: auto-load report data via ?report=<url> or data-report-src attribute
+  // Report loader (explicit errors shown on page)
+  async function loadReport(url){
+    const status = document.getElementById('loadStatus');
+    try{
+      if(!url){ status.textContent = 'No report URL set.'; return; }
+      const res = await fetch(url, { cache: 'no-store' });
+      if(!res.ok){ status.textContent = `Could not load report (${res.status}). Check path: ${url}`; return; }
+      const data = await res.json();
+      window.applyReport(data);
+      status.textContent = `Loaded report: ${url}`;
+    }catch(err){
+      status.textContent = 'Failed to load report: ' + (err?.message||String(err));
+    }
+  }
+
+  // Auto-load from ?report= or data-report-src
   try{
     const params = new URLSearchParams(location.search);
-    const url = document.body.dataset.reportSrc || params.get('report');
-    if(url){ fetch(url).then(r=>r.json()).then(data=>window.applyReport(data)).catch(()=>{}); }
-  }catch(e){}
+    const url = params.get('report') || document.body.dataset.reportSrc;
+    if(url){ loadReport(url); }
+  }catch(e){ document.getElementById('loadStatus').textContent = 'Init error: ' + (e?.message||String(e)); }
 
   // Focus filter
   document.getElementById('focus')?.addEventListener('change', e=>applyFocus(e.target.value));
@@ -514,37 +528,66 @@
     {key:'report', label:'Building reports & thumbnails'}
   ];
 
-  const busy = document.getElementById('busyIndicator');
-
   const Overlay = {
     root: document.getElementById('progressOverlay'),
     fill: document.getElementById('progressFill'),
     sub:  document.getElementById('progressSub'),
     eta:  document.getElementById('eta'),
     list: document.getElementById('statusList'),
+    msg:  document.getElementById('overlayMsg'),
+    actions: document.getElementById('overlayActions'),
     percent: 0,
-    timer: null,
+    last: 0,
+    watchdog: null,
     start(){
       this.root.hidden = false;
       this.percent = 0;
+      this.last = Date.now();
       this.renderList();
+      this.notice('');
+      this.actions.classList.remove('show');
       busy && (busy.hidden=false, busy.querySelector('.busy-text').textContent='Uploading video…');
       this.tick('Uploading video…');
+      this.startWatchdog();
     },
     set(p, sub){
       this.percent = Math.max(0, Math.min(100, p));
       this.fill.style.width = this.percent + '%';
       if(sub){ this.sub.textContent = sub; busy && (busy.querySelector('.busy-text').textContent=sub); }
+      this.last = Date.now();
+      this.notice('');
     },
     complete(){
       this.set(100, 'Done');
+      clearInterval(this.watchdog);
       setTimeout(()=>{ this.root.hidden = true; busy && (busy.hidden = true); }, 450);
+    },
+    fail(reason='Something went wrong'){
+      clearInterval(this.watchdog);
+      this.notice(reason, true);
+      this.actions.classList.add('show');
+      busy && (busy.hidden=false, busy.querySelector('.busy-text').textContent='Error');
     },
     renderList(activeIndex=0){
       this.list.innerHTML = steps.map((s,i)=>`<li class='status-item ${i<activeIndex?"done":i===activeIndex?"active":""}'>
         <span class='dot'></span><span>${s.label}</span></li>`).join('');
     },
-    tick(sub){ this.sub.textContent = sub || this.sub.textContent; }
+    tick(sub){ this.sub.textContent = sub || this.sub.textContent; },
+    notice(text='', isError=false){
+      if(!this.msg) return;
+      this.msg.textContent = text;
+      this.msg.className = 'eta ' + (isError? 'error' : (text? 'notice' : ''));
+    },
+    startWatchdog(){
+      clearInterval(this.watchdog);
+      const STALL_MS = 30000; // 30s without progress => show retry/cancel
+      const HARD_MS  = 180000; // 3 min => auto-fail
+      this.watchdog = setInterval(()=>{
+        const idle = Date.now() - this.last;
+        if(idle > HARD_MS){ this.fail('Processing stalled. Please retry.'); }
+        else if(idle > STALL_MS){ this.notice('Still working… this is taking longer than expected. You can Retry or Cancel.', false); this.actions.classList.add('show'); }
+      }, 1000);
+    }
   };
 
   // Demo/Hook: simulate analysis with realistic stages
@@ -571,98 +614,73 @@
     run();
   }
 
-  // Public hook: call window.AnalysisProgress.start() from your uploader once the file is received
-  window.AnalysisProgress = { start: simulateAnalysis, set: (p,msg)=>Overlay.set(p,msg), done: ()=>Overlay.complete() }
-
-  // Wire demo button
-  document.getElementById('analyzeBtn').addEventListener('click', simulateAnalysis);
-
-  // Video modal wiring
-  const videoOverlay = document.getElementById('videoOverlay');
-  const videoMount = document.getElementById('videoMount');
-  const videoTitle = document.getElementById('videoTitle');
-  document.getElementById('videoClose').addEventListener('click', closeVideo);
-  document.getElementById('videoOverlay').addEventListener('click', (e)=>{ if(e.target.id==='videoOverlay'){ closeVideo(); }});
-  document.getElementById('pList').addEventListener('click', (e)=>{
-    const btn = e.target.closest('.view-video');
-    if(btn){ openVideo(btn.dataset.phase); }
+  // Public hook: call // Overlay action buttons
+  document.getElementById('overlayRetry').addEventListener('click', ()=>{
+    if(window.AnalysisProgress && window.AnalysisProgress.onRetry){ try{ window.AnalysisProgress.onRetry(); }catch(e){} }
+    else { simulateAnalysis(); }
+  });
+  document.getElementById('overlayCancel').addEventListener('click', ()=>{
+    if(window.AnalysisProgress && window.AnalysisProgress.onCancel){ try{ window.AnalysisProgress.onCancel(); }catch(e){} }
+    Overlay.complete();
   });
 
-  function openVideo(phaseId){
-    const p = phases.find(x=>x.id===phaseId);
-    const src = p && (p.video || p.video_url);
-    videoMount.innerHTML = '';
-    if(src){
-      const vid = document.createElement('video');
-      vid.controls = true; vid.playsInline = true; vid.style.width = '100%';
-      vid.src = src; videoMount.appendChild(vid);
-    } else {
-      videoMount.textContent = 'No video available for ' + phaseId;
-    }
-    videoTitle.textContent = 'Video — ' + (p?.name || phaseId);
-    videoOverlay.hidden = false;
-  }
-  function closeVideo(){
-    const v = videoMount.querySelector('video');
-    if(v){ v.pause(); }
-    videoOverlay.hidden = true; videoMount.innerHTML='';
+  // Public hook
+  window.AnalysisProgress = {
+    start: simulateAnalysis,
+    set:  (p,msg)=>Overlay.set(p,msg),
+    done: ()=>Overlay.complete(),
+    fail: (reason)=>Overlay.fail(reason),
+    onRetry: null,
+    onCancel: null
   };
 
-  // --------- Data Ingestion Hook (REAL VALUES) ---------
-  window.applyReport = function(data){
-    // Mode from payload
-    if(data.mode){
-      const m = String(data.mode).toLowerCase();
-      const val = m.startsWith('putt') ? 'putt' : m.startsWith('chip') ? 'chip' : m.startsWith('bunk') ? 'bunker' : 'full';
-      const modeSel = document.getElementById('mode');
-      if(modeSel){ modeSel.value = val; }
-      setMode(val);
-    }
-    if(data.swings!=null){ document.getElementById('swingCount').textContent = String(data.swings); }
+  // Wire buttons
+  document.getElementById('analyzeBtn').addEventListener('click', simulateAnalysis);
+  document.getElementById('reloadReport').addEventListener('click', ()=>{
+    const params = new URLSearchParams(location.search);
+    const url = params.get('report') || document.body.dataset.reportSrc || '/reports/demo/report.json';
+    loadReport(url);
+  });
+  document.getElementById('killOverlays').addEventListener('click', ()=>{
+    try{ document.getElementById('progressOverlay').hidden = true; }catch(e){}
+    try{ document.getElementById('videoOverlay').hidden = true; }catch(e){}
+    try{ if(busy) busy.hidden = true; }catch(e){}
+    document.getElementById('loadStatus').textContent = 'Overlays hidden.';
+  });
 
-    if(Array.isArray(data.swing_metrics)){
-      swingMetrics = data.swing_metrics.map(m=>({
-        key:m.key, label:m.label ?? m.key, value:Number(m.value)||0, tags:m.tags||[]
-      }));
-    }
-
-    if(Array.isArray(data.position_metrics)){
-      positionMetrics = data.position_metrics.map(p=>({ p:p.p, value:Number(p.value)||0 }));
-    }
-
-    if(data.power){
-      power = {
-        score: Number(data.power.score)||0,
-        tempo: data.power.tempo ?? "—",
-        release_timing: typeof data.power.release_timing==='number' ? data.power.release_timing : Number(data.power.release_timing)||0
-      };
-    }
-
-    if(data.discipline){
-      discipline = String(data.discipline);
-      const sel = document.getElementById('discipline');
-      if(sel){ sel.value = discipline; }
-      document.getElementById('modeLabel').textContent = disciplineLabel(discipline);
-    };
-    }
-
-    if(Array.isArray(data.phases)){
-      const mapGrade = g => (g==='good'||g==='ok'||g==='bad') ? g : (Number(g)>=75?'good':Number(g)>=55?'ok':'bad');
-      phases = data.phases.map(p=>{
-        const gradeKey = p.grade!=null ? mapGrade(p.grade) : (p.grade_score!=null ? mapGrade(p.grade_score) : 'ok');
-        const gradeText = gradeKey==='good'?'Good':gradeKey==='ok'?'OK':'Needs Help';
-        return {
-          id:p.id, name:p.name, short:p.short, long:p.long, tags:p.tags||[],
-          grade:gradeKey, gradeText, video:(p.video||p.video_url)
-        };
-      });
-    }
-
-    // Re-render UI with REAL values
-    renderTop();
-    renderPhases();
-    applyFocus('all');
+  // Sample data to bypass fetch (for debugging)
+  const sampleData = {
+    swings: 1,
+    discipline: 'full-swing',
+    power: { score: 78, tempo: '3.0:1', release_timing: 62 },
+    swing_metrics: [
+      { key:'right-arm-angle', label:'Right Arm Angle', value:84 },
+      { key:'face-angle', label:'Club Face Angle', value:79 }
+    ],
+    position_metrics: [
+      {p:'P1',value:90},{p:'P2',value:74},{p:'P3',value:61},{p:'P4',value:55},{p:'P5',value:63},{p:'P6',value:70},{p:'P7',value:81},{p:'P8',value:86},{p:'P9',value:78}
+    ],
+    phases: [
+      { id:'P1', name:'Setup', short:'Athletic stance, posture aligned', long:'Neutral spine…', grade:'good' },
+      { id:'P2', name:'Shaft Parallel (Backswing)', short:'Club parallel, early width', long:'—', grade:'ok' },
+      { id:'P3', name:'Lead Arm Parallel (Backswing)', short:'Good extension, slight flat', long:'—', grade:'ok' },
+      { id:'P4', name:'Top of Swing', short:'Full coil', long:'—', grade:'bad' },
+      { id:'P5', name:'Lead Arm Parallel (Downswing)', short:'Arm drops inside', long:'—', grade:'good' },
+      { id:'P6', name:'Shaft Parallel (Downswing)', short:'Shallowing, trail elbow leads', long:'—', grade:'good' },
+      { id:'P7', name:'Impact', short:'Hips open, shaft lean', long:'—', grade:'ok' },
+      { id:'P8', name:'Trail Arm Parallel (Follow‑Through)', short:'Balanced extension', long:'—', grade:'good' },
+      { id:'P9', name:'Finish', short:'Upright, balanced', long:'—', grade:'good' }
+    ]
   };
-</script>
-</body>
-</html>
+  document.getElementById('loadSample').addEventListener('click', ()=>{
+    window.applyReport(sampleData);
+    document.getElementById('loadStatus').textContent = 'Loaded sample data (no fetch).';
+  });
+
+  // Surface JS errors so we can see them
+  const errBox = document.getElementById('errorStatus');
+  window.addEventListener('error', (e)=>{ errBox.textContent
+  document.getElementById('killOverlays').addEventListener('click', ()=>{
+    try{ document.getElementById('progressOverlay').hidden = true; }catch(e){}
+    try{ document.getElementById('videoOverlay').hidden = true; }catch(e){}
+    try{ if(busy) busy.hidden = true; }catch(e){}
