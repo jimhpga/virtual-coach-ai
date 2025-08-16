@@ -14,9 +14,9 @@
     html,body{height:100%}
     body{margin:0;color:var(--text);font:16px/1.45 system-ui, -apple-system, Segoe UI, Inter, Roboto, Helvetica, Arial, sans-serif;background:#0e1a22}
 
-    /* full-bleed golf course background */
-    .bg{position:fixed;inset:0;background:url('/homepage-background.png') center/cover no-repeat fixed;opacity:.36;z-index:-1}
-    .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,18,24,.35),rgba(10,18,24,.35))}
+    /* full-bleed golf course background (extra light) */
+    .bg{position:fixed;inset:0;background:url('/homepage-background.png') center/cover no-repeat fixed;opacity:.02;z-index:-1}
+    .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,18,24,.01),rgba(10,18,24,.01))}
 
     .wrap{max-width:1080px;margin:28px auto;padding:0 16px}
     header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:16px}
@@ -211,30 +211,41 @@
 
   const fmt = v => `${v}%`;
   const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';
-  const metricRow = m => `<div class="metric" data-tags="${(m.tags||[]).join(' ')}"><div class="name">${m.label}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
-  const posRow    = p => `<div class="metric"><div class="name">${p.p}</div><div class="bar"><span class="${band(p.value)}" style="width:${p.value}%"></span></div><div class="pct">${fmt(p.value)}</div></div>`;
+  const metricRow = m => `<div class=\"metric\" data-tags=\"${(m.tags||[]).join(' ')}\"><div class=\"name\">${m.label}</div><div class=\"bar\"><span class=\"${band(m.value)}\" style=\"width:${m.value}%\"></span></div><div class=\"pct\">${fmt(m.value)}</div></div>`;
+  const posRow    = p => `<div class=\"metric\"><div class=\"name\">${p.p}</div><div class=\"bar\"><span class=\"${band(p.value)}\" style=\"width:${p.value}%\"></span></div><div class=\"pct\">${fmt(p.value)}</div></div>`;
 
   // -------- Renderers --------
+  const defaultLong = {
+    P1: 'Athletic setup with neutral grip, soft knees, and neutral pelvis tilt. Pressure 55/45 lead‑to‑trail under the arches, ball position appropriate for the club. Spine long (not slumped), shoulders relaxed, eye line level.',
+    P2: 'Shaft parallel to the ground with width maintained. Hands stay in front of chest, club parallel to target line, wrists setting gradually. Clubface orientation near toe‑up (neutral) rather than shut or excessively open.',
+    P3: 'Lead arm parallel with a full turn of the torso. Trail elbow begins to fold in front of the ribcage, not flying. Club angle matches plane; hands remain a forearm’s width from the chest (no collapse).',
+    P4: 'Top of swing: pressure mostly into trail heel, trail hip deep, ribcage over trail thigh. Lead wrist closer to flat/bowed than cupped. Club not excessively across the line or laid off; head stable.',
+    P5: 'Transition: pelvis leads, then torso, then arms. Shaft shallows slightly, trail elbow stays in front of the seam line. Lead wrist maintains flexion to control face; pressure shifts into lead mid‑foot.',
+    P6: 'Delivery: shaft parallel approaching ball with hands slightly ahead of clubhead. Face square to path window, trail elbow tucked. Pelvis continues to rotate (no stall) as chest opens gradually.',
+    P7: 'Impact: forward shaft lean, handle ahead, low point forward. Pelvis 30–45° open, chest 10–20° open, lead leg braced. Face near square to path; contact from the middle‑low grooves, not thin or fat.',
+    P8: 'Post‑impact: trail arm extends, chest up and left, handle continues around (not down the line). Rate of closure controlled—no flip. Divot past the ball with balanced rotation.',
+    P9: 'Finish: weight fully into lead side, belt buckle and chest to target, trail toe down. Club finishes around the body; you can hold the pose without wobble.'
+  };
   function renderReport(data){
     if(data.discipline){ document.getElementById('modeLabel').textContent = /putt/i.test(data.discipline)?'Putting':/chip/i.test(data.discipline)?'Chipping':'Full Swing'; }
     if(data.swings!=null){ document.getElementById('swingCount').textContent = String(data.swings); }
 
-    const swingHtml = (data.swing_metrics||[]).map(metricRow).join('') || '<div class="sub">No swing metrics.</div>';
-    const posHtml   = (data.position_metrics||[]).map(posRow).join('')   || '<div class="sub">No position metrics.</div>';
+    const swingHtml = (data.swing_metrics||[]).map(metricRow).join('') || '<div class=\"sub\">No swing metrics.</div>';
+    const posHtml   = (data.position_metrics||[]).map(posRow).join('')   || '<div class=\"sub\">No position metrics.</div>';
     document.getElementById('swing').innerHTML = swingHtml;
     document.getElementById('position').innerHTML = posHtml;
 
     const p = data.power||{score:0, tempo:'—', release_timing:0};
     document.getElementById('power').innerHTML = `
-      <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="${band(p.score)}" style="width:${p.score}%"></span></div><div class="pct">${fmt(p.score)}</div></div>
-      <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo}</div></div>
-      <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
+      <div class=\"metric\"><div class=\"name\">Power Score</div><div class=\"bar\"><span class=\"${band(p.score)}\" style=\"width:${p.score}%\"></span></div><div class=\"pct\">${fmt(p.score)}</div></div>
+      <div class=\"metric\"><div class=\"name\">Tempo</div><div class=\"bar\"><span class=\"ok\" style=\"width:76%\"></span></div><div class=\"pct\">${p.tempo}</div></div>
+      <div class=\"metric\"><div class=\"name\">Release Timing</div><div class=\"bar\"><span class=\"${band(+p.release_timing)}\" style=\"width:${+p.release_timing||0}%\"></span></div><div class=\"pct\">${+p.release_timing||0}%</div></div>`;
 
     // P1–P9 (fallback if phases missing)
     let phases = Array.isArray(data.phases) ? data.phases.slice() : [];
     if(!phases.length){
       const names = ['Setup','Shaft Parallel (Backswing)','Lead Arm Parallel (Backswing)','Top of Swing','Lead Arm Parallel (Downswing)','Shaft Parallel (Downswing)','Impact','Trail Arm Parallel (Follow‑Through)','Finish'];
-      const pm = data.position_metrics||[];
+      const pm = (data.position_metrics||[]);
       for(let i=0;i<9;i++){
         const pid = 'P'+(i+1);
         const m = pm.find(x=>String(x.p).toUpperCase()===pid) || {value:0};
@@ -244,12 +255,12 @@
     }
     const plist = document.getElementById('plist');
     plist.innerHTML = phases.map((ph,i)=>`
-      <details ${i===0?'open':''} class="panel">
-        <summary><span class="pnum">${ph.id||('P'+(i+1))}</span> <span class="pname">${ph.name||''}</span> <span class="gchip g-${(ph.grade||'ok')}" style="margin-left:8px">${String(ph.grade||'OK').toUpperCase()}</span> <span class="sub" style="margin-left:8px">${ph.short||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
-        <div class="content">
-          <div class="sub" style="margin-bottom:8px">${ph.short||''}</div>
-          <div style="margin-bottom:10px">${ph.long||''}</div>
-          <button class="btn view-video" data-url="${ph.video||ph.video_url||''}">View Video</button>
+      <details ${i===0?'open':''} class=\"panel\">
+        <summary><span class=\"pnum\">${ph.id||('P'+(i+1))}</span> <span class=\"pname\">${ph.name||''}</span> <span class=\"gchip g-${(ph.grade||'ok')}\" style=\"margin-left:8px\">${String(ph.grade||'OK').toUpperCase()}</span> <span class=\"sub\" style=\"margin-left:8px\">${ph.short||''}</span><svg class=\"caret\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"/></svg></summary>
+        <div class=\"content\">
+          <div class=\"sub\" style=\"margin-bottom:8px\">${ph.short||''}</div>
+          <div style=\"margin-bottom:10px\">${(ph.long && ph.long.trim() && ph.long.trim() !== (ph.short||'').trim()) ? ph.long : (defaultLong[ph.id||('P'+(i+1))]||'')}</div>
+          <button class=\"btn view-video\" data-url=\"${ph.video||ph.video_url||''}\">View Video</button>
         </div>
       </details>
     `).join('');
@@ -269,7 +280,7 @@
       {title:'Lead‑leg brake', short:'Post into lead side.', long:'Plant lead heel from P4 and straighten lead leg through P5–P6. Towel under lead heel to feel pressure shift.'},
       {title:'Late release timing', short:'Deliver speed at P7–P8.', long:'Hold wrist angles to P6, then unhinge through impact. Two‑tee gate at ball for feedback.'}
     ];
-    const mk = item=>`<details class="panel"><summary><span class="pname">${item.title}</span><span class="sub" style="margin-left:8px">${item.short||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary><div class="content">${item.long||''}</div></details>`;
+    const mk = item=>`<details class=\"panel\"><summary><span class=\"pname\">${item.title}</span><span class=\"sub\" style=\"margin-left:8px\">${item.short||''}</span><svg class=\"caret\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"/></svg></summary><div class=\"content\">${item.long||''}</div></details>`;
     document.getElementById('coachPriority').innerHTML = pri.map(mk).join('');
     document.getElementById('coachPower').innerHTML   = pow.map(mk).join('');
   }
@@ -285,9 +296,9 @@
       ]
     }));
     document.getElementById('practice').innerHTML = plan.map(d=>`
-      <details class="panel" ${d.day===1?'open':''}>
-        <summary><span class="pname">Day ${d.day}</span> <span class="sub" style="margin-left:8px">${d.title||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
-        <div class="content">${(d.drills||[]).map(x=>`<div>• ${x}</div>`).join('')||'<div class="sub">No drills provided.</div>'}</div>
+      <details class=\"panel\" ${d.day===1?'open':''}>
+        <summary><span class=\"pname\">Day ${d.day}</span> <span class=\"sub\" style=\"margin-left:8px\">${d.title||''}</span><svg class=\"caret\" width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"/></svg></summary>
+        <div class=\"content\">${(d.drills||[]).map(x=>`<div>• ${x}</div>`).join('')||'<div class=\"sub\">No drills provided.</div>'}</div>
       </details>
     `).join('');
   }
@@ -295,18 +306,46 @@
   // -------- Loader & events --------
   async function loadReport(url){
     const s=document.getElementById('status'), e=document.getElementById('error');
-    e.textContent=''; s.textContent='Loading '+url+'…';
+    e.textContent=''; s.innerHTML='Loading <a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>…';
     try{
       const res = await fetch(url,{cache:'no-store'});
-      if(!res.ok){ s.textContent=''; e.textContent='Could not load report ('+res.status+'). Check path: '+url; return; }
-      const data = await res.json();
-      renderReport(data); s.textContent='Loaded report: '+url;
-    }catch(err){ s.textContent=''; e.textContent='Failed to load report: '+(err?.message||String(err)); }
+      if(!res.ok){ s.textContent=''; e.innerHTML='Could not load report ('+res.status+'). Check path: <a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>'; return; }
+      const txt = await res.text();
+      // Be forgiving: strip BOM, /* block comments */, // line comments, and trailing commas
+      let clean = txt.replace(/^\uFEFF/, '')
+                     .replace(/\/\*[\s\S]*?\*\//g,'')
+                     .replace(/(^|\s)\/\/.*$/gm,'')
+                     .replace(/,\s*([\]}])/g,'$1')
+                     .trim();
+      let data;
+      try { data = JSON.parse(clean); }
+      catch(parseErr){
+        e.textContent = 'Failed to parse JSON (showing Sample): '+(parseErr?.message||parseErr);
+        renderReport(sample);
+        s.innerHTML='Loaded SAMPLE (parse failed): <a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>';
+        return;
+      }
+      renderReport(data);
+      s.innerHTML='Loaded: <a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>';
+    }catch(err){
+      e.textContent='Failed to load report (showing Sample): '+(err?.message||String(err));
+      renderReport(sample);
+      s.textContent='Loaded SAMPLE (fetch failed)';
+    }
   }
 
   // sample data to prove UI without fetch
   const sample = { swings:1, discipline:'full-swing', power:{score:78, tempo:'3.0:1', release_timing:62},
-    swing_metrics:[{label:'Right Arm Angle',value:84,tags:['arm-bend']},{label:'Club Face Angle',value:79,tags:['face-angle']}],
+    swing_metrics:[
+      {label:'Right Arm Angle',value:84,tags:['arm-bend']},
+      {label:'Club Face Angle',value:79,tags:['face-angle']},
+      {label:'Shoulder Turn',value:72,tags:['shoulder-turn']},
+      {label:'Hip Turn',value:68,tags:['hip-movement']},
+      {label:'X‑Factor (Shoulder–Hip)',value:64,tags:['sequence']},
+      {label:'Club Path',value:71,tags:['club-path']},
+      {label:'Face‑to‑Path',value:66,tags:['face-angle']},
+      {label:'Attack Angle',value:62,tags:['delivery']}
+    ],
     position_metrics:[{p:'P1',value:90},{p:'P2',value:74},{p:'P3',value:61},{p:'P4',value:55},{p:'P5',value:63},{p:'P6',value:70},{p:'P7',value:81},{p:'P8',value:86},{p:'P9',value:78}],
     phases:[
       {id:'P1',name:'Setup',short:'Athletic stance, posture aligned',long:'Neutral spine…',grade:'good'},
