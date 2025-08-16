@@ -1,25 +1,49 @@
-{
-  "swings": 1,
-  "discipline": "full-swing",
-  "power": { "score": 78, "tempo": "3.0:1", "release_timing": 62 },
-  "swing_metrics": [
-    {"key":"right-arm-angle","label":"Right Arm Angle","value":84},
-    {"key":"face-angle","label":"Club Face Angle","value":79}
-  ],
-  "position_metrics": [
-    {"p":"P1","value":90},{"p":"P2","value":74},{"p":"P3","value":61},
-    {"p":"P4","value":55},{"p":"P5","value":63},{"p":"P6","value":70},
-    {"p":"P7","value":81},{"p":"P8","value":86},{"p":"P9","value":78}
-  ],
-  "phases": [
-    {"id":"P1","name":"Setup","short":"Athletic stance, posture aligned","long":"Neutral spine…","grade":"good"},
-    {"id":"P2","name":"Shaft Parallel (Backswing)","short":"Club parallel, early width","long":"—","grade":"ok"},
-    {"id":"P3","name":"Lead Arm Parallel (Backswing)","short":"Good extension, slight flat","long":"—","grade":"ok"},
-    {"id":"P4","name":"Top of Swing","short":"Full coil","long":"—","grade":"bad"},
-    {"id":"P5","name":"Lead Arm Parallel (Downswing)","short":"Arm drops inside","long":"—","grade":"good"},
-    {"id":"P6","name":"Shaft Parallel (Downswing)","short":"Shallowing, trail elbow leads","long":"—","grade":"good"},
-    {"id":"P7","name":"Impact","short":"Hips open, shaft lean","long":"—","grade":"ok"},
-    {"id":"P8","name":"Trail Arm Parallel (Follow-Through)","short":"Balanced extension","long":"—","grade":"good"},
-    {"id":"P9","name":"Finish","short":"Upright, balanced","long":"—","grade":"good"}
-  ]
-}
+ 1 {
+ 2   "swings": 2,
+ 3   "discipline": "full-swing",
+ 4   "power": { "score": 82, "tempo": "3.2:1", "release_timing": 64 },
+ 5
+ 6   "swing_metrics": [
+ 7     { "key": "right-arm-angle", "label": "Right Arm Angle", "value": 84, "tags": ["arm-bend"] },
+ 8     { "key": "face-angle",      "label": "Club Face Angle", "value": 79, "tags": ["face-angle"] },
+ 9     { "key": "shoulder-turn",   "label": "Shoulder Turn",    "value": 72, "tags": ["shoulder-turn"] },
+10     { "key": "hip-turn",        "label": "Hip Turn",         "value": 68, "tags": ["hip-movement"] },
+11     { "key": "x-factor",        "label": "X-Factor",         "value": 64, "tags": ["sequence"] },
+12     { "key": "club-path",       "label": "Club Path",        "value": 71, "tags": ["club-path"] },
+13     { "key": "face-to-path",    "label": "Face-to-Path",     "value": 66, "tags": ["face-angle"] },
+14     { "key": "attack-angle",    "label": "Attack Angle",     "value": 62, "tags": ["delivery"] }
+15   ],
+16
+17   "position_metrics": [
+18     { "p": "P1", "value": 90 }, { "p": "P2", "value": 74 }, { "p": "P3", "value": 61 },
+19     { "p": "P4", "value": 55 }, { "p": "P5", "value": 63 }, { "p": "P6", "value": 70 },
+20     { "p": "P7", "value": 81 }, { "p": "P8", "value": 86 }, { "p": "P9", "value": 78 }
+21   ],
+22
+23   "phases": [
+24     { "id": "P1", "name": "Setup",
+25       "short": "Athletic stance, posture aligned",
+26       "long":  "Neutral grip, soft knees, pelvis neutral, pressure ~55/45 lead-to-trail, spine long.",
+27       "grade": "good"
+28     },
+29     { "id": "P2", "name": "Shaft Parallel (Backswing)",
+30       "short": "Club parallel, early width",
+31       "long":  "Hands in front of chest, wrist set gradual, face near toe-up instead of shut/open.",
+32       "grade": "ok"
+33     }
+34     // …add P3–P9 similarly (or omit; the page will auto-fill long text if short==long/missing)
+35   ],
+36
+37   "coaching": {
+38     "priority_fixes": [
+39       { "title": "Clubface control at P7", "short": "Match face to path.", "long": "Lead-wrist flexion from P5→P6, half-swings keeping logo at target." },
+40       { "title": "Lower body sequence",    "short": "Hips before hands.",  "long": "Step-through drill; shift to lead heel before arm throw." },
+41       { "title": "Hand path width",        "short": "No collapse.",        "long": "Pump P3→mini P4→P5 with wide feel; trail elbow connected." }
+42     ],
+43     "power_fixes": [
+44       { "title": "Tempo 3:1",          "short": "Smooth the backswing.", "long": "Count 1-2-3 back, 1 through; 72 bpm, strike every 4th tick." },
+45       { "title": "Lead-leg brake",     "short": "Post into lead side.",  "long": "Plant heel at P4, straighten lead leg through P6; towel under heel." },
+46       { "title": "Late release timing","short": "Deliver speed P7–P8.",   "long": "Hold angles to P6; two-tee gate for strike window." }
+47     ]
+48   }
+49 }
