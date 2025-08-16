@@ -1,1 +1,26 @@
 
+{
+  "swings": 1,
+  "discipline": "full-swing",
+  "power": { "score": 78, "tempo": "3.0:1", "release_timing": 62 },
+  "swing_metrics": [
+    {"key":"right-arm-angle","label":"Right Arm Angle","value":84},
+    {"key":"face-angle","label":"Club Face Angle","value":79}
+  ],
+  "position_metrics": [
+    {"p":"P1","value":90},{"p":"P2","value":74},{"p":"P3","value":61},
+    {"p":"P4","value":55},{"p":"P5","value":63},{"p":"P6","value":70},
+    {"p":"P7","value":81},{"p":"P8","value":86},{"p":"P9","value":78}
+  ],
+  "phases": [
+    {
+      "id":"P1",
+      "name":"Setup",
+      "short":"Athletic stance, posture aligned",
+      "long":"Neutral spine…",
+      "grade":"good",
+      "tags":["right-wrist","foot-movement"],
+      "video":"/reports/demo/P1.mp4"
+    }
+  ]
+}
