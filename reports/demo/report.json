@@ -1,4 +1,3 @@
-
 {
   "swings": 1,
   "discipline": "full-swing",
@@ -13,14 +12,14 @@
     {"p":"P7","value":81},{"p":"P8","value":86},{"p":"P9","value":78}
   ],
   "phases": [
-    {
-      "id":"P1",
-      "name":"Setup",
-      "short":"Athletic stance, posture aligned",
-      "long":"Neutral spine…",
-      "grade":"good",
-      "tags":["right-wrist","foot-movement"],
-      "video":"/reports/demo/P1.mp4"
-    }
+    {"id":"P1","name":"Setup","short":"Athletic stance, posture aligned","long":"Neutral spine…","grade":"good"},
+    {"id":"P2","name":"Shaft Parallel (Backswing)","short":"Club parallel, early width","long":"—","grade":"ok"},
+    {"id":"P3","name":"Lead Arm Parallel (Backswing)","short":"Good extension, slight flat","long":"—","grade":"ok"},
+    {"id":"P4","name":"Top of Swing","short":"Full coil","long":"—","grade":"bad"},
+    {"id":"P5","name":"Lead Arm Parallel (Downswing)","short":"Arm drops inside","long":"—","grade":"good"},
+    {"id":"P6","name":"Shaft Parallel (Downswing)","short":"Shallowing, trail elbow leads","long":"—","grade":"good"},
+    {"id":"P7","name":"Impact","short":"Hips open, shaft lean","long":"—","grade":"ok"},
+    {"id":"P8","name":"Trail Arm Parallel (Follow-Through)","short":"Balanced extension","long":"—","grade":"good"},
+    {"id":"P9","name":"Finish","short":"Upright, balanced","long":"—","grade":"good"}
   ]
 }
