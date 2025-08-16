@@ -14,9 +14,9 @@
     html,body{height:100%}
     body{margin:0;color:var(--text);font:16px/1.45 system-ui, -apple-system, Segoe UI, Inter, Roboto, Helvetica, Arial, sans-serif;background:#0e1a22}
 
-    /* full-bleed golf course background — more visible */
-    .bg{position:fixed;inset:0;background:url('/homepage-background.png') center/cover no-repeat fixed;opacity:.12;z-index:-1}
-    .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,18,24,.03),rgba(10,18,24,.03))}
+    /* full-bleed golf course background */
+    .bg{position:fixed;inset:0;background:url('/homepage-background.png') center/cover no-repeat fixed;opacity:.04;z-index:-1}
+    .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,18,24,.02),rgba(10,18,24,.02))}
 
     .wrap{max-width:1080px;margin:28px auto;padding:0 16px}
     header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:16px}
@@ -168,14 +168,14 @@
       </div>
     </section>
 
-    <!-- 14-Day Practice Plan -->
+    <!-- 14‑Day Practice Plan -->
     <section class="card" style="margin-top:12px">
-      <h3>14-Day Practice Plan</h3>
+      <h3>14‑Day Practice Plan</h3>
       <div id="practice" class="content"></div>
     </section>
   </div>
 
-  <!-- Progress Overlay -->
+  <!-- Progress Overlay (for future use; not shown during report load) -->
   <div id="progressOverlay" class="overlay" hidden>
     <div class="overlay-card">
       <h2><span class="spinner" style="margin-right:8px"></span>Analyzing your swing…</h2>
@@ -214,19 +214,18 @@
   const metricRow = m => `<div class="metric" data-tags="${(m.tags||[]).join(' ')}"><div class="name">${m.label}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
   const posRow    = p => `<div class="metric"><div class="name">${p.p}</div><div class="bar"><span class="${band(p.value)}" style="width:${p.value}%"></span></div><div class="pct">${fmt(p.value)}</div></div>`;
 
-  // -------- Expanded P1–P9 explanations --------
+  // -------- Renderers --------
   const defaultLong = {
-    P1: '<strong>Setup — Checklist</strong><br><ul><li>Stance shoulder-width; weight 55/45 lead/trail under the arches (not toes).</li><li>Neutral grip: lead wrist flat, V’s toward trail shoulder; trail hand supports from below.</li><li>Pelvis neutral (no dump), chest proud, chin off chest; eye line level.</li><li>Ball position: wedges center, mid-irons one ball forward, driver inside lead heel.</li></ul><em>Common misses:</em> slumped spine, grip too strong/weak, weight in toes. <em>Fix:</em> club-across-hips to feel neutral tilt; 3-breath reset.',
-    P2: '<strong>Shaft Parallel (Backswing) — Keys</strong><br><ul><li>Club shaft parallel to ground and target line; width maintained (hands in front of chest).</li><li>Lead wrist trending flat; trail wrist starts to set—no snatch.</li><li>Clubface near toe-up (neutral) vs. shut/open extremes.</li></ul><em>Check:</em> at P2 the butt is just outside toes; face not skyward. <em>Drill:</em> half-back to P2 × 10, freeze, then through.',
-    P3: '<strong>Lead Arm Parallel — Structure</strong><br><ul><li>Lead arm parallel; trail elbow folds in front of ribcage (no “chicken wing”).</li><li>Hands keep a forearm’s width from chest; width preserved.</li><li>Shaft on plane; pelvis turning, not swaying.</li></ul><em>Misses:</em> across-the-line, early lift, collapse. <em>Feel:</em> rotate ribcage, not just arms.',
-    P4: '<strong>Top — Loaded & Organized</strong><br><ul><li>Pressure into trail heel; trail hip deep (space behind pelvis).</li><li>Lead wrist nearer flat/bowed; club not wildly across/laid off.</li><li>Head stable; thorax over trail thigh, not reverse-spined.</li></ul><em>Self-test:</em> Can you start down without shifting right? If not, you swayed. <em>Drill:</em> wall-hip depth—light glute contact at the top.',
-    P5: '<strong>Transition — Sequencing</strong><br><ul><li>Lower body leads: pressure to lead mid-foot; pelvis opens before chest.</li><li>Shaft shallows slightly; trail elbow in front of side seam.</li><li>Lead-wrist flexion sustains face control; handle lowers as chest stays on it.</li></ul><em>Keys:</em> bump → open → deliver. <em>Drill:</em> step-through × 8, then normal × 4.',
-    P6: '<strong>Delivery — On-Plane Speed</strong><br><ul><li>Shaft parallel again; hands slightly ahead; clubhead trails with retained lag.</li><li>Face square to path window; trail elbow tucked; pelvis keeps turning.</li><li>Hand path slightly in-to-out (irons) unless shot shape dictates.</li></ul><em>Checkpoint:</em> lead wrist still near flat; handle height echoes setup.',
-    P7: '<strong>Impact — Ball First, Face Square</strong><br><ul><li>Forward shaft lean; low point forward (irons).</li><li>Pelvis 30–45° open; chest 10–20°; lead leg posting (not collapsing).</li><li>Face near square to path; turf strike after ball.</li></ul><em>Drills:</em> two-tee gate; line-strike; “press-and-go” preset for lean.',
-    P8: '<strong>Post-Impact — Extension & Rotation</strong><br><ul><li>Trail arm extends; hands work up/left; chest rises and rotates left.</li><li>Rate of closure controlled—no flip; divot continues target-side.</li><li>Pressure into lead heel; trail foot rolls to instep (no early spin-out).</li></ul><em>Feel:</em> knuckles to the sky by waist-high as handle moves around.',
-    P9: '<strong>Finish — Balanced & Reproducible</strong><br><ul><li>Weight fully lead-side; belt buckle & sternum to target; trail toe down.</li><li>Club wraps around body; spine tall; hold pose 2–3 seconds.</li></ul><em>Test:</em> speak while holding finish—if you’re huffing, you over-swung.'
+    P1: 'Athletic setup with neutral grip, soft knees, and neutral pelvis tilt. Pressure 55/45 lead‑to‑trail under the arches, ball position appropriate for the club. Spine long (not slumped), shoulders relaxed, eye line level.',
+    P2: 'Shaft parallel to the ground with width maintained. Hands stay in front of chest, club parallel to target line, wrists setting gradually. Clubface orientation near toe‑up (neutral) rather than shut or excessively open.',
+    P3: 'Lead arm parallel with a full turn of the torso. Trail elbow begins to fold in front of the ribcage, not flying. Club angle matches plane; hands remain a forearm’s width from the chest (no collapse).',
+    P4: 'Top of swing: pressure mostly into trail heel, trail hip deep, ribcage over trail thigh. Lead wrist closer to flat/bowed than cupped. Club not excessively across the line or laid off; head stable.',
+    P5: 'Transition: pelvis leads, then torso, then arms. Shaft shallows slightly, trail elbow stays in front of the seam line. Lead wrist maintains flexion to control face; pressure shifts into lead mid‑foot.',
+    P6: 'Delivery: shaft parallel approaching ball with hands slightly ahead of clubhead. Face square to path window, trail elbow tucked. Pelvis continues to rotate (no stall) as chest opens gradually.',
+    P7: 'Impact: forward shaft lean, handle ahead, low point forward. Pelvis 30–45° open, chest 10–20° open, lead leg braced. Face near square to path; contact from the middle‑low grooves, not thin or fat.',
+    P8: 'Post‑impact: trail arm extends, chest up and left, handle continues around (not down the line). Rate of closure controlled—no flip. Divot past the ball with balanced rotation.',
+    P9: 'Finish: weight fully into lead side, belt buckle and chest to target, trail toe down. Club finishes around the body; you can hold the pose without wobble.'
   };
-
   function renderReport(data){
     if(data.discipline){ document.getElementById('modeLabel').textContent = /putt/i.test(data.discipline)?'Putting':/chip/i.test(data.discipline)?'Chipping':'Full Swing'; }
     if(data.swings!=null){ document.getElementById('swingCount').textContent = String(data.swings); }
@@ -242,10 +241,10 @@
       <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo}</div></div>
       <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
 
-    // P1–P9
+    // P1–P9 (fallback if phases missing)
     let phases = Array.isArray(data.phases) ? data.phases.slice() : [];
     if(!phases.length){
-      const names = ['Setup','Shaft Parallel (Backswing)','Lead Arm Parallel (Backswing)','Top of Swing','Lead Arm Parallel (Downswing)','Shaft Parallel (Downswing)','Impact','Trail Arm Parallel (Follow-Through)','Finish'];
+      const names = ['Setup','Shaft Parallel (Backswing)','Lead Arm Parallel (Backswing)','Top of Swing','Lead Arm Parallel (Downswing)','Shaft Parallel (Downswing)','Impact','Trail Arm Parallel (Follow‑Through)','Finish'];
       const pm = data.position_metrics||[];
       for(let i=0;i<9;i++){
         const pid = 'P'+(i+1);
@@ -270,47 +269,32 @@
     renderPractice(data);
   }
 
-  // -------- Coaching (more descriptive) --------
   function renderCoaching(data){
     const pri = (data.coaching && Array.isArray(data.coaching.priority_fixes)) ? data.coaching.priority_fixes : [
-      {title:'Face Control from P5→P7', short:'Stabilize the clubface through delivery.',
-       long:'<strong>Problem:</strong> face drifts open in transition and slams shut late.<br><strong>Solution:</strong> keep lead-wrist flexion (bowed feel) from P5 to P6 while pelvis opens. Maintain “logo-to-target” feel through P7.<br><strong>Micro-drills:</strong><ul><li>P5→P6 pump × 3 then strike (8 sets)</li><li>Impact bag with bowed lead wrist × 8</li><li>Two-tee gate at ball to audit start line</li></ul>'},
-      {title:'Lower-Body Sequence & Pressure', short:'Open the hips before the hands.',
-       long:'<strong>Problem:</strong> hands fire first; pelvis stalls.<br><strong>Solution:</strong> shift pressure to lead mid-foot as belt buckle begins to open while chest stays on the ball.<br><strong>Micro-drills:</strong><ul><li>Step-through drill × 10</li><li>Split-stance downswing (lead foot forward) × 10</li><li>Med-ball bump-and-open throws × 6</li></ul>'},
-      {title:'Width & Hand-Path', short:'Keep space; avoid across-the-line.',
-       long:'<strong>Problem:</strong> width collapses at P3; handle across chest.<br><strong>Solution:</strong> keep a forearm’s width from sternum; trail elbow in front of ribcage.<br><strong>Micro-drills:</strong><ul><li>Alignment-stick across chest turns × 10</li><li>P3→mini-P4→P5 “wide” pumps × 6</li><li>Towel under trail arm (don’t drop) × 10</li></ul>'}
+      {title:'Clubface control at P7 (impact)', short:'Match face to path window.', long:'Your face angle is drifting open at P6→P7. Prioritize a neutral grip check and lead‑wrist flexion (bowing) from P5→P6. Rehearse 8 reps of half‑swings keeping the logo to target through P7.'},
+      {title:'Lower body sequence', short:'Clear hips before hands.', long:'You’re firing the hands early. Feel the lead hip clear as pressure shifts to lead heel from P4. Use step‑through drill: backswing, step toward target as you start down.'},
+      {title:'Hand path width', short:'Avoid across-the-line.', long:'At P3 your hand path narrows. Rehearse pump‑downs: P3 → mini P4 → P5 with a wide feel, trail elbow connected.'}
     ];
     const pow = (data.coaching && Array.isArray(data.coaching.power_fixes)) ? data.coaching.power_fixes : [
-      {title:'Tempo to ~3:1', short:'Smooth backswing, crisp through.',
-       long:'Backswing outruns transition. Count “one-two-three” back, “one” through. Use 72–76 bpm; strike on every 4th tick.<br><em>Ladder:</em> 10 balls @70%, 10 @80%, 10 @90%—same cadence.'},
-      {title:'Lead-Leg Brake', short:'Post harder to transfer speed.',
-       long:'Turn linear speed into rotation by posting into the lead leg from P4; straighten through P5–P6.<br><strong>Drills:</strong> stick outside lead hip—miss it left × 12; jump-stop swings × 10; step-plant-post × 10.'},
-      {title:'Late Release Timing', short:'Deliver max speed at P7→P8.',
-       long:'Hold wrist angles until P6; unhinge through the ball, not at it.<br><strong>Drills:</strong> two-tee gate; smash-factor ladder with half swings; “throw the clubhead past the hands” feel after impact.'}
+      {title:'Tempo 3:1', short:'Smooth it out.', long:'Backswing too quick. Count “one‑two‑three” back, “one” through. Use metronome 72 bpm, strike on every 4th tick.'},
+      {title:'Lead‑leg brake', short:'Post into lead side.', long:'Plant lead heel from P4 and straighten lead leg through P5–P6. Towel under lead heel to feel pressure shift.'},
+      {title:'Late release timing', short:'Deliver speed at P7–P8.', long:'Hold wrist angles to P6, then unhinge through impact. Two‑tee gate at ball for feedback.'}
     ];
     const mk = item=>`<details class="panel"><summary><span class="pname">${item.title}</span><span class="sub" style="margin-left:8px">${item.short||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary><div class="content">${item.long||''}</div></details>`;
     document.getElementById('coachPriority').innerHTML = pri.map(mk).join('');
     document.getElementById('coachPower').innerHTML   = pow.map(mk).join('');
   }
 
-  // -------- 14-Day Practice Plan (expanded) --------
   function renderPractice(data){
-    const plan = (data.practice_plan && Array.isArray(data.practice_plan)) ? data.practice_plan : [
-      {day:1, title:'Baseline & Tempo', drills:['Record front/side swings (5 each).','Metronome 72 bpm: 3:1 cadence × 20 swings.','Gate drill (two tees) × 20 focusing start line.']},
-      {day:2, title:'Width & Hand-Path', drills:['Pump P3→mini-P4→P5 “wide” × 12.','Alignment-stick across chest turns × 10.','9-to-3 contact set × 25 (centered).']},
-      {day:3, title:'Transition Sequencing', drills:['Step-through drill × 12 (lead hip opens).','Split-stance downswing × 10.','Normal swings × 20; film P4→P6.']},
-      {day:4, title:'Face Control', drills:['Impact bag with bowed lead wrist × 12.','Hold-to-P6 rehearsals × 10, then strike × 10.','Start-line ladder: 5L/5R/10 straight.']},
-      {day:5, title:'Low-Point & Compression', drills:['Line-strike on turf: clip in front × 20.','Ball-then-turf brush swings × 20.','9-iron contact test × 15 filmed.']},
-      {day:6, title:'Lead-Leg Brake', drills:['Stick outside lead hip—miss left × 12.','Jump-stop swings × 10.','Full swings × 20 (track carry if possible).']},
-      {day:7, title:'Review (Light)', drills:['Pick weakest of Days 1–6: 2 drills × 10.','Tempo calibration × 15.','Film two swings for compare.']},
-      {day:8, title:'Pressure Shift & Footwork', drills:['Feet-together → normal swings × 12.','Step-plant-post sequence × 12.','Hold finish 3s × 15.']},
-      {day:9, title:'Delivery Window (P6)', drills:['Freeze at P6 then hit × 12.','Two-tee gate (narrow) × 15.','Face-to-path mini-ladder × 15.']},
-      {day:10,title:'Speed Without Effort', drills:['Speed sticks/overspeed 3×5 (if available).','90% intent with 3:1 tempo × 15.','Finish-hold test × 10.']},
-      {day:11,title:'Trajectory & Start Line', drills:['Knock-down 9-to-3 × 15.','High-flight with same face control × 10.','Start-line randomizer: aim gates × 20.']},
-      {day:12,title:'On-Course Transfer', drills:['Randomize clubs/targets × 20.','Pre-shot routine: 2 rehearsals then go.','Keep score for 20-ball set (FW/GIR).']},
-      {day:13,title:'Gap Plug — Weakest Link', drills:['Pick the lowest metric (e.g., P4 or face).','Run two targeted drills × 12 each.','Film before/after (2 swings each).']},
-      {day:14,title:'Retest & Lock-In', drills:['Re-record front/side like Day 1.','Best-of-10 with routine.','Write 3 cues that worked—keep for next block.']}
-    ];
+    const plan = (data.practice_plan && Array.isArray(data.practice_plan)) ? data.practice_plan : Array.from({length:14},(_,i)=>({
+      day:i+1,
+      title:(i%2? 'Contact + Face' : 'Tempo + Sequence'),
+      drills:[
+        '9‑to‑3 drill × 15 balls (clip P6→P8).',
+        'Step‑through swing × 10 focusing on lead‑leg brake.',
+        'Gate drill at impact × 15 balls.'
+      ]
+    }));
     document.getElementById('practice').innerHTML = plan.map(d=>`
       <details class="panel" ${d.day===1?'open':''}>
         <summary><span class="pname">Day ${d.day}</span> <span class="sub" style="margin-left:8px">${d.title||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
@@ -319,34 +303,21 @@
     `).join('');
   }
 
-  // -------- Loader & events (fixed) --------
+  // -------- Loader & events --------
   async function loadReport(url){
     const s=document.getElementById('status'), e=document.getElementById('error');
     e.textContent=''; s.innerHTML='Loading <a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>…';
     try{
       const res = await fetch(url,{cache:'no-store'});
       if(!res.ok){ s.textContent=''; e.innerHTML='Could not load report ('+res.status+'). Check path: <a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>'; return; }
-      const txt = await res.text();
-      // tolerant parse: strip comments + trailing commas
-      const clean = txt.replace(/\/\*[\s\S]*?\*\//g,'')
-                       .replace(/(^|\s)\/\/.*$/gm,'')
-                       .replace(/,\s*([\]}])/g,'$1')
-                       .trim();
-      let data;
-      try { data = JSON.parse(clean); }
-      catch(parseErr){
-        e.textContent = 'Failed to parse JSON (showing Sample): '+(parseErr?.message||parseErr);
-        renderReport(sample);
-        s.innerHTML='Loaded SAMPLE (parse failed): <a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>';
-        return;
-      }
-      renderReport(data);
-      s.innerHTML='Loaded: <a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>';
-    }catch(err){
-      e.textContent='Failed to load report (showing Sample): '+(err?.message||String(err));
-      renderReport(sample);
-      s.textContent='Loaded SAMPLE (fetch failed)';
-    }
+      const data = await res.json();
+      renderReport(data); s.innerHTML='Loaded: <a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>';
+    }catch(err){ s.textContent=''; e.textContent='Failed to load report: '+(err?.message||String(err)); }
+  });
+      if(!res.ok){ s.textContent=''; e.textContent='Could not load report ('+res.status+'). Check path: '+url; return; }
+      const data = await res.json();
+      renderReport(data); s.textContent='Loaded report: '+url;
+    }catch(err){ s.textContent=''; e.textContent='Failed to load report: '+(err?.message||String(err)); }
   }
 
   // sample data to prove UI without fetch
@@ -356,27 +327,25 @@
       {label:'Club Face Angle',value:79,tags:['face-angle']},
       {label:'Shoulder Turn',value:72,tags:['shoulder-turn']},
       {label:'Hip Turn',value:68,tags:['hip-movement']},
-      {label:'X-Factor (Shoulder–Hip)',value:64,tags:['sequence']},
+      {label:'X‑Factor (Shoulder–Hip)',value:64,tags:['sequence']},
       {label:'Club Path',value:71,tags:['club-path']},
-      {label:'Face-to-Path',value:66,tags:['face-angle']},
+      {label:'Face‑to‑Path',value:66,tags:['face-angle']},
       {label:'Attack Angle',value:62,tags:['delivery']}
     ],
     position_metrics:[{p:'P1',value:90},{p:'P2',value:74},{p:'P3',value:61},{p:'P4',value:55},{p:'P5',value:63},{p:'P6',value:70},{p:'P7',value:81},{p:'P8',value:86},{p:'P9',value:78}],
     phases:[
-      {id:'P1',name:'Setup',short:'Athletic stance, posture aligned',long:'',grade:'good'},
-      {id:'P2',name:'Shaft Parallel (Backswing)',short:'Club parallel, early width',long:'',grade:'ok'},
-      {id:'P3',name:'Lead Arm Parallel (Backswing)',short:'Good extension, slight flat',long:'',grade:'ok'},
-      {id:'P4',name:'Top of Swing',short:'Full coil',long:'',grade:'bad'},
-      {id:'P5',name:'Lead Arm Parallel (Downswing)',short:'Arm drops inside',long:'',grade:'good'},
-      {id:'P6',name:'Shaft Parallel (Downswing)',short:'Shallowing, trail elbow leads',long:'',grade:'good'},
-      {id:'P7',name:'Impact',short:'Hips open, shaft lean',long:'',grade:'ok'},
-      {id:'P8',name:'Trail Arm Parallel (Follow-Through)',short:'Balanced extension',long:'',grade:'good'},
-      {id:'P9',name:'Finish',short:'Upright, balanced',long:'',grade:'good'}]
-  };
+      {id:'P1',name:'Setup',short:'Athletic stance, posture aligned',long:'Neutral spine…',grade:'good'},
+      {id:'P2',name:'Shaft Parallel (Backswing)',short:'Club parallel, early width',long:'—',grade:'ok'},
+      {id:'P3',name:'Lead Arm Parallel (Backswing)',short:'Good extension, slight flat',long:'—',grade:'ok'},
+      {id:'P4',name:'Top of Swing',short:'Full coil',long:'—',grade:'bad'},
+      {id:'P5',name:'Lead Arm Parallel (Downswing)',short:'Arm drops inside',long:'—',grade:'good'},
+      {id:'P6',name:'Shaft Parallel (Downswing)',short:'Shallowing, trail elbow leads',long:'—',grade:'good'},
+      {id:'P7',name:'Impact',short:'Hips open, shaft lean',long:'—',grade:'ok'},
+      {id:'P8',name:'Trail Arm Parallel (Follow‑Through)',short:'Balanced extension',long:'—',grade:'good'},
+      {id:'P9',name:'Finish',short:'Upright, balanced',long:'—',grade:'good'}] };
 
-  // UI controls
   document.getElementById('reload').onclick = ()=>{
-    const u = new URLSearchParams(location.search).get('report') || document.body.dataset.reportSrc || '/reports/demo/report.json';
+    const u = new URLSearchParams(location.search).get('report') || document.body.dataset.reportSrc;
     loadReport(u);
   };
   document.getElementById('sample').onclick = ()=>{ renderReport(sample); document.getElementById('status').textContent='Loaded sample (no fetch).'; };
@@ -399,9 +368,9 @@
   const auto = new URLSearchParams(location.search).get('report') || document.body.dataset.reportSrc;
   if(auto){ loadReport(auto); }
 
-  // safety: overlays off on load
+  // safety: make sure busy/overlays are off on load
   window.addEventListener('load', ()=>{ try{ busy.hidden=true; document.getElementById('progressOverlay').hidden=true; document.getElementById('videoOverlay').hidden=true; }catch(_){} });
-  document.getElementById('hideOverlay').onclick = ()=>{ document.getElementById('progressOverlay').hidden=true; document.getElementById('videoOverlay').hidden=true; busy.hidden=true; };
+  document.getElementById('hideOverlay').onclick   = ()=>{ document.getElementById('progressOverlay').hidden=true; document.getElementById('videoOverlay').hidden=true; busy.hidden=true; };
   </script>
 </body>
 </html>
