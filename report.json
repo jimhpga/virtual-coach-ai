@@ -1,9 +1,7 @@
 {
   "swings": 1,
   "discipline": "full-swing",
-
   "power": { "score": 82, "tempo": "3.2:1", "release_timing": 68 },
-
   "swing_metrics": [
     { "label": "Right Arm Angle",         "value": 84, "tags": ["arm-bend"] },
     { "label": "Club Face Angle",         "value": 79, "tags": ["face-angle"] },
@@ -14,7 +12,6 @@
     { "label": "Face-to-Path",            "value": 66, "tags": ["face-angle"] },
     { "label": "Attack Angle",            "value": 62, "tags": ["delivery"] }
   ],
-
   "position_metrics": [
     { "p": "P1", "value": 90 },
     { "p": "P2", "value": 74 },
