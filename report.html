@@ -76,6 +76,7 @@
 
     /* busy pill */
     .busy{position:fixed;top:12px;right:12px;background:var(--panel);border:1px solid #224355;border-radius:999px;padding:8px 12px;display:flex;gap:8px;align-items:center;box-shadow:var(--shadow);z-index:10000}
+    .busy[hidden]{display:none!important}
     .spinner{width:18px;height:18px;border:3px solid #2a3f4d;border-top-color:#5eb3ff;border-radius:50%;animation:spin 1s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
   </style>
@@ -151,9 +152,30 @@
       <div class="sub">Click a P-section to expand. Use the Focus filter to dim everything except what you care about.</div>
       <div id="plist"></div>
     </section>
+
+    <!-- Coaching Card -->
+    <section class="card" style="margin-top:12px">
+      <h3>Coaching Card</h3>
+      <div class="content">
+        <details class="panel" open>
+          <summary><span class="pname">Top 3 Priority Fixes</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div id="coachPriority"></div>
+        </details>
+        <details class="panel" style="margin-top:10px">
+          <summary><span class="pname">Top 3 Power Fixes</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div id="coachPower"></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- 14‑Day Practice Plan -->
+    <section class="card" style="margin-top:12px">
+      <h3>14‑Day Practice Plan</h3>
+      <div id="practice" class="content"></div>
+    </section>
   </div>
 
-  <!-- Progress Overlay -->
+  <!-- Progress Overlay (for future use; not shown during report load) -->
   <div id="progressOverlay" class="overlay" hidden>
     <div class="overlay-card">
       <h2><span class="spinner" style="margin-right:8px"></span>Analyzing your swing…</h2>
@@ -182,7 +204,7 @@
   </div>
 
   <script>
-  // ---------- State ----------
+  // ---------- State & helpers ----------
   const busy = document.getElementById('busy');
   const setBusy = (on, text) => { try{ busy.hidden = !on; if(text) document.getElementById('busyText').textContent = text; }catch(_){} };
   document.getElementById('date').textContent = new Date().toLocaleDateString();
@@ -192,6 +214,7 @@
   const metricRow = m => `<div class="metric" data-tags="${(m.tags||[]).join(' ')}"><div class="name">${m.label}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
   const posRow    = p => `<div class="metric"><div class="name">${p.p}</div><div class="bar"><span class="${band(p.value)}" style="width:${p.value}%"></span></div><div class="pct">${fmt(p.value)}</div></div>`;
 
+  // -------- Renderers --------
   function renderReport(data){
     if(data.discipline){ document.getElementById('modeLabel').textContent = /putt/i.test(data.discipline)?'Putting':/chip/i.test(data.discipline)?'Chipping':'Full Swing'; }
     if(data.swings!=null){ document.getElementById('swingCount').textContent = String(data.swings); }
@@ -207,7 +230,18 @@
       <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo}</div></div>
       <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
 
-    const phases = data.phases||[];
+    // P1–P9 (fallback if phases missing)
+    let phases = Array.isArray(data.phases) ? data.phases.slice() : [];
+    if(!phases.length){
+      const names = ['Setup','Shaft Parallel (Backswing)','Lead Arm Parallel (Backswing)','Top of Swing','Lead Arm Parallel (Downswing)','Shaft Parallel (Downswing)','Impact','Trail Arm Parallel (Follow‑Through)','Finish'];
+      const pm = data.position_metrics||[];
+      for(let i=0;i<9;i++){
+        const pid = 'P'+(i+1);
+        const m = pm.find(x=>String(x.p).toUpperCase()===pid) || {value:0};
+        const g = m.value>=75?'good':m.value>=55?'ok':'bad';
+        phases.push({id:pid,name:names[i],short:'',long:'',grade:g});
+      }
+    }
     const plist = document.getElementById('plist');
     plist.innerHTML = phases.map((ph,i)=>`
       <details ${i===0?'open':''} class="panel">
@@ -218,18 +252,56 @@
           <button class="btn view-video" data-url="${ph.video||ph.video_url||''}">View Video</button>
         </div>
       </details>
-    `).join('') || '<div class="sub">No phases.</div>';
+    `).join('');
+
+    renderCoaching(data);
+    renderPractice(data);
   }
 
+  function renderCoaching(data){
+    const pri = (data.coaching && Array.isArray(data.coaching.priority_fixes)) ? data.coaching.priority_fixes : [
+      {title:'Clubface control at P7 (impact)', short:'Match face to path window.', long:'Your face angle is drifting open at P6→P7. Prioritize a neutral grip check and lead‑wrist flexion (bowing) from P5→P6. Rehearse 8 reps of half‑swings keeping the logo to target through P7.'},
+      {title:'Lower body sequence', short:'Clear hips before hands.', long:'You’re firing the hands early. Feel the lead hip clear as pressure shifts to lead heel from P4. Use step‑through drill: backswing, step toward target as you start down.'},
+      {title:'Hand path width', short:'Avoid across-the-line.', long:'At P3 your hand path narrows. Rehearse pump‑downs: P3 → mini P4 → P5 with a wide feel, trail elbow connected.'}
+    ];
+    const pow = (data.coaching && Array.isArray(data.coaching.power_fixes)) ? data.coaching.power_fixes : [
+      {title:'Tempo 3:1', short:'Smooth it out.', long:'Backswing too quick. Count “one‑two‑three” back, “one” through. Use metronome 72 bpm, strike on every 4th tick.'},
+      {title:'Lead‑leg brake', short:'Post into lead side.', long:'Plant lead heel from P4 and straighten lead leg through P5–P6. Towel under lead heel to feel pressure shift.'},
+      {title:'Late release timing', short:'Deliver speed at P7–P8.', long:'Hold wrist angles to P6, then unhinge through impact. Two‑tee gate at ball for feedback.'}
+    ];
+    const mk = item=>`<details class="panel"><summary><span class="pname">${item.title}</span><span class="sub" style="margin-left:8px">${item.short||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary><div class="content">${item.long||''}</div></details>`;
+    document.getElementById('coachPriority').innerHTML = pri.map(mk).join('');
+    document.getElementById('coachPower').innerHTML   = pow.map(mk).join('');
+  }
+
+  function renderPractice(data){
+    const plan = (data.practice_plan && Array.isArray(data.practice_plan)) ? data.practice_plan : Array.from({length:14},(_,i)=>({
+      day:i+1,
+      title:(i%2? 'Contact + Face' : 'Tempo + Sequence'),
+      drills:[
+        '9‑to‑3 drill × 15 balls (clip P6→P8).',
+        'Step‑through swing × 10 focusing on lead‑leg brake.',
+        'Gate drill at impact × 15 balls.'
+      ]
+    }));
+    document.getElementById('practice').innerHTML = plan.map(d=>`
+      <details class="panel" ${d.day===1?'open':''}>
+        <summary><span class="pname">Day ${d.day}</span> <span class="sub" style="margin-left:8px">${d.title||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
+        <div class="content">${(d.drills||[]).map(x=>`<div>• ${x}</div>`).join('')||'<div class="sub">No drills provided.</div>'}</div>
+      </details>
+    `).join('');
+  }
+
+  // -------- Loader & events --------
   async function loadReport(url){
     const s=document.getElementById('status'), e=document.getElementById('error');
-    e.textContent=''; s.textContent='Loading '+url+'…'; setBusy(true,'Loading report…');
+    e.textContent=''; s.textContent='Loading '+url+'…';
     try{
       const res = await fetch(url,{cache:'no-store'});
-      if(!res.ok){ s.textContent=''; e.textContent='Could not load report ('+res.status+'). Check path: '+url; setBusy(false); return; }
+      if(!res.ok){ s.textContent=''; e.textContent='Could not load report ('+res.status+'). Check path: '+url; return; }
       const data = await res.json();
-      renderReport(data); s.textContent='Loaded report: '+url; setBusy(false);
-    }catch(err){ s.textContent=''; e.textContent='Failed to load report: '+(err?.message||String(err)); setBusy(false); }
+      renderReport(data); s.textContent='Loaded report: '+url;
+    }catch(err){ s.textContent=''; e.textContent='Failed to load report: '+(err?.message||String(err)); }
   }
 
   // sample data to prove UI without fetch
@@ -244,52 +316,9 @@
       {id:'P5',name:'Lead Arm Parallel (Downswing)',short:'Arm drops inside',long:'—',grade:'good'},
       {id:'P6',name:'Shaft Parallel (Downswing)',short:'Shallowing, trail elbow leads',long:'—',grade:'good'},
       {id:'P7',name:'Impact',short:'Hips open, shaft lean',long:'—',grade:'ok'},
-      {id:'P8',name:'Trail Arm Parallel (Follow-Through)',short:'Balanced extension',long:'—',grade:'good'},
+      {id:'P8',name:'Trail Arm Parallel (Follow‑Through)',short:'Balanced extension',long:'—',grade:'good'},
       {id:'P9',name:'Finish',short:'Upright, balanced',long:'—',grade:'good'}] };
 
-  // ---------- Overlay / meter ----------
-  const Overlay = (()=>{
-    const root = document.getElementById('progressOverlay');
-    const fill = document.getElementById('progressFill');
-    const sub  = document.getElementById('progressSub');
-    const list = document.getElementById('statusList');
-    const msg  = document.getElementById('overlayMsg');
-    const eta  = document.getElementById('eta');
-    const actions = document.getElementById('overlayActions');
-    const steps = [
-      {key:'upload', label:'Uploading video'},
-      {key:'extract',label:'Extracting frames (P1–P9)'},
-      {key:'pose',   label:'Pose estimation'},
-      {key:'analyze',label:'Biomechanics + club math'},
-      {key:'report', label:'Building reports & thumbnails'}
-    ];
-    let last=0, watchdog=null;
-    function renderList(active){ list.innerHTML = steps.map((s,i)=>`<li class='status-item ${i<active?"done":i===active?"active":""}'><span class='dot'></span><span>${s.label}</span></li>`).join(''); }
-    function notice(text='', error=false){ msg.textContent=text; msg.className='eta '+(error?'error':(text?'notice':'')); }
-    return {
-      start(){ root.hidden=false; fill.style.width='0%'; sub.textContent='Preparing'; renderList(0); notice(''); actions.classList.remove('show'); setBusy(true,'Uploading video…'); last=Date.now(); this.startWatchdog(); },
-      set(p,label){ fill.style.width = Math.max(0,Math.min(100,p))+'%'; if(label) sub.textContent = label; last=Date.now(); notice(''); },
-      complete(){ clearInterval(watchdog); setBusy(false); setTimeout(()=>root.hidden=true, 300); },
-      fail(reason='Something went wrong'){ clearInterval(watchdog); notice(reason,true); actions.classList.add('show'); setBusy(true,'Error'); },
-      renderList,
-      startWatchdog(){ clearInterval(watchdog); const STALL=30000,HARD=180000; watchdog=setInterval(()=>{ const idle=Date.now()-last; if(idle>HARD) this.fail('Processing stalled. Please retry.'); else if(idle>STALL) { notice('Still working… taking longer than expected. You can Retry or Cancel.'); actions.classList.add('show'); } },1000); },
-      steps
-    };
-  })();
-
-  document.getElementById('overlayRetry').onclick = ()=>{ Overlay.start(); demoProgress(); };
-  document.getElementById('overlayCancel').onclick = ()=>{ Overlay.complete(); };
-  document.getElementById('hideOverlay').onclick   = ()=>{ document.getElementById('progressOverlay').hidden=true; document.getElementById('videoOverlay').hidden=true; setBusy(false); };
-
-  function demoProgress(){
-    const durs=[800,1000,1200,1000,800], pcts=[10,40,70,90,100];
-    let i=0; (function run(){ if(i>=pcts.length){ Overlay.complete(); return; }
-      Overlay.renderList(i); const label=Overlay.steps[i].label+'…'; const start=i? pcts[i-1]:0; const end=pcts[i]; const st=performance.now();
-      (function loop(now){ const t=Math.min(1,(now-st)/durs[i]); const pct=Math.round(start+(end-start)*t); Overlay.set(pct,label); if(t<1){ requestAnimationFrame(loop);} else { i++; setTimeout(run,120);} })(st);
-    })();
-  }
-
-  // ---------- Events ----------
   document.getElementById('reload').onclick = ()=>{
     const u = new URLSearchParams(location.search).get('report') || document.body.dataset.reportSrc || '/reports/demo/report.json';
     loadReport(u);
@@ -313,6 +342,10 @@
   // auto-load report if provided
   const auto = new URLSearchParams(location.search).get('report') || document.body.dataset.reportSrc;
   if(auto){ loadReport(auto); }
+
+  // safety: make sure busy/overlays are off on load
+  window.addEventListener('load', ()=>{ try{ busy.hidden=true; document.getElementById('progressOverlay').hidden=true; document.getElementById('videoOverlay').hidden=true; }catch(_){} });
+  document.getElementById('hideOverlay').onclick   = ()=>{ document.getElementById('progressOverlay').hidden=true; document.getElementById('videoOverlay').hidden=true; busy.hidden=true; };
   </script>
 </body>
 </html>
