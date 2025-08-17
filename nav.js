@@ -1,6 +1,13 @@
 <!-- /nav.js -->
 <script>
 (function(){
+  function canon(path){
+    // normalize /index.html → /  and  *.html → no extension  and remove trailing /
+    return (path||'/')
+      .replace(/\/index\.html$/i,'/')
+      .replace(/\.html$/i,'')
+      .replace(/\/$/,'');
+  }
   function mountNav(){
     var m = document.getElementById('navMount');
     if(!m) return;
@@ -9,13 +16,17 @@
       .then(function(html){
         m.innerHTML = html;
         try{
-          var here = (location.pathname.replace(/\/index\.html$/,'/') || '/');
+          var here = canon(location.pathname);
           m.querySelectorAll('[data-nav]').forEach(function(a){
-            if(a.getAttribute('href')===here){a.classList.add('active')}
+            var href = a.getAttribute('href')||'/';
+            var target = canon(href);
+            if(here === target){ a.classList.add('active'); }
           });
         }catch(e){}
-      }).catch(function(){});
+      })
+      .catch(function(){ /* ignore */ });
   }
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',mountNav)}else{mountNav()}
+  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', mountNav); }
+  else{ mountNav(); }
 })();
 </script>
