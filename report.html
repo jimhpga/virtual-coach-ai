@@ -47,6 +47,10 @@
     .info-btn{margin-left:8px;font-size:12px;line-height:1;background:rgba(255,255,255,.75);border:1px solid #d3e3ee;border-radius:999px;padding:4px 8px;cursor:pointer}
     .info-btn:hover{background:#fff}
     .info-callout{margin-top:10px;background:rgba(255,255,255,.65);border:1px solid #d8eaf6;border-radius:12px;padding:10px;color:#0c2433}
+    /* Reference Video button */
+    .video-btn{margin-left:8px;font-size:12px;line-height:1;background:rgba(255,255,255,.9);border:1px solid #d3e3ee;border-radius:999px;padding:4px 8px;cursor:pointer}
+    .video-btn:hover{background:#fff}
+    .video-btn::before{content:"▶";display:inline-block;margin-right:6px;font-size:11px}
     /* Hide debug panel */
     #debug{display:none!important}
 </style>
@@ -158,13 +162,27 @@ function renderReport(d){
        <div class="content">
          <div class="sub" style="margin-bottom:8px">${ph.short||''}</div>
          <div style="margin-bottom:10px">${ph.long||''}</div>
+         <div><button class="video-btn" type="button" data-q="golf ${ph.id} ${ph.name} drill">Reference Video</button></div>
        </div>
      </details>`
   ).join('');
 
   const pri=(d.coaching&&Array.isArray(d.coaching.priority_fixes))?d.coaching.priority_fixes:defaultPri;
   const pow=(d.coaching&&Array.isArray(d.coaching.power_fixes))?d.coaching.power_fixes:defaultPow;
-  const mk=i=>`<details class="panel"><summary><span class="pname">${i.title}</span><span class="sub" style="margin-left:8px">${i.short||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary><div class="content">${i.long||''}</div></details>`;
+  const mk = i => `
+  <details class="panel">
+    <summary>
+      <span class="pname">${i.title}</span>
+      <span class="sub" style="margin-left:8px">${i.short||''}</span>
+      <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </summary>
+    <div class="content">
+      ${i.long||''}
+      <div style="margin-top:8px">
+        <button class="video-btn" type="button" data-q="golf ${i.title} drill">Reference Video</button>
+      </div>
+    </div>
+  </details>`;
   $('#coachPriority').innerHTML = pri.map(mk).join('');
   $('#coachPower').innerHTML   = pow.map(mk).join('');
 }
@@ -288,6 +306,15 @@ const sample={
       if(t){ t.hidden=!t.hidden; }
     });
   });
-</script>
+
+// Reference Video buttons → open YouTube search in new tab (no regex to keep GitHub happy)
+document.addEventListener('click',(e)=>{
+  const btn=e.target.closest('.video-btn');
+  if(!btn) return;
+  const q=(btn.getAttribute('data-q')||'').trim();
+  const url='https://www.youtube.com/results?search_query='+encodeURIComponent(q);
+  window.open(url,'_blank','noopener');
+});
+</script></script>
 </body>
 </html>
