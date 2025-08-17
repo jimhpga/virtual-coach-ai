@@ -207,9 +207,9 @@ ${cleaned.slice(0,240)}`;
   }catch(err){
     er.textContent='Failed to load report: '+(err&&err.message?err.message:String(err));
     if (dbg) {
-      dbg.textContent += "
+      dbg.textContent += `
 
-ERROR: " + (err && err.stack ? err.stack : err);
+ERROR: ${err && err.stack ? err.stack : err}`;
       document.getElementById('debug').open = true;
     }
     renderReport(sample);
