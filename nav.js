@@ -1,8 +1,6 @@
-<!-- /nav.js -->
-<script>
+// /nav.js  (pure JS!)
 (function(){
   function canon(path){
-    // normalize /index.html → /  and  *.html → no extension  and remove trailing /
     return (path||'/')
       .replace(/\/index\.html$/i,'/')
       .replace(/\.html$/i,'')
@@ -29,4 +27,3 @@
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', mountNav); }
   else{ mountNav(); }
 })();
-</script>
