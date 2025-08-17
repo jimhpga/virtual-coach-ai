@@ -3,12 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Coach AI — Swing Report (Safe Mode, Fixed)</title>
+  <title>Virtual Coach AI — Swing Report (Stable)</title>
   <style>
-    :root{
-      --ink:#0c1f2b; --muted:#3b6178; --accent:#5eb3ff; --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b; --radius:16px;
-      --shadow:0 8px 24px rgba(0,0,0,.18);
-    }
+    :root{ --ink:#0c1f2b; --muted:#3b6178; --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.18); }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;color:#0f2330;font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif;background:#e9f4fb}
@@ -19,11 +16,9 @@
     .sub{color:var(--muted);font-size:13px}
     .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
     .btn,.select{background:rgba(255,255,255,.85);border:1px solid #d3e3ee;border-radius:12px;color:var(--ink);padding:8px 12px;box-shadow:var(--shadow);cursor:pointer}
-    .select{appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#083048" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');background-repeat:no-repeat;background-position:right 10px center;padding-right:36px}
     .badge{background:#fff;border:1px solid #d3e3ee;color:var(--ink);padding:6px 10px;border-radius:999px;font-size:12px}
 
-    .card,details.panel{background:rgba(255,255,255,.30); /* extra see-through */
-      border:1px solid #d8eaf6;border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:saturate(120%) blur(2px)}
+    .card,details.panel{background:rgba(255,255,255,.30);border:1px solid #d8eaf6;border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:saturate(120%) blur(2px)}
     .card h3{margin:0;padding:14px 16px;border-bottom:1px solid #e0edf5;color:var(--ink)}
     .card .content{padding:12px 16px}
 
@@ -47,11 +42,6 @@
 
     .grid{display:grid;grid-template-columns:1fr;gap:14px}
     @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
-
-    .busy{position:fixed;top:12px;right:12px;background:#ffffff;border:1px solid #d3e3ee;border-radius:999px;padding:8px 12px;display:flex;gap:8px;align-items:center;box-shadow:var(--shadow);z-index:10000}
-    .busy[hidden]{display:none!important}
-    .spinner{width:18px;height:18px;border:3px solid #e0edf5;border-top-color:#5eb3ff;border-radius:50%;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body data-report-src="/report.json">
@@ -90,15 +80,18 @@
   </div>
 
 <script>
-const $=s=>document.querySelector(s);
-$('#date').textContent=new Date().toLocaleDateString();
+// --- Init
+const $ = s => document.querySelector(s);
+$('#date').textContent = new Date().toLocaleDateString();
 
-const band=v=>v>=75?'ok':v>=55?'warn':'bad';
-const fmt=v=>`${v}%`;
-const metricRow=m=>`<div class="metric"><div class="name">${m.label}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
-const posRow=p=>`<div class="metric"><div class="name">${p.p}</div><div class="bar"><span class="${band(p.value)}" style="width:${p.value}%"></span></div><div class="pct">${fmt(p.value)}</div></div>`;
+// --- Helpers
+const band = v => v>=75?'ok':v>=55?'warn':'bad';
+const fmt  = v => `${v}%`;
+const metricRow = m => `<div class="metric"><div class="name">${m.label}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
+const posRow    = p => `<div class="metric"><div class="name">${p.p}</div><div class="bar"><span class="${band(p.value)}" style="width:${p.value}%"></span></div><div class="pct">${fmt(p.value)}</div></div>`;
 
-const long={
+const defaultNames=['Setup','Shaft Parallel (Backswing)','Lead Arm Parallel (Backswing)','Top of Swing','Lead Arm Parallel (Downswing)','Shaft Parallel (Downswing)','Impact','Trail Arm Parallel (Follow-Through)','Finish'];
+const defaultLong={
   P1:'Neutral grip (trail hand in fingers), soft knees, pelvis neutral. Pressure 55/45 lead-to-trail; ball position matches club. Spine tall, shoulders relaxed, eye line level.',
   P2:'Shaft parallel with width; hands in front of chest; wrists set gradually. Face near neutral (toe-up); pressure loads trail foot without sway.',
   P3:'Lead arm parallel with full torso turn. Trail elbow folds in front of ribcage; maintain width (~a forearm off chest). Club on plane; head steady.',
@@ -110,78 +103,109 @@ const long={
   P9:'Finish: pressure fully lead side; belt buckle/chest to target; trail toe down. Hold the pose.'
 };
 
+// --- Renderer
 function renderReport(d){
+  if(d.discipline){ $('#modeLabel').textContent = /putt/i.test(d.discipline)?'Putting':/chip/i.test(d.discipline)?'Chipping':'Full Swing'; }
+  if(d.swings!=null){ $('#swingCount').textContent = String(d.swings); }
+
+  const swingArr = Array.isArray(d.swing_metrics)?d.swing_metrics:[];
+  const posArr   = Array.isArray(d.position_metrics)?d.position_metrics:[];
+  $('#swing').innerHTML   = swingArr.map(metricRow).join('') || '<div class="sub">No swing metrics.</div>';
+  $('#position').innerHTML= posArr.map(posRow).join('')     || '<div class="sub">No position metrics.</div>';
+
+  const p=d.power||{score:0,tempo:'—',release_timing:0};
+  $('#power').innerHTML=
+    `<div class="metric"><div class="name">Power Score</div><div class="bar"><span class="${band(p.score)}" style="width:${p.score}%"></span></div><div class="pct">${fmt(p.score)}</div></div>`+
+    `<div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo}</div></div>`+
+    `<div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
+
+  // Build P1–P9 robustly
+  const pm = Array.isArray(d.position_metrics)?d.position_metrics:[];
+  let phases = Array.isArray(d.phases)?d.phases.slice():[];
+  const gradeFromVal = v => v>=75?'good':v>=55?'ok':'bad';
+  const getPmVal = id => { const m=pm.find(x=>String(x.p).toUpperCase()===id); return m?+m.value||0:0; };
+  for(let i=0;i<9;i++){
+    const id='P'+(i+1);
+    const base = phases.find(x=>String(x.id||'').toUpperCase()===id) || {};
+    phases[i] = {
+      id,
+      name: base.name || defaultNames[i],
+      short: base.short || '',
+      long: (base.long && base.long.trim() && base.long.trim()!==(base.short||'').trim()) ? base.long : (defaultLong[id]||''),
+      grade: base.grade || gradeFromVal(getPmVal(id))
+    };
+  }
+  const gradeLabel={good:'Good', ok:'OK', bad:'Needs Help'};
+  $('#plist').innerHTML = phases.map((ph,i)=>
+    `<details ${i===0?'open':''} class="panel">
+       <summary>
+         <span class="pnum">${ph.id}</span>
+         <span class="pname">${ph.name}</span>
+         <span class="gchip g-${ph.grade}" style="margin-left:8px">${gradeLabel[ph.grade]||'OK'}</span>
+         <span class="sub" style="margin-left:8px">${ph.short||''}</span>
+         <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+       </summary>
+       <div class="content">
+         <div class="sub" style="margin-bottom:8px">${ph.short||''}</div>
+         <div style="margin-bottom:10px">${ph.long||''}</div>
+       </div>
+     </details>`
+  ).join('');
+
+  // Coaching
+  const pri=(d.coaching&&Array.isArray(d.coaching.priority_fixes))?d.coaching.priority_fixes:defaultPri;
+  const pow=(d.coaching&&Array.isArray(d.coaching.power_fixes))?d.coaching.power_fixes:defaultPow;
+  const mk=i=>`<details class="panel"><summary><span class="pname">${i.title}</span><span class="sub" style="margin-left:8px">${i.short||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary><div class="content">${i.long||''}</div></details>`;
+  $('#coachPriority').innerHTML = pri.map(mk).join('');
+  $('#coachPower').innerHTML   = pow.map(mk).join('');
+}
+
+const defaultPri=[
+  {title:'Clubface control at P7 (impact)', short:'Match face to path', long:'Face drifting open from P6->P7. Grip audit; bow lead wrist from P5->P6. Rehearse 8 half-swings keeping glove logo at target; video 2.'},
+  {title:'Lower body sequence', short:'Clear hips before hands', long:'From P4 shift to lead heel then rotate pelvis while chest stays closed a beat. Step-through swings x10 slow + x10 normal.'},
+  {title:'Hand path width', short:'Keep width at P3', long:'Pump-downs P3 -> mini P4 -> P5 with trail elbow in front of side seam. 3x10 rehearsals, then 3 balls each set.'}
+];
+const defaultPow=[
+  {title:'Tempo 3:1', short:'Smooth rhythm', long:'Count 1-2-3 back, 1 through. 72 bpm; strike every 4th tick x12, rest, repeat x3.'},
+  {title:'Lead-leg brake', short:'Post into lead side', long:'Plant lead heel from P4, straighten through P5-6. Towel under lead heel; 10 reps then 5 balls.'},
+  {title:'Late release timing', short:'Speed at P7-8', long:'Hold to P6 then unhinge. Two-tee gate; clip both tees post-impact. 2x5; video last 2.'}
+];
+
+// --- JSON cleaning without regex traps
+function cleanJson(t){
+  if(!t) return '';
+  // strip BOM
+  if(t.charCodeAt(0)===0xFEFF) t=t.slice(1);
+  // drop control chars except tab/newline/cr
+  let out='';
+  for(let i=0;i<t.length;i++){ const c=t.charCodeAt(i); if(c===9||c===10||c===13||(c>=32&&c!==127)) out+=t[i]; }
+  // trim to first { or [ and last } or ]
+  let a=out.indexOf('{'); let a2=out.indexOf('['); if(a===-1||(a2!==-1&&a2<a)) a=a2; const b=Math.max(out.lastIndexOf('}'),out.lastIndexOf(']'));
+  if(a>-1&&b>a) out=out.slice(a,b+1);
+  return out.trim();
+}
+
+async function loadReport(url){
+  const st=$('#status'), er=$('#error'), dbg=$('#debugOut');
+  er.textContent=''; st.textContent='Loading '+url+'...'; if(dbg) dbg.textContent='';
   try{
-    if(d.discipline){document.getElementById('modeLabel').textContent=/putt/i.test(d.discipline)?'Putting':/chip/i.test(d.discipline)?'Chipping':'Full Swing';}
-    if(d.swings!=null){document.getElementById('swingCount').textContent=String(d.swings);}
-
-    const swingArr=Array.isArray(d.swing_metrics)?d.swing_metrics:[];
-    const posArr=Array.isArray(d.position_metrics)?d.position_metrics:[];
-    document.getElementById('swing').innerHTML=swingArr.map(metricRow).join('')||'<div class="sub">No swing metrics.</div>';
-    document.getElementById('position').innerHTML=posArr.map(posRow).join('')||'<div class="sub">No position metrics.</div>';
-
-    const p=d.power||{score:0,tempo:'—',release_timing:0};
-    document.getElementById('power').innerHTML=
-      `<div class="metric"><div class="name">Power Score</div><div class="bar"><span class="${band(p.score)}" style="width:${p.score}%"></span></div><div class="pct">${fmt(p.score)}</div></div>`+
-      `<div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo}</div></div>`+
-      `<div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
-
-    const defaultNames=['Setup','Shaft Parallel (Backswing)','Lead Arm Parallel (Backswing)','Top of Swing','Lead Arm Parallel (Downswing)','Shaft Parallel (Downswing)','Impact','Trail Arm Parallel (Follow-Through)','Finish'];
-    const gradeFromVal=v=>v>=75?'good':v>=55?'ok':'bad';
-    const pm=Array.isArray(d.position_metrics)?d.position_metrics:[];
-    let phases=Array.isArray(d.phases)?d.phases.slice():[];
-    const getPmVal=id=>{const m=pm.find(x=>String(x.p).toUpperCase()===id); return m?+m.value||0:0;};
-    for(let i=0;i<9;i++){
-      const id='P'+(i+1); const base=(phases.find(x=>String(x.id||'').toUpperCase()===id))||{};
-      phases[i]={ id,
-        name: base.name||defaultNames[i],
-        short: base.short||'',
-        long: (base.long&&base.long.trim()&&base.long.trim()!==(base.short||'').trim())?base.long:(long[id]||''),
-        grade: base.grade||gradeFromVal(getPmVal(id)) };
-    }
-    const gradeLabel={good:'Good',ok:'OK',bad:'Needs Help'};
-    document.getElementById('plist').innerHTML=phases.map((ph,i)=>
-      `<details ${i===0?'open':''} class="panel">
-        <summary>
-          <span class="pnum">${ph.id}</span>
-          <span class="pname">${ph.name}</span>
-          <span class="gchip g-${ph.grade}" style="margin-left:8px">${gradeLabel[ph.grade]||'OK'}</span>
-          <span class="sub" style="margin-left:8px">${ph.short||''}</span>
-          <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </summary>
-        <div class="content">
-          <div class="sub" style="margin-bottom:8px">${ph.short||''}</div>
-          <div style="margin-bottom:10px">${ph.long||''}</div>
-        </div>
-      </details>`).join('');
-
-    const pri=(d.coaching&&Array.isArray(d.coaching.priority_fixes))?d.coaching.priority_fixes:[];
-    const pow=(d.coaching&&Array.isArray(d.coaching.power_fixes))?d.coaching.power_fixes:[];
-    const mk=i=>`<details class="panel"><summary><span class="pname">${i.title}</span><span class="sub" style="margin-left:8px">${i.short||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary><div class="content">${i.long||''}</div></details>`;
-    document.getElementById('coachPriority').innerHTML=(pri.length?pri:defaultPri).map(mk).join('');
-    document.getElementById('coachPower').innerHTML=(pow.length?pow:defaultPow).map(mk).join('');
-  }catch(ex){
-    document.getElementById('error').textContent='Render error: '+ex.message;
-    const dbg=document.getElementById('debugOut');
-    if(dbg){
-      dbg.textContent = 'RAW (first 240):
-' + raw.slice(0,240) + '
+    const res=await fetch(url,{cache:'no-store'});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const raw=await res.text();
+    const cleaned=cleanJson(raw);
+    if(dbg){ dbg.textContent='RAW (first 240):
+'+raw.slice(0,240)+'
 
 CLEAN (first 240):
-' + cleaned.slice(0,240);
-      document.getElementById('debug').open=true;
-    }
+'+cleaned.slice(0,240); document.getElementById('debug').open=true; }
     const data=JSON.parse(cleaned);
     renderReport(data);
     st.textContent='Loaded: '+url;
   }catch(err){
     er.textContent='Failed to load report: '+(err&&err.message?err.message:String(err));
-    if(dbg){ dbg.textContent+='
+    if(dbg){ dbg.textContent += '
 
 ERROR: '+(err&&err.stack?err.stack:err); document.getElementById('debug').open=true; }
-    renderReport(sample);
-    st.textContent='Loaded SAMPLE (parse failed): '+url;
-  }
     renderReport(sample);
     st.textContent='Loaded SAMPLE (parse failed): '+url;
   }
