@@ -96,16 +96,27 @@ const metricRow = m => `<div class="metric"><div class="name">${m.label}</div><d
 const posRow    = p => `<div class="metric"><div class="name">${p.p}</div><div class="bar"><span class="${band(p.value)}" style="width:${p.value}%"></span></div><div class="pct">${fmt(p.value)}</div></div>`;
 
 const defaultNames=['Setup','Shaft Parallel (Backswing)','Lead Arm Parallel (Backswing)','Top of Swing','Lead Arm Parallel (Downswing)','Shaft Parallel (Downswing)','Impact','Trail Arm Parallel (Follow-Through)','Finish'];
+const defaultShort={
+  P1:'Athletic setup—tall spine, neutral grip, 55/45 pressure.',
+  P2:'Width maintained; toe‑up face; gentle early wrist set.',
+  P3:'Lead arm parallel; full turn; width kept from chest.',
+  P4:'Top: trail hip deep; flatter lead wrist; steady head.',
+  P5:'Transition: pelvis leads; shaft shallows; pressure left.',
+  P6:'Delivery: hands ahead; trail elbow tucked; face square.',
+  P7:'Impact: forward lean; hips open; low point forward.',
+  P8:'Through: extend trail arm; rotate; zero flip.',
+  P9:'Finish: balanced over lead side; hold the pose.'
+};
 const defaultLong={
-  P1:'Neutral grip (trail hand in fingers), soft knees, pelvis neutral. Pressure 55/45 lead-to-trail; ball position matches club. Spine tall, shoulders relaxed, eye line level.',
-  P2:'Shaft parallel with width; hands in front of chest; wrists set gradually. Face near neutral (toe-up); pressure loads trail foot without sway.',
-  P3:'Lead arm parallel with full torso turn. Trail elbow folds in front of ribcage; maintain width (~a forearm off chest). Club on plane; head steady.',
-  P4:'Top: pressure mostly trail heel; trail hip deep. Lead wrist nearer flat/bowed to manage face. Avoid across-the-line/laid-off extremes.',
-  P5:'Transition: pelvis -> torso -> arms. Shaft shallows; trail elbow in front of side seam. Maintain lead-wrist flexion; pressure into lead mid-foot.',
-  P6:'Delivery: shaft parallel; hands slightly ahead. Trail elbow tucked; face in window. Pelvis keeps turning (no stall).',
-  P7:'Impact: forward shaft lean; low point forward. Pelvis 30-45 deg open; chest 10-20 deg open; lead leg braced. Face close to square to path.',
-  P8:'Post-impact: trail arm extends; handle works around (not down the line). Control rate of closure (no flip); chest up/left.',
-  P9:'Finish: pressure fully lead side; belt buckle/chest to target; trail toe down. Hold the pose.'
+  P1:'Address like an athlete: neutral grip (trail hand in fingers), soft knees, pelvis neutral. Feel 55/45 pressure under the arches—lead foot slightly heavier for irons. Chin up, spine long, eyes level. Cue: “zipper tall, arms soft.” Common miss: slumped chest and ball too far back. Fix that first and most setup issues vanish.',
+  P2:'When the shaft is parallel, keep width—hands stay in front of the chest. Allow a gentle wrist set; the face should look close to toe‑up (neutral), not shut or wide open. Feel pressure loading into the trail foot without swaying off the ball. Self‑check: pause here in slow reps; if the clubhead is behind your hands and toe‑up-ish, you’re good.',
+  P3:'Lead arm parallel with the body fully turned. Trail elbow folds in front of the ribcage (not behind it) so you keep width about a forearm off the chest. Club on plane, head steady. Feel: “turn, don’t lift.” If you crowd your chest here, you’ll likely go across‑the‑line later—keep that space.',
+  P4:'At the top, let pressure live mostly in the trail heel; trail hip deep, not sliding. Prefer a flatter/bowed lead wrist over a cupped one to stabilize the face. Head steady, arms soft. If the club gets across‑the‑line or laid off, it’s usually a width/forearm rotation problem earlier—rehearse P3 → P4 without adding extra lift.',
+  P5:'Transition is sequenced: pelvis, then torso, then arms. The shaft shallows a touch as the trail elbow stays in front of your side seam. Keep lead‑wrist flexion to control the face and shift pressure into the lead mid‑foot. Feel: “bump, turn, drop.” If the hands race first, you’ll steepen—slow them down for one beat.',
+  P6:'Delivery position (shaft parallel on the way down): hands slightly ahead of the clubhead, trail elbow tucked, face living in the “window” (not shutting or hanging open). Pelvis keeps turning—no stall. A great checkpoint for strike: if your hands are ahead here, forward shaft lean at impact gets easier.',
+  P7:'Impact isn’t a pose, it’s a pass‑through—but the look is consistent: forward shaft lean, low point forward, hips ~30–45° open, chest ~10–20° open, lead leg braced. Face near square to the path so start‑line isn’t a surprise. Feel: “turn through a firm lead side.”',
+  P8:'Post‑impact, extend that trail arm and let the handle work around you, not straight down the line. Chest turns up and left; rate of closure is controlled—no flip. Divot in front of the ball tells you you delivered loft and struck it solid.',
+  P9:'Finish balanced with everything stacked over the lead side. Belt buckle and chest at the target; trail toe down for balance. If you can freeze the finish without wobble, your motion and tempo were organized.'
 };
 
 function renderReport(d){
@@ -130,7 +141,9 @@ function renderReport(d){
   for(let i=0;i<9;i++){
     const id='P'+(i+1);
     const base = phases.find(x=>String(x.id||'').toUpperCase()===id) || {};
-    phases[i] = { id, name: base.name || defaultNames[i], short: base.short || '', long: (base.long && base.long.trim() && base.long.trim()!==(base.short||'').trim()) ? base.long : (defaultLong[id]||''), grade: base.grade || gradeFromVal(getPmVal(id)) };
+    const shortText = (base.short && base.short.trim().length>24) ? base.short : (defaultShort[id] || base.short || '');
+    const longText  = (base.long && base.long.trim() && base.long.trim()!==(shortText||'').trim()) ? base.long : (defaultLong[id]||'');
+    phases[i] = { id, name: base.name || defaultNames[i], short: shortText, long: longText, grade: base.grade || gradeFromVal(getPmVal(id)) };
   }
   const gradeLabel={good:'Good', ok:'OK', bad:'Needs Help'};
   $('#plist').innerHTML = phases.map((ph,i)=>
@@ -157,14 +170,56 @@ function renderReport(d){
 }
 
 const defaultPri=[
-  {title:'Clubface control at P7 (impact)', short:'Match face to path', long:'Face drifting open from P6->P7. Grip audit; bow lead wrist from P5->P6. Rehearse 8 half-swings keeping glove logo at target; video 2.'},
-  {title:'Lower body sequence', short:'Clear hips before hands', long:'From P4 shift to lead heel then rotate pelvis while chest stays closed a beat. Step-through swings x10 slow + x10 normal.'},
-  {title:'Hand path width', short:'Keep width at P3', long:'Pump-downs P3 -> mini P4 -> P5 with trail elbow in front of side seam. 3x10 rehearsals, then 3 balls each set.'}
+  {
+    title:'Clubface control at P7 (impact)',
+    short:'Match face to path',
+    long:`<p><strong>Problem:</strong> The face drifts open from P6→P7, so starts leak right and you ride the face to save it.</p>
+          <p><strong>Why it matters:</strong> Face-to-path owns start line and curvature. If the face is late, path has to get funky and contact suffers.</p>
+          <p><strong>Feel:</strong> From P5→P6, flex (bow) the lead wrist and point the glove logo more at the target. Keep the logo facing the target through P7—no “roll save.”</p>
+          <p><strong>Drills:</strong></p>
+          <ul>
+            <li><em>Mirror Check:</em> Stop at P6; lead wrist flatter/bowed, leading edge matching spine tilt. 5 slow reps → 5 half swings.</li>
+            <li><em>Tee Gate:</em> Two tees: one at the ball, one 4" ahead. Clip both after impact. That means the face is stable <em>through</em> the ball.</li>
+            <li><em>Impact Bag (soft strikes):</em> Half swings, hold the bag contact for 1 count with bowed lead wrist and shaft lean.</li>
+          </ul>
+          <p><strong>Prescription:</strong> 3 sets × (5 rehearsals + 5 half swings + 3 full swings). Video the last 2 full swings each set.</p>
+          <p><strong>Quick checks:</strong> Ball starts closer to target; divot slightly ahead; no “face flip” in follow-through.</p>`
+  },
+  {
+    title:'Lower body sequence',
+    short:'Clear hips before hands',
+    long:`<p><strong>Problem:</strong> Hands jump first from P4, path steepens, then the face has to flip to square—timing roulette.</p>
+          <p><strong>Why:</strong> Efficient kinematic sequence is pelvis → torso → arms → club. Let the ground reaction force (lead side) unwind the system.</p>
+          <p><strong>Feel:</strong> From the top, <em>plant</em> the lead heel, post into the lead leg, and spin the belt buckle open while the chest stays closed for a beat.</p>
+          <p><strong>Drills:</strong></p>
+          <ul>
+            <li><em>Step‑Through:</em> Make a backswing, step into the lead foot as you start down, swing to balance. 2×10 reps, then 10 normal swings with the same feel.</li>
+            <li><em>Post & Turn:</em> Without a ball, bump into the lead hip, straighten the lead leg as the pelvis keeps turning. 3×8 rehearsals.</li>
+            <li><em>Split‑Stance Swings:</em> Narrow stance, lead toe flared; make 8 half swings feeling pressure driven into the lead heel.</li>
+          </ul>
+          <p><strong>Prescription:</strong> 3 blocks (8 rehearsals + 6 balls). “Tall finish” must be holdable for 2 counts.</p>
+          <p><strong>Quick checks:</strong> By P6 you feel pressure under the lead heel; chest not stalling; contact moves slightly forward.</p>`
+  },
+  {
+    title:'Hand path width',
+    short:'Keep width at P3',
+    long:`<p><strong>Problem:</strong> Width collapses by P3; trail elbow sneaks behind you → across‑the‑line or steep reroute later.</p>
+          <p><strong>Why:</strong> Losing width early kills space and speed. Width keeps the club organized and makes shallowing automatic.</p>
+          <p><strong>Feel:</strong> Imagine a small beach ball between sternum and hands—keep that forearm‑off‑chest gap. Trail elbow stays in front of your side seam.</p>
+          <p><strong>Drills:</strong></p>
+          <ul>
+            <li><em>Pump‑Downs:</em> Rehearse P3 → mini P4 → P5 without collapsing the gap. 3×10 rehearsals.</li>
+            <li><em>Split‑Hand Backswings:</em> Hands split by 2–3 inches; go to P3 maintaining width, then normal swings with the same feel.</li>
+            <li><em>Stick Under Arms (lightly):</em> Short stick across biceps; turn to P3 keeping light contact—don’t crush it.</li>
+          </ul>
+          <p><strong>Prescription:</strong> 2 sets × (10 rehearsals + 6 balls). Film one from face‑on—check that hands stay a forearm’s width from the chest at P3.</p>
+          <p><strong>Quick checks:</strong> Top is less across‑the‑line; delivery shallows easier; start‑line more predictable.</p>`
+  }
 ];
 const defaultPow=[
-  {title:'Tempo 3:1', short:'Smooth rhythm', long:'Count 1-2-3 back, 1 through. 72 bpm; strike every 4th tick x12, rest, repeat x3.'},
-  {title:'Lead-leg brake', short:'Post into lead side', long:'Plant lead heel from P4, straighten through P5-6. Towel under lead heel; 10 reps then 5 balls.'},
-  {title:'Late release timing', short:'Speed at P7-8', long:'Hold to P6 then unhinge. Two-tee gate; clip both tees post-impact. 2x5; video last 2.'}
+  {title:'Tempo 3:1', short:'Smooth, athletic rhythm', long:'Let’s make the swing feel unhurried going back and decisive through. Count “one‑two‑three” to the top and “one” through the ball. Use a metronome at ~72 bpm—hit every 4th tick for 12 balls, rest, repeat x3. Feel: the club is light on the way back and heavy through impact. Common miss: rushing the start. Fix: exhale at takeaway and keep your head still for the first beat.'},
+  {title:'Lead‑leg brake', short:'Post into the lead side', long:'I want you to “hit the brakes” with the lead leg so the upper body can unwind. From P4, plant the lead heel and feel the lead leg straighten as the hips keep turning. Cue: push the ground away under the lead foot. Drill: towel under the lead heel—10 rehearsals, then 5 balls, repeat x3. Success check: you feel pressure under the lead heel by P5 and can hold a tall finish.'},
+  {title:'Late release timing', short:'Hold, then let it go', long:'We’re saving the hit for after P6. Feel the angles (hinge and wrist flex) stay intact to delivery, then release through the ball—don’t throw early. Drill: two‑tee gate (one at the ball, one 4" ahead). Clip both tees after impact. Do 2×5 swings; video the last two to confirm the release is past the ball. Cue: “carry the lag to the front tee, then whip.”'}
 ];
 
 function cleanJson(t){
