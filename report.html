@@ -6,159 +6,108 @@
 <title>Virtual Coach AI — Swing Report</title>
 <style>
 :root{
-  --bg:#0e1a22; --panel:#16242e; --muted:#8aa5b5; --text:#ecf3f7; --accent:#5eb3ff;
-  --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b; --radius:16px; --chip:#1d2f3b;
-  --shadow:0 8px 24px rgba(0,0,0,.35);
-  --bgimg-opacity:.70; /* brighter background image */
+  --bg:#0e1a22; --text:#ecf3f7; --muted:#9fb8c7; --accent:#5eb3ff;
+  --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b;
+  --panel:rgba(22,36,46,.62); --panel-brd:rgba(34,55,67,.65);
+  --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.35);
+  --bgimg-opacity:.70; /* brighten background photo */
 }
 *{box-sizing:border-box} html,body{height:100%}
-body{margin:0;color:var(--text);font:16px/1.45 system-ui, -apple-system, Segoe UI, Inter, Roboto, Helvetica, Arial, sans-serif;background:#0e1a22}
+body{margin:0;color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif;background:var(--bg)}
+.bg{position:fixed;inset:0;background:url('/homepage-background.png') center/cover no-repeat fixed;opacity:var(--bgimg-opacity);filter:brightness(1.22) saturate(1.05);z-index:-1}
 
-/* full-bleed golf course background (no dark overlay) */
-.bg{position:fixed;inset:0;background:url('/homepage-background.png') center/cover no-repeat fixed;opacity:var(--bgimg-opacity);z-index:-1}
-
-/* TOP NAV – dark green */
-.topbar{position:sticky;top:0;z-index:1000;background:rgba(10,80,55,.95);backdrop-filter:saturate(120%) blur(6px);border-bottom:1px solid rgba(0,0,0,.25)}
-.topbar .inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px}
-.topbar .brand{display:flex;align-items:center;gap:10px;color:#e9fbf3;font-weight:800;letter-spacing:.2px;text-decoration:none}
-.topbar .brand img{height:28px;width:auto}
-.topbar .nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.topbar .nav a{display:inline-block;padding:8px 10px;border-radius:10px;color:#e9fbf3;text-decoration:none;border:1px solid transparent}
-.topbar .nav a:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18)}
-.topbar .nav a.active{background:#0fa36b;border-color:#0fa36b;color:#062a1d}
-
-/* layout */
 .wrap{max-width:1080px;margin:24px auto;padding:0 16px}
-header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin:8px 0 16px}
-.title{font-size:26px;font-weight:800;letter-spacing:.2px}
+h1,h2,h3{margin:0}
 .sub{color:var(--muted);font-size:13px}
+.header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:10px 0 14px}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+.btn,.select{background:rgba(22,36,46,.85);border:1px solid #223743;color:var(--text);padding:8px 12px;border-radius:12px;cursor:pointer}
+.select{appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');background-repeat:no-repeat;background-position:right 10px center;padding-right:36px}
+.badge{background:rgba(29,47,59,.55);border:1px solid #263b48;color:#cfe3ee;padding:6px 10px;border-radius:999px;font-size:12px}
 
-.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.btn,.select{background:rgba(22,36,46,.82);border:1px solid #223743;border-radius:12px;color:var(--text);padding:8px 12px;box-shadow:var(--shadow);cursor:pointer}
-.select{appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');background-repeat:no-repeat;background-position:right 10px center;padding-right:36px}
-.badge{background:rgba(29,47,59,.6);border:1px solid #263b48;color:#cfe3ee;padding:6px 10px;border-radius:999px;font-size:12px}
-
-/* cards (lighter alpha → more see-through) */
-.card,details.panel{background:rgba(22,36,46,.58);border:1px solid rgba(34,55,67,.7);border-radius:var(--radius);box-shadow:var(--shadow)}
-.card h3{margin:0;padding:14px 16px;border-bottom:1px solid rgba(31,51,64,.7)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+.card,details.panel{background:var(--panel);border:1px solid var(--panel-brd);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card h3{padding:14px 16px;border-bottom:1px solid rgba(31,51,64,.75)}
 .card .content{padding:12px 16px}
-.grid{display:grid;grid-template-columns:1fr;gap:14px}
-@media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
-
-summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer}
+summary{list-style:none;display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer}
 summary::-webkit-details-marker{display:none}
-.pnum{width:34px;height:34px;border-radius:10px;background:rgba(12,24,32,.7);border:1px solid #223743;display:grid;place-items:center;font-weight:800}
+.pnum{width:34px;height:34px;border-radius:10px;background:rgba(12,24,32,.85);border:1px solid #223743;display:grid;place-items:center;font-weight:800}
 .pname{font-weight:700}
-.caret{margin-left:auto;transition:transform .2s ease}
-details[open] .caret{transform:rotate(180deg)}
+.caret{margin-left:auto;transition:transform .2s ease} details[open] .caret{transform:rotate(180deg)}
 
-/* grade chips with white text & color backgrounds */
-.gchip{font-size:12px;font-weight:800;padding:3px 8px;border-radius:8px;border:1px solid transparent}
-.g-good{background:#0fa36b;color:#fff;border-color:#0fa36b}       /* GOOD = green */
-.g-ok{background:#c28b00;color:#fff;border-color:#c28b00}         /* OK = yellow  */
-.g-bad{background:#b13333;color:#fff;border-color:#b13333}        /* NEEDS HELP = red */
+.grade{display:inline-block;padding:3px 8px;border-radius:8px;font-size:12px;font-weight:800;color:#fff}
+.grade.good{background:var(--ok)} .grade.ok{background:var(--warn)} .grade.bad{background:var(--bad)}
+.meta{display:flex;gap:10px;flex-wrap:wrap}
 
-/* metric rows */
 .metric{display:flex;align-items:center;gap:10px;margin:9px 0}
-.metric .name{flex:0 0 260px;color:#cfe3ee;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.metric .name{flex:0 0 210px;color:#cfe3ee}
 .bar{flex:1;height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}
 .bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
-.ok{background:linear-gradient(90deg,var(--ok),#2bd897)}
-.warn{background:linear-gradient(90deg,var(--warn),#ffd479)}
-.bad{background:linear-gradient(90deg,var(--bad),#ff8f8f)}
+.okbar{background:linear-gradient(90deg,var(--ok),#2bd897)}
+.warnbar{background:linear-gradient(90deg,var(--warn),#ffd479)}
+.badbar{background:linear-gradient(90deg,var(--bad),#ff8f8f)}
 .pct{width:52px;text-align:right;color:#cfe3ee}
-.focus-dim{opacity:.35;filter:saturate(.5)}
 
-.info-btn{margin-left:8px;font-size:12px;line-height:1;background:rgba(255,255,255,.85);border:1px solid #d3e3ee;border-radius:999px;padding:4px 8px;cursor:pointer;color:#0b2230}
-.info-btn:hover{background:#fff}
-
-/* reference video (kept for P1–P9 + Coaching only) */
-.video-btn{margin-left:8px;font-size:12px;line-height:1;background:rgba(255,255,255,.9);border:1px solid #d3e3ee;border-radius:999px;padding:4px 8px;cursor:pointer;color:#0b2230}
-.video-btn:hover{background:#fff}
-.video-btn::before{content:"▶";display:inline-block;margin-right:6px;font-size:11px}
-
-/* busy pill */
-.busy{position:fixed;top:12px;right:12px;background:rgba(22,36,46,.8);border:1px solid #224355;border-radius:999px;padding:8px 12px;display:flex;gap:8px;align-items:center;box-shadow:var(--shadow);z-index:10000}
-.busy[hidden]{display:none!important}
-.spinner{width:18px;height:18px;border:3px solid #2a3f4d;border-top-color:#5eb3ff;border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-#debug{display:none!important}
+.info{background:rgba(22,36,46,.85);border:1px solid #224355;border-radius:10px;padding:6px 10px;font-size:12px;cursor:pointer}
+.kit{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.hidden{display:none}
 </style>
 </head>
-
 <body data-report-src="/reports/demo/report.json">
+  <!-- Shared nav (2 lines) -->
+  <div id="navMount"></div>
+  <script src="/nav.js" defer></script>
+
   <div class="bg" aria-hidden="true"></div>
 
-  <nav class="topbar" role="navigation" aria-label="Main">
-    <div class="inner">
-      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="" onerror="this.remove()"><span>Virtual Coach AI</span></a>
-      <div class="nav">
-        <a href="/" data-nav>Home</a>
-        <a href="/upload.html" data-nav>Upload</a>
-        <a href="/reports.html" data-nav>Reports</a>
-        <a href="/report.html" data-nav>Report</a>
-        <a href="/pricing.html" data-nav>Pricing</a>
-        <a href="/faq.html" data-nav>FAQ</a>
-        <a href="/contact.html" data-nav>Contact</a>
-        <a href="/login.html" data-nav>Login</a>
-      </div>
-    </div>
-  </nav>
-
-  <div id="busy" class="busy" hidden><span class="spinner" aria-hidden="true"></span><span id="busyText">Processing…</span></div>
-
-  <div class="wrap">
-    <header>
+  <main class="wrap">
+    <div class="header">
       <div>
-        <div class="title">Swing Report — P1–P9</div>
+        <h1>Swing Report — P1–P9</h1>
         <div class="sub">Date: <span id="date"></span> • Mode: <span id="modeLabel">Full Swing</span></div>
       </div>
-      <div class="toolbar">
-        <label class="badge">Swings: <span id="swingCount">1</span></label>
-        <select id="discipline" class="select" title="Shot type">
-          <option value="full-swing" selected>Full Swing</option>
-          <option value="chipping">Chipping</option>
-          <option value="putting">Putting</option>
-        </select>
+      <div class="tools">
+        <span class="badge">Swings: <span id="swingCount">1</span></span>
         <select id="focus" class="select" title="Focus filter">
           <option value="all" selected>Focus: All</option>
           <optgroup label="Upper Body">
             <option value="right-wrist">Right Wrist</option>
             <option value="left-wrist">Left Wrist</option>
             <option value="arm-bend">Arm Bend</option>
-            <option value="hand-path">Hand Path</option>
             <option value="shoulder-turn">Shoulder Turn</option>
           </optgroup>
           <optgroup label="Lower Body">
             <option value="hip-movement">Hip Movement</option>
             <option value="knee-movement">Knee Movement</option>
             <option value="foot-movement">Foot / Pressure</option>
-            <option value="lead-leg-brake">Lead Leg Braking</option>
           </optgroup>
           <optgroup label="Club">
             <option value="club-path">Club Path</option>
-            <option value="face-angle">Club Face Angle</option>
+            <option value="face-angle">Face Angle</option>
             <option value="tempo">Timing & Tempo</option>
           </optgroup>
         </select>
-        <button id="expandAll" class="btn" type="button">Expand All</button>
-        <button id="collapseAll" class="btn" type="button">Collapse All</button>
         <button id="reload" class="btn" type="button">Reload</button>
-        <button id="sample" class="btn" type="button">Load Sample</button>
+        <button id="share" class="btn" type="button">Share</button>
+        <button id="pdf" class="btn" type="button">Download PDF</button>
       </div>
-    </header>
+    </div>
 
-    <div class="sub" id="status"></div>
-    <div class="sub" id="error" style="color:#ff9a9a"></div>
+    <div id="status" class="sub"></div>
+    <div id="error" class="sub" style="color:#ff9a9a"></div>
 
     <!-- P1–P9 FIRST -->
-    <section style="margin-top:4px">
-      <div class="sub">Click a P-section to expand. Use Focus to dim what you don’t care about.</div>
-      <div id="plist"></div>
+    <section id="phases" class="card">
+      <h3 style="display:flex;align-items:center;gap:10px">
+        <span>P1–P9</span>
+        <button class="info" type="button" data-info="phelp">Info</button>
+      </h3>
+      <div class="sub" style="padding:0 16px 8px">Click a row to expand.</div>
+      <div id="plist" class="content"></div>
     </section>
 
-    <!-- Coaching Card -->
+    <!-- Coaching Card second -->
     <section class="card" style="margin-top:12px">
       <h3>Coaching Card</h3>
       <div class="content">
@@ -173,265 +122,168 @@ details[open] .caret{transform:rotate(180deg)}
       </div>
     </section>
 
-    <!-- CONSISTENCY + POWER (no reference-video buttons here) -->
-    <section class="grid" style="margin-top:12px">
+    <!-- The rest -->
+    <section class="grid2" style="margin-top:12px">
       <div class="card">
-        <h3>Position Consistency <button class="info-btn" type="button" data-target="info-position">Info</button></h3>
-        <div class="content">
-          <div id="position"></div>
-          <div id="info-position" class="sub" hidden>
-            Position Consistency shows how repeatable your checkpoints (P1–P9) are across the swings in this report.
-            It’s not “textbook form”—it’s how reliably <em>you</em> hit your own model. Higher = more repeatable.
-          </div>
-        </div>
+        <h3>Position Consistency <button class="info" type="button" data-info="pos">Info</button></h3>
+        <div id="position" class="content"></div>
       </div>
       <div class="card">
-        <h3>Swing Consistency <button class="info-btn" type="button" data-target="info-swing">Info</button></h3>
-        <div class="content">
-          <div id="swing"></div>
-          <div id="info-swing" class="sub" hidden>
-            Swing Consistency tracks dynamic metrics—arm angles, face-to-path, club path, attack angle, tempo—and how
-            much they vary swing-to-swing. Higher = steadier delivery; lower = timing changes.
-          </div>
-        </div>
+        <h3>Swing Consistency <button class="info" type="button" data-info="swing">Info</button></h3>
+        <div id="swing" class="content"></div>
       </div>
     </section>
 
     <section class="card" style="margin-top:12px">
-      <h3>Power Score Summary <button class="info-btn" type="button" data-target="info-power">Info</button></h3>
-      <div class="content">
-        <div id="power"></div>
-        <div id="info-power" class="sub" hidden>
-          Power Score is a 0–100 index of how effectively you produce and deliver speed. It blends tempo, sequencing,
-          release timing, and impact delivery. 75+ usually feels “easy speed”; 55–74 is workable; below 55 = efficiency leaks.
-        </div>
-      </div>
+      <h3>Power Score Summary <button class="info" type="button" data-info="power">Info</button></h3>
+      <div id="power" class="content"></div>
     </section>
-  </div>
+  </main>
 
 <script>
-const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
-const byId = s => document.getElementById(s);
-const fmt = v => `${v}%`;
-const band = v => v>=75?'ok':v>=55?'warn':'bad';
-const gradeLabel = {good:'GOOD', ok:'OK', bad:'NEEDS HELP'};
-const gradeClass = g => g==='good'?'g-good':g==='ok'?'g-ok':'g-bad';
+document.getElementById('date').textContent = new Date().toLocaleDateString();
 
-byId('date').textContent = new Date().toLocaleDateString();
+var infoMap = {
+  phelp: "P1–P9 are nine checkpoints from setup to finish. Tap a row for a quick why + how and (if provided) the phase video.",
+  pos: "Position Consistency = how reliably you put your body/club into each P-position swing-to-swing.",
+  swing: "Swing Consistency = repeatability of motion patterns (arms, face, hip, path, tempo, etc).",
+  power: "Power Score blends tempo, sequence, verticals/braking and release timing into one number."
+};
+document.addEventListener('click',function(e){
+  var btn = e.target.closest('.info'); if(!btn) return;
+  alert(infoMap[btn.getAttribute('data-info')]||'Info');
+});
 
-/* SAFE JSON CLEAN (no regex that trips GitHub) */
-function cleanJson(t){
-  if(!t) return '';
-  if (t.charCodeAt(0) === 0xFEFF) t = t.slice(1); // strip BOM
-  // remove control chars except \t \n \r
-  let out=''; for (let i=0;i<t.length;i++){ const c=t.charCodeAt(i); if(c===9||c===10||c===13||c>=32) out+=t[i]; }
-  let s = out.trim();
-  const firstCurly = s.indexOf('{'); const firstBracket = s.indexOf('[');
-  let start = firstCurly; if(firstBracket>=0 && (start<0 || firstBracket<start)) start = firstBracket;
-  if(start>0) s = s.slice(start);
-  const lastBrace = s.lastIndexOf('}'); const lastBracket = s.lastIndexOf(']');
-  const end = Math.max(lastBrace,lastBracket); if(end>=0) s = s.slice(0,end+1);
-  return s;
+function pct(v){ return (v||0) + '%' }
+function band(v){ return v>=75?'okbar':(v>=55?'warnbar':'badbar') }
+function gradeLabel(g){
+  var key=(g||'').toLowerCase();
+  if(key==='good') return ['good','GOOD'];
+  if(key==='ok'||key==='okay') return ['ok','OK'];
+  return ['bad','NEEDS HELP'];
 }
 
-/* RENDERERS */
 function metricRow(m){
-  return `<div class="metric">
-    <div class="name">${m.label||'Metric'}</div>
-    <div class="bar"><span class="${band(m.value||0)}" style="width:${m.value||0}%"></span></div>
-    <div class="pct">${fmt(m.value||0)}</div>
-  </div>`;
+  return '<div class="metric" data-tags="'+(m.tags||[]).join(' ')+'">'
+    +'<div class="name">'+m.label+'</div>'
+    +'<div class="bar"><span class="'+band(m.value)+'" style="width:'+m.value+'%"></span></div>'
+    +'<div class="pct">'+pct(m.value)+'</div></div>';
 }
 function posRow(p){
-  return `<div class="metric">
-    <div class="name">${p.p||''}</div>
-    <div class="bar"><span class="${band(p.value||0)}" style="width:${p.value||0}%"></span></div>
-    <div class="pct">${fmt(p.value||0)}</div>
-  </div>`;
+  return '<div class="metric">'
+    +'<div class="name">'+p.p+'</div>'
+    +'<div class="bar"><span class="'+band(p.value)+'" style="width:'+p.value+'%"></span></div>'
+    +'<div class="pct">'+pct(p.value)+'</div></div>';
 }
 
-const defaultShort = {
-  P1:'Athletic setup—tall spine, neutral grip, 55/45 pressure.',
-  P2:'Width maintained; toe-up face; gentle early wrist set.',
-  P3:'Lead arm parallel; full turn; width kept from chest.',
-  P4:'Top: trail hip deep; flatter lead wrist; steady head.',
-  P5:'Transition: pelvis leads; shaft shallows; pressure left.',
-  P6:'Delivery: hands ahead; trail elbow tucked; face square.',
-  P7:'Impact: forward lean; hips open; low point forward.',
-  P8:'Through: extend trail arm; rotate; zero flip.',
-  P9:'Finish: balanced over lead side; hold the pose.'
-};
-const defaultLong = {
-  P1:'Address like an athlete: neutral grip (trail hand in fingers), soft knees, pelvis neutral. Feel 55/45 under the arches. Chin up, spine long, eyes level.',
-  P2:'Shaft parallel with width. Hands in front of the chest, gentle wrist set, face near toe-up. Pressure loads trail foot without sway.',
-  P3:'Lead arm parallel with a full turn. Trail elbow folds in front of ribcage, not behind. Keep a forearm of space from chest; head steady.',
-  P4:'Top: pressure into trail heel, trail hip deep, lead wrist flatter/bowed. Avoid across-the-line/laid-off. Soft arms, steady head.',
-  P5:'Sequence = pelvis → torso → arms. Shaft shallows; trail elbow in front of side seam. Maintain lead-wrist flexion; pressure into lead mid-foot.',
-  P6:'Delivery: hands slightly ahead of clubhead, trail elbow tucked, face in the “window.” Pelvis keeps turning—no stall.',
-  P7:'Impact: forward shaft lean, low point forward. Hips ~30–45° open, chest ~10–20° open, lead leg braced. Face near square to path.',
-  P8:'Post-impact: extend trail arm, handle works around (not straight down the line). Chest up/left, no flip. Divot ahead of ball.',
-  P9:'Finish balanced, weight on lead side. Belt buckle and chest to target; trail toe down. Freeze for 2 counts.'
-};
+function renderCoaching(data){
+  var pri = (data.coaching&&data.coaching.priority_fixes)||[];
+  var pow = (data.coaching&&data.coaching.power_fixes)||[];
+  var mk = function(item){
+    return '<details class="panel"><summary><span class="pname">'
+      +item.title+'</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>'
+      +'<div class="content"><div class="sub" style="margin-bottom:8px">'+(item.short||'')+'</div>'
+      +'<div>'+(item.long||'')+'</div>'
+      +'<div class="kit"><button class="btn" type="button" onclick="alert(\'Ask your coach for a demo of this fix on your swing.\')">Add metrics</button><button class="btn" type="button" onclick="alert(\'Reference video opening…\')">Reference video</button></div>'
+      +'</div></details>';
+  };
+  document.getElementById('coachPriority').innerHTML = pri.map(mk).join('') || '<div class="sub">No priority fixes.</div>';
+  document.getElementById('coachPower').innerHTML   = pow.map(mk).join('') || '<div class="sub">No power fixes.</div>';
+}
+
+function renderPhases(data){
+  var phases = Array.isArray(data.phases)?data.phases.slice():[];
+  if(!phases.length){
+    var names = ['Setup','Shaft Parallel (Backswing)','Lead Arm Parallel (Backswing)','Top of Swing','Lead Arm Parallel (Downswing)','Shaft Parallel (Downswing)','Impact','Trail Arm Parallel (Follow-Through)','Finish'];
+    var pm = data.position_metrics||[];
+    for(var i=0;i<9;i++){
+      var pid='P'+(i+1);
+      var m=pm.find(function(x){return String(x.p).toUpperCase()===pid})||{value:0};
+      var g = m.value>=75?'good':(m.value>=55?'ok':'bad');
+      phases.push({id:pid,name:names[i],short:'',long:'',grade:g});
+    }
+  }
+  var html = phases.map(function(ph,i){
+    var parts = gradeLabel(ph.grade);
+    var gclass = parts[0], glabel = parts[1];
+    return '<details class="panel" '+(i===0?'open':'')+'>'
+      +'<summary>'
+      +'<span class="pnum">'+(ph.id||('P'+(i+1)))+'</span>'
+      +'<span class="pname">'+(ph.name||'')+'</span>'
+      +'<span class="grade '+gclass+'">'+glabel+'</span>'
+      +'<span class="sub" style="margin-left:8px">'+(ph.short||'')+'</span>'
+      +'<svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
+      +'</summary>'
+      +'<div class="content"><div class="sub" style="margin-bottom:8px">'+(ph.short||'')+'</div>'
+      +'<div style="margin-bottom:10px">'+(ph.long||'')+'</div>'
+      +'<div class="kit"><button class="btn" type="button" onclick="alert(\'P-phase metrics coming soon.\')">Add metrics</button><button class="btn" type="button" onclick="alert(\'Phase video placeholder.\')">View Video</button></div>'
+      +'</div></details>';
+  }).join('');
+  document.getElementById('plist').innerHTML = html;
+}
 
 function renderReport(data){
-  if(data.discipline){ byId('modeLabel').textContent = /putt/i.test(data.discipline)?'Putting':/chip/i.test(data.discipline)?'Chipping':'Full Swing'; }
-  if(data.swings!=null){ byId('swingCount').textContent = String(data.swings); }
+  if(data.discipline){ document.getElementById('modeLabel').textContent = /putt/i.test(data.discipline)?'Putting':/chip/i.test(data.discipline)?'Chipping':'Full Swing'; }
+  if(data.swings!=null){ document.getElementById('swingCount').textContent = String(data.swings); }
 
-  const p = data.power||{score:0, tempo:'—', release_timing:0};
-  byId('power').innerHTML = `
-    <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="${band(p.score)}" style="width:${p.score}%"></span></div><div class="pct">${fmt(p.score)}</div></div>
-    <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo}</div></div>
-    <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
+  document.getElementById('swing').innerHTML    = (data.swing_metrics||[]).map(metricRow).join('') || '<div class="sub">No swing metrics.</div>';
+  document.getElementById('position').innerHTML = (data.position_metrics||[]).map(posRow).join('')   || '<div class="sub">No position metrics.</div>';
 
-  const swingHtml = (data.swing_metrics||[]).map(metricRow).join('') || '<div class="sub">No swing metrics.</div>';
-  const posHtml   = (data.position_metrics||[]).map(posRow).join('')   || '<div class="sub">No position metrics.</div>';
-  byId('swing').innerHTML = swingHtml;
-  byId('position').innerHTML = posHtml;
+  var p = data.power||{score:0,tempo:'—',release_timing:0};
+  document.getElementById('power').innerHTML =
+    '<div class="metric"><div class="name">Power Score</div><div class="bar"><span class="'+band(p.score)+'" style="width:'+p.score+'%"></span></div><div class="pct">'+pct(p.score)+'</div></div>'
+   +'<div class="metric"><div class="name">Tempo</div><div class="bar"><span class="okbar" style="width:76%"></span></div><div class="pct">'+(p.tempo||'—')+'</div></div>'
+   +'<div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="'+band(+p.release_timing)+'" style="width:'+(+p.release_timing||0)+'%"></span></div><div class="pct">'+(+p.release_timing||0)+'%</div></div>';
 
-  const names = ['Setup','Shaft Parallel (Backswing)','Lead Arm Parallel (Backswing)','Top of Swing','Lead Arm Parallel (Downswing)','Shaft Parallel (Downswing)','Impact','Trail Arm Parallel (Follow-Through)','Finish'];
-  let phases = Array.isArray(data.phases)? data.phases.slice() : [];
-  const pm = data.position_metrics||[];
-  const getPmVal = id => { const m = pm.find(x=>(x.p||'').toUpperCase()===id); return m? m.value : 0; };
-  const gradeFromVal = v => v>=75?'good':v>=55?'ok':'bad';
-
-  if(!phases.length){
-    for(let i=0;i<9;i++){
-      const id='P'+(i+1), val=getPmVal(id), g=gradeFromVal(val);
-      phases.push({id,name:names[i],short:defaultShort[id],long:defaultLong[id],grade:g});
-    }
-  }else{
-    phases = phases.map((ph,i)=>{
-      const id = ph.id || ('P'+(i+1));
-      const g = ph.grade || gradeFromVal(getPmVal(id));
-      const s = (ph.short && ph.short.trim().length>24)? ph.short : (defaultShort[id]||ph.short||'');
-      const l = (ph.long && ph.long.trim() && ph.long.trim()!==(s||'').trim()) ? ph.long : (defaultLong[id]||'');
-      return {id,name:ph.name||names[i],short:s,long:l,grade:g};
-    });
-  }
-
-  byId('plist').innerHTML = phases.map((ph,i)=>`
-    <details ${i===0?'open':''} class="panel">
-      <summary>
-        <span class="pnum">${ph.id}</span>
-        <span class="pname">${ph.name}</span>
-        <span class="gchip ${ph.grade==='good'?'g-good':ph.grade==='ok'?'g-ok':'g-bad'}" style="margin-left:8px">${gradeLabel[ph.grade]||'OK'}</span>
-        <span class="sub" style="margin-left:8px">${ph.short||''}</span>
-        <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-      </summary>
-      <div class="content">
-        <div class="sub" style="margin-bottom:8px">${ph.short||''}</div>
-        <div style="margin-bottom:10px">${ph.long||''}</div>
-        <div><button class="video-btn" type="button" data-q="${'golf '+ph.id+' '+ph.name+' drill'}">Reference Video</button></div>
-      </div>
-    </details>`).join('');
-
-  // Coaching defaults (condensed here for brevity)
-  const pri = (data.coaching && Array.isArray(data.coaching.priority_fixes)) ? data.coaching.priority_fixes : [
-    {title:'Clubface control at P7 (impact)', short:'Match face to path', long:'Face drifting open from P6→P7. Grip audit; bow lead wrist from P5→P6; two-tee gate; 3 blocks: 5 reh + 5 half + 3 full.'},
-    {title:'Lower body sequence', short:'Clear hips before hands', long:'Plant lead heel from P4; post and turn. Step-throughs 2×10; post-and-turn 3×8; 3 blocks (8 reh + 6 balls).'},
-    {title:'Hand path width', short:'Keep width at P3', long:'Keep a “beach ball” of space. Pump-downs P3→mini P4→P5, 3×10; split-hand backswing; 2×(10 reh + 6 balls).'}
-  ];
-  const pow = (data.coaching && Array.isArray(data.coaching.power_fixes)) ? data.coaching.power_fixes : [
-    {title:'Tempo 3:1', short:'Smooth, athletic rhythm', long:'Count “1-2-3” back, “1” through. Metronome ~72 bpm. 3 sets × 12 swings.'},
-    {title:'Lead-leg brake', short:'Post into the lead side', long:'Plant lead heel at P4; straighten through P5–P6. Towel under heel; 10 reh + 5 balls × 3.'},
-    {title:'Late release timing', short:'Hold, then let it go', long:'Carry lag to P6 then release. Two-tee gate; clip both. 2×5 swings; video last 2.'}
-  ];
-  const mk = i => `
-    <details class="panel">
-      <summary><span class="pname">${i.title}</span><span class="sub" style="margin-left:8px">${i.short||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary>
-      <div class="content">${i.long||''}
-        <div style="margin-top:8px"><button class="video-btn" type="button" data-q="${'golf '+(i.title||'drill')}">Reference Video</button></div>
-      </div>
-    </details>`;
-  byId('coachPriority').innerHTML = pri.map(mk).join('');
-  byId('coachPower').innerHTML   = pow.map(mk).join('');
+  renderPhases(data);
+  renderCoaching(data);
 }
 
-/* LOADER */
+function cleanJSON(text){
+  // BOM + trim only (kept simple to avoid paste issues)
+  return (text||'').replace(/^\uFEFF/,'').trim();
+}
+
 async function loadReport(url){
-  const s = byId('status'), e = byId('error');
-  e.textContent=''; s.innerHTML='Loading <a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>…';
+  var s=document.getElementById('status'), e=document.getElementById('error');
+  e.textContent=''; s.textContent='Loading '+url+' …';
   try{
-    const res = await fetch(url,{cache:'no-store'});
+    var res = await fetch(url,{cache:'no-store'});
     if(!res.ok) throw new Error('HTTP '+res.status);
-    const raw = await res.text();
-    const clean = cleanJson(raw);
-    const data = JSON.parse(clean);
+    var raw = await res.text();
+    var data = JSON.parse(cleanJSON(raw));
     renderReport(data);
-    s.innerHTML='Loaded: <a href="'+url+'" target="_blank" rel="noopener">'+url+'</a>';
+    s.textContent='Loaded: '+url;
   }catch(err){
-    e.textContent='Failed to load report: '+(err && err.message ? err.message : String(err));
-    renderReport(sample);
-    s.textContent='Loaded SAMPLE (parse failed): '+url;
+    e.textContent='Failed to load report: '+(err.message||String(err));
   }
 }
 
-/* SAMPLE (for fallback) */
-const sample = {
-  swings:1, discipline:'full-swing',
-  power:{score:78, tempo:'3.0:1', release_timing:62},
-  swing_metrics:[
-    {label:'Right Arm Angle',value:84},
-    {label:'Club Face Angle',value:79},
-    {label:'Shoulder Turn',value:72},
-    {label:'Hip Turn',value:68},
-    {label:'X-Factor (Shoulder–Hip)',value:64},
-    {label:'Club Path',value:71},
-    {label:'Face-to-Path',value:66},
-    {label:'Attack Angle',value:62}
-  ],
-  position_metrics:[{p:'P1',value:90},{p:'P2',value:74},{p:'P3',value:61},{p:'P4',value:55},{p:'P5',value:63},{p:'P6',value:70},{p:'P7',value:81},{p:'P8',value:86},{p:'P9',value:78}],
-  phases:[
-    {id:'P1',name:'Setup',short:'Athletic stance',long:'Neutral grip, soft knees, pelvis neutral. Pressure 55/45 lead-to-trail; spine tall; eyes level.',grade:'good'},
-    {id:'P2',name:'Shaft Parallel (Backswing)',short:'Width + neutral face',long:'Hands in front of chest; gradual wrist set; near toe-up; pressure loads trail foot without sway.',grade:'ok'},
-    {id:'P3',name:'Lead Arm Parallel (Backswing)',short:'Maintain width',long:'Trail elbow folds in front of ribcage; club on plane; head steady; width ~a forearm off chest.',grade:'ok'},
-    {id:'P4',name:'Top of Swing',short:'Full coil',long:'Pressure into trail heel; trail hip deep; lead wrist nearer flat/bowed. Avoid across-the-line/laid-off extremes.',grade:'bad'},
-    {id:'P5',name:'Lead Arm Parallel (Downswing)',short:'Sequencing',long:'Pelvis → torso → arms. Shaft shallows; trail elbow in front of side seam; lead-wrist flexion maintained.',grade:'good'},
-    {id:'P6',name:'Shaft Parallel (Downswing)',short:'Deliver',long:'Hands slightly ahead; face in the window; pelvis keeps turning (no stall).',grade:'good'},
-    {id:'P7',name:'Impact',short:'Forward lean',long:'Forward shaft lean; low point forward. Pelvis 30–45° open; chest 10–20° open; lead leg braced.',grade:'ok'},
-    {id:'P8',name:'Trail Arm Parallel (Follow-Through)',short:'Extension',long:'Trail arm extends; handle works around; control rate of closure (no flip).',grade:'good'},
-    {id:'P9',name:'Finish',short:'Balanced',long:'Pressure fully lead side; belt buckle and chest to target; hold the pose.',grade:'good'}
-  ]
-};
-
-/* EVENTS */
-byId('expandAll').onclick = ()=>{$$('details.panel').forEach(d=>d.open=true);};
-byId('collapseAll').onclick = ()=>{$$('details.panel').forEach(d=>d.open=false);};
-byId('sample').onclick = ()=>{ renderReport(sample); byId('status').textContent='Loaded sample (no fetch).'; };
-byId('reload').onclick = ()=>{
-  const u = new URLSearchParams(location.search).get('report') || document.body.dataset.reportSrc || '/reports/demo/report.json';
+// Buttons
+document.getElementById('reload').onclick = function(){
+  var u = new URLSearchParams(location.search).get('report') || document.body.dataset.reportSrc || '/reports/demo/report.json';
   loadReport(u);
 };
-byId('focus').addEventListener('change', e=>{
-  const val=e.target.value;
-  $$('.metric').forEach(el=>{
-    el.classList.remove('focus-dim');
-    if(val==='all') return;
-    const tags=(el.getAttribute('data-tags')||'').split(' ');
-    if(!tags.includes(val)) el.classList.add('focus-dim');
+document.getElementById('pdf').onclick = function(){ window.print() };
+document.getElementById('share').onclick = function(){
+  var link = location.href;
+  if(navigator.share){ navigator.share({title:'Virtual Coach AI Report',url:link}).catch(()=>{}); }
+  else{ navigator.clipboard&&navigator.clipboard.writeText(link); alert('Link copied'); }
+};
+
+// Focus filter dims non-matching metrics
+document.getElementById('focus').addEventListener('change',function(e){
+  var val=e.target.value;
+  document.querySelectorAll('.metric').forEach(function(el){
+    el.style.opacity = (val==='all' || (el.getAttribute('data-tags')||'').split(' ').includes(val)) ? 1 : .35;
   });
 });
-// Info toggles
-document.addEventListener('click', (e)=>{
-  const ib = e.target.closest('.info-btn');
-  if(ib){ const t = byId(ib.dataset.target); if(t) t.hidden=!t.hidden; }
-});
-// mark active nav
-(function(){
-  try{
-    const here = location.pathname.replace(/\/index\.html$/,'/') || '/';
-    document.querySelectorAll('.topbar [data-nav]').forEach(a=>{
-      const href = a.getAttribute('href');
-      if(here === href) a.classList.add('active');
-    });
-  }catch(_){}
-})();
 
-// initial load
-const auto = new URLSearchParams(location.search).get('report') || document.body.dataset.reportSrc || '/reports/demo/report.json';
-loadReport(auto);
+// Auto load
+(function(){
+  var auto = new URLSearchParams(location.search).get('report') || document.body.dataset.reportSrc || '/reports/demo/report.json';
+  loadReport(auto);
+})();
 </script>
 </body>
 </html>
-
