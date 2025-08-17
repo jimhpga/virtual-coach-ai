@@ -96,8 +96,27 @@ $('#date').textContent = new Date().toLocaleDateString();
 
 const band = v => v>=75?'ok':v>=55?'warn':'bad';
 const fmt  = v => `${v}%`;
-const metricRow = m => `<div class="metric"><div class="name">${m.label}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
-const posRow    = p => `<div class="metric"><div class="name">${p.p}</div><div class="bar"><span class="${band(p.value)}" style="width:${p.value}%"></span></div><div class="pct">${fmt(p.value)}</div></div>`;
+const metricRow = m => {
+  const q = `golf ${m.label} drill`;
+  const tags = (m.tags||[]).join(' ');
+  return `<div class="metric" data-tags="${tags}">
+    <div class="name">${m.label}
+      <button class="video-btn" type="button" data-q="${q}">Reference Video</button>
+    </div>
+    <div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div>
+    <div class="pct">${fmt(m.value)}</div>
+  </div>`;
+};
+const posRow = p => {
+  const q = `golf ${p.p} position drill`;
+  return `<div class="metric">
+    <div class="name">${p.p}
+      <button class="video-btn" type="button" data-q="${q}">Reference Video</button>
+    </div>
+    <div class="bar"><span class="${band(p.value)}" style="width:${p.value}%"></span></div>
+    <div class="pct">${fmt(p.value)}</div>
+  </div>`;
+};
 
 const defaultNames=['Setup','Shaft Parallel (Backswing)','Lead Arm Parallel (Backswing)','Top of Swing','Lead Arm Parallel (Downswing)','Shaft Parallel (Downswing)','Impact','Trail Arm Parallel (Follow-Through)','Finish'];
 const defaultShort={
