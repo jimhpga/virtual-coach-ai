@@ -1,1 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI — Pricing (Coming Soon)</title>
+<style>
+:root{
+  --bg:#0e1a22; --text:#ecf3f7; --muted:#b7c9d6;
+  --panel:#16242e; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.35);
+  --ok:#19c37d; --accent:#5eb3ff;
+  --bgimg-opacity:.65; /* tweak if you want brighter/dimmer bg */
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.4 system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif}
+.bg{position:fixed;inset:0;background:url('/homepage-background.png') center/cover no-repeat fixed;opacity:var(--bgimg-opacity);z-index:-1}
+
+/* TOP NAV – dark green to match report */
+.topbar{position:sticky;top:0;z-index:1000;background:rgba(10,80,55,.95);backdrop-filter:saturate(120%) blur(6px);border-bottom:1px solid rgba(0,0,0,.25)}
+.topbar .inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px}
+.topbar .brand{display:flex;align-items:center;gap:10px;color:#e9fbf3;font-weight:800;text-decoration:none}
+.topbar .brand img{height:28px;width:auto}
+.topbar .nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.topbar .nav a{display:inline-block;padding:8px 10px;border-radius:10px;color:#e9fbf3;text-decoration:none;border:1px solid transparent}
+.topbar .nav a:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18)}
+.topbar .nav a.active{background:#0fa36b;border-color:#0fa36b;color:#062a1d}
+
+.wrap{max-width:1080px;margin:28px auto;padding:0 16px}
+.h1{font-size:32px;font-weight:900;margin:8px 0 4px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:18px}
+
+.notice{background:rgba(22,36,46,.6);border:1px solid rgba(34,55,67,.7);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin:12px 0}
+.row{display:grid;grid-template-columns:1fr;gap:14px;margin-top:14px}
+@media(min-width:900px){.row{grid-template-columns:1fr 1fr 1fr}}
+
+.card{background:rgba(22,36,46,.58);border:1px solid rgba(34,55,67,.7);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.card h3{margin:0 0 6px 0}
+.badge{display:inline-block;background:#0fa36b;color:#062a1d;font-weight:800;border-radius:999px;padding:4px 10px;margin-right:8px}
+.lock{display:inline-block;background:#30424f;color:#cfe3ee;border-radius:999px;padding:3px 8px;font-size:12px;margin-left:6px}
+
+.btn{display:inline-block;background:#0fa36b;color:#062a1d;border:1px solid #0fa36b;border-radius:12px;padding:10px 14px;text-decoration:none;font-weight:700;box-shadow:var(--shadow);cursor:pointer}
+.btn.alt{background:rgba(22,36,46,.8);color:#e8f5ef;border-color:#2b4655}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.footer-note{color:var(--muted);font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+
+<nav class="topbar" role="navigation" aria-label="Main">
+  <div class="inner">
+    <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="" onerror="this.remove()"><span>Virtual Coach AI</span></a>
+    <div class="nav">
+      <a href="/" data-nav>Home</a>
+      <a href="/upload.html" data-nav>Upload</a>
+      <a href="/reports.html" data-nav>Reports</a>
+      <a href="/report.html" data-nav>Report</a>
+      <a href="/pricing.html" data-nav>Pricing</a>
+      <a href="/faq.html" data-nav>FAQ</a>
+      <a href="/contact.html" data-nav>Contact</a>
+      <a href="/login.html" data-nav>Login</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="h1">Pricing <span class="lock">Coming Soon</span></div>
+  <div class="sub">We’re finishing up the plans. Want first crack (and early-bird pricing)?</div>
+
+  <div class="notice">
+    <div class="btn-row">
+      <a class="btn" href="mailto:info@virtualcoachai.net?subject=Pricing%20Notify&body=Please%20notify%20me%20when%20Virtual%20Coach%20AI%20pricing%20is%20live.">Notify me</a>
+      <a class="btn alt" href="/upload.html">Try the uploader</a>
+      <a class="btn alt" href="/reports.html">See demo reports</a>
+    </div>
+    <div class="footer-note">No spam. We’ll email once—when pricing is live.</div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h3><span class="badge">Starter</span>Single-player practice <span class="lock">Locked</span></h3>
+      <div>1 user, swing reports, P1–P9 insights, basic coaching card, practice plans.</div>
+    </div>
+    <div class="card">
+      <h3><span class="badge">Coach</span>Lesson workflow <span class="lock">Locked</span></h3>
+      <div>Coach dashboard, send-to-player, text/email export, templates, session notes.</div>
+    </div>
+    <div class="card">
+      <h3><span class="badge">Team</span>Academy/range <span class="lock">Locked</span></h3>
+      <div>Multi-coach seats, player groups, custom branding, priority support.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// highlight active nav
+(function(){
+  try{
+    const here = location.pathname.replace(/\/index\.html$/,'/') || '/';
+    document.querySelectorAll('.topbar [data-nav]').forEach(a=>{
+      if(a.getAttribute('href')===here) a.classList.add('active');
+    });
+  }catch(_){}
+})();
+</script>
+</body>
+</html>
 
