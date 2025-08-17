@@ -5,39 +5,57 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Coming Soon - Virtual Coach AI</title>
   <meta name="description" content="Junior Program, Mental Training, FAIR MVP, Torque Measure, reports, dashboards, and more." />
+  <link rel="preload" as="image" href="/homepage-background.png" />
+  <link rel="stylesheet" href="/style.css" />
   <style>
-    :root{--bg:rgba(0,0,0,.55);--panel:rgba(0,0,0,.6);--panel2:rgba(16,43,16,.85);--brand:#00ff99;--line:#1f5e1f;--dim:#d7e7d7}
-    body{margin:0;font-family:Arial,sans-serif;color:#fff;background:url('homepage-background.png') no-repeat center center fixed;background-size:cover}
-    .scrim{min-height:100vh;background:var(--bg)}
-    .navbar{background:rgba(0,51,0,.92);padding:12px 0;text-align:center;position:sticky;top:0;z-index:10}
-    .navbar a{color:#fff;margin:0 14px;text-decoration:none;font-weight:bold}
-    .navbar a[aria-current="page"]{text-decoration:underline}
-    .container{width:min(1100px,92%);margin:0 auto;padding:36px 0 56px}
-    .hero{padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
-    h1{margin:0 0 6px;font-size:2.2rem;color:var(--brand)}
-    .tag{display:inline-block;margin:8px 8px 12px 0;padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(0,0,0,.35);font-size:.9rem}
-    p.lead{color:var(--dim);margin:8px 0 18px;line-height:1.7}
+    :root{
+      /* Lighter scrim so the course photo shows through more */
+      --bg: rgba(0,0,0,.35);
+      --panel: rgba(0,0,0,.6);
+      --panel2: rgba(16,43,16,.85);
+      --brand:#00ff99; --line:#1f5e1f; --dim:#d7e7d7;
+    }
+    /* full-bleed background */
+    body{
+      margin:0; font-family:Arial,sans-serif; color:#fff;
+      background:url('/homepage-background.png') no-repeat center center fixed;
+      background-size:cover;
+    }
+    .scrim{min-height:100vh; background:var(--bg);}
+
+    /* Page container */
+    .container{width:min(1100px,92%); margin:0 auto; padding:36px 0 56px;}
+
+    /* Content cards */
+    .hero{padding:18px; border:1px solid var(--line); border-radius:12px; background:var(--panel2);}
+    h1{margin:0 0 6px; font-size:2.2rem; color:var(--brand);}
+    .tag{display:inline-block; margin:8px 8px 12px 0; padding:6px 10px; border:1px solid var(--line); border-radius:999px; background:rgba(0,0,0,.35); font-size:.9rem}
+    p.lead{color:var(--dim); margin:8px 0 18px; line-height:1.7;}
+
     section{margin-top:26px}
-    .section-title{display:flex;align-items:center;gap:10px;margin:0 0 12px}
-    .section-title h2{margin:0;font-size:1.35rem}
-    .badge{font-size:.85rem;padding:4px 8px;border-radius:999px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--dim)}
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .section-title{display:flex; align-items:center; gap:10px; margin:0 0 12px}
+    .section-title h2{margin:0; font-size:1.35rem}
+    .badge{font-size:.85rem; padding:4px 8px; border-radius:999px; border:1px solid var(--line); background:rgba(0,0,0,.35); color:var(--dim)}
+
+    .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
     @media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
     @media (max-width:640px){.grid{grid-template-columns:1fr}}
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;backdrop-filter:blur(2px)}
-    .card h3{margin:0 0 6px;font-size:1.05rem}
-    .card p{margin:6px 0 0;color:var(--dim);line-height:1.6;font-size:.98rem}
-    .pill{display:inline-block;margin-top:8px;font-size:.8rem;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:#cfeacf}
-    .cta{display:inline-block;margin-top:10px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.35);color:var(--brand);text-decoration:none;font-weight:bold}
-    .note{font-size:.9rem;color:#cfeacf;opacity:.9;margin-top:8px}
-    footer{text-align:center;color:#cbd5cb;font-size:12px;padding:18px 0 26px}
+
+    .card{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px; backdrop-filter:blur(2px)}
+    .card h3{margin:0 0 6px; font-size:1.05rem}
+    .card p{margin:6px 0 0; color:var(--dim); line-height:1.6; font-size:.98rem}
+    .pill{display:inline-block; margin-top:8px; font-size:.8rem; padding:4px 8px; border:1px solid var(--line); border-radius:999px; color:#cfeacf}
+    .cta{display:inline-block; margin-top:10px; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:rgba(0,0,0,.35); color:var(--brand); text-decoration:none; font-weight:bold}
+    .note{font-size:.9rem; color:#cfeacf; opacity:.9; margin-top:8px}
+    footer{text-align:center; color:#cbd5cb; font-size:12px; padding:18px 0 26px}
   </style>
 </head>
 <body>
   <div class="scrim">
+    <!-- Shared navigation -->
     <div id="navMount"></div>
-<script src="/nav.js" defer></script>
-    
+    <script src="/nav.js" defer></script>
+
     <main class="container">
       <section class="hero">
         <h1>Coming Soon</h1>
@@ -82,7 +100,7 @@
         <div class="section-title"><h2>Early Access</h2><span class="badge">Limited slots</span></div>
         <div class="card">
           <p>Want to test features early and steer the build? Join the early access list—no spam, just meaningful updates and priority invites.</p>
-          <a class="cta" href="contact.html">Get on the early access list →</a>
+          <a class="cta" href="/contact.html">Get on the early access list →</a>
           <div class="note">We ship weekly. If it doesn’t help your golf, it doesn’t ship.</div>
         </div>
       </section>
@@ -93,3 +111,4 @@
   <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
 </body>
 </html>
+
