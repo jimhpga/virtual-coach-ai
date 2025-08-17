@@ -1,1 +1,78 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FAQ — Virtual Coach AI</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="preload" as="image" href="/homepage-background.png" />
+  <style>
+    :root{
+      --bg: rgba(0,0,0,.28);
+      --panel: rgba(10,18,24,.85);
+      --line: rgba(255,255,255,.12);
+      --text: #ecf3f7; --muted:#bcd1d8;
+    }
+    body{
+      margin:0; color:var(--text);
+      background:url('/homepage-background.png') center/cover fixed no-repeat;
+      font:16px/1.5 system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial, sans-serif;
+    }
+    .scrim{min-height:100vh; background:var(--bg)}
+    .wrap{width:min(980px,92%); margin:0 auto; padding:20px 0 36px;}
+    .card{background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; backdrop-filter:blur(2px); margin:12px 0;}
+    h1{margin:10px 0 8px}
+    details{border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.04); margin:10px 0; padding:10px 12px;}
+    summary{cursor:pointer; font-weight:700}
+    .a{color:var(--muted); margin-top:6px}
+  </style>
+</head>
+<body>
+  <div class="scrim">
+    <div id="navMount"></div>
+    <script src="/nav.js" defer></script>
+
+    <main class="wrap">
+      <div class="card">
+        <h1>Frequently Asked Questions</h1>
+
+        <details open>
+          <summary>What is Virtual Coach AI?</summary>
+          <div class="a">A simple system that turns your swing video into a structured report (P1–P9 checkpoints), two consistency scores, and a 14-day practice plan you’ll actually do.</div>
+        </details>
+
+        <details>
+          <summary>How do I upload my swing?</summary>
+          <div class="a">From the Home page, click <strong>Upload Your Swing</strong>. Follow the prompts—face-on and down-the-line videos work best.</div>
+        </details>
+
+        <details>
+          <summary>What are P1–P9?</summary>
+          <div class="a">Nine common checkpoints from setup (P1) to finish (P9). Clear language, quick video references, and one actionable cue per checkpoint.</div>
+        </details>
+
+        <details>
+          <summary>What do “Swing Consistency” and “Position Consistency” mean?</summary>
+          <div class="a"><strong>Position Consistency</strong> = how reliably you match each P-position. <strong>Swing Consistency</strong> = repeatability of motion patterns across swings (tempo, face, path, etc.).</div>
+        </details>
+
+        <details>
+          <summary>Do the scores use real metrics?</summary>
+          <div class="a">Yes. We map measured/estimated metrics to each section (tempo, face-to-path, hand path, pressure shift, etc.). No fluff numbers.</div>
+        </details>
+
+        <details>
+          <summary>What if I don’t improve?</summary>
+          <div class="a">That’s on us to simplify. Short blocks, clear constraints, and feedback loops (video + checkpoints) make change stick. If it doesn’t help your golf, it doesn’t ship.</div>
+        </details>
+
+        <details>
+          <summary>Pricing?</summary>
+          <div class="a">We’ll announce it soon on the Pricing page.</div>
+        </details>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
