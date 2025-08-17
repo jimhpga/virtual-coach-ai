@@ -1,33 +1,32 @@
-<!-- /nav.html -->
-<nav class="topbar">
-  <div class="brand"><a href="/index.html">Virtual Coach AI</a></div>
-  <div class="nav">
-    <a href="/index.html" data-nav>Home</a>
-    <a href="/report.html?report=/report.json&ver=fix2" data-nav>Reports</a>
-    <a href="/pricing.html" data-nav>Pricing</a>
-    <a href="/faq.html" data-nav>FAQ</a>
-    <a href="/contact.html" data-nav>Contact</a>
-    <a href="/login.html" data-nav>Login</a>
-  </div>
-</nav>
+// /nav.js
+(function(){
+  async function mountNav(){
+    try{
+      const mount = document.getElementById('navMount');
+      if(!mount) return; // page doesn’t include a nav mount
 
-<style>
-  .topbar{
-    position:sticky; top:0; z-index:1000;
-    display:flex; justify-content:space-between; align-items:center;
-    padding:10px 14px;
-    background:#0b2b12; /* dark green */
-    border-bottom:1px solid rgba(255,255,255,.08);
+      // Bust caches so your latest nav.html always wins
+      const res = await fetch('/nav.html?v=3', { cache: 'no-store' });
+      if(!res.ok) throw new Error('nav.html HTTP '+res.status);
+      const html = await res.text();
+      mount.innerHTML = html;
+
+      // Mark current page
+      const herePath = location.pathname.replace(/\/+$/,'');
+      const links = mount.querySelectorAll('a[data-nav]');
+      links.forEach(a=>{
+        const u = new URL(a.getAttribute('href'), location.origin);
+        if (u.pathname.replace(/\/+$/,'') === herePath) {
+          a.setAttribute('aria-current','page');
+        }
+      });
+    }catch(e){
+      console.error('Nav load failed:', e);
+    }
   }
-  .topbar .brand a{
-    color:#ffffff; text-decoration:none; font-weight:800; letter-spacing:.2px;
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', mountNav);
+  }else{
+    mountNav();
   }
-  .topbar .nav a{
-    color:#ffffff; text-decoration:none;
-    margin:0 8px; padding:8px 10px; border-radius:10px;
-  }
-  .topbar .nav a:hover{ background:rgba(255,255,255,.10); }
-  .topbar .nav a[aria-current="page"]{
-    text-decoration:underline; text-underline-offset:4px;
-  }
-</style>
+})();
