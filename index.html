@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Virtual Coach AI — Home</title>
 
+  <!-- Your global stylesheet -->
   <link rel="stylesheet" href="/style.css" />
 
   <style>
-    /* Keep Home nice and tight and centered */
+    /* Home: stable, tight, centered */
     .home .container{
-      max-width: 820px;     /* adjust to 760–900px if you want */
+      max-width: 820px;         /* adjust to 760–900 if you want later */
       margin: 32px auto;
       padding: 12px 16px;
       background: rgba(0,0,0,0.12);
@@ -18,7 +19,15 @@
       border-radius: 16px;
       backdrop-filter: saturate(110%) blur(4px);
     }
-    .home .logo{ display:block; margin:24px auto 12px; max-width:220px; height:auto; }
+    /* Make sure the logo is big enough and NOT filtered dark */
+    .home .logo{
+      display:block;
+      margin:24px auto 12px;
+      width: clamp(220px, 22vw, 300px);
+      height:auto;
+      filter:none !important;
+      opacity:1 !important;
+    }
     .home .welcome{ text-align:center; font-weight:700; opacity:.9; }
     .home h1{ text-align:center; margin:8px 0 6px; }
     .home .tagline{ text-align:center; opacity:.9; margin-bottom:18px; }
@@ -35,18 +44,20 @@
       background:#0fa36b; color:#062a1d; font-weight:800; cursor:pointer;
     }
     footer{ text-align:center; opacity:.8; margin:18px 0 28px; }
-    /* NOTE: no rule here to hide the Pricing pill — it's back on purpose */
   </style>
 </head>
 
 <body class="home">
-  <!-- Shared navigation -->
+  <!-- Shared navigation (from /nav.html via /nav.js). Keep only ONE of these per page. -->
   <div id="navMount"></div>
-  <script src="/nav.js" defer></script>
+  <script src="/nav.js?v=5" defer></script>
 
   <div class="page">
     <main class="container">
-      <img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI logo" class="logo" />
+      <!-- Use the transparent logo; the leading slash forces the correct root path.
+           ?v=5 busts cache if the browser was holding the dark/old one. -->
+      <img src="/virtualcoach-logo-transparent.png?v=5" alt="Virtual Coach AI logo" class="logo" />
+
       <div class="welcome">Welcome Beta Testers</div>
       <h1>Virtual Coach AI</h1>
       <div class="tagline">Where the future of golf instruction begins with AI</div>
@@ -76,6 +87,7 @@
   </footer>
 
   <script>
+    // CTA to upload page
     document.getElementById('goUpload')?.addEventListener('click', function(){
       location.href = '/upload.html';
     });
