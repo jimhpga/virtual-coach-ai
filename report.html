@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Coach AI — Swing Report (Safe Mode)</title>
+  <title>Virtual Coach AI — Swing Report (Safe Mode, Fixed)</title>
   <style>
     :root{
       --ink:#0c1f2b; --muted:#3b6178; --accent:#5eb3ff; --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b; --radius:16px;
@@ -22,7 +22,7 @@
     .select{appearance:none;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#083048" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');background-repeat:no-repeat;background-position:right 10px center;padding-right:36px}
     .badge{background:#fff;border:1px solid #d3e3ee;color:var(--ink);padding:6px 10px;border-radius:999px;font-size:12px}
 
-    .card,details.panel{background:rgba(255,255,255,.36); /* EXTRA see-through */
+    .card,details.panel{background:rgba(255,255,255,.30); /* extra see-through */
       border:1px solid #d8eaf6;border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:saturate(120%) blur(2px)}
     .card h3{margin:0;padding:14px 16px;border-bottom:1px solid #e0edf5;color:var(--ink)}
     .card .content{padding:12px 16px}
@@ -71,7 +71,7 @@
     </header>
 
     <section id="plistWrap">
-      <div class="sub">Click a P-section to expand. Use the Focus filter to dim everything except what you care about.</div>
+      <div class="sub">P1–P9 (click a row to expand)</div>
       <div id="plist"></div>
     </section>
 
@@ -103,10 +103,10 @@ const long={
   P2:'Shaft parallel with width; hands in front of chest; wrists set gradually. Face near neutral (toe-up); pressure loads trail foot without sway.',
   P3:'Lead arm parallel with full torso turn. Trail elbow folds in front of ribcage; maintain width (~a forearm off chest). Club on plane; head steady.',
   P4:'Top: pressure mostly trail heel; trail hip deep. Lead wrist nearer flat/bowed to manage face. Avoid across-the-line/laid-off extremes.',
-  P5:'Transition: pelvis → torso → arms. Shaft shallows; trail elbow in front of side seam. Maintain lead-wrist flexion; pressure into lead mid-foot.',
-  P6:'Delivery: shaft parallel; hands slightly ahead. Trail elbow tucked; face in window. Pelvis keeps turning—no stall.',
-  P7:'Impact: forward shaft lean; low point forward. Pelvis 30–45° open; chest 10–20° open; lead leg braced. Face close to square to path.',
-  P8:'Post-impact: trail arm extends; handle works around (not down the line). Control rate of closure—no flip; chest up/left.',
+  P5:'Transition: pelvis -> torso -> arms. Shaft shallows; trail elbow in front of side seam. Maintain lead-wrist flexion; pressure into lead mid-foot.',
+  P6:'Delivery: shaft parallel; hands slightly ahead. Trail elbow tucked; face in window. Pelvis keeps turning (no stall).',
+  P7:'Impact: forward shaft lean; low point forward. Pelvis 30-45 deg open; chest 10-20 deg open; lead leg braced. Face close to square to path.',
+  P8:'Post-impact: trail arm extends; handle works around (not down the line). Control rate of closure (no flip); chest up/left.',
   P9:'Finish: pressure fully lead side; belt buckle/chest to target; trail toe down. Hold the pose.'
 };
 
@@ -176,7 +176,7 @@ const defaultPri=[
 const defaultPow=[
   {title:'Tempo 3:1', short:'Smooth rhythm', long:'Count 1-2-3 back, 1 through. 72 bpm; strike every 4th tick x12, rest, repeat x3.'},
   {title:'Lead-leg brake', short:'Post into lead side', long:'Plant lead heel from P4, straighten through P5-6. Towel under lead heel; 10 reps then 5 balls.'},
-  {title:'Late release timing', short:'Speed at P7–P8', long:'Hold to P6 then unhinge. Two-tee gate; clip both tees post-impact. 2x5; video last 2.'}
+  {title:'Late release timing', short:'Speed at P7-8', long:'Hold to P6 then unhinge. Two-tee gate; clip both tees post-impact. 2x5; video last 2.'}
 ];
 
 function cleanJson(t){
@@ -191,18 +191,21 @@ function cleanJson(t){
 
 async function loadReport(url){
   const st=document.getElementById('status'); const er=document.getElementById('error'); const dbg=document.getElementById('debugOut');
-  er.textContent=''; st.textContent='Loading '+url+'…'; if(dbg) dbg.textContent='';
+  er.textContent=''; st.textContent='Loading '+url+'...'; if(dbg) dbg.textContent='';
   let raw='';
   try{
     const res=await fetch(url,{cache:'no-store'});
     if(!res.ok) throw new Error('HTTP '+res.status);
     raw=await res.text();
     const cleaned=cleanJson(raw);
-    if(dbg){ dbg.textContent='RAW (first 240):
+    if(dbg){
+      dbg.textContent='RAW (first 240):
 '+raw.slice(0,240)+'
 
 CLEAN (first 240):
-'+cleaned.slice(0,240); document.getElementById('debug').open=true; }
+'+cleaned.slice(0,240);
+      document.getElementById('debug').open=true;
+    }
     const data=JSON.parse(cleaned);
     renderReport(data);
     st.textContent='Loaded: '+url;
@@ -220,7 +223,7 @@ const sample={
   swings:1, discipline:'full-swing', power:{score:78, tempo:'3.0:1', release_timing:62},
   swing_metrics:[
     {label:'Right Arm Angle',value:84}, {label:'Club Face Angle',value:79}, {label:'Shoulder Turn',value:72}, {label:'Hip Turn',value:68},
-    {label:'X-Factor (Shoulder–Hip)',value:64}, {label:'Club Path',value:71}, {label:'Face‑to‑Path',value:66}, {label:'Attack Angle',value:62}
+    {label:'X-Factor (Shoulder-Hip)',value:64}, {label:'Club Path',value:71}, {label:'Face-to-Path',value:66}, {label:'Attack Angle',value:62}
   ],
   position_metrics:[{p:'P1',value:90},{p:'P2',value:74},{p:'P3',value:61},{p:'P4',value:55},{p:'P5',value:63},{p:'P6',value:70},{p:'P7',value:81},{p:'P8',value:86},{p:'P9',value:78}],
   phases:[]
