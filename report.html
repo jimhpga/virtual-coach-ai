@@ -233,6 +233,41 @@ const sample={
   document.getElementById('sample').addEventListener('click',()=>{ renderReport(sample); document.getElementById('status').textContent='Loaded sample (no fetch).'; });
   loadReport(getPath());
 })();
+
+
+// --- Share / Export actions
+function getShareUrl(){
+  const url=new URL(location.href);
+  const p=new URLSearchParams(location.search).get('report') || document.body.dataset.reportSrc || '/report.json';
+  url.searchParams.set('report', p);
+  return url.origin + url.pathname + '?' + url.searchParams.toString();
+}
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); }
+  catch(_){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(__){} document.body.removeChild(ta); }
+}
+function sendToCoach(){
+  const email=prompt('Coach email address?'); if(!email) return;
+  const subject=encodeURIComponent('Virtual Coach AI — Swing Report');
+  const body=encodeURIComponent('Here is my swing report:
+'+getShareUrl());
+  location.href='mailto:'+encodeURIComponent(email)+'?subject='+subject+'&body='+body;
+}
+function textLink(){
+  const phone=prompt('Phone number to text? (+1...)'); if(!phone) return;
+  const num=phone.replace(/[^\d+]/g,'');
+  const smsUrl='sms:'+num+'?&body='+encodeURIComponent('Swing report: '+getShareUrl());
+  try{ location.href=smsUrl; }catch(e){}
+  copyText('Swing report: '+getShareUrl());
+  alert('If Messages did not open, the link has been copied to your clipboard.');
+}
+function downloadPDF(){ window.print(); }
+
+document.getElementById('btnSend')?.addEventListener('click',sendToCoach);
+document.getElementById('btnSMS')?.addEventListener('click',textLink);
+document.getElementById('btnPDF')?.addEventListener('click',downloadPDF);
+
+document.querySelectorAll('.navlinks a').forEach(a=>{ try{ if(new URL(a.href, location.origin).pathname===location.pathname) a.classList.add('active'); }catch(_){} });
 </script>
 </body>
 </html>
