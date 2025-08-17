@@ -5,62 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Virtual Coach AI — Home</title>
 
-  <!-- Site-wide CSS (keep if you already have it) -->
+  <!-- Site CSS (keep if you already have it) -->
   <link rel="stylesheet" href="/style.css" />
 
-  <!-- Home-only tweaks: squeeze layout + hide the Pricing pill on Home -->
   <style>
-    /* Narrow, centered content on Home */
+    /* Home layout: tighter and higher on the page */
     .home .container{
-      max-width: 820px;   /* adjust to taste (740–900px) */
-      margin: 16px auto;
-      padding: 0 16px;
-    }
-    /* Keep hero bits from stretching on huge screens */
-    .home .logo,
-    .home .welcome,
-    .home h1,
-    .home .tagline,
-    .home .dropdowns,
-    .home .actions{
-      max-width: 820px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    /* Optional: subtle card look for the main box */
-    .home .container{
-      background: rgba(0,0,0,0.15);
+      max-width: 820px;    /* adjust to taste: 760–880px */
+      margin: 8px auto 16px;   /* small top margin raises everything */
+      padding: 12px 16px;
+      background: rgba(0,0,0,0.12);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 16px;
       backdrop-filter: saturate(110%) blur(4px);
     }
-    /* Hide the yellow pill on Home (you can remove data-soon in /nav.html later) */
+    .home .logo{ display:block; margin:8px auto 8px; max-width:220px; height:auto; }
+    .home .welcome{ text-align:center; font-weight:700; opacity:.9; }
+    .home h1{ text-align:center; margin:8px 0 6px; }
+    .home .tagline{ text-align:center; opacity:.9; margin-bottom:12px; }
+    .home .dropdowns{
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin:8px 0 12px;
+    }
+    .home .dropdowns select{
+      padding:10px 12px; border-radius:10px;
+      border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:inherit;
+    }
+    .home .actions{ display:flex; justify-content:center; padding:6px 0 12px; }
+    .home .actions .btn{
+      padding:12px 18px; border-radius:12px; border:1px solid rgba(255,255,255,.18);
+      background:#0fa36b; color:#062a1d; font-weight:800; cursor:pointer;
+    }
+    footer{ text-align:center; opacity:.8; margin:10px 0 20px; }
+
+    /* If Pricing still has a yellow "Coming Soon" pill from nav.html, hide it */
     .topbar .nav a[data-soon]::after{ display:none !important; }
   </style>
 </head>
 
 <body class="home">
-  <!-- Shared navigation (pulled from /nav.html via /nav.js) -->
+  <!-- Shared navigation (from /nav.html via /nav.js) -->
   <div id="navMount"></div>
   <script src="/nav.js" defer></script>
 
   <!-- Page content -->
   <div class="page">
     <main class="container">
-      <img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI logo" class="logo" style="display:block;margin:24px auto 12px;max-width:220px;height:auto;" />
-      <div class="welcome" style="text-align:center;font-weight:700;opacity:.9;">Welcome Beta Testers</div>
-      <h1 style="text-align:center;margin:8px 0 6px;">Virtual Coach AI</h1>
-      <div class="tagline" style="text-align:center;opacity:.9;margin-bottom:18px;">
-        Where the future of golf instruction begins with AI
-      </div>
+      <img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI logo" class="logo" />
+      <div class="welcome">Welcome Beta Testers</div>
+      <h1>Virtual Coach AI</h1>
+      <div class="tagline">Where the future of golf instruction begins with AI</div>
 
-      <div class="dropdowns" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:10px 0 14px;">
-        <select id="handedness" aria-label="Select handedness" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:inherit;">
+      <div class="dropdowns">
+        <select id="handedness" aria-label="Select handedness">
           <option value="">Select Handedness</option>
           <option value="right">Right-Handed</option>
           <option value="left">Left-Handed</option>
         </select>
-        <select id="eyeDominance" aria-label="Select eye dominance" style="padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:inherit;">
+        <select id="eyeDominance" aria-label="Select eye dominance">
           <option value="">Select Eye Dominance</option>
           <option value="right">Right Eye</option>
           <option value="left">Left Eye</option>
@@ -68,22 +69,18 @@
         </select>
       </div>
 
-      <div class="actions" style="display:flex;justify-content:center;padding:8px 0 24px;">
-        <button class="btn" id="goUpload"
-          style="padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.18);
-                 background:#0fa36b;color:#062a1d;font-weight:800;cursor:pointer;">
-          Upload Your Swing
-        </button>
+      <div class="actions">
+        <button class="btn" id="goUpload">Upload Your Swing</button>
       </div>
     </main>
   </div>
 
-  <footer style="text-align:center;opacity:.8;margin:18px 0 28px;">
+  <footer>
     <div>&copy; 2025 Virtual Coach AI. All rights reserved.</div>
   </footer>
 
   <script>
-    // Simple CTA: send users to the upload page
+    // Simple CTA → Upload page
     document.getElementById('goUpload')?.addEventListener('click', function(){
       location.href = '/upload.html';
     });
