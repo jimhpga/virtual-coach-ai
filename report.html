@@ -162,48 +162,13 @@ function renderReport(d){
     document.getElementById('coachPower').innerHTML=(pow.length?pow:defaultPow).map(mk).join('');
   }catch(ex){
     document.getElementById('error').textContent='Render error: '+ex.message;
-    const dbg=document.getElementById('debugOut'); if(dbg){ dbg.textContent += '
-Render stack:
-'+(ex.stack||''); document.getElementById('debug').open=true; }
-  }
-}
-
-const defaultPri=[
-  {title:'Clubface control at P7 (impact)', short:'Match face to path', long:'Face drifting open from P6->P7. Grip audit; bow lead wrist from P5->P6. Rehearse 8 half-swings keeping glove logo at target; video 2.'},
-  {title:'Lower body sequence', short:'Clear hips before hands', long:'From P4 shift to lead heel then rotate pelvis while chest stays closed a beat. Step-through swings x10 slow + x10 normal.'},
-  {title:'Hand path width', short:'Keep width at P3', long:'Pump-downs P3 -> mini P4 -> P5 with trail elbow in front of side seam. 3x10 rehearsals, then 3 balls each set.'}
-];
-const defaultPow=[
-  {title:'Tempo 3:1', short:'Smooth rhythm', long:'Count 1-2-3 back, 1 through. 72 bpm; strike every 4th tick x12, rest, repeat x3.'},
-  {title:'Lead-leg brake', short:'Post into lead side', long:'Plant lead heel from P4, straighten through P5-6. Towel under lead heel; 10 reps then 5 balls.'},
-  {title:'Late release timing', short:'Speed at P7-8', long:'Hold to P6 then unhinge. Two-tee gate; clip both tees post-impact. 2x5; video last 2.'}
-];
-
-function cleanJson(t){
-  if(!t) return '';
-  if(t.charCodeAt(0)===0xFEFF) t = t.slice(1);
-  let out='';
-  for(let i=0;i<t.length;i++){ const c=t.charCodeAt(i); if(c===9||c===10||c===13||(c>=32&&c!==127)) out+=t[i]; }
-  let a=out.indexOf('{'), a2=out.indexOf('['); if(a===-1 || (a2!==-1 && a2<a)) a=a2; const b=Math.max(out.lastIndexOf('}'), out.lastIndexOf(']'));
-  if(a>-1 && b>a) out=out.slice(a,b+1);
-  return out.trim();
-}
-
-async function loadReport(url){
-  const st=document.getElementById('status'); const er=document.getElementById('error'); const dbg=document.getElementById('debugOut');
-  er.textContent=''; st.textContent='Loading '+url+'...'; if(dbg) dbg.textContent='';
-  let raw='';
-  try{
-    const res=await fetch(url,{cache:'no-store'});
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    raw=await res.text();
-    const cleaned=cleanJson(raw);
+    const dbg=document.getElementById('debugOut');
     if(dbg){
-      dbg.textContent='RAW (first 240):
-'+raw.slice(0,240)+'
+      dbg.textContent = 'RAW (first 240):
+' + raw.slice(0,240) + '
 
 CLEAN (first 240):
-'+cleaned.slice(0,240);
+' + cleaned.slice(0,240);
       document.getElementById('debug').open=true;
     }
     const data=JSON.parse(cleaned);
@@ -214,6 +179,9 @@ CLEAN (first 240):
     if(dbg){ dbg.textContent+='
 
 ERROR: '+(err&&err.stack?err.stack:err); document.getElementById('debug').open=true; }
+    renderReport(sample);
+    st.textContent='Loaded SAMPLE (parse failed): '+url;
+  }
     renderReport(sample);
     st.textContent='Loaded SAMPLE (parse failed): '+url;
   }
