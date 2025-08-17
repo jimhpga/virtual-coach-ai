@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Coach AI — Swing Report (Stable)</title>
+  <title>Virtual Coach AI — Swing Report (Stable Minimal)</title>
   <style>
-    :root{ --ink:#0c1f2b; --muted:#3b6178; --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.18); }
+    :root{ --ink:#0c1f2b; --muted:#3b6178; --ok:#19c37d; --warn:#f5b301; --bad:#e03131; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.18); }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;color:#0f2330;font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif;background:#e9f4fb}
@@ -29,15 +29,15 @@
     .caret{margin-left:auto;transition:transform .2s ease}
     details[open] .caret{transform:rotate(180deg)}
     .gchip{font-size:12px;font-weight:700;padding:3px 8px;border-radius:8px;border:1px solid transparent;background:transparent;color:#fff}
-    .g-good{background:#19c37d;border-color:#19c37d} .g-ok{background:#f5b301;border-color:#f5b301} .g-bad{background:#e03131;border-color:#e03131}
+    .g-good{background:var(--ok);border-color:var(--ok)} .g-ok{background:var(--warn);border-color:var(--warn)} .g-bad{background:var(--bad);border-color:var(--bad)}
 
     .metric{display:flex;align-items:center;gap:10px;margin:9px 0}
     .metric .name{flex:0 0 230px;color:#10344a}
     .bar{flex:1;height:10px;border-radius:999px;background:#e8f2f9;border:1px solid #d3e3ee;position:relative;overflow:hidden}
     .bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
     .ok{background:linear-gradient(90deg,#19c37d,#2bd897)}
-    .warn{background:linear-gradient(90deg,#f6c453,#ffd479)}
-    .bad{background:linear-gradient(90deg,#ff6b6b,#ff8f8f)}
+    .warn{background:linear-gradient(90deg,#f6c253,#ffd479)}
+    .bad{background:linear-gradient(90deg,#e03131,#ff8f8f)}
     .pct{width:52px;text-align:right;color:#0c2433}
 
     .grid{display:grid;grid-template-columns:1fr;gap:14px}
@@ -80,11 +80,9 @@
   </div>
 
 <script>
-// --- Init
 const $ = s => document.querySelector(s);
 $('#date').textContent = new Date().toLocaleDateString();
 
-// --- Helpers
 const band = v => v>=75?'ok':v>=55?'warn':'bad';
 const fmt  = v => `${v}%`;
 const metricRow = m => `<div class="metric"><div class="name">${m.label}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
@@ -103,7 +101,6 @@ const defaultLong={
   P9:'Finish: pressure fully lead side; belt buckle/chest to target; trail toe down. Hold the pose.'
 };
 
-// --- Renderer
 function renderReport(d){
   if(d.discipline){ $('#modeLabel').textContent = /putt/i.test(d.discipline)?'Putting':/chip/i.test(d.discipline)?'Chipping':'Full Swing'; }
   if(d.swings!=null){ $('#swingCount').textContent = String(d.swings); }
@@ -119,7 +116,6 @@ function renderReport(d){
     `<div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo}</div></div>`+
     `<div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
 
-  // Build P1–P9 robustly
   const pm = Array.isArray(d.position_metrics)?d.position_metrics:[];
   let phases = Array.isArray(d.phases)?d.phases.slice():[];
   const gradeFromVal = v => v>=75?'good':v>=55?'ok':'bad';
@@ -127,13 +123,7 @@ function renderReport(d){
   for(let i=0;i<9;i++){
     const id='P'+(i+1);
     const base = phases.find(x=>String(x.id||'').toUpperCase()===id) || {};
-    phases[i] = {
-      id,
-      name: base.name || defaultNames[i],
-      short: base.short || '',
-      long: (base.long && base.long.trim() && base.long.trim()!==(base.short||'').trim()) ? base.long : (defaultLong[id]||''),
-      grade: base.grade || gradeFromVal(getPmVal(id))
-    };
+    phases[i] = { id, name: base.name || defaultNames[i], short: base.short || '', long: (base.long && base.long.trim() && base.long.trim()!==(base.short||'').trim()) ? base.long : (defaultLong[id]||''), grade: base.grade || gradeFromVal(getPmVal(id)) };
   }
   const gradeLabel={good:'Good', ok:'OK', bad:'Needs Help'};
   $('#plist').innerHTML = phases.map((ph,i)=>
@@ -152,7 +142,6 @@ function renderReport(d){
      </details>`
   ).join('');
 
-  // Coaching
   const pri=(d.coaching&&Array.isArray(d.coaching.priority_fixes))?d.coaching.priority_fixes:defaultPri;
   const pow=(d.coaching&&Array.isArray(d.coaching.power_fixes))?d.coaching.power_fixes:defaultPow;
   const mk=i=>`<details class="panel"><summary><span class="pname">${i.title}</span><span class="sub" style="margin-left:8px">${i.short||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary><div class="content">${i.long||''}</div></details>`;
@@ -171,15 +160,11 @@ const defaultPow=[
   {title:'Late release timing', short:'Speed at P7-8', long:'Hold to P6 then unhinge. Two-tee gate; clip both tees post-impact. 2x5; video last 2.'}
 ];
 
-// --- JSON cleaning without regex traps
 function cleanJson(t){
   if(!t) return '';
-  // strip BOM
   if(t.charCodeAt(0)===0xFEFF) t=t.slice(1);
-  // drop control chars except tab/newline/cr
   let out='';
   for(let i=0;i<t.length;i++){ const c=t.charCodeAt(i); if(c===9||c===10||c===13||(c>=32&&c!==127)) out+=t[i]; }
-  // trim to first { or [ and last } or ]
   let a=out.indexOf('{'); let a2=out.indexOf('['); if(a===-1||(a2!==-1&&a2<a)) a=a2; const b=Math.max(out.lastIndexOf('}'),out.lastIndexOf(']'));
   if(a>-1&&b>a) out=out.slice(a,b+1);
   return out.trim();
@@ -194,13 +179,13 @@ async function loadReport(url){
     const raw=await res.text();
     const cleaned=cleanJson(raw);
     if (dbg) {
-    dbg.textContent = `RAW (first 240):
+      dbg.textContent = `RAW (first 240):
 ${raw.slice(0,240)}
 
 CLEAN (first 240):
 ${cleaned.slice(0,240)}`;
-    document.getElementById('debug').open = true;
-  }
+      document.getElementById('debug').open = true;
+    }
     const data=JSON.parse(cleaned);
     renderReport(data);
     st.textContent='Loaded: '+url;
@@ -233,41 +218,6 @@ const sample={
   document.getElementById('sample').addEventListener('click',()=>{ renderReport(sample); document.getElementById('status').textContent='Loaded sample (no fetch).'; });
   loadReport(getPath());
 })();
-
-
-// --- Share / Export actions
-function getShareUrl(){
-  const url=new URL(location.href);
-  const p=new URLSearchParams(location.search).get('report') || document.body.dataset.reportSrc || '/report.json';
-  url.searchParams.set('report', p);
-  return url.origin + url.pathname + '?' + url.searchParams.toString();
-}
-async function copyText(t){
-  try{ await navigator.clipboard.writeText(t); }
-  catch(_){ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(__){} document.body.removeChild(ta); }
-}
-function sendToCoach(){
-  const email=prompt('Coach email address?'); if(!email) return;
-  const subject=encodeURIComponent('Virtual Coach AI — Swing Report');
-  const body=encodeURIComponent('Here is my swing report:
-'+getShareUrl());
-  location.href='mailto:'+encodeURIComponent(email)+'?subject='+subject+'&body='+body;
-}
-function textLink(){
-  const phone=prompt('Phone number to text? (+1...)'); if(!phone) return;
-  const num=phone.replace(/[^\d+]/g,'');
-  const smsUrl='sms:'+num+'?&body='+encodeURIComponent('Swing report: '+getShareUrl());
-  try{ location.href=smsUrl; }catch(e){}
-  copyText('Swing report: '+getShareUrl());
-  alert('If Messages did not open, the link has been copied to your clipboard.');
-}
-function downloadPDF(){ window.print(); }
-
-document.getElementById('btnSend')?.addEventListener('click',sendToCoach);
-document.getElementById('btnSMS')?.addEventListener('click',textLink);
-document.getElementById('btnPDF')?.addEventListener('click',downloadPDF);
-
-document.querySelectorAll('.navlinks a').forEach(a=>{ try{ if(new URL(a.href, location.origin).pathname===location.pathname) a.classList.add('active'); }catch(_){} });
 </script>
 </body>
 </html>
