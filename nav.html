@@ -1,6 +1,6 @@
 <!-- /nav.html -->
 <style>
-/* Dark-green top bar (shared across the site) */
+/* Dark-green top bar (shared) */
 .topbar{
   position:sticky; top:0; z-index:1000;
   background:rgba(10,80,55,.95);
@@ -26,7 +26,7 @@
 .topbar .nav a:hover{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.18); }
 .topbar .nav a.active{ background:#0fa36b; border-color:#0fa36b; color:#062a1d; }
 
-/* Optional “Coming Soon” pill — appears when an <a> has data-soon */
+/* “Coming Soon” pill (optional) */
 .topbar .nav a[data-soon]::after{
   content:attr(data-soon);
   position:absolute; top:-8px; right:-6px;
@@ -41,9 +41,7 @@
     <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="" onerror="this.remove()"><span>Virtual Coach AI</span></a>
     <div class="nav">
       <a href="/" data-nav>Home</a>
-      <a href="/upload.html" data-nav>Upload</a>
       <a href="/reports.html" data-nav>Reports</a>
-      <a href="/report.html" data-nav>Report</a>
       <a href="/pricing.html" data-nav data-soon="Coming Soon">Pricing</a>
       <a href="/faq.html" data-nav>FAQ</a>
       <a href="/contact.html" data-nav>Contact</a>
