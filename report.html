@@ -44,7 +44,7 @@
     @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
   </style>
 </head>
-<body data-report-src="/virtualcodesreport.json">
+<body data-report-src="/report.json">
   <div class="bg" aria-hidden="true"></div>
   <div class="wrap">
     <header>
@@ -194,11 +194,11 @@ async function loadReport(url){
     const raw=await res.text();
     const cleaned=cleanJson(raw);
     if (dbg) {
-    dbg.textContent = 'RAW (first 240):
-' + raw.slice(0,240) + '
+    dbg.textContent = `RAW (first 240):
+${raw.slice(0,240)}
 
 CLEAN (first 240):
-' + cleaned.slice(0,240);
+${cleaned.slice(0,240)}`;
     document.getElementById('debug').open = true;
   }
     const data=JSON.parse(cleaned);
@@ -207,9 +207,9 @@ CLEAN (first 240):
   }catch(err){
     er.textContent='Failed to load report: '+(err&&err.message?err.message:String(err));
     if (dbg) {
-      dbg.textContent += '
+      dbg.textContent += "
 
-ERROR: ' + (err && err.stack ? err.stack : err);
+ERROR: " + (err && err.stack ? err.stack : err);
       document.getElementById('debug').open = true;
     }
     renderReport(sample);
