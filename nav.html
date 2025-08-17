@@ -1,35 +1,38 @@
 <!-- /nav.html -->
 <style>
-/* Dark-green top bar */
+/* Dark-green top bar (shared across the site) */
 .topbar{
-  position:sticky;top:0;z-index:1000;
+  position:sticky; top:0; z-index:1000;
   background:rgba(10,80,55,.95);
   backdrop-filter:saturate(120%) blur(6px);
-  border-bottom:1px solid rgba(0,0,0,.25)
+  border-bottom:1px solid rgba(0,0,0,.25);
 }
 .topbar .inner{
-  max-width:1100px;margin:0 auto;
-  display:flex;align-items:center;justify-content:space-between;
-  gap:12px;padding:10px 16px
+  max-width:1100px; margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:10px 16px;
 }
-.topbar .brand{display:flex;align-items:center;gap:10px;
-  color:#e9fbf3;font-weight:800;letter-spacing:.2px;text-decoration:none}
-.topbar .brand img{height:28px;width:auto}
-.topbar .nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.topbar .brand{
+  display:flex; align-items:center; gap:10px;
+  color:#e9fbf3; font-weight:800; letter-spacing:.2px; text-decoration:none;
+}
+.topbar .brand img{ height:28px; width:auto; }
+.topbar .nav{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 .topbar .nav a{
-  position:relative;display:inline-block;padding:8px 10px;border-radius:10px;
-  color:#e9fbf3;text-decoration:none;border:1px solid transparent
+  position:relative;
+  display:inline-block; padding:8px 10px; border-radius:10px;
+  color:#e9fbf3; text-decoration:none; border:1px solid transparent;
 }
-.topbar .nav a:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18)}
-.topbar .nav a.active{background:#0fa36b;border-color:#0fa36b;color:#062a1d}
+.topbar .nav a:hover{ background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.18); }
+.topbar .nav a.active{ background:#0fa36b; border-color:#0fa36b; color:#062a1d; }
 
-/* “Coming Soon” pill – appears when a link has data-soon */
+/* Optional “Coming Soon” pill — appears when an <a> has data-soon */
 .topbar .nav a[data-soon]::after{
-  content: attr(data-soon);
-  position:absolute;top:-8px;right:-6px;
-  font-size:10px;font-weight:700;letter-spacing:.2px;
-  background:#ffb33f;color:#1a1406;border:1px solid rgba(0,0,0,.2);
-  padding:2px 6px;border-radius:999px
+  content:attr(data-soon);
+  position:absolute; top:-8px; right:-6px;
+  font-size:10px; font-weight:700; letter-spacing:.2px;
+  background:#ffb33f; color:#1a1406;
+  border:1px solid rgba(0,0,0,.2); padding:2px 6px; border-radius:999px;
 }
 </style>
 
