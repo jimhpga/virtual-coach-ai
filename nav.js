@@ -4,7 +4,7 @@
     try{
       const mount = document.getElementById('navMount');
       if(!mount) return;
-      const res = await fetch('/nav.html?v=7', { cache: 'no-store' });
+      const res = await fetch('/nav.html?v=8', { cache: 'no-store' });
       if(!res.ok) throw new Error('nav.html HTTP '+res.status);
       mount.innerHTML = await res.text();
 
