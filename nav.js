@@ -1,27 +1,23 @@
 // /nav.js
 (function(){
-  function canon(path){
-    return (path||'/')
-      .replace(/\/index\.html$/i,'/')
-      .replace(/\.html$/i,'')
-      .replace(/\/$/,'');
+  async function mountNav(){
+    try{
+      const mount = document.getElementById('navMount');
+      if(!mount) return;
+      const res = await fetch('/nav.html?v=7', { cache: 'no-store' });
+      if(!res.ok) throw new Error('nav.html HTTP '+res.status);
+      mount.innerHTML = await res.text();
+
+      // Highlight current page
+      const herePath = (location.pathname === '/' ? '/index.html' : location.pathname).replace(/\/+$/,'');
+      mount.querySelectorAll('a[data-nav]').forEach(a=>{
+        const url = new URL(a.getAttribute('href'), location.origin);
+        const p = (url.pathname === '/' ? '/index.html' : url.pathname).replace(/\/+$/,'');
+        if(p === herePath) a.setAttribute('aria-current','page');
+      });
+    }catch(e){
+      console.error('Nav load failed:', e);
+    }
   }
-  function mountNav(){
-    var m = document.getElementById('navMount'); if(!m) return;
-    fetch('/nav.html',{cache:'no-store'})
-      .then(r=>r.text())
-      .then(html=>{
-        m.innerHTML = html;
-        try{
-          var here = canon(location.pathname);
-          m.querySelectorAll('[data-nav]').forEach(a=>{
-            var target = canon(a.getAttribute('href')||'/');
-            if(here===target){ a.classList.add('active'); }
-          });
-        }catch(e){}
-      })
-      .catch(()=>{});
-  }
-  if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', mountNav); }
-  else{ mountNav(); }
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', mountNav); } else { mountNav(); }
 })();
