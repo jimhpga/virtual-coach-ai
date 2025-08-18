@@ -4,34 +4,71 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual Coach AI — Pricing</title>
+<link rel="preload" as="image" href="/homepage-background.png" />
 <style>
-:root{
-  --bg:#0e1a22; --text:#ecf3f7; --muted:#a9c2d1;
-  --panel:#16242e; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.35);
-  --bgimg-opacity:.60; /* tweak this higher for brighter background */
-}
-*{box-sizing:border-box} html,body{height:100%}
-body{margin:0;color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif;background:#0e1a22}
-.bg{position:fixed;inset:0;background:url('/homepage-background.png') center/cover no-repeat fixed;opacity:var(--bgimg-opacity);z-index:-1}
+  :root{
+    --text:#ecf3f7; --muted:#a9c2d1;
+    --line: rgba(255,255,255,.14);
+    --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.30);
+    --maxw: 980px;
 
-.wrap{max-width:980px;margin:32px auto;padding:0 16px}
-.hero{background:rgba(22,36,46,.58);border:1px solid rgba(34,55,67,.7);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px}
-.hero h1{margin:0 0 6px 0;font-size:28px}
-.hero p{margin:6px 0 0 0;color:var(--muted)}
-.grid{display:grid;gap:14px;margin-top:14px}
-.card{background:rgba(22,36,46,.58);border:1px solid rgba(34,55,67,.7);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
-.badge{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(29,47,59,.6);border:1px solid #263b48;color:#cfe3ee;font-size:12px}
-.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-.btn{background:rgba(22,36,46,.82);border:1px solid #223743;border-radius:12px;color:var(--text);padding:10px 14px;cursor:pointer;text-decoration:none}
-.btn:hover{background:rgba(22,36,46,.92)}
-.note{color:var(--muted);font-size:13px;margin-top:8px}
+    /* Brighter background image */
+    --bgimg-opacity: .92;       /* bump this toward 1.0 to brighten more */
+    --panel: rgba(22,36,46,.42); /* make cards more translucent */
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--text);
+    font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif;
+    background:#0e1a22;
+  }
+  /* Full-bleed course photo */
+  .bg{position:fixed; inset:0; z-index:-1;
+      background:url('/homepage-background.png') center/cover no-repeat fixed;
+      opacity:var(--bgimg-opacity);}
+
+  /* Shared nav mount (top bar injected by /nav.js) */
+  .wrap{width:min(var(--maxw),94%); margin:28px auto; padding:0 14px}
+
+  .hero{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius); box-shadow:var(--shadow); padding:24px;
+  }
+  .badge{display:inline-block; padding:6px 10px; border-radius:999px;
+         border:1px solid var(--line); background:rgba(255,255,255,.06);
+         font-size:12px; color:#cfe3ee}
+  .hero h1{margin:6px 0 6px; font-size:28px}
+  .hero p{margin:6px 0 0; color:var(--muted)}
+
+  .grid{display:grid; gap:14px; margin-top:14px}
+  @media(min-width:860px){ .grid{grid-template-columns:1fr 1fr} }
+
+  .card{
+    background:var(--panel); border:1px solid var(--line);
+    border-radius:var(--radius); box-shadow:var(--shadow); padding:18px;
+  }
+  .card h3{margin:0 0 6px}
+  ul{margin:6px 0 0 18px}
+
+  .cta{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px}
+  .btn{
+    display:inline-block; text-decoration:none; color:#fff;
+    background:rgba(255,255,255,.12); border:1px solid var(--line);
+    border-radius:12px; padding:10px 14px; font-weight:600;
+  }
+  .btn:hover{background:rgba(255,255,255,.18)}
+  .note{color:var(--muted); font-size:13px; margin-top:8px}
+
+  footer{width:min(var(--maxw),94%); margin:16px auto 30px; color:#cbd9de; font-size:12px; text-align:center}
 </style>
 </head>
 <body>
-  <!-- Shared nav (2 lines) -->
+  <!-- Shared navigation -->
   <div id="navMount"></div>
   <script src="/nav.js" defer></script>
 
+  <!-- Background image -->
   <div class="bg" aria-hidden="true"></div>
 
   <main class="wrap">
@@ -41,30 +78,34 @@ body{margin:0;color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,
       <p>We’re finalizing tiers for coaches, teams, and players. Want early-access pricing? Ping us and we’ll prioritize you.</p>
       <div class="cta">
         <a class="btn" href="/contact.html">Contact Sales</a>
-        <a class="btn" href="/upload.html">Try a Sample Report</a>
+        <a class="btn" href="/report.html?report=/report.json">View Demo Report</a>
       </div>
-      <div class="note">Tell us what you need. We’ll price for real-world use, not fluff.</div>
+      <div class="note">We price for real-world use, not fluff.</div>
     </section>
 
     <section class="grid">
-      <div class="card">
+      <article class="card">
         <h3>What’s included</h3>
         <ul>
           <li>P1–P9 analysis with coach-ready summaries</li>
           <li>Power & Consistency metrics</li>
-          <li>Practice plans + Coaching cards</li>
-          <li>Team dashboards (optional)</li>
+          <li>Coaching cards + 14-day practice plans</li>
+          <li>Optional team dashboards</li>
         </ul>
-      </div>
-      <div class="card">
+      </article>
+
+      <article class="card">
         <h3>Likely tiers</h3>
         <ul>
           <li><strong>Player</strong> — per-swing or monthly</li>
           <li><strong>Coach</strong> — seat + athlete bundles</li>
           <li><strong>Academy</strong> — custom</li>
         </ul>
-      </div>
+      </article>
     </section>
   </main>
+
+  <footer>© <span id="y"></span> Virtual Coach AI</footer>
+  <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
 </body>
 </html>
