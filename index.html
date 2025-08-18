@@ -26,6 +26,7 @@
       background:url('/homepage-background.png') center/cover fixed no-repeat;
     }
     .scrim{min-height:100vh;background:var(--scrim)}
+
     /* NAV (self-contained) */
     header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
     .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
@@ -34,24 +35,37 @@
     nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
     nav a:hover{background:rgba(255,255,255,.08)}
     nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+
     /* MAIN */
     main{width:min(var(--maxw),94%);margin:0 auto;padding:var(--padTop) 0 40px;display:grid;gap:18px}
     .hero{
-      display:grid;gap:12px;padding:16px;border:1px solid var(--line);
-      border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow)
+      display:grid;gap:14px;padding:16px;border:1px solid var(--line);
+      border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow);
+      text-align:center; /* center everything in hero */
     }
-    .logo{width:240px;max-width:40vw;height:auto}
+    /* Centered, larger, green-tinted logo */
+    .logo{
+      width:320px;            /* larger */
+      max-width:50vw;
+      height:auto;
+      margin:6px auto 0;      /* centered */
+      /* green tint; tweak if your source art isn’t neutral */
+      filter: hue-rotate(95deg) saturate(360%) brightness(110%);
+    }
+
     h1{margin:0;font-size:2.05rem;line-height:1.2}
     .muted{color:var(--muted)}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center} /* buttons centered */
     .btn{border:1px solid var(--line);background:rgba(255,255,255,.12);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:600}
     .btn:hover{background:rgba(255,255,255,.18)}
     .btn.primary{background:rgba(0,255,153,.16);border-color:#0a7}
+
     .row{display:grid;gap:12px}
     @media(min-width:800px){.row{grid-template-columns:1.2fr .8fr}}
     .card{padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px)}
     .card h2{margin:0 0 6px;font-size:1.25rem}
     footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
+
     /* Pull up slightly more on very large screens (~30") */
     @media(min-width:1500px){ :root{ --padTop: 10px; } }
   </style>
