@@ -7,9 +7,12 @@
   <link rel="preload" as="image" href="/homepage-background.png" />
   <style>
     :root{
-      --scrim:rgba(0,0,0,.22);--panel:rgba(10,18,24,.78);--line:rgba(255,255,255,.12);
-      --text:#ecf3f7;--muted:#cfe0e6;--ok:#19c37d;--warn:#f6c453;--bad:#ff6b6b;
-      --radius:16px;--shadow:0 8px 24px rgba(0,0,0,.35)
+      --scrim:rgba(0,0,0,.18);
+      --panel:rgba(10,18,24,.60);     /* more translucent */
+      --line:rgba(255,255,255,.10);
+      --text:#ecf3f7; --muted:#cfe0e6;
+      --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b;
+      --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.30)
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
@@ -17,7 +20,7 @@
     .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
     .title{font-size:26px;font-weight:800}.sub{color:var(--muted);font-size:13px}
     .badge{background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
-    .card,details.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .card,details.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(2px)}
     .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)} .card .content{padding:12px 16px}
     summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer} summary::-webkit-details-marker{display:none}
     .pnum{width:34px;height:34px;border-radius:10px;background:#0c1820;border:1px solid var(--line);display:grid;place-items:center;font-weight:800}
@@ -33,11 +36,14 @@
     .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px} @media(max-width:960px){.grid2{grid-template-columns:1fr}}
     .hdr{display:flex;align-items:center;justify-content:space-between}
     .info{border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;padding:6px 10px;border-radius:10px;cursor:pointer}
+    .btn{border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;padding:8px 10px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center}
+    .btn:hover{background:rgba(255,255,255,.12)}
+    .yt{border-color:#8c1b1b}
   </style>
 </head>
 <body>
   <div id="navMount"></div>
-  <script src="/nav.js?v=7" defer></script>
+  <script src="/nav.js?v=8" defer></script>
 
   <div class="scrim">
     <main class="wrap">
@@ -54,7 +60,7 @@
         <h3 class="hdr">
           <span>P1–P9</span>
           <details style="display:inline-block"><summary class="info">Info</summary>
-            <div class="content">Nine checkpoints from setup to finish. Short shows in the header; expand for the long explanation.</div>
+            <div class="content">Nine checkpoints from setup to finish. Short shows in the header; expand for the long explanation. Each row includes a YouTube link for further reference.</div>
           </details>
         </h3>
         <div id="plist" class="content"></div>
@@ -113,10 +119,45 @@
 
   <script>
   const $ = s => document.querySelector(s);
+  const esc = s => encodeURIComponent(s||'');
+  const ytSearch = q => `https://www.youtube.com/results?search_query=${esc(q)}`;
+
   const fmt = v => `${v}%`;
   const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';
   const chip = g => g==='good' ? 'g-good' : g==='ok' ? 'g-ok' : 'g-bad';
   const metricRow = m => `<div class="metric"><div class="name">${m.label||m.p}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
+
+  function phaseRow(ph,i){
+    const id = ph.id || ('P'+(i+1));
+    const name = ph.name || '';
+    const grade = String(ph.grade||'').toLowerCase().replace('bad','needs help');
+    const short = ph.short || '';
+    const long = ph.long || '';
+    const ref = ph.ref || ytSearch(`${id} ${name} golf checkpoint`);
+    return `
+      <details class="panel" ${i===0?'open':''}>
+        <summary>
+          <span class="pnum">${id}</span>
+          <span class="pname">${name}</span>
+          <span class="gchip ${chip(grade)}">${grade.toUpperCase()}</span>
+          <span class="sub" style="margin-left:8px">${short}</span>
+          <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <div class="content">
+          <div class="sub" style="margin-bottom:8px">${short}</div>
+          <div style="margin-bottom:10px">${long}</div>
+          <a class="btn yt" href="${ref}" target="_blank" rel="noopener">YouTube</a>
+        </div>
+      </details>`;
+  }
+
+  function coachItem(item){
+    const title = item.title || '';
+    const short = item.short || '';
+    const long = item.long || '';
+    const ref = item.ref || ytSearch(`${title} golf drill`);
+    return `<details class="panel"><summary><span class="pname">${title}</span><span class="sub" style="margin-left:8px">${short}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary><div class="content"><div style="margin-bottom:10px">${long}</div><a class="btn yt" href="${ref}" target="_blank" rel="noopener">YouTube</a></div></details>`;
+  }
 
   function renderReport(data){
     $('#date').textContent = new Date().toLocaleDateString();
@@ -125,24 +166,13 @@
 
     // P1–P9
     const phases = Array.isArray(data.phases)? data.phases : [];
-    $('#plist').innerHTML = phases.map((ph,i)=>`
-      <details class="panel" ${i===0?'open':''}>
-        <summary>
-          <span class="pnum">${ph.id||('P'+(i+1))}</span>
-          <span class="pname">${ph.name||''}</span>
-          <span class="gchip ${chip((ph.grade||'').toLowerCase())}">${String(ph.grade||'').toUpperCase().replace('BAD','NEEDS HELP')}</span>
-          <span class="sub" style="margin-left:8px">${ph.short||''}</span>
-          <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </summary>
-        <div class="content"><div class="sub" style="margin-bottom:8px">${ph.short||''}</div><div>${ph.long||''}</div></div>
-      </details>`).join('') || '<div class="content sub">No phases found in report.</div>';
+    $('#plist').innerHTML = phases.map(phaseRow).join('') || '<div class="content sub">No phases found in report.</div>';
 
     // Coaching
     const pri = (data.coaching && Array.isArray(data.coaching.priority_fixes)) ? data.coaching.priority_fixes : [];
     const pow = (data.coaching && Array.isArray(data.coaching.power_fixes)) ? data.coaching.power_fixes : [];
-    const mk = item => `<details class="panel"><summary><span class="pname">${item.title||''}</span><span class="sub" style="margin-left:8px">${item.short||''}</span><svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></summary><div class="content">${item.long||''}</div></details>`;
-    $('#coachPriority').innerHTML = pri.map(mk).join('') || '<div class="sub">No priority fixes in report.</div>';
-    $('#coachPower').innerHTML    = pow.map(mk).join('') || '<div class="sub">No power fixes in report.</div>';
+    $('#coachPriority').innerHTML = pri.map(coachItem).join('') || '<div class="sub">No priority fixes in report.</div>';
+    $('#coachPower').innerHTML    = pow.map(coachItem).join('') || '<div class="sub">No power fixes in report.</div>';
 
     // Metrics
     $('#position').innerHTML = (data.position_metrics||[]).map(metricRow).join('') || '<div class="sub">No position metrics.</div>';
