@@ -1,134 +1,216 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Virtual Coach AI – Upload</title>
-  <style>
-    :root{ --green:#003300; }
-    html,body{ height:100%; margin:0; }
-    body{
-      font-family: Arial, sans-serif; color:#fff; text-align:center;
-      background:#000 url('homepage-background.png') no-repeat center/cover fixed;
-      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-    }
-    nav{position:sticky;top:0;background:var(--green);padding:8px 0}
-    nav a{color:#fff;text-decoration:none;font-weight:700;margin:0 12px}
-    main{max-width:840px;margin:30px auto;padding:16px;background:rgba(0,0,0,.35);border-radius:12px}
-    h1{margin-top:0}
-    .row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
-    input[type="file"]{
-      background: rgba(0,0,0,0.28); color:#fff;
-      border:1px solid rgba(255,255,255,.35); border-radius:6px; padding:6px;
-    }
-    input[type="file"]::file-selector-button{
-      background:var(--green); color:#fff; border:none; border-radius:4px; padding:6px 10px; cursor:pointer;
-    }
-    button{ background:var(--green); color:#fff; border:none; border-radius:6px; padding:8px 14px; cursor:pointer; }
-    #status{ margin-top:12px; font-weight:600; white-space:pre-wrap; text-align:left; background:#1118; padding:10px; border-radius:8px; }
-    video{ width:100%; max-height:400px; margin-top:16px; display:none; }
-    small{ display:block; color:#ccc; margin-top:6px; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Upload — Virtual Coach AI</title>
+<link rel="preload" as="image" href="/homepage-background.png" />
+<style>
+  :root{
+    --nav: rgba(7,68,32,.96);
+    --scrim: rgba(0,0,0,.06);
+    --panel: rgba(0,0,0,.28);
+    --line: rgba(255,255,255,.12);
+    --text:#f2f7f9; --muted:#cfe0e6; --radius:14px; --maxw:980px;
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{
+    margin:0; color:var(--text);
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
+    background:url('/homepage-background.png') center/cover fixed no-repeat;
+  }
+  header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+  .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .brand img{height:30px}
+  nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+  nav a:hover{background:rgba(255,255,255,.08)}
+
+  .scrim{min-height:100vh;background:var(--scrim)}
+  main{width:min(var(--maxw),94%);margin:0 auto;padding:18px 0 40px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);backdrop-filter:blur(2px);padding:18px}
+  h1{margin:0 0 8px}
+  .muted{color:var(--muted)}
+  .drop{
+    margin-top:12px;border:2px dashed rgba(255,255,255,.2);border-radius:14px;
+    padding:28px;text-align:center
+  }
+  .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;cursor:pointer}
+  .btn:hover{background:rgba(255,255,255,.16)}
+  input[type="file"]{display:none}
+  .small{font-size:12px;color:var(--muted);margin-top:6px;text-align:center}
+</style>
 </head>
 <body>
-  <nav>
-    <a href="/index.html">Home</a>
-    <a href="/about.html">About</a>
-    <a href="/coming-soon.html">Coming Soon</a>
-    <a href="/contact.html">Contact</a>
-    <a href="/upload.html" aria-current="page">Upload</a>
-  </nav>
-
-  <main>
-    <h1>Upload Your Swing</h1>
-    <div class="row">
-      <input type="file" id="fileInput" accept="video/*" />
-      <button id="uploadBtn">Upload</button>
+  <header>
+    <div class="navwrap">
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
+      <nav aria-label="Primary">
+        <a href="/index.html">Home</a>
+        <a href="/report.html?report=/report.json">Reports</a>
+        <a href="/coming-soon.html">Coming&nbsp;Soon</a>
+        <a href="/pricing.html">Pricing</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/login.html">Login</a>
+      </nav>
     </div>
-    <small>iPhone videos (.mov) are fine — uploaded as-is to the cloud.</small>
+  </header>
 
-    <div id="status">Idle</div>
-    <video id="preview" controls></video>
-  </main>
+  <div class="scrim">
+    <main>
+      <section class="card">
+        <h1>Upload your swing</h1>
+        <div class="muted">Pick a face-on or down-the-line clip. We’ll generate a report and take you there.</div>
 
-  <script>
-    const fileInput = document.getElementById('fileInput');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const statusBox = document.getElementById('status');
-    const preview = document.getElementById('preview');
+        <div class="drop" id="drop">
+          <p>Drag & drop a <strong>video</strong> here, or use a button below.</p>
+          <div class="row">
+            <label class="btn">
+              Select Video
+              <input id="pickVideo" type="file" accept="video/*" />
+            </label>
+            <label class="btn">
+              Load report.json
+              <input id="pickJson" type="file" accept="application/json,.json" />
+            </label>
+          </div>
+          <div class="small">Tip: you can also provide a ready-made <code>report.json</code> and we’ll use it directly.</div>
+        </div>
+      </section>
+    </main>
+  </div>
 
-    function setStatus(text, isError=false){
-      statusBox.textContent = text;
-      statusBox.style.color = isError ? '#ffd7d7' : '#bfffc7';
+<script>
+(function(){
+  const pickVideo = document.getElementById('pickVideo');
+  const pickJson  = document.getElementById('pickJson');
+  const drop      = document.getElementById('drop');
+
+  // --- helper: sample report builder (injects your uploaded video URL in refs) ---
+  function buildSampleReport(videoUrl, fileName){
+    // Use your current schema; this is your latest example with refs added
+    return {
+      swings: 1,
+      discipline: "full-swing",
+      power: { score: 82, tempo: "3.2:1", release_timing: 68 },
+      swing_metrics: [
+        { label: "Right Arm Angle", value: 84, tags: ["arm-bend"] },
+        { label: "Club Face Angle", value: 79, tags: ["face-angle"] },
+        { label: "Shoulder Turn", value: 72, tags: ["shoulder-turn"] },
+        { label: "Hip Turn", value: 68, tags: ["hip-movement"] },
+        { label: "X-Factor (Shoulder-Hip)", value: 64, tags: ["sequence"] },
+        { label: "Club Path", value: 71, tags: ["club-path"] },
+        { label: "Face-to-Path", value: 66, tags: ["face-angle"] },
+        { label: "Attack Angle", value: 62, tags: ["delivery"] }
+      ],
+      position_metrics: [
+        { p: "P1", value: 90 }, { p: "P2", value: 74 }, { p: "P3", value: 61 },
+        { p: "P4", value: 55 }, { p: "P5", value: 63 }, { p: "P6", value: 70 },
+        { p: "P7", value: 81 }, { p: "P8", value: 86 }, { p: "P9", value: 78 }
+      ],
+      phases: [
+        { id:"P1", name:"Setup", grade:"good", short:"Athletic stance",
+          long:"Neutral grip, soft knees, pelvis neutral. Pressure 55/45 lead-to-trail; spine tall; eyes level.",
+          ref: videoUrl },
+        { id:"P2", name:"Shaft Parallel (Backswing)", grade:"ok", short:"Width + neutral face",
+          long:"Hands in front of chest; gradual wrist set; near toe-up face; pressure loads trail foot without sway.",
+          ref: videoUrl },
+        { id:"P3", name:"Lead Arm Parallel (Backswing)", grade:"ok", short:"Maintain width",
+          long:"Trail elbow folds in front of ribcage; club on plane; head steady; width ~a forearm off chest.",
+          ref: videoUrl },
+        { id:"P4", name:"Top of Swing", grade:"bad", short:"Full coil",
+          long:"Pressure into trail heel; trail hip deep; lead wrist nearer flat/bowed. Avoid across-the-line/laid-off extremes.",
+          ref: videoUrl },
+        { id:"P5", name:"Lead Arm Parallel (Downswing)", grade:"good", short:"Sequencing",
+          long:"Pelvis -> torso -> arms. Shaft shallows; trail elbow in front of side seam; lead-wrist flexion maintained.",
+          ref: videoUrl },
+        { id:"P6", name:"Shaft Parallel (Downswing)", grade:"good", short:"Deliver",
+          long:"Hands slightly ahead; face in the window; pelvis keeps turning (no stall).",
+          ref: videoUrl },
+        { id:"P7", name:"Impact", grade:"ok", short:"Forward lean",
+          long:"Forward shaft lean; low point forward. Pelvis 30–45° open; chest 10–20° open; lead leg braced.",
+          ref: videoUrl },
+        { id:"P8", name:"Trail Arm Parallel (Follow-Through)", grade:"good", short:"Extension",
+          long:"Trail arm extends; handle works around; control rate of closure (no flip).",
+          ref: videoUrl },
+        { id:"P9", name:"Finish", grade:"good", short:"Balanced",
+          long:"Pressure fully lead side; belt buckle and chest to target; hold the pose.",
+          ref: videoUrl }
+      ],
+      coaching:{
+        priority_fixes:[
+          { title:"Clubface control at P7 (impact)", short:"Match face to path",
+            long:"Problem: face drifting open from P6->P7 causes blocks/push-fades. Fix: (1) Grip audit; lead hand stronger by half a knuckle if needed. (2) Bow lead wrist from P5->P6 to stabilize face. (3) Rehearsal: 8 half-swings stopping at P6, then to a soft P8 keeping glove logo at target. Feedback: alignment rod just outside ball to punish open face.",
+            ref: videoUrl },
+          { title:"Lower body sequence", short:"Clear hips before hands",
+            long:"Problem: hands fire early; sequence reverses, steep path, face flip. Fix: from P4, pressure to lead heel, pelvis opens while chest stays closed a beat, then arms drop. Drill: step-through swings x10 slow + x10 normal. Cue: belt buckle to target by impact.",
+            ref: videoUrl },
+          { title:"Hand path width", short:"Keep width at P3",
+            long:"Problem: width collapses at P3; trail elbow behind ribcage -> across-the-line. Fix: pump-downs P3 -> mini P4 -> P5 with trail elbow in front of side seam. Do 3x10 rehearsals, then 3 balls each set.",
+            ref: videoUrl }
+        ],
+        power_fixes:[
+          { title:"Tempo 3:1", short:"Smooth rhythm",
+            long:"Why: efficient speed comes from rhythm. Goal ratio ~3:1 (backswing:downswing). Drill: count 1-2-3 back, 1 through. Use 72 bpm metronome; strike every 4th tick for 12 balls; rest; repeat x3.",
+            ref: videoUrl },
+          { title:"Lead-leg brake", short:"Post into lead side",
+            long:"Why: verticals/braking create speed. Feel plant of lead heel from P4; straighten lead leg through P5–P6. Drill: towel under lead heel; 10 rehearsals then 5 balls. Cue: zipper to target; head stays behind ball.",
+            ref: videoUrl },
+          { title:"Late release timing", short:"Speed at P7–P8",
+            long:"Why: early throw wastes speed. Feel hold to P6 then unhinge through. Drill: two-tee gate (one at ball, one 4 in forward). Clip both tees after impact. Do 2x5; video last 2.",
+            ref: videoUrl }
+        ]
+      },
+      practice_plan:[
+        { day:1, title:"Tempo + Sequence", minutes:18, balls:36, difficulty:3,
+          desc:"Groove 3:1 rhythm and synced sequence. Three 6-min blocks; video 2 swings each block.",
+          drills:["Metronome 72 bpm: 12 half-swings","Step-through x12","Full swings x12 (same cadence)"] },
+        { day:2, title:"Contact + Face", minutes:20, balls:40, difficulty:3,
+          desc:"Tighten start-line and strike consistency.",
+          drills:["9-to-3 x 15 (clip P6->P8)","Two-tee gate x 15","Grip/face check x 10 slow reps"] }
+      ],
+      file_name: fileName || ""
+    };
+  }
+
+  function saveAndGo(reportObj){
+    try{ localStorage.setItem('vc_last_report', JSON.stringify(reportObj)); }catch(e){}
+    location.href = '/report.html?report=local';
+  }
+
+  pickVideo.addEventListener('change', async (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if(!f) return;
+    const url = URL.createObjectURL(f);
+    const report = buildSampleReport(url, f.name);
+    saveAndGo(report);
+  });
+
+  pickJson.addEventListener('change', async (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if(!f) return;
+    const txt = await f.text();
+    let data = {};
+    try{ data = JSON.parse(txt.trim().replace(/^\uFEFF/,'')); }
+    catch(err){ alert('Bad JSON: '+err.message); return; }
+    saveAndGo(data);
+  });
+
+  // drag & drop (optional)
+  ;['dragenter','dragover','dragleave','drop'].forEach(ev => {
+    drop.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }, false);
+  });
+  drop.addEventListener('drop', e=>{
+    const f = e.dataTransfer.files[0]; if(!f) return;
+    if(f.type === 'application/json' || /\.json$/i.test(f.name)){
+      pickJson.files = e.dataTransfer.files; pickJson.dispatchEvent(new Event('change'));
+    }else{
+      pickVideo.files = e.dataTransfer.files; pickVideo.dispatchEvent(new Event('change'));
     }
-    function guessContentType(file){
-      if (file.type) return file.type;
-      const n = (file.name||'').toLowerCase();
-      if (n.endsWith('.mp4')) return 'video/mp4';
-      if (n.endsWith('.mov')) return 'video/quicktime';
-      return 'application/octet-stream';
-    }
-
-    fileInput.addEventListener('change', () => {
-      const f = fileInput.files[0];
-      if (!f) return;
-      const url = URL.createObjectURL(f);
-      preview.src = url;
-      preview.style.display = 'block';
-    });
-
-    uploadBtn.addEventListener('click', async () => {
-      const file = fileInput.files[0];
-      if (!file){ setStatus('Please select a video file first.', true); return; }
-
-      setStatus('Requesting upload link…');
-      let presign;
-      try{
-        const res = await fetch('/api/s3-presign', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({
-            filename: file.name,
-            contentType: guessContentType(file)
-          })
-        });
-        if (!res.ok){
-          const t = await res.text().catch(()=> '');
-          setStatus(`Failed to get upload URL. Status ${res.status}\n${t}`, true);
-          return;
-        }
-        presign = await res.json();
-      }catch(e){
-        setStatus(`Error contacting /api/s3-presign: ${e.message}`, true);
-        return;
-      }
-
-      const { url, fields, publicUrl } = presign || {};
-      if (!url || !fields){ setStatus('Bad presign response from server.', true); return; }
-
-      setStatus('Uploading to S3…');
-      const formData = new FormData();
-      Object.entries(fields).forEach(([k,v]) => formData.append(k,v));
-      formData.append('file', file);
-
-      let s3Res, s3Text='';
-      try{
-        s3Res = await fetch(url, { method:'POST', body: formData });
-        s3Text = await s3Res.text().catch(()=> '');
-      }catch(e){
-        setStatus(`Network error posting to S3: ${e.message}`, true);
-        return;
-      }
-
-      if (!s3Res.ok){
-        setStatus(`S3 upload failed: ${s3Res.status} ${s3Res.statusText}\n---\n${s3Text}`, true);
-        return;
-      }
-
-      try{ sessionStorage.setItem('uploadedVideoUrl', publicUrl); }catch{}
-      setStatus('Upload complete. Redirecting…');
-      window.location.href = '/report.html';
-    });
-  </script>
+  });
+})();
+</script>
 </body>
 </html>
