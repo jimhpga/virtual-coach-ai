@@ -1,20 +1,48 @@
 <!-- /nav.html -->
 <nav class="topbar">
-  <div class="brand"><a href="/index.html">Virtual Coach AI</a></div>
-  <div class="nav">
-    <a href="/index.html" data-nav>Home</a>
-    <a href="/report.html?report=/report.json&ver=fix3" data-nav>Reports</a>
-    <a href="/coming-soon.html" data-nav>Coming Soon</a>
-    <a href="/pricing.html" data-nav>Pricing</a>
-    <a href="/faq.html" data-nav>FAQ</a>
-    <a href="/contact.html" data-nav>Contact</a>
-    <a href="/login.html" data-nav>Login</a>
+  <div class="topbar-inner">
+    <div class="brand">
+      <a href="/index.html">Virtual Coach AI</a>
+    </div>
+
+    <nav class="links" aria-label="Primary">
+      <a href="/index.html" data-nav>Home</a>
+      <a href="/report.html?report=/report.json&ver=fix3" data-nav>Reports</a>
+      <a href="/coming-soon.html" data-nav>Coming Soon</a>
+      <a href="/pricing.html" data-nav>Pricing</a>
+      <a href="/faq.html" data-nav>FAQ</a>
+      <a href="/contact.html" data-nav>Contact</a>
+      <a href="/login.html" data-nav>Login</a>
+    </nav>
   </div>
 </nav>
+
 <style>
-  .topbar{position:sticky;top:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#0b2b12;border-bottom:1px solid rgba(255,255,255,.08)}
-  .topbar .brand a{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
-  .topbar .nav a{color:#fff;text-decoration:none;margin:0 8px;padding:8px 10px;border-radius:10px}
-  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
-  .topbar .nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:4px}
+  :root{
+    --nav-bg: rgba(7,68,32,.96);       /* dark green (matches site) */
+    --nav-line: rgba(255,255,255,.12);
+  }
+  .topbar{
+    position:sticky; top:0; z-index:1000;
+    background:var(--nav-bg);
+    border-bottom:1px solid var(--nav-line);
+    backdrop-filter:saturate(120%) blur(3px);
+  }
+  .topbar-inner{
+    width:min(980px,94%); margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    padding:10px 0;
+  }
+  .brand a{
+    color:#fff; text-decoration:none; font-weight:800; letter-spacing:.2px;
+  }
+  .links a{
+    color:#fff; text-decoration:none;
+    margin:0 6px; padding:8px 10px; border-radius:10px; border:1px solid transparent;
+  }
+  .links a:hover{ background:rgba(255,255,255,.10); }
+  .links a[aria-current="page"]{
+    border-color:rgba(255,255,255,.18);
+    background:rgba(255,255,255,.10);
+  }
 </style>
