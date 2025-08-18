@@ -4,109 +4,66 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Virtual Coach AI — Home</title>
-  <!-- Preload bg for faster first paint -->
   <link rel="preload" as="image" href="/homepage-background.png" />
   <style>
     :root{
-      /* TWEAKS */
-      --nav-bg: rgba(7,68,32,.96);    /* dark green */
-      --scrim:  rgba(0,0,0,.06);      /* page darken (lower = brighter) */
-      --panel:  rgba(0,0,0,.35);      /* card translucency */
-      --brand:  #00ff99;
-      --text:   #f2f7f9;
-      --muted:  #cfe0e6;
-      --line:   rgba(255,255,255,.12);
+      --nav: rgba(7,68,32,.96);   /* dark green nav */
+      --scrim: rgba(0,0,0,.05);   /* lower = brighter page */
+      --panel: rgba(0,0,0,.30);   /* card translucency */
+      --line: rgba(255,255,255,.12);
+      --text: #f2f7f9;
+      --muted:#cfe0e6;
+      --maxw: 980px;              /* content width */
       --radius: 14px;
-      --shadow: 0 10px 25px rgba(0,0,0,.25);
-      --maxw:   980px;                /* page width */
-      --padtop: 28px;                 /* push content up/down */
+      --shadow: 0 10px 24px rgba(0,0,0,.22);
+      --padTop: 18px;             /* pull content up a bit */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body.home{
-      margin:0;color:var(--text);
-      background:url('/homepage-background.png') center/cover fixed no-repeat;
+    body{
+      margin:0; color:var(--text);
       font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
+      background:url('/homepage-background.png') center/cover fixed no-repeat;
     }
     .scrim{min-height:100vh;background:var(--scrim)}
-
-    /* NAV */
-    header.navbar{
-      background:var(--nav-bg);
-      position:sticky; top:0; z-index:20;
-      border-bottom:1px solid rgba(255,255,255,.08);
-    }
-    .navwrap{
-      width:min(var(--maxw),94%);
-      margin:0 auto; padding:10px 0;
-      display:flex; gap:18px; align-items:center; justify-content:space-between;
-    }
-    .brand{
-      display:flex; align-items:center; gap:10px; text-decoration:none; color:#fff; font-weight:800;
-      letter-spacing:.2px;
-    }
-    .brand img{height:28px; width:auto; display:block}
-    nav.links{display:flex; gap:14px; flex-wrap:wrap}
-    nav.links a{
-      color:#fff; text-decoration:none; padding:8px 10px; border-radius:10px;
-      border:1px solid transparent;
-    }
-    nav.links a:hover{background:rgba(255,255,255,.06)}
-    nav.links a[aria-current="page"]{border-color:rgba(255,255,255,.18); background:rgba(255,255,255,.08)}
-
+    /* NAV (self-contained) */
+    header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+    .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
+    .brand img{height:30px;width:auto;display:block}
+    nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+    nav a:hover{background:rgba(255,255,255,.08)}
+    nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
     /* MAIN */
-    main.container{
-      width:min(var(--maxw),94%); margin:0 auto;
-      padding:var(--padtop) 0 40px;
-      display:grid; gap:18px;
-    }
+    main{width:min(var(--maxw),94%);margin:0 auto;padding:var(--padTop) 0 40px;display:grid;gap:18px}
     .hero{
-      display:grid; gap:14px;
-      padding:16px; border:1px solid var(--line); border-radius:var(--radius);
-      background:var(--panel); backdrop-filter:blur(2px); box-shadow:var(--shadow);
+      display:grid;gap:12px;padding:16px;border:1px solid var(--line);
+      border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow)
     }
-    .logo{width:220px; max-width:40vw; height:auto; display:block}
-    h1{margin:0; font-size:2.1rem; line-height:1.2}
-    .tagline{color:var(--muted)}
-    .actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px}
-    .btn{
-      border:1px solid var(--line); background:rgba(255,255,255,.10); color:#fff;
-      padding:10px 14px; border-radius:12px; cursor:pointer; text-decoration:none; font-weight:600;
-    }
-    .btn:hover{background:rgba(255,255,255,.16)}
-    .btn.primary{background:rgba(0,255,153,.16); border-color:#0a7; }
-    .row{display:grid; gap:12px}
-    @media(min-width:800px){ .row{grid-template-columns:1.2fr .8fr} }
-
-    .card{
-      padding:14px; border:1px solid var(--line); border-radius:var(--radius);
-      background:var(--panel); backdrop-filter:blur(2px); box-shadow:var(--shadow);
-    }
-    .card h2{margin:0 0 8px 0; font-size:1.25rem}
-    .muted{color:var(--muted); font-size:.98rem}
-
-    footer{
-      width:min(var(--maxw),94%); margin:10px auto 26px; text-align:center; color:#cbd9de; font-size:12px;
-      text-shadow:0 1px 0 rgba(0,0,0,.2);
-    }
-
-    /* Pull content up a bit more on large screens (you asked for ~1 inch) */
-    @media(min-width:1400px){
-      :root{ --padtop: 18px; } /* lower top padding slightly on very big displays */
-    }
+    .logo{width:240px;max-width:40vw;height:auto}
+    h1{margin:0;font-size:2.05rem;line-height:1.2}
+    .muted{color:var(--muted)}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+    .btn{border:1px solid var(--line);background:rgba(255,255,255,.12);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:600}
+    .btn:hover{background:rgba(255,255,255,.18)}
+    .btn.primary{background:rgba(0,255,153,.16);border-color:#0a7}
+    .row{display:grid;gap:12px}
+    @media(min-width:800px){.row{grid-template-columns:1.2fr .8fr}}
+    .card{padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px)}
+    .card h2{margin:0 0 6px;font-size:1.25rem}
+    footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
+    /* Pull up slightly more on very large screens (~30") */
+    @media(min-width:1500px){ :root{ --padTop: 10px; } }
   </style>
 </head>
-<body class="home">
+<body>
   <!-- NAV -->
-  <header class="navbar">
+  <header>
     <div class="navwrap">
-      <a class="brand" href="/index.html">
-        <img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI" />
-        <span>Virtual Coach AI</span>
-      </a>
-      <nav class="links" aria-label="Primary">
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
+      <nav aria-label="Primary">
         <a href="/index.html" aria-current="page">Home</a>
-        <a href="/report.html?report=/report.json&ver=fix2">Reports</a>
+        <a href="/report.html?report=/report.json">Reports</a>
         <a href="/coming-soon.html">Coming&nbsp;Soon</a>
         <a href="/pricing.html">Pricing</a>
         <a href="/faq.html">FAQ</a>
@@ -117,21 +74,21 @@
   </header>
 
   <div class="scrim">
-    <main class="container">
+    <main>
       <section class="hero">
         <img class="logo" src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" />
         <h1>Where better swings and better decisions meet</h1>
-        <div class="tagline">Upload, analyze, and get a simple plan you can actually use on the range.</div>
+        <div class="muted">Upload, analyze, and get a simple plan you can actually use on the range.</div>
         <div class="actions">
-          <a class="btn primary" id="goReports" href="/report.html?report=/report.json&ver=fix2">View Demo Report</a>
-          <a class="btn" id="goUpload" href="/upload.html">Upload Your Swing</a>
+          <a class="btn primary" href="/report.html?report=/report.json">View Demo Report</a>
+          <a class="btn" href="/upload.html">Upload Your Swing</a>
         </div>
       </section>
 
       <div class="row">
         <section class="card">
           <h2>How it works</h2>
-          <p class="muted">1) Record face-on + down-the-line. 2) Upload. 3) Get a P1–P9 breakdown, top three fixes, and a two-week plan. No fluff.</p>
+          <p class="muted">1) Record face-on + down-the-line. 2) Upload. 3) Get a P1–P9 breakdown, top three fixes, and a two-week plan.</p>
         </section>
         <section class="card">
           <h2>What you’ll get</h2>
@@ -143,10 +100,6 @@
     <footer>© <span id="y"></span> Virtual Coach AI. All rights reserved.</footer>
   </div>
 
-  <script>
-    // Footer year + small helpers (no external deps)
-    document.getElementById('y').textContent = new Date().getFullYear();
-    // (Links already point to the right pages; buttons use hrefs so no JS required.)
-  </script>
+  <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
 </body>
 </html>
