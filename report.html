@@ -175,7 +175,9 @@
   const esc = s => encodeURIComponent(s||'');
   const ytSearch = q => `https://www.youtube.com/results?search_query=${esc(q)}`;
   const qp = new URLSearchParams(location.search);
-  const reportSrc = qp.get('report') || '/report.json';
+const reportParam = qp.get('report');
+const reportSrc = (reportParam === 'local') ? null : (reportParam || '/report.json');
+
 
   const fmt = v => `${v}%`;
   const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';
@@ -336,7 +338,23 @@
 
   // Boot
   document.getElementById('date').textContent = new Date().toLocaleDateString();
+if (reportSrc) {
   loadReport(reportSrc);
+} else {
+  // local mode
+  try{
+    const raw = localStorage.getItem('vc_last_report') || '{}';
+    const data = JSON.parse((raw||'').trim().replace(/^\uFEFF/,''));
+    if (!data || !Object.keys(data).length) {
+      throw new Error('No local report found. Go to Upload and try again.');
+    }
+    renderReport(data);
+  }catch(err){
+    console.error(err);
+    alert(err.message || String(err));
+  }
+}
+
   </script>
 </body>
 </html>
