@@ -1,47 +1,61 @@
 <!-- /nav.html -->
-<nav class="topbar">
-  <div class="brand">
-    <a href="/index.html">Virtual Coach AI</a>
-    <button class="burger" aria-label="Menu" aria-expanded="false">☰</button>
-  </div>
-  <div class="nav">
+<nav class="topbar" role="navigation" aria-label="Primary">
+  <a class="brand" href="/index.html">
+    <img src="/virtualcoach-logo-transparent.png" alt="" />
+    <span>Virtual Coach AI</span>
+  </a>
+
+  <button id="navToggle" class="hamb" aria-label="Menu" aria-controls="navLinks" aria-expanded="false">
+    <!-- simple hamburger icon -->
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="4" y1="6" x2="20" y2="6"></line>
+      <line x1="4" y1="12" x2="20" y2="12"></line>
+      <line x1="4" y1="18" x2="20" y2="18"></line>
+    </svg>
+  </button>
+
+  <div id="navLinks" class="links">
     <a href="/index.html" data-nav>Home</a>
     <a href="/report.html?report=/report.json" data-nav>Reports</a>
     <a href="/coming-soon.html" data-nav>Coming Soon</a>
     <a href="/pricing.html" data-nav>Pricing</a>
     <a href="/faq.html" data-nav>FAQ</a>
     <a href="/contact.html" data-nav>Contact</a>
+    <a href="/upload.html" data-nav>Upload</a>
     <a href="/login.html" data-nav>Login</a>
   </div>
 </nav>
+
 <style>
-  .topbar{position:sticky;top:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;
-          padding:10px 14px;background:#074420;border-bottom:1px solid rgba(255,255,255,.08)}
-  .topbar .brand a{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
-  .topbar .nav a{color:#fff;text-decoration:none;margin:0 8px;padding:8px 10px;border-radius:10px}
-  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
-  .topbar .nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:4px}
-  .burger{display:none;background:transparent;border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 10px}
-  @media (max-width: 760px){
-    .burger{display:inline-block}
-    .topbar{flex-wrap:wrap}
-    .topbar .nav{width:100%;display:none;flex-direction:column;gap:6px;margin-top:10px}
-    .topbar .nav a{margin:0;padding:10px 12px;background:rgba(255,255,255,.06)}
-    .topbar .nav.open{display:flex}
+  :root { --nav:#074420; --navLine:rgba(255,255,255,.10); }
+
+  .topbar{
+    position:sticky; top:0; z-index:1000;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 14px; background:var(--nav);
+    border-bottom:1px solid var(--navLine);
+  }
+  .brand{display:flex; align-items:center; gap:10px; color:#fff; text-decoration:none; font-weight:800; letter-spacing:.2px}
+  .brand img{height:28px; width:auto; display:block; filter: hue-rotate(95deg) saturate(360%) brightness(80%);} /* darker green logo */
+  .links a{
+    color:#fff; text-decoration:none; margin:0 8px; padding:8px 10px; border-radius:10px; border:1px solid transparent;
+    display:inline-block;
+  }
+  .links a:hover{ background:rgba(255,255,255,.08) }
+  .links a[aria-current="page"]{ border-color:rgba(255,255,255,.18); background:rgba(255,255,255,.10) }
+
+  /* mobile */
+  .hamb{display:none; background:transparent; border:1px solid rgba(255,255,255,.18); color:#fff; padding:6px 8px; border-radius:10px}
+  @media (max-width: 860px){
+    .hamb{display:inline-flex; align-items:center; justify-content:center}
+    .links{
+      position:fixed; inset:60px 10px auto 10px;
+      display:none; flex-direction:column; gap:8px;
+      background:rgba(0,0,0,.85); border:1px solid var(--navLine); border-radius:12px; padding:10px;
+      backdrop-filter: blur(4px);
+    }
+    .links.open{ display:flex; }
+    .links a{ margin:0; }
   }
 </style>
-<script>
-  // Mobile toggle
-  (function(){
-    const nav = document.currentScript.previousElementSibling; // <style> -> previous is <style>, previous to that is <nav>
-    const bar = nav;
-    const btn = bar.querySelector('.burger');
-    const list = bar.querySelector('.nav');
-    if(btn && list){
-      btn.addEventListener('click', ()=>{
-        const open = list.classList.toggle('open');
-        btn.setAttribute('aria-expanded', open ? 'true':'false');
-      });
-    }
-  })();
-</script>
