@@ -7,21 +7,31 @@
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
   :root{
-    --scrim: rgba(0,0,0,.06);
-    --panel: rgba(10,18,24,.24);
-    --line:  rgba(255,255,255,.08);
-    --text:  #ecf3f7; --muted:#cfe0e6;
-    --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
+    --scrim: rgba(0,0,0,.06); --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08);
+    --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
     --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b;
   }
   *{box-sizing:border-box} html,body{height:100%}
-  body{
-    margin:0;color:var(--text);
-    background:url('/homepage-background.png') center/cover fixed no-repeat;
-    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
-  }
+  body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
   .scrim{min-height:100vh;background:var(--scrim)}
   .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
+
+  /* NAV (same) */
+  .topbar{position:sticky;top:0;z-index:1000;display:flex;align-items:center;gap:12px;padding:10px 14px;background:#0b3d1b;border-bottom:1px solid rgba(255,255,255,.10)}
+  .topbar .brand{color:#fff;text-decoration:none;font-weight:800;white-space:nowrap}
+  .topbar .nav{display:flex;gap:6px;margin-left:auto;align-items:center;flex-wrap:wrap}
+  .topbar .nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
+  .topbar .nav a[aria-current="page"]{border-color:rgba(255,255,255,.20);background:rgba(255,255,255,.10)}
+  .nav-toggle{display:none}
+  .hamburger{display:none;margin-left:auto;width:38px;height:30px;cursor:pointer}
+  .hamburger span{display:block;height:3px;margin:6px 0;background:#fff;border-radius:2px}
+  @media (max-width:860px){
+    .hamburger{display:block}
+    .topbar .nav{position:fixed;left:0;right:0;top:52px;display:none;background:#0b3d1b;border-top:1px solid rgba(255,255,255,.12);flex-direction:column;gap:0;padding:8px 10px}
+    .topbar .nav a{padding:12px;border-radius:8px}
+    .nav-toggle:checked ~ .nav{display:flex}
+  }
 
   .title{font-size:26px;font-weight:800}
   .sub{color:var(--muted);font-size:13px}
@@ -30,14 +40,12 @@
   .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
   .card .content{padding:12px 16px}
   .hdr{display:flex;align-items:center;justify-content:space-between;gap:10px}
-
   .actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
   .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
   .btn:hover{background:rgba(255,255,255,.16)}
   .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6;}
   .btn.warn{background:rgba(246,196,83,.18);border-color:#b8860b;}
-  .btn.ghost{background:rgba(255,255,255,.06);}
-
+  .btn.ghost{background:rgba(255,255,255,.06)}
   summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer}
   summary::-webkit-details-marker{display:none}
   .pnum{width:34px;height:34px;border-radius:10px;background:#0c1820;border:1px solid var(--line);display:grid;place-items:center;font-weight:800}
@@ -48,7 +56,6 @@
   .g-good{background:var(--ok);color:#fff}
   .g-ok{background:var(--warn);color:#2a2300}
   .g-bad{background:var(--bad);color:#fff}
-
   .metric{display:flex;align-items:center;gap:10px;margin:9px 0}
   .metric .name{flex:0 0 210px;color:#d8ebf2}
   .bar{flex:1;height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}
@@ -57,37 +64,37 @@
   .warn{background:linear-gradient(90deg,#f6c453,#ffd479)}
   .bad{background:linear-gradient(90deg,#ff6b6b,#ff8f8f)}
   .pct{width:52px;text-align:right;color:#cfe3ee}
-
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(max-width:960px){.grid2{grid-template-columns:1fr}}
   .info{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:6px 10px;border-radius:10px;cursor:pointer}
   .info:hover{background:rgba(255,255,255,.16)}
 
-  /* Modal for in-site video */
-  dialog#ytModal{
-    border:none; padding:0; width:min(1024px,96vw);
-    background:transparent;
-  }
-  dialog#ytModal::backdrop{ background:rgba(0,0,0,.65) }
-  .mwrap{
-    background:rgba(0,0,0,.85);
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:14px; overflow:hidden;
-  }
-  .mhead{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:8px 12px; border-bottom:1px solid rgba(255,255,255,.12)
-  }
-  .mhead h4{margin:0; font-size:14px; color:#cfe0e6}
-  .mclose{background:transparent; border:1px solid rgba(255,255,255,.2); color:#fff; padding:6px 10px; border-radius:10px; cursor:pointer}
-  .mbody{width:min(1024px,96vw); height:min(576px, 56vw); background:#000}
-  .mbody iframe, .mbody video{width:100%; height:100%; display:block}
+  /* Modal */
+  dialog#ytModal{border:none;padding:0;width:min(1024px,96vw);background:transparent}
+  dialog#ytModal::backdrop{background:rgba(0,0,0,.65)}
+  .mwrap{background:rgba(0,0,0,.85);border:1px solid rgba(255,255,255,.12);border-radius:14px;overflow:hidden}
+  .mhead{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.12)}
+  .mhead h4{margin:0;font-size:14px;color:#cfe0e6}
+  .mclose{background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff;padding:6px 10px;border-radius:10px;cursor:pointer}
+  .mbody{width:min(1024px,96vw);height:min(576px,56vw);background:#000}
+  .mbody iframe,.mbody video{width:100%;height:100%;display:block}
 </style>
 </head>
 <body>
-  <!-- Shared nav -->
-  <div id="navMount"></div>
-  <script src="/nav.js?v=9" defer></script>
+  <nav class="topbar">
+    <a class="brand" href="/index.html">Virtual Coach AI</a>
+    <input id="navToggle" class="nav-toggle" type="checkbox" aria-label="Toggle navigation">
+    <label for="navToggle" class="hamburger" aria-hidden="true"><span></span><span></span><span></span></label>
+    <div class="nav">
+      <a href="/index.html">Home</a>
+      <a href="/report.html?report=/report.json" aria-current="page">Reports</a>
+      <a href="/coming-soon.html">Coming Soon</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/contact.html">Contact</a>
+      <a href="/login.html">Login</a>
+    </div>
+  </nav>
 
   <div class="scrim">
     <main class="wrap">
@@ -99,25 +106,22 @@
         <div><span class="badge">Swings: <span id="swingCount">1</span></span></div>
       </header>
 
-      <!-- Actions -->
       <div class="actions">
         <button id="btnDownload" class="btn primary">Download</button>
         <button id="btnSend" class="btn warn">Send to Coach</button>
         <button id="btnCopy" class="btn ghost">Copy Share Link</button>
       </div>
 
-      <!-- P1–P9 -->
       <section class="card" id="phasesCard" style="margin-top:6px">
         <h3 class="hdr">
           <span>P1–P9</span>
           <details style="display:inline-block"><summary class="info">Info</summary>
-            <div class="content">Nine checkpoints from setup to finish. Short shows in the header; expand for the long explanation. Video buttons open inside this site.</div>
+            <div class="content">Nine checkpoints from setup to finish. Video buttons open inside this site.</div>
           </details>
         </h3>
         <div id="plist" class="content"></div>
       </section>
 
-      <!-- Coaching -->
       <section class="card" style="margin-top:12px">
         <h3>Coaching Card</h3>
         <div class="content">
@@ -136,7 +140,6 @@
         </div>
       </section>
 
-      <!-- Consistency -->
       <section class="grid2" style="margin-top:12px">
         <div class="card">
           <h3 class="hdr"><span>Position Consistency</span>
@@ -156,7 +159,6 @@
         </div>
       </section>
 
-      <!-- Power -->
       <section class="card" style="margin-top:12px">
         <h3 class="hdr"><span>Power Score Summary</span>
           <details style="display:inline-block"><summary class="info">Info</summary>
@@ -190,10 +192,9 @@ const fmt  = v => `${v}%`;
 const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';
 const chip = g => (g==='good'?'g-good':g==='ok'?'g-ok':'g-bad');
 const metricRow = m => `<div class="metric"><div class="name">${m.label||m.p}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
-
-// Build a button that we'll intercept to open modal
-const linkBtn = (ref,label) =>
-  `<a class="btn videolink" data-ref="${encodeURIComponent(ref)}" href="${ref}" target="_blank" rel="noopener">${label}</a>`;
+const esc = s => encodeURIComponent(s||'');
+const ytSearch = q => `ytsearch:${q}`;
+const linkBtn = (ref,label)=>`<a class="btn videolink" data-ref="${encodeURIComponent(ref)}" href="${ref}" target="_blank" rel="noopener">${label}</a>`;
 
 function phaseRow(ph,i){
   const id = ph.id || ('P'+(i+1));
@@ -202,16 +203,12 @@ function phaseRow(ph,i){
   const grade = (gRaw==='bad') ? 'needs help' : (gRaw || 'ok');
   const short = ph.short || '';
   const long  = ph.long  || '';
-  // Prefer explicit links; else fallback to a searchable query we can embed as a playlist
-  const fallbackSearch = `P${i+1} ${name} golf checkpoint`;
-  const ref = ph.ref || ph.video || ph.video_url || `ytsearch:${fallbackSearch}`;
-  const label = ref.startsWith('blob:') ? 'Video' : 'YouTube';
-
-  return `
-  <details class="panel" ${i===0?'open':''}>
+  const fallback = `P${i+1} ${name} golf checkpoint`;
+  const ref = ph.ref || ph.video || ph.video_url || ytSearch(fallback);
+  const label = String(ref).startsWith('blob:') ? 'Video' : 'YouTube';
+  return `<details class="panel" ${i===0?'open':''}>
     <summary>
-      <span class="pnum">${id}</span>
-      <span class="pname">${name}</span>
+      <span class="pnum">${id}</span><span class="pname">${name}</span>
       <span class="gchip ${chip(grade)}">${grade.toUpperCase()}</span>
       <span class="sub" style="margin-left:8px">${short}</span>
       <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -223,13 +220,12 @@ function phaseRow(ph,i){
     </div>
   </details>`;
 }
-
 function coachItem(item){
   const title = item.title || '';
   const short = item.short || '';
   const long  = item.long  || '';
-  const ref   = item.ref || `ytsearch:${title} golf drill`;
-  const label = ref.startsWith('blob:') ? 'Video' : 'YouTube';
+  const ref   = item.ref || ytSearch(`${title} golf drill`);
+  const label = String(ref).startsWith('blob:') ? 'Video' : 'YouTube';
   return `<details class="panel">
     <summary><span class="pname">${title}</span><span class="sub" style="margin-left:8px">${short}</span>
       <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -241,28 +237,22 @@ function coachItem(item){
   </details>`;
 }
 
-let last = null;
+let last=null;
 function renderReport(data){
   last = data || {};
   $('#date').textContent = new Date().toLocaleDateString();
   if(data.discipline){
-    $('#modeLabel').textContent =
-      /putt/i.test(data.discipline) ? 'Putting' :
-      /chip/i.test(data.discipline) ? 'Chipping' : 'Full Swing';
+    $('#modeLabel').textContent = /putt/i.test(data.discipline)?'Putting' : /chip/i.test(data.discipline)?'Chipping' : 'Full Swing';
   }
   if(data.swings!=null){ $('#swingCount').textContent = String(data.swings); }
-
   const phases = Array.isArray(data.phases)? data.phases : [];
   $('#plist').innerHTML = phases.map(phaseRow).join('') || '<div class="content sub">No phases found in report.</div>';
-
   const pri = (data.coaching && Array.isArray(data.coaching.priority_fixes)) ? data.coaching.priority_fixes : [];
   const pow = (data.coaching && Array.isArray(data.coaching.power_fixes)) ? data.coaching.power_fixes : [];
   $('#coachPriority').innerHTML = pri.map(coachItem).join('') || '<div class="sub">No priority fixes in report.</div>';
   $('#coachPower').innerHTML    = pow.map(coachItem).join('')    || '<div class="sub">No power fixes in report.</div>';
-
   $('#position').innerHTML = (data.position_metrics||[]).map(metricRow).join('') || '<div class="sub">No position metrics.</div>';
   $('#swing').innerHTML    = (data.swing_metrics||[]).map(metricRow).join('')    || '<div class="sub">No swing metrics.</div>';
-
   const p = data.power||{score:0, tempo:'—', release_timing:0};
   $('#power').innerHTML = `
     <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="${band(+p.score||0)}" style="width:${+p.score||0}%"></span></div><div class="pct">${+p.score||0}%</div></div>
@@ -270,14 +260,12 @@ function renderReport(data){
     <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing||0)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
 }
 
-/* ---------- loading ---------- */
 async function loadReport(url){
   try{
     const res = await fetch(url, { cache:'no-store' });
     if(!res.ok) throw new Error('HTTP '+res.status);
     const txt = await res.text();
-    const data = JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
-    renderReport(data);
+    renderReport(JSON.parse(txt.trim().replace(/^\uFEFF/, '')));
   }catch(err){
     console.error('Report load failed:', err);
     document.querySelector('main').insertAdjacentHTML('afterbegin',
@@ -285,48 +273,36 @@ async function loadReport(url){
   }
 }
 
-/* ---------- share & actions ---------- */
 function shareUrl(){
   try{
     const u = new URL(location.href);
-    if (srcParam === 'session') {
-      u.searchParams.delete('src');
-      u.searchParams.set('report', reportParam || '/report.json');
-    } else {
-      u.searchParams.set('report', reportParam || '/report.json');
-    }
+    if ((qp.get('src')||'') === 'session'){ u.searchParams.delete('src'); u.searchParams.set('report', reportParam || '/report.json'); }
+    else { u.searchParams.set('report', reportParam || '/report.json'); }
     return u.toString();
   }catch{ return location.href; }
 }
 
 document.getElementById('date').textContent = new Date().toLocaleDateString();
-
 document.getElementById('btnCopy').addEventListener('click', async ()=>{
   const link = shareUrl();
   try{ await navigator.clipboard.writeText(link); alert('Share link copied'); }
   catch{ prompt('Copy link:', link); }
 });
-
 document.getElementById('btnSend').addEventListener('click', ()=>{
-  const email = prompt('Coach email (e.g. coach@example.com):');
-  if(!email) return;
+  const email = prompt('Coach email (e.g. coach@example.com):'); if(!email) return;
   const p = (last && last.power) ? `Power ${last.power.score||'-'}%  Tempo ${last.power.tempo||'-'}  Release ${last.power.release_timing||'-'}%` : '';
   const subject = encodeURIComponent('Virtual Coach AI Swing Report');
   const body = encodeURIComponent(`Here is my swing report:\n${shareUrl()}\n\n${p}\n\n— sent from virtualcoachai.net`);
   location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 });
-
 document.getElementById('btnDownload').addEventListener('click', ()=>{
   const html = document.documentElement.outerHTML;
   const blob = new Blob([html], {type:'text/html'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'swing-report.html';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'swing-report.html';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 });
 
-/* ---------- in-site video: modal & embed logic ---------- */
+/* modal handling */
 const modal = document.getElementById('ytModal');
 const mTitle = document.getElementById('mTitle');
 const mBody  = document.getElementById('mBody');
@@ -337,21 +313,17 @@ function toEmbed(refRaw){
   if (!refRaw) return null;
   const ref = decodeURIComponent(refRaw);
   if (ref.startsWith('blob:')) return { kind:'blob', src:ref };
-  if (ref.startsWith('ytsearch:')) {
+  if (ref.startsWith('ytsearch:')){
     const q = ref.slice('ytsearch:'.length);
     return { kind:'embed', src:`https://www.youtube.com/embed?autoplay=1&rel=0&modestbranding=1&listType=search&list=${encodeURIComponent(q)}` };
   }
   try{
-    const u = new URL(ref);
-    const host = u.hostname.replace(/^www\./,'');
-    // watch / youtu.be -> embed
+    const u = new URL(ref); const host = u.hostname.replace(/^www\./,'');
     if (host === 'youtube.com' || host === 'youtube-nocookie.com'){
       const v = u.searchParams.get('v');
       if (v) return { kind:'embed', src:`https://www.youtube-nocookie.com/embed/${v}?autoplay=1&rel=0&modestbranding=1` };
-      // handle /embed/VID too
       const m = u.pathname.match(/\/embed\/([A-Za-z0-9_-]{11})/);
       if (m) return { kind:'embed', src:`https://www.youtube-nocookie.com/embed/${m[1]}?autoplay=1&rel=0&modestbranding=1` };
-      // search page
       const sq = u.searchParams.get('search_query');
       if (sq) return { kind:'embed', src:`https://www.youtube.com/embed?autoplay=1&rel=0&modestbranding=1&listType=search&list=${encodeURIComponent(sq)}` };
     }
@@ -359,57 +331,32 @@ function toEmbed(refRaw){
       const m = u.pathname.match(/^\/([A-Za-z0-9_-]{11})/);
       if (m) return { kind:'embed', src:`https://www.youtube-nocookie.com/embed/${m[1]}?autoplay=1&rel=0&modestbranding=1` };
     }
-    // Unknown site: try iframe anyway (may block). Fallback handled by caller.
-    return { kind:'page', src: ref };
+    return { kind:'page', src:ref };
   }catch{
-    // Treat as plain search query
     return { kind:'embed', src:`https://www.youtube.com/embed?autoplay=1&rel=0&modestbranding=1&listType=search&list=${encodeURIComponent(ref)}` };
   }
 }
-
-function openModal(ref, title){
-  const spec = toEmbed(ref);
-  if (!spec){ window.open(ref, '_blank', 'noopener'); return; }
-  mTitle.textContent = title || 'Video';
-  mBody.innerHTML = '';
-  if (spec.kind === 'blob'){
-    const v = document.createElement('video');
-    v.controls = true; v.playsInline = true; v.src = spec.src;
-    mBody.appendChild(v);
-  } else if (spec.kind === 'embed'){
-    const f = document.createElement('iframe');
-    f.src = spec.src; f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-    f.allowFullscreen = true; f.frameBorder = "0";
-    mBody.appendChild(f);
-  } else {
-    // Try iframe; if it errors, user still has the original link as fallback (target=_blank)
-    const f = document.createElement('iframe');
-    f.src = spec.src; f.referrerPolicy = "no-referrer";
-    mBody.appendChild(f);
-  }
+function openModal(ref,title){
+  const spec = toEmbed(ref); if (!spec){ window.open(ref,'_blank','noopener'); return; }
+  mTitle.textContent = title || 'Video'; mBody.innerHTML = '';
+  if (spec.kind === 'blob'){ const v=document.createElement('video'); v.controls=true; v.playsInline=true; v.src=spec.src; mBody.appendChild(v); }
+  else if (spec.kind === 'embed'){ const f=document.createElement('iframe'); f.src=spec.src; f.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'; f.allowFullscreen=true; f.frameBorder='0'; mBody.appendChild(f); }
+  else { const f=document.createElement('iframe'); f.src=spec.src; f.referrerPolicy='no-referrer'; mBody.appendChild(f); }
   modal.showModal();
 }
-
-// Intercept clicks on video buttons
 document.addEventListener('click', (e)=>{
-  const a = e.target.closest('a.videolink');
-  if (!a) return;
+  const a = e.target.closest('a.videolink'); if (!a) return;
   e.preventDefault();
   const ref = a.getAttribute('data-ref');
   const title = a.closest('details')?.querySelector('.pname')?.textContent?.trim() || 'Video';
   openModal(ref, title);
 });
 
-/* ---------- boot (session or file) ---------- */
-if (srcParam === 'session') {
-  try{
-    const raw = sessionStorage.getItem('vc_report');
-    if (!raw) throw new Error('No session report found. Go to Upload and create a report.');
-    renderReport(JSON.parse(raw));
-  }catch(err){ console.error(err); alert(err.message || String(err)); }
-} else if (reportSrc) {
-  loadReport(reportSrc);
-}
+/* boot */
+if ((qp.get('src')||'') === 'session'){
+  try{ const raw=sessionStorage.getItem('vc_report'); if(!raw) throw new Error('No session report found.'); renderReport(JSON.parse(raw)); }
+  catch(err){ console.error(err); alert(err.message||String(err)); }
+}else if (reportSrc){ loadReport(reportSrc); }
 </script>
 </body>
 </html>
