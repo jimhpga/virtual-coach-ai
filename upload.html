@@ -1,54 +1,76 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Virtual Coach AI — Upload</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
   :root{
     --nav: rgba(7,68,32,.96);
-    --scrim: rgba(0,0,0,.06);
-    --panel: rgba(10,18,24,.24);
-    --line: rgba(255,255,255,.10);
-    --text: #ecf3f7; --muted:#cfe0e6;
-    --radius: 14px; --shadow: 0 8px 24px rgba(0,0,0,.20);
-    --maxw: 980px;
+    --scrim: rgba(0,0,0,.05);
+    --panel: rgba(0,0,0,.30);
+    --line: rgba(255,255,255,.12);
+    --text:#f2f7f9; --muted:#cfe0e6;
+    --maxw: 980px; --radius:14px; --shadow:0 10px 24px rgba(0,0,0,.22);
   }
-  *{box-sizing:border-box} html,body{height:100%}
+  *{box-sizing:border-box}
+  html,body{height:100%}
   body{
     margin:0; color:var(--text);
-    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
     background:url('/homepage-background.png') center/cover fixed no-repeat;
   }
   .scrim{min-height:100vh;background:var(--scrim)}
-  .wrap{width:min(var(--maxw),94%);margin:0 auto;padding:18px 0 42px}
+
+  /* NAV (same as Home/Login) */
   header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
-  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
+  .brand img{height:30px;width:auto;display:block}
   nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
   nav a:hover{background:rgba(255,255,255,.08)}
   nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
 
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px);padding:16px}
-  h1{margin:0 0 6px} .muted{color:var(--muted)}
-  .grid{display:grid;gap:12px}
-  @media(min-width:820px){.grid{grid-template-columns:1fr 1fr}}
-  label{display:block;margin:8px 0 6px}
-  input[type="file"],select{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.08);color:#fff}
-  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-  button{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:12px;cursor:pointer}
-  button.primary{background:rgba(25,195,125,.18);border-color:#2a6}
-  button:hover{background:rgba(255,255,255,.16)}
-  .hint{font-size:12px;color:#cfe0e6;margin-top:6px}
-  .ok{color:#8fe6ba}
+  /* Main */
+  main{width:min(var(--maxw),94%);margin:0 auto;padding:18px 0 40px;display:grid;gap:16px}
+  .card{padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow)}
+  h1{margin:0 0 6px}
+  .muted{color:var(--muted)}
+  .grid{display:grid;gap:14px}
+  @media(min-width:900px){ .grid{grid-template-columns:1.1fr .9fr} }
+
+  .field{display:grid;gap:8px;margin-top:8px}
+  input[type="file"], select{
+    padding:10px; border-radius:10px; border:1px solid var(--line);
+    background:rgba(255,255,255,.10); color:#fff
+  }
+  .btn{
+    border:1px solid var(--line); background:rgba(0,255,153,.16);
+    color:#fff; padding:10px 14px; border-radius:12px; text-decoration:none; font-weight:600;
+    cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn:hover{background:rgba(0,255,153,.22)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+
+  video{width:100%; border-radius:12px; border:1px solid var(--line); background:#000}
+  .status{font-size:14px;color:#cfe0e6;min-height:20px}
+  footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
+
+  /* Green masked logo (optional header visual) */
+  .logo{
+    width:min(240px,60vw); aspect-ratio: 1000 / 280; height:auto; margin:0 0 10px 0;
+    background:#00ff99;
+    -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
+            mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
+  }
 </style>
 </head>
 <body>
-  <!-- Shared nav -->
+  <!-- NAV -->
   <header>
     <div class="navwrap">
-      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI" style="height:30px"><span>Virtual Coach AI</span></a>
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
       <nav aria-label="Primary">
         <a href="/index.html">Home</a>
         <a href="/report.html?report=/report.json">Reports</a>
@@ -62,105 +84,149 @@
   </header>
 
   <div class="scrim">
-    <main class="wrap">
+    <main>
       <section class="card">
+        <div class="logo" role="img" aria-label="Virtual Coach AI"></div>
         <h1>Upload Your Swing</h1>
-        <div class="muted">Pick one or two videos from your device. We’ll attach them to the sample report and send you to the report page.</div>
+        <div class="muted">Pick a face-on or down-the-line clip. We’ll generate a report you can view and share.</div>
+      </section>
 
-        <div class="grid" style="margin-top:10px">
-          <div>
-            <label for="fo">Face-On Video (optional)</label>
-            <input id="fo" type="file" accept="video/*" />
-            <div class="hint">MP4/MOV from your phone works great.</div>
+      <section class="grid">
+        <!-- Left: inputs + actions -->
+        <div class="card">
+          <h2 style="margin:0 0 8px">Step 1 — Select video</h2>
+          <div class="field">
+            <label for="file">Choose a video file (mp4, mov, webm)</label>
+            <input id="file" type="file" accept="video/*" />
           </div>
-          <div>
-            <label for="dtl">Down-the-Line Video (optional)</label>
-            <input id="dtl" type="file" accept="video/*" />
-            <div class="hint">Pick either or both. We’ll link them in P1–P9.</div>
-          </div>
-        </div>
 
-        <div class="grid" style="margin-top:10px">
-          <div>
-            <label for="mode">Discipline</label>
-            <select id="mode">
+          <div class="field">
+            <label for="discipline">Discipline (optional)</label>
+            <select id="discipline">
               <option value="full-swing" selected>Full Swing</option>
               <option value="chipping">Chipping</option>
               <option value="putting">Putting</option>
             </select>
           </div>
-          <div>
-            <label for="swings">Swings</label>
-            <select id="swings">
-              <option>1</option><option>2</option><option>3</option><option>5</option><option>10</option>
-            </select>
+
+          <div class="row">
+            <button id="makeReport" class="btn">Create Report</button>
+            <span id="status" class="status"></span>
           </div>
         </div>
 
-        <div class="row">
-          <button id="build" class="primary">Build Report</button>
-          <button id="demo">Use Demo Only</button>
-          <span id="msg" class="hint"></span>
+        <!-- Right: preview -->
+        <div class="card">
+          <h2 style="margin:0 0 8px">Preview</h2>
+          <video id="preview" controls playsinline></video>
         </div>
       </section>
     </main>
+
+    <footer>© <span id="y"></span> Virtual Coach AI. All rights reserved.</footer>
   </div>
 
 <script>
-(async function(){
-  const $ = s => document.querySelector(s);
-  const msg = $('#msg');
+document.getElementById('y').textContent = new Date().getFullYear();
 
-  async function readSample(){
-    const res = await fetch('/report.json', { cache:'no-store' });
-    if(!res.ok) throw new Error('report.json HTTP '+res.status);
-    const txt = await res.text();
-    return JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
-  }
-  function blobFor(file){ return file ? URL.createObjectURL(file) : ''; }
+const fileInput = document.getElementById('file');
+const videoEl   = document.getElementById('preview');
+const statusEl  = document.getElementById('status');
+let blobUrl = '';
 
-  async function makeReport(fromFiles){
-    msg.textContent = 'Building...';
-    try{
-      const base = await readSample();
-
-      // Apply simple header choices
-      base.discipline = $('#mode').value;
-      base.swings = +$('#swings').value || 1;
-
-      // Attach videos if provided
-      let refs = [];
-      if (fromFiles) {
-        const fo  = $('#fo').files[0];
-        const dtl = $('#dtl').files[0];
-        const foUrl  = blobFor(fo);
-        const dtlUrl = blobFor(dtl);
-        // Alternate FO/DTL links across P-sections for variety.
-        refs = [foUrl, dtlUrl].filter(Boolean);
-        if (!refs.length) fromFiles = false; // nothing chosen
-      }
-
-      if (fromFiles && base.phases && base.phases.length){
-        for (let i=0;i<base.phases.length;i++){
-          const ref = refs.length ? refs[i % refs.length] : '';
-          if (ref) base.phases[i].ref = ref; // report.html will label as “Video”
-        }
-      }
-
-      // Save to session and go render
-      sessionStorage.setItem('vc_report', JSON.stringify(base));
-      msg.innerHTML = '<span class="ok">Done. Opening report…</span>';
-      // IMPORTANT: use src=session so report uses sessionStorage instead of a URL
-      location.href = '/report.html?src=session';
-    }catch(e){
-      console.error(e);
-      msg.textContent = 'Error: ' + (e.message || String(e));
+fileInput.addEventListener('change', () => {
+  try {
+    if (!fileInput.files || !fileInput.files.length) return;
+    const f = fileInput.files[0];
+    if (!/^video\//.test(f.type)) {
+      statusEl.textContent = 'Please choose a video file.';
+      return;
     }
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+    blobUrl = URL.createObjectURL(f);
+    videoEl.src = blobUrl;
+    videoEl.load();
+    statusEl.textContent = 'Video ready.';
+  } catch (e) {
+    console.error(e);
+    statusEl.textContent = 'Could not load video.';
+  }
+});
+
+document.getElementById('makeReport').addEventListener('click', async () => {
+  statusEl.textContent = '';
+  if (!blobUrl) {
+    statusEl.textContent = 'Select a video first.';
+    fileInput.focus();
+    return;
   }
 
-  $('#build').addEventListener('click', ()=>makeReport(true));
-  $('#demo').addEventListener('click',  ()=>makeReport(false));
-})();
+  // Minimal “fake analyzer”: build a usable report object.
+  const discipline = document.getElementById('discipline').value || 'full-swing';
+
+  // Helper: simple YouTube search link for each phase name
+  const yt = (q) => `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+
+  const report = {
+    swings: 1,
+    discipline,
+    power: { score: 78, tempo: "3.0:1", release_timing: 64 },
+
+    // NOTE: We store BOTH: a YouTube search link in `ref` (so the report shows a YouTube button),
+    // and your local video in `video` (held in case you later want to show the actual clip).
+    phases: [
+      { id:"P1", name:"Address",        grade:"ok",         short:"Setup looks serviceable.",                 long:"Neutral grip and posture. Tiny tweak: soften trail elbow and feel pressure mid-feet.", ref: yt("P1 Address golf checkpoint"),        video: blobUrl },
+      { id:"P2", name:"Takeaway",       grade:"good",       short:"Club outside hands, face stable.",         long:"Great start. Keep the triangle; feel chest move the club, not the wrists.",             ref: yt("P2 Takeaway golf checkpoint"),       video: blobUrl },
+      { id:"P3", name:"Lead Arm Parallel", grade:"ok",      short:"Slight inside path.",                      long:"Match shaft to trail forearm. Cue: “butt of club to belt buckle.”",                    ref: yt("P3 lead arm parallel golf checkpoint"), video: blobUrl },
+      { id:"P4", name:"Top",            grade:"needs help", short:"Across-the-line, bit long.",               long:"Shorten 1–2 inches; feel trail elbow more down. Quiet the wrists at the top.",        ref: yt("P4 top of backswing checkpoint"),    video: blobUrl },
+      { id:"P5", name:"Early Downswing",grade:"ok",         short:"Sequencing okay; room to shallow.",        long:"Bump hips, keep back to target micro-beat longer. Cue: “hips start, hands soft.”",     ref: yt("P5 transition shallow golf"),        video: blobUrl },
+      { id:"P6", name:"Shaft Parallel", grade:"needs help", short:"Shaft steep; face open.",                  long:"Feel trail elbow in front, knuckles down. Alignment stick drill for shallowing.",      ref: yt("P6 shaft parallel delivery golf"),   video: blobUrl },
+      { id:"P7", name:"Impact",         grade:"ok",         short:"Handle forward, face slightly open.",      long:"More forward shaft lean with body rotation. Impact bag: turn+lean together.",          ref: yt("P7 impact golf checkpoint"),         video: blobUrl },
+      { id:"P8", name:"Post-Impact",    grade:"good",       short:"On plane through; balanced.",              long:"Nice extension. Keep chest and belt turning left—no stall.",                           ref: yt("P8 post impact golf"),               video: blobUrl },
+      { id:"P9", name:"Finish",         grade:"good",       short:"Stable, stacked over lead side.",          long:"Hold full finish for 3 sec. Photo finish drill to lock balance.",                      ref: yt("P9 finish golf checkpoint"),         video: blobUrl },
+    ],
+
+    coaching: {
+      priority_fixes: [
+        { title:"Shorten & Set the Top (P4)", short:"Trim backswing; trail elbow down.", long:"Think ‘stop at 10:30’. Feel right elbow down and in, wrist set earlier so the club can shallow later.", ref: yt("shorten backswing drill") },
+        { title:"Shallow Then Turn (P5–P6)",  short:"Trail elbow forward; face square.", long:"Alignment-stick across hips: bump then turn. “Knuckles down” to match face to path.", ref: yt("shallow the club drill") },
+        { title:"Rotate Through Impact (P7)", short:"More body turn with lean.",          long:"Impact bag + turn: press handle ahead while chest keeps moving—no stall and flip.", ref: yt("impact bag drill rotation") }
+      ],
+      power_fixes: [
+        { title:"Tempo 3:1",                  short:"Smooth back, athletic through.",     long:"Count 1-2-3 to the top, then POP on 1. Keep grip pressure steady; speed from ground up.", ref: yt("golf tempo 3 to 1 drill") },
+        { title:"Ground Push",                short:"Pressure left earlier.",             long:"Step-change drill: tiny step to lead foot to feel pressure shift before the hit.",        ref: yt("pressure shift drill golf") },
+        { title:"Release Timing",             short:"Unhinge with turn, not hands only.", long:"Pump-pump-go drill: two mini rehearsals then a full swing keeping hands soft, body leads.", ref: yt("release timing golf drill") }
+      ]
+    },
+
+    position_metrics: [
+      {label:"Clubface @ P6", value:58},
+      {label:"Hand Path @ P3", value:64},
+      {label:"Spine Angle @ P1", value:72},
+      {label:"Head Movement", value:61}
+    ],
+    swing_metrics: [
+      {label:"Tempo", value:76},
+      {label:"Face-to-Path", value:60},
+      {label:"Pressure Shift", value:68},
+      {label:"Release Timing", value:64}
+    ]
+  };
+
+  try {
+    sessionStorage.setItem('vc_report', JSON.stringify(report));
+  } catch(e){
+    console.error(e);
+    statusEl.textContent = 'Could not save report in this browser.';
+    return;
+  }
+
+  // Small “processing” pause so it feels responsive
+  statusEl.textContent = 'Processing…';
+  setTimeout(() => {
+    window.location.href = '/report.html?src=session';
+  }, 400);
+});
 </script>
 </body>
 </html>
