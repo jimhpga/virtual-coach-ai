@@ -8,24 +8,27 @@
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
   :root{
-    --nav:#0b2b12;     --scrim: rgba(0,0,0,.05);
-    --panel: rgba(0,0,0,.30); --line: rgba(255,255,255,.12);
-    --text: #f2f7f9; --muted:#cfe0e6; --maxw:1100px;
-    --radius:14px; --shadow:0 10px 24px rgba(0,0,0,.22);
+    --nav:#0b2b12;                 /* dark green nav */
+    --scrim: rgba(0,0,0,.05);
+    --panel: rgba(0,0,0,.30);
+    --line: rgba(255,255,255,.12);
+    --text: #f2f7f9; --muted:#cfe0e6;
+    --maxw: 1100px; --radius: 14px;
+    --shadow: 0 10px 24px rgba(0,0,0,.22);
   }
   *{box-sizing:border-box} html,body{height:100%}
   body{
-    margin:0;color:var(--text);
-    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+    margin:0; color:var(--text);
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
     background:url('/homepage-background.png') center/cover fixed no-repeat;
-    min-height:100dvh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    min-height:100dvh;
   }
   .scrim{min-height:100dvh;background:var(--scrim)}
 
-  /* NAV */
+  /* NAV (inline, matches other pages) */
   header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
-  .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;
-           display:flex;gap:16px;align-items:center;justify-content:space-between}
+  .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
   .brand img{height:30px;width:auto;display:block}
   nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
@@ -35,11 +38,14 @@
   /* MAIN */
   main{width:min(680px,94%);margin:0 auto;padding:24px 0 40px}
   .center{display:grid;place-items:center;min-height:60vh}
-  .card{width:100%;padding:20px 18px 16px;border:1px solid var(--line);
-        border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px);
-        box-shadow:var(--shadow);text-align:center}
+  .card{
+    width:100%;padding:20px 18px 16px;
+    border:1px solid var(--line);border-radius:var(--radius);
+    background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow);
+    text-align:center;
+  }
 
-  /* dark-green solid logo using mask (no color shift) */
+  /* Dark-green solid logo via mask (no color shift/purple) */
   .logo{
     width:min(320px,70vw);height:90px;margin:0 auto 10px;background:#0b2b12;
     -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
@@ -54,12 +60,12 @@
     background:rgba(255,255,255,.10);color:#fff;font-size:16px
   }
   button{
-    padding:12px 16px;border:none;border-radius:10px;
+    padding:12px 16px;border:none;border-radius:10px;min-width:120px;
     background:rgba(0,255,153,.16);color:#fff;font-weight:700;cursor:pointer;border:1px solid #0a7
   }
   button:hover{background:rgba(0,255,153,.22)}
   .err{color:#ffb4b4;min-height:18px;margin-top:10px;font-size:14px}
-  .muted{margin-top:10px;font-size:12px;color:var(--muted)}
+  .muted{margin-top:10px;font-size:12px;color:var(--muted);word-break:break-word}
   footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
 </style>
 </head>
@@ -86,15 +92,17 @@
         <div class="card">
           <div class="logo" role="img" aria-label="Virtual Coach AI"></div>
           <h1>Enter Passcode</h1>
-          <p class="lead">One shared code for invitees.</p>
+          <p class="lead">Use your invite code (e.g., “Jim 1” or “Test 1”).</p>
 
           <form id="form" onsubmit="return false" class="field">
-            <input id="pass" type="password" inputmode="numeric" autocomplete="one-time-code" placeholder="Passcode (e.g., 2468)" />
+            <input id="pass" type="text" inputmode="text" autocomplete="one-time-code" placeholder="Passcode (e.g., Jim 1)" />
             <button id="go" type="button">Continue</button>
           </form>
           <div id="err" class="err"></div>
 
-          <div class="muted">Trouble? Email <a href="mailto:jimh@pga.com" style="color:#86efac;text-decoration:none">jimh@pga.com</a></div>
+          <div class="muted">
+            Need help? Email <a href="mailto:jimh@pga.com" style="color:#86efac;text-decoration:none">jimh@pga.com</a>
+          </div>
         </div>
       </div>
     </main>
@@ -104,28 +112,50 @@
 
 <script>
 (function(){
-  document.getElementById('y').textContent = new Date().getFullYear();
+  // -------- Allowed passcodes (case-insensitive) --------
+  const ALLOWED = [
+    'jim 1','ben 1','tim 1','gregory 1','corey 1','brian 1','cindy 1',
+    'test 1','test 2','test 3','test 4','test 5'
+  ];
 
-  // ===== EDIT YOUR PASSCODE HERE =====
-  const PASS = "2468"; // <- set the single shared passcode
+  function normalize(s){
+    return String(s||'')
+      .toLowerCase()
+      .replace(/\s+/g,' ')   // collapse spaces
+      .trim();
+  }
 
-  function successRedirect(){
-    const next = new URLSearchParams(location.search).get('next') || "";
-    const dest = (next === "upload") ? "/upload.html" : "/index.html";
-    try { localStorage.setItem('vc_auth','ok'); } catch(e){}
-    window.location.href = dest;
+  function nextUrl(){
+    const p = new URLSearchParams(location.search).get('next') || '';
+    // default to upload
+    return p ? String(p) : '/upload.html';
   }
 
   function submit(){
-    const code = (document.getElementById('pass').value || "").trim();
-    const err  = document.getElementById('err');
-    if (!code){ err.textContent = "Enter the passcode."; return; }
-    if (code === PASS) { err.textContent = ""; successRedirect(); }
-    else { err.textContent = "Invalid passcode. Try again."; }
+    const raw = document.getElementById('pass').value;
+    const passNorm = normalize(raw);
+    const err = document.getElementById('err');
+
+    if (ALLOWED.includes(passNorm)) {
+      try {
+        localStorage.setItem('vc_auth','ok');
+        localStorage.setItem('vc_user', raw.trim());
+      } catch(e) {}
+      err.textContent = '';
+      window.location.href = nextUrl();
+    } else {
+      err.textContent = 'Invalid passcode. Try “Jim 1”, “Ben 1”, or “Test 1”.';
+    }
   }
 
   document.getElementById('go').addEventListener('click', submit);
-  document.getElementById('pass').addEventListener('keydown', e => { if(e.key==='Enter') submit(); });
+  document.getElementById('pass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') submit();
+  });
+
+  // Focus and year
+  try { document.getElementById('pass').focus(); } catch(e){}
+  document.getElementById('y').textContent = new Date().getFullYear();
 })();
 </script>
 </body>
