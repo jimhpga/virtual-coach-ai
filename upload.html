@@ -23,6 +23,7 @@
   .btn:disabled{opacity:.55;cursor:not-allowed}
   input[type=file]{display:block;width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff}
   .kv{display:grid;grid-template-columns:140px 1fr;gap:6px;color:#dfecef;font-size:.95rem;margin-top:8px}
+  .mini{font-size:.9rem;color:#cfe3ee;margin-top:8px}
   footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
 </style>
 </head>
@@ -41,6 +42,7 @@
           <div class="kv"><div>Filename</div><div id="m_name"></div></div>
           <div class="kv"><div>Size</div><div id="m_size"></div></div>
           <div class="kv"><div>Duration</div><div id="m_dur"></div></div>
+          <div id="uploadInfo" class="mini" style="display:none"></div>
         </div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
@@ -59,7 +61,7 @@
   // Year
   document.getElementById('y').textContent = new Date().getFullYear();
 
-  // --- Simple auth gate for this page (optional) ---
+  // --- Simple auth gate (optional) ---
   try{
     const ok = localStorage.getItem('vc_auth') === 'ok';
     if (!ok) location.href = '/login.html?next=upload';
@@ -103,7 +105,11 @@
       .then(r=>r.ok?r.text():Promise.reject(r)).then(h=>{mount.innerHTML=h;markCurrent();}).catch(fallback);
   })();
 
-  // --- iPhone-friendly upload → build a real report object → open report page ---
+  // ---------- CONFIG (edit these if needed) ----------
+  const PRESIGN_ENDPOINT = '/api/presign';     // Vercel function below
+  const KEY_PREFIX = 'uploads/';               // S3 key prefix
+  // -----------------------------------------------
+
   const fileEl = document.getElementById('file');
   const makeBtn = document.getElementById('make');
   const resetBtn = document.getElementById('reset');
@@ -112,6 +118,7 @@
   const mName = document.getElementById('m_name');
   const mSize = document.getElementById('m_size');
   const mDur  = document.getElementById('m_dur');
+  const uploadInfo = document.getElementById('uploadInfo');
 
   let chosenFile = null;
   let blobUrl = null;
@@ -128,6 +135,7 @@
   resetBtn.addEventListener('click', ()=>{
     errEl.textContent='';
     metaBox.style.display='none';
+    uploadInfo.style.display='none'; uploadInfo.textContent='';
     mName.textContent=mSize.textContent=mDur.textContent='';
     fileEl.value='';
     makeBtn.disabled=true; resetBtn.disabled=true;
@@ -141,13 +149,12 @@
     const f = e.target.files && e.target.files[0];
     if(!f){ makeBtn.disabled=true; return; }
     if(!f.type || !/^video\//i.test(f.type)){
-      errEl.textContent='Please choose a video.';
-      makeBtn.disabled=true; return;
+      errEl.textContent='Please choose a video.'; makeBtn.disabled=true; return;
     }
     chosenFile=f;
     blobUrl = URL.createObjectURL(f);
 
-    // Probe duration safely (iOS ok)
+    // Probe duration
     try{
       const v = document.createElement('video');
       v.preload='metadata'; v.src = blobUrl; v.muted = true; v.playsInline = true;
@@ -159,7 +166,6 @@
       duration = isFinite(v.duration) ? v.duration : 0;
     }catch(e){ duration = 0; }
 
-    // Show meta
     metaBox.style.display='';
     mName.textContent = f.name || '(camera video)';
     mSize.textContent = fmtBytes(f.size);
@@ -168,14 +174,52 @@
     makeBtn.disabled=false;
   });
 
-  makeBtn.addEventListener('click', ()=>{
+  // ---------- S3 helper: the “sanity check” PUT (only Content-Type header) ----------
+  async function putToS3(presignedUrl, file){
+    const res = await fetch(presignedUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      body: file
+    });
+    if (!res.ok) {
+      const txt = await res.text().catch(()=> '');
+      throw new Error(`S3 PUT failed ${res.status} ${res.statusText} ${txt}`);
+    }
+    return presignedUrl.split('?')[0]; // object URL without the signature
+  }
+
+  async function presignFor(file){
+    const safeName = (file.name || 'video.mov').replace(/[^\w.\-.]+/g,'_');
+    const key = KEY_PREFIX + Date.now() + '-' + safeName;
+    const r = await fetch(`${PRESIGN_ENDPOINT}?key=${encodeURIComponent(key)}&type=${encodeURIComponent(file.type || 'application/octet-stream')}`);
+    if(!r.ok) throw new Error('Presign failed');
+    const { url } = await r.json();
+    if(!url) throw new Error('Bad presign response');
+    return { url, key };
+  }
+
+  makeBtn.addEventListener('click', async ()=>{
     if(!chosenFile || !blobUrl){
       errEl.textContent='Choose a video first.'; return;
     }
-    // Very light "real" content: store the video blob URL into every P position for review.
-    // (When your backend is ready, replace these placeholders with measured values.)
+    errEl.textContent='';
+    makeBtn.disabled=true;
+
+    let objectUrl = null;
+    try{
+      uploadInfo.style.display=''; uploadInfo.textContent='Uploading to S3…';
+      const { url } = await presignFor(chosenFile);
+      objectUrl = await putToS3(url, chosenFile);
+      uploadInfo.textContent = 'Uploaded to S3 ✓';
+    }catch(e){
+      console.warn(e);
+      uploadInfo.style.display=''; uploadInfo.textContent = 'S3 upload skipped — using local video only.';
+    }
+
+    // Build a simple report. If S3 worked, use that URL; else use blob:
+    const videoHref = objectUrl || blobUrl;
     const now = new Date();
-    const durScore = Math.max(40, Math.min(95, Math.round((duration||3)*8))); // playful placeholder
+    const durScore = Math.max(40, Math.min(95, Math.round((duration||3)*8)));
     const relScore = Math.max(35, Math.min(90, Math.round(60 + ((duration||0)-3)*5)));
 
     const phases = [
@@ -183,9 +227,9 @@
       ['P5','Delivery'],['P6','Shaft Parallel'],['P7','Impact'],['P8','Post-Impact'],['P9','Finish']
     ].map(([id,name])=>({
       id, name, grade:'ok',
-      short: 'Review with coach',
-      long: 'Tap the Video button to view your swing for this checkpoint.',
-      ref: blobUrl  // blob: link opens in a new tab as a video
+      short:'Review with coach',
+      long:'Tap the button to view your swing for this checkpoint.',
+      ref: videoHref
     }));
 
     const report = {
@@ -195,9 +239,9 @@
       phases,
       coaching: {
         priority_fixes: [
-          { title:'One Key Feel', short:'Pick one cue only', long:'Use one external cue for the next 15 balls (e.g., finish tall, hold posture). The goal is transfer, not perfect mechanics.', ref:''},
+          { title:'One Key Feel', short:'Pick one cue only', long:'Use one external cue for the next 15 balls (e.g., finish tall, hold posture).', ref:''},
           { title:'Tempo Baseline', short:'3:1 feel', long:'Count “one-two-three-hit” to settle down backswing length and keep transition smooth.', ref:''},
-          { title:'Impact Check', short:'Ball then turf', long:'On half swings with a mid-iron, focus on brushing the ground after impact; video two reps to confirm.', ref:''},
+          { title:'Impact Check', short:'Ball then turf', long:'On half swings, brush the ground after impact; video two reps to confirm.', ref:''},
         ],
         power_fixes: [
           { title:'Finish Tall', short:'No stall', long:'Let your chest face the target and push to full height after impact; this frees up speed.', ref:''}
@@ -212,15 +256,15 @@
         {label:'Tempo Repeatability', value: 76},
         {label:'Face-to-Path Stability', value: 64}
       ],
-      power: { score: durScore, tempo:'~3:1', release_timing: relScore }
+      power: { score: durScore, tempo:'~3:1', release_timing: relScore },
+      assets: { video: objectUrl || null } // keep S3 URL (if any) for later
     };
 
     try{
       sessionStorage.setItem('vc_report', JSON.stringify(report));
-      localStorage.setItem('vc_last_report', JSON.stringify(report)); // optional fallback
+      localStorage.setItem('vc_last_report', JSON.stringify(report));
     }catch(e){ console.warn('Storage full?', e); }
 
-    // Open the session-based report so the blob: link works
     location.href = '/report.html?src=session';
   });
 </script>
