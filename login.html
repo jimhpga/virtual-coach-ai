@@ -8,10 +8,9 @@
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
   :root{
-    --brand:#00ff99;                 /* <- logo green */
-    --nav: rgba(7,68,32,.96);        /* dark green nav */
-    --scrim: rgba(0,0,0,.05);        /* brighter background */
-    --panel: rgba(0,0,0,.30);        /* card translucency */
+    --nav: rgba(7,68,32,.96);     /* dark green nav */
+    --scrim: rgba(0,0,0,.05);     /* brighter background */
+    --panel: rgba(0,0,0,.30);     /* card translucency */
     --line: rgba(255,255,255,.12);
     --text: #f2f7f9;
     --muted:#cfe0e6;
@@ -30,7 +29,7 @@
   }
   .scrim{min-height:100dvh;background:var(--scrim)}
 
-  /* NAV */
+  /* NAV (same as Home) */
   header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
@@ -54,29 +53,15 @@
     text-align:center;
   }
 
-  /* --- LOGO: brand-green via CSS mask (rock solid) --- */
-  .logo-mask{
-    width:min(320px,70vw);
-    height:96px;                       /* adjust if needed to fit your PNG aspect */
+  /* Green masked logo (same as Home) */
+  .logo{
+    width:min(340px,70vw);
+    aspect-ratio: 1000 / 280;  /* adjust if your PNG differs */
+    height:auto;
     margin:0 auto 10px;
-    background: var(--brand);
-    /* mask uses PNG alpha to colorize solid green */
-    -webkit-mask-image: url('/virtualcoach-logo-transparent.png');
-    mask-image: url('/virtualcoach-logo-transparent.png');
-    -webkit-mask-repeat: no-repeat;     mask-repeat: no-repeat;
-    -webkit-mask-position: center;      mask-position: center;
-    -webkit-mask-size: contain;         mask-size: contain;
-    filter: drop-shadow(0 6px 16px rgba(0,0,0,.35));
-  }
-  /* Fallback for older browsers (shows original PNG with a mild tint) */
-  .logo-fallback{
-    display:none;
-    width:min(320px,70vw); height:auto; margin:0 auto 10px; 
-    filter: hue-rotate(95deg) saturate(360%) brightness(110%);
-  }
-  @supports not (mask-image: url("")) {
-    .logo-mask{ display:none; }
-    .logo-fallback{ display:block; }
+    background:#00ff99;
+    -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
+            mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
   }
 
   h1{margin:6px 0 8px;font-size:22px}
@@ -121,10 +106,7 @@
     <main>
       <div class="center">
         <div class="card">
-          <!-- Brand-green logo (mask) + fallback img -->
-          <div class="logo-mask" role="img" aria-label="Virtual Coach AI Logo"></div>
-          <img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo-fallback" />
-
+          <div class="logo" role="img" aria-label="Virtual Coach AI"></div>
           <h1>Enter Passcode</h1>
           <p class="lead">Tester access only.</p>
 
