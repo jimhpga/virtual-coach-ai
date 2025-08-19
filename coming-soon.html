@@ -1,8 +1,3 @@
-<body>
-  <div id="navMount"></div>
-  <script src="/nav.js" defer></script>
-
-  <!-- your existing page content starts here -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,11 +50,11 @@
   </style>
 </head>
 <body>
-  <div class="scrim">
-    <!-- Shared navigation (loads /nav.html via /nav.js) -->
-    <div id="navMount"></div>
-    <script src="/nav.js" defer></script>
+  <!-- Shared navigation (loads /nav.html via /nav.js) -->
+  <div id="navMount"></div>
+  <script src="/nav.js" defer></script>
 
+  <div class="scrim">
     <main>
       <section class="hero">
         <h1>Coming Soon</h1>
@@ -176,6 +171,9 @@
 
     <footer>© <span id="y"></span> Virtual Coach AI — Better decisions, better swings.</footer>
   </div>
-  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
