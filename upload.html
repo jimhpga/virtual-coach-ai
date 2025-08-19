@@ -34,7 +34,8 @@
     .btn:hover{background:rgba(255,255,255,.18)}
     .muted{color:var(--muted)}
     input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff}
-    .half{display:flex;gap:10px;flex-wrap:wrap}
+    .half{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    #msg{min-height:20px}
   </style>
 </head>
 <body>
@@ -44,7 +45,7 @@
       <nav aria-label="Primary">
         <a href="/index.html">Home</a>
         <a href="/report.html?report=/report.json">Reports</a>
-        <a href="/coming-soon.html">Coming Soon</a>
+        <a href="/coming-soon.html">Coming&nbsp;Soon</a>
         <a href="/pricing.html">Pricing</a>
         <a href="/faq.html">FAQ</a>
         <a href="/contact.html">Contact</a>
@@ -59,7 +60,7 @@
         <h2>Build a Live Report (no upload)</h2>
         <p class="muted">Paste a public video link (YouTube or MP4/MOV). We’ll generate a report and open it immediately.</p>
         <div class="row">
-          <label>Video URL</label>
+          <label for="videoUrl">Video URL</label>
           <input id="videoUrl" type="text" placeholder="https://www.youtube.com/watch?v=...  or  https://.../swing.mp4" />
           <div class="half">
             <button class="btn" id="make">Create Report</button>
@@ -74,8 +75,7 @@
   const $ = s => document.querySelector(s);
   const esc = s => encodeURIComponent(s||'');
 
-  function stub(videoUrl){
-    // Reuse your known-good JSON shape; point refs to videoUrl (or to a YT search if blank)
+  function buildReport(videoUrl){
     const yt = q => `https://www.youtube.com/results?search_query=${esc(q)}`;
     const ref = videoUrl || yt('golf swing P1 P9');
     return {
@@ -139,9 +139,9 @@
 
   document.getElementById('make').addEventListener('click', ()=>{
     const url = (document.getElementById('videoUrl').value||'').trim();
-    const report = stub(url);
+    const report = buildReport(url);
     const dataUrl = toDataUrl(report);
-    // Open in your viewer (no server needed)
+    // Open in the report viewer (no server needed)
     location.href = `/report.html?report=${encodeURIComponent(dataUrl)}`;
   });
   </script>
