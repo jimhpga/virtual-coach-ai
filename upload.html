@@ -1,64 +1,54 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Upload — Virtual Coach AI</title>
-  <link rel="preload" as="image" href="/homepage-background.png"/>
-  <style>
-    :root{
-      --nav: rgba(7,68,32,.96);
-      --scrim: rgba(0,0,0,.06);
-      --panel: rgba(0,0,0,.30);
-      --line: rgba(255,255,255,.12);
-      --text:#f2f7f9; --muted:#cfe0e6;
-      --maxw: 980px; --radius:14px; --shadow:0 10px 24px rgba(0,0,0,.22);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;color:var(--text);
-      font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
-      background:url('/homepage-background.png') center/cover fixed no-repeat;
-    }
-    header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
-    .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
-    .brand img{height:30px}
-    nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
-    nav a:hover{background:rgba(255,255,255,.08)}
-    nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI — Upload</title>
+<link rel="preload" as="image" href="/homepage-background.png" />
+<style>
+  :root{
+    --nav: rgba(7,68,32,.96);
+    --scrim: rgba(0,0,0,.06);
+    --panel: rgba(10,18,24,.24);
+    --line: rgba(255,255,255,.10);
+    --text: #ecf3f7; --muted:#cfe0e6;
+    --radius: 14px; --shadow: 0 8px 24px rgba(0,0,0,.20);
+    --maxw: 980px;
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{
+    margin:0; color:var(--text);
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+    background:url('/homepage-background.png') center/cover fixed no-repeat;
+  }
+  .scrim{min-height:100vh;background:var(--scrim)}
+  .wrap{width:min(var(--maxw),94%);margin:0 auto;padding:18px 0 42px}
+  header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+  .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+  nav a:hover{background:rgba(255,255,255,.08)}
+  nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
 
-    .scrim{min-height:100vh;background:var(--scrim)}
-    main{width:min(var(--maxw),94%);margin:0 auto;padding:18px 0 40px;display:grid;gap:16px}
-    .card{padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow)}
-    .hero{text-align:center}
-    h1{margin:6px 0 8px}
-    .muted{color:var(--muted)}
-    .row{display:grid;gap:12px}
-    @media(min-width:880px){.row{grid-template-columns:1fr 1fr}}
-    label{font-weight:700}
-    .field{display:grid;gap:6px;margin:10px 0}
-    input[type="url"], input[type="text"]{
-      width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);
-      background:rgba(255,255,255,.10);color:#fff
-    }
-    input[type="file"]{
-      width:100%;padding:10px;border-radius:10px;border:1px dashed var(--line);
-      background:rgba(255,255,255,.06);color:#fff
-    }
-    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
-    .btn{border:1px solid var(--line);background:rgba(255,255,255,.12);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:700;cursor:pointer}
-    .btn.primary{background:rgba(0,255,153,.16);border-color:#0a7}
-    .btn:hover{background:rgba(255,255,255,.18)}
-    .note{color:#cfe3ee;font-size:.9rem}
-  </style>
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px);padding:16px}
+  h1{margin:0 0 6px} .muted{color:var(--muted)}
+  .grid{display:grid;gap:12px}
+  @media(min-width:820px){.grid{grid-template-columns:1fr 1fr}}
+  label{display:block;margin:8px 0 6px}
+  input[type="file"],select{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.08);color:#fff}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  button{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:12px;cursor:pointer}
+  button.primary{background:rgba(25,195,125,.18);border-color:#2a6}
+  button:hover{background:rgba(255,255,255,.16)}
+  .hint{font-size:12px;color:#cfe0e6;margin-top:6px}
+  .ok{color:#8fe6ba}
+</style>
 </head>
 <body>
-  <!-- simple inline nav to match the site -->
+  <!-- Shared nav -->
   <header>
     <div class="navwrap">
-      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt=""><span>Virtual Coach AI</span></a>
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI" style="height:30px"><span>Virtual Coach AI</span></a>
       <nav aria-label="Primary">
         <a href="/index.html">Home</a>
         <a href="/report.html?report=/report.json">Reports</a>
@@ -72,134 +62,105 @@
   </header>
 
   <div class="scrim">
-    <main>
-      <section class="card hero">
+    <main class="wrap">
+      <section class="card">
         <h1>Upload Your Swing</h1>
-        <div class="muted">Pick a video file <em>or</em> paste a link. We’ll build a report instantly — no server needed.</div>
-      </section>
+        <div class="muted">Pick one or two videos from your device. We’ll attach them to the sample report and send you to the report page.</div>
 
-      <section class="row">
-        <div class="card">
-          <h2 style="margin:0 0 8px">Option A — Use a video file</h2>
-          <div class="field">
-            <label for="file">Choose a file (MP4/MOV/HEVC)</label>
-            <input id="file" type="file" accept="video/*" capture="environment"/>
+        <div class="grid" style="margin-top:10px">
+          <div>
+            <label for="fo">Face-On Video (optional)</label>
+            <input id="fo" type="file" accept="video/*" />
+            <div class="hint">MP4/MOV from your phone works great.</div>
           </div>
-          <div class="note">Tip: On iPhone, this opens Camera so you can record face-on or down-the-line, then use it.</div>
-        </div>
-
-        <div class="card">
-          <h2 style="margin:0 0 8px">Option B — Paste a video URL</h2>
-          <div class="field">
-            <label for="url">Video URL (YouTube or direct .mp4)</label>
-            <input id="url" type="url" placeholder="https://…"/>
+          <div>
+            <label for="dtl">Down-the-Line Video (optional)</label>
+            <input id="dtl" type="file" accept="video/*" />
+            <div class="hint">Pick either or both. We’ll link them in P1–P9.</div>
           </div>
-          <div class="note">If you paste a link, we’ll attach it to the report for quick reference.</div>
         </div>
-      </section>
 
-      <section class="card" style="text-align:center">
-        <div class="actions">
-          <button id="go" class="btn primary">Create Report</button>
-          <button id="clear" class="btn">Clear</button>
+        <div class="grid" style="margin-top:10px">
+          <div>
+            <label for="mode">Discipline</label>
+            <select id="mode">
+              <option value="full-swing" selected>Full Swing</option>
+              <option value="chipping">Chipping</option>
+              <option value="putting">Putting</option>
+            </select>
+          </div>
+          <div>
+            <label for="swings">Swings</label>
+            <select id="swings">
+              <option>1</option><option>2</option><option>3</option><option>5</option><option>10</option>
+            </select>
+          </div>
         </div>
-        <div id="msg" class="note" style="margin-top:8px"></div>
+
+        <div class="row">
+          <button id="build" class="primary">Build Report</button>
+          <button id="demo">Use Demo Only</button>
+          <span id="msg" class="hint"></span>
+        </div>
       </section>
     </main>
   </div>
 
-  <script>
-  (function(){
-    const $ = s => document.querySelector(s);
-    const msg = (t) => { $('#msg').textContent = t || ''; };
+<script>
+(async function(){
+  const $ = s => document.querySelector(s);
+  const msg = $('#msg');
 
-    function sampleReport(videoUrl, usedFile){
-      // Your known-good sample; tweak as needed
-      return {
-        date: new Date().toISOString().slice(0,10),
-        swings: 1,
-        discipline: "full-swing",
-        video_url: videoUrl || (usedFile ? "(local file selected)" : ""),
-        power: { score: 82, tempo: "3.2:1", release_timing: 68 },
-        swing_metrics: [
-          { label:"Right Arm Angle", value:84, tags:["arm-bend"] },
-          { label:"Club Face Angle", value:79, tags:["face-angle"] },
-          { label:"Shoulder Turn", value:72, tags:["shoulder-turn"] },
-          { label:"Hip Turn", value:68, tags:["hip-movement"] },
-          { label:"X-Factor (Shoulder-Hip)", value:64, tags:["sequence"] },
-          { label:"Club Path", value:71, tags:["club-path"] },
-          { label:"Face-to-Path", value:66, tags:["face-angle"] },
-          { label:"Attack Angle", value:62, tags:["delivery"] }
-        ],
-        position_metrics: [
-          { p:"P1", value:90 }, { p:"P2", value:74 }, { p:"P3", value:61 },
-          { p:"P4", value:55 }, { p:"P5", value:63 }, { p:"P6", value:70 },
-          { p:"P7", value:81 }, { p:"P8", value:86 }, { p:"P9", value:78 }
-        ],
-        phases: [
-          { id:"P1", name:"Setup", grade:"good", short:"Athletic stance", long:"Neutral grip, soft knees, pelvis neutral. Pressure 55/45 lead-to-trail; spine tall; eyes level." },
-          { id:"P2", name:"Shaft Parallel (Backswing)", grade:"ok", short:"Width + neutral face", long:"Hands in front of chest; gradual wrist set; near toe-up face; pressure loads trail foot without sway." },
-          { id:"P3", name:"Lead Arm Parallel (Backswing)", grade:"ok", short:"Maintain width", long:"Trail elbow folds in front of ribcage; club on plane; head steady; width ~a forearm off chest." },
-          { id:"P4", name:"Top of Swing", grade:"bad", short:"Full coil", long:"Pressure into trail heel; trail hip deep; lead wrist nearer flat/bowed. Avoid across-the-line/laid-off extremes." },
-          { id:"P5", name:"Lead Arm Parallel (Downswing)", grade:"good", short:"Sequencing", long:"Pelvis → torso → arms. Shaft shallows; trail elbow in front of side seam; lead-wrist flexion maintained." },
-          { id:"P6", name:"Shaft Parallel (Downswing)", grade:"good", short:"Deliver", long:"Hands slightly ahead; face in the window; pelvis keeps turning (no stall)." },
-          { id:"P7", name:"Impact", grade:"ok", short:"Forward lean", long:"Forward shaft lean; low point forward. Pelvis 30–45° open; chest 10–20° open; lead leg braced." },
-          { id:"P8", name:"Trail Arm Parallel (Follow-Through)", grade:"good", short:"Extension", long:"Trail arm extends; handle works around; control rate of closure (no flip)." },
-          { id:"P9", name:"Finish", grade:"good", short:"Balanced", long:"Pressure fully lead side; belt buckle and chest to target; hold the pose." }
-        ],
-        coaching: {
-          priority_fixes: [
-            { title:"Clubface control at P7 (impact)", short:"Match face to path", long:"Problem: face drifting open from P6→P7 causes blocks/push-fades. Fix: (1) Grip audit; lead hand stronger by half a knuckle if needed. (2) Bow lead wrist from P5→P6 to stabilize face. (3) Rehearsal: 8 half-swings stopping at P6, then to a soft P8 keeping glove logo at target. Feedback: alignment rod just outside ball to punish open face." },
-            { title:"Lower body sequence", short:"Clear hips before hands", long:"Problem: hands fire early; sequence reverses, steep path, face flip. Fix: from P4, pressure to lead heel, pelvis opens while chest stays closed a beat, then arms drop. Drill: step-through swings ×10 slow + ×10 normal. Cue: belt buckle to target by impact." },
-            { title:"Hand path width", short:"Keep width at P3", long:"Problem: width collapses at P3; trail elbow behind ribcage → across-the-line. Fix: pump-downs P3 → mini P4 → P5 with trail elbow in front of side seam. Do 3×10 rehearsals, then 3 balls each set." }
-          ],
-          power_fixes: [
-            { title:"Tempo 3:1", short:"Smooth rhythm", long:"Why: efficient speed comes from rhythm. Goal ratio ~3:1 (backswing:downswing). Drill: count 1-2-3 back, 1 through. Use 72 bpm metronome; strike every 4th tick for 12 balls; rest; repeat ×3." },
-            { title:"Lead-leg brake", short:"Post into lead side", long:"Why: braking creates speed. Plant lead heel from P4; straighten lead leg through P5–P6. Drill: towel under lead heel; 10 rehearsals then 5 balls. Cue: zipper to target; head stays behind ball." },
-            { title:"Late release timing", short:"Speed at P7–P8", long:"Why: early throw wastes speed. Hold to P6 then unhinge through. Drill: two-tee gate (one at ball, one 4\" forward). Clip both tees after impact. Do 2×5; video last 2." }
-          ]
-        },
-        practice_plan: [
-          { day:1, title:"Tempo + Sequence", minutes:18, balls:36, difficulty:3,
-            desc:"Groove 3:1 rhythm and synced sequence. Three 6-min blocks; video 2 swings each block.",
-            drills:["Metronome 72 bpm: 12 half-swings","Step-through ×12","Full swings ×12 (same cadence)"] },
-          { day:2, title:"Contact + Face", minutes:20, balls:40, difficulty:3,
-            desc:"Tighten start-line and strike consistency.",
-            drills:["9-to-3 × 15 (clip P6→P8)","Two-tee gate × 15","Grip/face check × 10 slow reps"] }
-        ]
-      };
-    }
+  async function readSample(){
+    const res = await fetch('/report.json', { cache:'no-store' });
+    if(!res.ok) throw new Error('report.json HTTP '+res.status);
+    const txt = await res.text();
+    return JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
+  }
+  function blobFor(file){ return file ? URL.createObjectURL(file) : ''; }
 
-    // Create report and send via sessionStorage (works for files or URLs)
-    async function createReport(){
-      const file = $('#file').files[0] || null;
-      const url  = ($('#url').value || '').trim();
-      if(!file && !url){
-        msg('Pick a file OR paste a URL.'); return;
+  async function makeReport(fromFiles){
+    msg.textContent = 'Building...';
+    try{
+      const base = await readSample();
+
+      // Apply simple header choices
+      base.discipline = $('#mode').value;
+      base.swings = +$('#swings').value || 1;
+
+      // Attach videos if provided
+      let refs = [];
+      if (fromFiles) {
+        const fo  = $('#fo').files[0];
+        const dtl = $('#dtl').files[0];
+        const foUrl  = blobFor(fo);
+        const dtlUrl = blobFor(dtl);
+        // Alternate FO/DTL links across P-sections for variety.
+        refs = [foUrl, dtlUrl].filter(Boolean);
+        if (!refs.length) fromFiles = false; // nothing chosen
       }
 
-      // We don’t embed the file (large). We just generate the JSON now.
-      const report = sampleReport(url, !!file);
-
-      try{
-        sessionStorage.setItem('vc_report', JSON.stringify(report));
-      }catch(e){
-        console.error(e);
-        msg('Could not store report in session. Try a shorter description or different browser.');
-        return;
+      if (fromFiles && base.phases && base.phases.length){
+        for (let i=0;i<base.phases.length;i++){
+          const ref = refs.length ? refs[i % refs.length] : '';
+          if (ref) base.phases[i].ref = ref; // report.html will label as “Video”
+        }
       }
 
-      // Jump to report reader; it will pull from sessionStorage when ?src=session
-      window.location.href = '/report.html?src=session';
+      // Save to session and go render
+      sessionStorage.setItem('vc_report', JSON.stringify(base));
+      msg.innerHTML = '<span class="ok">Done. Opening report…</span>';
+      // IMPORTANT: use src=session so report uses sessionStorage instead of a URL
+      location.href = '/report.html?src=session';
+    }catch(e){
+      console.error(e);
+      msg.textContent = 'Error: ' + (e.message || String(e));
     }
+  }
 
-    $('#go').addEventListener('click', createReport);
-    $('#clear').addEventListener('click', ()=>{
-      $('#file').value = '';
-      $('#url').value = '';
-      msg('');
-    });
-  })();
-  </script>
+  $('#build').addEventListener('click', ()=>makeReport(true));
+  $('#demo').addEventListener('click',  ()=>makeReport(false));
+})();
+</script>
 </body>
 </html>
