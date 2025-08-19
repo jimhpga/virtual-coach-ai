@@ -1,21 +1,21 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Upload — Virtual Coach AI</title>
-  <link rel="preload" as="image" href="/homepage-background.png" />
+  <link rel="preload" as="image" href="/homepage-background.png"/>
   <style>
     :root{
       --nav: rgba(7,68,32,.96);
-      --scrim: rgba(0,0,0,.05);
+      --scrim: rgba(0,0,0,.06);
       --panel: rgba(0,0,0,.30);
       --line: rgba(255,255,255,.12);
-      --text: #f2f7f9;
-      --muted:#cfe0e6;
-      --maxw: 980px; --radius: 14px; --shadow: 0 10px 24px rgba(0,0,0,.22);
+      --text:#f2f7f9; --muted:#cfe0e6;
+      --maxw: 980px; --radius:14px; --shadow:0 10px 24px rgba(0,0,0,.22);
     }
-    *{box-sizing:border-box} html,body{height:100%}
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
       margin:0;color:var(--text);
       font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
@@ -24,24 +24,41 @@
     header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
     .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
     .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+    .brand img{height:30px}
     nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
     nav a:hover{background:rgba(255,255,255,.08)}
+    nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+
     .scrim{min-height:100vh;background:var(--scrim)}
-    main{width:min(var(--maxw),94%);margin:0 auto;padding:24px 0 40px}
+    main{width:min(var(--maxw),94%);margin:0 auto;padding:18px 0 40px;display:grid;gap:16px}
     .card{padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow)}
-    .row{display:grid;gap:10px}
-    .btn{border:1px solid var(--line);background:rgba(255,255,255,.12);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:600;cursor:pointer}
-    .btn:hover{background:rgba(255,255,255,.18)}
+    .hero{text-align:center}
+    h1{margin:6px 0 8px}
     .muted{color:var(--muted)}
-    input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff}
-    .half{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    #msg{min-height:20px}
+    .row{display:grid;gap:12px}
+    @media(min-width:880px){.row{grid-template-columns:1fr 1fr}}
+    label{font-weight:700}
+    .field{display:grid;gap:6px;margin:10px 0}
+    input[type="url"], input[type="text"]{
+      width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);
+      background:rgba(255,255,255,.10);color:#fff
+    }
+    input[type="file"]{
+      width:100%;padding:10px;border-radius:10px;border:1px dashed var(--line);
+      background:rgba(255,255,255,.06);color:#fff
+    }
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+    .btn{border:1px solid var(--line);background:rgba(255,255,255,.12);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:700;cursor:pointer}
+    .btn.primary{background:rgba(0,255,153,.16);border-color:#0a7}
+    .btn:hover{background:rgba(255,255,255,.18)}
+    .note{color:#cfe3ee;font-size:.9rem}
   </style>
 </head>
 <body>
+  <!-- simple inline nav to match the site -->
   <header>
     <div class="navwrap">
-      <a class="brand" href="/"><span>Virtual Coach AI</span></a>
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt=""><span>Virtual Coach AI</span></a>
       <nav aria-label="Primary">
         <a href="/index.html">Home</a>
         <a href="/report.html?report=/report.json">Reports</a>
@@ -56,94 +73,133 @@
 
   <div class="scrim">
     <main>
-      <section class="card">
-        <h2>Build a Live Report (no upload)</h2>
-        <p class="muted">Paste a public video link (YouTube or MP4/MOV). We’ll generate a report and open it immediately.</p>
-        <div class="row">
-          <label for="videoUrl">Video URL</label>
-          <input id="videoUrl" type="text" placeholder="https://www.youtube.com/watch?v=...  or  https://.../swing.mp4" />
-          <div class="half">
-            <button class="btn" id="make">Create Report</button>
-            <span id="msg" class="muted"></span>
+      <section class="card hero">
+        <h1>Upload Your Swing</h1>
+        <div class="muted">Pick a video file <em>or</em> paste a link. We’ll build a report instantly — no server needed.</div>
+      </section>
+
+      <section class="row">
+        <div class="card">
+          <h2 style="margin:0 0 8px">Option A — Use a video file</h2>
+          <div class="field">
+            <label for="file">Choose a file (MP4/MOV/HEVC)</label>
+            <input id="file" type="file" accept="video/*" capture="environment"/>
           </div>
+          <div class="note">Tip: On iPhone, this opens Camera so you can record face-on or down-the-line, then use it.</div>
         </div>
+
+        <div class="card">
+          <h2 style="margin:0 0 8px">Option B — Paste a video URL</h2>
+          <div class="field">
+            <label for="url">Video URL (YouTube or direct .mp4)</label>
+            <input id="url" type="url" placeholder="https://…"/>
+          </div>
+          <div class="note">If you paste a link, we’ll attach it to the report for quick reference.</div>
+        </div>
+      </section>
+
+      <section class="card" style="text-align:center">
+        <div class="actions">
+          <button id="go" class="btn primary">Create Report</button>
+          <button id="clear" class="btn">Clear</button>
+        </div>
+        <div id="msg" class="note" style="margin-top:8px"></div>
       </section>
     </main>
   </div>
 
   <script>
-  const $ = s => document.querySelector(s);
-  const esc = s => encodeURIComponent(s||'');
+  (function(){
+    const $ = s => document.querySelector(s);
+    const msg = (t) => { $('#msg').textContent = t || ''; };
 
-  function buildReport(videoUrl){
-    const yt = q => `https://www.youtube.com/results?search_query=${esc(q)}`;
-    const ref = videoUrl || yt('golf swing P1 P9');
-    return {
-      swings: 1,
-      discipline: "full-swing",
-      power: { score: 78, tempo: "3.0:1", release_timing: 62 },
-      swing_metrics: [
-        { label:"Right Arm Angle", value:84, tags:["arm-bend"] },
-        { label:"Club Face Angle", value:79, tags:["face-angle"] },
-        { label:"Shoulder Turn", value:72, tags:["shoulder-turn"] },
-        { label:"Hip Turn", value:68, tags:["hip-movement"] },
-        { label:"X-Factor (Shoulder-Hip)", value:64, tags:["sequence"] },
-        { label:"Club Path", value:71, tags:["club-path"] },
-        { label:"Face-to-Path", value:66, tags:["face-angle"] },
-        { label:"Attack Angle", value:62, tags:["delivery"] }
-      ],
-      position_metrics: [
-        { p:"P1", value:90 }, { p:"P2", value:74 }, { p:"P3", value:61 },
-        { p:"P4", value:55 }, { p:"P5", value:63 }, { p:"P6", value:70 },
-        { p:"P7", value:81 }, { p:"P8", value:86 }, { p:"P9", value:78 }
-      ],
-      phases: [
-        { id:"P1", name:"Setup", grade:"good", short:"Athletic stance", long:"Neutral grip, soft knees, pelvis neutral. Pressure 55/45; spine tall; eyes level.", ref },
-        { id:"P2", name:"Shaft Parallel (Backswing)", grade:"ok", short:"Width + neutral face", long:"Hands in front of chest; gradual wrist set; near toe-up face; pressure loads trail foot.", ref },
-        { id:"P3", name:"Lead Arm Parallel (Backswing)", grade:"ok", short:"Maintain width", long:"Trail elbow folds in front of ribcage; club on plane; head steady.", ref },
-        { id:"P4", name:"Top of Swing", grade:"bad", short:"Full coil", long:"Pressure into trail heel; trail hip deep; lead wrist nearer flat/bowed.", ref },
-        { id:"P5", name:"Lead Arm Parallel (Downswing)", grade:"good", short:"Sequencing", long:"Pelvis → torso → arms. Shaft shallows; trail elbow in front of side seam.", ref },
-        { id:"P6", name:"Shaft Parallel (Downswing)", grade:"good", short:"Deliver", long:"Hands slightly ahead; face in the window; pelvis keeps turning (no stall).", ref },
-        { id:"P7", name:"Impact", grade:"ok", short:"Forward lean", long:"Forward shaft lean; low point forward. Pelvis 30–45° open; chest 10–20° open.", ref },
-        { id:"P8", name:"Trail Arm Parallel (Follow-Through)", grade:"good", short:"Extension", long:"Trail arm extends; handle works around; control rate of closure.", ref },
-        { id:"P9", name:"Finish", grade:"good", short:"Balanced", long:"Pressure fully lead side; belt buckle and chest to target; hold the pose.", ref }
-      ],
-      coaching:{
-        priority_fixes:[
-          { title:"Clubface control at P7 (impact)", short:"Match face to path", long:"Face drifting open from P6→P7 creates blocks/fades. Grip audit, then keep lead wrist flexed to P6; 8 half-swings to P8 keeping glove logo at target.", ref },
-          { title:"Lower body sequence", short:"Clear hips before hands", long:"From P4 shift to lead heel and open pelvis while chest stays closed a beat. Step-through x10 slow + x10 normal. Cue: belt buckle at target by impact.", ref },
-          { title:"Hand path width", short:"Keep width at P3", long:"Avoid collapsing width at P3. Pump-downs: P3 → mini P4 → P5 with trail elbow in front of seam. 3×10 rehearsals, then 3 balls each set.", ref }
+    function sampleReport(videoUrl, usedFile){
+      // Your known-good sample; tweak as needed
+      return {
+        date: new Date().toISOString().slice(0,10),
+        swings: 1,
+        discipline: "full-swing",
+        video_url: videoUrl || (usedFile ? "(local file selected)" : ""),
+        power: { score: 82, tempo: "3.2:1", release_timing: 68 },
+        swing_metrics: [
+          { label:"Right Arm Angle", value:84, tags:["arm-bend"] },
+          { label:"Club Face Angle", value:79, tags:["face-angle"] },
+          { label:"Shoulder Turn", value:72, tags:["shoulder-turn"] },
+          { label:"Hip Turn", value:68, tags:["hip-movement"] },
+          { label:"X-Factor (Shoulder-Hip)", value:64, tags:["sequence"] },
+          { label:"Club Path", value:71, tags:["club-path"] },
+          { label:"Face-to-Path", value:66, tags:["face-angle"] },
+          { label:"Attack Angle", value:62, tags:["delivery"] }
         ],
-        power_fixes:[
-          { title:"Tempo 3:1", short:"Smooth rhythm", long:"Backswing ~3x downswing. Count 1-2-3 back, 1 through. 72 bpm; strike every 4th tick, 12 balls × 3.", ref },
-          { title:"Lead-leg brake", short:"Post into lead side", long:"Plant lead heel from P4, straighten lead leg through P5–P6. Towel under heel; 10 rehearsals then 5 balls. Keep head behind ball.", ref },
-          { title:"Late release timing", short:"Speed at P7–P8", long:"Hold angles to P6, unhinge through. Two-tee gate; clip both after impact. 2×5 and video last 2.", ref }
+        position_metrics: [
+          { p:"P1", value:90 }, { p:"P2", value:74 }, { p:"P3", value:61 },
+          { p:"P4", value:55 }, { p:"P5", value:63 }, { p:"P6", value:70 },
+          { p:"P7", value:81 }, { p:"P8", value:86 }, { p:"P9", value:78 }
+        ],
+        phases: [
+          { id:"P1", name:"Setup", grade:"good", short:"Athletic stance", long:"Neutral grip, soft knees, pelvis neutral. Pressure 55/45 lead-to-trail; spine tall; eyes level." },
+          { id:"P2", name:"Shaft Parallel (Backswing)", grade:"ok", short:"Width + neutral face", long:"Hands in front of chest; gradual wrist set; near toe-up face; pressure loads trail foot without sway." },
+          { id:"P3", name:"Lead Arm Parallel (Backswing)", grade:"ok", short:"Maintain width", long:"Trail elbow folds in front of ribcage; club on plane; head steady; width ~a forearm off chest." },
+          { id:"P4", name:"Top of Swing", grade:"bad", short:"Full coil", long:"Pressure into trail heel; trail hip deep; lead wrist nearer flat/bowed. Avoid across-the-line/laid-off extremes." },
+          { id:"P5", name:"Lead Arm Parallel (Downswing)", grade:"good", short:"Sequencing", long:"Pelvis → torso → arms. Shaft shallows; trail elbow in front of side seam; lead-wrist flexion maintained." },
+          { id:"P6", name:"Shaft Parallel (Downswing)", grade:"good", short:"Deliver", long:"Hands slightly ahead; face in the window; pelvis keeps turning (no stall)." },
+          { id:"P7", name:"Impact", grade:"ok", short:"Forward lean", long:"Forward shaft lean; low point forward. Pelvis 30–45° open; chest 10–20° open; lead leg braced." },
+          { id:"P8", name:"Trail Arm Parallel (Follow-Through)", grade:"good", short:"Extension", long:"Trail arm extends; handle works around; control rate of closure (no flip)." },
+          { id:"P9", name:"Finish", grade:"good", short:"Balanced", long:"Pressure fully lead side; belt buckle and chest to target; hold the pose." }
+        ],
+        coaching: {
+          priority_fixes: [
+            { title:"Clubface control at P7 (impact)", short:"Match face to path", long:"Problem: face drifting open from P6→P7 causes blocks/push-fades. Fix: (1) Grip audit; lead hand stronger by half a knuckle if needed. (2) Bow lead wrist from P5→P6 to stabilize face. (3) Rehearsal: 8 half-swings stopping at P6, then to a soft P8 keeping glove logo at target. Feedback: alignment rod just outside ball to punish open face." },
+            { title:"Lower body sequence", short:"Clear hips before hands", long:"Problem: hands fire early; sequence reverses, steep path, face flip. Fix: from P4, pressure to lead heel, pelvis opens while chest stays closed a beat, then arms drop. Drill: step-through swings ×10 slow + ×10 normal. Cue: belt buckle to target by impact." },
+            { title:"Hand path width", short:"Keep width at P3", long:"Problem: width collapses at P3; trail elbow behind ribcage → across-the-line. Fix: pump-downs P3 → mini P4 → P5 with trail elbow in front of side seam. Do 3×10 rehearsals, then 3 balls each set." }
+          ],
+          power_fixes: [
+            { title:"Tempo 3:1", short:"Smooth rhythm", long:"Why: efficient speed comes from rhythm. Goal ratio ~3:1 (backswing:downswing). Drill: count 1-2-3 back, 1 through. Use 72 bpm metronome; strike every 4th tick for 12 balls; rest; repeat ×3." },
+            { title:"Lead-leg brake", short:"Post into lead side", long:"Why: braking creates speed. Plant lead heel from P4; straighten lead leg through P5–P6. Drill: towel under lead heel; 10 rehearsals then 5 balls. Cue: zipper to target; head stays behind ball." },
+            { title:"Late release timing", short:"Speed at P7–P8", long:"Why: early throw wastes speed. Hold to P6 then unhinge through. Drill: two-tee gate (one at ball, one 4\" forward). Clip both tees after impact. Do 2×5; video last 2." }
+          ]
+        },
+        practice_plan: [
+          { day:1, title:"Tempo + Sequence", minutes:18, balls:36, difficulty:3,
+            desc:"Groove 3:1 rhythm and synced sequence. Three 6-min blocks; video 2 swings each block.",
+            drills:["Metronome 72 bpm: 12 half-swings","Step-through ×12","Full swings ×12 (same cadence)"] },
+          { day:2, title:"Contact + Face", minutes:20, balls:40, difficulty:3,
+            desc:"Tighten start-line and strike consistency.",
+            drills:["9-to-3 × 15 (clip P6→P8)","Two-tee gate × 15","Grip/face check × 10 slow reps"] }
         ]
-      },
-      practice_plan:[
-        { day:1, title:"Tempo + Sequence", minutes:18, balls:36, difficulty:3,
-          desc:"Groove 3:1 rhythm and synced sequence. Three 6-min blocks; video 2 swings each block.",
-          drills:["Metronome 72 bpm: 12 half-swings","Step-through x12","Full swings x12 (same cadence)"] },
-        { day:2, title:"Contact + Face", minutes:20, balls:40, difficulty:3,
-          desc:"Tighten start-line and strike consistency.",
-          drills:["9-to-3 x 15 (clip P6→P8)","Two-tee gate x 15","Grip/face check x 10 slow reps"] }
-      ]
-    };
-  }
+      };
+    }
 
-  function toDataUrl(obj){
-    const json = JSON.stringify(obj);
-    const b64 = btoa(unescape(encodeURIComponent(json)));
-    return `data:application/json;base64,${b64}`;
-  }
+    // Create report and send via sessionStorage (works for files or URLs)
+    async function createReport(){
+      const file = $('#file').files[0] || null;
+      const url  = ($('#url').value || '').trim();
+      if(!file && !url){
+        msg('Pick a file OR paste a URL.'); return;
+      }
 
-  document.getElementById('make').addEventListener('click', ()=>{
-    const url = (document.getElementById('videoUrl').value||'').trim();
-    const report = buildReport(url);
-    const dataUrl = toDataUrl(report);
-    // Open in the report viewer (no server needed)
-    location.href = `/report.html?report=${encodeURIComponent(dataUrl)}`;
-  });
+      // We don’t embed the file (large). We just generate the JSON now.
+      const report = sampleReport(url, !!file);
+
+      try{
+        sessionStorage.setItem('vc_report', JSON.stringify(report));
+      }catch(e){
+        console.error(e);
+        msg('Could not store report in session. Try a shorter description or different browser.');
+        return;
+      }
+
+      // Jump to report reader; it will pull from sessionStorage when ?src=session
+      window.location.href = '/report.html?src=session';
+    }
+
+    $('#go').addEventListener('click', createReport);
+    $('#clear').addEventListener('click', ()=>{
+      $('#file').value = '';
+      $('#url').value = '';
+      msg('');
+    });
+  })();
   </script>
 </body>
 </html>
