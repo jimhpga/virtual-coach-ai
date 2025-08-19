@@ -1,40 +1,20 @@
-<body>
-  <div id="navMount"></div>
-  <script src="/nav.js" defer></script>
-
-  <!-- your existing page content starts here -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="robots" content="noindex, nofollow" />
 <title>Login — Virtual Coach AI</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
   :root{
-    --nav: rgba(7,68,32,.96);     /* dark green nav */
-    --scrim: rgba(0,0,0,.05);     /* brighter background */
-    --panel: rgba(0,0,0,.30);     /* card translucency */
-    --line: rgba(255,255,255,.12);
-    --text: #f2f7f9;
-    --muted:#cfe0e6;
-    --maxw: 1100px;
-    --radius: 14px;
-    --shadow: 0 10px 24px rgba(0,0,0,.22);
+    --nav:#0b2b12;     --scrim: rgba(0,0,0,.05);
+    --panel: rgba(0,0,0,.30); --line: rgba(255,255,255,.12);
+    --text: #f2f7f9; --muted:#cfe0e6; --maxw:1100px; --radius:14px; --shadow:0 10px 24px rgba(0,0,0,.22);
   }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; color:var(--text);
-    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
-    background:url('/homepage-background.png') center/cover fixed no-repeat;
-    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-    min-height:100dvh;
-  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:url('/homepage-background.png') center/cover fixed no-repeat;min-height:100dvh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
   .scrim{min-height:100dvh;background:var(--scrim)}
-
-  /* NAV (same as Home) */
   header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
@@ -42,51 +22,19 @@
   nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
   nav a:hover{background:rgba(255,255,255,.08)}
   nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-
-  /* MAIN */
-  main{width:min(var(--maxw),94%);margin:0 auto;padding:24px 0 40px}
+  main{width:min(680px,94%);margin:0 auto;padding:24px 0 40px}
   .center{display:grid;place-items:center;min-height:60vh}
-
-  .card{
-    width:min(520px,94vw);
-    padding:20px 18px 16px;
-    border:1px solid var(--line);
-    border-radius:var(--radius);
-    background:var(--panel);
-    backdrop-filter:blur(2px);
-    box-shadow:var(--shadow);
-    text-align:center;
-  }
-
-  /* Green masked logo (same as Home) */
-  .logo{
-    width:min(340px,70vw);
-    aspect-ratio: 1000 / 280;  /* adjust if your PNG differs */
-    height:auto;
-    margin:0 auto 10px;
-    background:#00ff99;
-    -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
-            mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
-  }
-
+  .card{width:100%;padding:20px 18px 16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow);text-align:center}
+  /* dark-green solid logo using mask (no purple tint) */
+  .logo{width:min(320px,70vw);height:90px;margin:0 auto 10px;background:#0b2b12;-webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;}
   h1{margin:6px 0 8px;font-size:22px}
   p.lead{margin:0 0 12px;color:var(--muted)}
-
-  .field{display:flex;gap:8px;align-items:center;margin-top:6px}
-  input[type="password"]{
-    flex:1; padding:12px 14px; border-radius:10px;
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.10); color:#fff; font-size:16px;
-  }
-  button{
-    padding:12px 16px; border:none; border-radius:10px;
-    background:rgba(0,255,153,.16); color:#fff; font-weight:700; cursor:pointer; min-width:110px;
-    border:1px solid #0a7;
-  }
+  .field{display:grid;gap:8px;margin-top:10px}
+  input{padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;font-size:16px}
+  button{padding:12px 16px;border:none;border-radius:10px;background:rgba(0,255,153,.16);color:#fff;font-weight:700;cursor:pointer;border:1px solid #0a7}
   button:hover{background:rgba(0,255,153,.22)}
   .err{color:#ffb4b4;min-height:18px;margin-top:10px;font-size:14px}
-  .muted{margin-top:10px;font-size:12px;color:var(--muted);word-break:break-word}
-
+  .muted{margin-top:10px;font-size:12px;color:var(--muted)}
   footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
 </style>
 </head>
@@ -112,21 +60,17 @@
       <div class="center">
         <div class="card">
           <div class="logo" role="img" aria-label="Virtual Coach AI"></div>
-          <h1>Enter Passcode</h1>
-          <p class="lead">Tester access only.</p>
+          <h1>Invite Login</h1>
+          <p class="lead">Enter your username and passcode.</p>
 
-          <form id="form" onsubmit="return false">
-            <div class="field">
-              <input id="pass" type="password" inputmode="numeric" autocomplete="one-time-code"
-                     placeholder="Passcode (e.g., 1234)" />
-              <button id="go" type="button">Continue</button>
-            </div>
-            <div id="err" class="err"></div>
+          <form id="form" onsubmit="return false" class="field">
+            <input id="user" placeholder="Username (e.g., pro1)" />
+            <input id="pass" type="password" inputmode="numeric" autocomplete="one-time-code" placeholder="Passcode (e.g., 2468)" />
+            <button id="go" type="button">Continue</button>
           </form>
+          <div id="err" class="err"></div>
 
-          <div class="muted">
-            Trouble? Email <a href="mailto:jimh@pga.com" style="color:#86efac;text-decoration:none">jimh@pga.com</a>
-          </div>
+          <div class="muted">Trouble? Email <a href="mailto:jimh@pga.com" style="color:#86efac;text-decoration:none">jimh@pga.com</a></div>
         </div>
       </div>
     </main>
@@ -136,33 +80,41 @@
 
 <script>
 (function(){
-  // ---- EDIT YOUR PASSCODE HERE ----
-  const PASS = "1234";
+  document.getElementById('y').textContent = new Date().getFullYear();
+
+  // Simple invite list (edit here)
+  const USERS = {
+    "jim":"1234",
+    "pro1":"2468",
+    "pro2":"1357",
+    "coach":"9090"
+  };
 
   function successRedirect(){
     const next = new URLSearchParams(location.search).get('next') || "";
     const dest = (next === "upload") ? "/upload.html" : "/index.html";
-    try { localStorage.setItem('vc_auth','ok'); } catch(e){}
     window.location.href = dest;
   }
 
   function submit(){
-    const code = (document.getElementById('pass').value || "").trim();
-    const err  = document.getElementById('err');
-    if (code === PASS) {
+    const u = (document.getElementById('user').value || "").trim().toLowerCase();
+    const p = (document.getElementById('pass').value || "").trim();
+    const err = document.getElementById('err');
+
+    if(!u || !p){ err.textContent = "Enter username and passcode."; return; }
+    if(USERS[u] && USERS[u] === p){
+      try{
+        localStorage.setItem('vc_auth','ok');
+        localStorage.setItem('vc_user', u);
+      }catch{}
       err.textContent = "";
       successRedirect();
-    } else {
-      err.textContent = "Invalid passcode. Try again.";
+    }else{
+      err.textContent = "Invalid credentials. Try again.";
     }
   }
-
   document.getElementById('go').addEventListener('click', submit);
-  document.getElementById('pass').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') submit();
-  });
-
-  document.getElementById('y').textContent = new Date().getFullYear();
+  document.getElementById('pass').addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
 })();
 </script>
 </body>
