@@ -152,7 +152,8 @@
 const $ = s => document.querySelector(s);
 const qp = new URLSearchParams(location.search);
 const reportParam = qp.get('report');
-const reportSrc = (reportParam === 'local') ? null : (reportParam || '/report.json');
+const reportSrc   = (reportParam === 'local') ? null : (reportParam || '/report.json');
+const src         = qp.get('src') || '';
 
 const fmt  = v => `${v}%`;
 const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';
@@ -165,8 +166,8 @@ function phaseRow(ph,i){
   const gRaw = String(ph.grade||'').toLowerCase();
   const grade = (gRaw==='bad') ? 'needs help' : gRaw || 'ok';
   const short = ph.short || '';
-  const long = ph.long || '';
-  const ref = ph.ref || ph.video || ph.video_url || '';
+  const long  = ph.long  || '';
+  const ref   = ph.ref || ph.video || ph.video_url || '';
   const isBlob = (ref||'').startsWith('blob:');
   const btnLabel = ref ? (isBlob ? 'Video' : 'YouTube') : '';
 
@@ -188,9 +189,12 @@ function phaseRow(ph,i){
 }
 
 function coachItem(item){
-  const title = item.title || ''; const short = item.short || ''; const long = item.long || '';
-  const ref = item.ref || '';
-  const isBlob = (ref||'').startsWith('blob:'); const btnLabel = ref ? (isBlob?'Video':'YouTube') : '';
+  const title = item.title || '';
+  const short = item.short || '';
+  const long  = item.long  || '';
+  const ref   = item.ref   || '';
+  const isBlob = (ref||'').startsWith('blob:');
+  const btnLabel = ref ? (isBlob?'Video':'YouTube') : '';
   return `<details class="panel">
     <summary><span class="pname">${title}</span><span class="sub" style="margin-left:8px">${short}</span>
       <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -244,7 +248,13 @@ async function loadReport(url){
 function shareUrl(){
   try{
     const u = new URL(location.href);
-    u.searchParams.set('report', reportParam || '');
+    if (src === 'session') {
+      // Session data isn’t shareable—switch the link to a file fallback
+      u.searchParams.delete('src');
+      u.searchParams.set('report', reportParam || '/report.json');
+    } else {
+      u.searchParams.set('report', reportParam || '/report.json');
+    }
     return u.toString();
   }catch{ return location.href; }
 }
@@ -276,16 +286,30 @@ document.getElementById('btnDownload').addEventListener('click', ()=>{
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 });
 
-// Boot: local or remote
-if (reportSrc) {
+/* ---------- BOOT: session (from /upload.html) or remote file ---------- */
+if (src === 'session') {
+  try{
+    const raw = sessionStorage.getItem('vc_report');
+    if (!raw) throw new Error('No session report found. Go to Upload and create a report.');
+    const data = JSON.parse(raw);
+    renderReport(data);
+  }catch(err){
+    console.error(err);
+    alert(err.message || String(err));
+  }
+} else if (reportSrc) {
   loadReport(reportSrc);
 } else {
+  // Optional localStorage fallback
   try{
-    const raw = localStorage.getItem('vc_last_report') || '{}';
-    const data = JSON.parse((raw||'').trim().replace(/^\uFEFF/,''));
-    if (!data || !Object.keys(data).length) throw new Error('No local report found. Go to Upload and try again.');
+    const raw = localStorage.getItem('vc_last_report') || '';
+    if (!raw) throw new Error('No saved report found. Go to Upload and try again.');
+    const data = JSON.parse(raw.trim().replace(/^\uFEFF/, ''));
     renderReport(data);
-  }catch(err){ console.error(err); alert(err.message || String(err)); }
+  }catch(err){
+    console.error(err);
+    alert(err.message || String(err));
+  }
 }
 </script>
 </body>
