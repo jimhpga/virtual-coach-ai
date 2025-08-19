@@ -1,9 +1,8 @@
 <!-- /nav.html -->
 <nav class="topbar">
-  <a class="brand" href="/index.html" data-nav>Virtual Coach AI</a>
+  <div class="brand"><a href="/index.html">Virtual Coach AI</a></div>
   <div class="nav">
     <a href="/index.html" data-nav>Home</a>
-    <a href="/upload.html" data-nav>Upload</a>
     <a href="/report.html?report=/report.json" data-nav>Reports</a>
     <a href="/coming-soon.html" data-nav>Coming Soon</a>
     <a href="/pricing.html" data-nav>Pricing</a>
@@ -12,11 +11,26 @@
     <a href="/login.html" data-nav>Login</a>
   </div>
 </nav>
+
+<div class="note">
+  Public beta — Live AI analysis is rolling out. Try the demo report, then upload a swing and share the report with your coach.
+</div>
+
 <style>
-  .topbar{position:sticky;top:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;
-          padding:10px 14px;background:#074420; /* dark green */ border-bottom:1px solid rgba(255,255,255,.08)}
-  .brand{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
-  .nav a{color:#fff;text-decoration:none;margin:0 8px;padding:8px 10px;border-radius:10px}
-  .nav a:hover{background:rgba(255,255,255,.10)}
-  .nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:4px}
+  .topbar{
+    position:sticky; top:0; z-index:1000;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 14px; background:#0b2b12;
+    border-bottom:1px solid rgba(255,255,255,.08)
+  }
+  .topbar .brand a{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
+  .topbar .nav a{color:#fff;text-decoration:none;margin:0 8px;padding:8px 10px;border-radius:10px}
+  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
+  .topbar .nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:4px}
+  .note{
+    position:sticky; top:52px; z-index:999;
+    background:rgba(255,255,255,.10); color:#e7f7ec;
+    padding:8px 14px; text-align:center; border-bottom:1px solid rgba(255,255,255,.08)
+  }
+  @media (max-width:680px){ .note{font-size:.9rem} }
 </style>
