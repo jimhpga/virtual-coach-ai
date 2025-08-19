@@ -1,6 +1,13 @@
 <!-- /nav.html -->
 <nav class="topbar">
-  <div class="brand"><a href="/index.html">Virtual Coach AI</a></div>
+  <a class="brand" href="/index.html" data-nav>Virtual Coach AI</a>
+
+  <!-- Mobile toggle (CSS-only) -->
+  <input id="navToggle" class="nav-toggle" type="checkbox" aria-label="Toggle navigation">
+  <label for="navToggle" class="hamburger" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </label>
+
   <div class="nav">
     <a href="/index.html" data-nav>Home</a>
     <a href="/report.html?report=/report.json" data-nav>Reports</a>
@@ -12,25 +19,44 @@
   </div>
 </nav>
 
-<div class="note">
-  Public beta — Live AI analysis is rolling out. Try the demo report, then upload a swing and share the report with your coach.
-</div>
-
 <style>
   .topbar{
     position:sticky; top:0; z-index:1000;
-    display:flex; justify-content:space-between; align-items:center;
-    padding:10px 14px; background:#0b2b12;
-    border-bottom:1px solid rgba(255,255,255,.08)
+    display:flex; align-items:center; gap:12px;
+    padding:10px 14px;
+    background:#0b3d1b; /* dark green */
+    border-bottom:1px solid rgba(255,255,255,.10);
   }
-  .topbar .brand a{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
-  .topbar .nav a{color:#fff;text-decoration:none;margin:0 8px;padding:8px 10px;border-radius:10px}
-  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
-  .topbar .nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:4px}
-  .note{
-    position:sticky; top:52px; z-index:999;
-    background:rgba(255,255,255,.10); color:#e7f7ec;
-    padding:8px 14px; text-align:center; border-bottom:1px solid rgba(255,255,255,.08)
+  .brand{
+    color:#fff; text-decoration:none; font-weight:800; letter-spacing:.2px;
+    white-space:nowrap;
   }
-  @media (max-width:680px){ .note{font-size:.9rem} }
+  .nav{display:flex; gap:6px; margin-left:auto; align-items:center; flex-wrap:wrap}
+  .nav a{
+    color:#fff; text-decoration:none; padding:8px 10px; border-radius:10px;
+    border:1px solid transparent; white-space:nowrap;
+  }
+  .nav a:hover{ background:rgba(255,255,255,.10) }
+  .nav a[aria-current="page"]{
+    border-color:rgba(255,255,255,.20); background:rgba(255,255,255,.10)
+  }
+
+  /* hamburger (hidden on wide) */
+  .nav-toggle{ display:none }
+  .hamburger{ display:none; margin-left:auto; width:38px; height:30px; cursor:pointer }
+  .hamburger span{
+    display:block; height:3px; margin:6px 0; background:#fff; border-radius:2px
+  }
+
+  /* mobile */
+  @media (max-width:860px){
+    .hamburger{ display:block }
+    .nav{
+      position:fixed; left:0; right:0; top:52px;
+      background:#0b3d1b; border-top:1px solid rgba(255,255,255,.12);
+      display:none; flex-direction:column; gap:0; padding:8px 10px;
+    }
+    .nav a{ padding:12px; border-radius:8px }
+    .nav-toggle:checked ~ .nav{ display:flex }
+  }
 </style>
