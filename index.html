@@ -1,93 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Virtual Coach AI — Home</title>
-  <link rel="preload" as="image" href="/homepage-background.png" />
-  <style>
-    :root{
-      --nav: rgba(7,68,32,.96);   /* dark green nav */
-      --scrim: rgba(0,0,0,.05);   /* lower = brighter page */
-      --panel: rgba(0,0,0,.30);   /* card translucency */
-      --line: rgba(255,255,255,.12);
-      --text: #f2f7f9;
-      --muted:#cfe0e6;
-      --maxw: 980px;              /* content width */
-      --radius: 14px;
-      --shadow: 0 10px 24px rgba(0,0,0,.22);
-      --padTop: 18px;             /* pull content up a bit */
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Virtual Coach AI — Home</title>
+<link rel="preload" as="image" href="/homepage-background.png" />
+<style>
+  :root{ --text:#f2f7f9; --muted:#cfe0e6; --line:rgba(255,255,255,.12); --radius:14px; --shadow:0 10px 24px rgba(0,0,0,.22) }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{
+    margin:0; color:var(--text);
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
+    background:url('/homepage-background.png') center/cover fixed no-repeat;
+  }
+  .scrim{min-height:100vh; background:rgba(0,0,0,.05)}
+  /* NAV (same on all pages) */
+  .topbar{
+    position:sticky; top:0; z-index:1000;
+    display:flex; align-items:center; gap:12px;
+    padding:10px 14px; background:#0b3d1b;
+    border-bottom:1px solid rgba(255,255,255,.10);
+  }
+  .topbar .brand{color:#fff;text-decoration:none;font-weight:800;white-space:nowrap}
+  .topbar .nav{display:flex;gap:6px;margin-left:auto;align-items:center;flex-wrap:wrap}
+  .topbar .nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
+  .topbar .nav a[aria-current="page"]{border-color:rgba(255,255,255,.20);background:rgba(255,255,255,.10)}
+  .nav-toggle{display:none}
+  .hamburger{display:none;margin-left:auto;width:38px;height:30px;cursor:pointer}
+  .hamburger span{display:block;height:3px;margin:6px 0;background:#fff;border-radius:2px}
+  @media (max-width:860px){
+    .hamburger{display:block}
+    .topbar .nav{
+      position:fixed; left:0; right:0; top:52px; display:none;
+      background:#0b3d1b; border-top:1px solid rgba(255,255,255,.12);
+      flex-direction:column; gap:0; padding:8px 10px;
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; color:var(--text);
-      font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
-      background:url('/homepage-background.png') center/cover fixed no-repeat;
-    }
-    .scrim{min-height:100vh;background:var(--scrim)}
+    .topbar .nav a{padding:12px;border-radius:8px}
+    .nav-toggle:checked ~ .nav{display:flex}
+  }
 
-    /* NAV (self-contained) */
-    header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
-    .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
-    .brand img{height:30px;width:auto;display:block}
-    nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
-    nav a:hover{background:rgba(255,255,255,.08)}
-    nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-
-    /* MAIN */
-    main{width:min(var(--maxw),94%);margin:0 auto;padding:var(--padTop) 0 40px;display:grid;gap:18px}
-    .hero{
-      display:grid;gap:14px;padding:16px;border:1px solid var(--line);
-      border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow);
-      text-align:center;
-    }
-
-    /* Centered, larger, solid-green logo via mask (no tint/purple) */
-    .logo{
-      width:min(340px,70vw);      /* size dial */
-      aspect-ratio: 1000 / 280;   /* adjust if your PNG’s proportions differ */
-      height:auto;
-      margin:6px auto 0;
-      background:#00ff99;         /* the green */
-      -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
-              mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
-    }
-
-    h1{margin:0;font-size:2.05rem;line-height:1.2}
-    .muted{color:var(--muted)}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-    .btn{border:1px solid var(--line);background:rgba(255,255,255,.12);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:600}
-    .btn:hover{background:rgba(255,255,255,.18)}
-    .btn.primary{background:rgba(0,255,153,.16);border-color:#0a7}
-
-    .row{display:grid;gap:12px}
-    @media(min-width:800px){.row{grid-template-columns:1.2fr .8fr}}
-    .card{padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px)}
-    .card h2{margin:0 0 6px;font-size:1.25rem}
-    footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
-
-    /* Pull up slightly more on very large screens (~30") */
-    @media(min-width:1500px){ :root{ --padTop: 10px; } }
-  </style>
+  /* Page */
+  main{width:min(980px,94%);margin:0 auto;padding:18px 0 40px;display:grid;gap:18px}
+  .hero{display:grid;gap:14px;padding:16px;border:1px solid var(--line);
+        border-radius:var(--radius);background:rgba(0,0,0,.30);
+        backdrop-filter:blur(2px);box-shadow:var(--shadow);text-align:center}
+  /* Dark-green masked logo */
+  .logo{
+    width:340px;height:96px;margin:6px auto 0;background:#0b3d1b;
+    -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
+            mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
+  }
+  h1{margin:0;font-size:2.05rem;line-height:1.2}
+  .muted{color:var(--muted)}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.12);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:600}
+  .btn:hover{background:rgba(255,255,255,.18)}
+  .btn.primary{background:rgba(0,255,153,.16);border-color:#0a7}
+  .row{display:grid;gap:12px}
+  @media(min-width:800px){.row{grid-template-columns:1.2fr .8fr}}
+  .card{padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:rgba(0,0,0,.30);backdrop-filter:blur(2px)}
+  .card h2{margin:0 0 6px;font-size:1.25rem}
+  footer{width:min(980px,94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
+</style>
 </head>
 <body>
-  <!-- NAV -->
-  <header>
-    <div class="navwrap">
-      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
-      <nav aria-label="Primary">
-        <a href="/index.html" aria-current="page">Home</a>
-        <a href="/report.html?report=/report.json">Reports</a>
-        <a href="/coming-soon.html">Coming&nbsp;Soon</a>
-        <a href="/pricing.html">Pricing</a>
-        <a href="/faq.html">FAQ</a>
-        <a href="/contact.html">Contact</a>
-        <a href="/login.html">Login</a>
-      </nav>
+  <nav class="topbar">
+    <a class="brand" href="/index.html">Virtual Coach AI</a>
+    <input id="navToggle" class="nav-toggle" type="checkbox" aria-label="Toggle navigation">
+    <label for="navToggle" class="hamburger" aria-hidden="true"><span></span><span></span><span></span></label>
+    <div class="nav">
+      <a href="/index.html" aria-current="page">Home</a>
+      <a href="/report.html?report=/report.json">Reports</a>
+      <a href="/coming-soon.html">Coming Soon</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/contact.html">Contact</a>
+      <a href="/login.html">Login</a>
     </div>
-  </header>
+  </nav>
 
   <div class="scrim">
     <main>
@@ -112,10 +103,8 @@
         </section>
       </div>
     </main>
-
     <footer>© <span id="y"></span> Virtual Coach AI. All rights reserved.</footer>
   </div>
-
   <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
 </body>
 </html>
