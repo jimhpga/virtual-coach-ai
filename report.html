@@ -7,8 +7,8 @@
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
   :root{
-    --scrim: rgba(0,0,0,.06);        /* brighter page */
-    --panel: rgba(10,18,24,.24);     /* more see-through */
+    --scrim: rgba(0,0,0,.06);
+    --panel: rgba(10,18,24,.24);
     --line:  rgba(255,255,255,.08);
     --text:  #ecf3f7; --muted:#cfe0e6;
     --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
@@ -45,7 +45,6 @@
   .caret{margin-left:auto;transition:transform .2s}
   details[open] .caret{transform:rotate(180deg)}
 
-  /* GOOD / OK / NEEDS HELP chips */
   .gchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;margin-left:8px}
   .g-good{background:#19c37d;color:#fff}
   .g-ok{background:#f6c453;color:#2a2300}
@@ -64,11 +63,34 @@
   @media(max-width:960px){.grid2{grid-template-columns:1fr}}
   .info{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:6px 10px;border-radius:10px;cursor:pointer}
   .info:hover{background:rgba(255,255,255,.16)}
+
+  /* Inline fallback nav (only shows if /nav.html fails or is slow) */
+  .topbar{position:sticky;top:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#0b2b12;border-bottom:1px solid rgba(255,255,255,.08)}
+  .topbar .brand a{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
+  .topbar .nav a{color:#fff;text-decoration:none;margin:0 8px;padding:8px 10px;border-radius:10px}
+  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
 </style>
 </head>
 <body>
-  <div id="navMount"></div>
-  <script src="/nav.js" defer></script>
+
+  <!-- NAV mount + fallback -->
+  <div id="navMount">
+    <!-- Fallback nav (gets replaced by /nav.html when nav.js runs) -->
+    <nav class="topbar">
+      <div class="brand"><a href="/index.html">Virtual Coach AI</a></div>
+      <div class="nav">
+        <a href="/index.html">Home</a>
+        <a href="/report.html?report=/report.json" aria-current="page">Reports</a>
+        <a href="/coming-soon.html">Coming Soon</a>
+        <a href="/pricing.html">Pricing</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/login.html">Login</a>
+      </div>
+    </nav>
+  </div>
+  <!-- Cache-busted so browsers grab the latest nav loader -->
+  <script src="/nav.js?v=12" defer></script>
 
   <div class="scrim">
     <main class="wrap">
@@ -198,7 +220,6 @@ function coachItem(item){
   const title = item.title || '';
   const short = item.short || '';
   const long  = item.long  || '';
-  // Prefer explicit link; else search YouTube for the drill title
   const ref   = item.ref || ytSearch(`${title} golf drill`);
   const isBlob = (ref||'').startsWith('blob:');
   const btnLabel = isBlob ? 'Video' : 'YouTube';
@@ -264,7 +285,6 @@ function shareUrl(){
   try{
     const u = new URL(location.href);
     if (src === 'session') {
-      // Session data isn’t portable; make the link point at a file
       u.searchParams.delete('src');
       u.searchParams.set('report', reportParam || '/report.json');
     } else {
@@ -315,7 +335,6 @@ if (src === 'session') {
 } else if (reportSrc) {
   loadReport(reportSrc);
 } else {
-  // Optional localStorage fallback
   try{
     const raw = localStorage.getItem('vc_last_report') || '';
     if (!raw) throw new Error('No saved report found. Go to Upload and try again.');
