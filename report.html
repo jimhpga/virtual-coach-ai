@@ -12,6 +12,7 @@
     --line:  rgba(255,255,255,.08);
     --text:  #ecf3f7; --muted:#cfe0e6;
     --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
+    --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b;
   }
   *{box-sizing:border-box} html,body{height:100%}
   body{
@@ -25,7 +26,6 @@
   .title{font-size:26px;font-weight:800}
   .sub{color:var(--muted);font-size:13px}
   .badge{background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
-
   .card,details.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px)}
   .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
   .card .content{padding:12px 16px}
@@ -44,11 +44,10 @@
   .pname{font-weight:700}
   .caret{margin-left:auto;transition:transform .2s}
   details[open] .caret{transform:rotate(180deg)}
-
   .gchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;margin-left:8px}
-  .g-good{background:#19c37d;color:#fff}
-  .g-ok{background:#f6c453;color:#2a2300}
-  .g-bad{background:#ff6b6b;color:#fff}
+  .g-good{background:var(--ok);color:#fff}
+  .g-ok{background:var(--warn);color:#2a2300}
+  .g-bad{background:var(--bad);color:#fff}
 
   .metric{display:flex;align-items:center;gap:10px;margin:9px 0}
   .metric .name{flex:0 0 210px;color:#d8ebf2}
@@ -64,33 +63,31 @@
   .info{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:6px 10px;border-radius:10px;cursor:pointer}
   .info:hover{background:rgba(255,255,255,.16)}
 
-  /* Inline fallback nav (only shows if /nav.html fails or is slow) */
-  .topbar{position:sticky;top:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#0b2b12;border-bottom:1px solid rgba(255,255,255,.08)}
-  .topbar .brand a{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
-  .topbar .nav a{color:#fff;text-decoration:none;margin:0 8px;padding:8px 10px;border-radius:10px}
-  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
+  /* Modal for in-site video */
+  dialog#ytModal{
+    border:none; padding:0; width:min(1024px,96vw);
+    background:transparent;
+  }
+  dialog#ytModal::backdrop{ background:rgba(0,0,0,.65) }
+  .mwrap{
+    background:rgba(0,0,0,.85);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:14px; overflow:hidden;
+  }
+  .mhead{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 12px; border-bottom:1px solid rgba(255,255,255,.12)
+  }
+  .mhead h4{margin:0; font-size:14px; color:#cfe0e6}
+  .mclose{background:transparent; border:1px solid rgba(255,255,255,.2); color:#fff; padding:6px 10px; border-radius:10px; cursor:pointer}
+  .mbody{width:min(1024px,96vw); height:min(576px, 56vw); background:#000}
+  .mbody iframe, .mbody video{width:100%; height:100%; display:block}
 </style>
 </head>
 <body>
-
-  <!-- NAV mount + fallback -->
-  <div id="navMount">
-    <!-- Fallback nav (gets replaced by /nav.html when nav.js runs) -->
-    <nav class="topbar">
-      <div class="brand"><a href="/index.html">Virtual Coach AI</a></div>
-      <div class="nav">
-        <a href="/index.html">Home</a>
-        <a href="/report.html?report=/report.json" aria-current="page">Reports</a>
-        <a href="/coming-soon.html">Coming Soon</a>
-        <a href="/pricing.html">Pricing</a>
-        <a href="/faq.html">FAQ</a>
-        <a href="/contact.html">Contact</a>
-        <a href="/login.html">Login</a>
-      </div>
-    </nav>
-  </div>
-  <!-- Cache-busted so browsers grab the latest nav loader -->
-  <script src="/nav.js?v=12" defer></script>
+  <!-- Shared nav -->
+  <div id="navMount"></div>
+  <script src="/nav.js?v=9" defer></script>
 
   <div class="scrim">
     <main class="wrap">
@@ -102,24 +99,25 @@
         <div><span class="badge">Swings: <span id="swingCount">1</span></span></div>
       </header>
 
+      <!-- Actions -->
       <div class="actions">
         <button id="btnDownload" class="btn primary">Download</button>
         <button id="btnSend" class="btn warn">Send to Coach</button>
         <button id="btnCopy" class="btn ghost">Copy Share Link</button>
       </div>
 
-      <!-- P1–P9 FIRST -->
+      <!-- P1–P9 -->
       <section class="card" id="phasesCard" style="margin-top:6px">
         <h3 class="hdr">
           <span>P1–P9</span>
           <details style="display:inline-block"><summary class="info">Info</summary>
-            <div class="content">Nine checkpoints from setup to finish. The short note shows in the header; expand for the long explanation. If no explicit video link is in your data, we’ll show a YouTube search.</div>
+            <div class="content">Nine checkpoints from setup to finish. Short shows in the header; expand for the long explanation. Video buttons open inside this site.</div>
           </details>
         </h3>
         <div id="plist" class="content"></div>
       </section>
 
-      <!-- Coaching Card -->
+      <!-- Coaching -->
       <section class="card" style="margin-top:12px">
         <h3>Coaching Card</h3>
         <div class="content">
@@ -170,23 +168,33 @@
     </main>
   </div>
 
+  <!-- In-site video modal -->
+  <dialog id="ytModal">
+    <div class="mwrap">
+      <div class="mhead">
+        <h4 id="mTitle">Video</h4>
+        <button class="mclose" id="mClose" type="button">Close</button>
+      </div>
+      <div class="mbody" id="mBody"></div>
+    </div>
+  </dialog>
+
 <script>
-/* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
 const qp = new URLSearchParams(location.search);
 const reportParam = qp.get('report');
+const srcParam    = qp.get('src') || '';
 const reportSrc   = (reportParam === 'local') ? null : (reportParam || '/report.json');
-const src         = qp.get('src') || '';
-
-const esc = s => encodeURIComponent(s || '');
-const ytSearch = q => `https://www.youtube.com/results?search_query=${esc(q)}`;
 
 const fmt  = v => `${v}%`;
 const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';
 const chip = g => (g==='good'?'g-good':g==='ok'?'g-ok':'g-bad');
 const metricRow = m => `<div class="metric"><div class="name">${m.label||m.p}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
 
-/* ---------- rows ---------- */
+// Build a button that we'll intercept to open modal
+const linkBtn = (ref,label) =>
+  `<a class="btn videolink" data-ref="${encodeURIComponent(ref)}" href="${ref}" target="_blank" rel="noopener">${label}</a>`;
+
 function phaseRow(ph,i){
   const id = ph.id || ('P'+(i+1));
   const name = ph.name || '';
@@ -194,10 +202,10 @@ function phaseRow(ph,i){
   const grade = (gRaw==='bad') ? 'needs help' : (gRaw || 'ok');
   const short = ph.short || '';
   const long  = ph.long  || '';
-  // Prefer explicit links; else fall back to a YouTube search
-  const ref   = ph.ref || ph.video || ph.video_url || ytSearch(`${id} ${name} golf checkpoint`);
-  const isBlob = (ref||'').startsWith('blob:');
-  const btnLabel = isBlob ? 'Video' : 'YouTube';
+  // Prefer explicit links; else fallback to a searchable query we can embed as a playlist
+  const fallbackSearch = `P${i+1} ${name} golf checkpoint`;
+  const ref = ph.ref || ph.video || ph.video_url || `ytsearch:${fallbackSearch}`;
+  const label = ref.startsWith('blob:') ? 'Video' : 'YouTube';
 
   return `
   <details class="panel" ${i===0?'open':''}>
@@ -211,7 +219,7 @@ function phaseRow(ph,i){
     <div class="content">
       <div class="sub" style="margin-bottom:8px">${short}</div>
       <div style="margin-bottom:10px">${long}</div>
-      <a class="btn" style="border-color:#8c1b1b;background:rgba(255,255,255,.10)" href="${ref}" target="_blank" rel="noopener">${btnLabel}</a>
+      ${linkBtn(ref,label)}
     </div>
   </details>`;
 }
@@ -220,22 +228,19 @@ function coachItem(item){
   const title = item.title || '';
   const short = item.short || '';
   const long  = item.long  || '';
-  const ref   = item.ref || ytSearch(`${title} golf drill`);
-  const isBlob = (ref||'').startsWith('blob:');
-  const btnLabel = isBlob ? 'Video' : 'YouTube';
-
+  const ref   = item.ref || `ytsearch:${title} golf drill`;
+  const label = ref.startsWith('blob:') ? 'Video' : 'YouTube';
   return `<details class="panel">
     <summary><span class="pname">${title}</span><span class="sub" style="margin-left:8px">${short}</span>
       <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </summary>
     <div class="content">
       <div style="margin-bottom:10px">${long}</div>
-      <a class="btn" style="border-color:#8c1b1b;background:rgba(255,255,255,.10)" href="${ref}" target="_blank" rel="noopener">${btnLabel}</a>
+      ${linkBtn(ref,label)}
     </div>
   </details>`;
 }
 
-/* ---------- render ---------- */
 let last = null;
 function renderReport(data){
   last = data || {};
@@ -265,7 +270,7 @@ function renderReport(data){
     <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing||0)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
 }
 
-/* ---------- load ---------- */
+/* ---------- loading ---------- */
 async function loadReport(url){
   try{
     const res = await fetch(url, { cache:'no-store' });
@@ -284,7 +289,7 @@ async function loadReport(url){
 function shareUrl(){
   try{
     const u = new URL(location.href);
-    if (src === 'session') {
+    if (srcParam === 'session') {
       u.searchParams.delete('src');
       u.searchParams.set('report', reportParam || '/report.json');
     } else {
@@ -321,29 +326,89 @@ document.getElementById('btnDownload').addEventListener('click', ()=>{
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 });
 
-/* ---------- BOOT: session (from /upload.html) or remote file ---------- */
-if (src === 'session') {
+/* ---------- in-site video: modal & embed logic ---------- */
+const modal = document.getElementById('ytModal');
+const mTitle = document.getElementById('mTitle');
+const mBody  = document.getElementById('mBody');
+document.getElementById('mClose').addEventListener('click', ()=> modal.close());
+modal.addEventListener('click', (e)=>{ if(e.target === modal) modal.close(); });
+
+function toEmbed(refRaw){
+  if (!refRaw) return null;
+  const ref = decodeURIComponent(refRaw);
+  if (ref.startsWith('blob:')) return { kind:'blob', src:ref };
+  if (ref.startsWith('ytsearch:')) {
+    const q = ref.slice('ytsearch:'.length);
+    return { kind:'embed', src:`https://www.youtube.com/embed?autoplay=1&rel=0&modestbranding=1&listType=search&list=${encodeURIComponent(q)}` };
+  }
+  try{
+    const u = new URL(ref);
+    const host = u.hostname.replace(/^www\./,'');
+    // watch / youtu.be -> embed
+    if (host === 'youtube.com' || host === 'youtube-nocookie.com'){
+      const v = u.searchParams.get('v');
+      if (v) return { kind:'embed', src:`https://www.youtube-nocookie.com/embed/${v}?autoplay=1&rel=0&modestbranding=1` };
+      // handle /embed/VID too
+      const m = u.pathname.match(/\/embed\/([A-Za-z0-9_-]{11})/);
+      if (m) return { kind:'embed', src:`https://www.youtube-nocookie.com/embed/${m[1]}?autoplay=1&rel=0&modestbranding=1` };
+      // search page
+      const sq = u.searchParams.get('search_query');
+      if (sq) return { kind:'embed', src:`https://www.youtube.com/embed?autoplay=1&rel=0&modestbranding=1&listType=search&list=${encodeURIComponent(sq)}` };
+    }
+    if (host === 'youtu.be'){
+      const m = u.pathname.match(/^\/([A-Za-z0-9_-]{11})/);
+      if (m) return { kind:'embed', src:`https://www.youtube-nocookie.com/embed/${m[1]}?autoplay=1&rel=0&modestbranding=1` };
+    }
+    // Unknown site: try iframe anyway (may block). Fallback handled by caller.
+    return { kind:'page', src: ref };
+  }catch{
+    // Treat as plain search query
+    return { kind:'embed', src:`https://www.youtube.com/embed?autoplay=1&rel=0&modestbranding=1&listType=search&list=${encodeURIComponent(ref)}` };
+  }
+}
+
+function openModal(ref, title){
+  const spec = toEmbed(ref);
+  if (!spec){ window.open(ref, '_blank', 'noopener'); return; }
+  mTitle.textContent = title || 'Video';
+  mBody.innerHTML = '';
+  if (spec.kind === 'blob'){
+    const v = document.createElement('video');
+    v.controls = true; v.playsInline = true; v.src = spec.src;
+    mBody.appendChild(v);
+  } else if (spec.kind === 'embed'){
+    const f = document.createElement('iframe');
+    f.src = spec.src; f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+    f.allowFullscreen = true; f.frameBorder = "0";
+    mBody.appendChild(f);
+  } else {
+    // Try iframe; if it errors, user still has the original link as fallback (target=_blank)
+    const f = document.createElement('iframe');
+    f.src = spec.src; f.referrerPolicy = "no-referrer";
+    mBody.appendChild(f);
+  }
+  modal.showModal();
+}
+
+// Intercept clicks on video buttons
+document.addEventListener('click', (e)=>{
+  const a = e.target.closest('a.videolink');
+  if (!a) return;
+  e.preventDefault();
+  const ref = a.getAttribute('data-ref');
+  const title = a.closest('details')?.querySelector('.pname')?.textContent?.trim() || 'Video';
+  openModal(ref, title);
+});
+
+/* ---------- boot (session or file) ---------- */
+if (srcParam === 'session') {
   try{
     const raw = sessionStorage.getItem('vc_report');
     if (!raw) throw new Error('No session report found. Go to Upload and create a report.');
-    const data = JSON.parse(raw);
-    renderReport(data);
-  }catch(err){
-    console.error(err);
-    alert(err.message || String(err));
-  }
+    renderReport(JSON.parse(raw));
+  }catch(err){ console.error(err); alert(err.message || String(err)); }
 } else if (reportSrc) {
   loadReport(reportSrc);
-} else {
-  try{
-    const raw = localStorage.getItem('vc_last_report') || '';
-    if (!raw) throw new Error('No saved report found. Go to Upload and try again.');
-    const data = JSON.parse(raw.trim().replace(/^\uFEFF/, ''));
-    renderReport(data);
-  }catch(err){
-    console.error(err);
-    alert(err.message || String(err));
-  }
 }
 </script>
 </body>
