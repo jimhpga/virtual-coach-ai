@@ -1,5 +1,5 @@
 // /api/sign-upload.js
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const REGION = process.env.AWS_REGION;
@@ -21,18 +21,26 @@ export default async function handler(req, res) {
     const ext = filename.includes('.') ? filename.split('.').pop() : 'mp4';
     const key = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-    const cmd = new PutObjectCommand({
+    // PUT presign (upload)
+    const putCmd = new PutObjectCommand({
       Bucket: BUCKET,
       Key: key,
       ContentType: contentType,
+      // If you want public objects, swap to 'public-read' and ensure bucket policy allows it:
+      // ACL: 'public-read',
       ACL: 'private',
     });
+    const uploadUrl = await getSignedUrl(s3, putCmd, { expiresIn: 900 }); // 15 min
 
-    const uploadUrl = await getSignedUrl(s3, cmd, { expiresIn: 900 });
+    // GET presign (view)
+    const getCmd = new GetObjectCommand({ Bucket: BUCKET, Key: key });
+    const viewUrl = await getSignedUrl(s3, getCmd, { expiresIn: 86400 }); // 24 hours
+
+    // Plain URL (will 403 if bucket/object is private)
     const publicUrl = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
 
     res.setHeader('Access-Control-Allow-Origin', '*');
-    return res.status(200).json({ uploadUrl, key, publicUrl });
+    return res.status(200).json({ uploadUrl, key, publicUrl, viewUrl });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: 'presign failed' });
