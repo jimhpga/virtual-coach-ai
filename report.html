@@ -129,7 +129,7 @@
 <script>
 const $ = s => document.querySelector(s);
 const qp = new URLSearchParams(location.search);
-const src = qp.get('src') || '';
+const src = (qp.get('src') || '').toLowerCase();
 const reportParam = qp.get('report');
 const reportSrc   = (reportParam === 'local') ? null : (reportParam || '/report.json');
 
@@ -230,15 +230,56 @@ async function loadReport(url){
   }
 }
 
+function tryLocalFallback() {
+  try {
+    const rawLocal = localStorage.getItem('vc_last_report') || '';
+    if (rawLocal) {
+      const data = JSON.parse(rawLocal.trim().replace(/^\uFEFF/,''));
+      renderReport(data);
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+(function boot(){
+  const reportParam = qp.get('report');
+  const fileSrc = (reportParam === 'local') ? null : (reportParam || '/report.json');
+
+  if (src === 'session') {
+    try{
+      const raw = sessionStorage.getItem('vc_report');
+      if (raw && raw.length > 2) {
+        const data = JSON.parse(raw);
+        renderReport(data);
+        return;
+      }
+      // Fallback to localStorage if session missing (iOS Safari quirk)
+      if (tryLocalFallback()) return;
+      // Otherwise, try file
+      if (fileSrc) return loadReport(fileSrc);
+      throw new Error('No session report found. Go to Upload and create a report.');
+    }catch(err){
+      console.error(err);
+      if (!tryLocalFallback()) alert(err.message || String(err));
+    }
+  } else if (src === 'local') {
+    if (tryLocalFallback()) return;
+    if (fileSrc) return loadReport(fileSrc);
+    alert('No saved report found. Go to Upload and try again.');
+  } else if (fileSrc) {
+    loadReport(fileSrc);
+  } else if (!tryLocalFallback()) {
+    alert('No report found.');
+  }
+})();
+
 function shareUrl(){
   try{
     const u = new URL(location.href);
-    if (src === 'session') {
-      u.searchParams.delete('src');
-      u.searchParams.set('report', reportParam || '/report.json');
-    } else {
-      u.searchParams.set('report', reportParam || '/report.json');
-    }
+    // produce a link that points to a file (or last-saved) instead of session/local
+    u.searchParams.delete('src');
+    u.searchParams.set('report', reportParam || '/report.json');
     return u.toString();
   }catch{ return location.href; }
 }
@@ -269,30 +310,6 @@ document.getElementById('btnDownload').addEventListener('click', ()=>{
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 });
-
-if (src === 'session') {
-  try{
-    const raw = sessionStorage.getItem('vc_report');
-    if (!raw) throw new Error('No session report found. Go to Upload and create a report.');
-    const data = JSON.parse(raw);
-    renderReport(data);
-  }catch(err){
-    console.error(err);
-    alert(err.message || String(err));
-  }
-} else if (reportSrc) {
-  loadReport(reportSrc);
-} else {
-  try{
-    const raw = localStorage.getItem('vc_last_report') || '';
-    if (!raw) throw new Error('No saved report found. Go to Upload and try again.');
-    const data = JSON.parse(raw.trim().replace(/^\uFEFF/, ''));
-    renderReport(data);
-  }catch(err){
-    console.error(err);
-    alert(err.message || String(err));
-  }
-}
 </script>
 </body>
 </html>
