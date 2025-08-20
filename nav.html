@@ -1,21 +1,7 @@
 <!-- /nav.html -->
-<nav class="topbar" role="navigation" aria-label="Primary">
-  <a class="brand" href="/index.html">
-    <img src="/virtualcoach-logo-transparent.png" alt="" />
-    <span>Virtual Coach AI</span>
-  </a>
-
-  <button id="navToggle" class="hamb" aria-label="Menu" aria-controls="navLinks" aria-expanded="false">
-    <!-- simple hamburger icon -->
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <line x1="4" y1="6" x2="20" y2="6"></line>
-      <line x1="4" y1="12" x2="20" y2="12"></line>
-      <line x1="4" y1="18" x2="20" y2="18"></line>
-    </svg>
-  </button>
-
-  <div id="navLinks" class="links">
+<nav class="topbar">
+  <div class="brand"><a href="/index.html">Virtual Coach AI</a></div>
+  <div class="nav" role="navigation" aria-label="Primary">
     <a href="/index.html" data-nav>Home</a>
     <a href="/report.html?report=/report.json" data-nav>Reports</a>
     <a href="/coming-soon.html" data-nav>Coming Soon</a>
@@ -26,36 +12,24 @@
     <a href="/login.html" data-nav>Login</a>
   </div>
 </nav>
-
 <style>
-  :root { --nav:#074420; --navLine:rgba(255,255,255,.10); }
-
   .topbar{
-    position:sticky; top:0; z-index:1000;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:10px 14px; background:var(--nav);
-    border-bottom:1px solid var(--navLine);
+    position:sticky;top:0;z-index:1000;
+    display:flex;justify-content:space-between;align-items:center;
+    gap:12px;padding:10px 14px;background:#0b2b12;
+    border-bottom:1px solid rgba(255,255,255,.08)
   }
-  .brand{display:flex; align-items:center; gap:10px; color:#fff; text-decoration:none; font-weight:800; letter-spacing:.2px}
-  .brand img{height:28px; width:auto; display:block; filter: hue-rotate(95deg) saturate(360%) brightness(80%);} /* darker green logo */
-  .links a{
-    color:#fff; text-decoration:none; margin:0 8px; padding:8px 10px; border-radius:10px; border:1px solid transparent;
-    display:inline-block;
+  .topbar .brand a{
+    color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px;white-space:nowrap
   }
-  .links a:hover{ background:rgba(255,255,255,.08) }
-  .links a[aria-current="page"]{ border-color:rgba(255,255,255,.18); background:rgba(255,255,255,.10) }
-
-  /* mobile */
-  .hamb{display:none; background:transparent; border:1px solid rgba(255,255,255,.18); color:#fff; padding:6px 8px; border-radius:10px}
-  @media (max-width: 860px){
-    .hamb{display:inline-flex; align-items:center; justify-content:center}
-    .links{
-      position:fixed; inset:60px 10px auto 10px;
-      display:none; flex-direction:column; gap:8px;
-      background:rgba(0,0,0,.85); border:1px solid var(--navLine); border-radius:12px; padding:10px;
-      backdrop-filter: blur(4px);
-    }
-    .links.open{ display:flex; }
-    .links a{ margin:0; }
+  .topbar .nav{
+    display:flex;gap:6px;align-items:center;overflow-x:auto;white-space:nowrap;
+    scrollbar-width:none;-ms-overflow-style:none;max-width:100%
   }
+  .topbar .nav::-webkit-scrollbar{display:none}
+  .topbar .nav a{
+    color:#fff;text-decoration:none;margin:0 2px;padding:8px 10px;border-radius:10px;flex:0 0 auto
+  }
+  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
+  .topbar .nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:4px}
 </style>
