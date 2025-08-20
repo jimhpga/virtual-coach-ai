@@ -1,50 +1,46 @@
-<!-- /nav.js -->
 <script>
 (function(){
-  async function mountNav(){
-    try{
-      const mount = document.getElementById('navMount');
-      if(!mount) return;
-      // cache-bust to ensure latest nav loads
-      const res = await fetch('/nav.html?v=12', { cache: 'no-store' });
-      if(!res.ok) throw new Error('nav.html HTTP '+res.status);
-      const html = await res.text();
-      mount.innerHTML = html;
+  const mount = document.getElementById('navMount');
+  if(!mount) return;
 
-      // Mark current link (compare PATH only, ignore query)
-      const herePath = location.pathname.replace(/\/+$/,'');
-      const links = mount.querySelectorAll('a[data-nav]');
-      links.forEach(a=>{
-        const u = new URL(a.getAttribute('href'), location.origin);
-        if (u.pathname.replace(/\/+$/,'') === herePath){
-          a.setAttribute('aria-current','page');
-        }
-      });
+  function markCurrent(){
+    const here = location.pathname.replace(/\/+$/,'') || '/index.html';
+    mount.querySelectorAll('a[data-nav]').forEach(a=>{
+      const u = new URL(a.getAttribute('href'), location.origin);
+      if(u.pathname.replace(/\/+$/,'') === here){ a.setAttribute('aria-current','page'); }
+    });
+  }
 
-      // Mobile toggle
-      const btn   = mount.querySelector('#navToggle');
-      const panel = mount.querySelector('#navLinks');
-      if(btn && panel){
-        const close = () => { panel.classList.remove('open'); btn.setAttribute('aria-expanded','false'); };
-        btn.addEventListener('click', ()=>{
-          const isOpen = panel.classList.toggle('open');
-          btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-        });
-        // Close after clicking a link (mobile)
-        panel.querySelectorAll('a').forEach(a=>{
-          a.addEventListener('click', close);
-        });
-        // Close on Escape
-        window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
-      }
-    }catch(e){
-      console.error('Nav load failed:', e);
-    }
+  function fallback(){
+    mount.innerHTML = `
+<nav class="topbar">
+  <div class="brand"><a href="/index.html">Virtual Coach AI</a></div>
+  <div class="nav" role="navigation" aria-label="Primary">
+    <a href="/index.html" data-nav>Home</a>
+    <a href="/report.html?report=/report.json" data-nav>Reports</a>
+    <a href="/coming-soon.html" data-nav>Coming Soon</a>
+    <a href="/pricing.html" data-nav>Pricing</a>
+    <a href="/faq.html" data-nav>FAQ</a>
+    <a href="/contact.html" data-nav>Contact</a>
+    <a href="/upload.html" data-nav>Upload</a>
+    <a href="/login.html" data-nav>Login</a>
+  </div>
+</nav>
+<style>
+  .topbar{position:sticky;top:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;background:#0b2b12;border-bottom:1px solid rgba(255,255,255,.08)}
+  .topbar .brand a{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px;white-space:nowrap}
+  .topbar .nav{display:flex;gap:6px;align-items:center;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-ms-overflow-style:none;max-width:100%}
+  .topbar .nav::-webkit-scrollbar{display:none}
+  .topbar .nav a{color:#fff;text-decoration:none;margin:0 2px;padding:8px 10px;border-radius:10px;flex:0 0 auto}
+  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
+  .topbar .nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:4px}
+</style>`;
+    markCurrent();
   }
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', mountNav);
-  }else{
-    mountNav();
-  }
+
+  fetch('/nav.html?v='+Date.now(), {cache:'no-store'})
+    .then(r=>r.ok?r.text():Promise.reject(r))
+    .then(h=>{ mount.innerHTML=h; markCurrent(); })
+    .catch(fallback);
 })();
 </script>
