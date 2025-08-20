@@ -7,16 +7,28 @@
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
   :root{
-    --nav:#0b2b12; --scrim: rgba(0,0,0,.05);
+    --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.05);
     --panel: rgba(0,0,0,.30); --line: rgba(255,255,255,.12);
     --text:#f2f7f9; --muted:#cfe0e6; --maxw:980px; --radius:14px;
   }
   *{box-sizing:border-box} html,body{height:100%}
   body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:url('/homepage-background.png') center/cover fixed no-repeat;}
   .scrim{min-height:100vh;background:var(--scrim);}
+  /* NAV */
+  header{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+  .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:14px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .brand-logo{width:160px;height:36px;background:var(--brand);
+    -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
+            mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;}
+  nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  nav a:hover{background:rgba(255,255,255,.08)}
+  nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+
   .wrap{width:min(var(--maxw),94%);margin:0 auto;padding:16px 0 40px}
   .card{padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px)}
-  .row{display:grid;gap:12px}
   .hint{color:var(--muted)}
   .btn{border:1px solid var(--line);background:rgba(255,255,255,.12);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:600;cursor:pointer}
   .btn.primary{background:rgba(0,255,153,.16);border-color:#0a7}
@@ -26,14 +38,27 @@
 </style>
 </head>
 <body>
-  <div id="navMount"></div>
-  <script src="/nav.js" defer></script>
+  <header>
+    <div class="navwrap">
+      <a class="brand" href="/"><div class="brand-logo"></div><span>Virtual Coach AI</span></a>
+      <nav aria-label="Primary">
+        <a href="/index.html">Home</a>
+        <a href="/upload.html" aria-current="page">Upload</a>
+        <a href="/report.html?report=/report.json">Reports</a>
+        <a href="/coming-soon.html">Coming&nbsp;Soon</a>
+        <a href="/pricing.html">Pricing</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/login.html">Login</a>
+      </nav>
+    </div>
+  </header>
 
   <div class="scrim">
     <main class="wrap">
       <h1 style="margin:6px 0 12px">Upload Your Swing</h1>
       <div class="card">
-        <p class="hint">iPhone: use <strong>Record Video</strong> (camera) or <strong>Choose from Library</strong> (Photos). Desktop works, too.</p>
+        <p class="hint">iPhone: tap <strong>Record Video</strong> (camera) or <strong>Choose from Library</strong> (Photos). Desktop works, too.</p>
 
         <!-- hidden inputs -->
         <input id="file-record" type="file" accept="video/*" capture="environment" style="display:none" />
@@ -62,7 +87,7 @@
 <script>
   document.getElementById('y').textContent = new Date().getFullYear();
 
-  // Simple gate
+  // Auth gate:
   try{ if (localStorage.getItem('vc_auth') !== 'ok') location.href = '/login.html?next=upload'; }catch{}
 
   const fileRecord = document.getElementById('file-record');
@@ -133,17 +158,17 @@
   makeBtn.addEventListener('click', async ()=>{
     if(!chosenFile){ errEl.textContent='Choose a video first.'; return; }
     try{
-      // 1) Presign
+      // 1) Presign to S3
       const q = new URLSearchParams({ filename: chosenFile.name || 'swing.mp4', contentType: chosenFile.type || 'video/mp4' });
       const presignRes = await fetch(`/api/sign-upload?${q.toString()}`, { method:'GET' });
-      if(!presignRes.ok) throw new Error('Presign failed');
+      if(!presignRes.ok) throw new Error('Could not get upload URL.');
       const { uploadUrl, publicUrl, viewUrl } = await presignRes.json();
 
-      // 2) Upload
+      // 2) Upload the video
       const put = await fetch(uploadUrl, { method:'PUT', headers:{ 'Content-Type': chosenFile.type || 'video/mp4' }, body: chosenFile });
-      if(!put.ok) throw new Error('S3 upload failed');
+      if(!put.ok) throw new Error('Upload failed. Check CORS and bucket policy.');
 
-      // 3) Build report (use signed viewUrl so private buckets still play)
+      // 3) Build the report
       const now = new Date();
       const durScore = Math.max(40, Math.min(95, Math.round((duration||3)*8)));
       const relScore = Math.max(35, Math.min(90, Math.round(60 + ((duration||0)-3)*5)));
@@ -152,32 +177,30 @@
       const phases = [
         ['P1','Setup'],['P2','Takeaway'],['P3','Lead Arm Parallel'],['P4','Top'],
         ['P5','Delivery'],['P6','Shaft Parallel'],['P7','Impact'],['P8','Post-Impact'],['P9','Finish']
-      ].map(([id,name])=>({ id, name, grade:'ok', short:'Review with coach', long:'Tap Video to view your swing for this checkpoint.', ref: videoHref }));
+      ].map(([id,name])=>({ id, name, grade:'ok', short:'Review with coach', long:'Tap Video to view this checkpoint.', ref: videoHref }));
 
       const report = {
         discipline:'Full Swing', date: now.toISOString(), swings:1,
         phases,
         coaching:{
           priority_fixes:[
-            { title:'One Key Feel', short:'Pick one cue only', long:'Use one external cue for the next 15 balls (e.g., finish tall).', ref:''},
+            { title:'One Key Feel', short:'Pick one cue only', long:'Use one external cue for 15 balls (e.g., finish tall).', ref:''},
             { title:'Tempo Baseline', short:'~3:1', long:'Count “one-two-three-hit” to smooth transition.', ref:''},
             { title:'Impact Check', short:'Ball then turf', long:'Half swings with a mid-iron; video two reps to confirm.', ref:''}
           ],
-          power_fixes:[
-            { title:'Finish Tall', short:'No stall', long:'Let your chest face the target and stand tall.', ref:''}
-          ]
+          power_fixes:[{ title:'Finish Tall', short:'No stall', long:'Let chest face target; stand tall.', ref:''}]
         },
         position_metrics:[{label:'Setup Match',value:72},{label:'Top Position',value:66},{label:'Impact Alignments',value:70}],
         swing_metrics:[{label:'Tempo Repeatability',value:76},{label:'Face-to-Path Stability',value:64}],
         power:{ score:durScore, tempo:'~3:1', release_timing:relScore }
       };
 
-      // Save both places; redirect with src=local (more reliable on iPhone)
       try{
         sessionStorage.setItem('vc_report', JSON.stringify(report));
         localStorage.setItem('vc_last_report', JSON.stringify(report));
       }catch(e){ console.warn('Storage issue:', e); }
 
+      // iPhone-safe redirect
       location.href = '/report.html?src=local';
     }catch(e){
       console.error(e);
