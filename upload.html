@@ -62,10 +62,9 @@
 <script>
   document.getElementById('y').textContent = new Date().getFullYear();
 
-  // Gate (simple)
+  // Simple gate
   try{ if (localStorage.getItem('vc_auth') !== 'ok') location.href = '/login.html?next=upload'; }catch{}
 
-  // Elements
   const fileRecord = document.getElementById('file-record');
   const fileChoose = document.getElementById('file-choose');
   const btnRecord  = document.getElementById('btnRecord');
@@ -138,24 +137,22 @@
       const q = new URLSearchParams({ filename: chosenFile.name || 'swing.mp4', contentType: chosenFile.type || 'video/mp4' });
       const presignRes = await fetch(`/api/sign-upload?${q.toString()}`, { method:'GET' });
       if(!presignRes.ok) throw new Error('Presign failed');
-      const { uploadUrl, publicUrl } = await presignRes.json();
+      const { uploadUrl, publicUrl, viewUrl } = await presignRes.json();
 
-      // 2) Upload to S3
-      const put = await fetch(uploadUrl, {
-        method:'PUT',
-        headers:{ 'Content-Type': chosenFile.type || 'video/mp4' },
-        body: chosenFile
-      });
+      // 2) Upload
+      const put = await fetch(uploadUrl, { method:'PUT', headers:{ 'Content-Type': chosenFile.type || 'video/mp4' }, body: chosenFile });
       if(!put.ok) throw new Error('S3 upload failed');
 
-      // 3) Build a basic report with S3 URL (real URL)
+      // 3) Build report (use signed viewUrl so private buckets still play)
       const now = new Date();
       const durScore = Math.max(40, Math.min(95, Math.round((duration||3)*8)));
       const relScore = Math.max(35, Math.min(90, Math.round(60 + ((duration||0)-3)*5)));
+      const videoHref = viewUrl || publicUrl;
+
       const phases = [
         ['P1','Setup'],['P2','Takeaway'],['P3','Lead Arm Parallel'],['P4','Top'],
         ['P5','Delivery'],['P6','Shaft Parallel'],['P7','Impact'],['P8','Post-Impact'],['P9','Finish']
-      ].map(([id,name])=>({ id, name, grade:'ok', short:'Review with coach', long:'Tap Video to view your swing for this checkpoint.', ref: publicUrl }));
+      ].map(([id,name])=>({ id, name, grade:'ok', short:'Review with coach', long:'Tap Video to view your swing for this checkpoint.', ref: videoHref }));
 
       const report = {
         discipline:'Full Swing', date: now.toISOString(), swings:1,
@@ -175,9 +172,13 @@
         power:{ score:durScore, tempo:'~3:1', release_timing:relScore }
       };
 
-      sessionStorage.setItem('vc_report', JSON.stringify(report));
-      localStorage.setItem('vc_last_report', JSON.stringify(report));
-      location.href = '/report.html?src=session';
+      // Save both places; redirect with src=local (more reliable on iPhone)
+      try{
+        sessionStorage.setItem('vc_report', JSON.stringify(report));
+        localStorage.setItem('vc_last_report', JSON.stringify(report));
+      }catch(e){ console.warn('Storage issue:', e); }
+
+      location.href = '/report.html?src=local';
     }catch(e){
       console.error(e);
       errEl.textContent = e.message || String(e);
