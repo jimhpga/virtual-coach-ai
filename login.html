@@ -21,12 +21,18 @@
   nav a:hover{background:rgba(255,255,255,.08)}
   main{width:min(520px,94%);margin:28px auto 40px}
   .card{padding:20px 18px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow);text-align:center}
-  .logo{width:min(320px,70vw);height:96px;margin:0 auto 10px;background:#0b2b12;-webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat}
+  /* dark-green logo to match nav */
+  .logo{width:min(320px,70vw);height:96px;margin:0 auto 10px;background:#0b2b12;
+        -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
+                mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat}
   h1{margin:6px 0 8px;font-size:22px} .lead{margin:0 0 12px;color:var(--muted)}
   .field{display:flex;gap:8px;align-items:center;margin-top:6px}
-  input{flex:1;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;font-size:16px}
-  button{padding:12px 16px;border:none;border-radius:10px;background:rgba(0,255,153,.16);color:#fff;font-weight:700;cursor:pointer;min-width:110px;border:1px solid #0a7}
-  button:hover{background:rgba(0,255,153,.22)} .err{color:#ffb4b4;min-height:18px;margin-top:10px;font-size:14px}
+  input{flex:1;padding:12px 14px;border-radius:10px;border:1px solid var(--line);
+        background:rgba(255,255,255,.10);color:#fff;font-size:16px}
+  button{padding:12px 16px;border:none;border-radius:10px;background:rgba(0,255,153,.16);
+         color:#fff;font-weight:700;cursor:pointer;min-width:110px;border:1px solid #0a7}
+  button:hover{background:rgba(0,255,153,.22)}
+  .err{color:#ffb4b4;min-height:18px;margin-top:10px;font-size:14px}
   .muted{margin-top:10px;font-size:12px;color:var(--muted)}
   footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
 </style>
@@ -55,7 +61,8 @@
         <p class="lead">Tester access only.</p>
         <form onsubmit="return false">
           <div class="field">
-            <input id="code" type="text" placeholder="Passcode (e.g., Jim1)" autocapitalize="none" autocomplete="one-time-code" />
+            <input id="code" type="text" placeholder="Passcode (Jim1, Ben1, Test1…)"
+                   autocapitalize="none" autocomplete="one-time-code" autocorrect="off" spellcheck="false" />
             <button id="go" type="button">Continue</button>
           </div>
           <div id="err" class="err"></div>
@@ -68,26 +75,38 @@
 
 <script>
 (function(){
-  const PASSCODES = new Set(["Jim1","Ben1","Tim1","Gregory1","Corey1","Brian1","Cindy1","Test1","Test2","Test3"]);
-  const err = document.getElementById('err');
-  function successRedirect(){
+  // Accept these testers (case/spacing/punctuation insensitive).
+  const ACCEPT = new Set(["jim1","ben1","tim1","gregory1","corey1","brian1","cindy1","test1","test2","test3"]);
+
+  const errEl = document.getElementById('err');
+  const codeEl = document.getElementById('code');
+
+  function norm(s){
+    // lower, drop non-alphanum; if no digit given, assume "1" (so "jim" -> "jim1")
+    let n = (s||"").toLowerCase().replace(/[^a-z0-9]/g,'');
+    if (!/\d/.test(n)) n += "1";
+    return n;
+  }
+
+  function successRedirect(who){
     const next = new URLSearchParams(location.search).get('next') || "";
     const dest = (next === "upload") ? "/upload.html" : "/index.html";
     try { localStorage.setItem('vc_auth','ok'); localStorage.setItem('vc_who', who); } catch(e){}
     try { sessionStorage.setItem('vc_auth','ok'); sessionStorage.setItem('vc_who', who); } catch(e){}
     location.href = dest;
   }
-  let who = "";
+
   function submit(){
-    const c = (document.getElementById('code').value||"").trim();
-    if (!c){ err.textContent="Enter your passcode."; return; }
-    if (!PASSCODES.has(c)){ err.textContent="Invalid passcode."; return; }
-    who = c;
-    err.textContent = "";
-    successRedirect();
+    const raw = codeEl.value;
+    const key = norm(raw);
+    if (!raw){ errEl.textContent = "Enter your passcode."; return; }
+    if (!ACCEPT.has(key)){ errEl.textContent = "Invalid passcode."; return; }
+    errEl.textContent = "";
+    successRedirect(key);
   }
+
   document.getElementById('go').addEventListener('click', submit);
-  document.getElementById('code').addEventListener('keydown', e => { if(e.key==='Enter') submit(); });
+  codeEl.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
   document.getElementById('y').textContent = new Date().getFullYear();
 })();
 </script>
