@@ -6,31 +6,45 @@
 <title>Virtual Coach AI — Swing Report</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
-  :root{ --scrim:rgba(0,0,0,.06); --panel:rgba(10,18,24,.24); --line:rgba(255,255,255,.08);
-         --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);}
+  :root{ --scrim: rgba(0,0,0,.06); --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08); --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);}
   *{box-sizing:border-box} html,body{height:100%}
   body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
-  .scrim{min-height:100vh;background:var(--scrim)} .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
-  .title{font-size:26px;font-weight:800} .sub{color:var(--muted);font-size:13px}
+  .scrim{min-height:100vh;background:var(--scrim)}
+  .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
+  .title{font-size:26px;font-weight:800}
+  .sub{color:var(--muted);font-size:13px}
   .badge{background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
   .card,details.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px)}
-  .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)} .card .content{padding:12px 16px}
+  .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .card .content{padding:12px 16px}
   .hdr{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
   .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
-  .btn:hover{background:rgba(255,255,255,.16)} .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6;}
-  .btn.warn{background:rgba(246,196,83,.18);border-color:#b8860b;} .btn.ghost{background:rgba(255,255,255,.06);}
+  .btn:hover{background:rgba(255,255,255,.16)}
+  .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6;}
+  .btn.warn{background:rgba(246,196,83,.18);border-color:#b8860b;}
+  .btn.ghost{background:rgba(255,255,255,.06);}
   summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer}
-  summary::-webkit-details-marker{display:none} .pnum{width:34px;height:34px;border-radius:10px;background:#0c1820;border:1px solid var(--line);display:grid;place-items:center;font-weight:800}
-  .pname{font-weight:700} .caret{margin-left:auto;transition:transform .2s} details[open] .caret{transform:rotate(180deg)}
+  summary::-webkit-details-marker{display:none}
+  .pnum{width:34px;height:34px;border-radius:10px;background:#0c1820;border:1px solid var(--line);display:grid;place-items:center;font-weight:800}
+  .pname{font-weight:700}
+  .caret{margin-left:auto;transition:transform .2s}
+  details[open] .caret{transform:rotate(180deg)}
   .gchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;margin-left:8px}
-  .g-good{background:#19c37d;color:#fff} .g-ok{background:#f6c453;color:#2a2300} .g-bad{background:#ff6b6b;color:#fff}
-  .metric{display:flex;align-items:center;gap:10px;margin:9px 0} .metric .name{flex:0 0 210px;color:#d8ebf2}
+  .g-good{background:#19c37d;color:#fff}
+  .g-ok{background:#f6c453;color:#2a2300}
+  .g-bad{background:#ff6b6b;color:#fff}
+  .metric{display:flex;align-items:center;gap:10px;margin:9px 0}
+  .metric .name{flex:0 0 210px;color:#d8ebf2}
   .bar{flex:1;height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}
   .bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
-  .ok{background:linear-gradient(90deg,#19c37d,#2bd897)} .warn{background:linear-gradient(90deg,#f6c453,#ffd479)} .bad{background:linear-gradient(90deg,#ff6b6b,#ff8f8f)}
-  .pct{width:52px;text-align:right;color:#cfe3ee} .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  @media(max-width:960px){.grid2{grid-template-columns:1fr}} .info{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:6px 10px;border-radius:10px;cursor:pointer}
+  .ok{background:linear-gradient(90deg,#19c37d,#2bd897)}
+  .warn{background:linear-gradient(90deg,#f6c453,#ffd479)}
+  .bad{background:linear-gradient(90deg,#ff6b6b,#ff8f8f)}
+  .pct{width:52px;text-align:right;color:#cfe3ee}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:960px){.grid2{grid-template-columns:1fr}}
+  .info{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:6px 10px;border-radius:10px;cursor:pointer}
   .info:hover{background:rgba(255,255,255,.16)}
 </style>
 </head>
@@ -58,7 +72,7 @@
         <h3 class="hdr">
           <span>P1–P9</span>
           <details style="display:inline-block"><summary class="info">Info</summary>
-            <div class="content">Nine checkpoints from setup to finish. If your data has a video link, the button opens it.</div>
+            <div class="content">Nine checkpoints from setup to finish. If a phase has a link, “Video” opens it; otherwise we show a YouTube search.</div>
           </details>
         </h3>
         <div id="plist" class="content"></div>
@@ -86,7 +100,7 @@
         <div class="card">
           <h3 class="hdr"><span>Position Consistency</span>
             <details style="display:inline-block"><summary class="info">Info</summary>
-              <div class="content">How reliably you match each P-position (P1–P9).</div>
+              <div class="content">How reliably you match each P-position (P1–P9) to its target window.</div>
             </details>
           </h3>
           <div id="position" class="content"></div>
@@ -117,12 +131,12 @@ const $ = s => document.querySelector(s);
 const qp = new URLSearchParams(location.search);
 const src = qp.get('src') || '';
 const reportParam = qp.get('report');
-const reportSrc = (reportParam === 'local') ? null : (reportParam || '/report.json');
+const reportSrc   = (reportParam === 'local') ? null : (reportParam || '/report.json');
 
 const esc = s => encodeURIComponent(s||'');
 const ytSearch = q => `https://www.youtube.com/results?search_query=${esc(q)}`;
 
-const fmt = v => `${v}%`;
+const fmt  = v => `${v}%`;
 const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';
 const chip = g => (g==='good'?'g-good':g==='ok'?'g-ok':'g-bad');
 const metricRow = m => `<div class="metric"><div class="name">${m.label||m.p}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
@@ -136,7 +150,8 @@ function phaseRow(ph,i){
   const long  = ph.long  || '';
   const ref   = ph.ref || ph.video || ph.video_url || ytSearch(`${id} ${name} golf checkpoint`);
   const isBlob = (ref||'').startsWith('blob:');
-  const btnLabel = isBlob ? 'Video' : 'YouTube';
+  const btnLabel = isBlob ? 'Video' : (ref.includes('youtube')?'YouTube':'Video');
+
   return `
   <details class="panel" ${i===0?'open':''}>
     <summary>
@@ -155,10 +170,12 @@ function phaseRow(ph,i){
 }
 
 function coachItem(item){
-  const title = item.title || '', short = item.short || '', long = item.long || '';
-  const ref = item.ref || ytSearch(`${title} golf drill`);
+  const title = item.title || '';
+  const short = item.short || '';
+  const long  = item.long  || '';
+  const ref   = item.ref || ytSearch(`${title} golf drill`);
   const isBlob = (ref||'').startsWith('blob:');
-  const btnLabel = isBlob ? 'Video' : 'YouTube';
+  const btnLabel = isBlob ? 'Video' : (ref.includes('youtube')?'YouTube':'Video');
   return `<details class="panel">
     <summary><span class="pname">${title}</span><span class="sub" style="margin-left:8px">${short}</span>
       <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -175,7 +192,9 @@ function renderReport(data){
   last = data || {};
   $('#date').textContent = new Date().toLocaleDateString();
   if(data.discipline){
-    $('#modeLabel').textContent = /putt/i.test(data.discipline)?'Putting':/chip/i.test(data.discipline)?'Chipping':'Full Swing';
+    $('#modeLabel').textContent =
+      /putt/i.test(data.discipline) ? 'Putting' :
+      /chip/i.test(data.discipline) ? 'Chipping' : 'Full Swing';
   }
   if(data.swings!=null){ $('#swingCount').textContent = String(data.swings); }
 
@@ -251,7 +270,6 @@ document.getElementById('btnDownload').addEventListener('click', ()=>{
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 });
 
-/* ---------- BOOT ---------- */
 if (src === 'session') {
   try{
     const raw = sessionStorage.getItem('vc_report');
