@@ -2,107 +2,55 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <meta name="robots" content="noindex, nofollow" />
 <title>Login — Virtual Coach AI</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
-  :root{
-    --nav:#0b2b12;                 /* dark green nav */
-    --scrim: rgba(0,0,0,.05);
-    --panel: rgba(0,0,0,.30);
-    --line: rgba(255,255,255,.12);
-    --text: #f2f7f9; --muted:#cfe0e6;
-    --maxw: 1100px; --radius: 14px;
-    --shadow: 0 10px 24px rgba(0,0,0,.22);
-  }
+  :root{ --nav:#0b2b12; --scrim:rgba(0,0,0,.05); --panel:rgba(0,0,0,.30); --line:rgba(255,255,255,.12);
+         --text:#f2f7f9; --muted:#cfe0e6; --maxw:1100px; --radius:14px; --shadow:0 10px 24px rgba(0,0,0,.22); }
   *{box-sizing:border-box} html,body{height:100%}
-  body{
-    margin:0; color:var(--text);
-    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
-    background:url('/homepage-background.png') center/cover fixed no-repeat;
-    -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
-    min-height:100dvh;
-  }
+  body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+       background:url('/homepage-background.png') center/cover fixed no-repeat;min-height:100dvh;}
   .scrim{min-height:100dvh;background:var(--scrim)}
-
-  /* NAV (inline) */
-  header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
-  .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
-  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
-  .brand img{height:30px;width:auto;display:block}
-  nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
-  nav a:hover{background:rgba(255,255,255,.08)}
-  nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-
-  /* MAIN */
-  main{width:min(680px,94%);margin:0 auto;padding:24px 0 40px}
+  /* NAV (fallback loader below ensures it shows) */
+  #navMount{position:sticky;top:0;z-index:20}
+  main{width:min(var(--maxw),94%);margin:0 auto;padding:24px 0 40px}
   .center{display:grid;place-items:center;min-height:60vh}
-  .card{
-    width:100%;padding:20px 18px 16px;
-    border:1px solid var(--line);border-radius:var(--radius);
-    background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow);
-    text-align:center;
-  }
-
-  /* Dark-green solid logo via mask */
-  .logo{
-    width:min(320px,70vw);height:90px;margin:0 auto 10px;background:#0b2b12;
-    -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
-            mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
-  }
-
-  h1{margin:6px 0 8px;font-size:22px}
-  p.lead{margin:0 0 12px;color:var(--muted)}
-  .field{display:grid;gap:8px;margin-top:10px}
-  input{
-    padding:12px 14px;border-radius:10px;border:1px solid var(--line);
-    background:rgba(255,255,255,.10);color:#fff;font-size:16px
-  }
-  button{
-    padding:12px 16px;border:none;border-radius:10px;min-width:120px;
-    background:rgba(0,255,153,.16);color:#fff;font-weight:700;cursor:pointer;border:1px solid #0a7
-  }
+  .card{width:min(520px,94vw);padding:20px 18px 16px;border:1px solid var(--line);border-radius:var(--radius);
+        background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow);text-align:center}
+  h1{margin:6px 0 8px;font-size:22px} p.lead{margin:0 0 12px;color:var(--muted)}
+  .field{display:flex;gap:8px;align-items:center;margin-top:6px}
+  input{flex:1;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;font-size:16px}
+  button{padding:12px 16px;border:none;border-radius:10px;background:rgba(0,255,153,.16);color:#fff;font-weight:700;cursor:pointer;min-width:110px;border:1px solid #0a7}
   button:hover{background:rgba(0,255,153,.22)}
+  .row{display:grid;gap:8px;margin-top:8px}
   .err{color:#ffb4b4;min-height:18px;margin-top:10px;font-size:14px}
   .muted{margin-top:10px;font-size:12px;color:var(--muted);word-break:break-word}
   footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
 </style>
 </head>
 <body>
-  <!-- NAV -->
-  <header>
-    <div class="navwrap">
-      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
-      <nav aria-label="Primary">
-        <a href="/index.html">Home</a>
-        <a href="/report.html?report=/report.json">Reports</a>
-        <a href="/coming-soon.html">Coming&nbsp;Soon</a>
-        <a href="/pricing.html">Pricing</a>
-        <a href="/faq.html">FAQ</a>
-        <a href="/contact.html">Contact</a>
-        <a href="/login.html" aria-current="page">Login</a>
-      </nav>
-    </div>
-  </header>
+  <div id="navMount"></div>
 
   <div class="scrim">
     <main>
       <div class="center">
         <div class="card">
-          <div class="logo" role="img" aria-label="Virtual Coach AI"></div>
-          <h1>Enter Passcode</h1>
-          <p class="lead">Try: Jim 1, Ben 1, … or Test 1–5 (no spaces also works).</p>
+          <h1>Access</h1>
+          <p class="lead">Enter a code, or a username + code.</p>
 
-          <form id="form" onsubmit="return false" class="field">
-            <input id="pass" type="text" inputmode="text" autocomplete="one-time-code" placeholder="Passcode (e.g., Jim 1 or Jim1)" />
-            <button id="go" type="button">Continue</button>
-          </form>
+          <div class="row">
+            <input id="user" placeholder="Username (optional, e.g., Jim)" />
+            <div class="field">
+              <input id="code" placeholder="Access code (e.g., Jim1)" />
+              <button id="go" type="button">Continue</button>
+            </div>
+          </div>
+
           <div id="err" class="err"></div>
 
-          <div class="muted">
-            Need help? Email <a href="mailto:jimh@pga.com" style="color:#86efac;text-decoration:none">jimh@pga.com</a>
-          </div>
+          <div class="muted">Codes allowed: Jim1, Ben1, Tim1, Gregory1, Corey1, Brian1, Cindy1, test1, test2, test3</div>
         </div>
       </div>
     </main>
@@ -111,47 +59,65 @@
   </div>
 
 <script>
-(function(){
-  // Accept “with or without spaces/punctuation” by normalizing to only a–z and 0–9.
-  const ALLOWED_NORMALIZED = new Set([
-    'jim1','ben1','tim1','gregory1','corey1','brian1','cindy1',
-    'test1','test2','test3','test4','test5'
-  ]);
+  // Year
+  document.getElementById('y').textContent = new Date().getFullYear();
 
-  function norm(s){
-    return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,''); // drop spaces, dashes, etc.
-  }
+  // Nav loader with fallback
+  (function(){
+    const mount = document.getElementById('navMount');
+    function markCurrent(){
+      const here = location.pathname.replace(/\/+$/,'');
+      mount.querySelectorAll('a[data-nav]').forEach(a=>{
+        const u = new URL(a.getAttribute('href'), location.origin);
+        if(u.pathname.replace(/\/+$/,'') === here){ a.setAttribute('aria-current','page'); }
+      });
+    }
+    function fallback(){
+      mount.innerHTML = `
+<nav class="topbar" style="background:#0b2b12;border-bottom:1px solid rgba(255,255,255,.1);padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+  <div class="brand"><a href="/index.html" style="color:#fff;text-decoration:none;font-weight:800">Virtual Coach AI</a></div>
+  <div class="nav">
+    <a href="/index.html" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">Home</a>
+    <a href="/report.html?report=/report.json" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">Reports</a>
+    <a href="/coming-soon.html" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">Coming Soon</a>
+    <a href="/pricing.html" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">Pricing</a>
+    <a href="/faq.html" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">FAQ</a>
+    <a href="/contact.html" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">Contact</a>
+    <a href="/login.html" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px" aria-current="page">Login</a>
+  </div>
+</nav>`;
+      markCurrent();
+    }
+    fetch('/nav.html?v='+Date.now(), {cache:'no-store'})
+      .then(r=>r.ok?r.text():Promise.reject(r)).then(h=>{mount.innerHTML=h;markCurrent();}).catch(fallback);
+  })();
 
-  function nextUrl(){
-    const p = new URLSearchParams(location.search).get('next') || '';
-    return p ? String(p) : '/upload.html';
-  }
+  // Allowed credentials
+  const PASSCODES = new Set(['Jim1','Ben1','Tim1','Gregory1','Corey1','Brian1','Cindy1','test1','test2','test3']);
+  const USER_CODES = { // optional mapping if you want username + code pairs
+    'Jim':'Jim1','Ben':'Ben1','Tim':'Tim1','Gregory':'Gregory1','Corey':'Corey1','Brian':'Brian1','Cindy':'Cindy1'
+  };
 
   function submit(){
-    const raw = document.getElementById('pass').value;
-    const key = norm(raw);
-    const err = document.getElementById('err');
+    const user = (document.getElementById('user').value||'').trim();
+    const code = (document.getElementById('code').value||'').trim();
+    const err  = document.getElementById('err');
 
-    if (ALLOWED_NORMALIZED.has(key)) {
-      try {
-        localStorage.setItem('vc_auth','ok');
-        localStorage.setItem('vc_user', raw.trim());
-      } catch(e) {}
-      err.textContent = '';
-      window.location.href = nextUrl();
-    } else {
-      err.textContent = 'Invalid passcode. Try “Jim 1”, “Ben 1”, or “Test 1–5”.';
-    }
+    let ok = false;
+    if (user && USER_CODES[user] && USER_CODES[user] === code) ok = true;
+    if (!user && PASSCODES.has(code)) ok = true;
+
+    if (!ok){ err.textContent = 'Invalid code. Try Jim1, Ben1, test1, etc.'; return; }
+
+    try { localStorage.setItem('vc_auth','ok'); if(user) localStorage.setItem('vc_user', user); } catch(e){}
+    // Redirect: honor ?next=
+    const next = new URLSearchParams(location.search).get('next') || '';
+    const dest = next ? `/${next}.html` : '/index.html';
+    location.href = dest;
   }
 
   document.getElementById('go').addEventListener('click', submit);
-  document.getElementById('pass').addEventListener('keydown', e => {
-    if (e.key === 'Enter') submit();
-  });
-
-  try { document.getElementById('pass').focus(); } catch(e){}
-  document.getElementById('y').textContent = new Date().getFullYear();
-})();
+  document.getElementById('code').addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
 </script>
 </body>
 </html>
