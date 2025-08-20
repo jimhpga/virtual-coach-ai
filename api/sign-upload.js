@@ -21,22 +21,17 @@ export default async function handler(req, res) {
     const ext = filename.includes('.') ? filename.split('.').pop() : 'mp4';
     const key = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-    // PUT presign (upload)
     const putCmd = new PutObjectCommand({
       Bucket: BUCKET,
       Key: key,
       ContentType: contentType,
-      // If you want public objects, swap to 'public-read' and ensure bucket policy allows it:
-      // ACL: 'public-read',
       ACL: 'private',
     });
     const uploadUrl = await getSignedUrl(s3, putCmd, { expiresIn: 900 }); // 15 min
 
-    // GET presign (view)
     const getCmd = new GetObjectCommand({ Bucket: BUCKET, Key: key });
     const viewUrl = await getSignedUrl(s3, getCmd, { expiresIn: 86400 }); // 24 hours
 
-    // Plain URL (will 403 if bucket/object is private)
     const publicUrl = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
 
     res.setHeader('Access-Control-Allow-Origin', '*');
