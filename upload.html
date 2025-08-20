@@ -9,306 +9,123 @@
   :root{ --nav:#0b2b12; --scrim:rgba(0,0,0,.05); --panel:rgba(0,0,0,.30); --line:rgba(255,255,255,.12);
          --text:#f2f7f9; --muted:#cfe0e6; --maxw:980px; --radius:14px; }
   *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:url('/homepage-background.png') center/cover fixed no-repeat;}
+  body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+       background:url('/homepage-background.png') center/cover fixed no-repeat;}
   .scrim{min-height:100vh;background:var(--scrim);} .wrap{width:min(var(--maxw),94%);margin:0 auto;padding:16px 0 40px}
   .card{padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px)}
   .hint{color:var(--muted)} .btn{border:1px solid var(--line);background:rgba(255,255,255,.12);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:600;cursor:pointer}
   .btn.primary{background:rgba(0,255,153,.16);border-color:#0a7} .btn:disabled{opacity:.55;cursor:not-allowed}
-  input[type=file], input[type=url], input[type=text]{display:block;width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff}
-  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
-  .tab{padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.08);cursor:pointer}
-  .tab[aria-selected="true"]{background:rgba(0,255,153,.16);border-color:#0a7}
-  .row{display:grid;gap:12px}
+  input[type=file]{display:block;width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff}
   .kv{display:grid;grid-template-columns:140px 1fr;gap:6px;color:#dfecef;font-size:.95rem;margin-top:8px}
-  .mini{font-size:.9rem;color:#cfe3ee;margin-top:8px}
   footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
-  video#preview{width:100%;max-height:240px;border-radius:10px;border:1px solid var(--line);background:#000}
 </style>
 </head>
 <body>
   <div id="navMount"></div>
+  <script src="/nav.js" defer></script>
 
   <div class="scrim">
     <main class="wrap">
       <h1 style="margin:6px 0 12px">Upload Your Swing</h1>
       <div class="card">
-        <p class="hint">Pick a source: file (desktop/iPhone), record live, or paste a link (YouTube or direct video URL).</p>
-
-        <div class="tabs" role="tablist">
-          <button class="tab" id="t-file" role="tab" aria-selected="true">File</button>
-          <button class="tab" id="t-record" role="tab" aria-selected="false">Record</button>
-          <button class="tab" id="t-link" role="tab" aria-selected="false">Link</button>
-        </div>
-
-        <!-- FILE -->
-        <div id="pane-file">
-          <input id="file" type="file" accept="video/*" capture="environment" />
-        </div>
-
-        <!-- RECORD -->
-        <div id="pane-record" hidden>
-          <video id="preview" playsinline muted></video>
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button id="recStart" class="btn">Start</button>
-            <button id="recStop"  class="btn" disabled>Stop</button>
-          </div>
-          <div class="mini">Tip: On iPhone Safari, the File tab’s “Take Video” is usually simpler. This Record tab uses your browser’s recorder.</div>
-        </div>
-
-        <!-- LINK -->
-        <div id="pane-link" hidden>
-          <input id="link" type="url" placeholder="Paste YouTube link or direct .mp4/.mov URL" />
-        </div>
-
+        <p class="hint">On iPhone: <strong>Choose File</strong> → Take Video (or Photo Library). Desktop works too.</p>
+        <input id="file" type="file" accept="video/*" capture="environment" />
         <div id="meta" style="display:none;margin-top:10px">
-          <div class="kv"><div>Source</div><div id="m_src"></div></div>
-          <div class="kv"><div>Filename/URL</div><div id="m_name"></div></div>
+          <div class="kv"><div>Filename</div><div id="m_name"></div></div>
           <div class="kv"><div>Size</div><div id="m_size"></div></div>
           <div class="kv"><div>Duration</div><div id="m_dur"></div></div>
-          <div id="uploadInfo" class="mini" style="display:none"></div>
         </div>
-
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-          <!-- CHANGED TEXT ONLY -->
-          <button id="make" class="btn primary" aria-label="Submit Video">Submit Video</button>
+          <button id="make" class="btn primary" disabled>Submit Video</button>
           <button id="reset" class="btn" disabled>Reset</button>
         </div>
-
         <p id="err" style="color:#ffd1d1;margin-top:10px"></p>
       </div>
     </main>
-
     <footer>© <span id="y"></span> Virtual Coach AI</footer>
   </div>
 
 <script>
-  // Year
   document.getElementById('y').textContent = new Date().getFullYear();
 
-  // Auth gate
-  try{ if(localStorage.getItem('vc_auth')!=='ok') location.href='/login.html?next=upload'; }catch{}
+  // --- Gate: accept auth from either storage (iPhone quirk-safe)
+  try{
+    const ok = (localStorage.getItem('vc_auth')==='ok') || (sessionStorage.getItem('vc_auth')==='ok');
+    if (!ok) location.href = '/login.html?next=upload';
+  }catch{}
 
-  // Nav loader with fallback
-  (function(){
-    const mount = document.getElementById('navMount');
-    function markCurrent(){
-      const here = location.pathname.replace(/\/+$/,'');
-      mount.querySelectorAll('a[data-nav]').forEach(a=>{
-        const u = new URL(a.getAttribute('href'), location.origin);
-        if(u.pathname.replace(/\/+$/,'') === here){ a.setAttribute('aria-current','page'); }
-      });
-    }
-    function fallback(){
-      mount.innerHTML = `
-<nav class="topbar" style="background:#0b2b12;border-bottom:1px solid rgba(255,255,255,.1);padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
-  <div class="brand"><a href="/index.html" style="color:#fff;text-decoration:none;font-weight:800">Virtual Coach AI</a></div>
-  <div class="nav">
-    <a href="/index.html" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">Home</a>
-    <a href="/report.html?report=/report.json" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">Reports</a>
-    <a href="/coming-soon.html" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">Coming Soon</a>
-    <a href="/pricing.html" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">Pricing</a>
-    <a href="/faq.html" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">FAQ</a>
-    <a href="/contact.html" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">Contact</a>
-    <a href="/login.html" data-nav style="color:#fff;margin:0 8px;text-decoration:none;padding:8px 10px;border-radius:10px">Login</a>
-  </div>
-</nav>`; markCurrent();
-    }
-    fetch('/nav.html?v='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.text():Promise.reject(r)).then(h=>{mount.innerHTML=h;markCurrent();}).catch(fallback);
-  })();
-
-  // Tabs
-  const tabFile = document.getElementById('t-file');
-  const tabRec  = document.getElementById('t-record');
-  const tabLink = document.getElementById('t-link');
-  const paneFile= document.getElementById('pane-file');
-  const paneRec = document.getElementById('pane-record');
-  const paneLink= document.getElementById('pane-link');
-  function sel(which){
-    for (const el of [tabFile,tabRec,tabLink]) el.setAttribute('aria-selected', String(el.id===which));
-    paneFile.hidden = which!=='t-file'; paneRec.hidden = which!=='t-record'; paneLink.hidden = which!=='t-link';
-    resetAll(false);
-  }
-  tabFile.onclick = ()=>sel('t-file'); tabRec.onclick = ()=>sel('t-record'); tabLink.onclick = ()=>sel('t-link');
-
-  // Elements
+  // --- Simple meta helpers
   const fileEl = document.getElementById('file');
-  const linkEl = document.getElementById('link');
-  const makeBtn= document.getElementById('make');
-  const resetBtn=document.getElementById('reset');
-  const errEl  = document.getElementById('err');
-  const metaBox= document.getElementById('meta');
-  const mSrc   = document.getElementById('m_src');
-  const mName  = document.getElementById('m_name');
-  const mSize  = document.getElementById('m_size');
-  const mDur   = document.getElementById('m_dur');
-  const uploadInfo = document.getElementById('uploadInfo');
+  const makeBtn = document.getElementById('make');
+  const resetBtn = document.getElementById('reset');
+  const errEl = document.getElementById('err');
+  const metaBox = document.getElementById('meta');
+  const mName = document.getElementById('m_name');
+  const mSize = document.getElementById('m_size');
+  const mDur  = document.getElementById('m_dur');
 
-  // Record
-  const preview = document.getElementById('preview');
-  const recStart= document.getElementById('recStart');
-  const recStop = document.getElementById('recStop');
-  let mediaRecorder=null, chunks=[], stream=null;
+  let chosenFile = null;
+  let blobUrl = null;
+  let duration = 0;
 
-  // State
-  let chosenBlob=null, blobUrl=null, duration=0, sourceLabel='';
-
-  function fmtBytes(b){ if(b==null) return '—'; const u=['B','KB','MB','GB']; let i=0,n=b; while(n>=1024&&i<u.length-1){n/=1024;i++;} return n.toFixed(1)+' '+u[i]; }
+  function fmtBytes(b){ const u=['B','KB','MB','GB']; let i=0,n=b; while(n>=1024 && i<u.length-1){n/=1024;i++;} return (b? n.toFixed(1):'0.0')+' '+u[i]; }
   function fmtSec(s){ if(!s) return '—'; const m=Math.floor(s/60), r=Math.round(s%60); return `${m}:${String(r).padStart(2,'0')}`; }
 
-  function resetAll(clearTab=true){
-    errEl.textContent='';
-    metaBox.style.display='none'; uploadInfo.style.display='none'; uploadInfo.textContent='';
-    mSrc.textContent=mName.textContent=mSize.textContent=mDur.textContent='';
-    fileEl.value=''; linkEl.value='';
-    makeBtn.disabled=true; resetBtn.disabled=true;
+  resetBtn.addEventListener('click', ()=>{
+    errEl.textContent=''; metaBox.style.display='none'; mName.textContent=mSize.textContent=mDur.textContent='';
+    fileEl.value=''; makeBtn.disabled=true; resetBtn.disabled=true;
     if (blobUrl) { try{ URL.revokeObjectURL(blobUrl); }catch{} }
-    chosenBlob=null; blobUrl=null; duration=0; sourceLabel='';
-    if (mediaRecorder && mediaRecorder.state!=='inactive'){ try{ mediaRecorder.stop(); }catch{} }
-    if (stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
-    preview.srcObject=null; preview.removeAttribute('src'); preview.pause();
-    if (clearTab) sel('t-file');
-  }
+    chosenFile=null; blobUrl=null; duration=0;
+  });
 
-  resetBtn.onclick = ()=>resetAll(false);
-
-  // FILE
   fileEl.addEventListener('change', async (e)=>{
+    resetBtn.disabled=false; errEl.textContent='';
     const f = e.target.files && e.target.files[0];
     if(!f){ makeBtn.disabled=true; return; }
     if(!/^video\//i.test(f.type||'')){ errEl.textContent='Please choose a video.'; makeBtn.disabled=true; return; }
-    chosenBlob=f; sourceLabel='File';
-    blobUrl = URL.createObjectURL(f);
-    duration = await probeDuration(blobUrl);
-    showMeta({name:f.name||'(camera video)', size:f.size});
+    chosenFile=f; blobUrl = URL.createObjectURL(f);
+
+    try{
+      const v = document.createElement('video'); v.preload='metadata'; v.src=blobUrl; v.muted=true; v.playsInline=true;
+      await new Promise((res,rej)=>{ const to=setTimeout(()=>rej(new Error('metadata timeout')),12000);
+        v.onloadedmetadata=()=>{clearTimeout(to);res();}; v.onerror=()=>{clearTimeout(to);rej(new Error('metadata error'));};
+      });
+      duration = isFinite(v.duration) ? v.duration : 0;
+    }catch{ duration = 0; }
+
+    metaBox.style.display=''; mName.textContent=f.name||'(camera)'; mSize.textContent=fmtBytes(f.size||0); mDur.textContent=fmtSec(duration);
+    makeBtn.disabled=false;
   });
 
-  // RECORD
-  recStart.onclick = async ()=>{
-    try{
-      stream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
-      preview.srcObject = stream; preview.muted=true; await preview.play();
-      chunks=[]; mediaRecorder = new MediaRecorder(stream, {mimeType: 'video/webm;codecs=vp8,opus'});
-      mediaRecorder.ondataavailable = e=>{ if(e.data && e.data.size) chunks.push(e.data); };
-      mediaRecorder.onstop = async ()=>{
-        chosenBlob = new Blob(chunks, {type:'video/webm'});
-        sourceLabel='Recorded';
-        blobUrl = URL.createObjectURL(chosenBlob);
-        duration = await probeDuration(blobUrl);
-        showMeta({name:'recording.webm', size:chosenBlob.size});
-      };
-      mediaRecorder.start();
-      recStart.disabled=true; recStop.disabled=false; resetBtn.disabled=false;
-    }catch(e){
-      errEl.textContent='Could not start camera/mic.';
-    }
-  };
-  recStop.onclick = ()=>{
-    recStop.disabled=true;
-    try{ mediaRecorder.stop(); }catch{}
-    if (stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; }
-    recStart.disabled=false;
-  };
+  makeBtn.addEventListener('click', ()=>{
+    if(!chosenFile || !blobUrl){ errEl.textContent='Choose a video first.'; return; }
 
-  // LINK
-  linkEl.addEventListener('input', ()=>{
-    const url = (linkEl.value||'').trim();
-    if(!url){ makeBtn.disabled=true; return; }
-    sourceLabel = isYouTube(url)? 'YouTube Link' : 'Direct Link';
-    chosenBlob=null; blobUrl=url; // use URL directly; we won't fetch
-    duration=0; // unknown
-    showMeta({name:url, size:null});
-  });
-
-  function isYouTube(u){ return /youtube\.com\/watch\?v=|youtu\.be\//i.test(u); }
-
-  async function probeDuration(url){
-    try{
-      const v=document.createElement('video'); v.preload='metadata'; v.src=url; v.muted=true; v.playsInline=true;
-      await new Promise((res,rej)=>{ const to=setTimeout(()=>rej(new Error('timeout')),12000); v.onloadedmetadata=()=>{clearTimeout(to);res();}; v.onerror=()=>{clearTimeout(to);rej(new Error('metadata error'));};});
-      return isFinite(v.duration)? v.duration : 0;
-    }catch{ return 0; }
-  }
-
-  function showMeta({name,size}){
-    mSrc.textContent = sourceLabel||'—';
-    mName.textContent= name||'—';
-    mSize.textContent= size!=null? fmtBytes(size) : '—';
-    mDur.textContent = fmtSec(duration);
-    metaBox.style.display='';
-    makeBtn.disabled=false; resetBtn.disabled=false;
-  }
-
-  // S3 helpers (optional; uses your /api/presign if configured)
-  const PRESIGN_ENDPOINT = '/api/presign';
-  const KEY_PREFIX = 'uploads/';
-  async function presignFor(file){
-    const safeName=(file.name||'video.webm').replace(/[^\w.\-.]+/g,'_');
-    const key = KEY_PREFIX + Date.now() + '-' + safeName;
-    const r = await fetch(`${PRESIGN_ENDPOINT}?key=${encodeURIComponent(key)}&type=${encodeURIComponent(file.type||'application/octet-stream')}`);
-    if(!r.ok) throw new Error('presign failed');
-    const {url} = await r.json(); if(!url) throw new Error('bad presign');
-    return {url, key};
-  }
-  async function putToS3(url, file){
-    const res = await fetch(url,{method:'PUT',headers:{'Content-Type':file.type||'application/octet-stream'},body:file});
-    if(!res.ok){ throw new Error(`S3 PUT ${res.status}`); }
-    return url.split('?')[0];
-  }
-
-  function makePhases(href){
-    return [
+    const phases = [
       ['P1','Setup'],['P2','Takeaway'],['P3','Lead Arm Parallel'],['P4','Top'],
       ['P5','Delivery'],['P6','Shaft Parallel'],['P7','Impact'],['P8','Post-Impact'],['P9','Finish']
-    ].map(([id,name])=>({ id,name,grade:'ok', short:'Review with coach', long:'Tap Play to view your swing for this checkpoint.', ref: href }));
-  }
+    ].map(([id,name])=>({ id, name, grade:'ok', short:'Review with coach',
+      long:'Tap the Video button to view your swing for this checkpoint.', ref: blobUrl }));
 
-  // Submit Video (build report)
-  document.getElementById('make').onclick = async ()=>{
-    errEl.textContent=''; uploadInfo.style.display='none'; uploadInfo.textContent='';
-
-    let href = blobUrl; // could be blob: or external URL
-    let s3url = null;
-
-    // If we have a local Blob, try S3 (optional). If it fails, keep blob:
-    if (chosenBlob instanceof Blob){
-      try{
-        uploadInfo.style.display=''; uploadInfo.textContent='Uploading to S3…';
-        const {url} = await presignFor(chosenBlob);
-        s3url = await putToS3(url, chosenBlob);
-        href = s3url;
-        uploadInfo.textContent='Uploaded to S3 ✓';
-      }catch(e){
-        console.warn(e); uploadInfo.textContent='S3 upload skipped — using local video only.';
-      }
-    }
-
-    const now=new Date();
     const durScore = Math.max(40, Math.min(95, Math.round((duration||3)*8)));
     const relScore = Math.max(35, Math.min(90, Math.round(60 + ((duration||0)-3)*5)));
 
     const report = {
-      discipline:'Full Swing', date: now.toISOString(), swings:1,
-      phases: makePhases(href),
+      discipline:'Full Swing', date:new Date().toISOString(), swings:1, phases,
       coaching:{ priority_fixes:[
-        {title:'One Key Feel', short:'Pick one cue', long:'Use one external cue for the next 15 balls.'},
-        {title:'Tempo Baseline', short:'~3:1', long:'Count “one-two-three-hit” for a smoother transition.'},
-        {title:'Impact Check', short:'Ball then turf', long:'Half swings; brush ground after impact; film 2 reps.'}
+        {title:'One Key Feel', short:'Pick one cue only', long:'One external cue for the next 15 balls (e.g., finish tall).'},
+        {title:'Tempo Baseline', short:'3:1 feel', long:'Count “one-two-three-hit” to smooth transition.'},
+        {title:'Impact Check', short:'Ball then turf', long:'Half swings; brush ground after impact; video two reps.'}
       ], power_fixes:[
-        {title:'Finish Tall', short:'No stall', long:'Chest to target; stand tall to free up speed.'}
+        {title:'Finish Tall', short:'No stall', long:'Chest to target, stand tall to free up speed.'}
       ]},
       position_metrics:[{label:'Setup Match',value:72},{label:'Top Position',value:66},{label:'Impact Alignments',value:70}],
       swing_metrics:[{label:'Tempo Repeatability',value:76},{label:'Face-to-Path Stability',value:64}],
-      power:{score:durScore, tempo:'~3:1', release_timing:relScore},
-      assets:{ video: s3url || null, srcType: sourceLabel }
+      power:{score:durScore, tempo:'~3:1', release_timing:relScore}
     };
 
     try{ sessionStorage.setItem('vc_report', JSON.stringify(report)); localStorage.setItem('vc_last_report', JSON.stringify(report)); }catch{}
-
     location.href = '/report.html?src=session';
-  };
-
-  // init
-  sel('t-file');
+  });
 </script>
 </body>
 </html>
