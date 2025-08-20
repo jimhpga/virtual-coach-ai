@@ -14,18 +14,24 @@
   *{box-sizing:border-box} html,body{height:100%}
   body{margin:0;color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;background:url('/homepage-background.png') center/cover fixed no-repeat}
   .scrim{min-height:100vh;background:var(--scrim)}
-  /* NAV */
-  header{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
-  .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:14px;align-items:center;justify-content:space-between}
+
+  /* NAV (hamburger) */
+  header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+  .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
   .brand-logo{width:160px;height:36px;background:var(--brand);
     -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
             mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;}
-  nav{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
-  nav::-webkit-scrollbar{display:none}
-  nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
-  nav a:hover{background:rgba(255,255,255,.08)}
-  nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+  .menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
+  nav.nav{display:flex;gap:8px}
+  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  nav.nav a:hover{background:rgba(255,255,255,.08)}
+  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+  @media(max-width:820px){
+    .menu-toggle{display:inline-flex}
+    nav.nav{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
+    header.top.open nav.nav{display:flex}
+  }
 
   main{width:min(var(--maxw),92%);margin:0 auto;padding:22px 0 56px}
   h1{margin:0 0 6px;font-size:2.1rem;color:#00ff99}
@@ -47,10 +53,11 @@
 </style>
 </head>
 <body>
-  <header>
+  <header class="top" id="site-header">
     <div class="navwrap">
-      <a class="brand" href="/"><div class="brand-logo" aria-label="Virtual Coach AI"></div><span>Virtual Coach AI</span></a>
-      <nav aria-label="Primary">
+      <a class="brand" href="/"><div class="brand-logo"></div><span>Virtual Coach AI</span></a>
+      <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
+      <nav class="nav" id="siteNav" aria-label="Primary">
         <a href="/index.html">Home</a>
         <a href="/upload.html">Upload</a>
         <a href="/report.html?report=/report.json">Reports</a>
@@ -71,7 +78,6 @@
         <p class="lead">No fluff—just upgrades that lower scores. Here’s what’s dropping next and what’s cooking after that.</p>
       </section>
 
-      <!-- Next Drops -->
       <section>
         <div class="section-title"><h2>Next Drops (2–4 weeks)</h2><span class="badge">High priority</span></div>
         <div class="grid">
@@ -84,7 +90,6 @@
         </div>
       </section>
 
-      <!-- In Progress -->
       <section>
         <div class="section-title"><h2>In Progress</h2><span class="badge">Design + build</span></div>
         <div class="grid">
@@ -94,7 +99,6 @@
         </div>
       </section>
 
-      <!-- On the Horizon -->
       <section>
         <div class="section-title"><h2>On the Horizon</h2><span class="badge">Roadmap</span></div>
         <div class="grid">
@@ -107,7 +111,6 @@
         </div>
       </section>
 
-      <!-- Early Access -->
       <section>
         <div class="section-title"><h2>Early Access</h2><span class="badge">Limited slots</span></div>
         <div class="card">
@@ -119,6 +122,18 @@
     </main>
     <footer>© <span id="y"></span> Virtual Coach AI — Better decisions, better swings.</footer>
   </div>
-  <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+
+<script>
+  document.getElementById('y').textContent = new Date().getFullYear();
+  const header = document.getElementById('site-header');
+  const btn = document.getElementById('menuBtn');
+  btn.addEventListener('click', ()=>{
+    const open = header.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.getElementById('siteNav').addEventListener('click', e=>{
+    if(e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+  });
+</script>
 </body>
 </html>
