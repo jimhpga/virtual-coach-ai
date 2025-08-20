@@ -69,7 +69,8 @@
         </div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-          <button id="make" class="btn primary" disabled>Create Report</button>
+          <!-- CHANGED TEXT ONLY -->
+          <button id="make" class="btn primary" aria-label="Submit Video">Submit Video</button>
           <button id="reset" class="btn" disabled>Reset</button>
         </div>
 
@@ -261,6 +262,7 @@
     ].map(([id,name])=>({ id,name,grade:'ok', short:'Review with coach', long:'Tap Play to view your swing for this checkpoint.', ref: href }));
   }
 
+  // Submit Video (build report)
   document.getElementById('make').onclick = async ()=>{
     errEl.textContent=''; uploadInfo.style.display='none'; uploadInfo.textContent='';
 
