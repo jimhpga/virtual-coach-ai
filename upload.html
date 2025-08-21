@@ -6,15 +6,10 @@
 <title>Upload — Virtual Coach AI</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
-  :root{
-    --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.05);
-    --panel: rgba(0,0,0,.30); --line: rgba(255,255,255,.12);
-    --text:#f2f7f9; --muted:#cfe0e6; --maxw:980px; --radius:14px;
-  }
+  :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.05); --panel: rgba(0,0,0,.30); --line: rgba(255,255,255,.12); --text:#f2f7f9; --muted:#cfe0e6; --maxw:980px; --radius:14px; }
   *{box-sizing:border-box} html,body{height:100%}
   body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:url('/homepage-background.png') center/cover fixed no-repeat;}
   .scrim{min-height:100vh;background:var(--scrim);}
-
   /* NAV (hamburger) */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
@@ -32,7 +27,6 @@
     nav.nav{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
     header.top.open nav.nav{display:flex}
   }
-
   .wrap{width:min(var(--maxw),94%);margin:0 auto;padding:16px 0 40px}
   .card{padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px)}
   .hint{color:var(--muted)}
@@ -65,9 +59,9 @@
     <main class="wrap">
       <h1 style="margin:6px 0 12px">Upload Your Swing</h1>
       <div class="card">
-        <p class="hint">iPhone: <strong>Record Video</strong> (camera) or <strong>Choose from Library</strong> (Photos). Desktop works too.</p>
+        <p class="hint">iPhone: <strong>Record Video</strong> (camera) or <strong>Choose from Library</strong>. Desktop works too.</p>
 
-        <!-- Hidden real inputs -->
+        <!-- hidden inputs -->
         <input id="file-record" type="file" accept="video/*" capture="environment" style="display:none" />
         <input id="file-choose" type="file" accept="video/*" style="display:none" />
 
@@ -87,26 +81,19 @@
         <p id="err" style="color:#ffd1d1;margin-top:10px"></p>
       </div>
     </main>
-
     <footer>© <span id="y"></span> Virtual Coach AI</footer>
   </div>
 
 <script>
   document.getElementById('y').textContent = new Date().getFullYear();
-
-  // Require code once (simple gate). If this is getting in your way, comment it out.
+  // simple gate (comment out if you want)
   try{ if (localStorage.getItem('vc_auth') !== 'ok') location.href = '/login.html?next=upload'; }catch{}
 
-  // Hamburger
+  // hamburger
   const header = document.getElementById('site-header');
   const btn = document.getElementById('menuBtn');
-  btn.addEventListener('click', ()=>{
-    const open = header.classList.toggle('open');
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-  document.getElementById('siteNav').addEventListener('click', e=>{
-    if(e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
-  });
+  btn.addEventListener('click', ()=>{ const open = header.classList.toggle('open'); btn.setAttribute('aria-expanded', open?'true':'false'); });
+  document.getElementById('siteNav').addEventListener('click', e=>{ if(e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); } });
 
   const fileRecord = document.getElementById('file-record');
   const fileChoose = document.getElementById('file-choose');
@@ -126,7 +113,6 @@
   const fmtBytes = b=>{ if(b==null) return '—'; const u=['B','KB','MB','GB']; let i=0,n=b; while(n>=1024&&i<u.length-1){n/=1024;i++;} return n.toFixed(1)+' '+u[i]; };
   const fmtSec = s=>{ if(!s) return '—'; const m=Math.floor(s/60); const r=Math.round(s%60); return `${m}:${String(r).padStart(2,'0')}`; };
 
-  // duration probe (iOS friendly)
   async function probeDuration(file){
     try{
       const v = document.createElement('video');
@@ -148,14 +134,11 @@
     mName.textContent = f.name || '(camera video)';
     mSize.textContent = fmtBytes(f.size);
   }
-
   function clearAll(){
-    errEl.textContent='';
-    metaBox.style.display='none';
+    errEl.textContent=''; metaBox.style.display='none';
     mName.textContent=mSize.textContent=mDur.textContent='';
     fileRecord.value=''; fileChoose.value='';
-    chosenFile=null; duration=0;
-    makeBtn.disabled=true; resetBtn.disabled=true;
+    chosenFile=null; duration=0; makeBtn.disabled=true; resetBtn.disabled=true;
   }
 
   btnRecord.addEventListener('click', ()=> fileRecord.click());
@@ -174,62 +157,40 @@
   fileRecord.addEventListener('change', e=>{ if(e.target.files&&e.target.files[0]) onPicked(e.target.files[0]); });
   fileChoose.addEventListener('change', e=>{ if(e.target.files&&e.target.files[0]) onPicked(e.target.files[0]); });
 
-  // Simple deterministic pseudo-random (so results look real but repeat for the same file)
-  function seedFrom(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=(h*16777619)>>>0; } return h; }
-  function rand01(seed){ seed = (seed*1664525+1013904223)>>>0; return [seed, (seed>>>8)/0xFFFFFF]; }
-
-  function variedGrades(file, dur){
-    const base = `${file.name}|${file.size}|${Math.round(dur*10)}`;
-    let seed = seedFrom(base);
-    const grades = [];
-    const names = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
-    for(let i=0;i<9;i++){
-      let r; [seed,r]=rand01(seed);
-      let g = r<0.25 ? 'bad' : r<0.6 ? 'ok' : 'good';
-      grades.push({id:names[i], grade:g});
-    }
-    return grades;
+  async function signUpload(filename, contentType){
+    const r = await fetch('/api/sign-upload', { method:'POST', body: JSON.stringify({ filename, contentType }) });
+    if(!r.ok) throw new Error('sign-upload failed');
+    return r.json();
+  }
+  async function putToS3(url, file, contentType){
+    const r = await fetch(url, { method:'PUT', headers:{ 'Content-Type': contentType }, body:file });
+    if(!r.ok) throw new Error('PUT to S3 failed');
+  }
+  async function analyze(key){
+    const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache:'no-store' });
+    if(!r.ok) throw new Error('analyze failed');
+    return r.json();
   }
 
-  makeBtn.addEventListener('click', ()=>{
+  makeBtn.addEventListener('click', async ()=>{
     if(!chosenFile){ errEl.textContent='Choose a video first.'; return; }
-
-    const grades = variedGrades(chosenFile, duration);
-    const now = new Date();
-    const durScore = Math.max(40, Math.min(95, Math.round((duration||3)*8)));
-    const relScore = Math.max(35, Math.min(90, Math.round(60 + ((duration||0)-3)*5)));
-    const blobUrl  = URL.createObjectURL(chosenFile);
-
-    const LABELS = ['Setup','Takeaway','Lead Arm Parallel','Top','Delivery','Shaft Parallel','Impact','Post-Impact','Finish'];
-    const phases = grades.map((g,i)=>({
-      id:g.id, name:LABELS[i], grade:g.grade,
-      short: g.grade==='bad' ? 'Needs attention' : g.grade==='good' ? 'Solid' : 'Workable',
-      long: 'Tap Video to review this checkpoint with your coach.',
-      ref: blobUrl
-    }));
-
-    const report = {
-      discipline:'Full Swing', date: now.toISOString(), swings:1,
-      phases,
-      coaching:{
-        priority_fixes:[
-          { title:'One Key Feel', short:'Pick one cue only', long:'Use one external cue for 15 balls (e.g., finish tall).', ref:''},
-          { title:'Tempo Baseline', short:'~3:1', long:'Count “one-two-three-hit” to smooth transition.', ref:''},
-          { title:'Impact Check', short:'Ball then turf', long:'Half swings with a mid-iron; video two reps to confirm.', ref:''}
-        ],
-        power_fixes:[{ title:'Finish Tall', short:'No stall', long:'Let chest face target; stand tall.', ref:''}]
-      },
-      position_metrics:[{label:'Setup Match',value:72},{label:'Top Position',value:66},{label:'Impact Alignments',value:70}],
-      swing_metrics:[{label:'Tempo Repeatability',value:76},{label:'Face-to-Path Stability',value:64}],
-      power:{ score:durScore, tempo:'~3:1', release_timing:relScore }
-    };
+    errEl.textContent='Uploading…';
+    makeBtn.disabled=true;
 
     try{
+      const { url, key } = await signUpload(chosenFile.name || 'swing.mp4', chosenFile.type || 'video/mp4');
+      await putToS3(url, chosenFile, chosenFile.type || 'video/mp4');
+      errEl.textContent='Analyzing…';
+      const { report } = await analyze(key);
+
       sessionStorage.setItem('vc_report', JSON.stringify(report));
       localStorage.setItem('vc_last_report', JSON.stringify(report));
-    }catch(e){ console.warn('Storage issue:', e); }
-
-    location.href = '/report.html?src=session';
+      location.href = '/report.html?src=session';
+    }catch(e){
+      console.error(e);
+      errEl.textContent = e.message || 'Upload/Analyze error';
+      makeBtn.disabled=false;
+    }
   });
 </script>
 </body>
