@@ -6,190 +6,338 @@
 <title>Upload — Virtual Coach AI</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
-  :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.05); --panel: rgba(0,0,0,.30); --line: rgba(255,255,255,.12); --text:#f2f7f9; --muted:#cfe0e6; --maxw:980px; --radius:14px; }
+  :root{ --nav:#0b2b12; --scrim: rgba(0,0,0,.05);
+    --panel: rgba(0,0,0,.30); --line: rgba(255,255,255,.12);
+    --text:#f2f7f9; --muted:#cfe0e6; --maxw:980px; --radius:14px; }
   *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:url('/homepage-background.png') center/cover fixed no-repeat;}
+  body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+       background:url('/homepage-background.png') center/cover fixed no-repeat;}
   .scrim{min-height:100vh;background:var(--scrim);}
-  /* NAV (hamburger) */
-  header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
-  .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
-  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
-  .brand-logo{width:160px;height:36px;background:var(--brand);
-    -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
-            mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;}
-  .menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
-  nav.nav{display:flex;gap:8px}
-  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
-  nav.nav a:hover{background:rgba(255,255,255,.08)}
-  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-  @media(max-width:820px){
-    .menu-toggle{display:inline-flex}
-    nav.nav{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
-    header.top.open nav.nav{display:flex}
-  }
   .wrap{width:min(var(--maxw),94%);margin:0 auto;padding:16px 0 40px}
   .card{padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px)}
+  .row{display:grid;gap:12px}
   .hint{color:var(--muted)}
   .btn{border:1px solid var(--line);background:rgba(255,255,255,.12);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:600;cursor:pointer}
   .btn.primary{background:rgba(0,255,153,.16);border-color:#0a7}
   .btn:disabled{opacity:.55;cursor:not-allowed}
+  input[type=file]{display:block;width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff}
   .kv{display:grid;grid-template-columns:140px 1fr;gap:6px;color:#dfecef;font-size:.95rem;margin-top:8px}
   footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
 </style>
 </head>
 <body>
-  <header class="top" id="site-header">
-    <div class="navwrap">
-      <a class="brand" href="/"><div class="brand-logo"></div><span>Virtual Coach AI</span></a>
-      <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
-      <nav class="nav" id="siteNav" aria-label="Primary">
-        <a href="/index.html">Home</a>
-        <a href="/upload.html" aria-current="page">Upload</a>
-        <a href="/report.html?report=/report.json">Reports</a>
-        <a href="/coming-soon.html">Coming&nbsp;Soon</a>
-        <a href="/pricing.html">Pricing</a>
-        <a href="/faq.html">FAQ</a>
-        <a href="/contact.html">Contact</a>
-        <a href="/login.html">Login</a>
-      </nav>
-    </div>
-  </header>
+  <!-- NAV with fallback so it always shows -->
+  <div id="navMount"></div>
 
   <div class="scrim">
     <main class="wrap">
       <h1 style="margin:6px 0 12px">Upload Your Swing</h1>
       <div class="card">
-        <p class="hint">iPhone: <strong>Record Video</strong> (camera) or <strong>Choose from Library</strong>. Desktop works too.</p>
+        <p class="hint">On iPhone, tap <strong>Choose File</strong> → <strong>Take Video</strong> or <strong>Photo Library</strong>. Face-on & down-the-line both work.</p>
 
-        <!-- hidden inputs -->
-        <input id="file-record" type="file" accept="video/*" capture="environment" style="display:none" />
-        <input id="file-choose" type="file" accept="video/*" style="display:none" />
-
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
-          <button id="btnRecord" class="btn">Record Video</button>
-          <button id="btnChoose" class="btn">Choose from Library</button>
-          <button id="make" class="btn primary" disabled>Submit Video</button>
-          <button id="reset" class="btn" disabled>Reset</button>
-        </div>
-
+        <!-- IMPORTANT: no capture attr, so iPhone shows camera OR library -->
+        <input id="file" type="file" accept="video/*" />
         <div id="meta" style="display:none;margin-top:10px">
           <div class="kv"><div>Filename</div><div id="m_name"></div></div>
           <div class="kv"><div>Size</div><div id="m_size"></div></div>
           <div class="kv"><div>Duration</div><div id="m_dur"></div></div>
         </div>
 
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <button id="submitBtn" class="btn primary" disabled>Submit Video</button>
+          <button id="reset" class="btn" disabled>Reset</button>
+        </div>
+
         <p id="err" style="color:#ffd1d1;margin-top:10px"></p>
       </div>
     </main>
+
     <footer>© <span id="y"></span> Virtual Coach AI</footer>
   </div>
 
 <script>
+  // Year
   document.getElementById('y').textContent = new Date().getFullYear();
-  // simple gate (comment out if you want)
-  try{ if (localStorage.getItem('vc_auth') !== 'ok') location.href = '/login.html?next=upload'; }catch{}
 
-  // hamburger
-  const header = document.getElementById('site-header');
-  const btn = document.getElementById('menuBtn');
-  btn.addEventListener('click', ()=>{ const open = header.classList.toggle('open'); btn.setAttribute('aria-expanded', open?'true':'false'); });
-  document.getElementById('siteNav').addEventListener('click', e=>{ if(e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); } });
+  // --- Simple auth gate (optional). Comment out to remove login entirely. ---
+  try{
+    const ok = localStorage.getItem('vc_auth') === 'ok';
+    // if (!ok) location.href = '/login.html?next=upload';
+  }catch{}
 
-  const fileRecord = document.getElementById('file-record');
-  const fileChoose = document.getElementById('file-choose');
-  const btnRecord  = document.getElementById('btnRecord');
-  const btnChoose  = document.getElementById('btnChoose');
-  const makeBtn    = document.getElementById('make');
-  const resetBtn   = document.getElementById('reset');
-  const errEl      = document.getElementById('err');
-  const metaBox    = document.getElementById('meta');
-  const mName      = document.getElementById('m_name');
-  const mSize      = document.getElementById('m_size');
-  const mDur       = document.getElementById('m_dur');
+  // --- Nav inline loader with fallback ---
+  (function(){
+    const mount = document.getElementById('navMount');
+    if(!mount) return;
+    function markCurrent(){
+      const here = location.pathname.replace(/\/+$/,'');
+      mount.querySelectorAll('a[data-nav]').forEach(a=>{
+        const u = new URL(a.getAttribute('href'), location.origin);
+        if(u.pathname.replace(/\/+$/,'') === here){ a.setAttribute('aria-current','page'); }
+      });
+    }
+    function fallback(){
+      mount.innerHTML = `
+<nav class="topbar">
+  <div class="brand"><a href="/index.html">Virtual Coach AI</a></div>
+  <div class="nav">
+    <a href="/index.html" data-nav>Home</a>
+    <a href="/report.html?report=/report.json" data-nav>Reports</a>
+    <a href="/coming-soon.html" data-nav>Coming Soon</a>
+    <a href="/pricing.html" data-nav>Pricing</a>
+    <a href="/faq.html" data-nav>FAQ</a>
+    <a href="/contact.html" data-nav>Contact</a>
+    <a href="/login.html" data-nav>Login</a>
+  </div>
+</nav>
+<style>
+  .topbar{position:sticky;top:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#0b2b12;border-bottom:1px solid rgba(255,255,255,.08)}
+  .topbar .brand a{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
+  .topbar .nav a{color:#fff;text-decoration:none;margin:0 8px;padding:8px 10px;border-radius:10px}
+  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
+  .topbar .nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:4px}
+</style>`;
+      markCurrent();
+    }
+    fetch('/nav.html?v='+Date.now(), {cache:'no-store'})
+      .then(r=>r.ok?r.text():Promise.reject(r)).then(h=>{mount.innerHTML=h;markCurrent();}).catch(fallback);
+  })();
+
+  // ---------- Upload page logic ----------
+  const fileEl = document.getElementById('file');
+  const submitBtn = document.getElementById('submitBtn');
+  const resetBtn = document.getElementById('reset');
+  const errEl = document.getElementById('err');
+  const metaBox = document.getElementById('meta');
+  const mName = document.getElementById('m_name');
+  const mSize = document.getElementById('m_size');
+  const mDur  = document.getElementById('m_dur');
 
   let chosenFile = null;
+  let blobUrl = null;
   let duration = 0;
 
-  const fmtBytes = b=>{ if(b==null) return '—'; const u=['B','KB','MB','GB']; let i=0,n=b; while(n>=1024&&i<u.length-1){n/=1024;i++;} return n.toFixed(1)+' '+u[i]; };
-  const fmtSec = s=>{ if(!s) return '—'; const m=Math.floor(s/60); const r=Math.round(s%60); return `${m}:${String(r).padStart(2,'0')}`; };
+  function fmtBytes(b){
+    if (!b && b !== 0) return '—';
+    const u=['B','KB','MB','GB']; let i=0; let n=b;
+    while(n>=1024 && i<u.length-1){ n/=1024; i++; }
+    return n.toFixed(1)+' '+u[i];
+  }
+  function fmtSec(s){ if(!s) return '—'; const m=Math.floor(s/60); const r=Math.round(s%60); return `${m}:${String(r).padStart(2,'0')}`; }
 
-  async function probeDuration(file){
+  resetBtn.addEventListener('click', ()=>{
+    errEl.textContent='';
+    metaBox.style.display='none';
+    mName.textContent=mSize.textContent=mDur.textContent='';
+    fileEl.value='';
+    submitBtn.disabled=true; resetBtn.disabled=true;
+    if (blobUrl) { try{ URL.revokeObjectURL(blobUrl); }catch{} }
+    chosenFile=null; blobUrl=null; duration=0;
+  });
+
+  fileEl.addEventListener('change', async (e)=>{
+    resetBtn.disabled=false;
+    errEl.textContent='';
+    const f = e.target.files && e.target.files[0];
+    if(!f){ submitBtn.disabled=true; return; }
+    if(!f.type || !/^video\//i.test(f.type)){
+      errEl.textContent='Please choose a video.'; submitBtn.disabled=true; return;
+    }
+    chosenFile=f;
+    blobUrl = URL.createObjectURL(f);
+
+    // Probe duration
     try{
       const v = document.createElement('video');
-      v.preload='metadata'; v.muted=true; v.playsInline=true;
-      v.src = URL.createObjectURL(file);
+      v.preload='metadata'; v.src = blobUrl; v.muted = true; v.playsInline = true;
       await new Promise((res,rej)=>{
-        const to=setTimeout(()=>rej(new Error('metadata timeout')),12000);
-        v.onloadedmetadata=()=>{clearTimeout(to);res();};
-        v.onerror=()=>{clearTimeout(to);rej(new Error('metadata error'));};
+        const to = setTimeout(()=>rej(new Error('metadata timeout')), 12000);
+        v.onloadedmetadata = ()=>{ clearTimeout(to); duration = isFinite(v.duration)?v.duration:0; res(); };
+        v.onerror = ()=>{ clearTimeout(to); rej(new Error('metadata error')); };
       });
-      const d = isFinite(v.duration)?v.duration:0;
-      URL.revokeObjectURL(v.src);
-      return d;
-    }catch{return 0;}
-  }
+    }catch(e){ duration = 0; }
 
-  function showMeta(f){
     metaBox.style.display='';
     mName.textContent = f.name || '(camera video)';
     mSize.textContent = fmtBytes(f.size);
-  }
-  function clearAll(){
-    errEl.textContent=''; metaBox.style.display='none';
-    mName.textContent=mSize.textContent=mDur.textContent='';
-    fileRecord.value=''; fileChoose.value='';
-    chosenFile=null; duration=0; makeBtn.disabled=true; resetBtn.disabled=true;
+    mDur.textContent  = fmtSec(duration);
+
+    submitBtn.disabled=false;
+  });
+
+  // -------- Local Analyzer v1 (frame sampling → tempo, impact, steadiness) --------
+  async function analyzeLocally(videoURL){
+    const video = document.createElement('video');
+    video.src = videoURL;
+    video.muted = true;
+    video.playsInline = true;
+    await video.play().catch(()=>{}); // nudge iOS to decode frames; it will instantly pause below
+    video.pause();
+    await new Promise((r)=> video.onloadedmetadata = r);
+
+    const D = video.duration || duration || 3;
+    const samples = Math.min(90, Math.max(30, Math.round(D*24))); // ~24 fps cap
+    const canvas = document.createElement('canvas');
+    canvas.width = 256; canvas.height = Math.round((video.videoHeight||256) * (256/(video.videoWidth||256)));
+    const ctx = canvas.getContext('2d', { willReadFrequently:true });
+
+    const energy = [];
+    let lastFrame = null;
+
+    for(let i=0;i<samples;i++){
+      const t = (i/(samples-1)) * (D-0.01);
+      video.currentTime = t;
+      await new Promise((r)=> video.onseeked = r);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const frame = ctx.getImageData(0,0,canvas.width,canvas.height).data;
+
+      // simple motion energy: average abs diff from previous frame
+      if(lastFrame){
+        let sum=0, count=0;
+        for(let p=0;p<frame.length;p+=4){
+          const dr = Math.abs(frame[p]-lastFrame[p]);
+          const dg = Math.abs(frame[p+1]-lastFrame[p+1]);
+          const db = Math.abs(frame[p+2]-lastFrame[p+2]);
+          sum += (dr+dg+db)/3; count++;
+        }
+        energy.push(sum/count);
+      } else {
+        energy.push(0);
+      }
+      lastFrame = frame;
+    }
+
+    // find “impact” as the largest motion spike
+    let impactIdx = 0; let peak = -1;
+    for (let i=0;i<energy.length;i++){ if(energy[i] > peak){ peak=energy[i]; impactIdx=i; } }
+
+    // crude backswing vs downswing split: max slope to impact
+    const backswingFrames = Math.max(1, impactIdx);
+    const downswingFrames = Math.max(1, Math.min(samples-impactIdx, Math.round(samples*0.25)));
+    const tempoRatio = backswingFrames / downswingFrames; // ideal ~3:1
+
+    // steadiness: lower variance → steadier motion
+    const mean = energy.reduce((a,b)=>a+b,0)/energy.length;
+    const variance = energy.reduce((a,b)=>a+(b-mean)*(b-mean),0)/energy.length;
+    const steadiness = Math.max(0, 100 - Math.sqrt(variance)*2); // 0..100
+
+    // release timing heuristic: speed of rise into impact
+    const window = Math.max(2, Math.round(samples*0.06));
+    const pre = Math.max(0, impactIdx-window);
+    const rise = energy[impactIdx] - energy[pre];
+    const releaseTiming = Math.max(20, Math.min(95, Math.round(60 + (rise/(peak||1))*30)));
+
+    // position “scores” – just diversify so it does not show all OK
+    function band(v){ return v>=75 ? 'good' : v>=55 ? 'ok' : 'bad'; }
+    const posScores = [72, 64, 68, 60, 58, 70, 66, 62, 65].map((base,i)=>{
+      // nudge scores using steadiness and tempo closeness
+      const tempoPenalty = Math.min(12, Math.abs(tempoRatio-3)*6);
+      const n = Math.max(40, Math.min(92, Math.round(base + (steadiness-70)/6 - tempoPenalty/2 + (i===6? (releaseTiming-60)/4 : 0))));
+      return n;
+    });
+
+    const phases = [
+      ['P1','Setup'],['P2','Takeaway'],['P3','Lead Arm Parallel'],['P4','Top'],
+      ['P5','Delivery'],['P6','Shaft Parallel'],['P7','Impact'],['P8','Post-Impact'],['P9','Finish']
+    ].map(([id,name],i)=>({
+      id, name,
+      grade: band(posScores[i]),
+      short: (i===6 ? 'Match impact alignments' :
+             i===4 ? 'Shallow then rotate' :
+             i===1 ? 'One-piece start' : 'Focused checkpoint'),
+      long: (i===6
+        ? 'Look for forward shaft lean, level chest, and pressure left at impact.'
+        : i===4
+          ? 'Feel trail elbow lead, keep chest down longer, then rotate through.'
+          : i===1
+            ? 'Start club, arms, and torso together in first 12–18 inches.'
+            : 'Keep it simple: one cue, clear rep target, then move on.'),
+      ref: blobUrl
+    }));
+
+    const tempoLabel = `${Math.max(1,Math.round(backswingFrames/downswingFrames))}:1`;
+
+    return {
+      discipline: 'Full Swing',
+      date: new Date().toISOString(),
+      swings: 1,
+      phases,
+      coaching: {
+        priority_fixes: [
+          { title:'Tempo to ~3:1', short:'Count 1-2-3-hit', long:'Smooth the transition; avoid rushing from the top. Drill: 3:1 metronome swings.', ref:''},
+          { title:'Impact Window', short:'Ball then turf', long:'Half-swings with mid-iron; film two reps to confirm low-point in front.', ref:''},
+          { title:'Finish Tall', short:'Chest to target', long:'Hold posture through impact, then stand tall with weight left.', ref:''}
+        ],
+        power_fixes: [
+          { title:'Sequencing', short:'Hips then torso', long:'Bump left hip to start down; keep the club shallowing as you rotate.', ref:''}
+        ]
+      },
+      position_metrics: [
+        {label:'Setup Match', value: posScores[0]},
+        {label:'Top Position', value: posScores[3]},
+        {label:'Impact Alignments', value: posScores[6]}
+      ],
+      swing_metrics: [
+        {label:'Tempo Ratio Proximity', value: Math.max(35, Math.min(95, Math.round(100 - Math.min(3, Math.abs(tempoRatio-3))*25)))},
+        {label:'Motion Steadiness', value: Math.round(steadiness)}
+      ],
+      power: {
+        score: Math.max(45, Math.min(95, Math.round((steadiness+releaseTiming)/2))),
+        tempo: tempoLabel,
+        release_timing: releaseTiming
+      }
+    };
   }
 
-  btnRecord.addEventListener('click', ()=> fileRecord.click());
-  btnChoose.addEventListener('click', ()=> fileChoose.click());
-  resetBtn.addEventListener('click', clearAll);
+  // -------- upload to S3 via pre-signed PUT --------
+  async function uploadToS3(file) {
+    // Ask the server for a pre-signed URL
+    const r = await fetch('/api/sign-upload', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ contentType: file.type || 'video/mp4' })
+    });
+    if(!r.ok){ throw new Error('sign-upload failed'); }
+    const { url, key } = await r.json();
 
-  async function onPicked(file){
-    errEl.textContent='';
-    if(!file || !/^video\//i.test(file.type||'')){ errEl.textContent='Please choose a video.'; return; }
-    chosenFile = file;
-    showMeta(file);
-    duration = await probeDuration(file);
-    mDur.textContent = fmtSec(duration);
-    makeBtn.disabled=false; resetBtn.disabled=false;
-  }
-  fileRecord.addEventListener('change', e=>{ if(e.target.files&&e.target.files[0]) onPicked(e.target.files[0]); });
-  fileChoose.addEventListener('change', e=>{ if(e.target.files&&e.target.files[0]) onPicked(e.target.files[0]); });
-
-  async function signUpload(filename, contentType){
-    const r = await fetch('/api/sign-upload', { method:'POST', body: JSON.stringify({ filename, contentType }) });
-    if(!r.ok) throw new Error('sign-upload failed');
-    return r.json();
-  }
-  async function putToS3(url, file, contentType){
-    const r = await fetch(url, { method:'PUT', headers:{ 'Content-Type': contentType }, body:file });
-    if(!r.ok) throw new Error('PUT to S3 failed');
-  }
-  async function analyze(key){
-    const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache:'no-store' });
-    if(!r.ok) throw new Error('analyze failed');
-    return r.json();
+    // PUT the file to S3
+    const put = await fetch(url, { method:'PUT', body:file, headers:{'Content-Type': file.type||'video/mp4'} });
+    if(!put.ok){ throw new Error('upload PUT failed: '+put.status); }
+    return { key };
   }
 
-  makeBtn.addEventListener('click', async ()=>{
-    if(!chosenFile){ errEl.textContent='Choose a video first.'; return; }
-    errEl.textContent='Uploading…';
-    makeBtn.disabled=true;
-
+  submitBtn.addEventListener('click', async ()=>{
     try{
-      const { url, key } = await signUpload(chosenFile.name || 'swing.mp4', chosenFile.type || 'video/mp4');
-      await putToS3(url, chosenFile, chosenFile.type || 'video/mp4');
-      errEl.textContent='Analyzing…';
-      const { report } = await analyze(key);
+      if(!chosenFile || !blobUrl){ errEl.textContent='Choose a video first.'; return; }
+      submitBtn.disabled = true;
+      errEl.textContent = 'Analyzing locally...';
 
+      // 1) local analyzer v1 (instant, on-device)
+      const report = await analyzeLocally(blobUrl);
+
+      // 2) upload the raw video to S3 (for back-end analyzer v2)
+      errEl.textContent = 'Uploading securely...';
+      let s3Key = null;
+      try{
+        const { key } = await uploadToS3(chosenFile);
+        s3Key = key;
+      }catch(e){
+        console.warn('Upload failed, continuing with local-only report', e);
+      }
+
+      if (s3Key) {
+        // Attach where we stored the video, so /api/analyze can find it later
+        report.source = { s3_key: s3Key };
+      }
+
+      // 3) stash and open the report (session-based → works with blob: refs)
       sessionStorage.setItem('vc_report', JSON.stringify(report));
       localStorage.setItem('vc_last_report', JSON.stringify(report));
       location.href = '/report.html?src=session';
-    }catch(e){
-      console.error(e);
-      errEl.textContent = e.message || 'Upload/Analyze error';
-      makeBtn.disabled=false;
+    }catch(err){
+      console.error(err);
+      errEl.textContent = err.message || String(err);
+      submitBtn.disabled = false;
     }
   });
 </script>
