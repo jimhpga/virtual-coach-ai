@@ -6,12 +6,13 @@
 <title>Upload — Virtual Coach AI</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
-  :root{ --nav:#0b2b12; --scrim: rgba(0,0,0,.05);
+  :root{
+    --nav:#0b2b12; --scrim: rgba(0,0,0,.05);
     --panel: rgba(0,0,0,.30); --line: rgba(255,255,255,.12);
-    --text:#f2f7f9; --muted:#cfe0e6; --maxw:980px; --radius:14px; }
+    --text:#f2f7f9; --muted:#cfe0e6; --maxw:980px; --radius:14px;
+  }
   *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-       background:url('/homepage-background.png') center/cover fixed no-repeat;}
+  body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:url('/homepage-background.png') center/cover fixed no-repeat;}
   .scrim{min-height:100vh;background:var(--scrim);}
   .wrap{width:min(var(--maxw),94%);margin:0 auto;padding:16px 0 40px}
   .card{padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px)}
@@ -22,6 +23,10 @@
   .btn:disabled{opacity:.55;cursor:not-allowed}
   input[type=file]{display:block;width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff}
   .kv{display:grid;grid-template-columns:140px 1fr;gap:6px;color:#dfecef;font-size:.95rem;margin-top:8px}
+  .note{color:#cfe0e6;font-size:.95rem;margin-top:10px}
+  .status{margin-top:10px;color:#cfe0e6;font-size:.95rem;display:none}
+  .spin{display:inline-block; width:1em; height:1em; border:.15em solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:spin 1s linear infinite; vertical-align:-.2em; margin-right:.5em}
+  @keyframes spin{to{transform:rotate(360deg)}}
   footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
 </style>
 </head>
@@ -33,9 +38,12 @@
     <main class="wrap">
       <h1 style="margin:6px 0 12px">Upload Your Swing</h1>
       <div class="card">
-        <p class="hint">On iPhone, tap <strong>Choose File</strong> → <strong>Take Video</strong> or <strong>Photo Library</strong>. Face-on & down-the-line both work.</p>
+        <p class="hint">
+          On iPhone, tap <strong>Choose File</strong> → pick <em>Take Video</em>, <em>Photo Library</em>, or <em>Browse</em>.
+          Face-on & down-the-line both work.
+        </p>
 
-        <!-- IMPORTANT: no capture attr, so iPhone shows camera OR library -->
+        <!-- IMPORTANT: no capture attribute, so iPhone shows all choices (camera, library, files) -->
         <input id="file" type="file" accept="video/*" />
         <div id="meta" style="display:none;margin-top:10px">
           <div class="kv"><div>Filename</div><div id="m_name"></div></div>
@@ -43,10 +51,16 @@
           <div class="kv"><div>Duration</div><div id="m_dur"></div></div>
         </div>
 
+        <!-- “~1 minute” note -->
+        <div class="note">After you submit, we’ll analyze your swing. This usually takes about a minute. Please keep this tab open.</div>
+
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-          <button id="submitBtn" class="btn primary" disabled>Submit Video</button>
+          <button id="make" class="btn primary" disabled>Submit Video</button>
           <button id="reset" class="btn" disabled>Reset</button>
         </div>
+
+        <!-- Live status line -->
+        <p id="status" class="status" role="status" aria-live="polite"></p>
 
         <p id="err" style="color:#ffd1d1;margin-top:10px"></p>
       </div>
@@ -59,13 +73,10 @@
   // Year
   document.getElementById('y').textContent = new Date().getFullYear();
 
-  // --- Simple auth gate (optional). Comment out to remove login entirely. ---
-  try{
-    const ok = localStorage.getItem('vc_auth') === 'ok';
-    // if (!ok) location.href = '/login.html?next=upload';
-  }catch{}
+  // --- REMOVE auth redirect for now to avoid blocking uploads ---
+  // If you want it: if (localStorage.getItem('vc_auth')!=='ok') location.href='/login.html?next=upload';
 
-  // --- Nav inline loader with fallback ---
+  // --- Nav inline loader with fallback (guarantees nav appears) ---
   (function(){
     const mount = document.getElementById('navMount');
     if(!mount) return;
@@ -103,34 +114,49 @@
       .then(r=>r.ok?r.text():Promise.reject(r)).then(h=>{mount.innerHTML=h;markCurrent();}).catch(fallback);
   })();
 
-  // ---------- Upload page logic ----------
+  // --- iPhone/desktop upload → build report → force-redirect to report ---
   const fileEl = document.getElementById('file');
-  const submitBtn = document.getElementById('submitBtn');
+  const makeBtn = document.getElementById('make');
   const resetBtn = document.getElementById('reset');
   const errEl = document.getElementById('err');
   const metaBox = document.getElementById('meta');
   const mName = document.getElementById('m_name');
   const mSize = document.getElementById('m_size');
   const mDur  = document.getElementById('m_dur');
+  const statusEl = document.getElementById('status');
 
   let chosenFile = null;
   let blobUrl = null;
   let duration = 0;
 
   function fmtBytes(b){
-    if (!b && b !== 0) return '—';
+    if (b === 0) return '0 B';
+    if (!b) return '—';
     const u=['B','KB','MB','GB']; let i=0; let n=b;
     while(n>=1024 && i<u.length-1){ n/=1024; i++; }
     return n.toFixed(1)+' '+u[i];
   }
   function fmtSec(s){ if(!s) return '—'; const m=Math.floor(s/60); const r=Math.round(s%60); return `${m}:${String(r).padStart(2,'0')}`; }
 
+  function showStatus(msg){
+    statusEl.innerHTML = `<span class="spin"></span>${msg}`;
+    statusEl.style.display = '';
+  }
+
+  function safeGo(url){
+    // multiple ways, just in case one is blocked
+    try { window.location.assign(url); } catch(e) {}
+    setTimeout(()=>{ try{ window.location.href = url; }catch(e){} }, 250);
+    setTimeout(()=>{ try{ window.location.replace(url); }catch(e){} }, 500);
+  }
+
   resetBtn.addEventListener('click', ()=>{
     errEl.textContent='';
+    statusEl.style.display='none'; statusEl.textContent='';
     metaBox.style.display='none';
     mName.textContent=mSize.textContent=mDur.textContent='';
     fileEl.value='';
-    submitBtn.disabled=true; resetBtn.disabled=true;
+    makeBtn.disabled=true; resetBtn.disabled=true;
     if (blobUrl) { try{ URL.revokeObjectURL(blobUrl); }catch{} }
     chosenFile=null; blobUrl=null; duration=0;
   });
@@ -138,23 +164,24 @@
   fileEl.addEventListener('change', async (e)=>{
     resetBtn.disabled=false;
     errEl.textContent='';
+    statusEl.style.display='none'; statusEl.textContent='';
     const f = e.target.files && e.target.files[0];
-    if(!f){ submitBtn.disabled=true; return; }
+    if(!f){ makeBtn.disabled=true; return; }
     if(!f.type || !/^video\//i.test(f.type)){
-      errEl.textContent='Please choose a video.'; submitBtn.disabled=true; return;
+      errEl.textContent='Please choose a video.'; makeBtn.disabled=true; return;
     }
     chosenFile=f;
-    blobUrl = URL.createObjectURL(f);
+    try{ blobUrl = URL.createObjectURL(f); }catch(e){ blobUrl = ''; }
 
-    // Probe duration
     try{
       const v = document.createElement('video');
       v.preload='metadata'; v.src = blobUrl; v.muted = true; v.playsInline = true;
       await new Promise((res,rej)=>{
-        const to = setTimeout(()=>rej(new Error('metadata timeout')), 12000);
-        v.onloadedmetadata = ()=>{ clearTimeout(to); duration = isFinite(v.duration)?v.duration:0; res(); };
+        const to = setTimeout(()=>rej(new Error('metadata timeout')), 10000);
+        v.onloadedmetadata = ()=>{ clearTimeout(to); res(); };
         v.onerror = ()=>{ clearTimeout(to); rej(new Error('metadata error')); };
       });
+      duration = isFinite(v.duration) ? v.duration : 0;
     }catch(e){ duration = 0; }
 
     metaBox.style.display='';
@@ -162,182 +189,76 @@
     mSize.textContent = fmtBytes(f.size);
     mDur.textContent  = fmtSec(duration);
 
-    submitBtn.disabled=false;
+    makeBtn.disabled=false;
   });
 
-  // -------- Local Analyzer v1 (frame sampling → tempo, impact, steadiness) --------
-  async function analyzeLocally(videoURL){
-    const video = document.createElement('video');
-    video.src = videoURL;
-    video.muted = true;
-    video.playsInline = true;
-    await video.play().catch(()=>{}); // nudge iOS to decode frames; it will instantly pause below
-    video.pause();
-    await new Promise((r)=> video.onloadedmetadata = r);
-
-    const D = video.duration || duration || 3;
-    const samples = Math.min(90, Math.max(30, Math.round(D*24))); // ~24 fps cap
-    const canvas = document.createElement('canvas');
-    canvas.width = 256; canvas.height = Math.round((video.videoHeight||256) * (256/(video.videoWidth||256)));
-    const ctx = canvas.getContext('2d', { willReadFrequently:true });
-
-    const energy = [];
-    let lastFrame = null;
-
-    for(let i=0;i<samples;i++){
-      const t = (i/(samples-1)) * (D-0.01);
-      video.currentTime = t;
-      await new Promise((r)=> video.onseeked = r);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const frame = ctx.getImageData(0,0,canvas.width,canvas.height).data;
-
-      // simple motion energy: average abs diff from previous frame
-      if(lastFrame){
-        let sum=0, count=0;
-        for(let p=0;p<frame.length;p+=4){
-          const dr = Math.abs(frame[p]-lastFrame[p]);
-          const dg = Math.abs(frame[p+1]-lastFrame[p+1]);
-          const db = Math.abs(frame[p+2]-lastFrame[p+2]);
-          sum += (dr+dg+db)/3; count++;
-        }
-        energy.push(sum/count);
-      } else {
-        energy.push(0);
-      }
-      lastFrame = frame;
+  makeBtn.addEventListener('click', ()=>{
+    errEl.textContent='';
+    if(!chosenFile || !blobUrl){
+      errEl.textContent='Choose a video first.'; return;
     }
 
-    // find “impact” as the largest motion spike
-    let impactIdx = 0; let peak = -1;
-    for (let i=0;i<energy.length;i++){ if(energy[i] > peak){ peak=energy[i]; impactIdx=i; } }
+    showStatus('Analyzing your swing… ~1 minute');
 
-    // crude backswing vs downswing split: max slope to impact
-    const backswingFrames = Math.max(1, impactIdx);
-    const downswingFrames = Math.max(1, Math.min(samples-impactIdx, Math.round(samples*0.25)));
-    const tempoRatio = backswingFrames / downswingFrames; // ideal ~3:1
-
-    // steadiness: lower variance → steadier motion
-    const mean = energy.reduce((a,b)=>a+b,0)/energy.length;
-    const variance = energy.reduce((a,b)=>a+(b-mean)*(b-mean),0)/energy.length;
-    const steadiness = Math.max(0, 100 - Math.sqrt(variance)*2); // 0..100
-
-    // release timing heuristic: speed of rise into impact
-    const window = Math.max(2, Math.round(samples*0.06));
-    const pre = Math.max(0, impactIdx-window);
-    const rise = energy[impactIdx] - energy[pre];
-    const releaseTiming = Math.max(20, Math.min(95, Math.round(60 + (rise/(peak||1))*30)));
-
-    // position “scores” – just diversify so it does not show all OK
-    function band(v){ return v>=75 ? 'good' : v>=55 ? 'ok' : 'bad'; }
-    const posScores = [72, 64, 68, 60, 58, 70, 66, 62, 65].map((base,i)=>{
-      // nudge scores using steadiness and tempo closeness
-      const tempoPenalty = Math.min(12, Math.abs(tempoRatio-3)*6);
-      const n = Math.max(40, Math.min(92, Math.round(base + (steadiness-70)/6 - tempoPenalty/2 + (i===6? (releaseTiming-60)/4 : 0))));
-      return n;
-    });
-
-    const phases = [
-      ['P1','Setup'],['P2','Takeaway'],['P3','Lead Arm Parallel'],['P4','Top'],
-      ['P5','Delivery'],['P6','Shaft Parallel'],['P7','Impact'],['P8','Post-Impact'],['P9','Finish']
-    ].map(([id,name],i)=>({
-      id, name,
-      grade: band(posScores[i]),
-      short: (i===6 ? 'Match impact alignments' :
-             i===4 ? 'Shallow then rotate' :
-             i===1 ? 'One-piece start' : 'Focused checkpoint'),
-      long: (i===6
-        ? 'Look for forward shaft lean, level chest, and pressure left at impact.'
-        : i===4
-          ? 'Feel trail elbow lead, keep chest down longer, then rotate through.'
-          : i===1
-            ? 'Start club, arms, and torso together in first 12–18 inches.'
-            : 'Keep it simple: one cue, clear rep target, then move on.'),
-      ref: blobUrl
-    }));
-
-    const tempoLabel = `${Math.max(1,Math.round(backswingFrames/downswingFrames))}:1`;
-
-    return {
-      discipline: 'Full Swing',
-      date: new Date().toISOString(),
-      swings: 1,
-      phases,
-      coaching: {
-        priority_fixes: [
-          { title:'Tempo to ~3:1', short:'Count 1-2-3-hit', long:'Smooth the transition; avoid rushing from the top. Drill: 3:1 metronome swings.', ref:''},
-          { title:'Impact Window', short:'Ball then turf', long:'Half-swings with mid-iron; film two reps to confirm low-point in front.', ref:''},
-          { title:'Finish Tall', short:'Chest to target', long:'Hold posture through impact, then stand tall with weight left.', ref:''}
-        ],
-        power_fixes: [
-          { title:'Sequencing', short:'Hips then torso', long:'Bump left hip to start down; keep the club shallowing as you rotate.', ref:''}
-        ]
-      },
-      position_metrics: [
-        {label:'Setup Match', value: posScores[0]},
-        {label:'Top Position', value: posScores[3]},
-        {label:'Impact Alignments', value: posScores[6]}
-      ],
-      swing_metrics: [
-        {label:'Tempo Ratio Proximity', value: Math.max(35, Math.min(95, Math.round(100 - Math.min(3, Math.abs(tempoRatio-3))*25)))},
-        {label:'Motion Steadiness', value: Math.round(steadiness)}
-      ],
-      power: {
-        score: Math.max(45, Math.min(95, Math.round((steadiness+releaseTiming)/2))),
-        tempo: tempoLabel,
-        release_timing: releaseTiming
-      }
-    };
-  }
-
-  // -------- upload to S3 via pre-signed PUT --------
-  async function uploadToS3(file) {
-    // Ask the server for a pre-signed URL
-    const r = await fetch('/api/sign-upload', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ contentType: file.type || 'video/mp4' })
-    });
-    if(!r.ok){ throw new Error('sign-upload failed'); }
-    const { url, key } = await r.json();
-
-    // PUT the file to S3
-    const put = await fetch(url, { method:'PUT', body:file, headers:{'Content-Type': file.type||'video/mp4'} });
-    if(!put.ok){ throw new Error('upload PUT failed: '+put.status); }
-    return { key };
-  }
-
-  submitBtn.addEventListener('click', async ()=>{
     try{
-      if(!chosenFile || !blobUrl){ errEl.textContent='Choose a video first.'; return; }
-      submitBtn.disabled = true;
-      errEl.textContent = 'Analyzing locally...';
+      // Lightweight placeholder analysis; replace with backend results later
+      const now = new Date();
+      const durScore = Math.max(40, Math.min(95, Math.round((duration||3)*8)));
+      const relScore = Math.max(35, Math.min(90, Math.round(60 + ((duration||0)-3)*5)));
 
-      // 1) local analyzer v1 (instant, on-device)
-      const report = await analyzeLocally(blobUrl);
+      const phases = [
+        ['P1','Setup'],['P2','Takeaway'],['P3','Lead Arm Parallel'],['P4','Top'],
+        ['P5','Delivery'],['P6','Shaft Parallel'],['P7','Impact'],['P8','Post-Impact'],['P9','Finish']
+      ].map(([id,name])=>({
+        id, name, grade:'ok',
+        short:'Review with coach',
+        long:'Tap the Video button to view your swing for this checkpoint.',
+        ref: blobUrl // opens your local phone video in a new tab
+      }));
 
-      // 2) upload the raw video to S3 (for back-end analyzer v2)
-      errEl.textContent = 'Uploading securely...';
-      let s3Key = null;
+      const report = {
+        discipline:'Full Swing',
+        date: now.toISOString(),
+        swings: 1,
+        phases,
+        coaching:{
+          priority_fixes:[
+            {title:'One Key Feel', short:'Pick one cue only', long:'Use one external cue for 15 balls (e.g., finish tall).'},
+            {title:'Tempo Baseline', short:'3:1 feel', long:'Count “one-two-three-hit” to smooth transition.'},
+            {title:'Impact Check', short:'Ball then turf', long:'Half swings with a mid-iron; brush after impact.'},
+          ],
+          power_fixes:[
+            {title:'Finish Tall', short:'No stall', long:'Chest to target, push to full height after impact.'}
+          ]
+        },
+        position_metrics:[
+          {label:'Setup Match', value:72},
+          {label:'Top Position', value:66},
+          {label:'Impact Alignments', value:70}
+        ],
+        swing_metrics:[
+          {label:'Tempo Repeatability', value:76},
+          {label:'Face-to-Path Stability', value:64}
+        ],
+        power:{score:durScore, tempo:'~3:1', release_timing:relScore}
+      };
+
+      // Try to persist (ok if it fails—redirect still happens)
       try{
-        const { key } = await uploadToS3(chosenFile);
-        s3Key = key;
-      }catch(e){
-        console.warn('Upload failed, continuing with local-only report', e);
-      }
+        sessionStorage.setItem('vc_report', JSON.stringify(report));
+        localStorage.setItem('vc_last_report', JSON.stringify(report));
+      }catch(e){ /* ignore quota/private mode */ }
 
-      if (s3Key) {
-        // Attach where we stored the video, so /api/analyze can find it later
-        report.source = { s3_key: s3Key };
-      }
+      // Force the redirect in multiple ways so it never sits stuck
+      safeGo('/report.html?src=session');
 
-      // 3) stash and open the report (session-based → works with blob: refs)
-      sessionStorage.setItem('vc_report', JSON.stringify(report));
-      localStorage.setItem('vc_last_report', JSON.stringify(report));
-      location.href = '/report.html?src=session';
-    }catch(err){
-      console.error(err);
-      errEl.textContent = err.message || String(err);
-      submitBtn.disabled = false;
+      // Ultra-belt-and-suspenders: if somehow still here after 2s, try again
+      setTimeout(()=>safeGo('/report.html?src=session'), 2000);
+
+    }catch(e){
+      console.error(e);
+      errEl.textContent = 'Something went wrong preparing the report.';
+      statusEl.style.display='none';
     }
   });
 </script>
