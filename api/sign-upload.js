@@ -1,43 +1,39 @@
 // /api/sign-upload.js
-import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const crypto = require("crypto");
 
-const REGION = process.env.AWS_REGION;
-const BUCKET = process.env.BUCKET_NAME;
+const BUCKET = process.env.VCA_BUCKET_UPLOADS;          // e.g. virtualcoachai-uploaods
+const REGION = process.env.AWS_REGION || "us-west-2";   // match your bucket region
 
 const s3 = new S3Client({ region: REGION });
 
-export default async function handler(req, res) {
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    return res.status(204).end();
+module.exports = async (req, res) => {
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method Not Allowed" });
+    return;
   }
-  if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed' });
-
   try {
-    const { filename = 'swing.mp4', contentType = 'video/mp4' } = req.query;
-    const ext = filename.includes('.') ? filename.split('.').pop() : 'mp4';
-    const key = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { filename, contentType } = JSON.parse(req.body || "{}");
+    if (!filename || !contentType) {
+      res.status(400).json({ error: "filename and contentType required" });
+      return;
+    }
 
-    const putCmd = new PutObjectCommand({
+    const ext = (filename.split(".").pop() || "mp4").toLowerCase();
+    const key = `uploads/${Date.now()}-${crypto.randomBytes(5).toString("hex")}.${ext}`;
+
+    const cmd = new PutObjectCommand({
       Bucket: BUCKET,
       Key: key,
       ContentType: contentType,
-      ACL: 'private',
+      ACL: "private"
     });
-    const uploadUrl = await getSignedUrl(s3, putCmd, { expiresIn: 900 }); // 15 min
 
-    const getCmd = new GetObjectCommand({ Bucket: BUCKET, Key: key });
-    const viewUrl = await getSignedUrl(s3, getCmd, { expiresIn: 86400 }); // 24 hours
-
-    const publicUrl = `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
-
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    return res.status(200).json({ uploadUrl, key, publicUrl, viewUrl });
+    const url = await getSignedUrl(s3, cmd, { expiresIn: 900 }); // 15 min
+    res.status(200).json({ url, key, bucket: BUCKET, region: REGION });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ error: 'presign failed' });
+    res.status(500).json({ error: "sign-upload failed" });
   }
-}
+};
