@@ -1,136 +1,78 @@
-export default async function handler(req, res) {
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(500).json({ error: 'Missing OPENAI_API_KEY' });
-  }
+// /api/analyze.js
+const { S3Client, HeadObjectCommand } = require("@aws-sdk/client-s3");
 
-  // Safely read request body
-  let body = '';
-  try {
-    await new Promise((resolve, reject) => {
-      req.on('data', chunk => (body += chunk));
-      req.on('end', resolve);
-      req.on('error', reject);
-    });
-  } catch {
-    return res.status(400).json({ error: 'Failed to read body' });
-  }
+const BUCKET = process.env.VCA_BUCKET_UPLOADS;
+const REGION = process.env.AWS_REGION || "us-west-2";
+const s3 = new S3Client({ region: REGION });
 
-  let payload = {};
-  try {
-    payload = JSON.parse(body);
-  } catch {
-    return res.status(400).json({ error: 'Invalid JSON' });
-  }
+// deterministic “random” from a string
+function seedFrom(s){ let h=2166136261>>>0; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=(h*16777619)>>>0; } return h; }
+function rand01(seed){ seed = (seed*1664525+1013904223)>>>0; return [seed, (seed>>>8)/0xFFFFFF]; }
 
-  // Grab videoUrl or use fallback
-  const selections = payload.selections || {};
-  let videoUrl = (payload.videoUrl || '').trim();
-  if (!videoUrl) {
-    videoUrl = 'https://samplelib.com/lib/preview/mp4/sample-5s.mp4';
-  }
-
-  const cid = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
-
-  // Call OpenAI
-  let ai = null;
-  try {
-    const prompt = `
-Return STRICT JSON ONLY. Format:
-{
-  "id": "string",
-  "profile": "string",
-  "tempo": "string",
-  "totals": { "fairways": number, "greens": number, "putts": number, "swingSpeedAvg": number, "power": number },
-  "metrics": { "P1": number, "P2": number, ..., "P9": number },
-  "pstack": {
-    "P1": { "condition": "string", "rating": "string", "status": "good|okay|need", "short": "string", "long": "string" },
-    ...
-    "P9": { ... }
-  },
-  "tips3": [ "string", "string", "string" ],
-  "power": { "score": number, "notes": [ "string", "string", "string" ] },
-  "powerTips3": [ "string", "string", "string" ],
-  "lessons14": [ "string", ..., "string" ]
+function variedGrades(seedBase){
+  let seed = seedFrom(seedBase);
+  const ids = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
+  return ids.map((id,i)=>{
+    let r; [seed,r]=rand01(seed);
+    const g = r<0.25 ? 'bad' : r<0.6 ? 'ok' : 'good';
+    return { id, name:['Setup','Takeaway','Lead Arm Parallel','Top','Delivery','Shaft Parallel','Impact','Post-Impact','Finish'][i], grade:g };
+  });
 }
 
-Only use: "status": good | okay | need
-video=${videoUrl}, club=${selections.club || '7I'}, model=${selections.model || 'v1'}
-    `.trim();
+function buildReport({ key, sizeBytes }){
+  const base = `${key}|${sizeBytes||0}`;
+  const grades = variedGrades(base);
+  const now = new Date();
 
-    const r = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: 'Return STRICT JSON only, no prose.' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.2,
-        response_format: { type: 'json_object' }
-      })
-    });
+  // fabricate duration-based “power” from size; swap with real metrics later
+  const approxSec = Math.max(2, Math.min(12, Math.round((sizeBytes||5_000_000) / 800_000)));
+  const durScore = Math.max(40, Math.min(95, approxSec*8));
+  const relScore = Math.max(35, Math.min(90, 60 + (approxSec-3)*5));
 
-    const json = await r.json();
-    const text = json?.choices?.[0]?.message?.content || '{}';
-    ai = JSON.parse(text);
-  } catch (err) {
-    console.error('[OpenAI error]', err);
-    ai = {
-      id: cid,
-      profile: 'Auto profile',
-      tempo: '3:1',
-      totals: { fairways: 8, greens: 12, putts: 30, swingSpeedAvg: 98, power: 82 },
-      metrics: Object.fromEntries(Array.from({ length: 9 }, (_, i) => [`P${i + 1}`, i + 1])),
-      pstack: Object.fromEntries(Array.from({ length: 9 }, (_, i) => {
-        const p = `P${i + 1}`;
-        return [p, {
-          condition: ['Setup','Takeaway','Lead Arm','Top','Transition','Delivery','Impact','Extension','Finish'][i],
-          rating: `${6 + (i % 4)}/10`,
-          status: ['good', 'okay', 'need'][i % 3],
-          short: `Auto short for ${p}`,
-          long: `Auto long explanation for ${p}`
-        }];
-      })),
-      tips3: ['Hold finish', 'Shift earlier', 'Extend left'],
-      power: { score: 82, notes: ['Strong base', 'Good lag', 'More width at P4'] },
-      powerTips3: ['Step drill', '3-ball whip', 'Med ball wall throw'],
-      lessons14: Array.from({ length: 14 }, (_, i) => `Day ${i + 1} - Practice block`)
-    };
-  }
+  const phases = grades.map((g)=>({
+    id:g.id, name:g.name, grade:g.grade,
+    short: g.grade==='bad' ? 'Needs attention' : g.grade==='good' ? 'Solid' : 'Workable',
+    long: 'Tap Video to review this checkpoint with your coach.',
+    ref: `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`
+  }));
 
-  // Force assign ID
-  ai.id = ai.id || cid;
+  return {
+    discipline:'Full Swing',
+    date: now.toISOString(),
+    swings: 1,
+    phases,
+    coaching:{
+      priority_fixes:[
+        { title:'One Key Feel', short:'Pick one cue', long:'Use one external cue for 15 balls (e.g., finish tall).', ref:''},
+        { title:'Tempo Baseline', short:'~3:1', long:'Count “one-two-three-hit” to smooth transition.', ref:''},
+        { title:'Impact Check', short:'Ball→turf', long:'Half swings with a mid-iron; video two reps to confirm.', ref:''},
+      ],
+      power_fixes:[{ title:'Finish Tall', short:'No stall', long:'Let chest face target; stand tall.', ref:''}]
+    },
+    position_metrics:[{label:'Setup Match',value:72},{label:'Top Position',value:66},{label:'Impact Alignments',value:70}],
+    swing_metrics:[{label:'Tempo Repeatability',value:76},{label:'Face-to-Path Stability',value:64}],
+    power:{ score:durScore, tempo:'~3:1', release_timing:relScore }
+  };
+}
 
-  // Save to Supabase
-  let saved = false;
-  try {
-    const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supaKey = process.env.SUPABASE_SERVICE_ROLE;
-    const r = await fetch(`${supaUrl}/rest/v1/reports`, {
-      method: 'POST',
-      headers: {
-        apikey: supaKey,
-        Authorization: `Bearer ${supaKey}`,
-        'Content-Type': 'application/json',
-        Prefer: 'resolution=merge-duplicates'
-      },
-      body: JSON.stringify({ id: ai.id, data: ai })
-    });
+module.exports = async (req, res) => {
+  try{
+    const { key } = req.query || {};
+    if (!key) { res.status(400).json({ error:'key required' }); return; }
 
-    if (r.ok) saved = true;
-    else {
-      const t = await r.text();
-      console.error('[Supabase save error]', r.status, t);
+    let sizeBytes = 0;
+    try{
+      const head = await s3.send(new HeadObjectCommand({ Bucket: BUCKET, Key: key }));
+      sizeBytes = Number(head.ContentLength || 0);
+    }catch(e){
+      // if HeadObject not allowed, we still produce a report
+      console.warn('HeadObject failed (continuing):', e?.name || e);
     }
-  } catch (err) {
-    console.error('[Supabase error]', err);
-  }
 
-  // Return result
-  res.setHeader('Cache-Control', 'no-store');
-  res.status(200).json({ ...ai, _saved: saved, _cid: cid, _videoUrl: videoUrl });
-}
+    const report = buildReport({ key, sizeBytes });
+    res.status(200).json({ report });
+  }catch(e){
+    console.error(e);
+    res.status(500).json({ error:'analyze failed' });
+  }
+};
