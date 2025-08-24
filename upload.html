@@ -303,6 +303,70 @@ select option{color:#111;background:#fff}
 
   /* ---------- Shortcuts ---------- */
   const $ = s => document.querySelector(s);
+  <script>
+/* If an old JSON <pre id="summary"> exists, swap it for a clean grid once */
+(function migrateOldSummary(){
+  const old = document.querySelector('pre#summary');
+  if (!old) return;
+  const wrap = document.createElement('div');
+  wrap.id = 'summary';
+  wrap.className = 'kv';
+  wrap.innerHTML = `
+    <div class="k">First</div><div class="v muted" data-k="first">—</div>
+    <div class="k">Email</div><div class="v muted" data-k="email">—</div>
+    <div class="k">Eye dominance</div><div class="v muted" data-k="eye">—</div>
+    <div class="k">Handedness</div><div class="v muted" data-k="hand">—</div>
+    <div class="k">Gender</div><div class="v muted" data-k="gender">—</div>
+    <div class="k">Height (in)</div><div class="v muted" data-k="height">—</div>
+    <div class="k">Body build</div><div class="v muted" data-k="bodyShape">—</div>
+    <div class="k">Focus</div><div class="v muted" data-k="focus">—</div>
+    <div class="k">Cross-dominant</div><div class="v muted" data-k="cross_dominant">—</div>
+    <div class="k">Aim bias</div><div class="v muted" data-k="aim_bias">—</div>
+    <div class="k">Scale factor</div><div class="v muted" data-k="scale_factor">—</div>
+  `;
+  old.replaceWith(wrap);
+})();
+
+/* Replace your updateSummary() with this version */
+function updateSummary(){
+  const fields = ['first','email','eye','hand','gender','height','bodyShape','focus'];
+  fields.forEach(k=>{
+    const el = document.getElementById(k);
+    if (!el) return;
+    // keep your global 'data' object in sync
+    data[k] = (el.type === 'number') ? (el.value ? Number(el.value) : '') : el.value.trim();
+  });
+
+  const derived = deriveHints(data);
+  const summary = document.getElementById('summary');
+
+  if (summary && summary.classList.contains('kv')){
+    const set = (key, val)=>{ const n = summary.querySelector(`[data-k="${key}"]`); if(n){ n.textContent = (val!=='' && val!=null) ? String(val) : '—'; n.classList.toggle('muted', !val);} };
+    set('first', data.first);
+    set('email', data.email);
+    set('eye', data.eye);
+    set('hand', data.hand);
+    set('gender', data.gender);
+    set('height', data.height);
+    set('bodyShape', data.bodyShape);
+    set('focus', data.focus);
+    set('cross_dominant', derived.cross_dominant ? 'Yes' : 'No');
+    set('aim_bias', derived.aim_bias);
+    set('scale_factor', derived.scale_factor);
+  } else if (summary && summary.tagName === 'PRE'){
+    // fallback if someone kept the <pre>
+    summary.textContent = JSON.stringify({ ...data, derived }, null, 2);
+  }
+
+  // keep your localStorage mirror
+  try{
+    const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
+    Object.assign(saved, data);
+    localStorage.setItem('vc_prefill', JSON.stringify(saved));
+  }catch{}
+}
+</script>
+
   const fileInput = $('#file');
   const fname = $('#fname');
   const fmeta = $('#fmeta');
