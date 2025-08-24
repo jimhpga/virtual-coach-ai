@@ -22,6 +22,7 @@
     .btn.secondary{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25)}
     .progress{height:10px;background:rgba(255,255,255,.25);border-radius:999px;overflow:hidden}
     .bar{display:block;height:100%;width:0%;background:linear-gradient(90deg,#6ad488,#34c77f)}
+    .muted{color:var(--muted)}
   </style>
 </head>
 <body>
@@ -67,8 +68,6 @@
         <button class="btn" id="submit">Submit for Analysis</button>
         <button class="btn secondary" id="clear-video" type="button">Clear Video</button>
       </div>
-
-      <pre id="payload" class="card" style="display:none"></pre>
     </section>
 
     <section id="progress-card" class="card" style="display:none">
@@ -82,13 +81,15 @@
       </ul>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
         <a class="btn" href="/reports.html" id="to-reports">Go to Reports</a>
+        <!-- NEW: Download link appears after successful upload -->
+        <a class="btn secondary" id="download-video" href="#" style="display:none">Download for Analysis</a>
         <button class="btn secondary" id="upload-another" type="button">Upload another</button>
       </div>
     </section>
   </main>
 
   <script>
-    // Load intake if present
+    // Load intake summary if present
     (function(){
       const el=document.getElementById('upload-intake');
       const raw=localStorage.getItem('vca_intake');
@@ -109,12 +110,16 @@
     const progressCard=document.getElementById('progress-card');
     const progressDesc=document.getElementById('progress-desc');
     const bar=document.getElementById('bar');
-    const payload=document.getElementById('payload');
+    const submitBtn=document.getElementById('submit');
+    const downloadBtn=document.getElementById('download-video');
 
     inputVideo.addEventListener('change',()=>{
       const file=inputVideo.files?.[0];
       if(!file){
-        status.textContent='Idle'; vid.style.display='none'; vid.removeAttribute('src'); filemeta.style.display='none'; return;
+        status.textContent='Idle';
+        vid.style.display='none'; vid.removeAttribute('src');
+        filemeta.style.display='none';
+        return;
       }
       const url=URL.createObjectURL(file);
       vid.src=url; vid.style.display='block';
@@ -124,55 +129,37 @@
     });
 
     document.getElementById('clear-video').addEventListener('click',()=>{
-      inputVideo.value=""; vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display='none';
+      inputVideo.value="";
+      vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display='none';
       status.textContent='Idle'; filemeta.style.display='none';
       localStorage.removeItem('vca_processing');
       progressCard.style.display='none';
-      payload.style.display='none';
+      downloadBtn.style.display='none'; downloadBtn.removeAttribute('href');
+      submitBtn.disabled=false;
     });
 
-    document.getElementById('submit').addEventListener('click',()=>{
-      const intake=localStorage.getItem('vca_intake');
-      const file=inputVideo.files?.[0];
-      if(!file){ alert('Choose a swing video.'); return; }
-
-      status.textContent='Uploading…';
-      const formData=new FormData();
-      if(intake) formData.append('intake',intake);
-      formData.append('video',file,file.name);
-
-      // Demo payload preview
-      payload.style.display='block';
-      payload.textContent=`POST /api/analyze
-Headers: (multipart/form-data)
-Intake:
-${intake||'(none)'} 
-
-Video: ${file.name} (${Math.round(file.size/1024)} KB)`;
-
-      status.textContent='Uploaded • Processing';
-      showProcessing(file.name);
-      localStorage.setItem('vca_processing', JSON.stringify({file:file.name, ts:Date.now()}));
+    document.getElementById('upload-another').addEventListener('click',()=>{
+      inputVideo.value="";
+      vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display='none';
+      status.textContent='Idle'; filemeta.style.display='none';
+      progressCard.style.display='none';
+      downloadBtn.style.display='none'; downloadBtn.removeAttribute('href');
+      submitBtn.disabled=false;
+      window.scrollTo({top:0,behavior:'smooth'});
     });
 
-    function showProcessing(filename){
-      progressCard.style.display='block';
-      progressDesc.textContent=`We received ${filename} and started analysis. You can head to Reports — it will appear there when ready.`;
-      animateBar();
-      document.getElementById('to-reports').focus();
-    }
+    submitBtn.addEventListener('click', async ()=>{
+      const intake = localStorage.getItem('vca_intake');
+      const file = inputVideo.files?.[0];
+      if (!file) { alert('Choose a swing video.'); return; }
 
-    function animateBar(){
-      let w=0; bar.style.width='0%';
-      clearInterval(window.__vcaBar);
-      window.__vcaBar=setInterval(()=>{w=(w+5)%105; bar.style.width=w+'%';},120);
-    }
+      submitBtn.disabled = true;
+      status.textContent = 'Uploading…';
 
-    (function restoreProcessing(){
-      const raw=localStorage.getItem('vca_processing');
-      if(!raw) return;
-      try{const {file}=JSON.parse(raw); if(file) showProcessing(file);}catch{}
-    })();
-  </script>
-</body>
-</html>
+      const formData = new FormData();
+      if (intake) formData.append('intake', intake);
+      formData.append('video', file, file.name);
+
+      let resp;
+      try {
+        resp = await fetch('/api/upload', { method: 'POST', body: formDat
