@@ -99,6 +99,20 @@
   .pop p{ margin:6px 0; font-size:13px; color:var(--muted); }
   .pop ul{ margin:6px 0 0 18px; padding:0; }
   .pop li{ margin:4px 0; font-size:13px; color:var(--muted); }
+
+  /* === inline glossary tooltips (auto-added in text) === */
+  .hint{ position:relative; cursor:help; border-bottom:1px dotted rgba(255,255,255,.55); }
+  .hint:focus-visible{ outline:2px dashed rgba(255,255,255,.35); outline-offset:2px; }
+  .hint[data-tip]::after{
+    content:attr(data-tip);
+    position:absolute; left:0; bottom:calc(100% + 6px);
+    display:none; z-index:30;
+    background:rgba(12,24,32,.96); color:var(--text);
+    border:1px solid var(--line); border-radius:8px;
+    padding:8px 10px; box-shadow:0 10px 28px rgba(0,0,0,.35);
+    width:min(360px, 92vw); white-space:normal;
+  }
+  .hint:hover::after, .hint:focus-visible::after{ display:block; }
 </style>
 </head>
 <body>
@@ -355,6 +369,9 @@
       <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing||0)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
 
     document.querySelectorAll('.videoBtn').forEach(b=> b.addEventListener('click', ()=> openViewer(b.dataset.href)));
+
+    // Sprinkle inline glossary tooltips after content is rendered
+    __annotateAll();
   }
 
   // ====== STATUS PILL (added programmatically) ===============================
@@ -493,6 +510,66 @@
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
   });
+
+  // === Inline glossary auto-tooltips ========================================
+  const __TERMS = [
+    { re: /\bP1\b/, tip: 'Address / setup.' },
+    { re: /\bP2\b/, tip: 'Takeaway — shaft roughly parallel to target line (club hip-high).' },
+    { re: /\bP3\b/, tip: 'Lead arm parallel to the ground.' },
+    { re: /\bP4\b/, tip: 'Top of backswing.' },
+    { re: /\bP5\b/, tip: 'Early downswing.' },
+    { re: /\bP6\b/, tip: 'Downswing — shaft roughly parallel again (club thigh-high).' },
+    { re: /\bP7\b/, tip: 'Impact (ball strike).' },
+    { re: /\bP8\b/, tip: 'Early follow-through.' },
+    { re: /\bP9\b/, tip: 'Finish — shaft roughly parallel on exit.' },
+    { re: /X[\s-]?Factor/iu, tip: 'Shoulder rotation minus hip rotation (°).' },
+    { re: /\btempo(?:\s*ratio)?\b/i, tip: 'Backswing : downswing time (tour ≈ 3:1).' },
+    { re: /release timing/i, tip: 'When club speed peaks relative to impact (P7).' },
+    { re: /kinematic sequence/i, tip: 'Energy transfer pelvis → thorax → arm → club.' },
+    { re: /hip(?:s)? rotation|pelvis rotation/i, tip: 'Pelvis angle vs. target line (°).' },
+    { re: /shoulder rotation|thorax rotation/i, tip: 'Thorax angle vs. target line (°).' },
+    { re: /shaft parallel/i, tip: 'Club roughly parallel to the target line.' },
+    { re: /down-?the-?line/i, tip: 'Camera along target line, ~8–12 ft behind the player.' },
+    { re: /face-?on/i, tip: 'Camera perpendicular to target line, ~8–12 ft in front of player.' }
+  ];
+
+  function __wrapOnce(node, re, tip){
+    re = new RegExp(re.source, re.flags.replace('g','')); // first match only
+    const m = re.exec(node.nodeValue);
+    if (!m) return false;
+    const before = node.nodeValue.slice(0, m.index);
+    const match  = node.nodeValue.slice(m.index, m.index + m[0].length);
+    const after  = node.nodeValue.slice(m.index + m[0].length);
+    const span = document.createElement('span');
+    span.className = 'hint'; span.setAttribute('data-tip', tip); span.textContent = match;
+    const parent = node.parentNode;
+    if (before) parent.insertBefore(document.createTextNode(before), node);
+    parent.insertBefore(span, node);
+    if (after) parent.insertBefore(document.createTextNode(after), node);
+    parent.removeChild(node);
+    return true;
+  }
+
+  function __annotateRoot(root){
+    if (!root) return;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    let n; while(n = walker.nextNode()) nodes.push(n);
+    nodes.forEach(node=>{
+      if (!node.nodeValue || !node.nodeValue.trim()) return;
+      const pe = node.parentElement;
+      if (!pe || pe.closest('script,style,code,pre,.hint,.qbtn,.pop,button,a,svg')) return;
+      for (const t of __TERMS){
+        if (t.re.test(node.nodeValue)) { __wrapOnce(node, t.re, t.tip); break; }
+      }
+    });
+  }
+
+  function __annotateAll(){
+    ['#plist', '#coachPriority', '#coachPower', '#position', '#swing', '#power'].forEach(sel=>{
+      __annotateRoot(document.querySelector(sel));
+    });
+  }
 
   // === popover logic (for the little “?” clouds) =============================
   (function helpPopovers(){
