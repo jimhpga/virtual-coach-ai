@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI – Intake</title>
+<style>
+:root{--vca-green:#0f7a3e; --text:#fff; --muted:#d7e5db; --glass:rgba(255,255,255,.08); --glass-2:rgba(255,255,255,.12); --warn:#f6c445}
+*{box-sizing:border-box}
+body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:url('homepage-background.png') center/cover fixed no-repeat;min-height:100dvh}
+header{position:sticky;top:0;background:var(--vca-green);border-bottom:1px solid rgba(255,255,255,.15);z-index:50}
+.wrap{max-width:1100px;margin:0 auto;padding:14px 18px}
+.row{display:flex;align-items:center;gap:12px}
+nav{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn-link,.btn-tab{appearance:none;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600;text-decoration:none}
+.hero{padding:28px 18px 12px}
+.hero h2{margin:0;font-size:32px}
+.card{background:var(--glass);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:18px;margin:0 18px 18px}
+@media(min-width:900px){.split{display:grid;grid-template-columns:6fr 6fr;gap:18px}.card{margin:0 0 18px}}
+form .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.field{grid-column:span 12;display:flex;flex-direction:column;gap:6px}
+@media(min-width:720px){.half{grid-column:span 6}}
+label{font-size:13px;opacity:.9}
+.req::after{content:" *";color:var(--warn);font-weight:800}
+input,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.20);color:#fff;background:rgba(255,255,255,.06)}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{appearance:none;border:none;background:linear-gradient(180deg,#34c77f,#199a57);color:#03150d;font-weight:800;letter-spacing:.2px;padding:12px 16px;border-radius:12px;cursor:pointer;box-shadow:0 8px 24px rgba(25,154,87,.35);text-transform:uppercase;font-size:12px}
+.btn.secondary{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25)}
+.note{font-size:12px;opacity:.85;margin-left:auto}
+</style>
+</head>
+<body>
+<header>
+<div class="wrap row">
+<div class="row"><img src="/virtualcoach-logo.png" alt="Virtual Coach AI" style="height:28px"></div>
+<nav aria-label="Main">
+<a class="btn-link" href="/index.html">Home</a>
+<a class="btn-link" href="/upload.html">Upload</a>
+<a class="btn-link" href="/reports.html">Reports</a>
+<a class="btn-link" href="/pricing.html">Pricing</a>
+<a class="btn-link" href="/faq.html">FAQ</a>
+<a class="btn-link" href="/team.html">Team</a>
+<a class="btn-link" href="/contact.html">Contact</a>
+<a class="btn-link" href="/coach-login.html">Login</a>
+</nav>
+</div>
+</header>
+
+
+<main class="wrap">
+<div class="hero">
+<h2>Quick Intake</h2>
+<p class="sub">Email is optional (we’ll need it to send the report). <strong>Height is required</strong> so we can scale your model.</p>
+</div>
+
+
+<section class="card split">
+<div>
+<form id="intake-form" onsubmit="return false;">
+<div class="grid">
+<div class="field half">
+<label for="first">First name</label>
+<input id="first" name="first" type="text" placeholder="John" />
+</div>
+<div class="field half">
+<label for="email">Email <span class="muted">(add if you want the report emailed to you)</span></label>
+</html>
