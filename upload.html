@@ -7,10 +7,8 @@
   <style>
     :root{
       --vca-green:#0f7a3e;
-      --vca-green-2:#0c5f31;
       --text:#ffffff;
       --muted:#d7e5db;
-      --bg:#0a0f0d;
       --glass: rgba(255,255,255,.08);
       --glass-2: rgba(255,255,255,.12);
       --ok:#6ad488;
@@ -20,18 +18,19 @@
     html,body{height:100%}
     body{
       margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      color:var(--text); background:#0a0f0d center/cover fixed no-repeat;
+      color:var(--text);
+      background:url('homepage-background.png') center/cover fixed no-repeat;
       min-height:100dvh;
     }
-    body::before{content:""; position:fixed; inset:0; background:linear-gradient(180deg, rgba(10,15,13,.45), rgba(10,15,13,.45)); z-index:-1}
 
-    header{position:sticky; top:0; backdrop-filter:saturate(120%) blur(8px);
-      background:linear-gradient(180deg, rgba(15,122,62,.88), rgba(12,95,49,.88));
-      border-bottom:1px solid rgba(255,255,255,.15); z-index:50;}
+    header{
+      position:sticky; top:0;
+      background-color: var(--vca-green);
+      border-bottom:1px solid rgba(255,255,255,.15); z-index:50;
+    }
     .wrap{max-width:1100px; margin:0 auto; padding:14px 18px;}
     .brand{display:flex; align-items:center; gap:12px}
     .logo{width:36px; height:36px; border-radius:10px; background:radial-gradient(circle at 30% 30%, #35d08d, #0f7a3e 70%);
-      box-shadow: 0 0 0 2px rgba(255,255,255,.15) inset, 0 8px 24px rgba(0,0,0,.25);
       display:grid; place-items:center; font-weight:700; color:#fff; font-size:18px;}
     .brand h1{font-size:18px; margin:0; letter-spacing:.2px; font-weight:700}
     nav{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
@@ -71,11 +70,6 @@
     .panel.active{display:block}
 
     .preview{background:rgba(0,0,0,.25); border:1px dashed rgba(255,255,255,.25); border-radius:12px; padding:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size:12px; max-height:260px; overflow:auto}
-
-    .pill{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:999px}
-    .badge-ok{background:rgba(106,212,136,.18); border-color:#6ad488}
-
-    select{backdrop-filter: blur(2px)}
 
     footer{opacity:.75; text-align:center; padding:40px 10px}
   </style>
@@ -223,16 +217,6 @@
   </footer>
 
   <script>
-    (function setExactBackground(){
-      const candidates = [
-        'homepage-background.png','golf-course-bg.jpg','virtualcoach-bg.png',
-        '/homepage-background.png','/golf-course-bg.jpg','/virtualcoach-bg.png']
-      const img = new Image(); let i=0;
-      function tryNext(){if(i>=candidates.length) return; const url=candidates[i++];
-        img.onload=()=>{document.body.style.backgroundImage=`url('${url}')`;};
-        img.onerror=tryNext; img.src=url+(url.includes('?')?'':'?v='+Date.now());}
-      tryNext();})();
-
     const tabs=document.querySelectorAll('.btn-tab');
     const panels={home:document.getElementById('panel-home'),upload:document.getElementById('panel-upload')};
     tabs.forEach(btn=>btn.addEventListener('click',()=>{
@@ -272,4 +256,38 @@
 
     resetBtn.addEventListener('click',()=>{
       form.reset();
-      document.querySelectorAll('.chip[aria
+      document.querySelectorAll('.chip[aria-pressed="true"]').forEach(c=>c.removeAttribute('aria-pressed'));
+      localStorage.removeItem('vca_intake');
+      preview.style.display='none';
+    });
+
+    function loadUploadIntake(){
+      const el=document.getElementById('upload-intake');
+      const raw=localStorage.getItem('vca_intake');
+      if(!raw){el.textContent='No intake saved yet. Go to Home → Save Intake.';return;}
+      try{el.textContent=JSON.stringify(JSON.parse(raw),null,2)}catch{el.textContent=raw}
+    }
+
+    const inputVideo=document.getElementById('video');
+    const vid=document.getElementById('preview');
+    const status=document.getElementById('status');
+
+    inputVideo.addEventListener('change',()=>{
+      const file=inputVideo.files?.[0];
+      if(!file){status.textContent='Idle'; vid.style.display='none'; vid.removeAttribute('src'); return;}
+      const url=URL.createObjectURL(file);
+      vid.src=url; vid.style.display='block';
+      status.textContent='Selected • Ready to upload';
+    });
+
+    document.getElementById('clear-video').addEventListener('click',()=>{
+      inputVideo.value=""; vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display='none';
+      status.textContent='Idle';
+    });
+
+    const submit=document.getElementById('submit');
+    const payload=document.getElementById('payload');
+
+    submit.addEventListener('click',()=>{
+      const intake=localStorage.getItem('vca_intake');
+      if(!int
