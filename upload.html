@@ -1,90 +1,179 @@
 <!DOCTYPE html>
-const inputVideo=document.getElementById('video');
-const vid=document.getElementById('preview');
-const status=document.getElementById('status');
-const filemeta=document.getElementById('filemeta');
-const progressCard=document.getElementById('progress-card');
-const progressDesc=document.getElementById('progress-desc');
-const bar=document.getElementById('bar');
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Coach AI – Upload</title>
+  <style>
+    :root{--vca-green:#0f7a3e;--text:#fff;--muted:#d7e5db;--glass:rgba(255,255,255,.08);--glass2:rgba(255,255,255,.12);--ok:#6ad488}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:url('homepage-background.png') center/cover fixed no-repeat;min-height:100dvh}
+    header{position:sticky;top:0;background:var(--vca-green);border-bottom:1px solid rgba(255,255,255,.15);z-index:50}
+    .wrap{max-width:1100px;margin:0 auto;padding:14px 18px}
+    nav{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+    .btn-link{appearance:none;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600;text-decoration:none}
+    .card{background:var(--glass);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:18px;margin:18px 0}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+    .field{grid-column:span 12;display:flex;flex-direction:column;gap:6px}
+    @media(min-width:720px){.half{grid-column:span 6}}
+    input[type=file]{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.20);background:rgba(255,255,255,.06);color:#fff}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:999px}
+    .btn{appearance:none;border:none;background:linear-gradient(180deg,#34c77f,#199a57);color:#03150d;font-weight:800;letter-spacing:.2px;padding:12px 16px;border-radius:12px;cursor:pointer;box-shadow:0 8px 24px rgba(25,154,87,.35);text-transform:uppercase;font-size:12px}
+    .btn.secondary{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25)}
+    .progress{height:10px;background:rgba(255,255,255,.25);border-radius:999px;overflow:hidden}
+    .bar{display:block;height:100%;width:0%;background:linear-gradient(90deg,#6ad488,#34c77f)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap" style="display:flex;align-items:center;gap:12px">
+      <div><img src="/virtualcoach-logo.png" alt="Virtual Coach AI" style="height:28px"></div>
+      <nav aria-label="Main">
+        <a class="btn-link" href="/index.html">Home</a>
+        <a class="btn-link" href="/upload.html">Upload</a>
+        <a class="btn-link" href="/reports.html">Reports</a>
+        <a class="btn-link" href="/pricing.html">Pricing</a>
+        <a class="btn-link" href="/faq.html">FAQ</a>
+        <a class="btn-link" href="/team.html">Team</a>
+        <a class="btn-link" href="/contact.html">Contact</a>
+        <a class="btn-link" href="/coach-login.html">Login</a>
+      </nav>
+    </div>
+  </header>
 
+  <main class="wrap">
+    <section class="card">
+      <h2 style="margin:0 0 8px">Upload Swing</h2>
+      <div class="grid">
+        <div class="field half">
+          <label for="video">Swing video (3–10s works best)</label>
+          <input type="file" id="video" accept="video/*" />
+        </div>
+        <div class="field half">
+          <label>Status</label>
+          <div id="status" class="pill">Idle</div>
+        </div>
+        <div class="field" style="grid-column: span 12">
+          <video id="preview" controls playsinline style="width:100%; max-height:360px; display:none; border-radius:12px; background:#000"></video>
+        </div>
+      </div>
 
-inputVideo.addEventListener('change',()=>{
-const file=inputVideo.files?.[0];
-if(!file){status.textContent='Idle'; vid.style.display='none'; vid.removeAttribute('src'); filemeta.style.display='none'; return;}
-const url=URL.createObjectURL(file);
-vid.src=url; vid.style.display='block';
-status.textContent='Selected • Ready to upload';
-filemeta.style.display='block';
-filemeta.textContent=`File: ${file.name} • ${Math.round(file.size/1024)} KB`;
-});
+      <div id="filemeta" class="muted" style="margin-top:8px; display:none"></div>
 
+      <h3 style="margin-top:8px">Intake Summary</h3>
+      <pre id="upload-intake" class="card" style="white-space:pre-wrap">No intake saved yet. Go to Home → Save Intake.</pre>
 
-document.getElementById('clear-video').addEventListener('click',()=>{
-inputVideo.value=""; vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display='none';
-status.textContent='Idle'; filemeta.style.display='none';
-localStorage.removeItem('vca_processing');
-document.getElementById('progress-card').style.display='none';
-});
+      <div class="actions" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn" id="submit">Submit for Analysis</button>
+        <button class="btn secondary" id="clear-video" type="button">Clear Video</button>
+      </div>
 
+      <pre id="payload" class="card" style="display:none"></pre>
+    </section>
 
-const submit=document.getElementById('submit');
-const payload=document.getElementById('payload');
+    <section id="progress-card" class="card" style="display:none">
+      <h3 style="margin:0 0 8px">Video in Progress</h3>
+      <p id="progress-desc" class="muted">We received your file and started processing.</p>
+      <div class="progress" aria-label="Upload/Processing progress"><i class="bar" id="bar"></i></div>
+      <ul class="muted" style="margin-top:10px">
+        <li><strong>Step 1:</strong> Upload complete</li>
+        <li><strong>Step 2:</strong> AI analysis (P1–P9, power, faults)</li>
+        <li><strong>Step 3:</strong> Report generated</li>
+      </ul>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <a class="btn" href="/reports.html" id="to-reports">Go to Reports</a>
+        <button class="btn secondary" id="upload-another" type="button">Upload another</button>
+      </div>
+    </section>
+  </main>
 
+  <script>
+    // Load intake if present
+    (function(){
+      const el=document.getElementById('upload-intake');
+      const raw=localStorage.getItem('vca_intake');
+      if(!raw) return;
+      try{el.textContent=JSON.stringify(JSON.parse(raw),null,2)}catch{el.textContent=raw}
+    })();
 
-submit.addEventListener('click',()=>{
-const intake=localStorage.getItem('vca_intake');
-const file=inputVideo.files?.[0];
-if(!file){ alert('Choose a swing video.'); return; }
+    // Focus file input if coming from intake
+    if(localStorage.getItem('vca_from_intake')){
+      try{document.getElementById('video').focus();}catch{}
+      localStorage.removeItem('vca_from_intake');
+    }
 
+    const inputVideo=document.getElementById('video');
+    const vid=document.getElementById('preview');
+    const status=document.getElementById('status');
+    const filemeta=document.getElementById('filemeta');
+    const progressCard=document.getElementById('progress-card');
+    const progressDesc=document.getElementById('progress-desc');
+    const bar=document.getElementById('bar');
+    const payload=document.getElementById('payload');
 
-status.textContent='Uploading…';
-const formData=new FormData();
-if(intake) formData.append('intake',intake);
-formData.append('video',file,file.name);
+    inputVideo.addEventListener('change',()=>{
+      const file=inputVideo.files?.[0];
+      if(!file){
+        status.textContent='Idle'; vid.style.display='none'; vid.removeAttribute('src'); filemeta.style.display='none'; return;
+      }
+      const url=URL.createObjectURL(file);
+      vid.src=url; vid.style.display='block';
+      status.textContent='Selected • Ready to upload';
+      filemeta.style.display='block';
+      filemeta.textContent=`File: ${file.name} • ${Math.round(file.size/1024)} KB`;
+    });
 
+    document.getElementById('clear-video').addEventListener('click',()=>{
+      inputVideo.value=""; vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display='none';
+      status.textContent='Idle'; filemeta.style.display='none';
+      localStorage.removeItem('vca_processing');
+      progressCard.style.display='none';
+      payload.style.display='none';
+    });
 
-payload.style.display='block';
-payload.textContent=`POST /api/analyze
+    document.getElementById('submit').addEventListener('click',()=>{
+      const intake=localStorage.getItem('vca_intake');
+      const file=inputVideo.files?.[0];
+      if(!file){ alert('Choose a swing video.'); return; }
+
+      status.textContent='Uploading…';
+      const formData=new FormData();
+      if(intake) formData.append('intake',intake);
+      formData.append('video',file,file.name);
+
+      // (Demo) Show payload preview instead of sending
+      payload.style.display='block';
+      payload.textContent=`POST /api/analyze
 Headers: (multipart/form-data)
 Intake:
-${intake||'(none)'}
-
+${intake||'(none)'} 
 
 Video: ${file.name} (${Math.round(file.size/1024)} KB)`;
 
+      status.textContent='Uploaded • Processing';
+      showProcessing(file.name);
+      localStorage.setItem('vca_processing', JSON.stringify({file:file.name, ts:Date.now()}));
+    });
 
-// Show processing immediately and persist state so it survives reload/navigation
-status.textContent='Uploaded • Processing';
-showProcessing(file.name);
-localStorage.setItem('vca_processing', JSON.stringify({file:file.name, ts:Date.now()}));
-});
+    function showProcessing(filename){
+      progressCard.style.display='block';
+      progressDesc.textContent=`We received ${filename} and started analysis. You can head to Reports — it will appear there when ready.`;
+      animateBar();
+      document.getElementById('to-reports').focus();
+    }
 
+    function animateBar(){
+      let w=0; bar.style.width='0%';
+      clearInterval(window.__vcaBar);
+      window.__vcaBar=setInterval(()=>{w=(w+5)%105; bar.style.width=w+'%';},120);
+    }
 
-function showProcessing(filename){
-progressCard.style.display='block';
-progressDesc.textContent=`We received ${filename} and started analysis. You can head to Reports — it will appear there when ready.`;
-animateBar();
-document.getElementById('to-reports').focus();
-}
-
-
-function animateBar(){
-let w=0; bar.style.width='0%';
-clearInterval(window.__vcaBar);
-window.__vcaBar=setInterval(()=>{w=(w+5)%105; bar.style.width=w+'%';},120);
-}
-
-
-(function restoreProcessing(){
-const raw=localStorage.getItem('vca_processing');
-if(!raw) return; try{const {file}=JSON.parse(raw); if(file) showProcessing(file);}catch{}
-})();
-
-
-(function checkQuery(){
-const q=new URLSearchParams(window.location.search);
-if(q.get('processing')){showProcessing('your video');}
-})();
-</script>
+    // Restore progress if user reloads / returns
+    (function restoreProcessing(){
+      const raw=localStorage.getItem('vca_processing');
+      if(!raw) return;
+      try{const {file}=JSON.parse(raw); if(file) showProcessing(file);}catch{}
+    })();
+  </script>
 </body>
 </html>
