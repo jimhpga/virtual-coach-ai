@@ -512,5 +512,129 @@
   updateSummary();
 })();
 </script>
+  <script>
+/* ========= Virtual Coach HOTFIX v1 =========
+   - Fix visible options in dropdowns (Firefox/Windows)
+   - Repopulate dropdowns if they somehow came up empty
+   - Replace JSON "Intake Summary" <pre> with a bullet list
+   - Force nav color to brand on this page
+   ========================================= */
+
+/* 0) Force nav to brand color so it matches other pages */
+(function(){
+  var header = document.getElementById('site-header');
+  if (header) header.style.background = '#0b2b12';
+})();
+
+/* 1) Make dropdown menus readable everywhere */
+(function(){
+  var s = document.createElement('style');
+  s.textContent = `
+    select, select option, optgroup { color:#111 !important; background:#fff !important; }
+    select { background: rgba(255,255,255,.92) !important; color:#111 !important; }
+  `;
+  document.head.appendChild(s);
+})();
+
+/* 2) If any dropdown somehow has no options, repopulate it */
+(function ensureOptions(){
+  function fill(id, options, placeholder){
+    var el = document.getElementById(id);
+    if (!el) return;
+    var needsFill = el.options.length === 0;
+    // also treat "one empty option" as empty
+    if (!needsFill && el.options.length === 1 && el.options[0].value === '' && !el.options[0].textContent.trim()) needsFill = true;
+    if (!needsFill) return;
+
+    el.innerHTML = '';
+    var ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = placeholder || 'Select…';
+    ph.disabled = true; ph.selected = true;
+    el.appendChild(ph);
+
+    (options || []).forEach(function(pair){
+      var o = document.createElement('option');
+      o.value = pair[0]; o.textContent = pair[1];
+      el.appendChild(o);
+    });
+  }
+
+  fill('eye', [['right','Right eye'],['left','Left eye'],['unknown','Not sure']], 'Select…');
+  fill('hand', [['right','Right'],['left','Left']], 'Select…');
+  fill('gender', [['','Prefer not to say'],['man','Man'],['woman','Woman'],['other','Other']], 'Prefer not to say');
+  fill('bodyShape', [
+    ['slim','Slim / Lean'],['average','Average / Athletic'],['muscular','Muscular / Stocky'],
+    ['tall-lean','Tall / Lean'],['short-compact','Short / Compact']
+  ], '— Select —');
+  // Focus has many items; if empty, add a few common ones
+  (function(){
+    var el = document.getElementById('focus');
+    if (!el) return;
+    if (el.options.length === 0){
+      el.innerHTML = '';
+      var ph = document.createElement('option'); ph.value=''; ph.textContent='— None —'; ph.selected=true; el.appendChild(ph);
+      ['Setup','Grip','Takeaway (P2)','Backswing (P3)','Top (P4)','Transition','Downswing','Shaft Parallel Down (P6)','Impact (P7)','Release','Finish'].forEach(function(t){
+        var o=document.createElement('option'); o.value=t; o.textContent=t; el.appendChild(o);
+      });
+    }
+  })();
+})();
+
+/* 3) Replace the JSON <pre id="summary"> with a clean <ul> if it still exists */
+(function swapJsonSummary(){
+  var pre = document.getElementById('summary');
+  if (pre){
+    var ul = document.createElement('ul');
+    ul.id = 'summaryList';
+    ul.className = 'clean';
+    pre.parentElement.replaceChild(ul, pre);
+  }else if(!document.getElementById('summaryList')){
+    // If neither exists, create summaryList under "Status" card
+    var statusCard = document.querySelector('.card .content');
+    if (statusCard){
+      var h3s = statusCard.querySelectorAll('h3');
+      var marker = null;
+      h3s.forEach(function(h){ if (/Intake|Your Info/i.test(h.textContent)) marker = h; });
+      var ul = document.createElement('ul'); ul.id='summaryList'; ul.className='clean';
+      (marker ? marker.after(ul) : statusCard.appendChild(ul));
+    }
+  }
+})();
+
+/* 4) Render summary as a bullet list from current form values */
+(function wireSummary(){
+  var ids = ['first','email','eye','hand','gender','height','bodyShape','focus'];
+  function getVal(id){ var el=document.getElementById(id); return el ? el.value : ''; }
+  function feetIn(n){ n = Number(n||0); if(!n) return '—'; var ft = Math.floor(n/12), inch = n%12; return ft+'′'+inch+'″ ('+n+'")'; }
+  function render(){
+    var d = {
+      first:getVal('first'), email:getVal('email'), eye:getVal('eye'), hand:getVal('hand'),
+      gender:getVal('gender'), height:getVal('height'), bodyShape:getVal('bodyShape'), focus:getVal('focus')
+    };
+    var ul = document.getElementById('summaryList'); if (!ul) return;
+    var items = [
+      ['Name', d.first || '—'],
+      ['Email', d.email ? 'On file' : '—'],
+      ['Eye', d.eye || '—'],
+      ['Hand', d.hand || '—'],
+      ['Gender', d.gender || '—'],
+      ['Height', d.height ? feetIn(d.height) : '—'],
+      ['Body build', d.bodyShape || '—'],
+      ['Focus', d.focus || '—']
+    ];
+    ul.innerHTML = items.map(function(x){ return '<li><strong>'+x[0]+':</strong> '+x[1]+'</li>'; }).join('');
+  }
+  ids.forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', render);
+  });
+  render();
+})();
+
+/* 5) Stamp so we can verify the hotfix really loaded */
+console.log('VC HOTFIX v1 applied');
+</script>
+
 </body>
 </html>
