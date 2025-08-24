@@ -11,7 +11,6 @@
   body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
   .scrim{min-height:100vh;background:var(--scrim)}
 
-  /* NAV (hamburger) */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
@@ -60,7 +59,6 @@
   .btn.ghost{background:rgba(255,255,255,.06);}
   .btn[disabled], .btn.disabled{opacity:.55;cursor:not-allowed;pointer-events:none}
 
-  /* Stepper + progress */
   .stepper{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
   .step{display:flex;align-items:center;gap:8px}
   .dot{width:20px;height:20px;border-radius:50%;border:2px solid #456;display:inline-block;background:transparent}
@@ -77,20 +75,12 @@
   details.tips summary{cursor:pointer;display:inline-block;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.06);font-weight:700}
   details.tips .content{margin-top:10px;color:var(--muted)}
 
-  /* === Dropdown readability + glass look === */
-  select{
-    background: rgba(255,255,255,.06);
-    color: var(--text);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-  }
-  select:hover{ background: rgba(255,255,255,.10); }
-  select:focus{ outline: none; box-shadow: 0 0 0 2px rgba(255,255,255,.18) inset; }
-  /* Opened list items — force dark text on white so it’s always readable */
-  select option{ color:#0b1520; background:#ffffff; }
-  select option[disabled], select option[value=""]{ color:#6b7b88; }
+  /* select look */
+  select{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+  select:hover{background:rgba(255,255,255,.10)}
+  select:focus{outline:none;box-shadow:0 0 0 2px rgba(255,255,255,.18) inset}
+  /* force readable items for browsers that apply our styles */
+  select option{color:#0b1520;background:#ffffff}
 </style>
 </head>
 <body>
@@ -142,32 +132,18 @@
             <div class="row">
               <div>
                 <label for="eye">Eye dominance <span class="req">*</span></label>
-                <select id="eye" required>
-                  <option value="">Select…</option>
-                  <option value="right">Right eye</option>
-                  <option value="left">Left eye</option>
-                  <option value="unknown">Not sure</option>
-                </select>
+                <select id="eye" required></select>
               </div>
               <div>
                 <label for="hand">Handedness</label>
-                <select id="hand">
-                  <option value="">Select…</option>
-                  <option value="right">Right</option>
-                  <option value="left">Left</option>
-                </select>
+                <select id="hand"></select>
               </div>
             </div>
 
             <div class="row">
               <div>
                 <label for="gender">Gender</label>
-                <select id="gender">
-                  <option value="">Prefer not to say</option>
-                  <option value="man">Man</option>
-                  <option value="woman">Woman</option>
-                  <option value="other">Other</option>
-                </select>
+                <select id="gender"></select>
               </div>
               <div>
                 <label for="height">Height (inches) <span class="req">*</span></label>
@@ -178,27 +154,11 @@
             <div class="row">
               <div>
                 <label for="bodyShape">Body build (optional)</label>
-                <select id="bodyShape">
-                  <option value="">— Select —</option>
-                  <option value="slim">Slim / Lean</option>
-                  <option value="average">Average / Athletic</option>
-                  <option value="muscular">Muscular / Stocky</option>
-                  <option value="tall-lean">Tall / Lean</option>
-                  <option value="short-compact">Short / Compact</option>
-                </select>
+                <select id="bodyShape"></select>
               </div>
               <div>
                 <label for="focus">Focus area (optional)</label>
-                <select id="focus">
-                  <option value="">— None —</option>
-                  <option>Setup</option><option>Grip</option><option>Takeaway (P2)</option>
-                  <option>Backswing (P3)</option><option>Top (P4)</option><option>Transition</option>
-                  <option>Downswing</option><option>Shaft Parallel Down (P6)</option><option>Impact (P7)</option>
-                  <option>Release</option><option>Finish</option><option>Swing Plane</option>
-                  <option>Club Path</option><option>Face Control</option><option>Tempo</option>
-                  <option>Kinematic Sequence</option><option>Posture</option><option>Ball Position</option>
-                  <option>Alignment</option>
-                </select>
+                <select id="focus"></select>
               </div>
             </div>
 
@@ -233,18 +193,14 @@
             <div class="progress" aria-label="Progress"><span id="bar"></span></div>
             <div class="hint" id="statusLine" style="margin-top:8px">Waiting for a file…</div>
 
-            <h3 style="margin-top:16px;border:none;padding-top:16px">Intake Summary</h3>
-            <pre id="summary">{
-  "first": "",
-  "email": "",
-  "eye": "",
-  "hand": "",
-  "gender": "",
-  "height": "",
-  "bodyShape": "",
-  "focus": "",
-  "derived": {}
-}</pre>
+            <h3 style="margin-top:16px;border:none;padding-top:16px">Your Info</h3>
+            <ul id="summaryList" style="margin:0 0 8px 18px;color:#cfe0e6">
+              <!-- filled by JS -->
+            </ul>
+            <details>
+              <summary style="cursor:pointer;color:#dff3ff">Show details (JSON)</summary>
+              <pre id="summary">{}</pre>
+            </details>
           </div>
         </div>
       </section>
@@ -252,7 +208,7 @@
   </div>
 
 <script>
-  // NAV (hamburger)
+  // NAV
   const header = document.getElementById('site-header');
   document.getElementById('menuBtn')?.addEventListener('click', ()=>{
     const open = header.classList.toggle('open');
@@ -264,21 +220,72 @@
 
   // Shortcuts
   const $ = s => document.querySelector(s);
-  const fileInput = $('#file');
-  const fname = $('#fname');
-  const fmeta = $('#fmeta');
-  const bar = $('#bar');
-  const pill = $('#pill');
-  const qcPill = document.getElementById('qcPill');
-  const statusLine = $('#statusLine');
-  const btnUpload = $('#btnUpload');
-  const btnReset = $('#btnReset');
-  const btnOpenReport = $('#btnOpenReport');
+  const fileInput = $('#file'), fname = $('#fname'), fmeta = $('#fmeta');
+  const bar = $('#bar'), pill = $('#pill'), qcPill = $('#qcPill'), statusLine = $('#statusLine');
+  const btnUpload = $('#btnUpload'), btnReset = $('#btnReset'), btnOpenReport = $('#btnOpenReport');
 
-  // Fields + model
+  // Data model
   const fields = ['first','email','eye','hand','gender','height','bodyShape','focus'];
   const data = Object.fromEntries(fields.map(k=>[k,'']));
 
+  // ----- SELECT HYDRATION (robust) -----
+  function hydrateSelect(id, options){
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.innerHTML = '';
+    options.forEach(o=>{
+      const opt = document.createElement('option');
+      opt.value = o.v;
+      opt.textContent = o.t;
+      if (o.disabled) opt.disabled = true;
+      if (o.selected) opt.selected = true;
+      el.appendChild(opt);
+    });
+  }
+  const EYE_OPTS = [
+    {v:'', t:'Select…', disabled:true, selected:true},
+    {v:'right', t:'Right eye'},
+    {v:'left',  t:'Left eye'},
+    {v:'unknown', t:'Not sure'}
+  ];
+  const HAND_OPTS = [
+    {v:'', t:'Select…', disabled:true, selected:true},
+    {v:'right', t:'Right'},
+    {v:'left',  t:'Left'}
+  ];
+  const GENDER_OPTS = [
+    {v:'', t:'Prefer not to say', selected:true},
+    {v:'man', t:'Man'},
+    {v:'woman', t:'Woman'},
+    {v:'other', t:'Other'}
+  ];
+  const BODY_OPTS = [
+    {v:'', t:'— Select —', selected:true},
+    {v:'slim', t:'Slim / Lean'},
+    {v:'average', t:'Average / Athletic'},
+    {v:'muscular', t:'Muscular / Stocky'},
+    {v:'tall-lean', t:'Tall / Lean'},
+    {v:'short-compact', t:'Short / Compact'}
+  ];
+  const FOCUS_OPTS = [
+    {v:'', t:'— None —', selected:true},
+    {v:'Setup', t:'Setup'}, {v:'Grip', t:'Grip'}, {v:'Takeaway (P2)', t:'Takeaway (P2)'},
+    {v:'Backswing (P3)', t:'Backswing (P3)'}, {v:'Top (P4)', t:'Top (P4)'}, {v:'Transition', t:'Transition'},
+    {v:'Downswing', t:'Downswing'}, {v:'Shaft Parallel Down (P6)', t:'Shaft Parallel Down (P6)'}, {v:'Impact (P7)', t:'Impact (P7)'},
+    {v:'Release', t:'Release'}, {v:'Finish', t:'Finish'}, {v:'Swing Plane', t:'Swing Plane'},
+    {v:'Club Path', t:'Club Path'}, {v:'Face Control', t:'Face Control'}, {v:'Tempo', t:'Tempo'},
+    {v:'Kinematic Sequence', t:'Kinematic Sequence'}, {v:'Posture', t:'Posture'}, {v:'Ball Position', t:'Ball Position'},
+    {v:'Alignment', t:'Alignment'}
+  ];
+  function hydrateAllSelects(){
+    hydrateSelect('eye', EYE_OPTS);
+    hydrateSelect('hand', HAND_OPTS);
+    hydrateSelect('gender', GENDER_OPTS);
+    hydrateSelect('bodyShape', BODY_OPTS);
+    hydrateSelect('focus', FOCUS_OPTS);
+  }
+
+  // Derived hints
   function deriveHints(d){
     const hand = (d.hand||'').toLowerCase();
     const eye  = (d.eye||'').toLowerCase();
@@ -286,11 +293,35 @@
     let aim = 'neutral';
     if (hand==='right' && eye==='left') aim = 'left';
     if (hand==='left'  && eye==='right') aim = 'right';
-
     const h = Number(d.height||0);
     const scale = h ? +(h/70).toFixed(2) : '';
-
     return { cross_dominant: !!cross, aim_bias: aim, scale_factor: scale };
+  }
+
+  // Friendly summary (no raw code)
+  function inchesToFeetIn(inches){
+    const n = Number(inches||0);
+    if (!n) return '';
+    const ft = Math.floor(n/12), inch = n%12;
+    return `${ft}′${inch}″ (${n}")`;
+  }
+  function renderSummaryList(d){
+    const derived = deriveHints(d);
+    const items = [
+      ['Name', d.first || '—'],
+      ['Email', d.email ? 'On file' : '—'],
+      ['Eye', d.eye || '—'],
+      ['Hand', d.hand || '—'],
+      ['Gender', d.gender || '—'],
+      ['Height', d.height ? inchesToFeetIn(d.height) : '—'],
+      ['Body build', d.bodyShape || '—'],
+      ['Focus', d.focus || '—'],
+      ['Notes', `Cross-dominant: ${derived.cross_dominant?'Yes':'No'} • Aim bias: ${derived.aim_bias} • Scale: ${derived.scale_factor||'—'}`]
+    ];
+    const ul = document.getElementById('summaryList');
+    ul.innerHTML = items.map(([k,v])=>`<li><strong>${k}:</strong> ${v}</li>`).join('');
+    // dev JSON (collapsible)
+    document.getElementById('summary').textContent = JSON.stringify({ ...d, derived }, null, 2);
   }
 
   function updateSummary(){
@@ -299,11 +330,7 @@
       if (!el) return;
       data[k] = (el.type === 'number') ? (el.value ? Number(el.value) : '') : el.value.trim();
     });
-
-    const derived = deriveHints(data);
-    $('#summary').textContent = JSON.stringify({ ...data, derived }, null, 2);
-
-    // Mirror to localStorage so Home and future sessions prefill
+    renderSummaryList(data);
     try{
       const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
       Object.assign(saved, data);
@@ -311,7 +338,6 @@
     }catch{}
   }
 
-  // Prefill from last session and/or Home
   function prefillFromLocal(){
     try{
       const merged = {};
@@ -320,7 +346,6 @@
       const li = JSON.parse(localStorage.getItem('vc_last_intake')||'null');
       const intake = li && li.intake ? li.intake : null;
       if (intake) Object.assign(merged, intake);
-
       fields.forEach(k=>{
         const el = document.getElementById(k);
         if (el && merged[k] != null && merged[k] !== '') el.value = String(merged[k]);
@@ -328,10 +353,10 @@
     }catch{}
   }
 
-  fields.forEach(k=> document.getElementById(k).addEventListener('input', updateSummary));
-  prefillFromLocal();
-  updateSummary();
+  // Wire inputs
+  function wireInputs(){ fields.forEach(k=> document.getElementById(k)?.addEventListener('input', updateSummary)); }
 
+  // File UI
   fileInput.addEventListener('change', ()=>{
     const f = fileInput.files && fileInput.files[0];
     if (!f){ fname.textContent = 'No file chosen'; fmeta.textContent = ''; return; }
@@ -356,25 +381,21 @@
     pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)';
   }
 
-  // === QC helpers ===
+  // QC
   function showQC(result){
     if (!qcPill) return;
     if (!result || !result.status){ qcPill.style.display='none'; return; }
     qcPill.style.display = 'inline-flex';
     if (result.status === 'ok'){
       qcPill.textContent = 'QC: Passed';
-      qcPill.style.background = 'rgba(25,195,125,.18)';
-      qcPill.style.borderColor = '#2a6';
+      qcPill.style.background = 'rgba(25,195,125,.18)'; qcPill.style.borderColor = '#2a6';
     } else if (result.status === 'warn'){
       qcPill.textContent = 'QC: Warnings';
-      qcPill.style.background = 'rgba(246,196,83,.18)';
-      qcPill.style.borderColor = '#b8860b';
+      qcPill.style.background = 'rgba(246,196,83,.18)'; qcPill.style.borderColor = '#b8860b';
     } else {
       qcPill.textContent = 'QC: Failed';
-      qcPill.style.background = 'rgba(255,107,107,.18)';
-      qcPill.style.borderColor = '#c44';
-      btnOpenReport.classList.add('disabled');
-      btnOpenReport.setAttribute('aria-disabled','true');
+      qcPill.style.background = 'rgba(255,107,107,.18)'; qcPill.style.borderColor = '#c44';
+      btnOpenReport.classList.add('disabled'); btnOpenReport.setAttribute('aria-disabled','true');
     }
   }
   async function runQC(key){
@@ -391,40 +412,29 @@
     }
   }
 
-  // Generate a key if backend doesn't provide one yet
+  // Upload plumbing
   function makeKey(file){
     const safe = file.name.replace(/[^a-z0-9_.-]+/gi,'_').toLowerCase();
     return `uploads/${Date.now()}-${safe}`;
   }
-
-  // Request a signed upload target
   async function getUploadTarget(file, key){
     const res = await fetch('/api/upload', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
+      method:'POST', headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({ filename: file.name, type: file.type, key })
     });
     if (!res.ok) throw new Error('Upload init failed: HTTP '+res.status);
-    return res.json(); // {putUrl,key} OR {url,fields,key} OR {key}
+    return res.json();
   }
-
-  // Save intake to backend (non-blocking)
   async function postIntake(key, intake) {
     try{
       const res = await fetch('/api/intake', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key, intake })
       });
       if (!res.ok) throw new Error('HTTP '+res.status);
       return res.json();
-    }catch(e){
-      console.warn('Intake save failed:', e);
-      return { ok:false, error: String(e.message || e) };
-    }
+    }catch(e){ console.warn('Intake save failed:', e); return { ok:false, error: String(e.message || e) }; }
   }
-
-  // PUT to signed URL with progress
   function putWithProgress(url, file){
     return new Promise((resolve, reject)=>{
       const xhr = new XMLHttpRequest();
@@ -436,17 +446,11 @@
       xhr.send(file);
     });
   }
-
-  // S3 form POST (fake smooth progress to 80%)
   async function postForm(url, fields, file){
     const fd = new FormData();
     Object.entries(fields||{}).forEach(([k,v])=> fd.append(k,v));
     fd.append('file', file);
-    const tick = setInterval(()=>{
-      const cur = parseFloat(bar.style.width)||0;
-      if (cur < 78) progress(cur + 2);
-      else clearInterval(tick);
-    }, 200);
+    const tick = setInterval(()=>{ const cur = parseFloat(bar.style.width)||0; if (cur < 78) progress(cur + 2); else clearInterval(tick); }, 200);
     const res = await fetch(url, { method:'POST', body:fd });
     clearInterval(tick);
     if (!res.ok) throw new Error('Upload error: HTTP '+res.status);
@@ -466,15 +470,12 @@
 
     try{
       let target;
-      try{ target = await getUploadTarget(f, clientKey); }
-      catch(_){ target = { key: clientKey }; }
-
+      try{ target = await getUploadTarget(f, clientKey); } catch(_){ target = { key: clientKey }; }
       if (target.key) finalKey = target.key;
-      if (target.putUrl){
-        await putWithProgress(target.putUrl, f);
-      } else if (target.url && target.fields){
-        await postForm(target.url, target.fields, f);
-      } else {
+
+      if (target.putUrl){ await putWithProgress(target.putUrl, f); }
+      else if (target.url && target.fields){ await postForm(target.url, target.fields, f); }
+      else {
         const fd = new FormData(); fd.append('file', f); fd.append('key', finalKey);
         const r = await fetch('/api/upload', { method:'POST', body:fd });
         if (!r.ok) throw new Error('Upload error: HTTP '+r.status);
@@ -482,7 +483,7 @@
 
       progress(82); step(2); status('Processing…', 'warn');
       saveIntake(finalKey);
-      postIntake(finalKey, { ...data, derived: deriveHints(data) }); // non-blocking
+      postIntake(finalKey, { ...data, derived: deriveHints(data) });
       pollAnalyze(finalKey);
     }catch(err){
       console.error(err);
@@ -492,20 +493,15 @@
     }
   }
 
-  // Store intake alongside key
   function saveIntake(key){
-    try{
-      const payload = { key, intake: data, ts: Date.now() };
-      localStorage.setItem('vc_last_intake', JSON.stringify(payload));
-    }catch{}
+    try{ localStorage.setItem('vc_last_intake', JSON.stringify({ key, intake: data, ts: Date.now() })); }catch{}
   }
 
-  // Poll analyze
   let pollTimer = null;
   async function checkAnalyze(key){
     const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache:'no-store' });
     if (!r.ok) throw new Error('HTTP '+r.status);
-    return r.json(); // {status:"pending"|"ready", report?}
+    return r.json();
   }
   async function pollAnalyze(key){
     async function tick(){
@@ -541,52 +537,12 @@
     showQC(null);
   });
 
-  // SAFETY NET: if any <select> lost its options, repopulate them
-  (function ensureSelectOptions(){
-    function setOpts(id, html){
-      const el = document.getElementById(id);
-      if (!el) return;
-      if (!el.options || el.options.length === 0) el.innerHTML = html;
-    }
-    setOpts('eye', `
-      <option value="">Select…</option>
-      <option value="right">Right eye</option>
-      <option value="left">Left eye</option>
-      <option value="unknown">Not sure</option>
-    `);
-    setOpts('hand', `
-      <option value="">Select…</option>
-      <option value="right">Right</option>
-      <option value="left">Left</option>
-    `);
-    setOpts('gender', `
-      <option value="">Prefer not to say</option>
-      <option value="man">Man</option>
-      <option value="woman">Woman</option>
-      <option value="other">Other</option>
-    `);
-    setOpts('bodyShape', `
-      <option value="">— Select —</option>
-      <option value="slim">Slim / Lean</option>
-      <option value="average">Average / Athletic</option>
-      <option value="muscular">Muscular / Stocky</option>
-      <option value="tall-lean">Tall / Lean</option>
-      <option value="short-compact">Short / Compact</option>
-    `);
-    setOpts('focus', `
-      <option value="">— None —</option>
-      <option>Setup</option><option>Grip</option><option>Takeaway (P2)</option>
-      <option>Backswing (P3)</option><option>Top (P4)</option><option>Transition</option>
-      <option>Downswing</option><option>Shaft Parallel Down (P6)</option><option>Impact (P7)</option>
-      <option>Release</option><option>Finish</option><option>Swing Plane</option>
-      <option>Club Path</option><option>Face Control</option><option>Tempo</option>
-      <option>Kinematic Sequence</option><option>Posture</option><option>Ball Position</option>
-      <option>Alignment</option>
-    `);
-  })();
-
-  // Initialize UI
-  step(1); progress(0); status('Idle','');
+  // Boot sequence — order matters:
+  hydrateAllSelects();     // 1) make sure dropdowns have options
+  prefillFromLocal();      // 2) set any saved values
+  wireInputs();            // 3) listen for changes
+  updateSummary();         // 4) paint summary
+  step(1); progress(0); status('Idle',''); // 5) init status
 </script>
 </body>
 </html>
