@@ -1,265 +1,423 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Coach AI – Upload</title>
-  <style>
-    :root{--vca-green:#0f7a3e;--text:#fff;--muted:#d7e5db;--glass:rgba(255,255,255,.08);--glass2:rgba(255,255,255,.12);--ok:#6ad488}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:url('homepage-background.png') center/cover fixed no-repeat;min-height:100dvh}
-    header{position:sticky;top:0;background:var(--vca-green);border-bottom:1px solid rgba(255,255,255,.15);z-index:50}
-    .wrap{max-width:1100px;margin:0 auto;padding:14px 18px}
-    nav{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
-    .btn-link{appearance:none;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600;text-decoration:none}
-    .card{background:var(--glass);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:18px;margin:18px 0}
-    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
-    .field{grid-column:span 12;display:flex;flex-direction:column;gap:6px}
-    @media(min-width:720px){.half{grid-column:span 6}}
-    input[type=file]{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.20);background:rgba(255,255,255,.06);color:#fff}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:999px}
-    .btn{appearance:none;border:none;background:linear-gradient(180deg,#34c77f,#199a57);color:#03150d;font-weight:800;letter-spacing:.2px;padding:12px 16px;border-radius:12px;cursor:pointer;box-shadow:0 8px 24px rgba(25,154,87,.35);text-transform:uppercase;font-size:12px}
-    .btn.secondary{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25)}
-    .progress{height:10px;background:rgba(255,255,255,.25);border-radius:999px;overflow:hidden}
-    .bar{display:block;height:100%;width:0%;background:linear-gradient(90deg,#6ad488,#34c77f)}
-    .muted{color:var(--muted)}
-    .notice{border-left:3px solid var(--ok)}
-    details summary{cursor:pointer;font-weight:700}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI — Upload</title>
+<link rel="preload" as="image" href="/homepage-background.png" />
+<style>
+  :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06); --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08); --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20); --ok:#19c37d; --warn:#f6c453; }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
+  .scrim{min-height:100vh;background:var(--scrim)}
+
+  /* NAV (hamburger) */
+  header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+  .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .brand-logo{width:160px;height:36px;background:var(--brand);
+    -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
+            mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;}
+  .menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
+  nav.nav{display:flex;gap:8px}
+  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  nav.nav a:hover{background:rgba(255,255,255,.08)}
+  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+  @media(max-width:820px){
+    .menu-toggle{display:inline-flex}
+    nav.nav{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
+    header.top.open nav.nav{display:flex}
+  }
+
+  .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
+
+  h1{margin:8px 0 6px;font-size:28px;font-weight:900}
+  .lead{color:var(--muted);max-width:68ch}
+  .badge{background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
+
+  .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:12px}
+  @media(max-width:960px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px)}
+  .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .card .content{padding:12px 16px}
+
+  label{display:block;font-weight:700;margin:8px 0 6px}
+  .req{color:#ffd479}
+  .hint{color:var(--muted);font-size:12px}
+  input[type="text"], input[type="email"], input[type="number"], select, button, .filebox{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:rgba(255,255,255,.08); color:#fff;
+  }
+  input::placeholder{color:#cfe0e699}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:700px){.row{grid-template-columns:1fr}}
+
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
+  .btn:hover{background:rgba(255,255,255,.16)}
+  .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6;}
+  .btn.warn{background:rgba(246,196,83,.18);border-color:#b8860b;}
+  .btn.ghost{background:rgba(255,255,255,.06);}
+  .btn[disabled]{opacity:.55;cursor:not-allowed}
+
+  /* Stepper + progress */
+  .stepper{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .step{display:flex;align-items:center;gap:8px}
+  .dot{width:20px;height:20px;border-radius:50%;border:2px solid #456;display:inline-block;background:transparent}
+  .step.active .dot{background:var(--warn);border-color:var(--warn)}
+  .step.done .dot{background:var(--ok);border-color:var(--ok)}
+  .step label{font-size:13px;color:#cfe0e6}
+  .progress{height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}
+  .progress>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,#19c37d,#2bd897);width:0%}
+  .filebox{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .filebox .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#dfefff}
+
+  pre{margin:0;padding:12px;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;white-space:pre-wrap;word-wrap:break-word}
+
+  details.tips summary{cursor:pointer;display:inline-block;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.06);font-weight:700}
+  details.tips .content{margin-top:10px;color:var(--muted)}
+</style>
 </head>
 <body>
-  <header>
-    <div class="wrap" style="display:flex;align-items:center;gap:12px">
-      <img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI" style="height:36px;width:auto" />
-      <nav aria-label="Main">
-        <a class="btn-link" href="/index.html">Home</a>
-        <a class="btn-link" href="/upload.html">Upload</a>
-        <a class="btn-link" href="/reports.html">Reports</a>
-        <a class="btn-link" href="/pricing.html">Pricing</a>
-        <a class="btn-link" href="/faq.html">FAQ</a>
-        <a class="btn-link" href="/team.html">Team</a>
-        <a class="btn-link" href="/contact.html">Contact</a>
-        <a class="btn-link" href="/coach-login.html">Login</a>
+  <header class="top" id="site-header">
+    <div class="navwrap">
+      <a class="brand" href="/"><div class="brand-logo"></div><span>Virtual Coach AI</span></a>
+      <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
+      <nav class="nav" id="siteNav" aria-label="Primary">
+        <a href="/index.html">Home</a>
+        <a href="/upload.html" aria-current="page">Upload</a>
+        <a href="/report.html?report=/report.json">Reports</a>
+        <a href="/pricing.html">Pricing</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/team.html">Team</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/login.html">Login</a>
       </nav>
     </div>
   </header>
 
-  <main class="wrap">
+  <div class="scrim">
+    <main class="wrap">
+      <header style="margin-bottom:8px">
+        <h1>Best Results Come From Good Footage</h1>
+        <p class="lead">Results are estimates from a single-camera video. For best accuracy, record from ~8–12 ft either <strong>down-the-line</strong> (along the target line) or <strong>face-on</strong> (perpendicular), in landscape, with your whole body and club in frame.</p>
+        <details class="tips"><summary>Recording tips (quick)</summary>
+          <div class="content">
+            • Keep the camera steady (tripod if possible). • Bright, even light. • Avoid extreme wide-angle. • Ball and hands visible at impact.
+          </div>
+        </details>
+      </header>
 
-    <!-- Accuracy & Filming Waiver -->
-    <section class="card notice">
-      <h3 style="margin:0 0 6px">Best Results Come From Good Footage</h3>
-      <p class="muted" style="margin:4px 0 10px">
-        Results are estimates from a single-camera video. For best accuracy, record from
-        <strong>~8–12 feet</strong> either <strong>down-the-line</strong> (along the target line) or
-        <strong>face-on</strong> (perpendicular to target line), in <strong>landscape</strong>, with your whole body and club in frame.
-      </p>
-      <details>
-        <summary>Recording tips (quick)</summary>
-        <ul class="muted" style="margin:8px 0 0 18px">
-          <li>Steady phone (bag stand/tripod), no zoom; 60–120 fps if available (30 fps is fine).</li>
-          <li>3–10 seconds total; include the full swing.</li>
-          <li>Good light, no people crossing in front; show the ball & target line.</li>
-        </ul>
-      </details>
-    </section>
+      <section class="grid">
+        <!-- LEFT: Intake + Upload -->
+        <div class="card">
+          <h3>Upload Swing</h3>
+          <div class="content">
+            <div class="row">
+              <div>
+                <label for="first">First name</label>
+                <input id="first" type="text" placeholder="e.g., Jim" />
+              </div>
+              <div>
+                <label for="email">Email <span class="hint">(optional)</span></label>
+                <input id="email" type="email" placeholder="Add if you want the report emailed to you" />
+              </div>
+            </div>
 
-    <section class="card">
-      <h2 style="margin:0 0 8px">Upload Swing</h2>
-      <div class="grid">
-        <div class="field half">
-          <label for="video">Swing video</label>
-          <input type="file" id="video" accept="video/*" />
+            <div class="row">
+              <div>
+                <label for="eye">Eye dominance <span class="req">*</span></label>
+                <select id="eye" required>
+                  <option value="">Select…</option>
+                  <option value="right">Right eye</option>
+                  <option value="left">Left eye</option>
+                  <option value="unknown">Not sure</option>
+                </select>
+              </div>
+              <div>
+                <label for="hand">Handedness</label>
+                <select id="hand">
+                  <option value="">Select…</option>
+                  <option value="right">Right</option>
+                  <option value="left">Left</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row">
+              <div>
+                <label for="gender">Gender</label>
+                <select id="gender">
+                  <option value="">Prefer not to say</option>
+                  <option value="man">Man</option>
+                  <option value="woman">Woman</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label for="height">Height (inches) <span class="req">*</span></label>
+                <input id="height" type="number" min="40" max="90" placeholder="e.g., 70 for 5'10&quot;" required />
+              </div>
+            </div>
+
+            <div>
+              <label for="focus">Focus area (optional)</label>
+              <select id="focus">
+                <option value="">— None —</option>
+                <option>Setup</option><option>Grip</option><option>Takeaway (P2)</option>
+                <option>Backswing (P3)</option><option>Top (P4)</option><option>Transition</option>
+                <option>Downswing</option><option>Shaft Parallel Down (P6)</option><option>Impact (P7)</option>
+                <option>Release</option><option>Finish</option><option>Swing Plane</option>
+                <option>Club Path</option><option>Face Control</option><option>Tempo</option>
+                <option>Kinematic Sequence</option><option>Posture</option><option>Ball Position</option>
+                <option>Alignment</option>
+              </select>
+            </div>
+
+            <div style="margin-top:10px">
+              <label for="file">Swing video</label>
+              <div class="filebox">
+                <input id="file" type="file" accept="video/*" />
+                <span class="name" id="fname">No file chosen</span>
+              </div>
+              <div class="hint" id="fmeta" style="margin-top:6px"></div>
+            </div>
+
+            <div class="actions">
+              <button class="btn primary" id="btnUpload">Start upload</button>
+              <button class="btn ghost" id="btnReset" type="button">Reset</button>
+              <a class="btn warn" id="btnOpenReport" href="#" target="_blank" rel="noopener" aria-disabled="true">Open Report</a>
+            </div>
+          </div>
         </div>
-        <div class="field half">
-          <label>Status</label>
-          <div id="status" class="pill">Idle</div>
+
+        <!-- RIGHT: Status + Steps + Summary -->
+        <div class="card">
+          <h3>Status</h3>
+          <div class="content">
+            <div class="stepper" style="margin-bottom:10px">
+              <div class="step" id="s1"><span class="dot"></span><label>1. Upload</label></div>
+              <div class="step" id="s2"><span class="dot"></span><label>2. Processing</label></div>
+              <div class="step" id="s3"><span class="dot"></span><label>3. Ready</label></div>
+              <span class="badge" id="pill" style="margin-left:auto">Idle</span>
+            </div>
+            <div class="progress" aria-label="Progress"><span id="bar"></span></div>
+            <div class="hint" id="statusLine" style="margin-top:8px">Waiting for a file…</div>
+
+            <h3 style="margin-top:16px;border:none;padding-top:16px">Intake Summary</h3>
+            <pre id="summary">{
+  "first": "",
+  "email": "",
+  "eye": "",
+  "hand": "",
+  "gender": "",
+  "height": "",
+  "focus": ""
+}</pre>
+          </div>
         </div>
-        <div class="field" style="grid-column: span 12">
-          <video id="preview" controls playsinline style="width:100%; max-height:360px; display:none; border-radius:12px; background:#000"></video>
-        </div>
-      </div>
+      </section>
+    </main>
+  </div>
 
-      <div id="filemeta" class="muted" style="margin-top:8px; display:none"></div>
+<script>
+  // NAV (hamburger)
+  const header = document.getElementById('site-header');
+  const btnMenu = document.createElement('button');
+  document.getElementById('menuBtn')?.addEventListener('click', ()=>{
+    const open = header.classList.toggle('open');
+    document.getElementById('menuBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.getElementById('siteNav').addEventListener('click', e=>{
+    if(e.target.tagName==='A'){ header.classList.remove('open'); document.getElementById('menuBtn')?.setAttribute('aria-expanded','false'); }
+  });
 
-      <h3 style="margin-top:8px">Intake Summary</h3>
-      <pre id="upload-intake" class="card" style="white-space:pre-wrap">No intake saved yet. Go to Home → Save Intake.</pre>
+  // Shortcuts
+  const $ = s => document.querySelector(s);
+  const fileInput = $('#file');
+  const fname = $('#fname');
+  const fmeta = $('#fmeta');
+  const bar = $('#bar');
+  const pill = $('#pill');
+  const statusLine = $('#statusLine');
+  const btnUpload = $('#btnUpload');
+  const btnReset = $('#btnReset');
+  const btnOpenReport = $('#btnOpenReport');
 
-      <div class="actions" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-        <button class="btn" id="submit">Submit for Analysis</button>
-        <button class="btn secondary" id="clear-video" type="button">Clear Video</button>
-      </div>
-    </section>
+  const fields = ['first','email','eye','hand','gender','height','focus'];
+  const data = Object.fromEntries(fields.map(k=>[k,'']));
 
-    <section id="progress-card" class="card" style="display:none">
-      <h3 style="margin:0 0 8px">Video in Progress</h3>
-      <p id="progress-desc" class="muted">We received your file and started processing.</p>
-      <div class="progress" aria-label="Upload/Processing progress"><i class="bar" id="bar"></i></div>
-      <ul class="muted" style="margin-top:10px">
-        <li><strong>Step 1:</strong> Upload complete</li>
-        <li><strong>Step 2:</strong> AI analysis (P1–P9, power, faults)</li>
-        <li><strong>Step 3:</strong> Report generated</li>
-      </ul>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-        <!-- When ready, this opens the full JSON viewer -->
-        <a class="btn" id="view-report" href="#" style="display:none">View Full Report</a>
-        <a class="btn" href="/reports.html" id="to-reports">Go to Reports</a>
-        <!-- Download original for manual coaching -->
-        <a class="btn secondary" id="download-video" href="#" style="display:none">Download for Analysis</a>
-        <button class="btn secondary" id="upload-another" type="button">Upload another</button>
-      </div>
-    </section>
-  </main>
-
-  <script>
-    // Load intake summary if present
-    (function(){
-      const el=document.getElementById('upload-intake');
-      const raw=localStorage.getItem('vca_intake');
-      if(!raw) return;
-      try{el.textContent=JSON.stringify(JSON.parse(raw),null,2)}catch{el.textContent=raw}
-    })();
-
-    // Focus file input if coming from intake
-    if(localStorage.getItem('vca_from_intake')){
-      try{document.getElementById('video').focus();}catch{}
-      localStorage.removeItem('vca_from_intake');
-    }
-
-    const inputVideo=document.getElementById('video');
-    const vid=document.getElementById('preview');
-    const status=document.getElementById('status');
-    const filemeta=document.getElementById('filemeta');
-    const progressCard=document.getElementById('progress-card');
-    const progressDesc=document.getElementById('progress-desc');
-    const bar=document.getElementById('bar');
-    const submitBtn=document.getElementById('submit');
-    const downloadBtn=document.getElementById('download-video');
-    const viewReportBtn=document.getElementById('view-report');
-
-    let pollTimer = null;
-    function animateBar(){
-      let w=0; bar.style.width='0%';
-      clearInterval(window.__vcaBar);
-      window.__vcaBar=setInterval(()=>{w=(w+5)%105; bar.style.width=w+'%';},120);
-    }
-    function showProcessing(filename){
-      progressCard.style.display='block';
-      progressDesc.textContent=`We received ${filename} and started analysis. You can head to Reports — it will appear there when ready.`;
-      animateBar();
-      document.getElementById('to-reports').focus();
-    }
-
-    inputVideo.addEventListener('change',()=>{
-      const file=inputVideo.files?.[0];
-      if(!file){
-        status.textContent='Idle';
-        vid.style.display='none'; vid.removeAttribute('src');
-        filemeta.style.display='none';
-        return;
-      }
-      const url=URL.createObjectURL(file);
-      vid.src=url; vid.style.display='block';
-      status.textContent='Selected • Ready to upload';
-      filemeta.style.display='block';
-      filemeta.textContent=`File: ${file.name} • ${Math.round(file.size/1024)} KB`;
+  function updateSummary(){
+    fields.forEach(k=>{
+      const el = document.getElementById(k);
+      if (!el) return;
+      data[k] = (el.type === 'number') ? (el.value ? Number(el.value) : '') : el.value.trim();
     });
+    $('#summary').textContent = JSON.stringify(data, null, 2);
+  }
+  fields.forEach(k=> document.getElementById(k).addEventListener('input', updateSummary));
+  updateSummary();
 
-    document.getElementById('clear-video').addEventListener('click',resetAll);
-    document.getElementById('upload-another').addEventListener('click',()=>{
-      resetAll(); window.scrollTo({top:0,behavior:'smooth'});
+  fileInput.addEventListener('change', ()=>{
+    const f = fileInput.files && fileInput.files[0];
+    if (!f){ fname.textContent = 'No file chosen'; fmeta.textContent = ''; return; }
+    fname.textContent = f.name;
+    fmeta.textContent = `${(f.size/1024/1024).toFixed(1)} MB • ${f.type||'video'}`;
+    status('File selected. Ready to upload.', 'warn');
+  });
+
+  // Stepper helpers
+  function step(n){
+    [$('#s1'),$('#s2'),$('#s3')].forEach((el,i)=>{
+      el.classList.remove('active','done');
+      if (i < n-1) el.classList.add('done');
+      if (i === n-1) el.classList.add('active');
     });
+  }
+  function progress(pct){ bar.style.width = Math.max(0, Math.min(100, pct)) + '%'; }
+  function status(text, tone){ statusLine.textContent = text; pill.textContent = text.split('.')[0]; pill.style.background = tone==='ok'?'rgba(25,195,125,.18)':tone==='warn'?'rgba(246,196,83,.18)':'rgba(255,255,255,.10)'; pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)'; }
 
-    function resetAll(){
-      inputVideo.value="";
-      vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display='none';
-      status.textContent='Idle'; filemeta.style.display='none';
-      progressCard.style.display='none';
-      downloadBtn.style.display='none'; downloadBtn.removeAttribute('href');
-      viewReportBtn.style.display='none'; viewReportBtn.removeAttribute('href');
-      submitBtn.disabled=false;
-      localStorage.removeItem('vca_processing');
-      if (pollTimer) { clearInterval(pollTimer); pollTimer=null; }
+  // Generate a key if backend doesn't provide one yet
+  function makeKey(file){
+    const safe = file.name.replace(/[^a-z0-9_.-]+/gi,'_').toLowerCase();
+    return `uploads/${Date.now()}-${safe}`;
     }
 
-    // Submit: POST to /api/upload (stores video), then poll /api/analyze?key=...
-    submitBtn.addEventListener('click', async ()=>{
-      const intake = localStorage.getItem('vca_intake');
-      const file = inputVideo.files?.[0];
-      if (!file) { alert('Choose a swing video.'); return; }
-
-      submitBtn.disabled = true;
-      status.textContent = 'Uploading…';
-
-      const formData = new FormData();
-      if (intake) formData.append('intake', intake);
-      formData.append('video', file, file.name);
-
-      let resp;
-      try {
-        resp = await fetch('/api/upload', { method: 'POST', body: formData });
-      } catch (e) {
-        submitBtn.disabled = false;
-        alert('Network error during upload.'); 
-        return;
-      }
-      if (!resp.ok) {
-        submitBtn.disabled = false;
-        const msg = await resp.text();
-        alert('Upload failed: ' + msg);
-        return;
-      }
-      const { key, downloadUrl } = await resp.json();
-
-      // Show processing UI + persist reference
-      status.textContent = 'Uploaded • Processing';
-      showProcessing(file.name);
-      localStorage.setItem('vca_processing', JSON.stringify({ file: file.name, key }));
-
-      // Reveal download link so you can grab the raw file immediately
-      if (downloadUrl) {
-        downloadBtn.href = downloadUrl;
-        downloadBtn.style.display = 'inline-flex';
-      }
-
-      // Start polling your /api/analyze GET
-      startPolling(key);
-      // Link "View Full Report" to the JSON viewer
-      viewReportBtn.href = `/report.html?key=${encodeURIComponent(key)}`;
+  // Try to request a signed upload from /api/upload
+  async function getUploadTarget(file, key){
+    const res = await fetch('/api/upload', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ filename: file.name, type: file.type, key })
     });
+    if (!res.ok) throw new Error('Upload init failed: HTTP '+res.status);
+    return res.json(); // shapes supported: {putUrl,key} OR {url,fields,key} OR {key}
+  }
 
-    function startPolling(key){
-      if (pollTimer) clearInterval(pollTimer);
-      const poll = async ()=>{
-        try{
-          const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`);
-          if(!r.ok) return;
-          const data = await r.json();
-          if (data.status === 'ready') {
-            clearInterval(pollTimer); pollTimer=null;
-            progressDesc.textContent = 'Analysis complete. View your full report.';
-            viewReportBtn.style.display = 'inline-flex';
-          }
-        }catch(_){} // ignore errors; try again next tick
-      };
-      poll(); // immediate
-      pollTimer = setInterval(poll, 7000);
+  // PUT to signed URL with progress
+  function putWithProgress(url, file){
+    return new Promise((resolve, reject)=>{
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', url, true);
+      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+      xhr.upload.onprogress = (e)=>{ if (e.lengthComputable){ progress( Math.round((e.loaded/e.total)*80) ); } };
+      xhr.onload = ()=> (xhr.status>=200 && xhr.status<300) ? resolve() : reject(new Error('Upload error: HTTP '+xhr.status));
+      xhr.onerror = ()=> reject(new Error('Network error during upload'));
+      xhr.send(file);
+    });
+  }
+
+  // S3 form POST (no reliable progress events; fake smooth progress to 80%)
+  async function postForm(url, fields, file){
+    const fd = new FormData();
+    Object.entries(fields||{}).forEach(([k,v])=> fd.append(k,v));
+    fd.append('file', file);
+    const controller = new AbortController();
+    const tick = setInterval(()=>{
+      const cur = parseFloat(bar.style.width)||0;
+      if (cur < 78) progress(cur + 2);
+      else clearInterval(tick);
+    }, 200);
+    const res = await fetch(url, { method:'POST', body:fd, signal:controller.signal });
+    clearInterval(tick);
+    if (!res.ok) throw new Error('Upload error: HTTP '+res.status);
+  }
+
+  async function startUpload(){
+    const f = fileInput.files && fileInput.files[0];
+    if (!f){ alert('Choose a swing video first.'); return; }
+    // Minimal validation
+    if (!$('#eye').value){ alert('Pick eye dominance.'); $('#eye').focus(); return; }
+    if (!$('#height').value){ alert('Enter height (inches).'); $('#height').focus(); return; }
+
+    btnUpload.disabled = true; btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled');
+    step(1); progress(2); status('Uploading…', 'warn');
+
+    const clientKey = makeKey(f);
+    let finalKey = clientKey;
+
+    try{
+      // Ask backend for upload target
+      let target;
+      try{ target = await getUploadTarget(f, clientKey); }
+      catch(_){ target = { key: clientKey }; } // fallback: backend will ingest by filename later
+
+      if (target.key) finalKey = target.key;
+      if (target.putUrl){
+        await putWithProgress(target.putUrl, f);
+      } else if (target.url && target.fields){
+        await postForm(target.url, target.fields, f);
+      } else {
+        // Fallback: try sending raw file to /api/upload (proxy upload)
+        const fd = new FormData(); fd.append('file', f); fd.append('key', finalKey);
+        const r = await fetch('/api/upload', { method:'POST', body:fd });
+        if (!r.ok) throw new Error('Upload error: HTTP '+r.status);
+      }
+
+      progress(82); step(2); status('Processing…', 'warn');
+      saveIntake(finalKey);
+      pollAnalyze(finalKey);
+    }catch(err){
+      console.error(err);
+      status('Upload failed', ''); progress(0); step(1);
+      alert('Upload failed: '+(err.message||err));
+      btnUpload.disabled = false;
     }
+  }
 
-    // Restore processing on reload
-    (function restoreProcessing(){
-      const raw=localStorage.getItem('vca_processing');
-      if(!raw) return;
+  // Store intake alongside key (for your pipeline if needed)
+  function saveIntake(key){
+    try{
+      const payload = { key, intake: data, ts: Date.now() };
+      localStorage.setItem('vc_last_intake', JSON.stringify(payload));
+    }catch{}
+  }
+
+  // Poll /api/analyze?key=... until ready, then link to report.html?key=...
+  let pollTimer = null;
+  async function checkAnalyze(key){
+    const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache:'no-store' });
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    return r.json(); // {status:"pending"|"ready", report?}
+  }
+  async function pollAnalyze(key){
+    async function tick(){
       try{
-        const { file, key } = JSON.parse(raw);
-        if (file) { showProcessing(file); }
-        if (key) {
-          // Set up report link and poll
-          viewReportBtn.href = `/report.html?key=${encodeURIComponent(key)}`;
-          startPolling(key);
+        const out = await checkAnalyze(key);
+        if (out.status === 'ready'){
+          clearInterval(pollTimer); pollTimer = null;
+          progress(100); step(3); status('Ready ✓', 'ok');
+          const url = `/report.html?key=${encodeURIComponent(key)}`;
+          btnOpenReport.href = url; btnOpenReport.removeAttribute('aria-disabled'); btnOpenReport.classList.remove('disabled');
+          // optional: persist report for faster open if provided
+          if (out.report){
+            try{ localStorage.setItem('vc_last_report', JSON.stringify(out.report)); }catch{}
+          }
+          return;
         }
-      }catch{}
-    })();
-  </script>
+        // pending
+        const cur = parseFloat(bar.style.width)||82;
+        progress( Math.min(98, cur + Math.random()*2) );
+        status('Processing…', 'warn');
+      }catch(e){
+        console.warn('Check failed', e);
+        status('Checking…', 'warn');
+      }
+    }
+    await tick();
+    pollTimer = setInterval(tick, 7000);
+  }
+
+  btnUpload.addEventListener('click', startUpload);
+  btnReset.addEventListener('click', ()=>{
+    fields.forEach(k=>{ const el = document.getElementById(k); if(el) el.value=''; });
+    updateSummary(); fileInput.value=''; fname.textContent='No file chosen'; fmeta.textContent='';
+    step(1); progress(0); status('Idle',''); btnUpload.disabled=false;
+    btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled'); btnOpenReport.href='#';
+  });
+
+  // Initialize UI
+  step(1); progress(0); status('Idle','');
+</script>
 </body>
 </html>
