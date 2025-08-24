@@ -58,7 +58,7 @@
   .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6;}
   .btn.warn{background:rgba(246,196,83,.18);border-color:#b8860b;}
   .btn.ghost{background:rgba(255,255,255,.06);}
-  .btn[disabled]{opacity:.55;cursor:not-allowed}
+  .btn[disabled], .btn.disabled{opacity:.55;cursor:not-allowed;pointer-events:none}
 
   /* Stepper + progress */
   .stepper{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
@@ -76,6 +76,21 @@
 
   details.tips summary{cursor:pointer;display:inline-block;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.06);font-weight:700}
   details.tips .content{margin-top:10px;color:var(--muted)}
+
+  /* === Dropdown readability + glass look === */
+  select{
+    background: rgba(255,255,255,.06);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+  select:hover{ background: rgba(255,255,255,.10); }
+  select:focus{ outline: none; box-shadow: 0 0 0 2px rgba(255,255,255,.18) inset; }
+  /* Opened list items — force dark text on white so it’s always readable */
+  select option{ color:#0b1520; background:#ffffff; }
+  select option[disabled], select option[value=""]{ color:#6b7b88; }
 </style>
 </head>
 <body>
@@ -199,7 +214,7 @@
             <div class="actions">
               <button class="btn primary" id="btnUpload">Start upload</button>
               <button class="btn ghost" id="btnReset" type="button">Reset</button>
-              <a class="btn warn" id="btnOpenReport" href="#" target="_blank" rel="noopener" aria-disabled="true">Open Report</a>
+              <a class="btn warn disabled" id="btnOpenReport" href="#" target="_blank" rel="noopener" aria-disabled="true">Open Report</a>
             </div>
           </div>
         </div>
@@ -213,7 +228,6 @@
               <div class="step" id="s2"><span class="dot"></span><label>2. Processing</label></div>
               <div class="step" id="s3"><span class="dot"></span><label>3. Ready</label></div>
               <span class="badge" id="pill" style="margin-left:auto">Idle</span>
-              <!-- QC pill (added) -->
               <span class="badge" id="qcPill" style="display:none">QC</span>
             </div>
             <div class="progress" aria-label="Progress"><span id="bar"></span></div>
@@ -255,7 +269,7 @@
   const fmeta = $('#fmeta');
   const bar = $('#bar');
   const pill = $('#pill');
-  const qcPill = document.getElementById('qcPill'); // <— QC pill
+  const qcPill = document.getElementById('qcPill');
   const statusLine = $('#statusLine');
   const btnUpload = $('#btnUpload');
   const btnReset = $('#btnReset');
@@ -359,9 +373,8 @@
       qcPill.textContent = 'QC: Failed';
       qcPill.style.background = 'rgba(255,107,107,.18)';
       qcPill.style.borderColor = '#c44';
-      // Optional: gate the report on FAIL
-      btnOpenReport.setAttribute('aria-disabled','true');
       btnOpenReport.classList.add('disabled');
+      btnOpenReport.setAttribute('aria-disabled','true');
     }
   }
   async function runQC(key){
@@ -445,7 +458,7 @@
     if (!$('#eye').value){ alert('Pick eye dominance.'); $('#eye').focus(); return; }
     if (!$('#height').value){ alert('Enter height (inches).'); $('#height').focus(); return; }
 
-    btnUpload.disabled = true; btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled');
+    btnUpload.disabled = true; btnOpenReport.classList.add('disabled'); btnOpenReport.setAttribute('aria-disabled','true');
     step(1); progress(2); status('Uploading…', 'warn');
 
     const clientKey = makeKey(f);
@@ -469,7 +482,6 @@
 
       progress(82); step(2); status('Processing…', 'warn');
       saveIntake(finalKey);
-      // persist intake server-side for the analyzer (B direction)
       postIntake(finalKey, { ...data, derived: deriveHints(data) }); // non-blocking
       pollAnalyze(finalKey);
     }catch(err){
@@ -480,7 +492,7 @@
     }
   }
 
-  // Store intake alongside key (for your pipeline if needed)
+  // Store intake alongside key
   function saveIntake(key){
     try{
       const payload = { key, intake: data, ts: Date.now() };
@@ -488,7 +500,7 @@
     }catch{}
   }
 
-  // Poll /api/analyze?key=... until ready, then link to report.html?key=...
+  // Poll analyze
   let pollTimer = null;
   async function checkAnalyze(key){
     const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache:'no-store' });
@@ -502,16 +514,12 @@
         if (out.status === 'ready'){
           clearInterval(pollTimer); pollTimer = null;
           progress(100); step(3); status('Ready ✓', 'ok');
-          // Run QC as soon as we’re ready
           await runQC(key);
           const url = `/report.html?key=${encodeURIComponent(key)}`;
-          btnOpenReport.href = url; btnOpenReport.removeAttribute('aria-disabled'); btnOpenReport.classList.remove('disabled');
-          if (out.report){
-            try{ localStorage.setItem('vc_last_report', JSON.stringify(out.report)); }catch{}
-          }
+          btnOpenReport.href = url; btnOpenReport.classList.remove('disabled'); btnOpenReport.removeAttribute('aria-disabled');
+          if (out.report){ try{ localStorage.setItem('vc_last_report', JSON.stringify(out.report)); }catch{} }
           return;
         }
-        // pending
         const cur = parseFloat(bar.style.width)||82;
         progress( Math.min(98, cur + Math.random()*2) );
         status('Processing…', 'warn');
@@ -529,9 +537,53 @@
     fields.forEach(k=>{ const el = document.getElementById(k); if(el) el.value=''; });
     updateSummary(); fileInput.value=''; fname.textContent='No file chosen'; fmeta.textContent='';
     step(1); progress(0); status('Idle',''); btnUpload.disabled=false;
-    btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled'); btnOpenReport.href='#';
-    showQC(null); // hide QC pill on reset
+    btnOpenReport.classList.add('disabled'); btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.href='#';
+    showQC(null);
   });
+
+  // SAFETY NET: if any <select> lost its options, repopulate them
+  (function ensureSelectOptions(){
+    function setOpts(id, html){
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (!el.options || el.options.length === 0) el.innerHTML = html;
+    }
+    setOpts('eye', `
+      <option value="">Select…</option>
+      <option value="right">Right eye</option>
+      <option value="left">Left eye</option>
+      <option value="unknown">Not sure</option>
+    `);
+    setOpts('hand', `
+      <option value="">Select…</option>
+      <option value="right">Right</option>
+      <option value="left">Left</option>
+    `);
+    setOpts('gender', `
+      <option value="">Prefer not to say</option>
+      <option value="man">Man</option>
+      <option value="woman">Woman</option>
+      <option value="other">Other</option>
+    `);
+    setOpts('bodyShape', `
+      <option value="">— Select —</option>
+      <option value="slim">Slim / Lean</option>
+      <option value="average">Average / Athletic</option>
+      <option value="muscular">Muscular / Stocky</option>
+      <option value="tall-lean">Tall / Lean</option>
+      <option value="short-compact">Short / Compact</option>
+    `);
+    setOpts('focus', `
+      <option value="">— None —</option>
+      <option>Setup</option><option>Grip</option><option>Takeaway (P2)</option>
+      <option>Backswing (P3)</option><option>Top (P4)</option><option>Transition</option>
+      <option>Downswing</option><option>Shaft Parallel Down (P6)</option><option>Impact (P7)</option>
+      <option>Release</option><option>Finish</option><option>Swing Plane</option>
+      <option>Club Path</option><option>Face Control</option><option>Tempo</option>
+      <option>Kinematic Sequence</option><option>Posture</option><option>Ball Position</option>
+      <option>Alignment</option>
+    `);
+  })();
 
   // Initialize UI
   step(1); progress(0); status('Idle','');
