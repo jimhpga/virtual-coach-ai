@@ -1,13 +1,14 @@
 {
-  "redirects": [
-    { "source": "/favicon.ico", "destination": "/virtualcoach-logo.png", "permanent": false }
-  ],
   "rewrites": [
-    { "source": "/report",     "destination": "/report.html" },
-    { "source": "/report.htm", "destination": "/report.html" }
+    { "source": "/",          "destination": "/index.html" },
+    { "source": "/upload",    "destination": "/upload.html" },
+    { "source": "/report",    "destination": "/report.html" },
+    { "source": "/report.htm","destination": "/report.html" }
   ],
   "headers": [
+    { "source": "/index.html",   "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
+    { "source": "/upload.html",  "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
     { "source": "/report.html",  "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
-    { "source": "/reports/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
+    { "source": "/(.*)\\.(css|js|png|jpg|jpeg|svg)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] }
   ]
 }
