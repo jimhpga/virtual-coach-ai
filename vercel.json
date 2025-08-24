@@ -1,16 +1,12 @@
 {
-  "functions": { "api/**/*.js": { "runtime": "nodejs20.x" } },
   "rewrites": [
-    { "source": "/api/upload",  "destination": "/api/gateway?op=upload"  },
-    { "source": "/api/intake",  "destination": "/api/gateway?op=intake"  },
-    { "source": "/api/analyze", "destination": "/api/gateway?op=analyze" },
-    { "source": "/api/qc",      "destination": "/api/gateway?op=qc"      },
-    { "source": "/report",      "destination": "/report.html"            },
-    { "source": "/report.htm",  "destination": "/report.html"            }
+    { "source": "/api/(.*)", "destination": "/api/gateway" },
+
+    { "source": "/report",     "destination": "/report.html" },
+    { "source": "/report.htm", "destination": "/report.html" }
   ],
   "headers": [
-    { "source": "/index.html",  "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
-    { "source": "/upload.html", "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
-    { "source": "/report.html", "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
+    { "source": "/report.html",  "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
+    { "source": "/reports/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
   ]
 }
