@@ -69,7 +69,15 @@
     .panel{display:none}
     .panel.active{display:block}
 
-    .preview{background:rgba(0,0,0,.25); border:1px dashed rgba(255,255,255,.25); border-radius:12px; padding:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size:12px; max-height:260px; overflow:auto}
+    .preview{background:rgba(0,0,0,.25); border:1px dashed rgba(255,255,255,.25); border-radius:12px; padding:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; max-height:260px; overflow:auto}
+
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:999px}
+    .badge-ok{background:rgba(106,212,136,.18); border-color:#6ad488}
+
+    /* progress bar */
+    .progress{height:10px; background:rgba(255,255,255,.2); border-radius:999px; overflow:hidden}
+    .progress > i{display:block; height:100%; width:0%; background:linear-gradient(90deg,#6ad488,#34c77f); animation:load 2.4s infinite ease-in-out}
+    @keyframes load{0%{width:0%}50%{width:70%}100%{width:100%}}
 
     footer{opacity:.75; text-align:center; padding:40px 10px}
   </style>
@@ -198,6 +206,8 @@
           </div>
         </div>
 
+        <div id="filemeta" class="muted" style="margin-top:8px; display:none"></div>
+
         <h3 style="margin-top:8px">Intake Summary</h3>
         <div id="upload-intake" class="preview">No intake saved yet. Go to Home → Save Intake.</div>
 
@@ -209,6 +219,22 @@
 
         <div id="payload" class="preview" style="margin-top:12px; display:none"></div>
       </section>
+
+      <!-- PROGRESS PANEL (shown after submit) -->
+      <section id="progress-card" class="card" style="display:none">
+        <h3>Video in Progress</h3>
+        <p class="muted" id="progress-desc">We received your file and started processing.</p>
+        <div class="progress" aria-label="Upload/Processing progress"><i></i></div>
+        <ul class="muted" style="margin-top:10px">
+          <li><strong>Step 1:</strong> Upload complete</li>
+          <li><strong>Step 2:</strong> AI analysis (P1–P9, power, faults)</li>
+          <li><strong>Step 3:</strong> Report generated</li>
+        </ul>
+        <div class="actions" style="margin-top:10px">
+          <a class="btn" href="/reports.html" id="to-reports">Go to Reports</a>
+          <button class="btn secondary" id="upload-another" type="button">Upload another</button>
+        </div>
+      </section>
     </section>
   </main>
 
@@ -217,6 +243,7 @@
   </footer>
 
   <script>
+    // Tab router
     const tabs=document.querySelectorAll('.btn-tab');
     const panels={home:document.getElementById('panel-home'),upload:document.getElementById('panel-upload')};
     tabs.forEach(btn=>btn.addEventListener('click',()=>{
@@ -229,6 +256,7 @@
       window.scrollTo({top:0,behavior:'smooth'});
     }));
 
+    // Focus chip toggles
     document.querySelectorAll('.chips').forEach(group=>{
       group.addEventListener('click',e=>{
         const chip=e.target.closest('.chip'); if(!chip)return;
@@ -236,6 +264,7 @@
       });
     });
 
+    // Intake save/reset
     const saveBtn=document.getElementById('save-intake');
     const resetBtn=document.getElementById('reset-intake');
     const form=document.getElementById('intake-form');
@@ -268,21 +297,27 @@
       try{el.textContent=JSON.stringify(JSON.parse(raw),null,2)}catch{el.textContent=raw}
     }
 
+    // Upload UX
     const inputVideo=document.getElementById('video');
     const vid=document.getElementById('preview');
     const status=document.getElementById('status');
+    const filemeta=document.getElementById('filemeta');
+    const progressCard=document.getElementById('progress-card');
+    const progressDesc=document.getElementById('progress-desc');
 
     inputVideo.addEventListener('change',()=>{
       const file=inputVideo.files?.[0];
-      if(!file){status.textContent='Idle'; vid.style.display='none'; vid.removeAttribute('src'); return;}
+      if(!file){status.textContent='Idle'; vid.style.display='none'; vid.removeAttribute('src'); filemeta.style.display='none'; return;}
       const url=URL.createObjectURL(file);
       vid.src=url; vid.style.display='block';
       status.textContent='Selected • Ready to upload';
+      filemeta.style.display='block';
+      filemeta.textContent=`File: ${file.name} • ${Math.round(file.size/1024)} KB`;
     });
 
     document.getElementById('clear-video').addEventListener('click',()=>{
       inputVideo.value=""; vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display='none';
-      status.textContent='Idle';
+      status.textContent='Idle'; filemeta.style.display='none';
     });
 
     const submit=document.getElementById('submit');
@@ -290,4 +325,36 @@
 
     submit.addEventListener('click',()=>{
       const intake=localStorage.getItem('vca_intake');
-      if(!int
+      const file=inputVideo.files?.[0];
+      if(!file){ alert('Choose a swing video.'); return; }
+
+      status.textContent='Uploading…';
+      // build mock payload (replace with real fetch when API ready)
+      const formData=new FormData();
+      if(intake) formData.append('intake',intake);
+      formData.append('video',file,file.name);
+
+      payload.style.display='block';
+      payload.textContent=`POST /api/analyze
+Headers: (multipart/form-data)
+Intake:
+${intake||'(none)'}
+
+Video: ${file.name} (${Math.round(file.size/1024)} KB)`;
+
+      // Simulate transition to processing state immediately
+      status.textContent='Uploaded • Processing';
+      progressCard.style.display='block';
+      progressDesc.textContent=`We received ${file.name} and started analysis. You can head to Reports — it will appear there when ready.`;
+      document.getElementById('to-reports').focus();
+    });
+
+    document.getElementById('upload-another').addEventListener('click',()=>{
+      progressCard.style.display='none';
+      inputVideo.value=""; vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display='none';
+      status.textContent='Idle'; filemeta.style.display='none'; payload.style.display='none';
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  </script>
+</body>
+</html>
