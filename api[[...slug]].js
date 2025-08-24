@@ -1,60 +1,63 @@
-// /api/[[...slug]].js
-// Single Serverless function that handles:
-//  GET  /api/ping
-//  POST /api/upload   (JSON init -> {key} only, OR multipart with field "file")
-//  POST /api/intake   (store intake next to key in /tmp just for now)
-//  GET  /api/analyze?key=...  (stub: always 'ready')
-//  GET  /api/qc?key=...       (stub: 'ok')
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import Busboy from "busboy";
+// api/[[...slug]].js
+// Single Serverless function for ALL endpoints:
+//   GET  /api/ping
+//   POST /api/upload   (JSON init -> { key } OR multipart with field "file"/"video")
+//   POST /api/intake   (stores intake JSON in /tmp next to the key)
+//   GET  /api/analyze?key=...   (stub: immediately "ready")
+//   GET  /api/qc?key=...        (stub: "ok")
+// This avoids S3 so your Upload page can run end-to-end on the Hobby plan.
 
-export const config = { api: { bodyParser: false } };
+const fs = require("node:fs");
+const path = require("node:path");
+const Busboy = require("busboy");
 
-const json = (res, code, obj) => res.status(code).json(obj);
-const bad  = (res, msg) => json(res, 400, { error: msg });
+// Disable builtin body parser so we can stream multipart
+module.exports.config = { api: { bodyParser: false } };
 
-const clean = s => String(s||"").trim().toLowerCase().replace(/[^a-z0-9_.-]+/g, "_");
-const makeKey = (name="video.mp4") => {
-  const safe = clean(name);
+// ---------- tiny helpers ----------
+function json(res, code, obj) {
+  res.statusCode = code;
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.end(JSON.stringify(obj));
+}
+function bad(res, msg) { return json(res, 400, { error: msg }); }
+
+function clean(name) {
+  return String(name || "").trim().toLowerCase().replace(/[^a-z0-9_.-]+/g, "_");
+}
+function makeKey(original = "video.mp4") {
+  const safe = clean(original);
   const ext  = (safe.split(".").pop() || "mp4").toLowerCase();
   const base = safe.replace(/\.[a-z0-9]+$/i, "");
   return `uploads/${Date.now()}-${base}.${ext}`;
-};
-
-// Read JSON body (when content-type is application/json)
-async function readJson(req){
+}
+async function readJson(req) {
   const chunks = [];
   for await (const c of req) chunks.push(c);
   try { return JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}"); }
   catch { return {}; }
 }
-
-// Save a stream to /tmp (ephemeral)
-function saveToTmp(filename){
-  const outPath = path.join("/tmp", filename);
-  const ws = fs.createWriteStream(outPath);
-  return { ws, outPath };
+function writeTmp(filename, bufOrStr) {
+  const p = path.join("/tmp", filename);
+  fs.writeFileSync(p, bufOrStr);
+  return p;
 }
 
-/* ---------------------- Handlers ---------------------- */
-async function handlePing(_req, res){
+// ---------- route handlers ----------
+async function handlePing(_req, res) {
   return json(res, 200, { ok: true, now: Date.now() });
 }
 
-async function handleUpload(req, res){
+async function handleUpload(req, res) {
   const ct = req.headers["content-type"] || "";
 
-  // MODE A: init via JSON -> return just { key }
-  if (ct.includes("application/json")){
-    const { filename="video.mp4", key } = await readJson(req);
-    const finalKey = key || makeKey(filename);
-    // Returning only {key} makes the front-end use the multipart fallback.
-    return json(res, 200, { key: finalKey });
+  // MODE A: JSON init -> return just { key } (front-end will fallback to multipart)
+  if (ct.includes("application/json")) {
+    const { filename = "video.mp4", key } = await readJson(req);
+    return json(res, 200, { key: key || makeKey(filename) });
   }
 
-  // MODE B: multipart -> save field "file" (or "video") to /tmp and return stored
+  // MODE B: multipart -> accept "file" or "video" field and save to /tmp
   const bb = Busboy({ headers: req.headers });
   let fileKey = null;
   let uploaded = false;
@@ -62,98 +65,100 @@ async function handleUpload(req, res){
   let intakeStr = null;
   let bytes = 0;
 
-  const finished = new Promise((resolve, reject)=>{
+  const finished = new Promise((resolve, reject) => {
     bb.on("field", (name, val) => {
       if (name === "key" && val) providedKey = String(val);
       if (name === "intake" && val) intakeStr = String(val);
     });
-    bb.on("file", (name, file, info) => {
-      if (name !== "file" && name !== "video"){ file.resume(); return; }
-      const { filename = "video.mp4" } = info || {};
+
+    bb.on("file", (name, file, info = {}) => {
+      if (name !== "file" && name !== "video") { file.resume(); return; }
+      const { filename = "video.mp4" } = info;
       fileKey = providedKey || makeKey(filename);
 
-      const { ws } = saveToTmp(path.basename(fileKey));
-      file.on("data", (chunk)=>{ bytes += chunk.length; });
-      file.pipe(ws);
-      ws.on("finish", ()=>{ uploaded = true; });
-      ws.on("error", reject);
+      const out = fs.createWriteStream(path.join("/tmp", path.basename(fileKey)));
+      file.on("data", (chunk) => { bytes += chunk.length; });
+      file.pipe(out);
+      out.on("finish", () => { uploaded = true; });
+      out.on("error", reject);
     });
+
     bb.on("error", reject);
     bb.on("finish", resolve);
   });
 
   req.pipe(bb);
-  try{
+
+  try {
     await finished;
     if (!uploaded || !fileKey) return bad(res, "No file received (use field 'file' or 'video')");
 
-    // If we got intake alongside, drop a JSON file next to it in /tmp (for now)
-    if (intakeStr){
-      try{
-        const intakePath = path.join("/tmp", path.basename(fileKey).replace(/\.[a-z0-9]+$/i, "") + ".intake.json");
-        fs.writeFileSync(intakePath, intakeStr);
-      }catch(_e){}
+    if (intakeStr) {
+      try {
+        const intakeName = path.basename(fileKey).replace(/\.[a-z0-9]+$/i, "") + ".intake.json";
+        writeTmp(intakeName, intakeStr);
+      } catch {}
     }
 
-    // Simulate a 24h download URL (we don't have S3 here; just echo the key)
-    return json(res, 200, {
-      status: "stored",
-      key: fileKey,
-      bytes
-    });
-  }catch(e){
+    // No S3 here—just confirm storage in /tmp and echo the key
+    return json(res, 200, { status: "stored", key: fileKey, bytes });
+  } catch (e) {
     console.error("upload error:", e);
     return json(res, 500, { error: String(e.message || e) });
   }
 }
 
-async function handleIntake(req, res){
+async function handleIntake(req, res) {
   if (req.method !== "POST") return json(res, 405, { error: "Method Not Allowed" });
   const { key, intake } = await readJson(req);
   if (!key) return bad(res, "missing key");
-  try{
-    const file = path.basename(key).replace(/\.[a-z0-9]+$/i, "") + ".intake.json";
-    fs.writeFileSync(path.join("/tmp", file), JSON.stringify(intake||{}, null, 2));
-  }catch(_e){}
+  try {
+    const fname = path.basename(key).replace(/\.[a-z0-9]+$/i, "") + ".intake.json";
+    writeTmp(fname, JSON.stringify(intake || {}, null, 2));
+  } catch {}
   return json(res, 200, { ok: true });
 }
 
-async function handleAnalyze(req, res){
-  const key = req.query.key || null;
-  // Stub "ready" so the UI can open the report.
+async function handleAnalyze(req, res, url) {
+  const key = url.searchParams.get("key");
   return json(res, 200, {
     status: key ? "ready" : "pending",
     report: key ? {
       key,
-      summary: {
-        priorities: ["Grip", "Posture", "P6 shaft plane"]
-      }
+      summary: { priorities: ["Grip", "Posture", "P6 shaft plane"] }
     } : undefined
   });
 }
 
-async function handleQC(_req, res){
+async function handleQC(_req, res) {
   return json(res, 200, { status: "ok", checks: { swingPath: "ok", shoulderTurn: "ok" } });
 }
 
-/* ---------------------- Router ---------------------- */
-export default async function handler(req, res){
-  const slug = (req.query.slug || []);
-  const route = String(slug[0] || "").toLowerCase();
+// ---------- router ----------
+module.exports = async (req, res) => {
+  let url;
+  try { url = new URL(req.url, `http://${req.headers.host}`); }
+  catch { return json(res, 400, { error: "Bad URL" }); }
 
-  try{
+  // Paths look like /api/ping, /api/upload, /api/analyze
+  const segs = url.pathname.split("/").filter(Boolean);
+  // segs[0] === "api"; route = segs[1] (or undefined)
+  const route = (segs[1] || "").toLowerCase();
+
+  try {
     if (route === "ping")    return handlePing(req, res);
     if (route === "upload")  return handleUpload(req, res);
     if (route === "intake")  return handleIntake(req, res);
-    if (route === "analyze") return handleAnalyze(req, res);
+    if (route === "analyze") return handleAnalyze(req, res, url);
     if (route === "qc")      return handleQC(req, res);
-    // Help text for /api
+
+    // Help text at /api
     return json(res, 200, {
       ok: true,
       routes: ["/api/ping", "/api/upload", "/api/analyze?key=...", "/api/intake (POST)", "/api/qc"]
     });
-  }catch(e){
+  } catch (e) {
     console.error("api error:", e);
     return json(res, 500, { error: String(e.message || e) });
   }
-}
+};
