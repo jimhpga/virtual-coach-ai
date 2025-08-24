@@ -22,7 +22,7 @@
   .scrim{min-height:100vh;background:var(--scrim)}
 
   /* NAV (hamburger) */
-  header.top{position:sticky;top:0;z-index:100;background:var(--nav, #0b2b12);border-bottom:1px solid rgba(255,255,255,.1)}
+  header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
   .brand-logo{width:160px;height:36px;background:var(--brand);
@@ -35,7 +35,7 @@
   nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
   @media(max-width:820px){
     .menu-toggle{display:inline-flex}
-    nav.nav{position:absolute;right:0;top:100%;background:var(--nav, #0b2b12);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
+    nav.nav{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
     header.top.open nav.nav{display:flex}
   }
 
@@ -85,23 +85,30 @@
   .filebox{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .filebox .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#dfefff}
 
-  /* ********** FIX 1: dropdowns readable everywhere ********** */
-  select{appearance:menulist;-webkit-appearance:menulist;-moz-appearance:menulist;}
-  /* Closed (collapsed) select uses our dark UI */
+  /* ========== DROPDOWN VISIBILITY FIX (Windows/Firefox/iPad) ========== */
+  select{appearance:menulist;-webkit-appearance:menulist;-moz-appearance:menulist;-webkit-text-fill-color:currentColor;}
+  /* closed select = translucent dark UI */
   select{color:#fff;background:rgba(255,255,255,.08)}
-  /* Opened list: force high-contrast black-on-white with !important to beat UA/OS & global styles */
+  /* opened list = high-contrast */
   select option{color:#111 !important;background:#fff !important}
   @media (prefers-color-scheme: dark){
     select option{color:#fff !important;background:#222 !important}
   }
+  @media (forced-colors: active){
+    select, select option{forced-color-adjust:none;color:ButtonText !important;background:Canvas !important}
+  }
 
-  /* ********** FIX 2: pretty, NON-CODE intake summary ********** */
+  /* ========== CLEAN INTAKE SUMMARY (no code blob) ========== */
   #summary.kv{
     display:grid;grid-template-columns:auto 1fr;gap:6px 10px;
     background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;padding:12px
   }
   #summary.kv .k{color:#cfe0e6}
   #summary.kv .v.muted{opacity:.6}
+
+  /* tips styling (kept) */
+  details.tips summary{cursor:pointer;display:inline-block;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.06);font-weight:700}
+  details.tips .content{margin-top:10px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -244,8 +251,7 @@
             <div class="hint" id="statusLine" style="margin-top:8px">Waiting for a file…</div>
 
             <h3 style="margin-top:16px;border:none;padding-top:16px">Intake Summary</h3>
-
-            <!-- ********** FIX 2: replace the old <pre id="summary"> with this grid ********** -->
+            <!-- CLEAN key→value summary (no JSON code) -->
             <div id="summary" class="kv">
               <div class="k">First</div><div class="v muted" data-k="first">—</div>
               <div class="k">Email</div><div class="v muted" data-k="email">—</div>
@@ -334,7 +340,6 @@
     setSummaryKV('aim_bias', derived.aim_bias);
     setSummaryKV('scale_factor', derived.scale_factor);
 
-    // Mirror to localStorage so Home & future sessions prefill
     try{
       const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
       Object.assign(saved, data);
@@ -346,9 +351,9 @@
   function prefillFromLocal(){
     try{
       const merged = {};
-      const p = JSON.parse(localStorage.getItem('vc_prefill')||'{}');  // any values typed on Home
+      const p = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
       Object.assign(merged, p);
-      const li = JSON.parse(localStorage.getItem('vc_last_intake')||'null'); // last full run
+      const li = JSON.parse(localStorage.getItem('vc_last_intake')||'null');
       const intake = li && li.intake ? li.intake : null;
       if (intake) Object.assign(merged, intake);
 
@@ -359,7 +364,7 @@
     }catch{}
   }
 
-  fields.forEach(k=> document.getElementById(k).addEventListener('input', updateSummary));
+  fields.forEach(k=> document.getElementById(k)?.addEventListener('input', updateSummary));
   prefillFromLocal();
   updateSummary();
 
@@ -399,7 +404,7 @@
       body: JSON.stringify({ filename: file.name, type: file.type, key })
     });
     if (!res.ok) throw new Error('Upload init failed: HTTP '+res.status);
-    return res.json(); // {key, putUrl} or other shapes you support
+    return res.json();
   }
   async function postIntake(key, intake) {
     try{
@@ -469,7 +474,7 @@
   async function checkAnalyze(key){
     const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache:'no-store' });
     if (!r.ok) throw new Error('HTTP '+r.status);
-    return r.json(); // {status:"pending"|"ready", report?}
+    return r.json();
   }
   async function pollAnalyze(key){
     async function tick(){
