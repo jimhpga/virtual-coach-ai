@@ -122,6 +122,35 @@
       }
     }catch{}
   })();
+  // ---- Cross-page prefill (no-op if fields aren't on Home) ----
+(function wireIndexPrefill(){
+  const ids = ['first','hand','eye','gender','height','email','focus'];
+  function load(){
+    try{
+      const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
+      ids.forEach(id=>{
+        const el = document.getElementById(id);
+        if (el && saved[id] != null && saved[id] !== '') el.value = String(saved[id]);
+      });
+    }catch{}
+  }
+  function save(){
+    try{
+      const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
+      ids.forEach(id=>{
+        const el = document.getElementById(id);
+        if (el) saved[id] = el.type === 'number' ? (el.value ? Number(el.value) : '') : el.value.trim();
+      });
+      localStorage.setItem('vc_prefill', JSON.stringify(saved));
+    }catch{}
+  }
+  ids.forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', save);
+  });
+  load();
+})();
+
 </script>
 </body>
 </html>
