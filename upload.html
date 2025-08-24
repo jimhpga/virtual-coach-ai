@@ -23,6 +23,8 @@
     .progress{height:10px;background:rgba(255,255,255,.25);border-radius:999px;overflow:hidden}
     .bar{display:block;height:100%;width:0%;background:linear-gradient(90deg,#6ad488,#34c77f)}
     .muted{color:var(--muted)}
+    .notice{border-left:3px solid var(--ok)}
+    details summary{cursor:pointer;font-weight:700}
   </style>
 </head>
 <body>
@@ -43,11 +45,30 @@
   </header>
 
   <main class="wrap">
+
+    <!-- Accuracy & Filming Waiver -->
+    <section class="card notice">
+      <h3 style="margin:0 0 6px">Best Results Come From Good Footage</h3>
+      <p class="muted" style="margin:4px 0 10px">
+        Results are estimates from a single-camera video. For best accuracy, record from
+        <strong>~8–12 feet</strong> either <strong>down-the-line</strong> (along the target line) or
+        <strong>face-on</strong> (perpendicular to target line), in <strong>landscape</strong>, with your whole body and club in frame.
+      </p>
+      <details>
+        <summary>Recording tips (quick)</summary>
+        <ul class="muted" style="margin:8px 0 0 18px">
+          <li>Steady phone (bag stand/tripod), no zoom; 60–120 fps if available (30 fps is fine).</li>
+          <li>3–10 seconds total; include the full swing.</li>
+          <li>Good light, no people crossing in front; show the ball & target line.</li>
+        </ul>
+      </details>
+    </section>
+
     <section class="card">
       <h2 style="margin:0 0 8px">Upload Swing</h2>
       <div class="grid">
         <div class="field half">
-          <label for="video">Swing video (3–10s works best)</label>
+          <label for="video">Swing video</label>
           <input type="file" id="video" accept="video/*" />
         </div>
         <div class="field half">
@@ -80,8 +101,10 @@
         <li><strong>Step 3:</strong> Report generated</li>
       </ul>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <!-- When ready, this opens the full JSON viewer -->
+        <a class="btn" id="view-report" href="#" style="display:none">View Full Report</a>
         <a class="btn" href="/reports.html" id="to-reports">Go to Reports</a>
-        <!-- NEW: Download link appears after successful upload -->
+        <!-- Download original for manual coaching -->
         <a class="btn secondary" id="download-video" href="#" style="display:none">Download for Analysis</a>
         <button class="btn secondary" id="upload-another" type="button">Upload another</button>
       </div>
@@ -112,6 +135,20 @@
     const bar=document.getElementById('bar');
     const submitBtn=document.getElementById('submit');
     const downloadBtn=document.getElementById('download-video');
+    const viewReportBtn=document.getElementById('view-report');
+
+    let pollTimer = null;
+    function animateBar(){
+      let w=0; bar.style.width='0%';
+      clearInterval(window.__vcaBar);
+      window.__vcaBar=setInterval(()=>{w=(w+5)%105; bar.style.width=w+'%';},120);
+    }
+    function showProcessing(filename){
+      progressCard.style.display='block';
+      progressDesc.textContent=`We received ${filename} and started analysis. You can head to Reports — it will appear there when ready.`;
+      animateBar();
+      document.getElementById('to-reports').focus();
+    }
 
     inputVideo.addEventListener('change',()=>{
       const file=inputVideo.files?.[0];
@@ -128,26 +165,24 @@
       filemeta.textContent=`File: ${file.name} • ${Math.round(file.size/1024)} KB`;
     });
 
-    document.getElementById('clear-video').addEventListener('click',()=>{
-      inputVideo.value="";
-      vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display='none';
-      status.textContent='Idle'; filemeta.style.display='none';
-      localStorage.removeItem('vca_processing');
-      progressCard.style.display='none';
-      downloadBtn.style.display='none'; downloadBtn.removeAttribute('href');
-      submitBtn.disabled=false;
-    });
-
+    document.getElementById('clear-video').addEventListener('click',resetAll);
     document.getElementById('upload-another').addEventListener('click',()=>{
+      resetAll(); window.scrollTo({top:0,behavior:'smooth'});
+    });
+
+    function resetAll(){
       inputVideo.value="";
       vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display='none';
       status.textContent='Idle'; filemeta.style.display='none';
       progressCard.style.display='none';
       downloadBtn.style.display='none'; downloadBtn.removeAttribute('href');
+      viewReportBtn.style.display='none'; viewReportBtn.removeAttribute('href');
       submitBtn.disabled=false;
-      window.scrollTo({top:0,behavior:'smooth'});
-    });
+      localStorage.removeItem('vca_processing');
+      if (pollTimer) { clearInterval(pollTimer); pollTimer=null; }
+    }
 
+    // Submit: POST to /api/upload (stores video), then poll /api/analyze?key=...
     submitBtn.addEventListener('click', async ()=>{
       const intake = localStorage.getItem('vca_intake');
       const file = inputVideo.files?.[0];
@@ -162,4 +197,69 @@
 
       let resp;
       try {
-        resp = await fetch('/api/upload', { method: 'POST', body: formDat
+        resp = await fetch('/api/upload', { method: 'POST', body: formData });
+      } catch (e) {
+        submitBtn.disabled = false;
+        alert('Network error during upload.'); 
+        return;
+      }
+      if (!resp.ok) {
+        submitBtn.disabled = false;
+        const msg = await resp.text();
+        alert('Upload failed: ' + msg);
+        return;
+      }
+      const { key, downloadUrl } = await resp.json();
+
+      // Show processing UI + persist reference
+      status.textContent = 'Uploaded • Processing';
+      showProcessing(file.name);
+      localStorage.setItem('vca_processing', JSON.stringify({ file: file.name, key }));
+
+      // Reveal download link so you can grab the raw file immediately
+      if (downloadUrl) {
+        downloadBtn.href = downloadUrl;
+        downloadBtn.style.display = 'inline-flex';
+      }
+
+      // Start polling your /api/analyze GET
+      startPolling(key);
+      // Link "View Full Report" to the JSON viewer
+      viewReportBtn.href = `/report.html?key=${encodeURIComponent(key)}`;
+    });
+
+    function startPolling(key){
+      if (pollTimer) clearInterval(pollTimer);
+      const poll = async ()=>{
+        try{
+          const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`);
+          if(!r.ok) return;
+          const data = await r.json();
+          if (data.status === 'ready') {
+            clearInterval(pollTimer); pollTimer=null;
+            progressDesc.textContent = 'Analysis complete. View your full report.';
+            viewReportBtn.style.display = 'inline-flex';
+          }
+        }catch(_){} // ignore errors; try again next tick
+      };
+      poll(); // immediate
+      pollTimer = setInterval(poll, 7000);
+    }
+
+    // Restore processing on reload
+    (function restoreProcessing(){
+      const raw=localStorage.getItem('vca_processing');
+      if(!raw) return;
+      try{
+        const { file, key } = JSON.parse(raw);
+        if (file) { showProcessing(file); }
+        if (key) {
+          // Set up report link and poll
+          viewReportBtn.href = `/report.html?key=${encodeURIComponent(key)}`;
+          startPolling(key);
+        }
+      }catch{}
+    })();
+  </script>
+</body>
+</html>
