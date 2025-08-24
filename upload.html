@@ -2,16 +2,29 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual Coach AI — Upload</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
-  :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06); --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08); --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20); --ok:#19c37d; --warn:#f6c453; }
-  *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
+  :root{
+    --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06);
+    --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08);
+    --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
+    --ok:#19c37d; --warn:#f6c453;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; color:var(--text);
+    background:url('/homepage-background.png') center/cover fixed no-repeat;
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+  }
   .scrim{min-height:100vh;background:var(--scrim)}
 
-  /* NAV (hamburger) */
+  /* NAV */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
@@ -46,17 +59,21 @@
   .req{color:#ffd479}
   .hint{color:var(--muted);font-size:12px}
 
-  /* Inputs + dropdowns */
+  /* Inputs */
   input[type="text"], input[type="email"], input[type="number"], select, button, .filebox{
-    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:rgba(255,255,255,.10); color:#fff;
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line);
+    background:rgba(255,255,255,.08); color:#fff;
   }
   input::placeholder{color:#cfe0e699}
+
+  /* IMPORTANT: Make dropdown text visible when the OS paints a white list */
+  /* Closed control stays translucent; the open list uses option color (dark). */
+  select{appearance:auto; -webkit-appearance:menulist; -moz-appearance:menulist; background-clip:padding-box}
+  select:invalid{ color:#b7c9cf; }
+  option{ color:#111 !important; background:#fff !important; } /* fix blank-looking lists on Win/Firefox */
+
   .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   @media(max-width:700px){.row{grid-template-columns:1fr}}
-  /* Make dropdown popup readable: options are dark text on white */
-  select option, select optgroup{ color:#111 !important; background:#fff !important; }
-  /* Keep the closed dropdown translucent like your design */
-  select{ background:rgba(255,255,255,.10); color:#fff; }
 
   .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
   .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
@@ -78,11 +95,7 @@
   .filebox{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .filebox .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#dfefff}
 
-  /* Summary list (replaces JSON) */
-  ul#summaryList{margin:0;padding-left:18px;color:#cfe0e6}
-  ul#summaryList li{margin:4px 0}
-  ul#summaryList strong{color:#ecf3f7}
-
+  pre{margin:0;padding:12px;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;white-space:pre-wrap;word-wrap:break-word}
   details.tips summary{cursor:pointer;display:inline-block;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.06);font-weight:700}
   details.tips .content{margin-top:10px;color:var(--muted)}
 </style>
@@ -109,10 +122,15 @@
     <main class="wrap">
       <header style="margin-bottom:8px">
         <h1>Best Results Come From Good Footage</h1>
-        <p class="lead">Results are estimates from a single-camera video. For best accuracy, record from ~8–12 ft either <strong>down-the-line</strong> (along the target line) or <strong>face-on</strong> (perpendicular), in landscape, with your whole body and club in frame.</p>
+        <p class="lead">
+          Results are estimates from a single-camera video. For best accuracy, record from ~8–12 ft either
+          <strong>down-the-line</strong> (along the target line) or <strong>face-on</strong> (perpendicular),
+          in landscape, with your whole body and club in frame.
+        </p>
         <details class="tips"><summary>Recording tips (quick)</summary>
           <div class="content">
-            • Keep the camera steady (tripod if possible). • Bright, even light. • Avoid extreme wide-angle. • Ball and hands visible at impact.
+            • Keep the camera steady (tripod if possible). • Bright, even light. • Avoid extreme wide-angle.
+            • Ball and hands visible at impact.
           </div>
         </details>
       </header>
@@ -222,13 +240,13 @@
               <div class="step" id="s2"><span class="dot"></span><label>2. Processing</label></div>
               <div class="step" id="s3"><span class="dot"></span><label>3. Ready</label></div>
               <span class="badge" id="pill" style="margin-left:auto">Idle</span>
+              <span class="badge" id="qcPill" style="display:none">QC</span>
             </div>
             <div class="progress" aria-label="Progress"><span id="bar"></span></div>
             <div class="hint" id="statusLine" style="margin-top:8px">Waiting for a file…</div>
 
             <h3 style="margin-top:16px;border:none;padding-top:16px">Intake Summary</h3>
-            <!-- REPLACED: was <pre id="summary">...</pre> -->
-            <ul id="summaryList"></ul>
+            <pre id="summary">Nothing entered yet.</pre>
           </div>
         </div>
       </section>
@@ -246,19 +264,30 @@
     if(e.target.tagName==='A'){ header.classList.remove('open'); document.getElementById('menuBtn')?.setAttribute('aria-expanded','false'); }
   });
 
+  // Shortcuts
   const $ = s => document.querySelector(s);
   const fileInput = $('#file');
   const fname = $('#fname');
   const fmeta = $('#fmeta');
   const bar = $('#bar');
   const pill = $('#pill');
+  const qcPill = document.getElementById('qcPill');
   const statusLine = $('#statusLine');
   const btnUpload = $('#btnUpload');
   const btnReset = $('#btnReset');
   const btnOpenReport = $('#btnOpenReport');
 
+  // Fields + model
   const fields = ['first','email','eye','hand','gender','height','bodyShape','focus'];
   const data = Object.fromEntries(fields.map(k=>[k,'']));
+
+  function toFeetInches(inches){
+    const n = Number(inches||0);
+    if (!n) return '';
+    const ft = Math.floor(n/12);
+    const inch = Math.round(n - ft*12);
+    return `${ft}'${inch}"`;
+  }
 
   function deriveHints(d){
     const hand = (d.hand||'').toLowerCase();
@@ -268,37 +297,41 @@
     if (hand==='right' && eye==='left') aim = 'left';
     if (hand==='left'  && eye==='right') aim = 'right';
     const h = Number(d.height||0);
-    const scale = h ? +(h/70).toFixed(2) : '';
+    const scale = h ? (h/70).toFixed(2) : '';
     return { cross_dominant: !!cross, aim_bias: aim, scale_factor: scale };
   }
 
-  function feetIn(n){
-    n = Number(n||0);
-    if(!n) return '—';
-    const ft = Math.floor(n/12), inch = n%12;
-    return ft+'′'+inch+'″ ('+n+'")';
+  function renderSummaryHuman(d, derived){
+    const lines = [];
+    const val = (x)=> (x===''||x==null) ? '—' : x;
+
+    lines.push(`First: ${val(d.first)}`);
+    lines.push(`Email: ${val(d.email)}`);
+    lines.push(`Eye dominance: ${val(d.eye)}`);
+    lines.push(`Handedness: ${val(d.hand)}`);
+    lines.push(`Gender: ${val(d.gender)}`);
+    const hTxt = d.height ? `${d.height} in (${toFeetInches(d.height)})` : '—';
+    lines.push(`Height: ${hTxt}`);
+    lines.push(`Body build: ${val(d.bodyShape)}`);
+    lines.push(`Focus: ${val(d.focus)}`);
+    lines.push('');
+    lines.push(`Cross-dominant: ${derived.cross_dominant ? 'Yes' : 'No'}`);
+    lines.push(`Aim bias: ${derived.aim_bias}`);
+    lines.push(`Scale factor: ${derived.scale_factor || '—'}`);
+
+    return lines.join('\n');
   }
 
-  function renderSummary(){
+  function updateSummary(){
     fields.forEach(k=>{
       const el = document.getElementById(k);
       if (!el) return;
       data[k] = (el.type === 'number') ? (el.value ? Number(el.value) : '') : el.value.trim();
     });
-    const d = { ...data, derived: deriveHints(data) };
-    const ul = document.getElementById('summaryList');
-    if (!ul) return;
-    ul.innerHTML = [
-      ['Name', d.first || '—'],
-      ['Email', d.email ? 'On file' : '—'],
-      ['Eye', d.eye || '—'],
-      ['Hand', d.hand || '—'],
-      ['Gender', d.gender || '—'],
-      ['Height', d.height ? feetIn(d.height) : '—'],
-      ['Body build', d.bodyShape || '—'],
-      ['Focus', d.focus || '—']
-    ].map(([k,v])=> `<li><strong>${k}:</strong> ${v}</li>`).join('');
+    const derived = deriveHints(data);
+    $('#summary').textContent = renderSummaryHuman(data, derived);
 
+    // Mirror to localStorage so Home and future sessions prefill
     try{
       const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
       Object.assign(saved, data);
@@ -306,6 +339,7 @@
     }catch{}
   }
 
+  // Prefill from last session and/or Home
   function prefillFromLocal(){
     try{
       const merged = {};
@@ -314,6 +348,7 @@
       const li = JSON.parse(localStorage.getItem('vc_last_intake')||'null');
       const intake = li && li.intake ? li.intake : null;
       if (intake) Object.assign(merged, intake);
+
       fields.forEach(k=>{
         const el = document.getElementById(k);
         if (el && merged[k] != null && merged[k] !== '') el.value = String(merged[k]);
@@ -321,12 +356,9 @@
     }catch{}
   }
 
-  fields.forEach(k=>{
-    const el = document.getElementById(k);
-    if (el){ el.addEventListener('input', renderSummary); el.addEventListener('change', renderSummary); }
-  });
+  fields.forEach(k=> document.getElementById(k).addEventListener('input', updateSummary));
   prefillFromLocal();
-  renderSummary();
+  updateSummary();
 
   fileInput.addEventListener('change', ()=>{
     const f = fileInput.files && fileInput.files[0];
@@ -352,6 +384,41 @@
     pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)';
   }
 
+  // QC pill helpers (optional backend /api/qc)
+  function showQC(result){
+    if (!qcPill) return;
+    if (!result || !result.status){ qcPill.style.display='none'; return; }
+    qcPill.style.display = 'inline-flex';
+    if (result.status === 'ok'){
+      qcPill.textContent = 'QC: Passed';
+      qcPill.style.background = 'rgba(25,195,125,.18)';
+      qcPill.style.borderColor = '#2a6';
+    } else if (result.status === 'warn'){
+      qcPill.textContent = 'QC: Warnings';
+      qcPill.style.background = 'rgba(246,196,83,.18)';
+      qcPill.style.borderColor = '#b8860b';
+    } else {
+      qcPill.textContent = 'QC: Failed';
+      qcPill.style.background = 'rgba(255,107,107,.18)';
+      qcPill.style.borderColor = '#c44';
+      btnOpenReport.setAttribute('aria-disabled','true');
+      btnOpenReport.classList.add('disabled');
+    }
+  }
+  async function runQC(key){
+    try{
+      const r = await fetch(`/api/qc?key=${encodeURIComponent(key)}`, { cache:'no-store' });
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      const out = await r.json();
+      showQC(out);
+      return out;
+    }catch(e){
+      console.warn('QC call failed:', e);
+      showQC(null);
+      return null;
+    }
+  }
+
   // Generate a key if backend doesn't provide one yet
   function makeKey(file){
     const safe = file.name.replace(/[^a-z0-9_.-]+/gi,'_').toLowerCase();
@@ -367,6 +434,22 @@
     });
     if (!res.ok) throw new Error('Upload init failed: HTTP '+res.status);
     return res.json(); // {putUrl,key} OR {url,fields,key} OR {key}
+  }
+
+  // Save intake to backend (non-blocking)
+  async function postIntake(key, intake) {
+    try{
+      const res = await fetch('/api/intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, intake })
+      });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
+    }catch(e){
+      console.warn('Intake save failed:', e);
+      return { ok:false, error: String(e.message || e) };
+    }
   }
 
   // PUT to signed URL with progress
@@ -427,6 +510,7 @@
 
       progress(82); step(2); status('Processing…', 'warn');
       saveIntake(finalKey);
+      postIntake(finalKey, { ...data, derived: deriveHints(data) }); // non-blocking
       pollAnalyze(finalKey);
     }catch(err){
       console.error(err);
@@ -436,6 +520,7 @@
     }
   }
 
+  // Store intake alongside key (for your pipeline if needed)
   function saveIntake(key){
     try{
       const payload = { key, intake: data, ts: Date.now() };
@@ -443,6 +528,7 @@
     }catch{}
   }
 
+  // Poll /api/analyze?key=... until ready, then link to report.html?key=...
   let pollTimer = null;
   async function checkAnalyze(key){
     const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache:'no-store' });
@@ -456,6 +542,7 @@
         if (out.status === 'ready'){
           clearInterval(pollTimer); pollTimer = null;
           progress(100); step(3); status('Ready ✓', 'ok');
+          await runQC(key);
           const url = `/report.html?key=${encodeURIComponent(key)}`;
           btnOpenReport.href = url; btnOpenReport.removeAttribute('aria-disabled'); btnOpenReport.classList.remove('disabled');
           if (out.report){
@@ -478,14 +565,14 @@
   btnUpload.addEventListener('click', startUpload);
   btnReset.addEventListener('click', ()=>{
     fields.forEach(k=>{ const el = document.getElementById(k); if(el) el.value=''; });
-    renderSummary(); fileInput.value=''; fname.textContent='No file chosen'; fmeta.textContent='';
+    updateSummary(); fileInput.value=''; fname.textContent='No file chosen'; fmeta.textContent='';
     step(1); progress(0); status('Idle',''); btnUpload.disabled=false;
     btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled'); btnOpenReport.href='#';
+    showQC(null);
   });
 
   // Initialize UI
   step(1); progress(0); status('Idle','');
-  console.log('Upload page fix applied');
 </script>
 </body>
 </html>
