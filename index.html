@@ -68,22 +68,13 @@
 
 <div class="scrim">
   <main class="wrap">
+    <!-- HERO GRID -->
     <section class="hero">
-      <!-- Quality matters note -->
-<section class="card" style="margin-top:12px">
-  <div class="content">
-    <strong>Great video = great results.</strong>
-    Accuracy improves a lot with steady, well-lit footage from <strong>8–12 ft</strong>,
-    filmed <strong>down-the-line</strong> (target line) or <strong>face-on</strong> (perpendicular) in
-    <strong>landscape</strong>, with your whole body and club visible at impact.
-    <a href="/upload.html" style="color:#dff3ff;text-decoration:underline">Recording tips</a>.
-  </div>
-</section>
-
       <div class="panel">
         <div class="title">Welcome to Virtual Coach AI</div>
         <p class="copy">
-          Welcome to the evolution of golf instruction. With this AI-assisted teaching device, you get <strong>tour-level coaching</strong> from your phone at the range—upload one swing and we benchmark your motion against P1–P9, surface the top priorities, and give you fixes you can try on the very next ball.
+          Welcome to the evolution of golf instruction. With this AI-assisted teaching device, you get
+          <strong>tour-level coaching</strong> from your phone at the range—upload one swing and we benchmark your motion across P1–P9, surface the top priorities, and give you fixes you can try on the very next ball.
         </p>
         <p class="lead">Upload your swing. Get a clean, coach-grade report — P1 to P9, priorities, and power.</p>
         <div class="actions">
@@ -93,6 +84,7 @@
         </div>
         <p class="note">Pro tip: best results from filming 8–12 ft away, down-the-line or face-on, landscape.</p>
       </div>
+
       <div class="panel hero-card">
         <h3>How it works</h3>
         <ol class="hero-list">
@@ -101,6 +93,15 @@
           <li>We process it and hand you a P1–P9 report with simple priorities.</li>
         </ol>
       </div>
+    </section>
+
+    <!-- QUALITY MATTERS NOTE (separate from grid for full-width clarity) -->
+    <section class="panel" style="margin-top:16px">
+      <strong>Great video = great results.</strong>
+      Accuracy improves a lot with steady, well-lit footage from <strong>8–12 ft</strong>,
+      filmed <strong>down-the-line</strong> (target line) or <strong>face-on</strong> (perpendicular) in
+      <strong>landscape</strong>, with your whole body and club visible at impact.
+      <a href="/upload.html" style="color:#dff3ff;text-decoration:underline">Recording tips</a>.
     </section>
   </main>
 </div>
@@ -133,35 +134,35 @@
       }
     }catch{}
   })();
-  // ---- Cross-page prefill (no-op if fields aren't on Home) ----
-(function wireIndexPrefill(){
-  const ids = ['first','hand','eye','gender','height','email','focus'];
-  function load(){
-    try{
-      const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
-      ids.forEach(id=>{
-        const el = document.getElementById(id);
-        if (el && saved[id] != null && saved[id] !== '') el.value = String(saved[id]);
-      });
-    }catch{}
-  }
-  function save(){
-    try{
-      const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
-      ids.forEach(id=>{
-        const el = document.getElementById(id);
-        if (el) saved[id] = el.type === 'number' ? (el.value ? Number(el.value) : '') : el.value.trim();
-      });
-      localStorage.setItem('vc_prefill', JSON.stringify(saved));
-    }catch{}
-  }
-  ids.forEach(id=>{
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', save);
-  });
-  load();
-})();
 
+  // Cross-page prefill (safe no-op since Home has no inputs)
+  (function wireIndexPrefill(){
+    const ids = ['first','hand','eye','gender','height','email','focus'];
+    function load(){
+      try{
+        const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
+        ids.forEach(id=>{
+          const el = document.getElementById(id);
+          if (el && saved[id] != null && saved[id] !== '') el.value = String(saved[id]);
+        });
+      }catch{}
+    }
+    function save(){
+      try{
+        const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
+        ids.forEach(id=>{
+          const el = document.getElementById(id);
+          if (el) saved[id] = el.type === 'number' ? (el.value ? Number(el.value) : '') : el.value.trim();
+        });
+        localStorage.setItem('vc_prefill', JSON.stringify(saved));
+      }catch{}
+    }
+    ids.forEach(id=>{
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', save);
+    });
+    load();
+  })();
 </script>
 </body>
 </html>
