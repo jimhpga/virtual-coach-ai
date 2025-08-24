@@ -33,6 +33,20 @@ if (location.search.includes('resetSW=1')) {
   *{box-sizing:border-box} html,body{height:100%}
   body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
   .scrim{min-height:100vh;background:var(--scrim)}
+/* Drop-downs: readable closed + open states */
+select{appearance:menulist;-webkit-appearance:menulist;-moz-appearance:menulist;color:#fff;background:rgba(255,255,255,.08)}
+select option{color:#111;background:#fff}
+@media (prefers-color-scheme: dark){
+  select option{color:#fff;background:#222}
+}
+
+/* Pretty key–value summary (replaces the JSON <pre>) */
+#summary.kv{
+  display:grid;grid-template-columns:auto 1fr;gap:6px 10px;
+  background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;padding:12px
+}
+#summary.kv .k{color:#cfe0e6}
+#summary.kv .v.muted{opacity:.6}
 
   /* NAV (keep same color as Home) */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
