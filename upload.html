@@ -1,4 +1,4 @@
-=<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -6,7 +6,7 @@
   <title>Virtual Coach AI – Intake & Upload</title>
   <style>
     :root{
-      --vca-green:#0f7a3e; /* logo green */
+      --vca-green:#0f7a3e;
       --vca-green-2:#0c5f31;
       --text:#ffffff;
       --muted:#d7e5db;
@@ -20,30 +20,23 @@
     html,body{height:100%}
     body{
       margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      color:var(--text); background:#0a0f0d center/cover fixed no-repeat; /* image set by JS for exact match */
+      color:var(--text); background:#0a0f0d center/cover fixed no-repeat;
       min-height:100dvh;
     }
-    /* Lighter overlay for a BRIGHTER background */
     body::before{content:""; position:fixed; inset:0; background:linear-gradient(180deg, rgba(10,15,13,.45), rgba(10,15,13,.45)); z-index:-1}
 
-    header{
-      position:sticky; top:0; backdrop-filter:saturate(120%) blur(8px);
+    header{position:sticky; top:0; backdrop-filter:saturate(120%) blur(8px);
       background:linear-gradient(180deg, rgba(15,122,62,.88), rgba(12,95,49,.88));
-      border-bottom:1px solid rgba(255,255,255,.15); z-index:50;
-    }
+      border-bottom:1px solid rgba(255,255,255,.15); z-index:50;}
     .wrap{max-width:1100px; margin:0 auto; padding:14px 18px;}
     .brand{display:flex; align-items:center; gap:12px}
-    .logo{
-      width:36px; height:36px; border-radius:10px; background:radial-gradient(circle at 30% 30%, #35d08d, #0f7a3e 70%);
+    .logo{width:36px; height:36px; border-radius:10px; background:radial-gradient(circle at 30% 30%, #35d08d, #0f7a3e 70%);
       box-shadow: 0 0 0 2px rgba(255,255,255,.15) inset, 0 8px 24px rgba(0,0,0,.25);
-      display:grid; place-items:center; font-weight:700; color:#fff; font-size:18px;
-    }
+      display:grid; place-items:center; font-weight:700; color:#fff; font-size:18px;}
     .brand h1{font-size:18px; margin:0; letter-spacing:.2px; font-weight:700}
     nav{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
     .row{display:flex; align-items:center; gap:16px}
-    .btn-tab, .btn-link{
-      appearance:none; border:1px solid rgba(255,255,255,.2); background:transparent; color:#fff; padding:8px 12px; border-radius:999px; cursor:pointer; font-weight:600; text-decoration:none;
-    }
+    .btn-tab, .btn-link{appearance:none; border:1px solid rgba(255,255,255,.2); background:transparent; color:#fff; padding:8px 12px; border-radius:999px; cursor:pointer; font-weight:600; text-decoration:none;}
     .btn-tab[aria-current="page"]{background:var(--glass-2)}
 
     .hero{padding:28px 18px 12px}
@@ -51,10 +44,7 @@
     .sub{opacity:.9; margin-top:6px}
 
     section.card{background:var(--glass); border:1px solid rgba(255,255,255,.12); border-radius:18px; padding:18px; box-shadow:0 10px 30px rgba(0,0,0,.25); margin:0 18px 18px}
-    @media(min-width:900px){
-      section.card.split{display:grid; grid-template-columns: 6fr 6fr; gap:18px}
-      section.card{margin:0 0 18px}
-    }
+    @media(min-width:900px){section.card.split{display:grid; grid-template-columns: 6fr 6fr; gap:18px}section.card{margin:0 0 18px}}
 
     h3{margin:8px 0 10px; font-size:18px; letter-spacing:.2px}
     .muted{color:var(--muted)}
@@ -64,33 +54,27 @@
     @media(min-width:720px){.half{grid-column: span 6}}
     label{font-size:13px; opacity:.9}
     .req::after{content:" *"; color:var(--warn); font-weight:800}
-    input[type="text"], input[type="email"], select, textarea{
+    input[type="text"], input[type="email"], select{
       width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.20); color:#fff; background: rgba(255,255,255,.06);
-      outline:none; box-shadow: 0 2px 0 rgba(255,255,255,.05) inset;
-    }
+      outline:none; box-shadow: 0 2px 0 rgba(255,255,255,.05) inset;}
     .chips{display:flex; flex-wrap:wrap; gap:8px}
     .chip{padding:9px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.06); cursor:pointer; user-select:none}
     .chip[aria-pressed="true"]{background:rgba(106,212,136,.18); border-color:#6ad488}
 
     .actions{display:flex; gap:10px; flex-wrap:wrap}
-    .btn{
-      appearance:none; border:none; background:linear-gradient(180deg, #34c77f, #199a57); color:#03150d; font-weight:800; letter-spacing:.2px;
-      padding:12px 16px; border-radius:12px; cursor:pointer; box-shadow:0 8px 24px rgba(25,154,87,.35); text-transform:uppercase; font-size:12px
-    }
+    .btn{appearance:none; border:none; background:linear-gradient(180deg, #34c77f, #199a57); color:#03150d; font-weight:800; letter-spacing:.2px;
+      padding:12px 16px; border-radius:12px; cursor:pointer; box-shadow:0 8px 24px rgba(25,154,87,.35); text-transform:uppercase; font-size:12px}
     .btn.secondary{background:transparent; color:#fff; border:1px solid rgba(255,255,255,.25)}
     .note{font-size:12px; opacity:.85; margin-left:auto}
 
     .panel{display:none}
     .panel.active{display:block}
 
-    .preview{
-      background:rgba(0,0,0,.25); border:1px dashed rgba(255,255,255,.25); border-radius:12px; padding:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:12px; max-height:260px; overflow:auto
-    }
+    .preview{background:rgba(0,0,0,.25); border:1px dashed rgba(255,255,255,.25); border-radius:12px; padding:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size:12px; max-height:260px; overflow:auto}
 
     .pill{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15); border-radius:999px}
     .badge-ok{background:rgba(106,212,136,.18); border-color:#6ad488}
 
-    /* translucent selects per Jim's preference */
     select{backdrop-filter: blur(2px)}
 
     footer{opacity:.75; text-align:center; padding:40px 10px}
@@ -119,7 +103,7 @@
   <main class="wrap">
     <div class="hero">
       <h2>Where the future of golf instruction is built<span class="muted"> — fast.</span></h2>
-      <p class="sub">Short intake. Full report. No fluff.</p>
+      <p class="sub">Fill out the basics. Height is required so we can scale your swing model correctly.</p>
     </div>
 
     <!-- HOME / INTAKE PANEL -->
@@ -130,21 +114,33 @@
           <form id="intake-form" onsubmit="return false;">
             <div class="grid">
               <div class="field half">
-                <label class="req" for="first">First name</label>
-                <input id="first" name="first" type="text" placeholder="John" required />
+                <label for="first">First name</label>
+                <input id="first" name="first" type="text" placeholder="John" />
               </div>
               <div class="field half">
-                <label class="req" for="email">Email</label>
-                <input id="email" name="email" type="email" placeholder="you@example.com" required />
+                <label for="email">Email <span class="muted">(add if you want the report emailed to you or saved for later)</span></label>
+                <input id="email" name="email" type="email" placeholder="you@example.com" />
               </div>
-              <div class="field">
-                <label class="req" for="eye">Eye Dominance</label>
-                <select id="eye" name="eye" required>
+              <div class="field half">
+                <label for="eye">Eye Dominance</label>
+                <select id="eye" name="eye">
                   <option value="">Select…</option>
                   <option>Right‑eye dominant</option>
                   <option>Left‑eye dominant</option>
                   <option>Unsure</option>
                 </select>
+              </div>
+              <div class="field half">
+                <label for="hand">Handed</label>
+                <select id="hand" name="hand">
+                  <option value="">Select…</option>
+                  <option>Right‑handed</option>
+                  <option>Left‑handed</option>
+                </select>
+              </div>
+              <div class="field half">
+                <label class="req" for="height">Height (inches or cm)</label>
+                <input id="height" name="height" type="number" placeholder="e.g., 70 in / 178 cm" required />
               </div>
             </div>
 
@@ -227,152 +223,53 @@
   </footer>
 
   <script>
-    // === Background loader (uses same images as site) ===
     (function setExactBackground(){
       const candidates = [
-        'homepage-background.png',
-        'golf-course-bg.jpg',
-        'virtualcoach-bg.png',
-        '/homepage-background.png',
-        '/golf-course-bg.jpg',
-        '/virtualcoach-bg.png'
-      ];
-      const img = new Image();
-      let i = 0;
-      function tryNext(){
-        if(i>=candidates.length) return;
-        const url = candidates[i++];
-        img.onload = ()=>{ document.body.style.backgroundImage = `url('${url}')`; };
-        img.onerror = tryNext;
-        img.src = url + (url.includes('?')?'':'?v=' + Date.now());
-      }
-      tryNext();
-    })();
+        'homepage-background.png','golf-course-bg.jpg','virtualcoach-bg.png',
+        '/homepage-background.png','/golf-course-bg.jpg','/virtualcoach-bg.png']
+      const img = new Image(); let i=0;
+      function tryNext(){if(i>=candidates.length) return; const url=candidates[i++];
+        img.onload=()=>{document.body.style.backgroundImage=`url('${url}')`;};
+        img.onerror=tryNext; img.src=url+(url.includes('?')?'':'?v='+Date.now());}
+      tryNext();})();
 
-    // Tab router for Home/Upload
-    const tabs = document.querySelectorAll('.btn-tab');
-    const panels = {
-      home: document.getElementById('panel-home'),
-      upload: document.getElementById('panel-upload')
-    };
+    const tabs=document.querySelectorAll('.btn-tab');
+    const panels={home:document.getElementById('panel-home'),upload:document.getElementById('panel-upload')};
     tabs.forEach(btn=>btn.addEventListener('click',()=>{
-      const tab = btn.getAttribute('data-tab');
+      const tab=btn.getAttribute('data-tab');
       tabs.forEach(b=>b.removeAttribute('aria-current'));
       btn.setAttribute('aria-current','page');
       Object.values(panels).forEach(p=>p.classList.remove('active'));
       panels[tab].classList.add('active');
       if(tab==='upload') loadUploadIntake();
-      window.scrollTo({top:0, behavior:'smooth'});
+      window.scrollTo({top:0,behavior:'smooth'});
     }));
 
-    // Chips toggle logic
     document.querySelectorAll('.chips').forEach(group=>{
-      group.addEventListener('click', e=>{
-        const chip = e.target.closest('.chip');
-        if(!chip) return;
-        chip.setAttribute('aria-pressed', chip.getAttribute('aria-pressed')!=="true");
+      group.addEventListener('click',e=>{
+        const chip=e.target.closest('.chip'); if(!chip)return;
+        chip.setAttribute('aria-pressed',chip.getAttribute('aria-pressed')!=="true");
       });
     });
 
-    // Save intake
-    const saveBtn = document.getElementById('save-intake');
-    const resetBtn = document.getElementById('reset-intake');
-    const form = document.getElementById('intake-form');
-    const preview = document.getElementById('intake-preview');
+    const saveBtn=document.getElementById('save-intake');
+    const resetBtn=document.getElementById('reset-intake');
+    const form=document.getElementById('intake-form');
+    const preview=document.getElementById('intake-preview');
 
-    saveBtn.addEventListener('click', ()=>{
-      const data = Object.fromEntries(new FormData(form).entries());
-      // collect chip groups
+    saveBtn.addEventListener('click',()=>{
+      const data=Object.fromEntries(new FormData(form).entries());
       document.querySelectorAll('.chips').forEach(group=>{
-        const name = group.dataset.name;
-        const selected = [...group.querySelectorAll('.chip[aria-pressed="true"]')].map(c=>c.textContent.trim());
-        if(selected.length) data[name] = selected;
-      });
-      localStorage.setItem('vca_intake', JSON.stringify(data));
-      preview.style.display = 'block';
-      preview.textContent = JSON.stringify(data, null, 2);
-      saveBtn.textContent = 'Saved ✓';
-      setTimeout(()=>saveBtn.textContent='Save Intake', 1400);
+        const name=group.dataset.name;
+        const selected=[...group.querySelectorAll('.chip[aria-pressed="true"]')].map(c=>c.textContent.trim());
+        if(selected.length) data[name]=selected;});
+      localStorage.setItem('vca_intake',JSON.stringify(data));
+      preview.style.display='block';
+      preview.textContent=JSON.stringify(data,null,2);
+      saveBtn.textContent='Saved ✓';
+      setTimeout(()=>saveBtn.textContent='Save Intake',1400);
     });
 
-    resetBtn.addEventListener('click', ()=>{
+    resetBtn.addEventListener('click',()=>{
       form.reset();
-      document.querySelectorAll('.chip[aria-pressed="true"]').forEach(c=>c.removeAttribute('aria-pressed'));
-      localStorage.removeItem('vca_intake');
-      preview.style.display = 'none';
-    });
-
-    // Load intake into upload panel
-    function loadUploadIntake(){
-      const el = document.getElementById('upload-intake');
-      const raw = localStorage.getItem('vca_intake');
-      if(!raw){el.textContent = 'No intake saved yet. Go to Home → Save Intake.'; return;}
-      try { el.textContent = JSON.stringify(JSON.parse(raw), null, 2) } catch{ el.textContent = raw }
-    }
-
-    // Video preview
-    const inputVideo = document.getElementById('video');
-    const vid = document.getElementById('preview');
-    const status = document.getElementById('status');
-
-    inputVideo.addEventListener('change', ()=>{
-      const file = inputVideo.files?.[0];
-      if(!file){ status.textContent='Idle'; vid.style.display='none'; vid.removeAttribute('src'); return; }
-      const url = URL.createObjectURL(file);
-      vid.src = url; vid.style.display='block';
-      status.textContent = 'Selected • Ready to upload';
-    });
-
-    document.getElementById('clear-video').addEventListener('click',()=>{
-      inputVideo.value=""; vid.pause(); vid.removeAttribute('src'); vid.load(); vid.style.display='none';
-      status.textContent='Idle';
-    });
-
-    // Submit (mock endpoint). Replace with real fetch to your API.
-    const submit = document.getElementById('submit');
-    const payload = document.getElementById('payload');
-
-    submit.addEventListener('click', async ()=>{
-      const intake = localStorage.getItem('vca_intake');
-      if(!intake){ alert('Save your intake on Home first.'); return; }
-      const file = inputVideo.files?.[0];
-      if(!file){ alert('Choose a swing video.'); return; }
-      status.textContent = 'Analyzing locally…';
-
-      const formData = new FormData();
-      formData.append('intake', intake);
-      formData.append('video', file, file.name);
-
-      payload.style.display='block';
-      payload.textContent = `POST /api/analyze
-Headers: (multipart/form-data)
-Intake:
-${intake}
-
-Video: ${file.name} (${Math.round(file.size/1024)} KB)`;
-    });
-
-    // Autofill form if intake exists
-    (function hydrate(){
-      const raw = localStorage.getItem('vca_intake');
-      if(!raw) return;
-      try{
-        const data = JSON.parse(raw);
-        for(const [k,v] of Object.entries(data)){
-          const el = document.getElementById('intake-form').elements[k];
-          if(!el) continue;
-          if(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement){
-            el.value = v;
-          }
-        }
-        document.querySelectorAll('.chips').forEach(group=>{
-          const name = group.dataset.name; if(!data[name]) return;
-          [...group.children].forEach(chip=>{
-            if(data[name].includes(chip.textContent.trim())) chip.setAttribute('aria-pressed','true');
-          });
-        });
-      }catch{}
-    })();
-  </script>
-</body>
-</html>
+      document.querySelectorAll('.chip[aria
