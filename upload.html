@@ -213,6 +213,8 @@
               <div class="step" id="s2"><span class="dot"></span><label>2. Processing</label></div>
               <div class="step" id="s3"><span class="dot"></span><label>3. Ready</label></div>
               <span class="badge" id="pill" style="margin-left:auto">Idle</span>
+              <!-- QC pill (added) -->
+              <span class="badge" id="qcPill" style="display:none">QC</span>
             </div>
             <div class="progress" aria-label="Progress"><span id="bar"></span></div>
             <div class="hint" id="statusLine" style="margin-top:8px">Waiting for a file…</div>
@@ -253,6 +255,7 @@
   const fmeta = $('#fmeta');
   const bar = $('#bar');
   const pill = $('#pill');
+  const qcPill = document.getElementById('qcPill'); // <— QC pill
   const statusLine = $('#statusLine');
   const btnUpload = $('#btnUpload');
   const btnReset = $('#btnReset');
@@ -263,7 +266,6 @@
   const data = Object.fromEntries(fields.map(k=>[k,'']));
 
   function deriveHints(d){
-    // Cross-dominance & aim bias
     const hand = (d.hand||'').toLowerCase();
     const eye  = (d.eye||'').toLowerCase();
     const cross = (hand && eye) ? (hand[0] !== eye[0]) : false;
@@ -271,15 +273,10 @@
     if (hand==='right' && eye==='left') aim = 'left';
     if (hand==='left'  && eye==='right') aim = 'right';
 
-    // Height scale vs. 70 in baseline (~5'10")
     const h = Number(d.height||0);
     const scale = h ? +(h/70).toFixed(2) : '';
 
-    return {
-      cross_dominant: !!cross,
-      aim_bias: aim,
-      scale_factor: scale
-    };
+    return { cross_dominant: !!cross, aim_bias: aim, scale_factor: scale };
   }
 
   function updateSummary(){
@@ -304,9 +301,9 @@
   function prefillFromLocal(){
     try{
       const merged = {};
-      const p = JSON.parse(localStorage.getItem('vc_prefill')||'{}');  // any values typed on Home
+      const p = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
       Object.assign(merged, p);
-      const li = JSON.parse(localStorage.getItem('vc_last_intake')||'null'); // last full run
+      const li = JSON.parse(localStorage.getItem('vc_last_intake')||'null');
       const intake = li && li.intake ? li.intake : null;
       if (intake) Object.assign(merged, intake);
 
@@ -343,6 +340,42 @@
     pill.textContent = text.split('.')[0];
     pill.style.background = tone==='ok'?'rgba(25,195,125,.18)':tone==='warn'?'rgba(246,196,83,.18)':'rgba(255,255,255,.10)';
     pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)';
+  }
+
+  // === QC helpers ===
+  function showQC(result){
+    if (!qcPill) return;
+    if (!result || !result.status){ qcPill.style.display='none'; return; }
+    qcPill.style.display = 'inline-flex';
+    if (result.status === 'ok'){
+      qcPill.textContent = 'QC: Passed';
+      qcPill.style.background = 'rgba(25,195,125,.18)';
+      qcPill.style.borderColor = '#2a6';
+    } else if (result.status === 'warn'){
+      qcPill.textContent = 'QC: Warnings';
+      qcPill.style.background = 'rgba(246,196,83,.18)';
+      qcPill.style.borderColor = '#b8860b';
+    } else {
+      qcPill.textContent = 'QC: Failed';
+      qcPill.style.background = 'rgba(255,107,107,.18)';
+      qcPill.style.borderColor = '#c44';
+      // Optional: gate the report on FAIL
+      btnOpenReport.setAttribute('aria-disabled','true');
+      btnOpenReport.classList.add('disabled');
+    }
+  }
+  async function runQC(key){
+    try{
+      const r = await fetch(`/api/qc?key=${encodeURIComponent(key)}`, { cache:'no-store' });
+      if (!r.ok) throw new Error('HTTP '+r.status);
+      const out = await r.json();
+      showQC(out);
+      return out;
+    }catch(e){
+      console.warn('QC call failed:', e);
+      showQC(null);
+      return null;
+    }
   }
 
   // Generate a key if backend doesn't provide one yet
@@ -409,7 +442,6 @@
   async function startUpload(){
     const f = fileInput.files && fileInput.files[0];
     if (!f){ alert('Choose a swing video first.'); return; }
-    // Minimal validation (per your specs)
     if (!$('#eye').value){ alert('Pick eye dominance.'); $('#eye').focus(); return; }
     if (!$('#height').value){ alert('Enter height (inches).'); $('#height').focus(); return; }
 
@@ -420,10 +452,9 @@
     let finalKey = clientKey;
 
     try{
-      // Ask backend for upload target
       let target;
       try{ target = await getUploadTarget(f, clientKey); }
-      catch(_){ target = { key: clientKey }; } // fallback: backend will ingest by filename later
+      catch(_){ target = { key: clientKey }; }
 
       if (target.key) finalKey = target.key;
       if (target.putUrl){
@@ -431,7 +462,6 @@
       } else if (target.url && target.fields){
         await postForm(target.url, target.fields, f);
       } else {
-        // Fallback: POST to /api/upload (proxy)
         const fd = new FormData(); fd.append('file', f); fd.append('key', finalKey);
         const r = await fetch('/api/upload', { method:'POST', body:fd });
         if (!r.ok) throw new Error('Upload error: HTTP '+r.status);
@@ -439,7 +469,7 @@
 
       progress(82); step(2); status('Processing…', 'warn');
       saveIntake(finalKey);
-      // 🔥 the missing “B direction”: persist intake server-side for the analyzer
+      // persist intake server-side for the analyzer (B direction)
       postIntake(finalKey, { ...data, derived: deriveHints(data) }); // non-blocking
       pollAnalyze(finalKey);
     }catch(err){
@@ -472,6 +502,8 @@
         if (out.status === 'ready'){
           clearInterval(pollTimer); pollTimer = null;
           progress(100); step(3); status('Ready ✓', 'ok');
+          // Run QC as soon as we’re ready
+          await runQC(key);
           const url = `/report.html?key=${encodeURIComponent(key)}`;
           btnOpenReport.href = url; btnOpenReport.removeAttribute('aria-disabled'); btnOpenReport.classList.remove('disabled');
           if (out.report){
@@ -498,6 +530,7 @@
     updateSummary(); fileInput.value=''; fname.textContent='No file chosen'; fmeta.textContent='';
     step(1); progress(0); status('Idle',''); btnUpload.disabled=false;
     btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled'); btnOpenReport.href='#';
+    showQC(null); // hide QC pill on reset
   });
 
   // Initialize UI
