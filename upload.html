@@ -14,7 +14,7 @@
   body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
   .scrim{min-height:100vh;background:var(--scrim)}
 
-  /* NAV */
+  /* NAV (keep same color as Home) */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
@@ -57,10 +57,12 @@
   }
   input::placeholder{color:#cfe0e699}
 
-  /* Dropdown legibility across iPad/iOS */
+  /* Keep dropdowns readable on iPad without breaking Windows/Firefox */
   select{appearance:menulist; -webkit-appearance:menulist; -moz-appearance:menulist; color:#fff;}
-  /* Opened option list (system UI) */
-  option{ color:#111 !important; background:#fff !important; }
+  /* Only apply option colors on WebKit (iOS Safari) */
+  @supports (-webkit-touch-callout: none){
+    select option{ color:#111 !important; background:#fff !important; }
+  }
 
   .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   @media(max-width:700px){.row{grid-template-columns:1fr}}
@@ -114,7 +116,7 @@
     <main class="wrap">
       <header style="margin-bottom:8px">
         <h1>Best Results Come From Good Footage</h1>
-        <div class="build-tag">BUILD v12</div>
+        <div class="build-tag">BUILD v13</div>
         <p class="lead">Results are estimates from a single-camera video. For best accuracy, record from ~8–12 ft either <strong>down-the-line</strong> (along the target line) or <strong>face-on</strong> (perpendicular), in landscape, with your whole body and club in frame.</p>
         <details class="tips"><summary>Recording tips (quick)</summary>
           <div class="content">
@@ -234,7 +236,7 @@
             <div class="hint" id="statusLine" style="margin-top:8px">Waiting for a file…</div>
 
             <h3 style="margin-top:16px;border:none;padding-top:16px">Intake Summary</h3>
-            <!-- NOT code; simple key/value list -->
+            <!-- Clean list, and JS will auto-create this if an old <pre> is present -->
             <div id="summary" class="kv">
               <div class="k">First</div><div class="v muted">—</div>
               <div class="k">Email</div><div class="v muted">—</div>
@@ -255,7 +257,7 @@
   </div>
 
 <script>
-  // NAV
+  /* ---------- NAV ---------- */
   const header = document.getElementById('site-header');
   document.getElementById('menuBtn')?.addEventListener('click', ()=>{
     const open = header.classList.toggle('open');
@@ -265,7 +267,7 @@
     if(e.target.tagName==='A'){ header.classList.remove('open'); document.getElementById('menuBtn')?.setAttribute('aria-expanded','false'); }
   });
 
-  // Shortcuts
+  /* ---------- Shortcuts ---------- */
   const $ = s => document.querySelector(s);
   const fileInput = $('#file');
   const fname = $('#fname');
@@ -278,8 +280,79 @@
   const btnReset = $('#btnReset');
   const btnOpenReport = $('#btnOpenReport');
 
+  /* ---------- Fields/model ---------- */
   const fields = ['first','email','eye','hand','gender','height','bodyShape','focus'];
   const data = Object.fromEntries(fields.map(k=>[k,'']));
+
+  /* If the build system left you the OLD <pre id="summary">…JSON…</pre>, replace it */
+  (function migrateOldSummary(){
+    const oldPre = document.querySelector('pre#summary');
+    if (!oldPre) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'summary';
+    wrap.className = 'kv';
+    wrap.innerHTML = `
+      <div class="k">First</div><div class="v muted">—</div>
+      <div class="k">Email</div><div class="v muted">—</div>
+      <div class="k">Eye dominance</div><div class="v muted">—</div>
+      <div class="k">Handedness</div><div class="v muted">—</div>
+      <div class="k">Gender</div><div class="v muted">—</div>
+      <div class="k">Height</div><div class="v muted">—</div>
+      <div class="k">Body build</div><div class="v muted">—</div>
+      <div class="k">Focus</div><div class="v muted">—</div>
+      <div class="k">Cross-dominant</div><div class="v muted">—</div>
+      <div class="k">Aim bias</div><div class="v muted">—</div>
+      <div class="k">Scale factor</div><div class="v muted">—</div>
+    `;
+    oldPre.replaceWith(wrap);
+  })();
+
+  /* If any dropdown got stripped by a build/minifier, repopulate it here */
+  function ensureOptions(id, items){
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    // If there's already more than the placeholder, leave it.
+    if (sel.options && sel.options.length > 1) return;
+    sel.innerHTML = ''; // clear
+    items.forEach(([label, value])=>{
+      const opt = document.createElement('option');
+      opt.textContent = label;
+      if (value != null) opt.value = value;
+      sel.appendChild(opt);
+    });
+  }
+  ensureOptions('eye', [
+    ['Select…',''],
+    ['Right eye','right'],
+    ['Left eye','left'],
+    ['Not sure','unknown']
+  ]);
+  ensureOptions('hand', [
+    ['Select…',''],
+    ['Right','right'],
+    ['Left','left']
+  ]);
+  ensureOptions('gender', [
+    ['Prefer not to say',''],
+    ['Man','man'],
+    ['Woman','woman'],
+    ['Other','other']
+  ]);
+  ensureOptions('bodyShape', [
+    ['— Select —',''],
+    ['Slim / Lean','slim'],
+    ['Average / Athletic','average'],
+    ['Muscular / Stocky','muscular'],
+    ['Tall / Lean','tall-lean'],
+    ['Short / Compact','short-compact']
+  ]);
+  ensureOptions('focus', [
+    ['— None —',''],
+    ['Setup'],['Grip'],['Takeaway (P2)'],['Backswing (P3)'],['Top (P4)'],
+    ['Transition'],['Downswing'],['Shaft Parallel Down (P6)'],['Impact (P7)'],
+    ['Release'],['Finish'],['Swing Plane'],['Club Path'],['Face Control'],
+    ['Tempo'],['Kinematic Sequence'],['Posture'],['Ball Position'],['Alignment']
+  ]);
 
   function toFeetInches(inches){
     const n = Number(inches||0);
@@ -302,12 +375,11 @@
   }
 
   function setRow(label, value){
-    // find the value cell by label text
     const all = document.querySelectorAll('#summary .k');
     for (const k of all){
       if (k.textContent.trim().toLowerCase() === label.toLowerCase()){
         const v = k.nextElementSibling;
-        v.textContent = value===''||value==null ? '—' : value;
+        v.textContent = (value===''||value==null) ? '—' : value;
         v.classList.toggle('muted', value===''||value==null);
         break;
       }
@@ -372,6 +444,7 @@
     status('File selected. Ready to upload.', 'warn');
   });
 
+  /* ---------- Stepper helpers ---------- */
   function step(n){
     [$('#s1'),$('#s2'),$('#s3')].forEach((el,i)=>{
       el.classList.remove('active','done');
@@ -387,6 +460,7 @@
     pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)';
   }
 
+  /* ---------- (optional) QC badge ---------- */
   async function runQC(key){
     try{
       const r = await fetch(`/api/qc?key=${encodeURIComponent(key)}`, { cache:'no-store' });
@@ -406,11 +480,11 @@
     }
   }
 
+  /* ---------- Upload plumbing ---------- */
   function makeKey(file){
     const safe = file.name.replace(/[^a-z0-9_.-]+/gi,'_').toLowerCase();
     return `uploads/${Date.now()}-${safe}`;
   }
-
   async function getUploadTarget(file, key){
     const res = await fetch('/api/upload', {
       method:'POST',
@@ -420,7 +494,6 @@
     if (!res.ok) throw new Error('Upload init failed: HTTP '+res.status);
     return res.json();
   }
-
   async function postIntake(key, intake) {
     try{
       const res = await fetch('/api/intake', {
@@ -435,7 +508,6 @@
       return { ok:false, error: String(e.message || e) };
     }
   }
-
   function putWithProgress(url, file){
     return new Promise((resolve, reject)=>{
       const xhr = new XMLHttpRequest();
@@ -447,7 +519,6 @@
       xhr.send(file);
     });
   }
-
   async function postForm(url, fields, file){
     const fd = new FormData();
     Object.entries(fields||{}).forEach(([k,v])=> fd.append(k,v));
