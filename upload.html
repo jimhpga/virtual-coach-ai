@@ -9,19 +9,9 @@
 <title>Virtual Coach AI — Upload</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
-  :root{
-    --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06);
-    --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08);
-    --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
-    --ok:#19c37d; --warn:#f6c453;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; color:var(--text);
-    background:url('/homepage-background.png') center/cover fixed no-repeat;
-    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-  }
+  :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06); --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08); --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20); --ok:#19c37d; --warn:#f6c453; }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
   .scrim{min-height:100vh;background:var(--scrim)}
 
   /* NAV */
@@ -46,6 +36,7 @@
 
   h1{margin:8px 0 6px;font-size:28px;font-weight:900}
   .lead{color:var(--muted);max-width:68ch}
+  .build-tag{color:#dff3ff;opacity:.65;font-size:12px;margin-top:4px}
   .badge{background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
 
   .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:12px}
@@ -61,16 +52,15 @@
 
   /* Inputs */
   input[type="text"], input[type="email"], input[type="number"], select, button, .filebox{
-    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line);
-    background:rgba(255,255,255,.08); color:#fff;
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:rgba(255,255,255,.08); color:#fff;
+    -webkit-text-fill-color:#fff; /* closed control text on iOS */
   }
   input::placeholder{color:#cfe0e699}
 
-  /* IMPORTANT: Make dropdown text visible when the OS paints a white list */
-  /* Closed control stays translucent; the open list uses option color (dark). */
-  select{appearance:auto; -webkit-appearance:menulist; -moz-appearance:menulist; background-clip:padding-box}
-  select:invalid{ color:#b7c9cf; }
-  option{ color:#111 !important; background:#fff !important; } /* fix blank-looking lists on Win/Firefox */
+  /* Dropdown legibility across iPad/iOS */
+  select{appearance:menulist; -webkit-appearance:menulist; -moz-appearance:menulist; color:#fff;}
+  /* Opened option list (system UI) */
+  option{ color:#111 !important; background:#fff !important; }
 
   .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   @media(max-width:700px){.row{grid-template-columns:1fr}}
@@ -95,9 +85,11 @@
   .filebox{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .filebox .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#dfefff}
 
-  pre{margin:0;padding:12px;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;white-space:pre-wrap;word-wrap:break-word}
-  details.tips summary{cursor:pointer;display:inline-block;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.06);font-weight:700}
-  details.tips .content{margin-top:10px;color:var(--muted)}
+  /* Intake Summary list (not code) */
+  .kv{display:grid;grid-template-columns:140px 1fr;gap:8px;align-items:start}
+  .k{color:#cfe0e6}
+  .v{color:#ecf3f7}
+  .muted{color:#cfe0e6}
 </style>
 </head>
 <body>
@@ -122,15 +114,11 @@
     <main class="wrap">
       <header style="margin-bottom:8px">
         <h1>Best Results Come From Good Footage</h1>
-        <p class="lead">
-          Results are estimates from a single-camera video. For best accuracy, record from ~8–12 ft either
-          <strong>down-the-line</strong> (along the target line) or <strong>face-on</strong> (perpendicular),
-          in landscape, with your whole body and club in frame.
-        </p>
+        <div class="build-tag">BUILD v12</div>
+        <p class="lead">Results are estimates from a single-camera video. For best accuracy, record from ~8–12 ft either <strong>down-the-line</strong> (along the target line) or <strong>face-on</strong> (perpendicular), in landscape, with your whole body and club in frame.</p>
         <details class="tips"><summary>Recording tips (quick)</summary>
           <div class="content">
-            • Keep the camera steady (tripod if possible). • Bright, even light. • Avoid extreme wide-angle.
-            • Ball and hands visible at impact.
+            • Keep the camera steady (tripod if possible). • Bright, even light. • Avoid extreme wide-angle. • Ball and hands visible at impact.
           </div>
         </details>
       </header>
@@ -246,7 +234,20 @@
             <div class="hint" id="statusLine" style="margin-top:8px">Waiting for a file…</div>
 
             <h3 style="margin-top:16px;border:none;padding-top:16px">Intake Summary</h3>
-            <pre id="summary">Nothing entered yet.</pre>
+            <!-- NOT code; simple key/value list -->
+            <div id="summary" class="kv">
+              <div class="k">First</div><div class="v muted">—</div>
+              <div class="k">Email</div><div class="v muted">—</div>
+              <div class="k">Eye dominance</div><div class="v muted">—</div>
+              <div class="k">Handedness</div><div class="v muted">—</div>
+              <div class="k">Gender</div><div class="v muted">—</div>
+              <div class="k">Height</div><div class="v muted">—</div>
+              <div class="k">Body build</div><div class="v muted">—</div>
+              <div class="k">Focus</div><div class="v muted">—</div>
+              <div class="k">Cross-dominant</div><div class="v muted">—</div>
+              <div class="k">Aim bias</div><div class="v muted">—</div>
+              <div class="k">Scale factor</div><div class="v muted">—</div>
+            </div>
           </div>
         </div>
       </section>
@@ -254,7 +255,7 @@
   </div>
 
 <script>
-  // NAV (hamburger)
+  // NAV
   const header = document.getElementById('site-header');
   document.getElementById('menuBtn')?.addEventListener('click', ()=>{
     const open = header.classList.toggle('open');
@@ -277,7 +278,6 @@
   const btnReset = $('#btnReset');
   const btnOpenReport = $('#btnOpenReport');
 
-  // Fields + model
   const fields = ['first','email','eye','hand','gender','height','bodyShape','focus'];
   const data = Object.fromEntries(fields.map(k=>[k,'']));
 
@@ -301,25 +301,17 @@
     return { cross_dominant: !!cross, aim_bias: aim, scale_factor: scale };
   }
 
-  function renderSummaryHuman(d, derived){
-    const lines = [];
-    const val = (x)=> (x===''||x==null) ? '—' : x;
-
-    lines.push(`First: ${val(d.first)}`);
-    lines.push(`Email: ${val(d.email)}`);
-    lines.push(`Eye dominance: ${val(d.eye)}`);
-    lines.push(`Handedness: ${val(d.hand)}`);
-    lines.push(`Gender: ${val(d.gender)}`);
-    const hTxt = d.height ? `${d.height} in (${toFeetInches(d.height)})` : '—';
-    lines.push(`Height: ${hTxt}`);
-    lines.push(`Body build: ${val(d.bodyShape)}`);
-    lines.push(`Focus: ${val(d.focus)}`);
-    lines.push('');
-    lines.push(`Cross-dominant: ${derived.cross_dominant ? 'Yes' : 'No'}`);
-    lines.push(`Aim bias: ${derived.aim_bias}`);
-    lines.push(`Scale factor: ${derived.scale_factor || '—'}`);
-
-    return lines.join('\n');
+  function setRow(label, value){
+    // find the value cell by label text
+    const all = document.querySelectorAll('#summary .k');
+    for (const k of all){
+      if (k.textContent.trim().toLowerCase() === label.toLowerCase()){
+        const v = k.nextElementSibling;
+        v.textContent = value===''||value==null ? '—' : value;
+        v.classList.toggle('muted', value===''||value==null);
+        break;
+      }
+    }
   }
 
   function updateSummary(){
@@ -328,18 +320,28 @@
       if (!el) return;
       data[k] = (el.type === 'number') ? (el.value ? Number(el.value) : '') : el.value.trim();
     });
-    const derived = deriveHints(data);
-    $('#summary').textContent = renderSummaryHuman(data, derived);
+    const d = data;
+    const hint = deriveHints(d);
 
-    // Mirror to localStorage so Home and future sessions prefill
+    setRow('First', d.first);
+    setRow('Email', d.email);
+    setRow('Eye dominance', d.eye);
+    setRow('Handedness', d.hand);
+    setRow('Gender', d.gender);
+    setRow('Height', d.height ? `${d.height} in (${toFeetInches(d.height)})` : '');
+    setRow('Body build', d.bodyShape);
+    setRow('Focus', d.focus);
+    setRow('Cross-dominant', hint.cross_dominant ? 'Yes' : 'No');
+    setRow('Aim bias', hint.aim_bias);
+    setRow('Scale factor', hint.scale_factor || '');
+
     try{
       const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
-      Object.assign(saved, data);
+      Object.assign(saved, d);
       localStorage.setItem('vc_prefill', JSON.stringify(saved));
     }catch{}
   }
 
-  // Prefill from last session and/or Home
   function prefillFromLocal(){
     try{
       const merged = {};
@@ -348,7 +350,6 @@
       const li = JSON.parse(localStorage.getItem('vc_last_intake')||'null');
       const intake = li && li.intake ? li.intake : null;
       if (intake) Object.assign(merged, intake);
-
       fields.forEach(k=>{
         const el = document.getElementById(k);
         if (el && merged[k] != null && merged[k] !== '') el.value = String(merged[k]);
@@ -356,7 +357,10 @@
     }catch{}
   }
 
-  fields.forEach(k=> document.getElementById(k).addEventListener('input', updateSummary));
+  fields.forEach(k=>{
+    const el = document.getElementById(k);
+    if (el) el.addEventListener('input', updateSummary);
+  });
   prefillFromLocal();
   updateSummary();
 
@@ -368,7 +372,6 @@
     status('File selected. Ready to upload.', 'warn');
   });
 
-  // Stepper helpers
   function step(n){
     [$('#s1'),$('#s2'),$('#s3')].forEach((el,i)=>{
       el.classList.remove('active','done');
@@ -384,48 +387,30 @@
     pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)';
   }
 
-  // QC pill helpers (optional backend /api/qc)
-  function showQC(result){
-    if (!qcPill) return;
-    if (!result || !result.status){ qcPill.style.display='none'; return; }
-    qcPill.style.display = 'inline-flex';
-    if (result.status === 'ok'){
-      qcPill.textContent = 'QC: Passed';
-      qcPill.style.background = 'rgba(25,195,125,.18)';
-      qcPill.style.borderColor = '#2a6';
-    } else if (result.status === 'warn'){
-      qcPill.textContent = 'QC: Warnings';
-      qcPill.style.background = 'rgba(246,196,83,.18)';
-      qcPill.style.borderColor = '#b8860b';
-    } else {
-      qcPill.textContent = 'QC: Failed';
-      qcPill.style.background = 'rgba(255,107,107,.18)';
-      qcPill.style.borderColor = '#c44';
-      btnOpenReport.setAttribute('aria-disabled','true');
-      btnOpenReport.classList.add('disabled');
-    }
-  }
   async function runQC(key){
     try{
       const r = await fetch(`/api/qc?key=${encodeURIComponent(key)}`, { cache:'no-store' });
       if (!r.ok) throw new Error('HTTP '+r.status);
       const out = await r.json();
-      showQC(out);
+      if (qcPill){
+        qcPill.style.display = 'inline-flex';
+        if (out.status === 'ok'){ qcPill.textContent='QC: Passed'; qcPill.style.background='rgba(25,195,125,.18)'; qcPill.style.borderColor='#2a6'; }
+        else if (out.status === 'warn'){ qcPill.textContent='QC: Warnings'; qcPill.style.background='rgba(246,196,83,.18)'; qcPill.style.borderColor='#b8860b'; }
+        else { qcPill.textContent='QC: Failed'; qcPill.style.background='rgba(255,107,107,.18)'; qcPill.style.borderColor='#c44'; btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled'); }
+      }
       return out;
     }catch(e){
       console.warn('QC call failed:', e);
-      showQC(null);
+      if (qcPill) qcPill.style.display='none';
       return null;
     }
   }
 
-  // Generate a key if backend doesn't provide one yet
   function makeKey(file){
     const safe = file.name.replace(/[^a-z0-9_.-]+/gi,'_').toLowerCase();
     return `uploads/${Date.now()}-${safe}`;
   }
 
-  // Request a signed upload target
   async function getUploadTarget(file, key){
     const res = await fetch('/api/upload', {
       method:'POST',
@@ -433,10 +418,9 @@
       body: JSON.stringify({ filename: file.name, type: file.type, key })
     });
     if (!res.ok) throw new Error('Upload init failed: HTTP '+res.status);
-    return res.json(); // {putUrl,key} OR {url,fields,key} OR {key}
+    return res.json();
   }
 
-  // Save intake to backend (non-blocking)
   async function postIntake(key, intake) {
     try{
       const res = await fetch('/api/intake', {
@@ -452,7 +436,6 @@
     }
   }
 
-  // PUT to signed URL with progress
   function putWithProgress(url, file){
     return new Promise((resolve, reject)=>{
       const xhr = new XMLHttpRequest();
@@ -465,7 +448,6 @@
     });
   }
 
-  // S3 form POST (fake smooth progress to 80%)
   async function postForm(url, fields, file){
     const fd = new FormData();
     Object.entries(fields||{}).forEach(([k,v])=> fd.append(k,v));
@@ -509,8 +491,8 @@
       }
 
       progress(82); step(2); status('Processing…', 'warn');
-      saveIntake(finalKey);
-      postIntake(finalKey, { ...data, derived: deriveHints(data) }); // non-blocking
+      try{ localStorage.setItem('vc_last_intake', JSON.stringify({ key: finalKey, intake: data, ts: Date.now() })); }catch{}
+      postIntake(finalKey, { ...data, derived: deriveHints(data) });
       pollAnalyze(finalKey);
     }catch(err){
       console.error(err);
@@ -520,20 +502,11 @@
     }
   }
 
-  // Store intake alongside key (for your pipeline if needed)
-  function saveIntake(key){
-    try{
-      const payload = { key, intake: data, ts: Date.now() };
-      localStorage.setItem('vc_last_intake', JSON.stringify(payload));
-    }catch{}
-  }
-
-  // Poll /api/analyze?key=... until ready, then link to report.html?key=...
   let pollTimer = null;
   async function checkAnalyze(key){
     const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache:'no-store' });
     if (!r.ok) throw new Error('HTTP '+r.status);
-    return r.json(); // {status:"pending"|"ready", report?}
+    return r.json();
   }
   async function pollAnalyze(key){
     async function tick(){
@@ -543,11 +516,10 @@
           clearInterval(pollTimer); pollTimer = null;
           progress(100); step(3); status('Ready ✓', 'ok');
           await runQC(key);
-          const url = `/report.html?key=${encodeURIComponent(key)}`;
-          btnOpenReport.href = url; btnOpenReport.removeAttribute('aria-disabled'); btnOpenReport.classList.remove('disabled');
-          if (out.report){
-            try{ localStorage.setItem('vc_last_report', JSON.stringify(out.report)); }catch{}
-          }
+          btnOpenReport.href = `/report.html?key=${encodeURIComponent(key)}`;
+          btnOpenReport.removeAttribute('aria-disabled');
+          btnOpenReport.classList.remove('disabled');
+          if (out.report){ try{ localStorage.setItem('vc_last_report', JSON.stringify(out.report)); }catch{} }
           return;
         }
         const cur = parseFloat(bar.style.width)||82;
@@ -568,10 +540,10 @@
     updateSummary(); fileInput.value=''; fname.textContent='No file chosen'; fmeta.textContent='';
     step(1); progress(0); status('Idle',''); btnUpload.disabled=false;
     btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled'); btnOpenReport.href='#';
-    showQC(null);
+    if (qcPill){ qcPill.style.display='none'; }
   });
 
-  // Initialize UI
+  // Init
   step(1); progress(0); status('Idle','');
 </script>
 </body>
