@@ -1,10 +1,13 @@
 {
+  "redirects": [
+    { "source": "/favicon.ico", "destination": "/virtualcoach-logo.png", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/report",     "destination": "/report.html" },
     { "source": "/report.htm", "destination": "/report.html" }
   ],
   "headers": [
-    { "source": "/report.html",   "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
-    { "source": "/reports/(.*)",  "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
+    { "source": "/report.html",  "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
+    { "source": "/reports/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
   ]
 }
