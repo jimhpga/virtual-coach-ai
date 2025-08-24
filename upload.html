@@ -2,6 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+  <script>
+/* visit /upload.html?resetSW=1 once to nuke old SW + caches */
+if (location.search.includes('resetSW=1')) {
+  (async () => {
+    try {
+      if (navigator.serviceWorker) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+    } catch(e) {}
+    // reload with a new cache-busting version
+    location.replace(location.pathname + '?v=v14');
+  })();
+}
+</script>
+
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
