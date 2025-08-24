@@ -100,19 +100,13 @@
   .pop ul{ margin:6px 0 0 18px; padding:0; }
   .pop li{ margin:4px 0; font-size:13px; color:var(--muted); }
 
-  /* === inline glossary tooltips (auto-added in text) === */
-  .hint{ position:relative; cursor:help; border-bottom:1px dotted rgba(255,255,255,.55); }
-  .hint:focus-visible{ outline:2px dashed rgba(255,255,255,.35); outline-offset:2px; }
-  .hint[data-tip]::after{
-    content:attr(data-tip);
-    position:absolute; left:0; bottom:calc(100% + 6px);
-    display:none; z-index:30;
-    background:rgba(12,24,32,.96); color:var(--text);
-    border:1px solid var(--line); border-radius:8px;
-    padding:8px 10px; box-shadow:0 10px 28px rgba(0,0,0,.35);
-    width:min(360px, 92vw); white-space:normal;
-  }
-  .hint:hover::after, .hint:focus-visible::after{ display:block; }
+  /* === tour delta list === */
+  .delta{display:flex; align-items:center; gap:10px; margin:10px 0}
+  .delta .name{flex:1; font-weight:700}
+  .delta .nums{font-size:12px; color:#d8ebf2}
+  .dchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;border:1px solid var(--line)}
+  .dplus{background:rgba(246,196,83,.18);border-color:#b8860b} /* needs work (you behind tour) */
+  .dminus{background:rgba(25,195,125,.18);border-color:#2a6}  /* you ahead of tour (usually fine) */
 </style>
 </head>
 <body>
@@ -140,7 +134,9 @@
           <div class="title">Swing Report — P1–P9</div>
           <div class="sub">Date: <span id="date"></span> • Mode: <span id="modeLabel">Full Swing</span></div>
         </div>
-        <div><span class="badge">Swings: <span id="swingCount">1</span></span></div>
+        <div>
+          <span class="badge">Swings: <span id="swingCount">1</span></span>
+        </div>
       </header>
 
       <div class="actions">
@@ -213,6 +209,25 @@
         <div id="power" class="content"></div>
       </section>
 
+      <!-- NEW: Tour-player delta -->
+      <section class="card" style="margin-top:12px">
+        <h3 class="hdr">
+          <span>Tour-Player Delta — Top 3 Fundamentals</span>
+          <button class="qbtn" data-pop="delta" aria-label="How we pick these?">?</button>
+          <div class="pop" id="pop-delta">
+            <h4>What this means</h4>
+            <p>We compare your fundamentals to a tour cohort that matches <em>your</em> key traits (hand, eye, gender, height, build). The three largest gaps are listed first. Closing these usually gives the fastest gains.</p>
+            <ul>
+              <li><strong>Cohort:</strong> picked from your intake or the report’s metadata.</li>
+              <li><strong>Delta:</strong> You − Tour average (units vary by item; % shown where applicable).</li>
+              <li><strong>Tip:</strong> Fix one at a time. Start with the biggest delta.</li>
+            </ul>
+          </div>
+        </h3>
+        <div id="cohortLine" class="content sub" style="padding-bottom:0"></div>
+        <div id="tourDelta" class="content"></div>
+      </section>
+
       <!-- Key Terms mini card -->
       <section class="card" style="margin-top:12px">
         <h3 class="hdr">
@@ -261,10 +276,10 @@
   const qp = new URLSearchParams(location.search);
   const src = (qp.get('src') || '').toLowerCase();
   const reportParam = qp.get('report');
-  const keyParam = qp.get('key'); // NEW: uploads/<ts>-file.ext
+  const keyParam = qp.get('key'); // uploads/<ts>-file.ext
   const fileSrc = (reportParam === 'local') ? null : (reportParam || '/report.json');
 
-  // ====== RENDER HELPERS (unchanged) =========================================
+  // ====== RENDER HELPERS =====================================================
   const fmt  = v => `${v}%`;
   const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';
   const chip = g => (g==='good'?'g-good':g==='ok'?'g-ok':'g-bad');
@@ -304,7 +319,8 @@
     const gRaw = String(ph.grade||'').toLowerCase();
     const grade = (gRaw==='bad') ? 'needs help' : (gRaw || 'ok');
     const short = ph.short || '';
-    const long  = ph.long  || '';
+    theLong = ph.long  || '';
+    const long = theLong;
     const ref   = ph.ref || ph.video || ph.video_url || '';
     const btnLabel = /youtu(\.be|be\.com)/.test(ref) ? 'YouTube' : 'Video';
     return `
@@ -340,6 +356,76 @@
     </details>`;
   }
 
+  // ====== NEW: Tour delta helpers ===========================================
+  function safeNum(v){
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  }
+  function buildCohortLine(data){
+    const c = data.cohort || data.intake || {};
+    const bits = [];
+    if (c.hand || c.handedness) bits.push((c.hand||c.handedness).toString().replace(/^\w/, s=>s.toUpperCase())+'-hand');
+    if (c.eye || c.eye_dominance) bits.push((c.eye||c.eye_dominance)+'-eye');
+    if (c.gender) bits.push(c.gender);
+    if (c.height) bits.push((c.height+' in'));
+    if (c.bodyShape || c.build) bits.push(c.bodyShape||c.build);
+    return bits.length ? `Matched cohort: ${bits.join(', ')}` : '';
+  }
+  function autoPickDeltas(data){
+    const out = [];
+
+    function consider(arr){
+      if (!Array.isArray(arr)) return;
+      for (const m of arr){
+        const you = safeNum(m.value);
+        const t = safeNum(m.tour ?? m.pro ?? m.target ?? (m.ref && m.ref.tour));
+        if (you==null || t==null) continue;
+        out.push({
+          label: m.label || m.p || 'Metric',
+          you, tour: t,
+          delta: +(you - t).toFixed(1),
+          unit: m.unit || (typeof m.value==='number' ? '%' : '')
+        });
+      }
+    }
+    consider(data.position_metrics);
+    consider(data.swing_metrics);
+    // If still empty, check power fields
+    if (data.power && safeNum(data.power.score)!=null){
+      const t = safeNum(data.power.tour || 85);
+      out.push({ label:'Power Score', you:+data.power.score, tour:t, delta:+(+data.power.score - t).toFixed(1), unit:'%' });
+    }
+    // sort by absolute gap desc
+    out.sort((a,b)=> Math.abs(b.delta) - Math.abs(a.delta));
+    return out.slice(0,3);
+  }
+  function getTopDeltas(data){
+    if (Array.isArray(data.tour_delta) && data.tour_delta.length){
+      const arr = data.tour_delta.map(d=>({
+        label: d.label || d.name || 'Metric',
+        you: safeNum(d.you),
+        tour: safeNum(d.tour),
+        delta: safeNum(d.delta)!=null ? +d.delta : (safeNum(d.you)!=null && safeNum(d.tour)!=null ? +(d.you - d.tour).toFixed(1) : null),
+        unit: d.unit || '%',
+        note: d.note || ''
+      })).filter(x=>x.delta!=null);
+      arr.sort((a,b)=> Math.abs(b.delta) - Math.abs(a.delta));
+      return arr.slice(0,3);
+    }
+    return autoPickDeltas(data);
+  }
+  function deltaRow(d){
+    const cls = d.delta>0 ? 'dplus' : 'dminus';
+    const sign = d.delta>0 ? '+' : '';
+    const unit = d.unit || '';
+    const nums = `You ${d.you}${unit} • Tour ${d.tour}${unit}`;
+    return `<div class="delta">
+      <div class="name">${d.label}</div>
+      <span class="dchip ${cls}">${sign}${d.delta}${unit}</span>
+      <div class="nums">${nums}</div>
+    </div>`;
+  }
+
   let last = null;
   function renderReport(data){
     last = data || {};
@@ -368,10 +454,18 @@
       <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo||'—'}</div></div>
       <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing||0)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
 
+    // Wire videos
     document.querySelectorAll('.videoBtn').forEach(b=> b.addEventListener('click', ()=> openViewer(b.dataset.href)));
 
-    // Sprinkle inline glossary tooltips after content is rendered
-    __annotateAll();
+    // Cohort + Top 3 fundamentals different from tour
+    const cohortText = buildCohortLine(data);
+    const cohortEl = document.getElementById('cohortLine');
+    cohortEl.textContent = cohortText || '';
+    cohortEl.style.display = cohortText ? 'block' : 'none';
+
+    const deltas = getTopDeltas(data);
+    document.getElementById('tourDelta').innerHTML =
+      deltas.length ? deltas.map(deltaRow).join('') : '<div class="sub">No cohort comparison available yet.</div>';
   }
 
   // ====== STATUS PILL (added programmatically) ===============================
@@ -438,7 +532,6 @@
             renderReport(data.report);
             try{ localStorage.setItem('vc_last_report', JSON.stringify(data.report)); }catch{}
           } else {
-            // Fallback: if API returns {format:'html', key:...}, just link it
             document.querySelector('main').insertAdjacentHTML('afterbegin',
               `<div class="card"><div class="content">Your report is ready: <a class="btn primary" href="/${data.key}" target="_blank" rel="noopener">Open HTML Report</a></div></div>`);
           }
@@ -475,7 +568,7 @@
     }
   })();
 
-  // ====== SHARE / SEND / DOWNLOAD (unchanged) ================================
+  // ====== SHARE / SEND / DOWNLOAD ===========================================
   function shareUrl(){
     try{
       const u = new URL(location.href);
@@ -511,70 +604,9 @@
     setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
   });
 
-  // === Inline glossary auto-tooltips ========================================
-  const __TERMS = [
-    { re: /\bP1\b/, tip: 'Address / setup.' },
-    { re: /\bP2\b/, tip: 'Takeaway — shaft roughly parallel to target line (club hip-high).' },
-    { re: /\bP3\b/, tip: 'Lead arm parallel to the ground.' },
-    { re: /\bP4\b/, tip: 'Top of backswing.' },
-    { re: /\bP5\b/, tip: 'Early downswing.' },
-    { re: /\bP6\b/, tip: 'Downswing — shaft roughly parallel again (club thigh-high).' },
-    { re: /\bP7\b/, tip: 'Impact (ball strike).' },
-    { re: /\bP8\b/, tip: 'Early follow-through.' },
-    { re: /\bP9\b/, tip: 'Finish — shaft roughly parallel on exit.' },
-    { re: /X[\s-]?Factor/iu, tip: 'Shoulder rotation minus hip rotation (°).' },
-    { re: /\btempo(?:\s*ratio)?\b/i, tip: 'Backswing : downswing time (tour ≈ 3:1).' },
-    { re: /release timing/i, tip: 'When club speed peaks relative to impact (P7).' },
-    { re: /kinematic sequence/i, tip: 'Energy transfer pelvis → thorax → arm → club.' },
-    { re: /hip(?:s)? rotation|pelvis rotation/i, tip: 'Pelvis angle vs. target line (°).' },
-    { re: /shoulder rotation|thorax rotation/i, tip: 'Thorax angle vs. target line (°).' },
-    { re: /shaft parallel/i, tip: 'Club roughly parallel to the target line.' },
-    { re: /down-?the-?line/i, tip: 'Camera along target line, ~8–12 ft behind the player.' },
-    { re: /face-?on/i, tip: 'Camera perpendicular to target line, ~8–12 ft in front of player.' }
-  ];
-
-  function __wrapOnce(node, re, tip){
-    re = new RegExp(re.source, re.flags.replace('g','')); // first match only
-    const m = re.exec(node.nodeValue);
-    if (!m) return false;
-    const before = node.nodeValue.slice(0, m.index);
-    const match  = node.nodeValue.slice(m.index, m.index + m[0].length);
-    const after  = node.nodeValue.slice(m.index + m[0].length);
-    const span = document.createElement('span');
-    span.className = 'hint'; span.setAttribute('data-tip', tip); span.textContent = match;
-    const parent = node.parentNode;
-    if (before) parent.insertBefore(document.createTextNode(before), node);
-    parent.insertBefore(span, node);
-    if (after) parent.insertBefore(document.createTextNode(after), node);
-    parent.removeChild(node);
-    return true;
-  }
-
-  function __annotateRoot(root){
-    if (!root) return;
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    const nodes = [];
-    let n; while(n = walker.nextNode()) nodes.push(n);
-    nodes.forEach(node=>{
-      if (!node.nodeValue || !node.nodeValue.trim()) return;
-      const pe = node.parentElement;
-      if (!pe || pe.closest('script,style,code,pre,.hint,.qbtn,.pop,button,a,svg')) return;
-      for (const t of __TERMS){
-        if (t.re.test(node.nodeValue)) { __wrapOnce(node, t.re, t.tip); break; }
-      }
-    });
-  }
-
-  function __annotateAll(){
-    ['#plist', '#coachPriority', '#coachPower', '#position', '#swing', '#power'].forEach(sel=>{
-      __annotateRoot(document.querySelector(sel));
-    });
-  }
-
   // === popover logic (for the little “?” clouds) =============================
   (function helpPopovers(){
     let openPop = null;
-
     function togglePop(btn){
       const id = 'pop-' + btn.dataset.pop;
       const pop = document.getElementById(id);
@@ -582,8 +614,6 @@
       if (openPop && openPop !== pop) { openPop.classList.remove('show'); openPop = null; }
       pop.classList.toggle('show');
       openPop = pop.classList.contains('show') ? pop : null;
-
-      // basic right-edge nudge
       if (openPop) {
         const rect = pop.getBoundingClientRect();
         if (rect.right > window.innerWidth - 8) {
@@ -591,11 +621,9 @@
         }
       }
     }
-
     document.querySelectorAll('.qbtn').forEach(btn=>{
       btn.addEventListener('click', (e)=>{ e.stopPropagation(); togglePop(btn); });
     });
-
     document.addEventListener('click', ()=>{ if(openPop){ openPop.classList.remove('show'); openPop=null; }});
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && openPop){ openPop.classList.remove('show'); openPop=null; }});
   })();
