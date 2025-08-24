@@ -27,7 +27,7 @@
 <body>
   <header>
     <div class="wrap" style="display:flex;align-items:center;gap:12px">
-      <div><img src="/virtualcoach-logo.png" alt="Virtual Coach AI" style="height:28px"></div>
+      <img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI" style="height:36px;width:auto" />
       <nav aria-label="Main">
         <a class="btn-link" href="/index.html">Home</a>
         <a class="btn-link" href="/upload.html">Upload</a>
@@ -141,7 +141,7 @@
       if(intake) formData.append('intake',intake);
       formData.append('video',file,file.name);
 
-      // (Demo) Show payload preview instead of sending
+      // Demo payload preview
       payload.style.display='block';
       payload.textContent=`POST /api/analyze
 Headers: (multipart/form-data)
@@ -168,7 +168,6 @@ Video: ${file.name} (${Math.round(file.size/1024)} KB)`;
       window.__vcaBar=setInterval(()=>{w=(w+5)%105; bar.style.width=w+'%';},120);
     }
 
-    // Restore progress if user reloads / returns
     (function restoreProcessing(){
       const raw=localStorage.getItem('vca_processing');
       if(!raw) return;
