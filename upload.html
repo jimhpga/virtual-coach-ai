@@ -160,18 +160,31 @@
               </div>
             </div>
 
-            <div>
-              <label for="focus">Focus area (optional)</label>
-              <select id="focus">
-                <option value="">— None —</option>
-                <option>Setup</option><option>Grip</option><option>Takeaway (P2)</option>
-                <option>Backswing (P3)</option><option>Top (P4)</option><option>Transition</option>
-                <option>Downswing</option><option>Shaft Parallel Down (P6)</option><option>Impact (P7)</option>
-                <option>Release</option><option>Finish</option><option>Swing Plane</option>
-                <option>Club Path</option><option>Face Control</option><option>Tempo</option>
-                <option>Kinematic Sequence</option><option>Posture</option><option>Ball Position</option>
-                <option>Alignment</option>
-              </select>
+            <div class="row">
+              <div>
+                <label for="bodyShape">Body build (optional)</label>
+                <select id="bodyShape">
+                  <option value="">— Select —</option>
+                  <option value="slim">Slim / Lean</option>
+                  <option value="average">Average / Athletic</option>
+                  <option value="muscular">Muscular / Stocky</option>
+                  <option value="tall-lean">Tall / Lean</option>
+                  <option value="short-compact">Short / Compact</option>
+                </select>
+              </div>
+              <div>
+                <label for="focus">Focus area (optional)</label>
+                <select id="focus">
+                  <option value="">— None —</option>
+                  <option>Setup</option><option>Grip</option><option>Takeaway (P2)</option>
+                  <option>Backswing (P3)</option><option>Top (P4)</option><option>Transition</option>
+                  <option>Downswing</option><option>Shaft Parallel Down (P6)</option><option>Impact (P7)</option>
+                  <option>Release</option><option>Finish</option><option>Swing Plane</option>
+                  <option>Club Path</option><option>Face Control</option><option>Tempo</option>
+                  <option>Kinematic Sequence</option><option>Posture</option><option>Ball Position</option>
+                  <option>Alignment</option>
+                </select>
+              </div>
             </div>
 
             <div style="margin-top:10px">
@@ -212,7 +225,9 @@
   "hand": "",
   "gender": "",
   "height": "",
-  "focus": ""
+  "bodyShape": "",
+  "focus": "",
+  "derived": {}
 }</pre>
           </div>
         </div>
@@ -223,7 +238,6 @@
 <script>
   // NAV (hamburger)
   const header = document.getElementById('site-header');
-  const btnMenu = document.createElement('button');
   document.getElementById('menuBtn')?.addEventListener('click', ()=>{
     const open = header.classList.toggle('open');
     document.getElementById('menuBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -244,8 +258,29 @@
   const btnReset = $('#btnReset');
   const btnOpenReport = $('#btnOpenReport');
 
-  const fields = ['first','email','eye','hand','gender','height','focus'];
+  // Fields + model
+  const fields = ['first','email','eye','hand','gender','height','bodyShape','focus'];
   const data = Object.fromEntries(fields.map(k=>[k,'']));
+
+  function deriveHints(d){
+    // Cross-dominance & aim bias
+    const hand = (d.hand||'').toLowerCase();
+    const eye  = (d.eye||'').toLowerCase();
+    const cross = (hand && eye) ? (hand[0] !== eye[0]) : false;
+    let aim = 'neutral';
+    if (hand==='right' && eye==='left') aim = 'left';
+    if (hand==='left'  && eye==='right') aim = 'right';
+
+    // Height scale vs. 70 in baseline (~5'10")
+    const h = Number(d.height||0);
+    const scale = h ? +(h/70).toFixed(2) : '';
+
+    return {
+      cross_dominant: !!cross,
+      aim_bias: aim,
+      scale_factor: scale
+    };
+  }
 
   function updateSummary(){
     fields.forEach(k=>{
@@ -253,9 +288,37 @@
       if (!el) return;
       data[k] = (el.type === 'number') ? (el.value ? Number(el.value) : '') : el.value.trim();
     });
-    $('#summary').textContent = JSON.stringify(data, null, 2);
+
+    const derived = deriveHints(data);
+    $('#summary').textContent = JSON.stringify({ ...data, derived }, null, 2);
+
+    // Mirror to localStorage so Home (if ever used) and future sessions prefill
+    try{
+      const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
+      Object.assign(saved, data);
+      localStorage.setItem('vc_prefill', JSON.stringify(saved));
+    }catch{}
   }
+
+  // Prefill from last session and/or Home
+  function prefillFromLocal(){
+    try{
+      const merged = {};
+      const p = JSON.parse(localStorage.getItem('vc_prefill')||'{}');  // any values typed on Home
+      Object.assign(merged, p);
+      const li = JSON.parse(localStorage.getItem('vc_last_intake')||'null'); // last full run
+      const intake = li && li.intake ? li.intake : null;
+      if (intake) Object.assign(merged, intake);
+
+      fields.forEach(k=>{
+        const el = document.getElementById(k);
+        if (el && merged[k] != null && merged[k] !== '') el.value = String(merged[k]);
+      });
+    }catch{}
+  }
+
   fields.forEach(k=> document.getElementById(k).addEventListener('input', updateSummary));
+  prefillFromLocal();
   updateSummary();
 
   fileInput.addEventListener('change', ()=>{
@@ -275,15 +338,20 @@
     });
   }
   function progress(pct){ bar.style.width = Math.max(0, Math.min(100, pct)) + '%'; }
-  function status(text, tone){ statusLine.textContent = text; pill.textContent = text.split('.')[0]; pill.style.background = tone==='ok'?'rgba(25,195,125,.18)':tone==='warn'?'rgba(246,196,83,.18)':'rgba(255,255,255,.10)'; pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)'; }
+  function status(text, tone){
+    statusLine.textContent = text;
+    pill.textContent = text.split('.')[0];
+    pill.style.background = tone==='ok'?'rgba(25,195,125,.18)':tone==='warn'?'rgba(246,196,83,.18)':'rgba(255,255,255,.10)';
+    pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)';
+  }
 
   // Generate a key if backend doesn't provide one yet
   function makeKey(file){
     const safe = file.name.replace(/[^a-z0-9_.-]+/gi,'_').toLowerCase();
     return `uploads/${Date.now()}-${safe}`;
-    }
+  }
 
-  // Try to request a signed upload from /api/upload
+  // Request a signed upload target
   async function getUploadTarget(file, key){
     const res = await fetch('/api/upload', {
       method:'POST',
@@ -291,7 +359,7 @@
       body: JSON.stringify({ filename: file.name, type: file.type, key })
     });
     if (!res.ok) throw new Error('Upload init failed: HTTP '+res.status);
-    return res.json(); // shapes supported: {putUrl,key} OR {url,fields,key} OR {key}
+    return res.json(); // {putUrl,key} OR {url,fields,key} OR {key}
   }
 
   // PUT to signed URL with progress
@@ -307,18 +375,17 @@
     });
   }
 
-  // S3 form POST (no reliable progress events; fake smooth progress to 80%)
+  // S3 form POST (fake smooth progress to 80%)
   async function postForm(url, fields, file){
     const fd = new FormData();
     Object.entries(fields||{}).forEach(([k,v])=> fd.append(k,v));
     fd.append('file', file);
-    const controller = new AbortController();
     const tick = setInterval(()=>{
       const cur = parseFloat(bar.style.width)||0;
       if (cur < 78) progress(cur + 2);
       else clearInterval(tick);
     }, 200);
-    const res = await fetch(url, { method:'POST', body:fd, signal:controller.signal });
+    const res = await fetch(url, { method:'POST', body:fd });
     clearInterval(tick);
     if (!res.ok) throw new Error('Upload error: HTTP '+res.status);
   }
@@ -326,7 +393,7 @@
   async function startUpload(){
     const f = fileInput.files && fileInput.files[0];
     if (!f){ alert('Choose a swing video first.'); return; }
-    // Minimal validation
+    // Minimal validation (per your specs)
     if (!$('#eye').value){ alert('Pick eye dominance.'); $('#eye').focus(); return; }
     if (!$('#height').value){ alert('Enter height (inches).'); $('#height').focus(); return; }
 
@@ -348,7 +415,7 @@
       } else if (target.url && target.fields){
         await postForm(target.url, target.fields, f);
       } else {
-        // Fallback: try sending raw file to /api/upload (proxy upload)
+        // Fallback: POST to /api/upload (proxy)
         const fd = new FormData(); fd.append('file', f); fd.append('key', finalKey);
         const r = await fetch('/api/upload', { method:'POST', body:fd });
         if (!r.ok) throw new Error('Upload error: HTTP '+r.status);
@@ -389,7 +456,6 @@
           progress(100); step(3); status('Ready ✓', 'ok');
           const url = `/report.html?key=${encodeURIComponent(key)}`;
           btnOpenReport.href = url; btnOpenReport.removeAttribute('aria-disabled'); btnOpenReport.classList.remove('disabled');
-          // optional: persist report for faster open if provided
           if (out.report){
             try{ localStorage.setItem('vc_last_report', JSON.stringify(out.report)); }catch{}
           }
