@@ -1,161 +1,127 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Coach AI – Intake</title>
-  <style>
-    :root{--vca-green:#0f7a3e;--text:#fff;--muted:#d7e5db;--glass:rgba(255,255,255,.08);--glass2:rgba(255,255,255,.12);--warn:#f6c445}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:url('homepage-background.png') center/cover fixed no-repeat;min-height:100dvh}
-    header{position:sticky;top:0;background:var(--vca-green);border-bottom:1px solid rgba(255,255,255,.15);z-index:50}
-    .wrap{max-width:1100px;margin:0 auto;padding:14px 18px}
-    nav{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
-    .btn-link{appearance:none;border:1px solid rgba(255,255,255,.2);background:transparent;color:#fff;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600;text-decoration:none}
-    .brand-row{display:flex;align-items:center;gap:12px}
-    .hero{padding:28px 18px 12px;text-align:center}
-    .hero-logo{height:110px;width:auto;display:block;margin:6px auto 10px;filter:drop-shadow(0 4px 14px rgba(0,0,0,.35))}
-    .tagline{margin:6px 0 2px;font-size:18px;opacity:.95}
-    .sub{opacity:.9;margin-top:6px}
-    .card{background:var(--glass);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:18px;margin:0 18px 18px}
-    @media(min-width:900px){.split{display:grid;grid-template-columns:6fr 6fr;gap:18px}.card{margin:0 0 18px}}
-    form .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
-    .field{grid-column:span 12;display:flex;flex-direction:column;gap:6px}
-    @media(min-width:720px){.half{grid-column:span 6}}
-    label{font-size:13px;opacity:.9}
-    .req::after{content:" *";color:var(--warn);font-weight:800}
-    input,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.20);color:#fff;background:rgba(255,255,255,.06)}
-    .actions{display:flex;gap:10px;flex-wrap:wrap}
-    .btn{appearance:none;border:none;background:linear-gradient(180deg,#34c77f,#199a57);color:#03150d;font-weight:800;letter-spacing:.2px;padding:12px 16px;border-radius:12px;cursor:pointer;box-shadow:0 8px 24px rgba(25,154,87,.35);text-transform:uppercase;font-size:12px}
-    .btn.secondary{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.25)}
-    .note{font-size:12px;opacity:.85;margin-left:auto}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI — Home</title>
+<link rel="preload" as="image" href="/homepage-background.png" />
+<style>
+  :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06); --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08); --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);}
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
+  .scrim{min-height:100vh;background:var(--scrim)}
+
+  /* NAV */
+  header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+  .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .brand-logo{width:200px;height:48px;background:var(--brand);
+    -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
+            mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;}
+  .menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
+  nav.nav{display:flex;gap:8px}
+  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  nav.nav a:hover{background:rgba(255,255,255,.08)}
+  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+  @media(max-width:820px){
+    .menu-toggle{display:inline-flex}
+    nav.nav{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
+    header.top.open nav.nav{display:flex}
+  }
+
+  /* HERO */
+  .wrap{width:min(1080px,92%);margin:0 auto;padding:28px 0 64px}
+  .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:center}
+  @media(max-width:960px){.hero{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px);padding:22px}
+  .title{font-size:34px;font-weight:900;margin:0 0 8px}
+  .lead{color:#cfe0e6;font-size:14px;margin:0 0 14px}
+  .copy{margin:0 0 14px;color:#ecf3f7}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:12px 16px;border-radius:12px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
+  .btn:hover{background:rgba(255,255,255,.16)}
+  .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6;}
+  .btn.ghost{background:rgba(255,255,255,.06);}
+  .note{color:var(--muted);font-size:13px;margin-top:10px}
+  .hero-card h3{margin:0 0 8px}
+  .hero-list{margin:0;padding-left:18px;color:#cfe0e6}
+  .continue{display:none}
+</style>
 </head>
 <body>
-  <header>
-    <div class="wrap brand-row">
-      <img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI" style="height:36px;width:auto" />
-      <nav aria-label="Main">
-        <a class="btn-link" href="/index.html">Home</a>
-        <a class="btn-link" href="/upload.html">Upload</a>
-        <a class="btn-link" href="/reports.html">Reports</a>
-        <a class="btn-link" href="/pricing.html">Pricing</a>
-        <a class="btn-link" href="/faq.html">FAQ</a>
-        <a class="btn-link" href="/team.html">Team</a>
-        <a class="btn-link" href="/contact.html">Contact</a>
-        <a class="btn-link" href="/coach-login.html">Login</a>
-      </nav>
-    </div>
-  </header>
+<header class="top" id="site-header">
+  <div class="navwrap">
+    <a class="brand" href="/"><div class="brand-logo"></div><span>Virtual Coach AI</span></a>
+    <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
+    <nav class="nav" id="siteNav" aria-label="Primary">
+      <a href="/index.html" aria-current="page">Home</a>
+      <a href="/upload.html">Upload</a>
+      <a href="/report.html?report=/report.json">Reports</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/team.html">Team</a>
+      <a href="/contact.html">Contact</a>
+      <a href="/login.html">Login</a>
+    </nav>
+  </div>
+</header>
 
+<div class="scrim">
   <main class="wrap">
-    <div class="hero">
-      <img class="hero-logo" src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI logo" />
-      <h1 style="margin:0;font-size:32px">Welcome to Virtual Coach AI</h1>
-      <p class="tagline">Smarter swing analysis. Faster improvement.</p>
-      <p class="sub">Short intake. Full report. No fluff.</p>
-    </div>
-
-    <section class="card split">
-      <div>
-        <h3 style="margin:0 0 10px">Quick Intake</h3>
-        <form id="intake-form" onsubmit="return false;">
-          <div class="grid">
-            <div class="field half">
-              <label for="first">First name</label>
-              <input id="first" name="first" type="text" placeholder="John" />
-            </div>
-            <div class="field half">
-              <label for="email">Email <span class="muted">(add if you want the report emailed to you)</span></label>
-              <input id="email" name="email" type="email" placeholder="you@example.com" />
-            </div>
-            <div class="field half">
-              <label for="eye">Eye Dominance</label>
-              <select id="eye" name="eye">
-                <option value="">Select…</option>
-                <option>Right-eye dominant</option>
-                <option>Left-eye dominant</option>
-                <option>Unsure</option>
-              </select>
-            </div>
-            <div class="field half">
-              <label for="hand">Handed</label>
-              <select id="hand" name="hand">
-                <option value="">Select…</option>
-                <option>Right-handed</option>
-                <option>Left-handed</option>
-              </select>
-            </div>
-            <div class="field half">
-              <label for="gender">Gender</label>
-              <select id="gender" name="gender">
-                <option value="">Select…</option>
-                <option>Man</option>
-                <option>Woman</option>
-              </select>
-            </div>
-            <div class="field half">
-              <label class="req" for="height">Height (inches or cm)</label>
-              <input id="height" name="height" type="number" placeholder="e.g., 70 in / 178 cm" required />
-            </div>
-            <div class="field half">
-              <label for="focus">Focus Area (optional)</label>
-              <select id="focus" name="focus">
-                <option value="">— None —</option>
-                <option>Setup/Posture</option>
-                <option>Grip/Clubface</option>
-                <option>Takeaway (P2)</option>
-                <option>Top/Structure (P4)</option>
-                <option>Shallow/Transition</option>
-                <option>Over-the-Top</option>
-                <option>Early Extension</option>
-                <option>Trail Arm Mechanics</option>
-                <option>Lead-leg Braking</option>
-                <option>Hip/Thorax Sequence</option>
-                <option>Club Path</option>
-                <option>Face Control/Release</option>
-                <option>Swing Plane</option>
-                <option>Tempo/Rhythm</option>
-                <option>Balance/Finish</option>
-                <option>Putting</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="actions" style="margin-top:10px">
-            <button class="btn" id="save-continue">Save & Continue to Upload</button>
-            <button class="btn secondary" id="reset-intake" type="button">Reset</button>
-            <span class="note">Full Report is the default (P1–P9).</span>
-          </div>
-        </form>
+    <section class="hero">
+      <div class="panel">
+        <div class="title">Welcome to Virtual Coach AI</div>
+        <p class="copy">
+          Welcome to the evolution of golf instruction. With this AI-assisted teaching device, you get <strong>tour-level coaching</strong> from your phone at the range—upload one swing and we benchmark your motion against P1–P9, surface the top priorities, and give you fixes you can try on the very next ball.
+        </p>
+        <p class="lead">Upload your swing. Get a clean, coach-grade report — P1 to P9, priorities, and power.</p>
+        <div class="actions">
+          <a class="btn primary" href="/upload.html">Upload Swing</a>
+          <a class="btn ghost" href="/report.html?report=/report.json">See Sample Report</a>
+          <a class="btn ghost continue" id="btnContinue" href="#">Continue Where You Left Off</a>
+        </div>
+        <p class="note">Pro tip: best results from filming 8–12 ft away, down-the-line or face-on, landscape.</p>
       </div>
-      <div>
-        <h3 style="margin:0 0 10px">What happens next?</h3>
-        <ul class="muted" style="margin-top:8px">
-          <li>P1–P9 sequence strip</li>
-          <li>Power & Efficiency report</li>
-          <li>Fault map + instant drill prescriptions</li>
-          <li>Optional voice summary clip</li>
-        </ul>
+      <div class="panel hero-card">
+        <h3>How it works</h3>
+        <ol class="hero-list">
+          <li>Go to <strong>Upload</strong> and add your swing video.</li>
+          <li>Pick eye dominance & height (so we can scale you correctly).</li>
+          <li>We process it and hand you a P1–P9 report with simple priorities.</li>
+        </ol>
       </div>
     </section>
   </main>
+</div>
 
-  <script>
-    const form=document.getElementById('intake-form');
-    document.getElementById('reset-intake').addEventListener('click',()=>{
-      form.reset(); localStorage.removeItem('vca_intake');
-    });
-    document.getElementById('save-continue').addEventListener('click',()=>{
-      const data=Object.fromEntries(new FormData(form).entries());
-      localStorage.setItem('vca_intake', JSON.stringify(data));
-      localStorage.setItem('vca_from_intake','1');
-      window.location.href='/upload.html';
-    });
-    (function hydrate(){
-      const raw=localStorage.getItem('vca_intake'); if(!raw) return;
-      try{const data=JSON.parse(raw); for(const[k,v] of Object.entries(data)){ const el=form.elements[k]; if(el) el.value=v; }}catch{}
-    })();
-  </script>
+<script>
+  // Hamburger
+  const header = document.getElementById('site-header');
+  const btn = document.getElementById('menuBtn');
+  btn.addEventListener('click', ()=>{
+    const open = header.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  document.getElementById('siteNav').addEventListener('click', e=>{
+    if(e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+  });
+
+  // Show "Continue" if there’s something saved
+  (function(){
+    try{
+      const last = JSON.parse(localStorage.getItem('vc_last_intake')||'null');
+      const btn = document.getElementById('btnContinue');
+      if (last && last.key){
+        btn.href = `/report.html?key=${encodeURIComponent(last.key)}`;
+        btn.style.display = 'inline-flex';
+        return;
+      }
+      if (localStorage.getItem('vc_last_report')){
+        btn.href = '/report.html?src=local';
+        btn.style.display = 'inline-flex';
+      }
+    }catch{}
+  })();
+</script>
 </body>
 </html>
