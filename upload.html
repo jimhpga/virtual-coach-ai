@@ -2,15 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<meta http-equiv="Cache-Control" content="no-store, max-age=0" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual Coach AI — Upload</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
-  :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06); --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08); --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20); --ok:#19c37d; --warn:#f6c453; }
+  :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06);
+         --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08);
+         --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
+         --ok:#19c37d; --warn:#f6c453; }
   *{box-sizing:border-box} html,body{height:100%}
   body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
   .scrim{min-height:100vh;background:var(--scrim)}
 
+  /* NAV */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
@@ -37,7 +42,7 @@
   .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:12px}
   @media(max-width:960px){.grid{grid-template-columns:1fr}}
 
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
   .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
   .card .content{padding:12px 16px}
 
@@ -72,15 +77,8 @@
 
   pre{margin:0;padding:12px;background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;white-space:pre-wrap;word-wrap:break-word}
 
-  details.tips summary{cursor:pointer;display:inline-block;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.06);font-weight:700}
-  details.tips .content{margin-top:10px;color:var(--muted)}
-
-  /* select look */
-  select{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
-  select:hover{background:rgba(255,255,255,.10)}
-  select:focus{outline:none;box-shadow:0 0 0 2px rgba(255,255,255,.18) inset}
-  /* force readable items for browsers that apply our styles */
-  select option{color:#0b1520;background:#ffffff}
+  /* Make dropdown list readable on all browsers */
+  select option{color:#111;background:#fff}
 </style>
 </head>
 <body>
@@ -105,11 +103,9 @@
     <main class="wrap">
       <header style="margin-bottom:8px">
         <h1>Best Results Come From Good Footage</h1>
-        <p class="lead">Results are estimates from a single-camera video. For best accuracy, record from ~8–12 ft either <strong>down-the-line</strong> (along the target line) or <strong>face-on</strong> (perpendicular), in landscape, with your whole body and club in frame.</p>
+        <p class="lead">Record from ~8–12 ft, <strong>down-the-line</strong> or <strong>face-on</strong>, landscape, with your whole body and club in frame.</p>
         <details class="tips"><summary>Recording tips (quick)</summary>
-          <div class="content">
-            • Keep the camera steady (tripod if possible). • Bright, even light. • Avoid extreme wide-angle. • Ball and hands visible at impact.
-          </div>
+          <div class="content">• Steady camera (tripod). • Bright, even light. • Avoid extreme wide-angle. • Ball & hands visible at impact.</div>
         </details>
       </header>
 
@@ -121,29 +117,43 @@
             <div class="row">
               <div>
                 <label for="first">First name</label>
-                <input id="first" type="text" placeholder="e.g., Jim" />
+                <input id="first" type="text" placeholder="e.g., Jim" autocomplete="off" />
               </div>
               <div>
                 <label for="email">Email <span class="hint">(optional)</span></label>
-                <input id="email" type="email" placeholder="Add if you want the report emailed to you" />
+                <input id="email" type="email" placeholder="Add if you want the report emailed to you" autocomplete="off" />
               </div>
             </div>
 
             <div class="row">
               <div>
                 <label for="eye">Eye dominance <span class="req">*</span></label>
-                <select id="eye" required></select>
+                <select id="eye" required>
+                  <option value="" selected disabled>Select…</option>
+                  <option value="right">Right eye</option>
+                  <option value="left">Left eye</option>
+                  <option value="unknown">Not sure</option>
+                </select>
               </div>
               <div>
                 <label for="hand">Handedness</label>
-                <select id="hand"></select>
+                <select id="hand">
+                  <option value="" selected disabled>Select…</option>
+                  <option value="right">Right</option>
+                  <option value="left">Left</option>
+                </select>
               </div>
             </div>
 
             <div class="row">
               <div>
                 <label for="gender">Gender</label>
-                <select id="gender"></select>
+                <select id="gender">
+                  <option value="" selected>Prefer not to say</option>
+                  <option value="man">Man</option>
+                  <option value="woman">Woman</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
               <div>
                 <label for="height">Height (inches) <span class="req">*</span></label>
@@ -154,11 +164,27 @@
             <div class="row">
               <div>
                 <label for="bodyShape">Body build (optional)</label>
-                <select id="bodyShape"></select>
+                <select id="bodyShape">
+                  <option value="" selected>— Select —</option>
+                  <option value="slim">Slim / Lean</option>
+                  <option value="average">Average / Athletic</option>
+                  <option value="muscular">Muscular / Stocky</option>
+                  <option value="tall-lean">Tall / Lean</option>
+                  <option value="short-compact">Short / Compact</option>
+                </select>
               </div>
               <div>
                 <label for="focus">Focus area (optional)</label>
-                <select id="focus"></select>
+                <select id="focus">
+                  <option value="" selected>— None —</option>
+                  <option>Setup</option><option>Grip</option><option>Takeaway (P2)</option>
+                  <option>Backswing (P3)</option><option>Top (P4)</option><option>Transition</option>
+                  <option>Downswing</option><option>Shaft Parallel Down (P6)</option><option>Impact (P7)</option>
+                  <option>Release</option><option>Finish</option><option>Swing Plane</option>
+                  <option>Club Path</option><option>Face Control</option><option>Tempo</option>
+                  <option>Kinematic Sequence</option><option>Posture</option><option>Ball Position</option>
+                  <option>Alignment</option>
+                </select>
               </div>
             </div>
 
@@ -172,7 +198,7 @@
             </div>
 
             <div class="actions">
-              <button class="btn primary" id="btnUpload">Start upload</button>
+              <button class="btn primary" id="btnUpload" type="button">Start upload</button>
               <button class="btn ghost" id="btnReset" type="button">Reset</button>
               <a class="btn warn disabled" id="btnOpenReport" href="#" target="_blank" rel="noopener" aria-disabled="true">Open Report</a>
             </div>
@@ -194,9 +220,7 @@
             <div class="hint" id="statusLine" style="margin-top:8px">Waiting for a file…</div>
 
             <h3 style="margin-top:16px;border:none;padding-top:16px">Your Info</h3>
-            <ul id="summaryList" style="margin:0 0 8px 18px;color:#cfe0e6">
-              <!-- filled by JS -->
-            </ul>
+            <ul id="summaryList" style="margin:0 0 8px 18px;color:#cfe0e6"></ul>
             <details>
               <summary style="cursor:pointer;color:#dff3ff">Show details (JSON)</summary>
               <pre id="summary">{}</pre>
@@ -208,106 +232,49 @@
   </div>
 
 <script>
+(function(){
   // NAV
-  const header = document.getElementById('site-header');
-  document.getElementById('menuBtn')?.addEventListener('click', ()=>{
-    const open = header.classList.toggle('open');
-    document.getElementById('menuBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+  var header = document.getElementById('site-header');
+  var menuBtn = document.getElementById('menuBtn');
+  if (menuBtn) menuBtn.addEventListener('click', function(){
+    var open = header.classList.toggle('open');
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  document.getElementById('siteNav').addEventListener('click', e=>{
-    if(e.target.tagName==='A'){ header.classList.remove('open'); document.getElementById('menuBtn')?.setAttribute('aria-expanded','false'); }
+  var siteNav = document.getElementById('siteNav');
+  if (siteNav) siteNav.addEventListener('click', function(e){
+    if(e.target && e.target.tagName === 'A'){ header.classList.remove('open'); menuBtn && menuBtn.setAttribute('aria-expanded','false'); }
   });
 
   // Shortcuts
-  const $ = s => document.querySelector(s);
-  const fileInput = $('#file'), fname = $('#fname'), fmeta = $('#fmeta');
-  const bar = $('#bar'), pill = $('#pill'), qcPill = $('#qcPill'), statusLine = $('#statusLine');
-  const btnUpload = $('#btnUpload'), btnReset = $('#btnReset'), btnOpenReport = $('#btnOpenReport');
+  function $(sel){ return document.querySelector(sel); }
+  var fileInput = $('#file'), fname = $('#fname'), fmeta = $('#fmeta');
+  var bar = $('#bar'), pill = $('#pill'), qcPill = $('#qcPill'), statusLine = $('#statusLine');
+  var btnUpload = $('#btnUpload'), btnReset = $('#btnReset'), btnOpenReport = $('#btnOpenReport');
 
-  // Data model
-  const fields = ['first','email','eye','hand','gender','height','bodyShape','focus'];
-  const data = Object.fromEntries(fields.map(k=>[k,'']));
+  var fields = ['first','email','eye','hand','gender','height','bodyShape','focus'];
+  var data = {}; fields.forEach(function(k){ data[k]=''; });
 
-  // ----- SELECT HYDRATION (robust) -----
-  function hydrateSelect(id, options){
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.innerHTML = '';
-    options.forEach(o=>{
-      const opt = document.createElement('option');
-      opt.value = o.v;
-      opt.textContent = o.t;
-      if (o.disabled) opt.disabled = true;
-      if (o.selected) opt.selected = true;
-      el.appendChild(opt);
-    });
-  }
-  const EYE_OPTS = [
-    {v:'', t:'Select…', disabled:true, selected:true},
-    {v:'right', t:'Right eye'},
-    {v:'left',  t:'Left eye'},
-    {v:'unknown', t:'Not sure'}
-  ];
-  const HAND_OPTS = [
-    {v:'', t:'Select…', disabled:true, selected:true},
-    {v:'right', t:'Right'},
-    {v:'left',  t:'Left'}
-  ];
-  const GENDER_OPTS = [
-    {v:'', t:'Prefer not to say', selected:true},
-    {v:'man', t:'Man'},
-    {v:'woman', t:'Woman'},
-    {v:'other', t:'Other'}
-  ];
-  const BODY_OPTS = [
-    {v:'', t:'— Select —', selected:true},
-    {v:'slim', t:'Slim / Lean'},
-    {v:'average', t:'Average / Athletic'},
-    {v:'muscular', t:'Muscular / Stocky'},
-    {v:'tall-lean', t:'Tall / Lean'},
-    {v:'short-compact', t:'Short / Compact'}
-  ];
-  const FOCUS_OPTS = [
-    {v:'', t:'— None —', selected:true},
-    {v:'Setup', t:'Setup'}, {v:'Grip', t:'Grip'}, {v:'Takeaway (P2)', t:'Takeaway (P2)'},
-    {v:'Backswing (P3)', t:'Backswing (P3)'}, {v:'Top (P4)', t:'Top (P4)'}, {v:'Transition', t:'Transition'},
-    {v:'Downswing', t:'Downswing'}, {v:'Shaft Parallel Down (P6)', t:'Shaft Parallel Down (P6)'}, {v:'Impact (P7)', t:'Impact (P7)'},
-    {v:'Release', t:'Release'}, {v:'Finish', t:'Finish'}, {v:'Swing Plane', t:'Swing Plane'},
-    {v:'Club Path', t:'Club Path'}, {v:'Face Control', t:'Face Control'}, {v:'Tempo', t:'Tempo'},
-    {v:'Kinematic Sequence', t:'Kinematic Sequence'}, {v:'Posture', t:'Posture'}, {v:'Ball Position', t:'Ball Position'},
-    {v:'Alignment', t:'Alignment'}
-  ];
-  function hydrateAllSelects(){
-    hydrateSelect('eye', EYE_OPTS);
-    hydrateSelect('hand', HAND_OPTS);
-    hydrateSelect('gender', GENDER_OPTS);
-    hydrateSelect('bodyShape', BODY_OPTS);
-    hydrateSelect('focus', FOCUS_OPTS);
-  }
-
-  // Derived hints
   function deriveHints(d){
-    const hand = (d.hand||'').toLowerCase();
-    const eye  = (d.eye||'').toLowerCase();
-    const cross = (hand && eye) ? (hand[0] !== eye[0]) : false;
-    let aim = 'neutral';
-    if (hand==='right' && eye==='left') aim = 'left';
-    if (hand==='left'  && eye==='right') aim = 'right';
-    const h = Number(d.height||0);
-    const scale = h ? +(h/70).toFixed(2) : '';
+    var hand = (d.hand||'').toLowerCase();
+    var eye  = (d.eye||'').toLowerCase();
+    var cross = (hand && eye) ? (hand.charAt(0) !== eye.charAt(0)) : false;
+    var aim = 'neutral';
+    if (hand==='right' && eye==='left') aim='left';
+    if (hand==='left' && eye==='right') aim='right';
+    var h = Number(d.height||0);
+    var scale = h ? +(h/70).toFixed(2) : '';
     return { cross_dominant: !!cross, aim_bias: aim, scale_factor: scale };
   }
 
-  // Friendly summary (no raw code)
-  function inchesToFeetIn(inches){
-    const n = Number(inches||0);
-    if (!n) return '';
-    const ft = Math.floor(n/12), inch = n%12;
-    return `${ft}′${inch}″ (${n}")`;
+  function inchesToFeetIn(n){
+    n = Number(n||0); if(!n) return '';
+    var ft = Math.floor(n/12), inch = n%12;
+    return ft + '′' + inch + '″ (' + n + '")';
   }
+
   function renderSummaryList(d){
-    const derived = deriveHints(d);
-    const items = [
+    var derived = deriveHints(d);
+    var items = [
       ['Name', d.first || '—'],
       ['Email', d.email ? 'On file' : '—'],
       ['Eye', d.eye || '—'],
@@ -316,168 +283,169 @@
       ['Height', d.height ? inchesToFeetIn(d.height) : '—'],
       ['Body build', d.bodyShape || '—'],
       ['Focus', d.focus || '—'],
-      ['Notes', `Cross-dominant: ${derived.cross_dominant?'Yes':'No'} • Aim bias: ${derived.aim_bias} • Scale: ${derived.scale_factor||'—'}`]
+      ['Notes', 'Cross-dominant: ' + (derived.cross_dominant?'Yes':'No') + ' • Aim bias: ' + derived.aim_bias + ' • Scale: ' + (derived.scale_factor||'—')]
     ];
-    const ul = document.getElementById('summaryList');
-    ul.innerHTML = items.map(([k,v])=>`<li><strong>${k}:</strong> ${v}</li>`).join('');
-    // dev JSON (collapsible)
+    var ul = document.getElementById('summaryList');
+    ul.innerHTML = items.map(function(x){ return '<li><strong>'+x[0]+':</strong> '+x[1]+'</li>'; }).join('');
     document.getElementById('summary').textContent = JSON.stringify({ ...d, derived }, null, 2);
   }
 
   function updateSummary(){
-    fields.forEach(k=>{
-      const el = document.getElementById(k);
+    fields.forEach(function(k){
+      var el = document.getElementById(k);
       if (!el) return;
-      data[k] = (el.type === 'number') ? (el.value ? Number(el.value) : '') : el.value.trim();
+      if (el.tagName === 'INPUT' && el.type === 'number'){
+        data[k] = el.value ? Number(el.value) : '';
+      } else {
+        data[k] = (el.value||'').trim();
+      }
     });
     renderSummaryList(data);
     try{
-      const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
-      Object.assign(saved, data);
+      var saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
+      fields.forEach(function(k){ saved[k]=data[k]; });
       localStorage.setItem('vc_prefill', JSON.stringify(saved));
-    }catch{}
+    }catch(e){}
   }
 
   function prefillFromLocal(){
     try{
-      const merged = {};
-      const p = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
-      Object.assign(merged, p);
-      const li = JSON.parse(localStorage.getItem('vc_last_intake')||'null');
-      const intake = li && li.intake ? li.intake : null;
-      if (intake) Object.assign(merged, intake);
-      fields.forEach(k=>{
-        const el = document.getElementById(k);
-        if (el && merged[k] != null && merged[k] !== '') el.value = String(merged[k]);
+      var p = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
+      var li = JSON.parse(localStorage.getItem('vc_last_intake')||'null');
+      var merged = {};
+      [p, (li && li.intake)||{}].forEach(function(src){
+        Object.keys(src||{}).forEach(function(k){ if (src[k]!==undefined && src[k]!==null && src[k]!=='') merged[k]=src[k]; });
       });
-    }catch{}
+      fields.forEach(function(k){
+        var el = document.getElementById(k);
+        if (el && merged[k] !== undefined){
+          el.value = String(merged[k]);
+        }
+      });
+    }catch(e){}
   }
 
-  // Wire inputs
-  function wireInputs(){ fields.forEach(k=> document.getElementById(k)?.addEventListener('input', updateSummary)); }
+  function wireInputs(){
+    fields.forEach(function(k){
+      var el = document.getElementById(k);
+      if (el) el.addEventListener('input', updateSummary);
+    });
+  }
 
   // File UI
-  fileInput.addEventListener('change', ()=>{
-    const f = fileInput.files && fileInput.files[0];
+  if (fileInput) fileInput.addEventListener('change', function(){
+    var f = fileInput.files && fileInput.files[0];
     if (!f){ fname.textContent = 'No file chosen'; fmeta.textContent = ''; return; }
     fname.textContent = f.name;
-    fmeta.textContent = `${(f.size/1024/1024).toFixed(1)} MB • ${f.type||'video'}`;
+    fmeta.textContent = (f.size/1024/1024).toFixed(1)+' MB • '+(f.type||'video');
     status('File selected. Ready to upload.', 'warn');
   });
 
   // Stepper helpers
   function step(n){
-    [$('#s1'),$('#s2'),$('#s3')].forEach((el,i)=>{
+    ['#s1','#s2','#s3'].forEach(function(sel, i){
+      var el = $(sel);
+      if (!el) return;
       el.classList.remove('active','done');
       if (i < n-1) el.classList.add('done');
       if (i === n-1) el.classList.add('active');
     });
   }
-  function progress(pct){ bar.style.width = Math.max(0, Math.min(100, pct)) + '%'; }
+  function progress(pct){ if (bar) bar.style.width = Math.max(0, Math.min(100, pct)) + '%'; }
   function status(text, tone){
-    statusLine.textContent = text;
-    pill.textContent = text.split('.')[0];
-    pill.style.background = tone==='ok'?'rgba(25,195,125,.18)':tone==='warn'?'rgba(246,196,83,.18)':'rgba(255,255,255,.10)';
-    pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)';
+    if (statusLine) statusLine.textContent = text;
+    if (pill){
+      pill.textContent = text.split('.')[0];
+      pill.style.background = tone==='ok'?'rgba(25,195,125,.18)':tone==='warn'?'rgba(246,196,83,.18)':'rgba(255,255,255,.10)';
+      pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)';
+    }
   }
 
-  // QC
+  // QC badge
   function showQC(result){
     if (!qcPill) return;
     if (!result || !result.status){ qcPill.style.display='none'; return; }
-    qcPill.style.display = 'inline-flex';
-    if (result.status === 'ok'){
-      qcPill.textContent = 'QC: Passed';
-      qcPill.style.background = 'rgba(25,195,125,.18)'; qcPill.style.borderColor = '#2a6';
-    } else if (result.status === 'warn'){
-      qcPill.textContent = 'QC: Warnings';
-      qcPill.style.background = 'rgba(246,196,83,.18)'; qcPill.style.borderColor = '#b8860b';
-    } else {
-      qcPill.textContent = 'QC: Failed';
-      qcPill.style.background = 'rgba(255,107,107,.18)'; qcPill.style.borderColor = '#c44';
-      btnOpenReport.classList.add('disabled'); btnOpenReport.setAttribute('aria-disabled','true');
-    }
+    qcPill.style.display='inline-flex';
+    if (result.status === 'ok'){ qcPill.textContent='QC: Passed'; qcPill.style.background='rgba(25,195,125,.18)'; qcPill.style.borderColor='#2a6'; }
+    else if (result.status === 'warn'){ qcPill.textContent='QC: Warnings'; qcPill.style.background='rgba(246,196,83,.18)'; qcPill.style.borderColor='#b8860b'; }
+    else { qcPill.textContent='QC: Failed'; qcPill.style.background='rgba(255,107,107,.18)'; qcPill.style.borderColor='#c44'; btnOpenReport.classList.add('disabled'); btnOpenReport.setAttribute('aria-disabled','true'); }
   }
   async function runQC(key){
     try{
-      const r = await fetch(`/api/qc?key=${encodeURIComponent(key)}`, { cache:'no-store' });
+      var r = await fetch('/api/qc?key='+encodeURIComponent(key), { cache:'no-store' });
       if (!r.ok) throw new Error('HTTP '+r.status);
-      const out = await r.json();
+      var out = await r.json();
       showQC(out);
       return out;
-    }catch(e){
-      console.warn('QC call failed:', e);
-      showQC(null);
-      return null;
-    }
+    }catch(e){ showQC(null); return null; }
   }
 
-  // Upload plumbing
+  // Upload helpers
   function makeKey(file){
-    const safe = file.name.replace(/[^a-z0-9_.-]+/gi,'_').toLowerCase();
-    return `uploads/${Date.now()}-${safe}`;
+    var safe = (file.name||'video').replace(/[^a-z0-9_.-]+/gi,'_').toLowerCase();
+    return 'uploads/'+Date.now()+'-'+safe;
   }
   async function getUploadTarget(file, key){
-    const res = await fetch('/api/upload', {
+    var res = await fetch('/api/upload', {
       method:'POST', headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({ filename: file.name, type: file.type, key })
     });
     if (!res.ok) throw new Error('Upload init failed: HTTP '+res.status);
     return res.json();
   }
-  async function postIntake(key, intake) {
+  async function postIntake(key, intake){
     try{
-      const res = await fetch('/api/intake', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+      var res = await fetch('/api/intake', {
+        method:'POST', headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify({ key, intake })
       });
       if (!res.ok) throw new Error('HTTP '+res.status);
       return res.json();
-    }catch(e){ console.warn('Intake save failed:', e); return { ok:false, error: String(e.message || e) }; }
+    }catch(e){ return { ok:false, error:String(e.message||e) }; }
   }
   function putWithProgress(url, file){
-    return new Promise((resolve, reject)=>{
-      const xhr = new XMLHttpRequest();
+    return new Promise(function(resolve, reject){
+      var xhr = new XMLHttpRequest();
       xhr.open('PUT', url, true);
       xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
-      xhr.upload.onprogress = (e)=>{ if (e.lengthComputable){ progress( Math.round((e.loaded/e.total)*80) ); } };
-      xhr.onload = ()=> (xhr.status>=200 && xhr.status<300) ? resolve() : reject(new Error('Upload error: HTTP '+xhr.status));
-      xhr.onerror = ()=> reject(new Error('Network error during upload'));
+      xhr.upload.onprogress = function(e){ if (e.lengthComputable){ progress( Math.round((e.loaded/e.total)*80) ); } };
+      xhr.onload = function(){ (xhr.status>=200 && xhr.status<300) ? resolve() : reject(new Error('Upload error: HTTP '+xhr.status)); };
+      xhr.onerror = function(){ reject(new Error('Network error during upload')); };
       xhr.send(file);
     });
   }
   async function postForm(url, fields, file){
-    const fd = new FormData();
-    Object.entries(fields||{}).forEach(([k,v])=> fd.append(k,v));
+    var fd = new FormData();
+    Object.keys(fields||{}).forEach(function(k){ fd.append(k, fields[k]); });
     fd.append('file', file);
-    const tick = setInterval(()=>{ const cur = parseFloat(bar.style.width)||0; if (cur < 78) progress(cur + 2); else clearInterval(tick); }, 200);
-    const res = await fetch(url, { method:'POST', body:fd });
+    var tick = setInterval(function(){ var cur = parseFloat(bar.style.width)||0; if (cur < 78) progress(cur + 2); else clearInterval(tick); }, 200);
+    var res = await fetch(url, { method:'POST', body:fd });
     clearInterval(tick);
     if (!res.ok) throw new Error('Upload error: HTTP '+res.status);
   }
 
   async function startUpload(){
-    const f = fileInput.files && fileInput.files[0];
+    var f = fileInput && fileInput.files && fileInput.files[0];
     if (!f){ alert('Choose a swing video first.'); return; }
-    if (!$('#eye').value){ alert('Pick eye dominance.'); $('#eye').focus(); return; }
-    if (!$('#height').value){ alert('Enter height (inches).'); $('#height').focus(); return; }
+    if (!document.getElementById('eye').value){ alert('Pick eye dominance.'); document.getElementById('eye').focus(); return; }
+    if (!document.getElementById('height').value){ alert('Enter height (inches).'); document.getElementById('height').focus(); return; }
 
     btnUpload.disabled = true; btnOpenReport.classList.add('disabled'); btnOpenReport.setAttribute('aria-disabled','true');
     step(1); progress(2); status('Uploading…', 'warn');
 
-    const clientKey = makeKey(f);
-    let finalKey = clientKey;
+    var clientKey = makeKey(f);
+    var finalKey = clientKey;
 
     try{
-      let target;
+      var target;
       try{ target = await getUploadTarget(f, clientKey); } catch(_){ target = { key: clientKey }; }
       if (target.key) finalKey = target.key;
 
       if (target.putUrl){ await putWithProgress(target.putUrl, f); }
       else if (target.url && target.fields){ await postForm(target.url, target.fields, f); }
       else {
-        const fd = new FormData(); fd.append('file', f); fd.append('key', finalKey);
-        const r = await fetch('/api/upload', { method:'POST', body:fd });
+        var fd = new FormData(); fd.append('file', f); fd.append('key', finalKey);
+        var r = await fetch('/api/upload', { method:'POST', body:fd });
         if (!r.ok) throw new Error('Upload error: HTTP '+r.status);
       }
 
@@ -486,41 +454,39 @@
       postIntake(finalKey, { ...data, derived: deriveHints(data) });
       pollAnalyze(finalKey);
     }catch(err){
-      console.error(err);
-      status('Upload failed', ''); progress(0); step(1);
+      status('Upload failed',''); progress(0); step(1);
       alert('Upload failed: '+(err.message||err));
       btnUpload.disabled = false;
     }
   }
 
   function saveIntake(key){
-    try{ localStorage.setItem('vc_last_intake', JSON.stringify({ key, intake: data, ts: Date.now() })); }catch{}
+    try{ localStorage.setItem('vc_last_intake', JSON.stringify({ key, intake: data, ts: Date.now() })); }catch(e){}
   }
 
-  let pollTimer = null;
+  var pollTimer = null;
   async function checkAnalyze(key){
-    const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache:'no-store' });
+    var r = await fetch('/api/analyze?key='+encodeURIComponent(key), { cache:'no-store' });
     if (!r.ok) throw new Error('HTTP '+r.status);
     return r.json();
   }
   async function pollAnalyze(key){
     async function tick(){
       try{
-        const out = await checkAnalyze(key);
+        var out = await checkAnalyze(key);
         if (out.status === 'ready'){
           clearInterval(pollTimer); pollTimer = null;
           progress(100); step(3); status('Ready ✓', 'ok');
           await runQC(key);
-          const url = `/report.html?key=${encodeURIComponent(key)}`;
+          var url = '/report.html?key='+encodeURIComponent(key);
           btnOpenReport.href = url; btnOpenReport.classList.remove('disabled'); btnOpenReport.removeAttribute('aria-disabled');
-          if (out.report){ try{ localStorage.setItem('vc_last_report', JSON.stringify(out.report)); }catch{} }
+          if (out.report){ try{ localStorage.setItem('vc_last_report', JSON.stringify(out.report)); }catch(e){} }
           return;
         }
-        const cur = parseFloat(bar.style.width)||82;
+        var cur = parseFloat(bar.style.width)||82;
         progress( Math.min(98, cur + Math.random()*2) );
         status('Processing…', 'warn');
       }catch(e){
-        console.warn('Check failed', e);
         status('Checking…', 'warn');
       }
     }
@@ -528,21 +494,21 @@
     pollTimer = setInterval(tick, 7000);
   }
 
-  btnUpload.addEventListener('click', startUpload);
-  btnReset.addEventListener('click', ()=>{
-    fields.forEach(k=>{ const el = document.getElementById(k); if(el) el.value=''; });
-    updateSummary(); fileInput.value=''; fname.textContent='No file chosen'; fmeta.textContent='';
+  if (btnUpload) btnUpload.addEventListener('click', startUpload);
+  if (btnReset) btnReset.addEventListener('click', function(){
+    fields.forEach(function(k){ var el = document.getElementById(k); if(el) el.value=''; });
+    updateSummary(); if (fileInput){ fileInput.value=''; fname.textContent='No file chosen'; fmeta.textContent=''; }
     step(1); progress(0); status('Idle',''); btnUpload.disabled=false;
     btnOpenReport.classList.add('disabled'); btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.href='#';
     showQC(null);
   });
 
-  // Boot sequence — order matters:
-  hydrateAllSelects();     // 1) make sure dropdowns have options
-  prefillFromLocal();      // 2) set any saved values
-  wireInputs();            // 3) listen for changes
-  updateSummary();         // 4) paint summary
-  step(1); progress(0); status('Idle',''); // 5) init status
+  // Boot
+  step(1); progress(0); status('Idle','');
+  prefillFromLocal();
+  wireInputs();
+  updateSummary();
+})();
 </script>
 </body>
 </html>
