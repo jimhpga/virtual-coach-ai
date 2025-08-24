@@ -292,7 +292,7 @@
     const derived = deriveHints(data);
     $('#summary').textContent = JSON.stringify({ ...data, derived }, null, 2);
 
-    // Mirror to localStorage so Home (if ever used) and future sessions prefill
+    // Mirror to localStorage so Home and future sessions prefill
     try{
       const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
       Object.assign(saved, data);
@@ -362,6 +362,22 @@
     return res.json(); // {putUrl,key} OR {url,fields,key} OR {key}
   }
 
+  // Save intake to backend (non-blocking)
+  async function postIntake(key, intake) {
+    try{
+      const res = await fetch('/api/intake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, intake })
+      });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      return res.json();
+    }catch(e){
+      console.warn('Intake save failed:', e);
+      return { ok:false, error: String(e.message || e) };
+    }
+  }
+
   // PUT to signed URL with progress
   function putWithProgress(url, file){
     return new Promise((resolve, reject)=>{
@@ -423,6 +439,8 @@
 
       progress(82); step(2); status('Processing…', 'warn');
       saveIntake(finalKey);
+      // 🔥 the missing “B direction”: persist intake server-side for the analyzer
+      postIntake(finalKey, { ...data, derived: deriveHints(data) }); // non-blocking
       pollAnalyze(finalKey);
     }catch(err){
       console.error(err);
