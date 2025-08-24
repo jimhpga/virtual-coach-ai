@@ -2,7 +2,9 @@
   "name": "virtualcoachai-homepage",
   "private": true,
   "type": "module",
+  "engines": { "node": ">=18" },
   "dependencies": {
     "busboy": "^1.6.0"
-  }
+  },
+  "scripts": {}
 }
