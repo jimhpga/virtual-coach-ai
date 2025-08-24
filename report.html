@@ -11,7 +11,7 @@
   body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
   .scrim{min-height:100vh;background:var(--scrim)}
 
-  /* NAV (hamburger) */
+  /* NAV */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
@@ -76,37 +76,24 @@
   .modal iframe, .modal video{width:100%;height:min(72vh,56vw);background:#000;border-radius:8px}
   .closebtn{background:transparent;color:#fff;border:1px solid #345;padding:6px 10px;border-radius:8px;cursor:pointer}
 
-  /* === inline help popovers === */
-  .qbtn{
-    display:inline-flex; align-items:center; justify-content:center;
-    width:22px; height:22px; margin-left:8px; border-radius:50%;
-    border:1px solid var(--line); background:rgba(255,255,255,.10);
-    color:#fff; font-weight:800; cursor:pointer; line-height:1;
-  }
-  .qbtn:hover{ background:rgba(255,255,255,.16); }
-  .pop{
-    position:absolute; top:calc(100% + 8px); right:0; z-index:20;
-    max-width:min(520px, 92vw); padding:12px 14px; border-radius:12px;
-    background:rgba(12,24,32,.96); border:1px solid var(--line);
-    box-shadow:0 10px 28px rgba(0,0,0,.35); color:var(--text); display:none;
-  }
-  .pop.show{ display:block; }
-  .pop::after{ content:""; position:absolute; top:-8px; right:12px;
-    border-width:8px; border-style:solid;
-    border-color:transparent transparent rgba(12,24,32,.96) transparent;
-  }
-  .pop h4{ margin:0 0 6px; font-size:14px; }
-  .pop p{ margin:6px 0; font-size:13px; color:var(--muted); }
-  .pop ul{ margin:6px 0 0 18px; padding:0; }
-  .pop li{ margin:4px 0; font-size:13px; color:var(--muted); }
+  /* help popovers */
+  .qbtn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:8px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;font-weight:800;cursor:pointer;line-height:1}
+  .qbtn:hover{background:rgba(255,255,255,.16)}
+  .pop{position:absolute;top:calc(100% + 8px);right:0;z-index:20;max-width:min(520px,92vw);padding:12px 14px;border-radius:12px;background:rgba(12,24,32,.96);border:1px solid var(--line);box-shadow:0 10px 28px rgba(0,0,0,.35);color:var(--text);display:none}
+  .pop.show{display:block}
+  .pop::after{content:"";position:absolute;top:-8px;right:12px;border-width:8px;border-style:solid;border-color:transparent transparent rgba(12,24,32,.96) transparent}
+  .pop h4{margin:0 0 6px;font-size:14px}
+  .pop p{margin:6px 0;font-size:13px;color:var(--muted)}
+  .pop ul{margin:6px 0 0 18px;padding:0}
+  .pop li{margin:4px 0;font-size:13px;color:var(--muted)}
 
-  /* === tour delta list === */
-  .delta{display:flex; align-items:center; gap:10px; margin:10px 0}
-  .delta .name{flex:1; font-weight:700}
-  .delta .nums{font-size:12px; color:#d8ebf2}
+  /* tour delta */
+  .delta{display:flex;align-items:center;gap:10px;margin:10px 0}
+  .delta .name{flex:1;font-weight:700}
+  .delta .nums{font-size:12px;color:#d8ebf2}
   .dchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;border:1px solid var(--line)}
-  .dplus{background:rgba(246,196,83,.18);border-color:#b8860b} /* needs work (you behind tour) */
-  .dminus{background:rgba(25,195,125,.18);border-color:#2a6}  /* you ahead of tour (usually fine) */
+  .dplus{background:rgba(246,196,83,.18);border-color:#b8860b}
+  .dminus{background:rgba(25,195,125,.18);border-color:#2a6}
 </style>
 </head>
 <body>
@@ -134,9 +121,7 @@
           <div class="title">Swing Report — P1–P9</div>
           <div class="sub">Date: <span id="date"></span> • Mode: <span id="modeLabel">Full Swing</span></div>
         </div>
-        <div>
-          <span class="badge">Swings: <span id="swingCount">1</span></span>
-        </div>
+        <div><span class="badge">Swings: <span id="swingCount">1</span></span></div>
       </header>
 
       <div class="actions">
@@ -180,10 +165,9 @@
               <h4>Swing Consistency</h4>
               <p>How repeatable your swings are across the session.</p>
               <ul>
-                <li><strong>Tempo ratio</strong> stability (backswing : downswing, e.g., ≈3:1).</li>
+                <li><strong>Tempo ratio</strong> stability (backswing : downswing ≈ 3:1).</li>
                 <li><strong>Club path & face</strong> variance (lower spread is better).</li>
                 <li><strong>Release timing</strong> variance (how consistently you time speed).</li>
-                <li><strong>Score:</strong> 0–100. 100 = extremely repeatable.</li>
               </ul>
             </div>
           </h3>
@@ -202,33 +186,38 @@
               <li><strong>Kinematic sequence:</strong> pelvis → thorax → arm → club.</li>
               <li><strong>Speed curve:</strong> build → peak near P7 (impact) without dumping early.</li>
               <li><strong>Release timing:</strong> later (but controlled) is typically better.</li>
-              <li><strong>Note:</strong> Single-camera estimates; best accuracy with good filming.</li>
             </ul>
           </div>
         </h3>
         <div id="power" class="content"></div>
       </section>
 
-      <!-- NEW: Tour-player delta -->
+      <!-- Tour-player delta -->
       <section class="card" style="margin-top:12px">
         <h3 class="hdr">
           <span>Tour-Player Delta — Top 3 Fundamentals</span>
           <button class="qbtn" data-pop="delta" aria-label="How we pick these?">?</button>
           <div class="pop" id="pop-delta">
             <h4>What this means</h4>
-            <p>We compare your fundamentals to a tour cohort that matches <em>your</em> key traits (hand, eye, gender, height, build). The three largest gaps are listed first. Closing these usually gives the fastest gains.</p>
+            <p>We compare your fundamentals to a tour cohort that matches your traits (hand, eye, gender, height, build). The biggest gaps surface first. Close these for the fastest gains.</p>
             <ul>
-              <li><strong>Cohort:</strong> picked from your intake or the report’s metadata.</li>
-              <li><strong>Delta:</strong> You − Tour average (units vary by item; % shown where applicable).</li>
-              <li><strong>Tip:</strong> Fix one at a time. Start with the biggest delta.</li>
+              <li><strong>Delta:</strong> You − Tour average (units vary, % or °).</li>
+              <li><strong>Method:</strong> Prefer your priority fundamentals; fall back to any available metrics.</li>
             </ul>
           </div>
         </h3>
         <div id="cohortLine" class="content sub" style="padding-bottom:0"></div>
         <div id="tourDelta" class="content"></div>
+
+        <details class="panel" style="margin:10px">
+          <summary><span class="pname">See all fundamentals</span>
+            <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div id="allFundamentals" class="content"></div>
+        </details>
       </section>
 
-      <!-- Key Terms mini card -->
+      <!-- Key Terms -->
       <section class="card" style="margin-top:12px">
         <h3 class="hdr">
           <span>Definitions & Key Terms</span>
@@ -236,17 +225,18 @@
           <div class="pop" id="pop-terms">
             <h4>Key Terms</h4>
             <ul>
-              <li><strong>P2 (Takeaway – shaft parallel):</strong> club roughly parallel to target line, about hip-high.</li>
-              <li><strong>P6 (Downswing – shaft parallel):</strong> club roughly parallel again, about thigh-high on the way down.</li>
-              <li><strong>P7 (Impact):</strong> strike; reference for face, path, & lead-wrist conditions.</li>
-              <li><strong>Hip / Shoulder Rotation:</strong> angle vs. target line (°); <em>X-Factor</em> = shoulders − hips.</li>
-              <li><strong>Tempo Ratio:</strong> backswing time : downswing time (tour ≈ 3:1).</li>
-              <li><strong>Release Timing:</strong> when club speed peaks relative to P7.</li>
+              <li><strong>Grip:</strong> relative hand placement & strength.</li>
+              <li><strong>Posture:</strong> spine angle & hip hinge at setup.</li>
+              <li><strong>Club-head in/out:</strong> takeaway path vs. target line (often at P2).</li>
+              <li><strong>Shaft plane/pitch:</strong> club angle vs. reference plane (P4–P7 checkpoints).</li>
+              <li><strong>P2/P4/P5/P6/P7/P8:</strong> standard swing checkpoints (takeaway, top, mid-down, shaft-parallel down, impact, early finish).</li>
+              <li><strong>Leg movement:</strong> knees/pelvis sway & rotation control.</li>
+              <li><strong>Arm bend:</strong> right/left elbow flexion control through the swing.</li>
+              <li><strong>Head movement:</strong> vertical/horizontal drift vs. setup.</li>
             </ul>
-            <p style="margin-top:8px"><em>Best results:</em> film from ~8–12 ft, down-the-line or face-on, landscape, whole body & club in frame.</p>
           </div>
         </h3>
-        <div class="content sub">Tap the “?” to see definitions anytime.</div>
+        <div class="content sub">Tap the “?” anywhere for a plain-English definition.</div>
       </section>
     </main>
   </div>
@@ -260,7 +250,7 @@
   </div>
 
 <script>
-  // ====== NAV (hamburger) ====================================================
+  // NAV
   const header = document.getElementById('site-header');
   const btn = document.getElementById('menuBtn');
   btn.addEventListener('click', ()=>{
@@ -271,15 +261,14 @@
     if(e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
   });
 
-  // ====== UTILITIES & QUERY PARAMS ===========================================
+  // QS & helpers
   const $ = s => document.querySelector(s);
   const qp = new URLSearchParams(location.search);
   const src = (qp.get('src') || '').toLowerCase();
   const reportParam = qp.get('report');
-  const keyParam = qp.get('key'); // uploads/<ts>-file.ext
+  const keyParam = qp.get('key');
   const fileSrc = (reportParam === 'local') ? null : (reportParam || '/report.json');
 
-  // ====== RENDER HELPERS =====================================================
   const fmt  = v => `${v}%`;
   const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';
   const chip = g => (g==='good'?'g-good':g==='ok'?'g-ok':'g-bad');
@@ -288,7 +277,7 @@
   function toYouTubeEmbed(url){
     try{
       const u = new URL(url);
-      if (u.hostname.includes('youtube.com')) {
+      if (u.hostname.includes('youtube.com')){
         if (u.pathname === '/watch' && u.searchParams.get('v')) return `https://www.youtube.com/embed/${u.searchParams.get('v')}`;
         if (u.pathname.startsWith('/embed/')) return url;
       }
@@ -319,8 +308,7 @@
     const gRaw = String(ph.grade||'').toLowerCase();
     const grade = (gRaw==='bad') ? 'needs help' : (gRaw || 'ok');
     const short = ph.short || '';
-    theLong = ph.long  || '';
-    const long = theLong;
+    const long  = ph.long  || '';
     const ref   = ph.ref || ph.video || ph.video_url || '';
     const btnLabel = /youtu(\.be|be\.com)/.test(ref) ? 'YouTube' : 'Video';
     return `
@@ -356,64 +344,83 @@
     </details>`;
   }
 
-  // ====== NEW: Tour delta helpers ===========================================
-  function safeNum(v){
-    const n = Number(v);
-    return Number.isFinite(n) ? n : null;
+  /* ===== Fundamentals preference ===== */
+  const FUNDAMENTALS_PRIORITY = [
+    {key:'grip',                match:/\bgrip\b/i, unit:''},
+    {key:'posture',             match:/posture|spine\s*angle|setup spine/i, unit:'°'},
+    {key:'club_head_in_out',    match:/club[-\s]?head.*(inside|outside)|takeaway.*(inside|outside)|\bP2\b.*(club|shaft)/i, unit:'°'},
+    {key:'shaft_plane',         match:/shaft\s*(plane|pitch|angle)|swing\s*plane/i, unit:'°'},
+    {key:'P4',                  match:/\bP4\b|top\b/i, unit:'°'},
+    {key:'P5',                  match:/\bP5\b/i, unit:'°'},
+    {key:'P6',                  match:/\bP6\b|shaft.*parallel.*down/i, unit:'°'},
+    {key:'P7',                  match:/\bP7\b|impact\b/i, unit:'°'},
+    {key:'P8',                  match:/\bP8\b/i, unit:'°'},
+    {key:'leg_movement',        match:/leg|knee|pelvis\s*(sway|thrust|slide|rotation)|hip\s*(slide|sway)/i, unit:'°'},
+    {key:'right_arm_bend',      match:/right.*(arm|elbow).*(bend|flex|angle)/i, unit:'°'},
+    {key:'left_arm_bend',       match:/left.*(arm|elbow).*(bend|flex|angle)/i, unit:'°'},
+    {key:'head_movement',       match:/head\s*(movement|drift|tilt|drop|rise|sway)/i, unit:'in'}
+  ];
+
+  function safeNum(v){ const n = Number(v); return Number.isFinite(n) ? n : null; }
+
+  function collectMetricCandidates(data){
+    const out = [];
+    function push(arr){
+      if (!Array.isArray(arr)) return;
+      for (const m of arr){
+        const label = (m.label || m.p || m.name || '').toString();
+        const you = safeNum(m.value);
+        const tour = safeNum(m.tour ?? m.pro ?? m.target ?? (m.ref && m.ref.tour));
+        if (you==null || tour==null) continue;
+        out.push({ label, you, tour, unit: m.unit || '' });
+      }
+    }
+    push(data.position_metrics);
+    push(data.swing_metrics);
+    // Power as a candidate too (with default tour baseline 85 if not provided)
+    if (data.power && safeNum(data.power.score)!=null){
+      const t = safeNum(data.power.tour) ?? 85;
+      out.push({ label:'Power Score', you:+data.power.score, tour:t, unit:'%' });
+    }
+    return out;
   }
+
+  function tagFundamental(cand){
+    const l = cand.label.toLowerCase();
+    for (let i=0;i<FUNDAMENTALS_PRIORITY.length;i++){
+      const f = FUNDAMENTALS_PRIORITY[i];
+      if (f.match.test(l)) return { ...cand, fkey:f.key, fidx:i, unit: cand.unit || f.unit || '' };
+    }
+    return { ...cand, fkey:null, fidx:999 };
+  }
+
   function buildCohortLine(data){
     const c = data.cohort || data.intake || {};
     const bits = [];
-    if (c.hand || c.handedness) bits.push((c.hand||c.handedness).toString().replace(/^\w/, s=>s.toUpperCase())+'-hand');
-    if (c.eye || c.eye_dominance) bits.push((c.eye||c.eye_dominance)+'-eye');
-    if (c.gender) bits.push(c.gender);
-    if (c.height) bits.push((c.height+' in'));
-    if (c.bodyShape || c.build) bits.push(c.bodyShape||c.build);
+    const cap = s=> String(s||'').replace(/^\w/,m=>m.toUpperCase());
+    if (c.hand || c.handedness) bits.push(`${cap(c.hand||c.handedness)}-hand`);
+    if (c.eye || c.eye_dominance) bits.push(`${cap(c.eye||c.eye_dominance)}-eye`);
+    if (c.gender) bits.push(cap(c.gender));
+    if (c.height) bits.push(`${c.height} in`);
+    if (c.bodyShape || c.build) bits.push(cap(c.bodyShape||c.build));
     return bits.length ? `Matched cohort: ${bits.join(', ')}` : '';
   }
-  function autoPickDeltas(data){
-    const out = [];
 
-    function consider(arr){
-      if (!Array.isArray(arr)) return;
-      for (const m of arr){
-        const you = safeNum(m.value);
-        const t = safeNum(m.tour ?? m.pro ?? m.target ?? (m.ref && m.ref.tour));
-        if (you==null || t==null) continue;
-        out.push({
-          label: m.label || m.p || 'Metric',
-          you, tour: t,
-          delta: +(you - t).toFixed(1),
-          unit: m.unit || (typeof m.value==='number' ? '%' : '')
-        });
-      }
-    }
-    consider(data.position_metrics);
-    consider(data.swing_metrics);
-    // If still empty, check power fields
-    if (data.power && safeNum(data.power.score)!=null){
-      const t = safeNum(data.power.tour || 85);
-      out.push({ label:'Power Score', you:+data.power.score, tour:t, delta:+(+data.power.score - t).toFixed(1), unit:'%' });
-    }
-    // sort by absolute gap desc
-    out.sort((a,b)=> Math.abs(b.delta) - Math.abs(a.delta));
-    return out.slice(0,3);
+  function rankFundamentals(data){
+    const cands = collectMetricCandidates(data).map(tagFundamental);
+    // Compute deltas
+    cands.forEach(c=> c.delta = +(c.you - c.tour).toFixed(1));
+
+    // preferred fundamentals first, sorted by |delta|
+    const preferred = cands.filter(c=> c.fkey).sort((a,b)=> a.fidx - b.fidx || Math.abs(b.delta) - Math.abs(a.delta));
+    // others next
+    const others = cands.filter(c=> !c.fkey).sort((a,b)=> Math.abs(b.delta) - Math.abs(a.delta));
+
+    const all = [...preferred, ...others];
+    const top3 = all.slice(0,3);
+    return { top3, all };
   }
-  function getTopDeltas(data){
-    if (Array.isArray(data.tour_delta) && data.tour_delta.length){
-      const arr = data.tour_delta.map(d=>({
-        label: d.label || d.name || 'Metric',
-        you: safeNum(d.you),
-        tour: safeNum(d.tour),
-        delta: safeNum(d.delta)!=null ? +d.delta : (safeNum(d.you)!=null && safeNum(d.tour)!=null ? +(d.you - d.tour).toFixed(1) : null),
-        unit: d.unit || '%',
-        note: d.note || ''
-      })).filter(x=>x.delta!=null);
-      arr.sort((a,b)=> Math.abs(b.delta) - Math.abs(a.delta));
-      return arr.slice(0,3);
-    }
-    return autoPickDeltas(data);
-  }
+
   function deltaRow(d){
     const cls = d.delta>0 ? 'dplus' : 'dminus';
     const sign = d.delta>0 ? '+' : '';
@@ -442,8 +449,7 @@
 
     const pri = (data.coaching && Array.isArray(data.coaching.priority_fixes)) ? data.coaching.priority_fixes : [];
     const pow = (data.coaching && Array.isArray(data.coaching.power_fixes)) ? data.coaching.power_fixes : [];
-    document.getElementById('coachPriority').innerHTML = pri.map(coachItem).join('') || '<div class="sub">No priority fixes in report.</div>';
-    document.getElementById('coachPower').innerHTML    = pow.map(coachItem).join('')    || '<div class="sub">No power fixes in report.</div>';
+    document.getElementById('coachPriority')?.remove(); // (legacy safety)
 
     document.getElementById('position').innerHTML = (data.position_metrics||[]).map(metricRow).join('') || '<div class="sub">No position metrics.</div>';
     document.getElementById('swing').innerHTML    = (data.swing_metrics||[]).map(metricRow).join('')    || '<div class="sub">No swing metrics.</div>';
@@ -454,21 +460,23 @@
       <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo||'—'}</div></div>
       <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing||0)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
 
-    // Wire videos
+    // Video buttons in phases/coaching
     document.querySelectorAll('.videoBtn').forEach(b=> b.addEventListener('click', ()=> openViewer(b.dataset.href)));
 
-    // Cohort + Top 3 fundamentals different from tour
+    // Cohort line + fundamentals ranking
     const cohortText = buildCohortLine(data);
     const cohortEl = document.getElementById('cohortLine');
     cohortEl.textContent = cohortText || '';
     cohortEl.style.display = cohortText ? 'block' : 'none';
 
-    const deltas = getTopDeltas(data);
+    const { top3, all } = rankFundamentals(data);
     document.getElementById('tourDelta').innerHTML =
-      deltas.length ? deltas.map(deltaRow).join('') : '<div class="sub">No cohort comparison available yet.</div>';
+      top3.length ? top3.map(deltaRow).join('') : '<div class="sub">No cohort comparison available yet.</div>';
+    document.getElementById('allFundamentals').innerHTML =
+      all.length ? all.map(deltaRow).join('') : '<div class="sub">Waiting on more metrics.</div>';
   }
 
-  // ====== STATUS PILL (added programmatically) ===============================
+  // Status pill (for dynamic check mode)
   function ensureStatusPill(){
     let pill = document.getElementById('statusPill');
     if (!pill) {
@@ -488,7 +496,7 @@
     pill.style.background = ok ? 'rgba(25,195,125,.18)' : 'rgba(255,255,255,.10)';
   }
 
-  // ====== DATA LOADERS =======================================================
+  // Loaders
   async function loadReport(url){
     try{
       const res = await fetch(url, { cache:'no-store' });
@@ -513,7 +521,6 @@
     return false;
   }
 
-  // NEW: Poll /api/analyze?key=... until ready
   async function fetchAnalyze(key){
     const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache: 'no-store' });
     if (!r.ok) throw new Error('HTTP '+r.status);
@@ -547,20 +554,14 @@
     if (!__pollTimer) __pollTimer = setInterval(tick, 7000);
   }
 
-  // ====== BOOT SEQUENCE ======================================================
   (function boot(){
     document.getElementById('date').textContent = new Date().toLocaleDateString();
-
-    if (keyParam) {         // Preferred: dynamic via /api/analyze
-      bootFromKey(keyParam);
-      return;
-    }
-
-    if (src === 'session' || src === 'local') {  // Fallback: from storage
+    if (keyParam) { bootFromKey(keyParam); return; }
+    if (src === 'session' || src === 'local') {
       if (tryLocal()) return;
       if (fileSrc) return loadReport(fileSrc);
       alert('No saved report found. Go to Upload and try again.');
-    } else if (fileSrc) {   // Static JSON path
+    } else if (fileSrc) {
       setPill('Loading…', false);
       loadReport(fileSrc);
     } else if (!tryLocal()) {
@@ -568,7 +569,6 @@
     }
   })();
 
-  // ====== SHARE / SEND / DOWNLOAD ===========================================
   function shareUrl(){
     try{
       const u = new URL(location.href);
@@ -604,7 +604,7 @@
     setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
   });
 
-  // === popover logic (for the little “?” clouds) =============================
+  // popovers
   (function helpPopovers(){
     let openPop = null;
     function togglePop(btn){
