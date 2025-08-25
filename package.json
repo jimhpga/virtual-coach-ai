@@ -1,11 +1,4 @@
 {
   "name": "virtualcoachai-homepage",
-  "private": true,
-  "type": "module",
-  "engines": { "node": "20.x" },
-  "dependencies": {
-    "busboy": "^1.6.0",
-    "@aws-sdk/client-s3": "^3.637.0",
-    "@aws-sdk/s3-request-presigner": "^3.637.0"
-  }
+  "private": true
 }
