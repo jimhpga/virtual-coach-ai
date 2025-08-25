@@ -1,7 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/gateway?path=$1" },
-
     { "source": "/report",     "destination": "/report.html" },
     { "source": "/report.htm", "destination": "/report.html" }
   ],
