@@ -381,32 +381,49 @@
     pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)';
   }
 
-  // --------- PROXY-ONLY UPLOAD (avoids S3 CORS) ---------
+  // ==== DIRECT S3 UPLOAD (presigned URL) ====
+
   function makeKey(file){
     const safe = file.name.replace(/[^a-z0-9_.-]+/gi,'_').toLowerCase();
     return `uploads/${Date.now()}-${safe}`;
   }
-  async function proxyUploadWithProgress(file, key){
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('key', key);
-    fd.append('intake', JSON.stringify({ ...data, derived: deriveHints(data) }));
 
-    // Smooth progress to ~80% while upload is in-flight
-    const tick = setInterval(()=>{
-      const cur = parseFloat(bar.style.width)||0;
-      if (cur < 78) progress(cur + 2);
-      else clearInterval(tick);
-    }, 180);
-
-    const resp = await fetch('/api/upload', { method:'POST', body: fd });
-    clearInterval(tick);
-
-    if (!resp.ok){
-      let extra = '';
-      try{ extra = ' — ' + (await resp.text()).slice(0,200); }catch{}
-      throw new Error(`Proxy upload failed: HTTP ${resp.status}${extra}`);
+  async function getUploadTarget(file, key){
+    const res = await fetch('/api/presign', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        filename: file.name,
+        type: file.type || 'application/octet-stream',
+        key
+      })
+    });
+    if (!res.ok){
+      let txt = '';
+      try { txt = await res.text(); } catch {}
+      throw new Error(`Presign failed: HTTP ${res.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
     }
+    return res.json(); // => { key, putUrl }
+  }
+
+  function putWithProgress(url, file){
+    return new Promise((resolve, reject)=>{
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', url, true);
+      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+
+      xhr.upload.onprogress = (e)=>{
+        if (e.lengthComputable){
+          const pct = Math.round((e.loaded/e.total)*80);
+          progress(pct);
+        }
+      };
+      xhr.onload = ()=> (xhr.status>=200 && xhr.status<300)
+        ? resolve()
+        : reject(new Error('S3 upload error: HTTP '+xhr.status));
+      xhr.onerror = ()=> reject(new Error('Network error during S3 upload'));
+      xhr.send(file);
+    });
   }
 
   async function startUpload(){
@@ -418,24 +435,36 @@
     btnUpload.disabled = true; btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled');
     step(1); progress(2); status('Uploading…', 'warn');
 
-    const key = makeKey(f);
+    const clientKey = makeKey(f);
+    let finalKey = clientKey;
 
     try{
-      await proxyUploadWithProgress(f, key);           // <-- only proxy path
+      // 1) presign
+      const target = await getUploadTarget(f, clientKey);
+      if (!target.putUrl) throw new Error('No putUrl returned from /api/presign');
+      if (target.key) finalKey = target.key;
+
+      // 2) PUT to S3
+      await putWithProgress(target.putUrl, f);
+
+      // 3) update UI + save intake + poll
       progress(82); step(2); status('Processing…', 'warn');
 
-      try{ localStorage.setItem('vc_last_intake', JSON.stringify({ key, intake: data, ts: Date.now() })); }catch{}
+      try{
+        localStorage.setItem('vc_last_intake', JSON.stringify({ key: finalKey, intake: data, ts: Date.now() }));
+      }catch{}
 
-      // non-blocking intake save (ok if gateway ignores it)
       fetch('/api/intake', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key, intake: { ...data, derived: deriveHints(data) } })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: finalKey, intake: { ...data, derived: deriveHints(data) } })
       }).catch(()=>{});
 
-      pollAnalyze(key);
+      pollAnalyze(finalKey);
     }catch(err){
       console.error(err);
-      status('Upload failed', ''); progress(0); step(1);
+      status('Upload failed', '');
+      progress(0); step(1);
       alert(err.message || 'Upload failed');
       btnUpload.disabled = false;
     }
