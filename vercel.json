@@ -1,13 +1,5 @@
 {
   "functions": {
-    "api/**.js": { "runtime": "nodejs20.x" }
-  },
-  "rewrites": [
-    { "source": "/report",     "destination": "/report.html" },
-    { "source": "/report.htm", "destination": "/report.html" }
-  ],
-  "headers": [
-    { "source": "/report.html",  "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
-    { "source": "/reports/(.*)", "headers": [{ "key": "Cache-Control", "value": "no-store" }] }
-  ]
+    "api/**/*.js": { "runtime": "nodejs20.x" }
+  }
 }
