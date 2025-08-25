@@ -411,11 +411,10 @@
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', url, true);
       xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
-
       xhr.upload.onprogress = (e)=>{
         if (e.lengthComputable){
-          const pct = Math.round((e.loaded/e.total)*80);
-          progress(pct);
+          const pct = 2 + Math.round((e.loaded/e.total)*78); // up to ~80%
+          progress(Math.min(80, pct));
         }
       };
       xhr.onload = ()=> (xhr.status>=200 && xhr.status<300)
@@ -432,7 +431,9 @@
     if (!$('#eye').value){ alert('Pick eye dominance.'); $('#eye').focus(); return; }
     if (!$('#height').value){ alert('Enter height (inches).'); $('#height').focus(); return; }
 
-    btnUpload.disabled = true; btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled');
+    btnUpload.disabled = true;
+    btnOpenReport.setAttribute('aria-disabled','true');
+    btnOpenReport.classList.add('disabled');
     step(1); progress(2); status('Uploading…', 'warn');
 
     const clientKey = makeKey(f);
@@ -485,7 +486,9 @@
           clearInterval(pollTimer); pollTimer = null;
           progress(100); step(3); status('Ready ✓', 'ok');
           const url = `/report.html?key=${encodeURIComponent(key)}`;
-          btnOpenReport.href = url; btnOpenReport.removeAttribute('aria-disabled'); btnOpenReport.classList.remove('disabled');
+          btnOpenReport.href = url;
+          btnOpenReport.removeAttribute('aria-disabled');
+          btnOpenReport.classList.remove('disabled');
           if (out.report){ try{ localStorage.setItem('vc_last_report', JSON.stringify(out.report)); }catch{} }
           return;
         }
@@ -514,3 +517,4 @@
 </script>
 </body>
 </html>
+
