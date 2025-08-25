@@ -1,4 +1,4 @@
-// /api/[[...slug]].js  — minimal sanity version
+// /api/[[...slug]].js — minimal sanity version
 export const config = { api: { bodyParser: false } };
 
 function json(res, code, obj) {
@@ -18,16 +18,12 @@ export default async function handler(req, res) {
       return json(res, 200, { pong: true, at: Date.now() });
     }
 
-    if (req.method === "GET" && path === "env-check") {
-      return json(res, 200, {
-        ok: true,
-        node: process.version
-      });
-    }
-
-    // simple hello for testing
     if (req.method === "GET" && (path === "hello" || path === "")) {
       return json(res, 200, { ok: true, route: path || "(root)" });
+    }
+
+    if (req.method === "GET" && path === "env-check") {
+      return json(res, 200, { ok: true, node: process.version });
     }
 
     return json(res, 404, { error: "Not found", path });
