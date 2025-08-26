@@ -230,26 +230,44 @@ async function routeAnalyze(req, res) {
   const sessionId = String(req.query.session || "").trim();
   const key = String(req.query.key || "").trim();
 
-  // Session polling: find any *.report.json under uploads/sessions/<sessionId>/
+  // Session polling: look for *.report.json under either 'sessions/<id>/' or '<PREFIX>/sessions/<id>/'
   if (sessionId) {
-    const prefix = `${PREFIX.replace(/\/?$/,'/')}` + `sessions/${sessionId}/`;
-    try {
-      const listed = await s3.send(new ListObjectsV2Command({
-        Bucket: BUCKET,
-        Prefix: prefix
-      }));
-      const items = (listed.Contents || []).map(o => o.Key || "");
-      const reportKey = items.find(k => k.endsWith(".report.json"));
-      if (!reportKey) return json(res, 200, { status: "pending" });
+    const prefixes = [
+      `sessions/${sessionId}/`,
+      `${PREFIX.replace(/\/?$/,'/') }sessions/${sessionId}/`
+    ];
 
-      const report = await tryReadReport(reportKey);
-      const status = (report && typeof report.status === "string") ? report.status : "ready";
-      if (status !== "ready") return json(res, 200, { status });
+    for (const pref of prefixes) {
+      try {
+        let reportKey = null;
+        let token = undefined;
 
-      return json(res, 200, { status: "ready", report });
-    } catch (e) {
-      return json(res, 200, { status: "pending" });
+        do {
+          const listed = await s3.send(new ListObjectsV2Command({
+            Bucket: BUCKET,
+            Prefix: pref,
+            ContinuationToken: token
+          }));
+          const items = (listed.Contents || []).map(o => o.Key || "");
+          const found = items.find(k => k.endsWith(".report.json"));
+          if (found) {
+            reportKey = found;
+            break;
+          }
+          token = listed.IsTruncated ? listed.NextContinuationToken : undefined;
+        } while (token);
+
+        if (!reportKey) continue;
+
+        const report = await tryReadReport(reportKey);
+        const status = (report && typeof report.status === "string") ? report.status : "ready";
+        if (status === "ready") return json(res, 200, { status: "ready", report });
+        return json(res, 200, { status }); // e.g., "pending" | "processing"
+      } catch {
+        // try next prefix
+      }
     }
+    return json(res, 200, { status: "pending" });
   }
 
   // Single key polling
