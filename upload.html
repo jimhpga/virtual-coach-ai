@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual Coach AI — Upload</title>
-<link rel="preload" as="image" href="/homepage-background.png" />
 <style>
   :root{
     --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06);
@@ -96,12 +95,11 @@
     select, select option{forced-color-adjust:none;color:ButtonText !important;background:Canvas !important}
   }
 
-  /* Clean intake summary (no JSON blob) */
+  /* Clean intake summary */
   #summary.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;
     background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;padding:12px}
   #summary.kv .k{color:#cfe0e6}
   #summary.kv .v.muted{opacity:.6}
-
   details.tips summary{cursor:pointer;display:inline-block;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.06);font-weight:700}
   details.tips .content{margin-top:10px;color:#cfe0e6}
 </style>
@@ -128,9 +126,9 @@
     <main class="wrap">
       <header style="margin-bottom:8px">
         <h1>Best Results Come From Good Footage</h1>
-        <p class="lead">Results are estimates from a single-camera video. For best accuracy, record from ~8–12 ft either <strong>down-the-line</strong> (along the target line) or <strong>face-on</strong> (perpendicular), in landscape, with your whole body and club in frame.</p>
+        <p class="lead">Record from ~8–12 ft, landscape, whole body + club in frame. Choose Down-the-Line, Face-On, or Both.</p>
         <details class="tips"><summary>Recording tips (quick)</summary>
-          <div class="content">• Keep the camera steady (tripod if possible). • Bright, even light. • Avoid extreme wide-angle. • Ball and hands visible at impact.</div>
+          <div class="content">• Tripod if possible • Bright, even light • Avoid ultra wide • Ball & hands visible at impact</div>
         </details>
       </header>
 
@@ -213,13 +211,28 @@
               </div>
             </div>
 
+            <!-- Views + pickers -->
             <div style="margin-top:10px">
-              <label for="file">Swing video</label>
-              <div class="filebox">
-                <input id="file" type="file" accept="video/*" />
-                <span class="name" id="fname">No file chosen</span>
+              <label>Camera views</label>
+              <select id="views">
+                <option value="dtl">Down-the-Line</option>
+                <option value="fo">Face-On</option>
+                <option value="both">Both (two files)</option>
+              </select>
+
+              <label style="margin-top:10px">Swing video</label>
+
+              <div class="filebox" id="picker-dtl">
+                <input id="fileDTL" type="file" accept="video/*" />
+                <span class="name" id="nameDTL">No file chosen</span>
               </div>
-              <div class="hint" id="fmeta" style="margin-top:6px"></div>
+              <div class="hint" id="metaDTL" style="margin-top:6px"></div>
+
+              <div class="filebox" id="picker-fo" style="display:none; margin-top:8px">
+                <input id="fileFO" type="file" accept="video/*" />
+                <span class="name" id="nameFO">No file chosen</span>
+              </div>
+              <div class="hint" id="metaFO" style="margin-top:6px; display:none"></div>
             </div>
 
             <div class="actions">
@@ -270,21 +283,60 @@
     const open = header.classList.toggle('open');
     document.getElementById('menuBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
   });
-  document.getElementById('siteNav').addEventListener('click', e=>{
+  document.getElementById('siteNav')?.addEventListener('click', e=>{
     if(e.target.tagName==='A'){ header.classList.remove('open'); document.getElementById('menuBtn')?.setAttribute('aria-expanded','false'); }
   });
 
   // Shortcuts
   const $ = s => document.querySelector(s);
-  const fileInput = $('#file');
-  const fname = $('#fname');
-  const fmeta = $('#fmeta');
   const bar = $('#bar');
   const pill = $('#pill');
   const statusLine = $('#statusLine');
   const btnUpload = $('#btnUpload');
   const btnReset = $('#btnReset');
   const btnOpenReport = $('#btnOpenReport');
+
+  // Views & file pickers
+  const viewsSel = $('#views');
+  const pickerDTL = $('#picker-dtl');
+  const pickerFO  = $('#picker-fo');
+  const fileDTL = $('#fileDTL');
+  const fileFO  = $('#fileFO');
+  const nameDTL = $('#nameDTL');
+  const nameFO  = $('#nameFO');
+  const metaDTL = $('#metaDTL');
+  const metaFO  = $('#metaFO');
+
+  function currentViews(){ return viewsSel.value || 'dtl'; }
+  function updatePickers(){
+    const v = currentViews();
+    if (v === 'dtl'){
+      pickerDTL.style.display = '';
+      pickerFO.style.display  = 'none';
+      metaFO.style.display    = 'none';
+    } else if (v === 'fo'){
+      pickerDTL.style.display = 'none';
+      pickerFO.style.display  = '';
+      metaFO.style.display    = '';
+    } else {
+      pickerDTL.style.display = '';
+      pickerFO.style.display  = '';
+      metaFO.style.display    = '';
+    }
+  }
+  viewsSel.addEventListener('change', updatePickers);
+  updatePickers();
+
+  function showFileMeta(input, nameEl, metaEl){
+    const f = input.files && input.files[0];
+    if (!f){ nameEl.textContent = 'No file chosen'; metaEl.textContent=''; return; }
+    nameEl.textContent = f.name;
+    const mb = (f.size/1024/1024).toFixed(1);
+    metaEl.textContent = `${mb} MB • ${f.type || 'video'}`;
+    status('File selected. Ready to upload.', 'warn');
+  }
+  fileDTL.addEventListener('change', ()=>showFileMeta(fileDTL, nameDTL, metaDTL));
+  fileFO .addEventListener('change', ()=>showFileMeta(fileFO , nameFO , metaFO ));
 
   // Fields + model
   const fields = ['first','email','eye','hand','gender','height','bodyShape','focus'];
@@ -338,9 +390,8 @@
       localStorage.setItem('vc_prefill', JSON.stringify(saved));
     }catch{}
   }
-
-  // Prefill
-  function prefillFromLocal(){
+  fields.forEach(k=> document.getElementById(k)?.addEventListener('input', updateSummary));
+  (function prefillFromLocal(){
     try{
       const merged = {};
       const p = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
@@ -353,17 +404,8 @@
         if (el && merged[k] != null && merged[k] !== '') el.value = String(merged[k]);
       });
     }catch{}
-  }
-  fields.forEach(k=> document.getElementById(k)?.addEventListener('input', updateSummary));
-  prefillFromLocal(); updateSummary();
-
-  fileInput.addEventListener('change', ()=>{
-    const f = fileInput.files && fileInput.files[0];
-    if (!f){ fname.textContent = 'No file chosen'; fmeta.textContent = ''; return; }
-    fname.textContent = f.name;
-    fmeta.textContent = `${(f.size/1024/1024).toFixed(1)} MB • ${f.type||'video'}`;
-    status('File selected. Ready to upload.', 'warn');
-  });
+  })();
+  updateSummary();
 
   // Stepper + status
   function step(n){
@@ -381,53 +423,58 @@
     pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)';
   }
 
-  // ==== DIRECT S3 UPLOAD (presigned URL) ====
-
-  function makeKey(file){
-    const safe = file.name.replace(/[^a-z0-9_.-]+/gi,'_').toLowerCase();
-    return `uploads/${Date.now()}-${safe}`;
+  // ==== S3 presign + PUT ====
+  function cleanName(name){ return String(name||'video.mp4').replace(/[^a-z0-9_.-]+/gi,'_').toLowerCase(); }
+  function makeSessionId(){ return 's' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7); }
+  function keyFor(sessionId, label, file){
+    const safe = cleanName(file.name);
+    const ts = Date.now();
+    return `sessions/${sessionId}/${label}-${ts}-${safe}`;
   }
 
-  async function getUploadTarget(file, key){
-    const res = await fetch('/api/presign', {
+  async function presign(key, file){
+    const r = await fetch('/api/presign', {
       method:'POST',
       headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({
-        filename: file.name,
-        type: file.type || 'application/octet-stream',
-        key
-      })
+      body: JSON.stringify({ filename:file.name, type:file.type||'application/octet-stream', key })
     });
-    if (!res.ok){
-      let txt = '';
-      try { txt = await res.text(); } catch {}
-      throw new Error(`Presign failed: HTTP ${res.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
+    if (!r.ok){
+      let t=''; try{t=await r.text()}catch{}
+      throw new Error(`Presign failed: HTTP ${r.status}${t? ' — '+t.slice(0,200):''}`);
     }
-    return res.json(); // => { key, putUrl }
+    return r.json(); // { key, putUrl }
   }
 
-  function putWithProgress(url, file){
+  function putWithProgress(url, file, basePctStart, basePctEnd){
+    const span = Math.max(0, basePctEnd - basePctStart);
     return new Promise((resolve, reject)=>{
       const xhr = new XMLHttpRequest();
       xhr.open('PUT', url, true);
       xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
       xhr.upload.onprogress = (e)=>{
         if (e.lengthComputable){
-          const pct = 2 + Math.round((e.loaded/e.total)*78); // up to ~80%
-          progress(Math.min(80, pct));
+          const pct = basePctStart + Math.round((e.loaded/e.total)*span);
+          progress(pct);
         }
       };
-      xhr.onload = ()=> (xhr.status>=200 && xhr.status<300)
-        ? resolve()
-        : reject(new Error('S3 upload error: HTTP '+xhr.status));
+      xhr.onload = ()=> (xhr.status>=200 && xhr.status<300) ? resolve() : reject(new Error('S3 upload error: HTTP '+xhr.status));
       xhr.onerror = ()=> reject(new Error('Network error during S3 upload'));
       xhr.send(file);
     });
   }
 
+  function collectFiles(){
+    const v = currentViews();
+    if (v === 'dtl'){ return { views:v, dtl: fileDTL.files?.[0]||null, fo:null }; }
+    if (v === 'fo')  { return { views:v, dtl: null, fo:fileFO.files?.[0]||null }; }
+    return { views:v, dtl:fileDTL.files?.[0]||null, fo:fileFO.files?.[0]||null }; // both
+  }
+
   async function startUpload(){
-    const f = fileInput.files && fileInput.files[0];
-    if (!f){ alert('Choose a swing video first.'); return; }
+    const { views, dtl, fo } = collectFiles();
+    if (views === 'dtl' && !dtl){ alert('Choose your Down-the-Line video.'); return; }
+    if (views === 'fo'  && !fo ){ alert('Choose your Face-On video.'); return; }
+    if (views === 'both' && (!dtl || !fo)){ alert('Choose both videos (DTL and FO).'); return; }
     if (!$('#eye').value){ alert('Pick eye dominance.'); $('#eye').focus(); return; }
     if (!$('#height').value){ alert('Enter height (inches).'); $('#height').focus(); return; }
 
@@ -436,32 +483,46 @@
     btnOpenReport.classList.add('disabled');
     step(1); progress(2); status('Uploading…', 'warn');
 
-    const clientKey = makeKey(f);
-    let finalKey = clientKey;
+    const sessionId = makeSessionId();
+    const uploadedKeys = [];
 
     try{
-      // 1) presign
-      const target = await getUploadTarget(f, clientKey);
-      if (!target.putUrl) throw new Error('No putUrl returned from /api/presign');
-      if (target.key) finalKey = target.key;
+      if (views === 'dtl' || views === 'fo'){
+        const file = views === 'dtl' ? dtl : fo;
+        const label = views === 'dtl' ? 'dtl' : 'fo';
+        const key = keyFor(sessionId, label, file);
+        const { putUrl, key:finalKey } = await presign(key, file);
+        await putWithProgress(putUrl, file, 5, 85);
+        uploadedKeys.push(finalKey);
+      } else {
+        // Both (sequential for simpler progress)
+        const key1 = keyFor(sessionId, 'dtl', dtl);
+        const { putUrl:url1, key:final1 } = await presign(key1, dtl);
+        await putWithProgress(url1, dtl, 5, 45);
+        uploadedKeys.push(final1);
 
-      // 2) PUT to S3
-      await putWithProgress(target.putUrl, f);
+        const key2 = keyFor(sessionId, 'fo', fo);
+        const { putUrl:url2, key:final2 } = await presign(key2, fo);
+        await putWithProgress(url2, fo, 45, 85);
+        uploadedKeys.push(final2);
+      }
 
-      // 3) update UI + save intake + poll
-      progress(82); step(2); status('Processing…', 'warn');
+      // Intake save + move to processing
+      progress(88); step(2); status('Processing…', 'warn');
+      const derived = deriveHints(data);
+      try{ localStorage.setItem('vc_last_intake', JSON.stringify({ sessionId, intake:data, ts: Date.now() })); }catch{}
 
-      try{
-        localStorage.setItem('vc_last_intake', JSON.stringify({ key: finalKey, intake: data, ts: Date.now() }));
-      }catch{}
-
-      fetch('/api/intake', {
+      await fetch('/api/intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: finalKey, intake: { ...data, derived: deriveHints(data) } })
+        body: JSON.stringify({
+          key: `sessions/${sessionId}/bundle`,
+          intake: { ...data, derived, sessionId, views, files: uploadedKeys }
+        })
       }).catch(()=>{});
 
-      pollAnalyze(finalKey);
+      // Poll for readiness by session (preferred) and per-file (fallback)
+      pollReady(sessionId, uploadedKeys);
     }catch(err){
       console.error(err);
       status('Upload failed', '');
@@ -471,28 +532,44 @@
     }
   }
 
-  // Poll analyzer
+  // Poll analyzer (session preferred; falls back to per-file keys)
   let pollTimer = null;
-  async function checkAnalyze(key){
+
+  async function checkAnalyzeSession(sessionId){
+    try{
+      const r = await fetch(`/api/analyze?session=${encodeURIComponent(sessionId)}`, { cache:'no-store' });
+      if (r.ok) return r.json(); // {status:"pending"|"ready", report?}
+    }catch{}
+    return null; // session endpoint might not exist yet
+  }
+
+  async function checkAnalyzeKey(key){
     const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache:'no-store' });
     if (!r.ok) throw new Error('HTTP '+r.status);
-    return r.json(); // {status:"pending"|"ready", report?}
+    return r.json();
   }
-  async function pollAnalyze(key){
+
+  async function pollReady(sessionId, keys){
     async function tick(){
       try{
-        const out = await checkAnalyze(key);
-        if (out.status === 'ready'){
-          clearInterval(pollTimer); pollTimer = null;
-          progress(100); step(3); status('Ready ✓', 'ok');
-          const url = `/report.html?key=${encodeURIComponent(key)}`;
-          btnOpenReport.href = url;
-          btnOpenReport.removeAttribute('aria-disabled');
-          btnOpenReport.classList.remove('disabled');
-          if (out.report){ try{ localStorage.setItem('vc_last_report', JSON.stringify(out.report)); }catch{} }
+        // 1) Try session endpoint first
+        const sess = await checkAnalyzeSession(sessionId);
+        if (sess && sess.status === 'ready'){
+          finishReady(`sessions/${sessionId}/bundle`, sess.report);
           return;
         }
-        const cur = parseFloat(bar.style.width)||82;
+        // 2) Fallback: if any individual key is ready, consider the session ready
+        for (const k of keys){
+          try{
+            const out = await checkAnalyzeKey(k);
+            if (out.status === 'ready'){
+              finishReady(k, out.report);
+              return;
+            }
+          }catch(e){ /* ignore one-off failures while polling */ }
+        }
+        // keep polling
+        const cur = parseFloat(bar.style.width)||88;
         progress( Math.min(98, cur + Math.random()*2) );
         status('Processing…', 'warn');
       }catch(e){
@@ -500,21 +577,38 @@
         status('Checking…', 'warn');
       }
     }
+    function finishReady(reportKey, reportObj){
+      clearInterval(pollTimer); pollTimer = null;
+      progress(100); step(3); status('Ready ✓', 'ok');
+      const url = `/report.html?key=${encodeURIComponent(reportKey)}`;
+      btnOpenReport.href = url;
+      btnOpenReport.removeAttribute('aria-disabled');
+      btnOpenReport.classList.remove('disabled');
+      if (reportObj){ try{ localStorage.setItem('vc_last_report', JSON.stringify(reportObj)); }catch{} }
+    }
+
     await tick();
     pollTimer = setInterval(tick, 7000);
   }
 
   btnUpload.addEventListener('click', startUpload);
   btnReset.addEventListener('click', ()=>{
-    fields.forEach(k=>{ const el = document.getElementById(k); if(el) el.value=''; });
-    updateSummary(); fileInput.value=''; fname.textContent='No file chosen'; fmeta.textContent='';
+    ['first','email','eye','hand','gender','height','bodyShape','focus'].forEach(k=>{
+      const el = document.getElementById(k); if(el) el.value='';
+    });
+    updateSummary();
+    fileDTL.value=''; fileFO.value='';
+    nameDTL.textContent='No file chosen'; nameFO.textContent='No file chosen';
+    metaDTL.textContent=''; metaFO.textContent='';
     step(1); progress(0); status('Idle',''); btnUpload.disabled=false;
     btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled'); btnOpenReport.href='#';
   });
 
   // Initialize UI
   step(1); progress(0); status('Idle','');
+  function status(t, tone){ statusLine.textContent = t; pill.textContent = t.split('.')[0];
+    pill.style.background = tone==='ok'?'rgba(25,195,125,.18)':tone==='warn'?'rgba(246,196,83,.18)':'rgba(255,255,255,.10)';
+    pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)'; }
 </script>
 </body>
 </html>
-
