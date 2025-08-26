@@ -3,7 +3,8 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
-  HeadObjectCommand
+  HeadObjectCommand,
+  ListObjectsV2Command
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import Busboy from "busboy";
@@ -12,13 +13,11 @@ export const config = { api: { bodyParser: false } };
 
 // ==== ENV ====
 const REGION = process.env.AWS_REGION || "us-west-2";
-const BUCKET = process.env.S3_UPLOAD_BUCKET; // e.g. "virtualcoachai-prod"
+const BUCKET = process.env.S3_UPLOAD_BUCKET; // e.g. virtualcoachai-prod
 const PREFIX = (process.env.S3_UPLOAD_PREFIX || "uploads/").replace(/^\/+/, "");
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ||
   "https://virtualcoachai.net,https://virtualcoachai-homepage.vercel.app")
-  .split(",")
-  .map(s => s.trim())
-  .filter(Boolean);
+  .split(",").map(s => s.trim()).filter(Boolean);
 
 const s3 = new S3Client({
   region: REGION,
@@ -122,13 +121,12 @@ async function routePresign(req, res) {
   const finalKey = body.key || makeKey(filename);
 
   const cmd = new PutObjectCommand({ Bucket: BUCKET, Key: finalKey, ContentType: type });
-  const putUrl = await getSignedUrl(s3, cmd, { expiresIn: 60 * 15 }); // 15 minutes
+  const putUrl = await getSignedUrl(s3, cmd, { expiresIn: 60 * 15 });
   return json(res, 200, { key: finalKey, putUrl });
 }
 
 // POST /api/upload  (multipart: file|video, key?, intake?)
 async function routeUpload(req, res) {
-  // Guard: this proxy path is for small files only (Vercel hobby 5 MB-ish)
   const cl = Number(req.headers["content-length"] || 0);
   if (cl > 4_500_000) {
     return json(res, 413, { error: "File too large for proxy upload. Use /api/presign + PUT to S3." });
@@ -196,8 +194,7 @@ async function routeIntake(req, res) {
   return json(res, 200, { ok: true });
 }
 
-// POST /api/report  { key, report }  (write analyzer output)
-// (This enables your console “stub report” test and unblocks /api/analyze polling.)
+// POST /api/report  { key, report }
 async function routeReport(req, res) {
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
   const body = await readJson(req);
@@ -209,33 +206,62 @@ async function routeReport(req, res) {
   const payload = JSON.stringify(body.report || {}, null, 2);
 
   await s3.send(new PutObjectCommand({
-    Bucket: BUCKET,
-    Key: reportKey,
-    Body: payload,
-    ContentType: "application/json"
+    Bucket: BUCKET, Key: reportKey, Body: payload, ContentType: "application/json"
   }));
 
   return json(res, 200, { ok: true, reportKey });
 }
 
-// GET /api/analyze?key=...
+// helper: read report JSON if present
+async function tryReadReport(objectKey) {
+  try {
+    const obj = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: objectKey }));
+    const txt = await obj.Body.transformToString();
+    try { return JSON.parse(txt); } catch { return { raw: txt }; }
+  } catch {
+    return null;
+  }
+}
+
+// GET /api/analyze?key=... OR /api/analyze?session=...
 async function routeAnalyze(req, res) {
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
-  const key = String(req.query.key || "");
+
+  const sessionId = String(req.query.session || "").trim();
+  const key = String(req.query.key || "").trim();
+
+  // Session polling: find any *.report.json under uploads/sessions/<sessionId>/
+  if (sessionId) {
+    const prefix = `${PREFIX.replace(/\/?$/,'/')}` + `sessions/${sessionId}/`;
+    try {
+      const listed = await s3.send(new ListObjectsV2Command({
+        Bucket: BUCKET,
+        Prefix: prefix
+      }));
+      const items = (listed.Contents || []).map(o => o.Key || "");
+      const reportKey = items.find(k => k.endsWith(".report.json"));
+      if (!reportKey) return json(res, 200, { status: "pending" });
+
+      const report = await tryReadReport(reportKey);
+      const status = (report && typeof report.status === "string") ? report.status : "ready";
+      if (status !== "ready") return json(res, 200, { status });
+
+      return json(res, 200, { status: "ready", report });
+    } catch (e) {
+      return json(res, 200, { status: "pending" });
+    }
+  }
+
+  // Single key polling
   if (!key) return json(res, 400, { error: "Missing key" });
   const base = baseKey(key);
   const reportKey = `${base}.report.json`;
 
-  try {
-    await s3.send(new HeadObjectCommand({ Bucket: BUCKET, Key: reportKey }));
-  } catch {
-    return json(res, 200, { status: "pending" });
-  }
+  const report = await tryReadReport(reportKey);
+  if (!report) return json(res, 200, { status: "pending" });
 
-  const obj = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: reportKey }));
-  const txt = await obj.Body.transformToString();
-  let report = {};
-  try { report = JSON.parse(txt); } catch { report = { raw: txt }; }
+  const status = (report && typeof report.status === "string") ? report.status : "ready";
+  if (status !== "ready") return json(res, 200, { status });
 
   return json(res, 200, { status: "ready", report });
 }
