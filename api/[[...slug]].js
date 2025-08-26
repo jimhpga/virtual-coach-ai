@@ -115,6 +115,7 @@ async function routeEnv(req, res) {
 
 // POST /api/presign  { filename, type, key? } -> { key, putUrl }
 async function routePresign(req, res) {
+  if (req.method !== "POST") return json(res, 405, { error: "POST only" });
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
   const body = await readJson(req);
   const filename = body.filename || "video.mp4";
@@ -128,6 +129,9 @@ async function routePresign(req, res) {
 
 // POST /api/upload  (multipart: file|video, key?, intake?)
 async function routeUpload(req, res) {
+  if (req.method !== "POST") return json(res, 405, { error: "POST only" });
+
+  // Guard: small files only via proxy
   const cl = Number(req.headers["content-length"] || 0);
   if (cl > 4_500_000) {
     return json(res, 413, { error: "File too large for proxy upload. Use /api/presign + PUT to S3." });
@@ -149,12 +153,11 @@ async function routeUpload(req, res) {
       if (name !== "file" && name !== "video") { file.resume(); return; }
       const { filename = "video.mp4", mimeType } = info || {};
       fileKey = providedKey || makeKey(filename);
-      try {
-        await s3.send(new PutObjectCommand({
-          Bucket: BUCKET, Key: fileKey, Body: file, ContentType: mimeType || "application/octet-stream"
-        }));
+      s3.send(new PutObjectCommand({
+        Bucket: BUCKET, Key: fileKey, Body: file, ContentType: mimeType || "application/octet-stream"
+      })).then(() => {
         fileUploaded = true;
-      } catch (err) { reject(err); }
+      }).catch(reject);
     });
     bb.on("error", reject);
     bb.on("finish", resolve);
@@ -171,7 +174,7 @@ async function routeUpload(req, res) {
         await s3.send(new PutObjectCommand({
           Bucket: BUCKET, Key: `${base}.intake.json`, Body: intakeJson, ContentType: "application/json"
         }));
-      } catch { /* ignore */ }
+      } catch { /* ignore intake save failure */ }
     }
 
     const getUrl = await getSignedUrl(s3, new GetObjectCommand({ Bucket: BUCKET, Key: fileKey }), { expiresIn: 60 * 60 * 24 });
@@ -183,6 +186,7 @@ async function routeUpload(req, res) {
 
 // POST /api/intake  { key, intake }
 async function routeIntake(req, res) {
+  if (req.method !== "POST") return json(res, 405, { error: "POST only" });
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
   const body = await readJson(req);
   const key = String(body.key || "");
@@ -195,9 +199,11 @@ async function routeIntake(req, res) {
   return json(res, 200, { ok: true });
 }
 
-// POST /api/report  { key, report }   <-- THIS is the route you were missing
+// POST /api/report  { key, report }
 async function routeReport(req, res) {
+  if (req.method !== "POST") return json(res, 405, { error: "POST only" });
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
+
   const body = await readJson(req);
   const key = String(body.key || "");
   if (!key) return json(res, 400, { error: "Missing key" });
@@ -274,7 +280,7 @@ export default async function handler(req, res) {
     if (req.method === "POST" && path === "presign")    return routePresign(req, res);
     if (req.method === "POST" && path === "upload")     return routeUpload(req, res);
     if (req.method === "POST" && path === "intake")     return routeIntake(req, res);
-    if (req.method === "POST" && path === "report")     return routeReport(req, res); // <--
+    if (req.method === "POST" && path === "report")     return routeReport(req, res);
 
     if (req.method === "GET"  && path === "analyze")    return routeAnalyze(req, res);
     if (req.method === "GET"  && path === "qc")         return routeQC(req, res);
