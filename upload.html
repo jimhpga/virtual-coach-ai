@@ -474,6 +474,35 @@
     return { views:v, dtl:fileDTL.files?.[0]||null, fo:fileFO.files?.[0]||null }; // both
   }
 
+  // ===== Report helpers (write immediately; no Lambda needed)
+  function reportKeyFor(sessionId, views, uploadedKeys){
+    return (views === 'both')
+      ? `${KEY_PREFIX}/sessions/${sessionId}/bundle`
+      : (uploadedKeys && uploadedKeys[0]);
+  }
+
+  async function writeStubReport(reportKey, report){
+    const r = await fetch('/api/report', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ key: reportKey, report })
+    });
+    if (!r.ok){
+      let t=''; try{ t = await r.text(); }catch{}
+      throw new Error(`Report write failed: HTTP ${r.status}${t ? ' — ' + t.slice(0,200) : ''}`);
+    }
+    return r.json().catch(()=> ({}));
+  }
+
+  function finishReady(reportKey, reportObj){
+    progress(100); step(3); status('Ready ✓', 'ok');
+    const url = `/report.html?key=${encodeURIComponent(reportKey)}`;
+    btnOpenReport.href = url;
+    btnOpenReport.removeAttribute('aria-disabled');
+    btnOpenReport.classList.remove('disabled');
+    if (reportObj){ try{ localStorage.setItem('vc_last_report', JSON.stringify(reportObj)); }catch{} }
+  }
+
   async function startUpload(){
     const { views, dtl, fo } = collectFiles();
     if (views === 'dtl' && !dtl){ alert('Choose your Down-the-Line video.'); return; }
@@ -499,7 +528,6 @@
         await putWithProgress(putUrl, file, 5, 85);
         uploadedKeys.push(finalKey);
       } else {
-        // Both (sequential for simpler progress)
         const key1 = keyFor(sessionId, 'dtl', dtl);
         const { putUrl:url1, key:final1 } = await presign(key1, dtl);
         await putWithProgress(url1, dtl, 5, 45);
@@ -511,7 +539,7 @@
         uploadedKeys.push(final2);
       }
 
-      // Intake save + move to processing
+      // Intake save
       progress(88); step(2); status('Processing…', 'warn');
       const derived = deriveHints(data);
 
@@ -530,8 +558,22 @@
         })
       }).catch(()=>{});
 
-      // Poll for readiness by session (preferred) and per-file (fallback)
-      pollReady(sessionId, uploadedKeys);
+      // WRITE A READY REPORT NOW (no Lambda)
+      const reportKey = reportKeyFor(sessionId, views, uploadedKeys);
+      const stubReport = {
+        status: 'ready',
+        generated_at: new Date().toISOString(),
+        sessionId,
+        views,
+        files: uploadedKeys,
+        intake: { ...data, derived },
+        metrics: { note: 'stub metrics' }
+      };
+      await writeStubReport(reportKey, stubReport);
+
+      // Flip UI to Ready immediately
+      finishReady(reportKey, stubReport);
+
     }catch(err){
       console.error(err);
       status('Upload failed', '');
@@ -541,93 +583,26 @@
     }
   }
 
-  // Poll analyzer (session preferred; falls back to per-file keys)
-  let pollTimer = null;
-
-  async function checkAnalyzeSession(sessionId){
-    try{
-      const r = await fetch(`/api/analyze?session=${encodeURIComponent(sessionId)}`, { cache:'no-store' });
-      if (r.ok) return r.json(); // {status:"pending"|"ready", report?}
-    }catch{}
-    return null; // session endpoint might not exist yet
-  }
-
-  async function checkAnalyzeKey(key){
-    const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache:'no-store' });
-    if (!r.ok) throw new Error('HTTP '+r.status);
-    return r.json();
-  }
-
-  async function pollReady(sessionId, keys){
-    async function tick(){
-      try{
-        // 1) Try session endpoint first
-        const sess = await checkAnalyzeSession(sessionId);
-        if (sess && sess.status === 'ready'){
-          finishReady(`${KEY_PREFIX}/sessions/${sessionId}/bundle`, sess.report);
-          return;
-        }
-        // 2) Fallback: if any individual key is ready, consider the session ready
-        for (const k of keys){
-          try{
-            const out = await checkAnalyzeKey(k);
-            if (out.status === 'ready'){
-              finishReady(k, out.report);
-              return;
-            }
-          }catch(e){ /* ignore one-off failures while polling */ }
-        }
-        // keep polling
-        const cur = parseFloat(bar.style.width)||88;
-        progress( Math.min(98, cur + Math.random()*2) );
-        status('Processing…', 'warn');
-      }catch(e){
-        console.warn('Check failed', e);
-        status('Checking…', 'warn');
-      }
-    }
-    function finishReady(reportKey, reportObj){
-      clearInterval(pollTimer); pollTimer = null;
-      progress(100); step(3); status('Ready ✓', 'ok');
-      const url = `/report.html?key=${encodeURIComponent(reportKey)}`;
-      btnOpenReport.href = url;
-      btnOpenReport.removeAttribute('aria-disabled');
-      btnOpenReport.classList.remove('disabled');
-      if (reportObj){ try{ localStorage.setItem('vc_last_report', JSON.stringify(reportObj)); }catch{} }
-    }
-
-    await tick();
-    pollTimer = setInterval(tick, 7000);
-  }
-
-  // Force Complete (stub) – writes a placeholder report so UI flips to Ready
+  // Force Complete (stub) – manual fallback
   btnForce.addEventListener('click', async ()=>{
     try{
       const last = JSON.parse(localStorage.getItem('vc_last_intake')||'{}');
-      const key = Array.isArray(last?.files) && last.files[0];
-      if(!key){ alert('No last upload key — upload a small file first.'); return; }
+      const { sessionId, views, files = [], intake } = last || {};
+      if(!sessionId || !files.length){ alert('No last upload — upload a small file first.'); return; }
 
+      const reportKey = reportKeyFor(sessionId, views, files);
+      const derived = deriveHints(intake || {});
       const demoReport = {
-        meta: { createdAt: new Date().toISOString(), key, source: "force-complete" },
+        status: 'ready',
+        generated_at: new Date().toISOString(),
+        sessionId, views, files,
+        intake: { ...(intake||{}), derived },
         metrics: { shoulder_turn_deg: 92, swing_path_up_deg: 3, club_speed_mph: 98 },
-        notes: "Stub report generated by Force Complete button."
+        notes: "Stub report generated by Force Complete."
       };
 
-      const r = await fetch('/api/report', {
-        method:'POST',
-        headers:{ 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key, report: demoReport })
-      });
-      if(!r.ok){
-        const t = await r.text().catch(()=> '');
-        throw new Error(`Report write failed: HTTP ${r.status}${t? ' — ' + t.slice(0,200):''}`);
-      }
-
-      progress(100); step(3); status('Ready ✓', 'ok');
-      const url = `/report.html?key=${encodeURIComponent(key)}`;
-      btnOpenReport.href = url;
-      btnOpenReport.removeAttribute('aria-disabled');
-      btnOpenReport.classList.remove('disabled');
+      await writeStubReport(reportKey, demoReport);
+      finishReady(reportKey, demoReport);
     }catch(e){
       console.error(e);
       alert(e.message || 'Force complete failed');
