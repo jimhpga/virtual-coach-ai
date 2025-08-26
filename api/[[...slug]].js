@@ -51,14 +51,6 @@ function makeKey(originalFilename = "video.mp4") {
   const base = safe.replace(/\.[a-z0-9]+$/i, "");
   return `${PREFIX}${ts}-${base}.${ext}`;
 }
-function makeSessionKey(originalFilename = "video.mp4", session = "", view = "") {
-  const ts = Date.now();
-  const safe = cleanName(originalFilename);
-  const ext = (safe.split(".").pop() || "mp4").toLowerCase();
-  const base = safe.replace(/\.[a-z0-9]+$/i, "");
-  const vtag = view ? `${String(view).toLowerCase()}-` : "";
-  return `sessions/${session}/${ts}-${vtag}${base}.${ext}`;
-}
 async function readJson(req) {
   const chunks = [];
   for await (const c of req) chunks.push(c);
@@ -121,27 +113,21 @@ async function routeEnv(req, res) {
   });
 }
 
-// POST /api/presign  { filename, type, key?, session?, view? } -> { key, putUrl }
+// POST /api/presign  { filename, type, key? } -> { key, putUrl }
 async function routePresign(req, res) {
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
   const body = await readJson(req);
   const filename = body.filename || "video.mp4";
   const type = body.type || "application/octet-stream";
-
-  let finalKey = body.key || "";
-  if (!finalKey) {
-    if (body.session) finalKey = makeSessionKey(filename, String(body.session), String(body.view || ""));
-    else finalKey = makeKey(filename);
-  }
+  const finalKey = body.key || makeKey(filename);
 
   const cmd = new PutObjectCommand({ Bucket: BUCKET, Key: finalKey, ContentType: type });
-  const putUrl = await getSignedUrl(s3, cmd, { expiresIn: 60 * 15 }); // 15 minutes
+  const putUrl = await getSignedUrl(s3, cmd, { expiresIn: 60 * 15 });
   return json(res, 200, { key: finalKey, putUrl });
 }
 
-// POST /api/upload  (multipart: file|video, key?, intake?, session?, view?)
+// POST /api/upload  (multipart: file|video, key?, intake?)
 async function routeUpload(req, res) {
-  // Guard: Vercel Hobby will 413 anything big; this path is for small files only.
   const cl = Number(req.headers["content-length"] || 0);
   if (cl > 4_500_000) {
     return json(res, 413, { error: "File too large for proxy upload. Use /api/presign + PUT to S3." });
@@ -152,21 +138,17 @@ async function routeUpload(req, res) {
   let fileKey = null;
   let providedKey = null;
   let intakeJson = null;
-  let session = "";
-  let view = "";
   let fileUploaded = false;
 
   const done = new Promise((resolve, reject) => {
     bb.on("field", (name, val) => {
       if (name === "key") providedKey = String(val);
       if (name === "intake") intakeJson = String(val);
-      if (name === "session") session = String(val || "");
-      if (name === "view") view = String(val || "");
     });
     bb.on("file", async (name, file, info) => {
       if (name !== "file" && name !== "video") { file.resume(); return; }
       const { filename = "video.mp4", mimeType } = info || {};
-      fileKey = providedKey || (session ? makeSessionKey(filename, session, view) : makeKey(filename));
+      fileKey = providedKey || makeKey(filename);
       try {
         await s3.send(new PutObjectCommand({
           Bucket: BUCKET, Key: fileKey, Body: file, ContentType: mimeType || "application/octet-stream"
@@ -184,82 +166,59 @@ async function routeUpload(req, res) {
     if (!fileUploaded || !fileKey) return json(res, 400, { error: "No file received" });
 
     if (intakeJson) {
+      const base = baseKey(fileKey);
       try {
-        if (session) {
-          await s3.send(new PutObjectCommand({
-            Bucket: BUCKET, Key: `sessions/${session}/intake.json`, Body: intakeJson, ContentType: "application/json"
-          }));
-        } else {
-          const base = baseKey(fileKey);
-          await s3.send(new PutObjectCommand({
-            Bucket: BUCKET, Key: `${base}.intake.json`, Body: intakeJson, ContentType: "application/json"
-          }));
-        }
+        await s3.send(new PutObjectCommand({
+          Bucket: BUCKET, Key: `${base}.intake.json`, Body: intakeJson, ContentType: "application/json"
+        }));
       } catch { /* ignore */ }
     }
 
     const getUrl = await getSignedUrl(s3, new GetObjectCommand({ Bucket: BUCKET, Key: fileKey }), { expiresIn: 60 * 60 * 24 });
-    return json(res, 200, { status: "stored", key: fileKey, session: session || null, view: view || null, downloadUrl: getUrl });
+    return json(res, 200, { status: "stored", key: fileKey, downloadUrl: getUrl });
   } catch (e) {
     return json(res, 500, { error: String(e.message || e) });
   }
 }
 
-// POST /api/intake  { key?, session?, intake }
+// POST /api/intake  { key, intake }
 async function routeIntake(req, res) {
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
   const body = await readJson(req);
-  const payload = JSON.stringify(body.intake || {}, null, 2);
-
-  if (body.session) {
-    const sid = String(body.session);
-    await s3.send(new PutObjectCommand({
-      Bucket: BUCKET, Key: `sessions/${sid}/intake.json`, Body: payload, ContentType: "application/json"
-    }));
-    return json(res, 200, { ok: true, wrote: `sessions/${sid}/intake.json` });
-  }
-
   const key = String(body.key || "");
-  if (!key) return json(res, 400, { error: "Missing key or session" });
+  if (!key) return json(res, 400, { error: "Missing key" });
   const base = baseKey(key);
+  const payload = JSON.stringify(body.intake || {}, null, 2);
   await s3.send(new PutObjectCommand({
     Bucket: BUCKET, Key: `${base}.intake.json`, Body: payload, ContentType: "application/json"
   }));
-  return json(res, 200, { ok: true, wrote: `${base}.intake.json` });
+  return json(res, 200, { ok: true });
 }
 
-// POST /api/report  { key, report }   OR  { session, report }  (DEV/ANALYZER WRITER)
+// POST /api/report  { key, report }   <-- THIS is the route you were missing
 async function routeReport(req, res) {
-  if (req.method !== "POST") return json(res, 405, { error: "POST only" });
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
-
   const body = await readJson(req);
-
-  // Session-wide bundle
-  if (body.session) {
-    const sid = String(body.session);
-    const target = `sessions/${sid}/bundle.report.json`;
-    const payload = JSON.stringify(body.report || {}, null, 2);
-    await s3.send(new PutObjectCommand({
-      Bucket: BUCKET, Key: target, Body: payload, ContentType: "application/json"
-    }));
-    return json(res, 200, { ok: true, reportKey: target });
-  }
-
-  // Per-file report
   const key = String(body.key || "");
-  if (!key) return json(res, 400, { error: "Missing key or session" });
+  if (!key) return json(res, 400, { error: "Missing key" });
+
   const base = baseKey(key);
   const reportKey = `${base}.report.json`;
   const payload = JSON.stringify(body.report || {}, null, 2);
+
   await s3.send(new PutObjectCommand({
-    Bucket: BUCKET, Key: reportKey, Body: payload, ContentType: "application/json"
+    Bucket: BUCKET,
+    Key: reportKey,
+    Body: payload,
+    ContentType: "application/json"
   }));
+
   return json(res, 200, { ok: true, reportKey });
 }
 
-// GET /api/analyze?key=...   OR   GET /api/analyze?session=SID
-async function routeAnalyzeKey(req, res) {
+// GET /api/analyze?key=...
+async function routeAnalyze(req, res) {
+  if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
   const key = String(req.query.key || "");
   if (!key) return json(res, 400, { error: "Missing key" });
   const base = baseKey(key);
@@ -275,23 +234,7 @@ async function routeAnalyzeKey(req, res) {
   const txt = await obj.Body.transformToString();
   let report = {};
   try { report = JSON.parse(txt); } catch { report = { raw: txt }; }
-  return json(res, 200, { status: "ready", report });
-}
-async function routeAnalyzeSession(req, res) {
-  const session = String(req.query.session || "").trim();
-  if (!session) return json(res, 400, { error: "Missing session" });
 
-  const reportKey = `sessions/${session}/bundle.report.json`;
-  try {
-    await s3.send(new HeadObjectCommand({ Bucket: BUCKET, Key: reportKey }));
-  } catch {
-    return json(res, 200, { status: "pending" });
-  }
-
-  const obj = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: reportKey }));
-  const txt = await obj.Body.transformToString();
-  let report = {};
-  try { report = JSON.parse(txt); } catch { report = { raw: txt }; }
   return json(res, 200, { status: "ready", report });
 }
 
@@ -308,45 +251,12 @@ async function routeQC(req, res) {
     const obj = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: reportKey }));
     const txt = await obj.Body.transformToString();
     report = JSON.parse(txt);
-  } catch { /* no report yet */ }
+  } catch {}
 
   if (!report) return json(res, 200, { status: "warn", issues: [{ level: "warn", msg: "No report yet" }] });
 
   const out = qcReport(report);
   return json(res, 200, out);
-}
-
-// DEV: POST /api/dev-ready { key? or session?, report? }
-async function routeDevReady(req, res) {
-  if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
-  const body = await readJson(req);
-
-  let targetKey = "";
-  if (body.session) {
-    const sid = String(body.session).trim();
-    if (!sid) return json(res, 400, { error: "Bad session" });
-    targetKey = `sessions/${sid}/bundle.report.json`;
-  } else if (body.key) {
-    const base = baseKey(String(body.key));
-    if (!base) return json(res, 400, { error: "Bad key" });
-    targetKey = `${base}.report.json`;
-  } else {
-    return json(res, 400, { error: "Provide session or key" });
-  }
-
-  const synthetic = body.report || {
-    createdAt: Date.now(),
-    summary: "Stub report (dev)",
-    metrics: { shoulder_turn_deg: 92, attackAngle: 3.1, club_speed_mph: 104 }
-  };
-
-  await s3.send(new PutObjectCommand({
-    Bucket: BUCKET,
-    Key: targetKey,
-    Body: JSON.stringify(synthetic, null, 2),
-    ContentType: "application/json"
-  }));
-  return json(res, 200, { ok: true, wrote: targetKey });
 }
 
 // ==== ROUTER ====
@@ -358,32 +268,19 @@ export default async function handler(req, res) {
   const path = parts.join("/").toLowerCase();
 
   try {
-    if (req.method === "GET"  && path === "ping")        return routePing(req, res);
-    if (req.method === "GET"  && path === "env-check")   return routeEnv(req, res);
+    if (req.method === "GET"  && path === "ping")       return routePing(req, res);
+    if (req.method === "GET"  && path === "env-check")  return routeEnv(req, res);
 
-    if (req.method === "POST" && path === "presign")     return routePresign(req, res);
-    if (req.method === "POST" && path === "upload")      return routeUpload(req, res);
-    if (req.method === "POST" && path === "intake")      return routeIntake(req, res);
-    if (req.method === "POST" && path === "report")      return routeReport(req, res);
-    if (req.method === "POST" && path === "dev-ready")   return routeDevReady(req, res); // DEV helper
+    if (req.method === "POST" && path === "presign")    return routePresign(req, res);
+    if (req.method === "POST" && path === "upload")     return routeUpload(req, res);
+    if (req.method === "POST" && path === "intake")     return routeIntake(req, res);
+    if (req.method === "POST" && path === "report")     return routeReport(req, res); // <--
 
-    if (req.method === "GET"  && path === "analyze" && req.query.session) return routeAnalyzeSession(req, res);
-    if (req.method === "GET"  && path === "analyze")     return routeAnalyzeKey(req, res);
-    if (req.method === "GET"  && path === "qc")          return routeQC(req, res);
+    if (req.method === "GET"  && path === "analyze")    return routeAnalyze(req, res);
+    if (req.method === "GET"  && path === "qc")         return routeQC(req, res);
 
     return json(res, 404, { error: "Not found" });
   } catch (e) {
     return json(res, 500, { error: String(e.message || e) });
   }
 }
-
-/*
-NOTE (IAM):
-Your IAM policy for the Vercel runtime credentials must allow:
-  s3:PutObject, s3:GetObject, s3:HeadObject
-on BOTH:
-  arn:aws:s3:::<your-bucket>/uploads/*
-  arn:aws:s3:::<your-bucket>/sessions/*
-
-Otherwise presigned PUTs will work but writing intake/report files or session bundles will fail.
-*/
