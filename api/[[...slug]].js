@@ -1,6 +1,9 @@
 // /api/[[...slug]].js  (Vercel Node.js 20, ESM)
 import {
-  S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import Busboy from "busboy";
@@ -9,11 +12,13 @@ export const config = { api: { bodyParser: false } };
 
 // ==== ENV ====
 const REGION = process.env.AWS_REGION || "us-west-2";
-const BUCKET = process.env.S3_UPLOAD_BUCKET; // e.g. virtualcoachai-prod
+const BUCKET = process.env.S3_UPLOAD_BUCKET; // e.g. "virtualcoachai-prod"
 const PREFIX = (process.env.S3_UPLOAD_PREFIX || "uploads/").replace(/^\/+/, "");
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ||
   "https://virtualcoachai.net,https://virtualcoachai-homepage.vercel.app")
-  .split(",").map(s => s.trim()).filter(Boolean);
+  .split(",")
+  .map(s => s.trim())
+  .filter(Boolean);
 
 const s3 = new S3Client({
   region: REGION,
@@ -36,12 +41,12 @@ function setCORS(req, res) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization");
   res.setHeader("Access-Control-Max-Age", "300");
 }
-function cleanName(n = "video.mp4") {
-  return String(n).trim().toLowerCase().replace(/[^a-z0-9_.-]+/g, "_");
+function cleanName(name = "video.mp4") {
+  return String(name).trim().toLowerCase().replace(/[^a-z0-9_.-]+/g, "_");
 }
-function makeKey(original = "video.mp4") {
+function makeKey(originalFilename = "video.mp4") {
   const ts = Date.now();
-  const safe = cleanName(original);
+  const safe = cleanName(originalFilename);
   const ext = (safe.split(".").pop() || "mp4").toLowerCase();
   const base = safe.replace(/\.[a-z0-9]+$/i, "");
   return `${PREFIX}${ts}-${base}.${ext}`;
@@ -50,7 +55,8 @@ async function readJson(req) {
   const chunks = [];
   for await (const c of req) chunks.push(c);
   const buf = Buffer.concat(chunks);
-  try { return JSON.parse(buf.toString("utf8") || "{}"); } catch { return {}; }
+  try { return JSON.parse(buf.toString("utf8") || "{}"); }
+  catch { return {}; }
 }
 function json(res, code, obj) {
   res.status(code).setHeader("Content-Type", "application/json");
@@ -89,13 +95,14 @@ function qcReport(report = {}) {
 }
 
 // ==== ROUTES ====
+
 // GET /api/ping
-async function routePing(req, res) {
+async function routePing(_req, res) {
   return json(res, 200, { pong: true, at: Date.now() });
 }
 
 // GET /api/env-check
-async function routeEnv(req, res) {
+async function routeEnv(_req, res) {
   return json(res, 200, {
     ok: !!(BUCKET && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY),
     node: process.version,
@@ -115,12 +122,13 @@ async function routePresign(req, res) {
   const finalKey = body.key || makeKey(filename);
 
   const cmd = new PutObjectCommand({ Bucket: BUCKET, Key: finalKey, ContentType: type });
-  const putUrl = await getSignedUrl(s3, cmd, { expiresIn: 60 * 15 });
+  const putUrl = await getSignedUrl(s3, cmd, { expiresIn: 60 * 15 }); // 15 minutes
   return json(res, 200, { key: finalKey, putUrl });
 }
 
 // POST /api/upload  (multipart: file|video, key?, intake?)
 async function routeUpload(req, res) {
+  // Guard: this proxy path is for small files only (Vercel hobby 5 MB-ish)
   const cl = Number(req.headers["content-length"] || 0);
   if (cl > 4_500_000) {
     return json(res, 413, { error: "File too large for proxy upload. Use /api/presign + PUT to S3." });
@@ -128,7 +136,10 @@ async function routeUpload(req, res) {
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
 
   const bb = Busboy({ headers: req.headers });
-  let fileKey = null, providedKey = null, intakeJson = null, fileUploaded = false;
+  let fileKey = null;
+  let providedKey = null;
+  let intakeJson = null;
+  let fileUploaded = false;
 
   const done = new Promise((resolve, reject) => {
     bb.on("field", (name, val) => {
@@ -161,7 +172,7 @@ async function routeUpload(req, res) {
         await s3.send(new PutObjectCommand({
           Bucket: BUCKET, Key: `${base}.intake.json`, Body: intakeJson, ContentType: "application/json"
         }));
-      } catch {}
+      } catch { /* ignore */ }
     }
 
     const getUrl = await getSignedUrl(s3, new GetObjectCommand({ Bucket: BUCKET, Key: fileKey }), { expiresIn: 60 * 60 * 24 });
@@ -185,7 +196,8 @@ async function routeIntake(req, res) {
   return json(res, 200, { ok: true });
 }
 
-// POST /api/report  { key, report }
+// POST /api/report  { key, report }  (write analyzer output)
+// (This enables your console “stub report” test and unblocks /api/analyze polling.)
 async function routeReport(req, res) {
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
   const body = await readJson(req);
@@ -197,7 +209,10 @@ async function routeReport(req, res) {
   const payload = JSON.stringify(body.report || {}, null, 2);
 
   await s3.send(new PutObjectCommand({
-    Bucket: BUCKET, Key: reportKey, Body: payload, ContentType: "application/json"
+    Bucket: BUCKET,
+    Key: reportKey,
+    Body: payload,
+    ContentType: "application/json"
   }));
 
   return json(res, 200, { ok: true, reportKey });
@@ -221,6 +236,7 @@ async function routeAnalyze(req, res) {
   const txt = await obj.Body.transformToString();
   let report = {};
   try { report = JSON.parse(txt); } catch { report = { raw: txt }; }
+
   return json(res, 200, { status: "ready", report });
 }
 
@@ -240,6 +256,7 @@ async function routeQC(req, res) {
   } catch {}
 
   if (!report) return json(res, 200, { status: "warn", issues: [{ level: "warn", msg: "No report yet" }] });
+
   const out = qcReport(report);
   return json(res, 200, out);
 }
@@ -260,9 +277,6 @@ export default async function handler(req, res) {
     if (req.method === "POST" && path === "upload")     return routeUpload(req, res);
     if (req.method === "POST" && path === "intake")     return routeIntake(req, res);
     if (req.method === "POST" && path === "report")     return routeReport(req, res);
-
-    // helpful probe: GET /api/report returns 405 (so you don't see a 404 if it's deployed)
-    if (req.method === "GET"  && path === "report")     return json(res, 405, { error: "Use POST for /api/report" });
 
     if (req.method === "GET"  && path === "analyze")    return routeAnalyze(req, res);
     if (req.method === "GET"  && path === "qc")         return routeQC(req, res);
