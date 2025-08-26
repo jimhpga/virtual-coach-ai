@@ -502,6 +502,49 @@
     btnOpenReport.classList.remove('disabled');
     if (reportObj){ try{ localStorage.setItem('vc_last_report', JSON.stringify(reportObj)); }catch{} }
   }
+<script>
+// — add this —
+async function writeStubReports(sessionId, keys, intake, views){
+  const now = new Date().toISOString();
+
+  // small per-file stub (so even single-file polling sees "ready")
+  const perFileTasks = (keys || []).map(k => fetch('/api/report', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      key: k,
+      report: {
+        status: "ready",
+        generated_at: now,
+        source_key: k,
+        mode: "per-file",
+        metrics: { note: "stub metrics (per-file)" }
+      }
+    })
+  }).catch(()=>{}));
+
+  // bundle stub (preferred by the UI/polling)
+  const bundleKeyBase = `uploads/sessions/${sessionId}/bundle`;
+  const bundleTask = fetch('/api/report', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      key: bundleKeyBase,
+      report: {
+        status: "ready",
+        generated_at: now,
+        sessionId,
+        views,
+        files: keys,
+        intake
+      }
+    })
+  }).catch(()=>{});
+
+  await Promise.allSettled([ ...perFileTasks, bundleTask ]);
+}
+// — end helper —
+</script>
 
   async function startUpload(){
     const { views, dtl, fo } = collectFiles();
