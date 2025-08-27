@@ -3,7 +3,6 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
-  HeadObjectCommand,
   ListObjectsV2Command
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -118,7 +117,7 @@ async function routePresign(req, res) {
   const body = await readJson(req);
   const filename = body.filename || "video.mp4";
   const type = body.type || "application/octet-stream";
-  const finalKey = body.key || makeKey(filename);
+  const finalKey = (body.key ? String(body.key) : makeKey(filename)).trim();
 
   const cmd = new PutObjectCommand({ Bucket: BUCKET, Key: finalKey, ContentType: type });
   const putUrl = await getSignedUrl(s3, cmd, { expiresIn: 60 * 15 });
@@ -141,7 +140,7 @@ async function routeUpload(req, res) {
 
   const done = new Promise((resolve, reject) => {
     bb.on("field", (name, val) => {
-      if (name === "key") providedKey = String(val);
+      if (name === "key") providedKey = String(val).trim();
       if (name === "intake") intakeJson = String(val);
     });
     bb.on("file", async (name, file, info) => {
@@ -184,7 +183,7 @@ async function routeUpload(req, res) {
 async function routeIntake(req, res) {
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
   const body = await readJson(req);
-  const key = String(body.key || "");
+  const key = String(body.key || "").trim();
   if (!key) return json(res, 400, { error: "Missing key" });
   const base = baseKey(key);
   const payload = JSON.stringify(body.intake || {}, null, 2);
@@ -198,7 +197,7 @@ async function routeIntake(req, res) {
 async function routeReport(req, res) {
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
   const body = await readJson(req);
-  const key = String(body.key || "");
+  const key = String(body.key || "").trim();
   if (!key) return json(res, 400, { error: "Missing key" });
 
   const base = baseKey(key);
@@ -234,7 +233,7 @@ async function routeAnalyze(req, res) {
   if (sessionId) {
     const prefixes = [
       `sessions/${sessionId}/`,
-      `${PREFIX.replace(/\/?$/,'/') }sessions/${sessionId}/`
+      `${PREFIX.replace(/\/?$/,'/')}sessions/${sessionId}/` // <— NO stray space
     ];
 
     for (const pref of prefixes) {
@@ -287,7 +286,7 @@ async function routeAnalyze(req, res) {
 // GET /api/qc?key=...
 async function routeQC(req, res) {
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
-  const key = String(req.query.key || "");
+  const key = String(req.query.key || "").trim();
   if (!key) return json(res, 400, { error: "Missing key" });
   const base = baseKey(key);
   const reportKey = `${base}.report.json`;
