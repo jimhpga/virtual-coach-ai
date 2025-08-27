@@ -467,6 +467,25 @@
     });
   }
 
+  // NEW: write JSON straight to S3 via /api/presign + PUT
+  async function writeJsonToS3(objectKey, obj){
+    const key = objectKey.endsWith('.report.json') ? objectKey : `${objectKey}.report.json`;
+    const pres = await fetch('/api/presign', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ filename:'report.json', type:'application/json', key }),
+      cache:'no-store'
+    });
+    if(!pres.ok){
+      const t = await pres.text().catch(()=> '');
+      throw new Error(`presign failed ${pres.status}${t ? ' — ' + t.slice(0,200) : ''}`);
+    }
+    const { putUrl } = await pres.json();
+    const put = await fetch(putUrl, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(obj) });
+    if(!put.ok) throw new Error(`PUT failed ${put.status}`);
+    return key;
+  }
+
   function collectFiles(){
     const v = currentViews();
     if (v === 'dtl'){ return { views:v, dtl: fileDTL.files?.[0]||null, fo:null }; }
@@ -478,42 +497,29 @@
   async function writeStubReports(sessionId, keys, intake, views){
     const now = new Date().toISOString();
 
-    // Write per-file stubs (helps if you open a single-file report)
-    const perFileTasks = (keys || []).map(k => fetch('/api/report', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        key: k,
-        report: {
-          status: "ready",
-          generated_at: now,
-          source_key: k,
-          mode: "per-file",
-          metrics: { note: "stub metrics (per-file)" }
-        }
-      })
-    }).catch(()=>{}));
+    // Per-file stub reports (optional)
+    await Promise.allSettled(
+      (keys || []).map(k => writeJsonToS3(k, {
+        status: "ready",
+        generated_at: now,
+        source_key: k,
+        mode: "per-file",
+        metrics: { note: "stub metrics (per-file)" }
+      }))
+    );
 
-    // Bundle stub (what the UI will prefer)
-    const bundleKeyBase = `${KEY_PREFIX}/sessions/${sessionId}/bundle`;
-    const bundleTask = fetch('/api/report', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        key: bundleKeyBase,
-        report: {
-          status: "ready",
-          generated_at: now,
-          sessionId,
-          views,
-          files: keys,
-          intake
-        }
-      })
-    }).catch(()=>{});
+    // Bundle (preferred)
+    const bundleBase = `${KEY_PREFIX}/sessions/${sessionId}/bundle`;
+    await writeJsonToS3(bundleBase, {
+      status: "ready",
+      generated_at: now,
+      sessionId,
+      views,
+      files: keys,
+      intake
+    });
 
-    await Promise.allSettled([ ...perFileTasks, bundleTask ]);
-    return `${KEY_PREFIX}/sessions/${sessionId}/bundle`; // prefer bundle
+    return bundleBase; // base path (no .report.json)
   }
 
   function finishReady(reportKey, reportObj){
@@ -618,7 +624,6 @@
 
     }catch(err){
       console.error(err);
-      // fallback to polling if report write failed
       try{ await pollReady(sessionId); }catch{}
       status('Upload failed', '');
       alert(err.message || 'Upload failed');
@@ -637,19 +642,12 @@
       const bundleKey = `${KEY_PREFIX}/sessions/${sessionId}/bundle`;
       const now = new Date().toISOString();
 
-      await fetch('/api/report', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify({
-          key: bundleKey,
-          report: {
-            status:'ready',
-            generated_at: now,
-            sessionId, views, files,
-            intake: { ...(intake||{}), derived },
-            metrics: { note: 'stub metrics (force complete)' }
-          }
-        })
+      await writeJsonToS3(bundleKey, {
+        status:'ready',
+        generated_at: now,
+        sessionId, views, files,
+        intake: { ...(intake||{}), derived },
+        metrics: { note: 'stub metrics (force complete)' }
       });
 
       finishReady(bundleKey, { status:'ready', sessionId, views, files, intake: { ...(intake||{}), derived } });
@@ -677,4 +675,3 @@
 </script>
 </body>
 </html>
-
