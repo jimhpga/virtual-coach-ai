@@ -739,5 +739,54 @@ window.writeJsonToS3 = writeJsonToS3;
   // Initialize UI
   step(1); progress(0); status('Idle','');
 </script>
+  <script>
+  // define + expose for console/tests
+  window.writeJsonToS3 = async function(objectKey, obj){
+    // make sure the key ends with .report.json
+    const key = objectKey.endsWith('.report.json') ? objectKey : `${objectKey}.report.json`;
+
+    // safety timeout so we don't hang forever
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort('timeout'), 20000);
+
+    try {
+      console.log('[report] presign for', key);
+      const pres = await fetch('/api/presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: 'report.json', type: 'application/json', key }),
+        cache: 'no-store',
+        signal: ac.signal
+      });
+
+      if (!pres.ok) {
+        let txt = ''; try { txt = await pres.text(); } catch {}
+        throw new Error(`presign failed ${pres.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
+      }
+
+      const { putUrl } = await pres.json();
+      if (!putUrl) throw new Error('presign response missing putUrl');
+
+      const put = await fetch(putUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(obj),
+        signal: ac.signal
+      });
+
+      if (!put.ok) {
+        let txt = ''; try { txt = await put.text(); } catch {}
+        throw new Error(`PUT failed ${put.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
+      }
+
+      console.log('[report] PUT OK →', key);
+      return key;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+</script>
+
+  
 </body>
 </html>
