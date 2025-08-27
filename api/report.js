@@ -3,6 +3,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 export const config = { api: { bodyParser: false } };
 
+// ==== ENV ====
 const REGION  = process.env.AWS_REGION || "us-west-2";
 const BUCKET  = process.env.S3_UPLOAD_BUCKET;          // e.g. "virtualcoachai-prod"
 const PREFIX  = (process.env.S3_UPLOAD_PREFIX || "uploads/").replace(/^\/+/, "");
@@ -12,6 +13,7 @@ const ORIGINS = (process.env.ALLOWED_ORIGINS ||
 
 const s3 = new S3Client({ region: REGION });
 
+// ==== helpers ====
 function baseKey(key) {
   return String(key || "").replace(/\.[a-z0-9]+$/i, "");
 }
@@ -35,11 +37,11 @@ function json(res, code, obj) {
   res.end(JSON.stringify(obj));
 }
 
+// ==== handler ====
 export default async function handler(req, res) {
   setCORS(req, res);
   if (req.method === "OPTIONS") { res.status(204).end(); return; }
   if (req.method !== "POST") return json(res, 405, { error: "Method Not Allowed", allow: "POST" });
-
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
 
   try {
