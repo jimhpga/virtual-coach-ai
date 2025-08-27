@@ -5,12 +5,13 @@ export const config = { api: { bodyParser: false } };
 
 // ==== ENV ====
 const REGION  = process.env.AWS_REGION || "us-west-2";
-const BUCKET  = process.env.S3_UPLOAD_BUCKET;          // e.g. "virtualcoachai-prod"
+const BUCKET  = process.env.S3_UPLOAD_BUCKET; // e.g. "virtualcoachai-prod"
 const PREFIX  = (process.env.S3_UPLOAD_PREFIX || "uploads/").replace(/^\/+/, "");
 const ORIGINS = (process.env.ALLOWED_ORIGINS ||
-  "https://virtualcoachai.net,https://virtualcoachai-homepage.vercel.app")
-  .split(",").map(s => s.trim()).filter(Boolean);
+  "https://virtualcoachai.net,https://virtualcoachai-homepage.vercel.app"
+).split(",").map(s => s.trim()).filter(Boolean);
 
+// S3 client
 const s3 = new S3Client({
   region: REGION,
   credentials: {
@@ -21,7 +22,13 @@ const s3 = new S3Client({
 
 // ==== helpers ====
 function baseKey(key) {
+  // strip any file extension; "uploads/..../bundle" stays the same,
+  // "uploads/.../video.mp4" -> "uploads/.../video"
   return String(key || "").replace(/\.[a-z0-9]+$/i, "");
+}
+function json(res, code, obj) {
+  res.status(code).setHeader("Content-Type", "application/json");
+  res.end(JSON.stringify(obj));
 }
 function setCORS(req, res) {
   const o = req.headers.origin || "";
@@ -38,32 +45,24 @@ async function readJson(req) {
   try { return JSON.parse(buf.toString("utf8") || "{}"); }
   catch { return {}; }
 }
-function json(res, code, obj) {
-  res.status(code).setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify(obj));
-}
 
 // ==== handler ====
 export default async function handler(req, res) {
   setCORS(req, res);
   if (req.method === "OPTIONS") { res.status(204).end(); return; }
-
-  if (req.method !== "POST") {
-    return json(res, 405, { error: "Method Not Allowed", allow: "POST" });
-  }
-
+  if (req.method !== "POST") return json(res, 405, { error: "Method Not Allowed", allow: "POST" });
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
 
   try {
     const body = await readJson(req);
-    const key = String(body.key || "");
+    const key = String(body.key || "").trim();
     if (!key) return json(res, 400, { error: "Missing key" });
 
     const report = body.report || {};
-    const base = baseKey(key);
+    const base = baseKey(key); // e.g. "uploads/sessions/abc/bundle"
     const reportKey = `${base}.report.json`;
-    const payload = JSON.stringify(report, null, 2);
 
+    const payload = JSON.stringify(report, null, 2);
     await s3.send(new PutObjectCommand({
       Bucket: BUCKET,
       Key: reportKey,
@@ -71,8 +70,9 @@ export default async function handler(req, res) {
       ContentType: "application/json"
     }));
 
-    return json(res, 200, { ok: true, reportKey });
+    return json(res, 200, { ok: true, reportKey, bucket: BUCKET });
   } catch (e) {
-    return json(res, 500, { error: String(e.message || e) });
+    console.error("report write error:", e);
+    return json(res, 500, { error: String(e?.message || e) });
   }
 }
