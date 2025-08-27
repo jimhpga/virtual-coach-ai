@@ -440,7 +440,8 @@
     const r = await fetch('/api/presign', {
       method:'POST',
       headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ filename:file.name, type:file.type||'application/octet-stream', key })
+      body: JSON.stringify({ filename:file.name, type:file.type||'application/octet-stream', key }),
+      cache:'no-store'
     });
     if (!r.ok){
       let t=''; try{t=await r.text()}catch{}
@@ -467,23 +468,46 @@
     });
   }
 
-  // NEW: write JSON straight to S3 via /api/presign + PUT
+  // NEW: write JSON straight to S3 via /api/presign + PUT (with timeout + logs)
   async function writeJsonToS3(objectKey, obj){
     const key = objectKey.endsWith('.report.json') ? objectKey : `${objectKey}.report.json`;
-    const pres = await fetch('/api/presign', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ filename:'report.json', type:'application/json', key }),
-      cache:'no-store'
-    });
-    if(!pres.ok){
-      const t = await pres.text().catch(()=> '');
-      throw new Error(`presign failed ${pres.status}${t ? ' — ' + t.slice(0,200) : ''}`);
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort('timeout'), 20000);
+
+    try {
+      console.log('[report] presign for', key);
+      const pres = await fetch('/api/presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: 'report.json', type: 'application/json', key }),
+        cache: 'no-store',
+        signal: ac.signal
+      });
+      if (!pres.ok) {
+        let txt = ''; try { txt = await pres.text(); } catch {}
+        throw new Error(`presign failed ${pres.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
+      }
+
+      const j = await pres.json().catch(() => ({}));
+      const putUrl = j.putUrl;
+      if (!putUrl) throw new Error('presign response missing putUrl');
+
+      const put = await fetch(putUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(obj),
+        signal: ac.signal
+      });
+      if (!put.ok) {
+        let txt = ''; try { txt = await put.text(); } catch {}
+        throw new Error(`PUT failed ${put.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
+      }
+
+      console.log('[report] PUT OK →', key);
+      return key;
+    } finally {
+      clearTimeout(timer);
     }
-    const { putUrl } = await pres.json();
-    const put = await fetch(putUrl, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(obj) });
-    if(!put.ok) throw new Error(`PUT failed ${put.status}`);
-    return key;
   }
 
   function collectFiles(){
@@ -593,16 +617,9 @@
         uploadedKeys.push(final2);
       }
 
-      // Intake save
+      // Intake save (best-effort)
       progress(88); step(2); status('Processing…', 'warn');
       const derived = deriveHints(data);
-
-      try{
-        localStorage.setItem('vc_last_intake', JSON.stringify({
-          sessionId, intake:data, views, files: uploadedKeys, ts: Date.now()
-        }));
-      }catch{}
-
       fetch('/api/intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
