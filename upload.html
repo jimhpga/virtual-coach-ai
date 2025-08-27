@@ -110,6 +110,31 @@
   details.tips .content{margin-top:10px;color:#cfe0e6}
 </style>
 </head>
+  <button id="make-sample-report">Make Sample Report</button>
+<script>
+document.getElementById('make-sample-report').addEventListener('click', ()=>{
+  const sample = {
+    discipline: "full",
+    swings: 12,
+    phases: [
+      { id:"P1", name:"Setup", grade:"ok", short:"Grip neutral; posture a touch tall.", long:"Soften knees slightly; hinge a bit more; aim feet/hips/shoulders together.", ref:"https://youtu.be/dQw4w9WgXcQ" },
+      { id:"P6", name:"Shaft Parallel (DS)", grade:"bad", short:"Face open, path out-to-in.", long:"Bump-then-turn; trail elbow into slot; alignment-stick ‘lane’.", ref:"" },
+      { id:"P7", name:"Impact", grade:"ok", short:"Handle lead but face leaking.", long:"Lead-wrist flexion by P6; tee-gate drill; slow-mo check to P6." }
+    ],
+    position_metrics: [
+      { label:"P4 Top Window", value:68 }, { label:"P6 Window", value:52 }, { label:"P7 Window", value:61 }
+    ],
+    swing_metrics: [
+      { label:"Tempo Ratio (3:1 target)", value:74 }, { label:"Face-to-Path Variance", value:57 }, { label:"Release Timing", value:62 }
+    ],
+    power: { score:64, tempo:"3.0:1", release_timing:62 },
+    cohort: { hand:"Right", eye:"Left", gender:"Male", height:70, build:"Athletic" }
+  };
+  localStorage.setItem('vc_last_report', JSON.stringify(sample));
+  location.href = "/report.html?src=local";
+});
+</script>
+
 <body>
   <header class="top" id="site-header">
     <div class="navwrap">
