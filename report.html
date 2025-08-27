@@ -115,7 +115,7 @@
   </header>
 
   <div class="scrim">
-    <main class="wrap">
+    <main class="wrap" id="report-root">
       <header class="hdr" style="margin-bottom:10px">
         <div>
           <div class="title">Swing Report — P1–P9</div>
@@ -447,10 +447,6 @@
     const phases = Array.isArray(data.phases)? data.phases : [];
     document.getElementById('plist').innerHTML = phases.map(phaseRow).join('') || '<div class="content sub">No phases found in report.</div>';
 
-    const pri = (data.coaching && Array.isArray(data.coaching.priority_fixes)) ? data.coaching.priority_fixes : [];
-    const pow = (data.coaching && Array.isArray(data.coaching.power_fixes)) ? data.coaching.power_fixes : [];
-    document.getElementById('coachPriority')?.remove(); // (legacy safety)
-
     document.getElementById('position').innerHTML = (data.position_metrics||[]).map(metricRow).join('') || '<div class="sub">No position metrics.</div>';
     document.getElementById('swing').innerHTML    = (data.swing_metrics||[]).map(metricRow).join('')    || '<div class="sub">No swing metrics.</div>';
 
@@ -460,7 +456,7 @@
       <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo||'—'}</div></div>
       <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing||0)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
 
-    // Video buttons in phases/coaching
+    // Video buttons
     document.querySelectorAll('.videoBtn').forEach(b=> b.addEventListener('click', ()=> openViewer(b.dataset.href)));
 
     // Cohort line + fundamentals ranking
@@ -594,9 +590,97 @@
     const body = encodeURIComponent(`Here is my swing report:\n${shareUrl()}\n\n${p}\n\n— sent from virtualcoachai.net`);
     location.href = `mailto:${email}?subject=${subject}&body=${body}`;
   });
+
+  // === Portable HTML download ===
+  function buildPortableHtml(){
+    const css = `
+      body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;margin:24px;background:#0b1520;color:#ecf3f7}
+      .card{background:#0e1b25;border:1px solid #123;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3);margin:12px 0}
+      .card h3{margin:0;padding:14px 16px;border-bottom:1px solid #123}
+      .content{padding:12px 16px}
+      .title{font-size:26px;font-weight:800}
+      .sub{color:#cfe0e6;font-size:13px}
+      .badge{display:inline-block;background:#0d2230;border:1px solid #234;color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
+      .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+      @media(max-width:960px){.grid2{grid-template-columns:1fr}}
+      .metric{display:flex;align-items:center;gap:10px;margin:9px 0}
+      .metric .name{flex:0 0 210px;color:#d8ebf2}
+      .bar{flex:1;height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}
+      .bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
+      .ok{background:linear-gradient(90deg,#19c37d,#2bd897)}
+      .warn{background:linear-gradient(90deg,#f6c453,#ffd479)}
+      .bad{background:linear-gradient(90deg,#ff6b6b,#ff8f8f)}
+      .pct{width:52px;text-align:right;color:#cfe3ee}
+      details.panel{background:#0e1b25;border:1px solid #123;border-radius:12px}
+      summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer}
+      summary::-webkit-details-marker{display:none}
+      .pnum{width:34px;height:34px;border-radius:10px;background:#0c1820;border:1px solid #123;display:grid;place-items:center;font-weight:800}
+      .pname{font-weight:700}
+      .gchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;margin-left:8px}
+      .g-good{background:#19c37d;color:#fff}
+      .g-ok{background:#f6c453;color:#2a2300}
+      .g-bad{background:#ff6b6b;color:#fff}
+      .delta{display:flex;align-items:center;gap:10px;margin:10px 0}
+      .delta .name{flex:1;font-weight:700}
+      .dchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;border:1px solid #234}
+      .dplus{background:rgba(246,196,83,.18);border-color:#b8860b}
+      .dminus{background:rgba(25,195,125,.18);border-color:#2a6}
+    `.trim();
+
+    const titleBlock = document.querySelector('.title')?.textContent || 'Swing Report — P1–P9';
+    const dateTxt = document.getElementById('date')?.textContent || '';
+    const modeTxt = document.getElementById('modeLabel')?.textContent || 'Full Swing';
+    const swings = document.getElementById('swingCount')?.textContent || '—';
+
+    const phases = document.getElementById('plist')?.innerHTML || '';
+    const pos    = document.getElementById('position')?.innerHTML || '';
+    const swg    = document.getElementById('swing')?.innerHTML || '';
+    const power  = document.getElementById('power')?.innerHTML || '';
+    const cohort = document.getElementById('cohortLine')?.innerHTML || '';
+    const top3   = document.getElementById('tourDelta')?.innerHTML || '';
+    const allF   = document.getElementById('allFundamentals')?.innerHTML || '';
+
+    const json = JSON.stringify(last || {}, null, 2);
+
+    return `<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>${titleBlock}</title>
+<style>${css}</style>
+</head><body>
+<header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+  <div>
+    <div class="title">${titleBlock}</div>
+    <div class="sub">Date: <strong>${dateTxt}</strong> • Mode: <strong>${modeTxt}</strong></div>
+  </div>
+  <div><span class="badge">Swings: <span>${swings}</span></span></div>
+</header>
+
+<section class="card"><h3>P1–P9</h3><div class="content">${phases}</div></section>
+
+<section class="grid2">
+  <div class="card"><h3>Position Consistency</h3><div class="content">${pos}</div></div>
+  <div class="card"><h3>Swing Consistency</h3><div class="content">${swg}</div></div>
+</section>
+
+<section class="card"><h3>Power Score Summary</h3><div class="content">${power}</div></section>
+
+<section class="card">
+  <h3>Tour-Player Delta — Top 3 Fundamentals</h3>
+  <div class="content">${cohort ? `<div class="sub" style="padding-bottom:8px">${cohort}</div>` : ''}${top3}</div>
+  <details class="panel" style="margin:10px"><summary><span class="pname">See all fundamentals</span></summary>
+    <div class="content">${allF}</div>
+  </details>
+</section>
+
+<script type="application/json" id="report-data">${json.replace(/<\/script>/gi,'<\\/script>')}</script>
+</body></html>`;
+  }
+
   document.getElementById('btnDownload').addEventListener('click', ()=>{
-    const html = document.documentElement.outerHTML;
-    const blob = new Blob([html], {type:'text/html'});
+    // Build a portable (offline-safe) HTML with embedded data & styles
+    const portable = buildPortableHtml();
+    const blob = new Blob([portable], {type:'text/html'});
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'swing-report.html';
