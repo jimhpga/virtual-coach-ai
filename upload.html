@@ -4,6 +4,12 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual Coach AI — Upload</title>
+
+<!-- Quiet the favicon 404 -->
+<link rel="icon" href="/virtualcoach-logo-transparent.png" type="image/png">
+<!-- If you keep a preload for the background, make it valid -->
+<link rel="preload" href="/homepage-background.png" as="image">
+
 <style>
   :root{
     --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06);
@@ -240,6 +246,9 @@
               <button class="btn ghost" id="btnReset" type="button">Reset</button>
               <a class="btn warn" id="btnOpenReport" href="#" target="_blank" rel="noopener" aria-disabled="true">Open Report</a>
               <button class="btn" id="btnForce" type="button" title="Write a stub report immediately for demo/testing">Force Complete (stub)</button>
+
+              <!-- Self-test button (no video needed) -->
+              <button class="btn ghost" type="button" onclick="window.selfTestWrite()">Self-test: write report</button>
             </div>
           </div>
         </div>
@@ -440,8 +449,7 @@
     const r = await fetch('/api/presign', {
       method:'POST',
       headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ filename:file.name, type:file.type||'application/octet-stream', key }),
-      cache:'no-store'
+      body: JSON.stringify({ filename:file.name, type:file.type||'application/octet-stream', key })
     });
     if (!r.ok){
       let t=''; try{t=await r.text()}catch{}
@@ -467,97 +475,6 @@
       xhr.send(file);
     });
   }
-<!-- keep this inside the same <script> tag -->
-<script>
-async function writeJsonToS3(objectKey, obj){
-  // normalize key to end with .report.json
-  const key = objectKey.endsWith('.report.json') ? objectKey : `${objectKey}.report.json`;
-
-  // safety timeout so we don't hang forever
-  const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort('timeout'), 20000);
-
-  try {
-    console.log('[report] presign for', key);
-    const pres = await fetch('/api/presign', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename: 'report.json', type: 'application/json', key }),
-      cache: 'no-store',
-      signal: ac.signal
-    });
-
-    if (!pres.ok) {
-      let txt = ''; try { txt = await pres.text(); } catch {}
-      throw new Error(`presign failed ${pres.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
-    }
-
-    const j = await pres.json().catch(() => ({}));
-    const putUrl = j.putUrl;
-    if (!putUrl) throw new Error('presign response missing putUrl');
-
-    const put = await fetch(putUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(obj),
-      signal: ac.signal
-    });
-    if (!put.ok) {
-      let txt = ''; try { txt = await put.text(); } catch {}
-      throw new Error(`PUT failed ${put.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
-    }
-
-    console.log('[report] PUT OK →', key);
-    return key;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-// expose for console use
-window.writeJsonToS3 = writeJsonToS3;
-</script>
-
-  // NEW: write JSON straight to S3 via /api/presign + PUT (with timeout + logs)
-  async function writeJsonToS3(objectKey, obj){
-    const key = objectKey.endsWith('.report.json') ? objectKey : `${objectKey}.report.json`;
-    const ac = new AbortController();
-    const timer = setTimeout(() => ac.abort('timeout'), 20000);
-
-    try {
-      console.log('[report] presign for', key);
-      const pres = await fetch('/api/presign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: 'report.json', type: 'application/json', key }),
-        cache: 'no-store',
-        signal: ac.signal
-      });
-      if (!pres.ok) {
-        let txt = ''; try { txt = await pres.text(); } catch {}
-        throw new Error(`presign failed ${pres.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
-      }
-
-      const j = await pres.json().catch(() => ({}));
-      const putUrl = j.putUrl;
-      if (!putUrl) throw new Error('presign response missing putUrl');
-
-      const put = await fetch(putUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(obj),
-        signal: ac.signal
-      });
-      if (!put.ok) {
-        let txt = ''; try { txt = await put.text(); } catch {}
-        throw new Error(`PUT failed ${put.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
-      }
-
-      console.log('[report] PUT OK →', key);
-      return key;
-    } finally {
-      clearTimeout(timer);
-    }
-  }
 
   function collectFiles(){
     const v = currentViews();
@@ -566,13 +483,66 @@ window.writeJsonToS3 = writeJsonToS3;
     return { views:v, dtl:fileDTL.files?.[0]||null, fo:fileFO.files?.[0]||null }; // both
   }
 
-  // ===== Report helpers (write immediately; no Lambda needed)
+  // ======== WRITE REPORTS DIRECTLY TO S3 (no /api/report) ========
+  window.writeJsonToS3 = async function(objectKey, obj){
+    const key = objectKey.endsWith('.report.json') ? objectKey : `${objectKey}.report.json`;
+
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort('timeout'), 20000);
+
+    try {
+      const pres = await fetch('/api/presign', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ filename:'report.json', type:'application/json', key }),
+        cache:'no-store',
+        signal: ac.signal
+      });
+      if (!pres.ok){
+        let txt=''; try{ txt = await pres.text(); }catch{}
+        throw new Error(`presign failed ${pres.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
+      }
+      const { putUrl } = await pres.json();
+      if (!putUrl) throw new Error('presign response missing putUrl');
+
+      const put = await fetch(putUrl, {
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(obj),
+        signal: ac.signal
+      });
+      if (!put.ok){
+        let txt=''; try{ txt = await put.text(); }catch{}
+        throw new Error(`PUT failed ${put.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
+      }
+      console.log('[report] PUT OK →', key);
+      return key;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
+  // helper: self-test button
+  window.selfTestWrite = async function(){
+    try{
+      const keyBase = `${KEY_PREFIX}/sessions/test-session/bundle`;
+      const wrote = await window.writeJsonToS3(keyBase, { status:'ready', smoke:true, at:new Date().toISOString() });
+      alert('Wrote: ' + wrote);
+      // enable the report button to open that report
+      document.getElementById('btnOpenReport').href = `/report.html?key=${encodeURIComponent(keyBase)}`;
+      document.getElementById('btnOpenReport').removeAttribute('aria-disabled');
+      document.getElementById('btnOpenReport').classList.remove('disabled');
+    }catch(e){
+      alert('Self-test failed: ' + (e && e.message || e));
+    }
+  };
+
+  // ===== Report helpers =====
   async function writeStubReports(sessionId, keys, intake, views){
     const now = new Date().toISOString();
 
-    // Per-file stub reports (optional)
     await Promise.allSettled(
-      (keys || []).map(k => writeJsonToS3(k, {
+      (keys || []).map(k => window.writeJsonToS3(k, {
         status: "ready",
         generated_at: now,
         source_key: k,
@@ -581,15 +551,11 @@ window.writeJsonToS3 = writeJsonToS3;
       }))
     );
 
-    // Bundle (preferred)
     const bundleBase = `${KEY_PREFIX}/sessions/${sessionId}/bundle`;
-    await writeJsonToS3(bundleBase, {
+    await window.writeJsonToS3(bundleBase, {
       status: "ready",
       generated_at: now,
-      sessionId,
-      views,
-      files: keys,
-      intake
+      sessionId, views, files: keys, intake
     });
 
     return bundleBase; // base path (no .report.json)
@@ -666,9 +632,16 @@ window.writeJsonToS3 = writeJsonToS3;
         uploadedKeys.push(final2);
       }
 
-      // Intake save (best-effort)
       progress(88); step(2); status('Processing…', 'warn');
+
       const derived = deriveHints(data);
+
+      try{
+        localStorage.setItem('vc_last_intake', JSON.stringify({
+          sessionId, intake:data, views, files: uploadedKeys, ts: Date.now()
+        }));
+      }catch{}
+
       fetch('/api/intake', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -678,10 +651,8 @@ window.writeJsonToS3 = writeJsonToS3;
         })
       }).catch(()=>{});
 
-      // Write a READY report now (no Lambda required)
       const bundleKey = await writeStubReports(sessionId, uploadedKeys, { ...data, derived }, views);
 
-      // Flip UI to Ready immediately
       finishReady(bundleKey, {
         status:'ready',
         sessionId, views, files: uploadedKeys,
@@ -708,7 +679,7 @@ window.writeJsonToS3 = writeJsonToS3;
       const bundleKey = `${KEY_PREFIX}/sessions/${sessionId}/bundle`;
       const now = new Date().toISOString();
 
-      await writeJsonToS3(bundleKey, {
+      await window.writeJsonToS3(bundleKey, {
         status:'ready',
         generated_at: now,
         sessionId, views, files,
@@ -736,57 +707,7 @@ window.writeJsonToS3 = writeJsonToS3;
     btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled'); btnOpenReport.href='#';
   });
 
-  // Initialize UI
   step(1); progress(0); status('Idle','');
 </script>
-  <script>
-  // define + expose for console/tests
-  window.writeJsonToS3 = async function(objectKey, obj){
-    // make sure the key ends with .report.json
-    const key = objectKey.endsWith('.report.json') ? objectKey : `${objectKey}.report.json`;
-
-    // safety timeout so we don't hang forever
-    const ac = new AbortController();
-    const timer = setTimeout(() => ac.abort('timeout'), 20000);
-
-    try {
-      console.log('[report] presign for', key);
-      const pres = await fetch('/api/presign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: 'report.json', type: 'application/json', key }),
-        cache: 'no-store',
-        signal: ac.signal
-      });
-
-      if (!pres.ok) {
-        let txt = ''; try { txt = await pres.text(); } catch {}
-        throw new Error(`presign failed ${pres.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
-      }
-
-      const { putUrl } = await pres.json();
-      if (!putUrl) throw new Error('presign response missing putUrl');
-
-      const put = await fetch(putUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(obj),
-        signal: ac.signal
-      });
-
-      if (!put.ok) {
-        let txt = ''; try { txt = await put.text(); } catch {}
-        throw new Error(`PUT failed ${put.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
-      }
-
-      console.log('[report] PUT OK →', key);
-      return key;
-    } finally {
-      clearTimeout(timer);
-    }
-  };
-</script>
-
-  
 </body>
 </html>
