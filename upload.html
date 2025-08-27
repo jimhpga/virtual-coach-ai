@@ -475,23 +475,45 @@
   }
 
   // ===== Report helpers (write immediately; no Lambda needed)
-  function reportKeyFor(sessionId, views, uploadedKeys){
-    return (views === 'both')
-      ? `${KEY_PREFIX}/sessions/${sessionId}/bundle`
-      : (uploadedKeys && uploadedKeys[0]);
-  }
+  async function writeStubReports(sessionId, keys, intake, views){
+    const now = new Date().toISOString();
 
-  async function writeStubReport(reportKey, report){
-    const r = await fetch('/api/report', {
+    // Write per-file stubs (helps if you open a single-file report)
+    const perFileTasks = (keys || []).map(k => fetch('/api/report', {
       method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ key: reportKey, report })
-    });
-    if (!r.ok){
-      let t=''; try{ t = await r.text(); }catch{}
-      throw new Error(`Report write failed: HTTP ${r.status}${t ? ' — ' + t.slice(0,200) : ''}`);
-    }
-    return r.json().catch(()=> ({}));
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        key: k,
+        report: {
+          status: "ready",
+          generated_at: now,
+          source_key: k,
+          mode: "per-file",
+          metrics: { note: "stub metrics (per-file)" }
+        }
+      })
+    }).catch(()=>{}));
+
+    // Bundle stub (what the UI will prefer)
+    const bundleKeyBase = `${KEY_PREFIX}/sessions/${sessionId}/bundle`;
+    const bundleTask = fetch('/api/report', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        key: bundleKeyBase,
+        report: {
+          status: "ready",
+          generated_at: now,
+          sessionId,
+          views,
+          files: keys,
+          intake
+        }
+      })
+    }).catch(()=>{});
+
+    await Promise.allSettled([ ...perFileTasks, bundleTask ]);
+    return `${KEY_PREFIX}/sessions/${sessionId}/bundle`; // prefer bundle
   }
 
   function finishReady(reportKey, reportObj){
@@ -502,49 +524,32 @@
     btnOpenReport.classList.remove('disabled');
     if (reportObj){ try{ localStorage.setItem('vc_last_report', JSON.stringify(reportObj)); }catch{} }
   }
-<script>
-// — add this —
-async function writeStubReports(sessionId, keys, intake, views){
-  const now = new Date().toISOString();
 
-  // small per-file stub (so even single-file polling sees "ready")
-  const perFileTasks = (keys || []).map(k => fetch('/api/report', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      key: k,
-      report: {
-        status: "ready",
-        generated_at: now,
-        source_key: k,
-        mode: "per-file",
-        metrics: { note: "stub metrics (per-file)" }
+  // Optional fallback polling (only used if stub write fails)
+  async function checkAnalyzeSession(sessionId){
+    try{
+      const r = await fetch(`/api/analyze?session=${encodeURIComponent(sessionId)}`, { cache:'no-store' });
+      if (r.ok) return r.json();
+    }catch{}
+    return null;
+  }
+  async function pollReady(sessionId){
+    const tryOnce = async ()=>{
+      const sess = await checkAnalyzeSession(sessionId);
+      if (sess && sess.status === 'ready'){
+        finishReady(`${KEY_PREFIX}/sessions/${sessionId}/bundle`, sess.report);
+        return true;
       }
-    })
-  }).catch(()=>{}));
-
-  // bundle stub (preferred by the UI/polling)
-  const bundleKeyBase = `uploads/sessions/${sessionId}/bundle`;
-  const bundleTask = fetch('/api/report', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      key: bundleKeyBase,
-      report: {
-        status: "ready",
-        generated_at: now,
-        sessionId,
-        views,
-        files: keys,
-        intake
-      }
-    })
-  }).catch(()=>{});
-
-  await Promise.allSettled([ ...perFileTasks, bundleTask ]);
-}
-// — end helper —
-</script>
+      const cur = parseFloat(bar.style.width)||88;
+      progress(Math.min(98, cur + Math.random()*2));
+      status('Processing…', 'warn');
+      return false;
+    };
+    if (await tryOnce()) return;
+    const id = setInterval(async ()=>{
+      if (await tryOnce()) clearInterval(id);
+    }, 6000);
+  }
 
   async function startUpload(){
     const { views, dtl, fo } = collectFiles();
@@ -601,26 +606,21 @@ async function writeStubReports(sessionId, keys, intake, views){
         })
       }).catch(()=>{});
 
-      // WRITE A READY REPORT NOW (no Lambda)
-      const reportKey = reportKeyFor(sessionId, views, uploadedKeys);
-      const stubReport = {
-        status: 'ready',
-        generated_at: new Date().toISOString(),
-        sessionId,
-        views,
-        files: uploadedKeys,
-        intake: { ...data, derived },
-        metrics: { note: 'stub metrics' }
-      };
-      await writeStubReport(reportKey, stubReport);
+      // Write a READY report now (no Lambda required)
+      const bundleKey = await writeStubReports(sessionId, uploadedKeys, { ...data, derived }, views);
 
       // Flip UI to Ready immediately
-      finishReady(reportKey, stubReport);
+      finishReady(bundleKey, {
+        status:'ready',
+        sessionId, views, files: uploadedKeys,
+        intake:{ ...data, derived }
+      });
 
     }catch(err){
       console.error(err);
+      // fallback to polling if report write failed
+      try{ await pollReady(sessionId); }catch{}
       status('Upload failed', '');
-      progress(0); step(1);
       alert(err.message || 'Upload failed');
       btnUpload.disabled = false;
     }
@@ -633,19 +633,26 @@ async function writeStubReports(sessionId, keys, intake, views){
       const { sessionId, views, files = [], intake } = last || {};
       if(!sessionId || !files.length){ alert('No last upload — upload a small file first.'); return; }
 
-      const reportKey = reportKeyFor(sessionId, views, files);
       const derived = deriveHints(intake || {});
-      const demoReport = {
-        status: 'ready',
-        generated_at: new Date().toISOString(),
-        sessionId, views, files,
-        intake: { ...(intake||{}), derived },
-        metrics: { shoulder_turn_deg: 92, swing_path_up_deg: 3, club_speed_mph: 98 },
-        notes: "Stub report generated by Force Complete."
-      };
+      const bundleKey = `${KEY_PREFIX}/sessions/${sessionId}/bundle`;
+      const now = new Date().toISOString();
 
-      await writeStubReport(reportKey, demoReport);
-      finishReady(reportKey, demoReport);
+      await fetch('/api/report', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({
+          key: bundleKey,
+          report: {
+            status:'ready',
+            generated_at: now,
+            sessionId, views, files,
+            intake: { ...(intake||{}), derived },
+            metrics: { note: 'stub metrics (force complete)' }
+          }
+        })
+      });
+
+      finishReady(bundleKey, { status:'ready', sessionId, views, files, intake: { ...(intake||{}), derived } });
     }catch(e){
       console.error(e);
       alert(e.message || 'Force complete failed');
@@ -670,3 +677,4 @@ async function writeStubReports(sessionId, keys, intake, views){
 </script>
 </body>
 </html>
+
