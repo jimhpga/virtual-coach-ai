@@ -1,6 +1,8 @@
+// /api/[[...slug]].js  (Vercel — Node.js 20, ESM)
+
 import * as Sentry from "@sentry/node";
 Sentry.init({ dsn: process.env.SENTRY_DSN || "", tracesSampleRate: 1.0 });
-// /api/[[...slug]].js  (Vercel Node.js 20, ESM)
+
 import {
   S3Client,
   PutObjectCommand,
@@ -14,10 +16,10 @@ export const config = { api: { bodyParser: false } };
 
 // ==== ENV ====
 const REGION = process.env.AWS_REGION || "us-west-2";
-const BUCKET = process.env.S3_UPLOAD_BUCKET; // e.g. "virtualcoachai-prod"
+const BUCKET = process.env.S3_UPLOAD_BUCKET; // e.g., "virtualcoachai-prod"
 const PREFIX = (process.env.S3_UPLOAD_PREFIX || "uploads/").replace(/^\/+/, "");
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ||
-  "https://virtualcoachai.net,https://virtualcoachai-homepage.vercel.app")
+  "https://virtualcoachai.net,https://virtualcoachai-homepage.vercel.app,http://localhost:3000")
   .split(",")
   .map(s => s.trim())
   .filter(Boolean);
@@ -98,7 +100,7 @@ function qcReport(report = {}) {
 
 // ==== ROUTES ====
 
-// GET /api       -> basic index so you don’t see 404s when hitting /api
+// GET /api (index)
 async function routeIndex(_req, res) {
   return json(res, 200, {
     ok: true,
@@ -216,8 +218,8 @@ async function routeIntake(req, res) {
   return json(res, 200, { ok: true });
 }
 
-// GET /api/report  -> friendly health
-// POST /api/report { key, report } -> s3://<bucket>/<base>.report.json
+// GET /api/report  -> health
+// POST /api/report { key, report } -> write <base>.report.json
 async function routeReport(req, res) {
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
 
@@ -258,7 +260,6 @@ async function routeAnalyze(req, res) {
   const sessionId = String(req.query.session || "").trim();
   const key = String(req.query.key || "").trim();
 
-  // Session polling: look for *.report.json under either 'sessions/<id>/' or '<PREFIX>/sessions/<id>/'
   if (sessionId) {
     const prefixes = [
       `sessions/${sessionId}/`,
@@ -287,7 +288,7 @@ async function routeAnalyze(req, res) {
         const report = await tryReadReport(reportKey);
         const status = (report && typeof report.status === "string") ? report.status : "ready";
         if (status === "ready") return json(res, 200, { status: "ready", report });
-        return json(res, 200, { status }); // pending/processing/etc.
+        return json(res, 200, { status });
       } catch {
         // try next prefix
       }
@@ -354,11 +355,8 @@ export default async function handler(req, res) {
     if (req.method === "GET"  && path === "qc")                   return routeQC(req, res);
 
     return json(res, 404, { error: "Not found" });
- } catch (e) {
-  try { Sentry.captureException(e); } catch {}
-  return json(res, 500, { error: String(e.message || e) });
+  } catch (e) {
+    try { Sentry.captureException(e); } catch {}
+    return json(res, 500, { error: String(e.message || e) });
+  }
 }
-
-    
-  
-
