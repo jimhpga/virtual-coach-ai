@@ -1,44 +1,26 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const s3 = new S3Client({ region: process.env.AWS_REGION });
 
-const REGION = process.env.AWS_REGION || "us-west-2";
-const BUCKET = process.env.S3_UPLOAD_BUCKET || "";
-
-const s3 = new S3Client({
-  region: REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ""
-  }
-});
-
-function baseKey(k=""){ return String(k).replace(/\.[a-z0-9]+$/i, ""); }
-
-export default async function handler(req, res) {
-  if (req.method === "GET" || req.method === "HEAD") {
-    res.status(200).json({ ok: true, expects: "POST { key, report }" }); return;
-  }
-  if (req.method !== "POST") {
-    res.status(405).json({ error: "Method Not Allowed", allow: "GET,HEAD,POST" }); return;
-  }
-  if (!BUCKET) { res.status(500).json({ error: "S3 bucket not configured" }); return; }
-
+module.exports = async function handler(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ error: "Use POST" });
   try {
-    let body = ""; for await (const c of req) body += c;
-    const parsed = JSON.parse(body || "{}");
-    const key = String(parsed.key || "").trim();
-    const report = parsed.report || {};
-    if (!key) { res.status(400).json({ error: "Missing key" }); return; }
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
+    const jobId = body.jobId || "unknown";
+    const status = body.status || "pending";
+    const data = { status, ...body.data };
 
-    const reportKey = `${baseKey(key)}.report.json`;
+    const Bucket = process.env.S3_BUCKET;
+    const Key = `status/${jobId}.json`;
+
     await s3.send(new PutObjectCommand({
-      Bucket: BUCKET,
-      Key: reportKey,
-      Body: JSON.stringify(report, null, 2),
+      Bucket,
+      Key,
+      Body: JSON.stringify(data),
       ContentType: "application/json"
     }));
 
-    res.status(200).json({ ok: true, reportKey });
+    res.status(200).json({ ok: true, Bucket, Key, wrote: data });
   } catch (e) {
-    res.status(500).json({ error: String(e.message || e) });
+    res.status(500).json({ ok: false, error: e?.message || "report-write-failed" });
   }
-}
+};
