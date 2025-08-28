@@ -12,11 +12,13 @@ export const config = { api: { bodyParser: false } };
 
 // ==== ENV ====
 const REGION = process.env.AWS_REGION || "us-west-2";
-const BUCKET = process.env.S3_UPLOAD_BUCKET; // e.g. virtualcoachai-prod
+const BUCKET = process.env.S3_UPLOAD_BUCKET; // e.g. "virtualcoachai-prod"
 const PREFIX = (process.env.S3_UPLOAD_PREFIX || "uploads/").replace(/^\/+/, "");
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ||
   "https://virtualcoachai.net,https://virtualcoachai-homepage.vercel.app")
-  .split(",").map(s => s.trim()).filter(Boolean);
+  .split(",")
+  .map(s => s.trim())
+  .filter(Boolean);
 
 const s3 = new S3Client({
   region: REGION,
@@ -64,7 +66,7 @@ function baseKey(key) {
   return String(key || "").replace(/\.[a-z0-9]+$/i, "");
 }
 
-// Simple QC over a report object
+// Simple QC over a report object (safe defaults)
 function qcReport(report = {}) {
   const issues = [];
   const r = report.metrics || report || {};
@@ -94,6 +96,24 @@ function qcReport(report = {}) {
 
 // ==== ROUTES ====
 
+// GET /api       -> basic index so you don’t see 404s when hitting /api
+async function routeIndex(_req, res) {
+  return json(res, 200, {
+    ok: true,
+    routes: [
+      "GET  /api/ping",
+      "GET  /api/env-check",
+      "POST /api/presign   { filename, type, key? }",
+      "POST /api/upload    (multipart; file|video, key?, intake?)",
+      "POST /api/intake    { key, intake }",
+      "GET  /api/report    (health)",
+      "POST /api/report    { key, report } -> writes <base>.report.json",
+      "GET  /api/analyze?key=... | ?session=...",
+      "GET  /api/qc?key=..."
+    ]
+  });
+}
+
 // GET /api/ping
 async function routePing(_req, res) {
   return json(res, 200, { pong: true, at: Date.now() });
@@ -103,6 +123,7 @@ async function routePing(_req, res) {
 async function routeEnv(_req, res) {
   return json(res, 200, {
     ok: !!(BUCKET && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY),
+    haveKeys: !!(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY),
     node: process.version,
     region: REGION,
     bucket: BUCKET || "(missing)",
@@ -117,7 +138,7 @@ async function routePresign(req, res) {
   const body = await readJson(req);
   const filename = body.filename || "video.mp4";
   const type = body.type || "application/octet-stream";
-  const finalKey = (body.key ? String(body.key) : makeKey(filename)).trim();
+  const finalKey = String(body.key ? String(body.key) : makeKey(filename)).trim();
 
   const cmd = new PutObjectCommand({ Bucket: BUCKET, Key: finalKey, ContentType: type });
   const putUrl = await getSignedUrl(s3, cmd, { expiresIn: 60 * 15 });
@@ -193,9 +214,15 @@ async function routeIntake(req, res) {
   return json(res, 200, { ok: true });
 }
 
-// POST /api/report  { key, report }
+// GET /api/report  -> friendly health
+// POST /api/report { key, report } -> s3://<bucket>/<base>.report.json
 async function routeReport(req, res) {
   if (!BUCKET) return json(res, 500, { error: "S3 bucket not configured" });
+
+  if (req.method === "GET" || req.method === "HEAD") {
+    return json(res, 200, { ok: true, expects: "POST { key, report }" });
+  }
+
   const body = await readJson(req);
   const key = String(body.key || "").trim();
   if (!key) return json(res, 400, { error: "Missing key" });
@@ -233,13 +260,13 @@ async function routeAnalyze(req, res) {
   if (sessionId) {
     const prefixes = [
       `sessions/${sessionId}/`,
-      `${PREFIX.replace(/\/?$/,'/')}sessions/${sessionId}/` // <— NO stray space
+      `${PREFIX.replace(/\/?$/,'/')}sessions/${sessionId}/`
     ];
 
     for (const pref of prefixes) {
       try {
         let reportKey = null;
-        let token = undefined;
+        let token;
 
         do {
           const listed = await s3.send(new ListObjectsV2Command({
@@ -249,10 +276,7 @@ async function routeAnalyze(req, res) {
           }));
           const items = (listed.Contents || []).map(o => o.Key || "");
           const found = items.find(k => k.endsWith(".report.json"));
-          if (found) {
-            reportKey = found;
-            break;
-          }
+          if (found) { reportKey = found; break; }
           token = listed.IsTruncated ? listed.NextContinuationToken : undefined;
         } while (token);
 
@@ -261,7 +285,7 @@ async function routeAnalyze(req, res) {
         const report = await tryReadReport(reportKey);
         const status = (report && typeof report.status === "string") ? report.status : "ready";
         if (status === "ready") return json(res, 200, { status: "ready", report });
-        return json(res, 200, { status }); // e.g., "pending" | "processing"
+        return json(res, 200, { status }); // pending/processing/etc.
       } catch {
         // try next prefix
       }
@@ -313,16 +337,19 @@ export default async function handler(req, res) {
   const path = parts.join("/").toLowerCase();
 
   try {
-    if (req.method === "GET"  && path === "ping")       return routePing(req, res);
-    if (req.method === "GET"  && path === "env-check")  return routeEnv(req, res);
+    if (req.method === "GET"  && (path === "" || path === "/"))   return routeIndex(req, res);
+    if (req.method === "GET"  && path === "ping")                 return routePing(req, res);
+    if (req.method === "GET"  && path === "env-check")            return routeEnv(req, res);
 
-    if (req.method === "POST" && path === "presign")    return routePresign(req, res);
-    if (req.method === "POST" && path === "upload")     return routeUpload(req, res);
-    if (req.method === "POST" && path === "intake")     return routeIntake(req, res);
-    if (req.method === "POST" && path === "report")     return routeReport(req, res);
+    if (req.method === "POST" && path === "presign")              return routePresign(req, res);
+    if (req.method === "POST" && path === "upload")               return routeUpload(req, res);
+    if (req.method === "POST" && path === "intake")               return routeIntake(req, res);
 
-    if (req.method === "GET"  && path === "analyze")    return routeAnalyze(req, res);
-    if (req.method === "GET"  && path === "qc")         return routeQC(req, res);
+    if ((req.method === "POST" || req.method === "GET" || req.method === "HEAD") && path === "report")
+      return routeReport(req, res);
+
+    if (req.method === "GET"  && path === "analyze")              return routeAnalyze(req, res);
+    if (req.method === "GET"  && path === "qc")                   return routeQC(req, res);
 
     return json(res, 404, { error: "Not found" });
   } catch (e) {
