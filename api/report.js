@@ -1,7 +1,8 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Use POST" });
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
@@ -23,4 +24,4 @@ module.exports = async function handler(req, res) {
   } catch (e) {
     res.status(500).json({ ok: false, error: e?.message || "report-write-failed" });
   }
-};
+}
