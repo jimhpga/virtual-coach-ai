@@ -354,7 +354,11 @@ export default async function handler(req, res) {
     if (req.method === "GET"  && path === "qc")                   return routeQC(req, res);
 
     return json(res, 404, { error: "Not found" });
-  } catch (e) {
-    return json(res, 500, { error: String(e.message || e) });
-  }
+ } catch (e) {
+  try { Sentry.captureException(e); } catch {}
+  return json(res, 500, { error: String(e.message || e) });
 }
+
+    
+  
+
