@@ -3,8 +3,6 @@
   "buildCommand": "",
   "outputDirectory": ".",
   "functions": {
-    "api/**/*.js": { "runtime": "nodejs20.x" },
-    "api/**/*.mjs": { "runtime": "nodejs20.x" }
+    "api/**/*.[jt]s": { "runtime": "nodejs20.x" }
   }
 }
-
