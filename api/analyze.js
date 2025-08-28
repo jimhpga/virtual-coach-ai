@@ -1,0 +1,90 @@
+// api/analyze.js (ESM, verbose + robust)
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { Readable } from "node:stream";
+
+const REGION = process.env.AWS_REGION;
+const BUCKET = process.env.S3_BUCKET;
+
+const s3 = new S3Client({ region: REGION });
+
+function streamToString(stream) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    stream.on("data", (c) => chunks.push(Buffer.from(c)));
+    stream.on("error", reject);
+    stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
+  });
+}
+
+export default async function handler(req, res) {
+  try {
+    // Parse jobId from the actual request URL (don’t trust framework sugar)
+    const url = new URL(req.url, `https://${req.headers.host || "localhost"}`);
+    const jobId = url.searchParams.get("jobId") || url.searchParams.get("id");
+
+    if (!jobId) {
+      return res.status(400).json({
+        status: "error",
+        error: "missing jobId",
+        hint: "Use /api/analyze?jobId=smoke"
+      });
+    }
+
+    if (!BUCKET || !REGION) {
+      return res.status(500).json({
+        status: "error",
+        error: "missing env",
+        details: {
+          S3_BUCKET_present: !!BUCKET,
+          AWS_REGION_present: !!REGION
+        },
+        hint: "Set env vars in Vercel (Production) then redeploy"
+      });
+    }
+
+    const Key = `status/${jobId}.json`;
+
+    try {
+      const obj = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key }));
+      const bodyStream =
+        obj.Body instanceof Readable ? obj.Body : Readable.from(obj.Body);
+      const text = await streamToString(bodyStream);
+      let payload;
+      try {
+        payload = JSON.parse(text || "{}");
+      } catch {
+        payload = { status: "error", error: "invalid JSON in status file" };
+      }
+      return res.status(200).json({
+        ok: true,
+        bucket: BUCKET,
+        key: Key,
+        jobId,
+        ...payload
+      });
+    } catch (e) {
+      const code = e?.$metadata?.httpStatusCode;
+      if (code === 404 || e?.name === "NoSuchKey") {
+        return res.status(200).json({
+          ok: true,
+          bucket: BUCKET,
+          key: Key,
+          jobId,
+          status: "pending"
+        });
+      }
+      return res.status(500).json({
+        status: "error",
+        error: e?.message || "analyze-read-failed",
+        bucket: BUCKET,
+        key: Key,
+        jobId
+      });
+    }
+  } catch (e) {
+    return res.status(500).json({
+      status: "error",
+      error: e?.message || "handler-failed"
+    });
+  }
+}
