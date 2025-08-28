@@ -1,9 +1,9 @@
-export default function handler(req, res) {
-  const keys = ["S3_BUCKET","AWS_REGION","AWS_ACCESS_KEY_ID","AWS_SECRET_ACCESS_KEY"];
-  const env = Object.fromEntries(keys.map(k => [k, !!process.env[k]]));
+module.exports = function handler(req, res) {
+  const KEYS = ["S3_BUCKET","AWS_REGION","AWS_ACCESS_KEY_ID","AWS_SECRET_ACCESS_KEY"];
+  const env = Object.fromEntries(KEYS.map(k => [k, !!process.env[k]]));
   res.status(200).json({
-    ok: keys.every(k => !!process.env[k] ),
+    ok: KEYS.every(k => !!process.env[k]),
     env,
-    note: "Checks presence of required env vars. Doesn’t validate IAM or CORS."
+    note: "Presence check only. Does not validate IAM or CORS."
   });
-}
+};
