@@ -1,40 +1,32 @@
-import { S3Client, GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
+const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const s3 = new S3Client({ region: process.env.AWS_REGION });
 
-const REGION = process.env.AWS_REGION || "us-west-2";
-const BUCKET = process.env.S3_UPLOAD_BUCKET || "";
-
-const s3 = new S3Client({
-  region: REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ""
-  }
-});
-
-function baseKey(k=""){ return String(k).replace(/\.[a-z0-9]+$/i, ""); }
-
-export default async function handler(req, res) {
-  try {
-    const key = String(req.query.key || "").trim();
-    if (!key) { res.status(400).json({ error: "Missing key" }); return; }
-    if (!BUCKET) { res.status(500).json({ error: "S3 bucket not configured" }); return; }
-
-    const reportKey = `${baseKey(key)}.report.json`;
-
-    // existence check → if missing, pending
-    await s3.send(new HeadObjectCommand({ Bucket: BUCKET, Key: reportKey }))
-      .catch(() => { throw { code: "NOPE" }; });
-
-    const obj = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: reportKey }));
-    const txt = await obj.Body.transformToString();
-    let report; try { report = JSON.parse(txt); } catch { report = { raw: txt }; }
-
-    const status = (report && typeof report.status === "string") ? report.status : "ready";
-    if (status !== "ready") { res.status(200).json({ status }); return; }
-
-    res.status(200).json({ status: "ready", report });
-  } catch (e) {
-    if (e && e.code === "NOPE") { res.status(200).json({ status: "pending" }); return; }
-    res.status(500).json({ error: String(e.message || e) });
-  }
+function streamToString(stream) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    stream.on("data", (c) => chunks.push(Buffer.from(c)));
+    stream.on("error", reject);
+    stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
+  });
 }
+
+module.exports = async function handler(req, res) {
+  try {
+    const jobId = (req.query && (req.query.jobId || req.query.id)) || null;
+    if (!jobId) return res.status(400).json({ status: "error", error: "missing jobId" });
+
+    const Bucket = process.env.S3_BUCKET;
+    const Key = `status/${jobId}.json`;
+
+    try {
+      const obj = await s3.send(new GetObjectCommand({ Bucket, Key }));
+      const text = await streamToString(obj.Body);
+      res.status(200).json(JSON.parse(text || "{}"));
+    } catch {
+      // If the status file isn't there yet, report pending
+      res.status(200).json({ status: "pending" });
+    }
+  } catch (e) {
+    res.status(500).json({ status: "error", error: e?.message || "analyze-read-failed" });
+  }
+};
