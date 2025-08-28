@@ -1,8 +1,7 @@
 {
-  "framework": "other",
-  "buildCommand": "",
-  "outputDirectory": ".",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
   "functions": {
-    "api/**/*.[jt]s": { "runtime": "nodejs20.x" }
+    "api/**/*.js": { "runtime": "nodejs20.x" }
   }
 }
