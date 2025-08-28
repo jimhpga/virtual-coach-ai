@@ -4,8 +4,23 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual Coach AI — Upload</title>
-  <script src="https://browser.sentry-cdn.com/7.120.0/bundle.min.js" crossorigin="anonymous"></script>
-<script>Sentry.init({ dsn: "PASTE_YOUR_PUBLIC_DSN_HERE", tracesSampleRate: 1.0 });</script>
+
+<!-- Favicon to avoid 404 on /favicon.ico -->
+<link rel="icon" href="/favicon.ico" />
+
+<!-- Sentry (guarded). Replace DSN or leave empty. -->
+<script defer src="https://browser.sentry-cdn.com/7.120.0/bundle.min.js" crossorigin="anonymous"></script>
+<script>
+  window.addEventListener('DOMContentLoaded', function(){
+    try{
+      var DSN = "PASTE_YOUR_PUBLIC_DSN_HERE"; // leave "" if you don't have one yet
+      if (window.Sentry && DSN && DSN !== "PASTE_YOUR_PUBLIC_DSN_HERE") {
+        window.Sentry.init({ dsn: DSN, tracesSampleRate: 1.0 });
+        window.Sentry.captureMessage("upload.html loaded");
+      }
+    }catch(e){ /* ignore */ }
+  });
+</script>
 
 <style>
   :root{
@@ -131,7 +146,7 @@
         <h1>Best Results Come From Good Footage</h1>
         <p class="lead">Results are estimates from a single-camera video. For best accuracy, record from ~8–12 ft either <strong>down-the-line</strong> or <strong>face-on</strong>, landscape, with your whole body and club in frame.</p>
         <details class="tips"><summary>Recording tips (quick)</summary>
-          <div class="content">• Tripod if possible • Bright, even light • Avoid ultra wide • Ball & hands visible at impact</div>
+          <div class="content">• Tripod if possible • Bright, even light • Avoid ultra wide • Ball &amp; hands visible at impact</div>
         </details>
       </header>
 
@@ -197,7 +212,7 @@
             </div>
 
             <div class="actions">
-              <button class="btn primary" id="btnUpload">Start upload</button>
+              <button class="btn primary" id="btnUpload" type="button">Start upload</button>
               <button class="btn ghost" id="btnReset" type="button">Reset</button>
               <a class="btn warn" id="btnOpenReport" href="#" target="_blank" rel="noopener" aria-disabled="true">Open Report</a>
             </div>
@@ -242,7 +257,7 @@
   const header = document.getElementById('site-header');
   document.getElementById('menuBtn')?.addEventListener('click', ()=>{
     const open = header.classList.toggle('open');
-    document.getElementById('menuBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+    document.getElementById('menuBtn')?.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
   document.getElementById('siteNav')?.addEventListener('click', e=>{
     if(e.target.tagName==='A'){ header.classList.remove('open'); document.getElementById('menuBtn')?.setAttribute('aria-expanded','false'); }
@@ -355,6 +370,7 @@
   async function presign(file, key){
     const res = await fetch('/api/presign', {
       method:'POST',
+      cache:'no-store',
       headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({
         filename: file.name,
@@ -397,6 +413,7 @@
     };
     const r = await fetch('/api/report', {
       method:'POST',
+      cache:'no-store',
       headers:{ 'Content-Type':'application/json' },
       body: JSON.stringify({ key, report: stub })
     });
@@ -435,6 +452,7 @@
       const derived = deriveHints(data);
       fetch('/api/intake', {
         method: 'POST',
+        cache:'no-store',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: finalKey, intake: { ...data, derived } })
       }).catch(()=>{});
@@ -452,6 +470,7 @@
       try{ localStorage.setItem('vc_last_report', JSON.stringify(reportObj)); }catch{}
     }catch(err){
       console.error(err);
+      try{ if (window.Sentry) window.Sentry.captureException(err); }catch{}
       status('Upload failed', '');
       progress(0); step(1);
       alert(err.message || 'Upload failed');
