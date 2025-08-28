@@ -1,9 +1,3 @@
-
 export default function handler(req, res) {
-  res.status(200).json({
-    ok: true,
-    method: req.method,
-    url: req.url,
-    now: Date.now()
-  });
+  res.status(200).json({ ok: true, route: "/api/hello" });
 }
