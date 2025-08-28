@@ -1,4 +1,6 @@
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { Readable } from "node:stream";
+
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 
 function streamToString(stream) {
@@ -10,7 +12,7 @@ function streamToString(stream) {
   });
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   try {
     const jobId = (req.query && (req.query.jobId || req.query.id)) || null;
     if (!jobId) return res.status(400).json({ status: "error", error: "missing jobId" });
@@ -20,13 +22,12 @@ module.exports = async function handler(req, res) {
 
     try {
       const obj = await s3.send(new GetObjectCommand({ Bucket, Key }));
-      const text = await streamToString(obj.Body);
+      const text = await streamToString(obj.Body instanceof Readable ? obj.Body : Readable.from(obj.Body));
       res.status(200).json(JSON.parse(text || "{}"));
     } catch {
-      // If the status file isn't there yet, report pending
       res.status(200).json({ status: "pending" });
     }
   } catch (e) {
     res.status(500).json({ status: "error", error: e?.message || "analyze-read-failed" });
   }
-};
+}
