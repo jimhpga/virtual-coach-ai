@@ -1,54 +1,42 @@
 // /api/report.js
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 const BUCKET = process.env.S3_BUCKET;
 const REGION = process.env.AWS_REGION;
 
-function json(status, obj) {
-  return new Response(JSON.stringify(obj), {
-    status,
-    headers: { "Content-Type": "application/json" }
-  });
-}
-
-function jobIdFromKey(key) {
-  const base = String(key).replace(/^uploads\//, "");
-  return base.replace(/\.[^.]+$/, "");
-}
-
-export default async function handler(request) {
+export default async function handler(req, res) {
   try {
-    if (request.method !== "POST") {
-      return json(405, { ok: false, error: "Method Not Allowed" });
-    }
-    if (!BUCKET || !REGION) {
-      return json(500, { ok: false, error: "Missing S3 env (S3_BUCKET, AWS_REGION)" });
-    }
-    const body = await request.json().catch(() => ({}));
-    let { jobId, status = "ready", data = {}, key } = body;
+    if (req.method !== 'POST') return res.status(405).json({ ok:false, error:'POST only' });
+    if (!BUCKET || !REGION) return res.status(500).json({ ok:false, error:'Missing env S3_BUCKET/AWS_REGION' });
 
-    if (!jobId && key) jobId = jobIdFromKey(key);
-    if (!jobId) return json(400, { ok: false, error: "Missing jobId or key" });
+    const { jobId, status = 'ready', data = {}, key } = await readJson(req);
+    const id = jobId || keyToJobId(key);
+    if (!id) return res.status(400).json({ ok:false, error:'Provide jobId or key' });
 
     const s3 = new S3Client({ region: REGION });
-    const statusKey = `status/${jobId}.json`;
-    const payload = {
-      status,
-      ...("size" in data ? { size: data.size } : {}),
-      ...("type" in data ? { type: data.type } : {}),
-      ...("etag" in data ? { etag: data.etag } : {}),
-      t: Date.now()
-    };
+    const body = JSON.stringify({ status, ...data }, null, 2);
+    const statusKey = `status/${id}.json`;
 
     await s3.send(new PutObjectCommand({
       Bucket: BUCKET,
       Key: statusKey,
-      Body: JSON.stringify(payload),
-      ContentType: "application/json"
+      Body: body,
+      ContentType: 'application/json',
     }));
 
-    return json(200, { ok: true, bucket: BUCKET, key: statusKey, wrote: payload });
+    res.status(200).json({ ok:true, bucket: BUCKET, key: statusKey, wrote: { status, ...data } });
   } catch (e) {
-    return json(500, { ok: false, error: e?.message || String(e) });
+    res.status(500).json({ ok:false, error: e?.message || String(e) });
   }
+}
+
+function keyToJobId(k) {
+  if (!k) return null;
+  return String(k).replace(/^uploads\//, '').replace(/\.[^.]+$/, '');
+}
+async function readJson(req) {
+  const chunks = [];
+  for await (const ch of req) chunks.push(ch);
+  const txt = Buffer.concat(chunks).toString('utf8') || '{}';
+  try { return JSON.parse(txt); } catch { return {}; }
 }
