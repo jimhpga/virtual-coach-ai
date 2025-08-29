@@ -1,4 +1,12 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "version": 2
+  "version": 2,
+  "routes": [
+    { "src": "^/upload$", "dest": "/upload.html" },
+    { "src": "^/report$", "dest": "/report.html" }
+  ],
+  "functions": {
+    "api/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
 }
