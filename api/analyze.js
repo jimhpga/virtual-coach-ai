@@ -1,59 +1,92 @@
-// api/analyze.js
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { Readable } from "node:stream";
+// /api/analyze.js
+import { S3Client, HeadObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 
-const REGION = process.env.AWS_REGION;
 const BUCKET = process.env.S3_BUCKET;
-const s3 = new S3Client({ region: REGION });
+const REGION = process.env.AWS_REGION;
 
-function streamToString(stream) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    stream.on("data", c => chunks.push(Buffer.from(c)));
-    stream.on("error", reject);
-    stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf-8")));
+function json(status, obj) {
+  return new Response(JSON.stringify(obj), {
+    status,
+    headers: { "Content-Type": "application/json" }
   });
 }
 
 function jobIdFromKey(key) {
-  // uploads/1756346153644-img_3490_1_.mov -> 1756346153644-img_3490_1_
-  const base = key.replace(/^uploads\//, "");
-  return base.replace(/\.[^.]+$/, ""); // strip extension
+  const base = String(key).replace(/^uploads\//, "");
+  return base.replace(/\.[^.]+$/, "");
 }
 
-export default async function handler(req, res) {
+async function objectExists(s3, key) {
   try {
-    const url = new URL(req.url, `https://${req.headers.host || "localhost"}`);
-    let jobId = url.searchParams.get("jobId");
-    const key = url.searchParams.get("key");
-    if (!jobId && key) jobId = jobIdFromKey(key);
-    if (!jobId) return res.status(400).json({ status: "error", error: "missing jobId or key" });
+    await s3.send(new HeadObjectCommand({ Bucket: BUCKET, Key: key }));
+    return true;
+  } catch {
+    return false;
+  }
+}
 
+async function getJSON(s3, key) {
+  const res = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }));
+  const txt = await res.Body.transformToString();
+  return JSON.parse(txt);
+}
+
+export default async function handler(request) {
+  try {
+    if (request.method !== "GET") {
+      return json(405, { ok: false, error: "Method Not Allowed" });
+    }
     if (!BUCKET || !REGION) {
-      return res.status(500).json({
-        status: "error",
-        error: "missing env",
-        details: { S3_BUCKET_present: !!BUCKET, AWS_REGION_present: !!REGION }
-      });
+      return json(500, { ok: false, error: "Missing S3 env (S3_BUCKET, AWS_REGION)" });
     }
 
-    const Key = `status/${encodeURIComponent(jobId)}.json`;
+    const url = new URL(request.url);
+    const keyParam = url.searchParams.get("key");
+    let jobId = url.searchParams.get("jobId");
 
-    try {
-      const obj = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key }));
-      const body = obj.Body instanceof Readable ? obj.Body : Readable.from(obj.Body);
-      const text = await streamToString(body);
-      let payload = {};
-      try { payload = JSON.parse(text || "{}"); } catch { payload = { status: "error", error: "invalid JSON" }; }
-      return res.status(200).json({ ok: true, bucket: BUCKET, key: Key, jobId, ...payload });
-    } catch (e) {
-      const code = e?.$metadata?.httpStatusCode;
-      if (code === 404 || e?.name === "NoSuchKey") {
-        return res.status(200).json({ ok: true, bucket: BUCKET, key: Key, jobId, status: "pending" });
+    if (!jobId && keyParam) jobId = jobIdFromKey(keyParam);
+    if (!jobId) return json(400, { ok: false, error: "Missing jobId or key" });
+
+    const s3 = new S3Client({ region: REGION });
+    const statusKey = `status/${jobId}.json`;
+    const reportKey = `reports/${jobId}.json`;
+
+    // default shape
+    const body = {
+      ok: true,
+      bucket: BUCKET,
+      key: statusKey,
+      jobId,
+      status: "pending"
+    };
+
+    // read status if it exists
+    if (await objectExists(s3, statusKey)) {
+      try {
+        const s = await getJSON(s3, statusKey);
+        if (s?.status) body.status = s.status;
+        if ("size" in s) body.size = s.size;
+        if ("type" in s) body.type = s.type;
+        if ("etag" in s) body.etag = s.etag;
+        if ("t" in s) body.t = s.t;
+      } catch {
+        // ignore corrupt status; leave pending
       }
-      return res.status(500).json({ status: "error", error: e?.message || "analyze-read-failed", bucket: BUCKET, key: Key, jobId });
     }
+
+    // if a per-upload report exists, return pointer + embed it for instant render
+    if (await objectExists(s3, reportKey)) {
+      body.reportKey = reportKey;
+      try {
+        body.report = await getJSON(s3, reportKey);
+        body.status = "ready";
+      } catch {
+        // keep pointer even if embed fails
+      }
+    }
+
+    return json(200, body);
   } catch (e) {
-    return res.status(500).json({ status: "error", error: e?.message || "handler-failed" });
+    return json(500, { ok: false, error: e?.message || String(e) });
   }
 }
