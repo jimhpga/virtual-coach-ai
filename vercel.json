@@ -1,10 +1,10 @@
 {
   "version": 2,
+  "functions": {
+    "api/*.js": { "runtime": "nodejs18.x" }
+  },
   "routes": [
     { "src": "^/upload$", "dest": "/upload.html" },
     { "src": "^/report$", "dest": "/report.html" }
-  ],
-  "functions": {
-    "api/*.js": { "runtime": "nodejs18.x" }
-  }
+  ]
 }
