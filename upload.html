@@ -1,502 +1,125 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Virtual Coach AI — Upload</title>
-
-<!-- Favicon to avoid 404 on /favicon.ico -->
-<link rel="icon" href="/favicon.ico" />
-
-<!-- Sentry (guarded). Replace DSN or leave empty. -->
-<script defer src="https://browser.sentry-cdn.com/7.120.0/bundle.min.js" crossorigin="anonymous"></script>
-<script>
-  window.addEventListener('DOMContentLoaded', function(){
-    try{
-      var DSN = "PASTE_YOUR_PUBLIC_DSN_HERE"; // leave "" if you don't have one yet
-      if (window.Sentry && DSN && DSN !== "PASTE_YOUR_PUBLIC_DSN_HERE") {
-        window.Sentry.init({ dsn: DSN, tracesSampleRate: 1.0 });
-        window.Sentry.captureMessage("upload.html loaded");
-      }
-    }catch(e){ /* ignore */ }
-  });
-</script>
-
+<meta charset="utf-8">
+<title>Upload → Report → Analyze</title>
 <style>
-  :root{
-    --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06);
-    --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08);
-    --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
-    --ok:#19c37d; --warn:#f6c453;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; color:var(--text);
-    background:url('/homepage-background.png') center/cover fixed no-repeat;
-    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-  }
-  .scrim{min-height:100vh;background:var(--scrim)}
-
-  /* NAV (hamburger) */
-  header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
-  .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
-  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
-  .brand-logo{width:160px;height:36px;background:var(--brand);
-    -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
-            mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;}
-  .menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
-  nav.nav{display:flex;gap:8px}
-  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
-  nav.nav a:hover{background:rgba(255,255,255,.08)}
-  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-  @media(max-width:820px){
-    .menu-toggle{display:inline-flex}
-    nav.nav{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
-    header.top.open nav.nav{display:flex}
-  }
-
-  .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
-
-  h1{margin:8px 0 6px;font-size:28px;font-weight:900}
-  .lead{color:var(--muted);max-width:68ch}
-  .badge{background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
-
-  .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:12px}
-  @media(max-width:960px){.grid{grid-template-columns:1fr}}
-
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px)}
-  .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
-  .card .content{padding:12px 16px}
-
-  label{display:block;font-weight:700;margin:8px 0 6px}
-  .req{color:#ffd479}
-  .hint{color:#cfe0e6;font-size:12px}
-
-  input[type="text"], input[type="email"], input[type="number"], select, button, .filebox{
-    width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line);
-    background:rgba(255,255,255,.08); color:#fff; background-clip:padding-box;
-  }
-  input::placeholder{color:#cfe0e699}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  @media(max-width:700px){.row{grid-template-columns:1fr}}
-
-  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
-  .btn:hover{background:rgba(255,255,255,.16)}
-  .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6;}
-  .btn.warn{background:rgba(246,196,83,.18);border-color:#b8860b;}
-  .btn.ghost{background:rgba(255,255,255,.06);}
-  .btn[disabled]{opacity:.55;cursor:not-allowed}
-
-  /* Stepper + progress */
-  .stepper{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-  .step{display:flex;align-items:center;gap:8px}
-  .dot{width:20px;height:20px;border-radius:50%;border:2px solid #456;display:inline-block;background:transparent}
-  .step.active .dot{background:var(--warn);border-color:var(--warn)}
-  .step.done .dot{background:var(--ok);border-color:var(--ok)}
-  .step label{font-size:13px;color:#cfe0e6}
-  .progress{height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}
-  .progress>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,#19c37d,#2bd897);width:0%}
-
-  .filebox{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .filebox .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#dfefff}
-
-  /* Dropdown: readable everywhere */
-  select{appearance:menulist;-webkit-appearance:menulist;-moz-appearance:menulist;-webkit-text-fill-color:currentColor;}
-  select{color:#fff;background:rgba(255,255,255,.08)}
-  select option{color:#111 !important;background:#fff !important}
-  @media (prefers-color-scheme: dark){
-    select option{color:#fff !important;background:#222 !important}
-  }
-  @media (forced-colors: active){
-    select, select option{forced-color-adjust:none;color:ButtonText !important;background:Canvas !important}
-  }
-
-  /* Clean intake summary */
-  #summary.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;
-    background:rgba(0,0,0,.28);border:1px solid var(--line);border-radius:12px;padding:12px}
-  #summary.kv .k{color:#cfe0e6}
-  #summary.kv .v.muted{opacity:.6}
-  details.tips summary{cursor:pointer;display:inline-block;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.06);font-weight:700}
-  details.tips .content{margin-top:10px;color:#cfe0e6}
+  body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
+  .row { margin: 8px 0; }
+  button { padding: 8px 14px; border-radius: 8px; border: 1px solid #ccc; cursor: pointer; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  #log { white-space: pre-wrap; background: #111; color: #ddd; padding: 12px; border-radius: 8px; min-height: 120px; }
 </style>
-</head>
-<body>
-  <header class="top" id="site-header">
-    <div class="navwrap">
-      <a class="brand" href="/"><div class="brand-logo"></div><span>Virtual Coach AI</span></a>
-      <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
-      <nav class="nav" id="siteNav" aria-label="Primary">
-        <a href="/index.html">Home</a>
-        <a href="/upload.html" aria-current="page">Upload</a>
-        <a href="/report.html?report=/report.json">Reports</a>
-        <a href="/pricing.html">Pricing</a>
-        <a href="/faq.html">FAQ</a>
-        <a href="/team.html">Team</a>
-        <a href="/contact.html">Contact</a>
-        <a href="/login.html">Login</a>
-      </nav>
-    </div>
-  </header>
 
-  <div class="scrim">
-    <main class="wrap">
-      <header style="margin-bottom:8px">
-        <h1>Best Results Come From Good Footage</h1>
-        <p class="lead">Results are estimates from a single-camera video. For best accuracy, record from ~8–12 ft either <strong>down-the-line</strong> or <strong>face-on</strong>, landscape, with your whole body and club in frame.</p>
-        <details class="tips"><summary>Recording tips (quick)</summary>
-          <div class="content">• Tripod if possible • Bright, even light • Avoid ultra wide • Ball &amp; hands visible at impact</div>
-        </details>
-      </header>
+<h1>Upload → Report → Analyze</h1>
 
-      <section class="grid">
-        <!-- LEFT: Intake + Upload -->
-        <div class="card">
-          <h3>Upload Swing</h3>
-          <div class="content">
-            <div class="row">
-              <div>
-                <label for="first">First name</label>
-                <input id="first" type="text" placeholder="e.g., Jim" />
-              </div>
-              <div>
-                <label for="email">Email <span class="hint">(optional)</span></label>
-                <input id="email" type="email" placeholder="Add if you want the report emailed to you" />
-              </div>
-            </div>
+<div class="row">
+  <input id="file" type="file" />
+  <button id="go">Upload & Process</button>
+</div>
 
-            <div class="row">
-              <div>
-                <label for="eye">Eye dominance <span class="req">*</span></label>
-                <select id="eye" required>
-                  <option value="">Select…</option>
-                  <option value="right">Right eye</option>
-                  <option value="left">Left eye</option>
-                  <option value="unknown">Not sure</option>
-                </select>
-              </div>
-              <div>
-                <label for="hand">Handedness</label>
-                <select id="hand">
-                  <option value="">Select…</option>
-                  <option value="right">Right</option>
-                  <option value="left">Left</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="row">
-              <div>
-                <label for="gender">Gender</label>
-                <select id="gender">
-                  <option value="">Prefer not to say</option>
-                  <option value="man">Man</option>
-                  <option value="woman">Woman</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label for="height">Height (inches) <span class="req">*</span></label>
-                <input id="height" type="number" min="40" max="90" placeholder="e.g., 70 for 5'10&quot;" required />
-              </div>
-            </div>
-
-            <div style="margin-top:10px">
-              <label for="file">Swing video</label>
-              <div class="filebox">
-                <input id="file" type="file" accept="video/*" />
-                <span class="name" id="fname">No file chosen</span>
-              </div>
-              <div class="hint" id="fmeta" style="margin-top:6px"></div>
-            </div>
-
-            <div class="actions">
-              <button class="btn primary" id="btnUpload" type="button">Start upload</button>
-              <button class="btn ghost" id="btnReset" type="button">Reset</button>
-              <a class="btn warn" id="btnOpenReport" href="#" target="_blank" rel="noopener" aria-disabled="true">Open Report</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- RIGHT: Status + Steps + Summary -->
-        <div class="card">
-          <h3>Status</h3>
-          <div class="content">
-            <div class="stepper" style="margin-bottom:10px">
-              <div class="step" id="s1"><span class="dot"></span><label>1. Upload</label></div>
-              <div class="step" id="s2"><span class="dot"></span><label>2. Processing</label></div>
-              <div class="step" id="s3"><span class="dot"></span><label>3. Ready</label></div>
-              <span class="badge" id="pill" style="margin-left:auto">Idle</span>
-            </div>
-            <div class="progress" aria-label="Progress"><span id="bar"></span></div>
-            <div class="hint" id="statusLine" style="margin-top:8px">Waiting for a file…</div>
-
-            <h3 style="margin-top:16px;border:none;padding-top:16px">Intake Summary</h3>
-            <div id="summary" class="kv">
-              <div class="k">First</div><div class="v muted" data-k="first">—</div>
-              <div class="k">Email</div><div class="v muted" data-k="email">—</div>
-              <div class="k">Eye dominance</div><div class="v muted" data-k="eye">—</div>
-              <div class="k">Handedness</div><div class="v muted" data-k="hand">—</div>
-              <div class="k">Gender</div><div class="v muted" data-k="gender">—</div>
-              <div class="k">Height (in)</div><div class="v muted" data-k="height">—</div>
-              <div class="k">Body build</div><div class="v muted" data-k="bodyShape">—</div>
-              <div class="k">Focus</div><div class="v muted" data-k="focus">—</div>
-              <div class="k">Cross-dominant</div><div class="v muted" data-k="cross_dominant">—</div>
-              <div class="k">Aim bias</div><div class="v muted" data-k="aim_bias">—</div>
-              <div class="k">Scale factor</div><div class="v muted" data-k="scale_factor">—</div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
+<div class="row"><b>Key:</b> <span id="key">(none)</span></div>
+<div class="row" id="log">Ready.</div>
 
 <script>
-  // NAV (hamburger)
-  const header = document.getElementById('site-header');
-  document.getElementById('menuBtn')?.addEventListener('click', ()=>{
-    const open = header.classList.toggle('open');
-    document.getElementById('menuBtn')?.setAttribute('aria-expanded', open ? 'true' : 'false');
+// ------- helpers -------
+const log = (m) => (document.getElementById('log').textContent += "\n" + m);
+const setKey = (k) => (document.getElementById('key').textContent = k || "(none)");
+
+function jobIdFromKey(key) {
+  const base = String(key).replace(/^uploads\//, "");
+  return base.replace(/\.[^.]+$/, "");
+}
+
+async function reportReady({ key, jobId, status = "ready", data = {} }) {
+  if (!jobId && key) jobId = jobIdFromKey(key);
+  if (!jobId) throw new Error("reportReady: missing jobId or key");
+  const r = await fetch("/api/report", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ jobId, status, data, key })
   });
-  document.getElementById('siteNav')?.addEventListener('click', e=>{
-    if(e.target.tagName==='A'){ header.classList.remove('open'); document.getElementById('menuBtn')?.setAttribute('aria-expanded','false'); }
-  });
-
-  // Shortcuts
-  const $ = s => document.querySelector(s);
-  const fileInput = $('#file');
-  const fname = $('#fname');
-  const fmeta = $('#fmeta');
-  const bar = $('#bar');
-  const pill = $('#pill');
-  const statusLine = $('#statusLine');
-  const btnUpload = $('#btnUpload');
-  const btnReset = $('#btnReset');
-  const btnOpenReport = $('#btnOpenReport');
-
-  // Fields + model
-  const fields = ['first','email','eye','hand','gender','height','bodyShape','focus'];
-  const data = Object.fromEntries(fields.map(k=>[k,'']));
-
-  function deriveHints(d){
-    const hand = (d.hand||'').toLowerCase();
-    const eye  = (d.eye||'').toLowerCase();
-    const cross = (hand && eye) ? (hand[0] !== eye[0]) : false;
-    let aim = 'neutral';
-    if (hand==='right' && eye==='left') aim = 'left';
-    if (hand==='left'  && eye==='right') aim = 'right';
-    const h = Number(d.height||0);
-    const scale = h ? +(h/70).toFixed(2) : '';
-    return { cross_dominant: !!cross, aim_bias: aim, scale_factor: scale };
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || j.ok === false) {
+    throw new Error(`reportReady failed: ${r.status} ${j.error || ""}`);
   }
+  return j;
+}
 
-  function setSummaryKV(key, val){
-    const wrap = document.getElementById('summary');
-    if (!wrap) return;
-    const n = wrap.querySelector(`[data-k="${key}"]`);
-    if (!n) return;
-    const text = (val !== '' && val != null) ? String(val) : '—';
-    n.textContent = text;
-    n.classList.toggle('muted', text === '—');
+async function pollAnalyze({ key, jobId, intervalMs = 1500, maxAttempts = 40, onTick = ()=>{} }) {
+  if (!jobId && key) jobId = jobIdFromKey(key);
+  if (!jobId && !key) throw new Error("pollAnalyze: missing jobId or key");
+  let attempt = 0, delay = intervalMs;
+  while (attempt < maxAttempts) {
+    const qs = key ? `key=${encodeURIComponent(key)}` : `jobId=${encodeURIComponent(jobId)}`;
+    const res = await fetch(`/api/analyze?${qs}`);
+    const txt = await res.text();
+    let j; try { j = JSON.parse(txt); } catch { j = { status: "error", error: "invalid JSON", raw: txt }; }
+    onTick({ attempt, response: j });
+    if (j.status === "ready") return j;
+    if (j.status && j.status !== "pending") { const e = new Error(j.error || j.status); e.details = j; throw e; }
+    await new Promise(r => setTimeout(r, delay));
+    delay = Math.min(Math.round(delay * 1.5), 8000);
+    attempt++;
   }
+  throw new Error("pollAnalyze timeout");
+}
 
-  function updateSummary(){
-    fields.forEach(k=>{
-      const el = document.getElementById(k);
-      if (!el) return;
-      data[k] = (el.type === 'number') ? (el.value ? Number(el.value) : '') : el.value.trim();
+// ------- main flow -------
+document.getElementById('go').onclick = async () => {
+  const btn = document.getElementById('go');
+  const f = document.getElementById('file').files[0];
+  if (!f) { alert("Choose a file first."); return; }
+
+  btn.disabled = true;
+  document.getElementById('log').textContent = "Starting…";
+
+  try {
+    // 1) build a safe key
+    const safeName = f.name.replace(/[^a-zA-Z0-9._-]+/g, "_");
+    const key = `uploads/${Date.now()}-${safeName}`;
+    setKey(key);
+
+    // 2) ask backend for a signed URL to PUT to S3
+    log("Requesting signed URL…");
+    const up = await fetch("/api/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key, contentType: f.type || "application/octet-stream" })
     });
-    const derived = deriveHints(data);
+    const upj = await up.json().catch(()=> ({}));
+    log(`upload api: ${up.status} ${JSON.stringify(upj)}`);
+    if (!up.ok || !upj.url) throw new Error(`upload api failed ${up.status}`);
 
-    setSummaryKV('first', data.first);
-    setSummaryKV('email', data.email);
-    setSummaryKV('eye', data.eye);
-    setSummaryKV('hand', data.hand);
-    setSummaryKV('gender', data.gender);
-    setSummaryKV('height', data.height);
-    setSummaryKV('bodyShape', data.bodyShape);
-    setSummaryKV('focus', data.focus);
-    setSummaryKV('cross_dominant', derived.cross_dominant ? 'Yes' : 'No');
-    setSummaryKV('aim_bias', derived.aim_bias);
-    setSummaryKV('scale_factor', derived.scale_factor);
+    // 3) PUT the file to S3
+    log("PUT to S3…");
+    const put = await fetch(upj.url, { method: "PUT", body: f });
+    log(`PUT result: ${put.status}`);
+    if (!(put.status === 200 || put.status === 204)) throw new Error(`PUT failed ${put.status}`);
+    const etag = put.headers.get("etag") || null;
 
-    try{
-      const saved = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
-      Object.assign(saved, data);
-      localStorage.setItem('vc_prefill', JSON.stringify(saved));
-    }catch{}
-  }
-  fields.forEach(k=> document.getElementById(k)?.addEventListener('input', updateSummary));
-  (function prefillFromLocal(){
-    try{
-      const merged = {};
-      const p = JSON.parse(localStorage.getItem('vc_prefill')||'{}');
-      Object.assign(merged, p);
-      const li = JSON.parse(localStorage.getItem('vc_last_intake')||'null');
-      const intake = li && li.intake ? li.intake : null;
-      if (intake) Object.assign(merged, intake);
-      fields.forEach(k=>{
-        const el = document.getElementById(k);
-        if (el && merged[k] != null && merged[k] !== '') el.value = String(merged[k]);
-      });
-    }catch{}
-  })();
-  updateSummary();
-
-  // Stepper + status
-  function step(n){
-    [$('#s1'),$('#s2'),$('#s3')].forEach((el,i)=>{
-      el.classList.remove('active','done');
-      if (i < n-1) el.classList.add('done');
-      if (i === n-1) el.classList.add('active');
+    // 4) Report ready
+    log("Reporting ready…");
+    const rep = await reportReady({
+      key,
+      status: "ready",
+      data: { size: f.size, type: f.type || "application/octet-stream", etag, t: Date.now() }
     });
-  }
-  function progress(pct){ bar.style.width = Math.max(0, Math.min(100, pct)) + '%'; }
-  function status(text, tone){
-    statusLine.textContent = text;
-    pill.textContent = text.split('.')[0];
-    pill.style.background = tone==='ok'?'rgba(25,195,125,.18)':tone==='warn'?'rgba(246,196,83,.18)':'rgba(255,255,255,.10)';
-    pill.style.borderColor = tone==='ok'?'#2a6':tone==='warn'?'#b8860b':'rgba(255,255,255,.18)';
-  }
+    log(`report: ${JSON.stringify(rep)}`);
 
-  // ==== DIRECT S3 UPLOAD + WRITE REPORT ====
-
-  function makeKey(file){
-    const safe = file.name.replace(/[^a-z0-9_.-]+/gi,'_').toLowerCase();
-    return `uploads/${Date.now()}-${safe}`;
-  }
-
-  async function presign(file, key){
-    const res = await fetch('/api/presign', {
-      method:'POST',
-      cache:'no-store',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({
-        filename: file.name,
-        type: file.type || 'application/octet-stream',
-        key
-      })
+    // 5) Poll analyze until done
+    log("Polling analyze…");
+    const result = await pollAnalyze({
+      key,
+      onTick: ({ attempt, response }) => log(`tick ${attempt}: ${JSON.stringify(response)}`)
     });
-    if (!res.ok){
-      let txt = ''; try { txt = await res.text(); } catch {}
-      throw new Error(`Presign failed: HTTP ${res.status}${txt ? ' — ' + txt.slice(0,200) : ''}`);
-    }
-    return res.json(); // => { key, putUrl }
+
+    log(`DONE: ${JSON.stringify(result)}`);
+    alert("Processing complete!");
+  } catch (e) {
+    log("ERROR: " + (e?.message || e));
+    console.error(e);
+    alert("Upload failed: " + (e?.message || e));
+  } finally {
+    btn.disabled = false;
   }
-
-  function putWithProgress(url, file){
-    return new Promise((resolve, reject)=>{
-      const xhr = new XMLHttpRequest();
-      xhr.open('PUT', url, true);
-      xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
-      xhr.upload.onprogress = (e)=>{
-        if (e.lengthComputable){
-          const pct = 2 + Math.round((e.loaded/e.total)*78); // up to ~80%
-          progress(Math.min(80, pct));
-        }
-      };
-      xhr.onload = ()=> (xhr.status>=200 && xhr.status<300)
-        ? resolve()
-        : reject(new Error('S3 upload error: HTTP '+xhr.status));
-      xhr.onerror = ()=> reject(new Error('Network error during S3 upload'));
-      xhr.send(file);
-    });
-  }
-
-  async function writeReport(key){
-    const stub = {
-      status: 'ready',
-      generated_at: new Date().toISOString(),
-      source_key: key,
-      metrics: { note: 'stub metrics' }
-    };
-    const r = await fetch('/api/report', {
-      method:'POST',
-      cache:'no-store',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ key, report: stub })
-    });
-    if (!r.ok){
-      const t = await r.text().catch(()=> '');
-      throw new Error(`Report write failed: HTTP ${r.status}${t? ' — ' + t.slice(0,200):''}`);
-    }
-    return stub;
-  }
-
-  async function startUpload(){
-    const f = fileInput.files && fileInput.files[0];
-    if (!f){ alert('Choose a swing video first.'); return; }
-    if (!$('#eye').value){ alert('Pick eye dominance.'); $('#eye').focus(); return; }
-    if (!$('#height').value){ alert('Enter height (inches).'); $('#height').focus(); return; }
-
-    btnUpload.disabled = true;
-    btnOpenReport.setAttribute('aria-disabled','true');
-    btnOpenReport.classList.add('disabled');
-    step(1); progress(2); status('Uploading…', 'warn');
-
-    const clientKey = makeKey(f);
-    let finalKey = clientKey;
-
-    try{
-      // 1) presign
-      const { putUrl, key } = await presign(f, clientKey);
-      if (!putUrl) throw new Error('No putUrl returned from /api/presign');
-      if (key) finalKey = key;
-
-      // 2) PUT to S3
-      await putWithProgress(putUrl, f);
-
-      // 3) Save intake (best effort)
-      progress(82); step(2); status('Processing…', 'warn');
-      const derived = deriveHints(data);
-      fetch('/api/intake', {
-        method: 'POST',
-        cache:'no-store',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: finalKey, intake: { ...data, derived } })
-      }).catch(()=>{});
-
-      try{ localStorage.setItem('vc_last_intake', JSON.stringify({ key: finalKey, intake: data, ts: Date.now() })); }catch{}
-
-      // 4) Write the report JSON now (front-end), then flip UI to Ready
-      const reportObj = await writeReport(finalKey);
-
-      progress(100); step(3); status('Ready ✓', 'ok');
-      const url = `/report.html?key=${encodeURIComponent(finalKey)}`;
-      btnOpenReport.href = url;
-      btnOpenReport.removeAttribute('aria-disabled');
-      btnOpenReport.classList.remove('disabled');
-      try{ localStorage.setItem('vc_last_report', JSON.stringify(reportObj)); }catch{}
-    }catch(err){
-      console.error(err);
-      try{ if (window.Sentry) window.Sentry.captureException(err); }catch{}
-      status('Upload failed', '');
-      progress(0); step(1);
-      alert(err.message || 'Upload failed');
-      btnUpload.disabled = false;
-    }
-  }
-
-  // File picker UI
-  fileInput.addEventListener('change', ()=>{
-    const f = fileInput.files && fileInput.files[0];
-    if (!f){ fname.textContent = 'No file chosen'; fmeta.textContent = ''; return; }
-    fname.textContent = f.name;
-    fmeta.textContent = `${(f.size/1024/1024).toFixed(1)} MB • ${f.type||'video'}`;
-    status('File selected. Ready to upload.', 'warn');
-  });
-
-  btnUpload.addEventListener('click', startUpload);
-  btnReset.addEventListener('click', ()=>{
-    fields.forEach(k=>{ const el = document.getElementById(k); if(el) el.value=''; });
-    updateSummary(); fileInput.value=''; fname.textContent='No file chosen'; fmeta.textContent='';
-    step(1); progress(0); status('Idle',''); btnUpload.disabled=false;
-    btnOpenReport.setAttribute('aria-disabled','true'); btnOpenReport.classList.add('disabled'); btnOpenReport.href='#';
-  });
-
-  // Initialize UI
-  step(1); progress(0); status('Idle','');
+};
 </script>
-</body>
-</html>
