@@ -122,4 +122,14 @@ document.getElementById('go').onclick = async () => {
     btn.disabled = false;
   }
 };
+  <!-- If your project is plain <script> (no bundler), load as a module: -->
+<script type="module">
+  import { reportReady, pollAnalyze, jobIdFromKey } from './helpers-upload.js';
+
+  // Make them globally accessible if your existing code expects window.*
+  window.reportReady = reportReady;
+  window.pollAnalyze = pollAnalyze;
+  window.jobIdFromKey = jobIdFromKey;
+</script>
+
 </script>
