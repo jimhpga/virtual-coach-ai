@@ -1,45 +1,54 @@
-// api/report.js
+// /api/report.js
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
-const REGION = process.env.AWS_REGION;
 const BUCKET = process.env.S3_BUCKET;
-const s3 = new S3Client({ region: REGION });
+const REGION = process.env.AWS_REGION;
+
+function json(status, obj) {
+  return new Response(JSON.stringify(obj), {
+    status,
+    headers: { "Content-Type": "application/json" }
+  });
+}
 
 function jobIdFromKey(key) {
-  const base = key.replace(/^uploads\//, "");
+  const base = String(key).replace(/^uploads\//, "");
   return base.replace(/\.[^.]+$/, "");
 }
 
-export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Use POST" });
+export default async function handler(request) {
   try {
-    const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
-    let { jobId, key, status, data } = body;
+    if (request.method !== "POST") {
+      return json(405, { ok: false, error: "Method Not Allowed" });
+    }
+    if (!BUCKET || !REGION) {
+      return json(500, { ok: false, error: "Missing S3 env (S3_BUCKET, AWS_REGION)" });
+    }
+    const body = await request.json().catch(() => ({}));
+    let { jobId, status = "ready", data = {}, key } = body;
 
     if (!jobId && key) jobId = jobIdFromKey(key);
-    if (!jobId) return res.status(400).json({ ok: false, error: "missing jobId or key" });
+    if (!jobId) return json(400, { ok: false, error: "Missing jobId or key" });
 
-    status = status || "pending";
-    const payload = { status, ...(data || {}) };
+    const s3 = new S3Client({ region: REGION });
+    const statusKey = `status/${jobId}.json`;
+    const payload = {
+      status,
+      ...("size" in data ? { size: data.size } : {}),
+      ...("type" in data ? { type: data.type } : {}),
+      ...("etag" in data ? { etag: data.etag } : {}),
+      t: Date.now()
+    };
 
-    if (!BUCKET || !REGION) {
-      return res.status(500).json({
-        ok: false,
-        error: "missing env",
-        details: { S3_BUCKET_present: !!BUCKET, AWS_REGION_present: !!REGION }
-      });
-    }
-
-    const Key = `status/${encodeURIComponent(jobId)}.json`;
     await s3.send(new PutObjectCommand({
       Bucket: BUCKET,
-      Key,
+      Key: statusKey,
       Body: JSON.stringify(payload),
       ContentType: "application/json"
     }));
 
-    return res.status(200).json({ ok: true, bucket: BUCKET, key: Key, wrote: payload });
+    return json(200, { ok: true, bucket: BUCKET, key: statusKey, wrote: payload });
   } catch (e) {
-    return res.status(500).json({ ok: false, error: e?.message || "report-write-failed" });
+    return json(500, { ok: false, error: e?.message || String(e) });
   }
 }
