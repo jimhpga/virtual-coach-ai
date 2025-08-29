@@ -10,7 +10,7 @@
 <p>This page probes your live APIs and writes/reads a test status.</p>
 <table id="t"><thead><tr><th>Check</th><th>Status</th><th>HTTP</th><th>Body</th></tr></thead><tbody></tbody></table>
 <script>
-const checks=[
+const checks=[ 
   { label:"API: /api/health", url:"/api/health" },
   { label:"API: /api/upload (POST)", url:"/api/upload", method:"POST",
     body:{ jobId:"smoke", key:"uploads/smoke.txt", contentType:"text/plain" } },
