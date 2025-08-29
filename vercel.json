@@ -5,8 +5,6 @@
     { "src": "^/report$", "dest": "/report.html" }
   ],
   "functions": {
-    "api/*.js": {
-      "runtime": "nodejs18.x"
-    }
+    "api/*.js": { "runtime": "nodejs18.x" }
   }
 }
