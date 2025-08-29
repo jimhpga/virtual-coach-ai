@@ -250,467 +250,535 @@
   </div>
 
 <script>
-  // NAV
-  const header = document.getElementById('site-header');
-  const btn = document.getElementById('menuBtn');
-  btn.addEventListener('click', ()=>{
-    const open = header.classList.toggle('open');
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-  document.getElementById('siteNav').addEventListener('click', e=>{
-    if(e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
-  });
+// ===== tiny utils =====
+function $(s){ return document.querySelector(s); }
+function logWarn(){ try{ console.warn.apply(console, arguments); }catch{} }
 
-  // QS & helpers
-  const $ = s => document.querySelector(s);
-  const qp = new URLSearchParams(location.search);
-  const src = (qp.get('src') || '').toLowerCase();
-  const reportParam = qp.get('report');
-  const keyParam = qp.get('key');
-  const fileSrc = (reportParam === 'local') ? null : (reportParam || '/report.json');
-
-  const fmt  = v => `${v}%`;
-  const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';
-  const chip = g => (g==='good'?'g-good':g==='ok'?'g-ok':'g-bad');
-  const metricRow = m => `<div class="metric"><div class="name">${m.label||m.p}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
-
-  function toYouTubeEmbed(url){
-    try{
-      const u = new URL(url);
-      if (u.hostname.includes('youtube.com')){
-        if (u.pathname === '/watch' && u.searchParams.get('v')) return `https://www.youtube.com/embed/${u.searchParams.get('v')}`;
-        if (u.pathname.startsWith('/embed/')) return url;
+// NAV
+(function(){
+  var header = document.getElementById('site-header');
+  var btn = document.getElementById('menuBtn');
+  if (btn) {
+    btn.addEventListener('click', function(){
+      var open = header.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+  var nav = document.getElementById('siteNav');
+  if (nav) {
+    nav.addEventListener('click', function(e){
+      if (e.target && e.target.tagName === 'A') {
+        header.classList.remove('open');
+        btn && btn.setAttribute('aria-expanded','false');
       }
-      if (u.hostname === 'youtu.be') return `https://www.youtube.com/embed/${u.pathname.slice(1)}`;
-    }catch{}
-    return null;
+    });
   }
-  function openViewer(href){
-    const viewer = $('#viewer');
-    const body = $('#viewerBody');
-    body.innerHTML = '';
-    const yt = toYouTubeEmbed(href);
-    if (yt){
-      body.innerHTML = `<iframe src="${yt}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-    } else if (/^https?:/.test(href)){
-      body.innerHTML = `<video controls playsinline src="${href}"></video>`;
-    } else {
-      window.open(href, '_blank', 'noopener'); return;
+})();
+
+// query params & simple helpers
+var qp = new URLSearchParams(location.search);
+var src = (qp.get('src') || '').toLowerCase();
+var reportParam = qp.get('report');
+var keyParam = qp.get('key');
+var fileSrc = (reportParam === 'local') ? null : (reportParam || '/report.json');
+
+function fmt(v){ return String(v) + '%'; }
+function band(v){ v = +v; return v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad'; }
+function chip(g){ return g==='good'?'g-good':g==='ok'?'g-ok':'g-bad'; }
+function safeNum(v){ var n = Number(v); return isFinite(n) ? n : null; }
+
+function toYouTubeEmbed(url){
+  try{
+    var u = new URL(url);
+    if (u.hostname.indexOf('youtube.com') !== -1){
+      if (u.pathname === '/watch' && u.searchParams.get('v')) return 'https://www.youtube.com/embed/' + u.searchParams.get('v');
+      if (u.pathname.indexOf('/embed/') === 0) return url;
     }
-    viewer.classList.add('open');
+    if (u.hostname === 'youtu.be') return 'https://www.youtube.com/embed/' + u.pathname.slice(1);
+  }catch(e){}
+  return null;
+}
+
+function openViewer(href){
+  var viewer = $('#viewer');
+  var body = $('#viewerBody');
+  body.innerHTML = '';
+  var yt = toYouTubeEmbed(href);
+  if (yt){
+    body.innerHTML = '<iframe src="' + yt + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+  } else if (/^https?:/.test(href)){
+    body.innerHTML = '<video controls playsinline src="' + href + '"></video>';
+  } else {
+    window.open(href, '_blank', 'noopener'); return;
   }
-  $('#viewerClose').addEventListener('click', ()=>$('#viewer').classList.remove('open'));
-  $('#viewer').addEventListener('click', (e)=>{ if(e.target.id==='viewer') $('#viewer').classList.remove('open'); });
+  viewer.classList.add('open');
+}
+(function(){
+  var vc = $('#viewerClose'), v = $('#viewer');
+  vc && vc.addEventListener('click', function(){ v.classList.remove('open'); });
+  v && v.addEventListener('click', function(e){ if(e.target.id==='viewer') v.classList.remove('open'); });
+})();
 
-  function phaseRow(ph,i){
-    const id = ph.id || ('P'+(i+1));
-    const name = ph.name || '';
-    const gRaw = String(ph.grade||'').toLowerCase();
-    const grade = (gRaw==='bad') ? 'needs help' : (gRaw || 'ok');
-    const short = ph.short || '';
-    const long  = ph.long  || '';
-    const ref   = ph.ref || ph.video || ph.video_url || '';
-    const btnLabel = /youtu(\.be|be\.com)/.test(ref) ? 'YouTube' : 'Video';
-    return `
-    <details class="panel" ${i===0?'open':''}>
-      <summary>
-        <span class="pnum">${id}</span>
-        <span class="pname">${name}</span>
-        <span class="gchip ${chip(gRaw)}">${grade.toUpperCase()}</span>
-        <span class="sub" style="margin-left:8px">${short}</span>
-        <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-      </summary>
-      <div class="content">
-        <div class="sub" style="margin-bottom:8px">${short}</div>
-        <div style="margin-bottom:10px">${long}</div>
-        ${ref?`<button class="btn videoBtn" data-href="${ref}">${btnLabel}</button>`:''}
-      </div>
-    </details>`;
-  }
-  function coachItem(item){
-    const title = item.title || '';
-    const short = item.short || '';
-    const long  = item.long  || '';
-    const ref   = item.ref || '';
-    const btnLabel = /youtu(\.be|be\.com)/.test(ref) ? 'YouTube' : 'Video';
-    return `<details class="panel">
-      <summary><span class="pname">${title}</span><span class="sub" style="margin-left:8px">${short}</span>
-        <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-      </summary>
-      <div class="content">
-        <div style="margin-bottom:10px">${long}</div>
-        ${ref?`<button class="btn videoBtn" data-href="${ref}">${btnLabel}</button>`:''}
-      </div>
-    </details>`;
-  }
+function metricRow(m){
+  var label = m.label || m.p || '';
+  var val = +m.value || 0;
+  return '' +
+    '<div class="metric">' +
+      '<div class="name">' + label + '</div>' +
+      '<div class="bar"><span class="' + band(val) + '" style="width:' + val + '%"></span></div>' +
+      '<div class="pct">' + fmt(val) + '</div>' +
+    '</div>';
+}
 
-  /* ===== Fundamentals preference ===== */
-  const FUNDAMENTALS_PRIORITY = [
-    {key:'grip',                match:/\bgrip\b/i, unit:''},
-    {key:'posture',             match:/posture|spine\s*angle|setup spine/i, unit:'°'},
-    {key:'club_head_in_out',    match:/club[-\s]?head.*(inside|outside)|takeaway.*(inside|outside)|\bP2\b.*(club|shaft)/i, unit:'°'},
-    {key:'shaft_plane',         match:/shaft\s*(plane|pitch|angle)|swing\s*plane/i, unit:'°'},
-    {key:'P4',                  match:/\bP4\b|top\b/i, unit:'°'},
-    {key:'P5',                  match:/\bP5\b/i, unit:'°'},
-    {key:'P6',                  match:/\bP6\b|shaft.*parallel.*down/i, unit:'°'},
-    {key:'P7',                  match:/\bP7\b|impact\b/i, unit:'°'},
-    {key:'P8',                  match:/\bP8\b/i, unit:'°'},
-    {key:'leg_movement',        match:/leg|knee|pelvis\s*(sway|thrust|slide|rotation)|hip\s*(slide|sway)/i, unit:'°'},
-    {key:'right_arm_bend',      match:/right.*(arm|elbow).*(bend|flex|angle)/i, unit:'°'},
-    {key:'left_arm_bend',       match:/left.*(arm|elbow).*(bend|flex|angle)/i, unit:'°'},
-    {key:'head_movement',       match:/head\s*(movement|drift|tilt|drop|rise|sway)/i, unit:'in'}
-  ];
+function phaseRow(ph, i){
+  var id = ph.id || ('P' + (i+1));
+  var name = ph.name || '';
+  var gRaw = String(ph.grade||'').toLowerCase();
+  var grade = (gRaw==='bad') ? 'needs help' : (gRaw || 'ok');
+  var short = ph.short || '';
+  var longTxt  = ph.long  || '';
+  var ref   = ph.ref || ph.video || ph.video_url || '';
+  var btnLabel = /youtu(\.be|be\.com)/.test(ref) ? 'YouTube' : 'Video';
+  return [
+    '<details class="panel" ' + (i===0?'open':'') + '>',
+      '<summary>',
+        '<span class="pnum">' + id + '</span>',
+        '<span class="pname">' + name + '</span>',
+        '<span class="gchip ' + chip(gRaw) + '">' + String(grade).toUpperCase() + '</span>',
+        '<span class="sub" style="margin-left:8px">' + short + '</span>',
+        '<svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+      '</summary>',
+      '<div class="content">',
+        '<div class="sub" style="margin-bottom:8px">' + short + '</div>',
+        '<div style="margin-bottom:10px">' + longTxt + '</div>',
+        (ref ? '<button class="btn videoBtn" data-href="' + ref + '">' + btnLabel + '</button>' : ''),
+      '</div>',
+    '</details>'
+  ].join('');
+}
 
-  function safeNum(v){ const n = Number(v); return Number.isFinite(n) ? n : null; }
+function coachItem(item){
+  var title = item.title || '';
+  var short = item.short || '';
+  var longTxt = item.long  || '';
+  var ref   = item.ref || '';
+  var btnLabel = /youtu(\.be|be\.com)/.test(ref) ? 'YouTube' : 'Video';
+  return [
+    '<details class="panel">',
+      '<summary><span class="pname">' + title + '</span><span class="sub" style="margin-left:8px">' + short + '</span>',
+        '<svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+      '</summary>',
+      '<div class="content">',
+        '<div style="margin-bottom:10px">' + longTxt + '</div>',
+        (ref ? '<button class="btn videoBtn" data-href="' + ref + '">' + btnLabel + '</button>' : ''),
+      '</div>',
+    '</details>'
+  ].join('');
+}
 
-  function collectMetricCandidates(data){
-    const out = [];
-    function push(arr){
-      if (!Array.isArray(arr)) return;
-      for (const m of arr){
-        const label = (m.label || m.p || m.name || '').toString();
-        const you = safeNum(m.value);
-        const tour = safeNum(m.tour ?? m.pro ?? m.target ?? (m.ref && m.ref.tour));
-        if (you==null || tour==null) continue;
-        out.push({ label, you, tour, unit: m.unit || '' });
-      }
+/* ===== Fundamentals preference ===== */
+var FUNDAMENTALS_PRIORITY = [
+  {key:'grip',                match:/\bgrip\b/i, unit:''},
+  {key:'posture',             match:/posture|spine\s*angle|setup spine/i, unit:'°'},
+  {key:'club_head_in_out',    match:/club[-\s]?head.*(inside|outside)|takeaway.*(inside|outside)|\bP2\b.*(club|shaft)/i, unit:'°'},
+  {key:'shaft_plane',         match:/shaft\s*(plane|pitch|angle)|swing\s*plane/i, unit:'°'},
+  {key:'P4',                  match:/\bP4\b|top\b/i, unit:'°'},
+  {key:'P5',                  match:/\bP5\b/i, unit:'°'},
+  {key:'P6',                  match:/\bP6\b|shaft.*parallel.*down/i, unit:'°'},
+  {key:'P7',                  match:/\bP7\b|impact\b/i, unit:'°'},
+  {key:'P8',                  match:/\bP8\b/i, unit:'°'},
+  {key:'leg_movement',        match:/leg|knee|pelvis\s*(sway|thrust|slide|rotation)|hip\s*(slide|sway)/i, unit:'°'},
+  {key:'right_arm_bend',      match:/right.*(arm|elbow).*(bend|flex|angle)/i, unit:'°'},
+  {key:'left_arm_bend',       match:/left.*(arm|elbow).*(bend|flex|angle)/i, unit:'°'},
+  {key:'head_movement',       match:/head\s*(movement|drift|tilt|drop|rise|sway)/i, unit:'in'}
+];
+
+function collectMetricCandidates(data){
+  var out = [];
+  function push(arr){
+    if (!Array.isArray(arr)) return;
+    for (var i=0;i<arr.length;i++){
+      var m = arr[i];
+      var label = (m.label || m.p || m.name || '');
+      var you = safeNum(m.value);
+      var tour = safeNum( m.tour!=null ? m.tour :
+                 (m.pro!=null ? m.pro :
+                 (m.target!=null ? m.target :
+                  (m.ref && m.ref.tour))));
+      if (you==null || tour==null) continue;
+      out.push({ label: String(label), you: +you, tour: +tour, unit: m.unit || '' });
     }
-    push(data.position_metrics);
-    push(data.swing_metrics);
-    // Power as a candidate too (with default tour baseline 85 if not provided)
-    if (data.power && safeNum(data.power.score)!=null){
-      const t = safeNum(data.power.tour) ?? 85;
-      out.push({ label:'Power Score', you:+data.power.score, tour:t, unit:'%' });
-    }
-    return out;
+  }
+  push(data.position_metrics);
+  push(data.swing_metrics);
+  if (data.power && safeNum(data.power.score)!=null){
+    var t = safeNum(data.power.tour); if (t==null) t = 85;
+    out.push({ label:'Power Score', you:+data.power.score, tour:t, unit:'%' });
+  }
+  return out;
+}
+
+function tagFundamental(cand){
+  var l = cand.label.toLowerCase();
+  for (var i=0;i<FUNDAMENTALS_PRIORITY.length;i++){
+    var f = FUNDAMENTALS_PRIORITY[i];
+    if (f.match.test(l)) return { fkey:f.key, fidx:i, unit:(cand.unit || f.unit || ''), label:cand.label, you:cand.you, tour:cand.tour };
+  }
+  return { fkey:null, fidx:999, unit:(cand.unit || ''), label:cand.label, you:cand.you, tour:cand.tour };
+}
+
+function buildCohortLine(data){
+  var c = data.cohort || data.intake || {};
+  var bits = [];
+  function cap(s){ s = String(s||''); return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+  if (c.hand || c.handedness) bits.push(cap(c.hand||c.handedness) + '-hand');
+  if (c.eye || c.eye_dominance) bits.push(cap(c.eye||c.eye_dominance) + '-eye');
+  if (c.gender) bits.push(cap(c.gender));
+  if (c.height) bits.push(String(c.height) + ' in');
+  if (c.bodyShape || c.build) bits.push(cap(c.bodyShape||c.build));
+  return bits.length ? 'Matched cohort: ' + bits.join(', ') : '';
+}
+
+function rankFundamentals(data){
+  var cands = collectMetricCandidates(data).map(tagFundamental);
+  for (var i=0;i<cands.length;i++){
+    var c = cands[i];
+    c.delta = +(c.you - c.tour).toFixed(1);
+  }
+  var preferred = cands.filter(function(c){ return !!c.fkey; })
+                       .sort(function(a,b){ return (a.fidx - b.fidx) || (Math.abs(b.delta) - Math.abs(a.delta)); });
+  var others = cands.filter(function(c){ return !c.fkey; })
+                    .sort(function(a,b){ return Math.abs(b.delta) - Math.abs(a.delta); });
+  var all = preferred.concat(others);
+  return { top3: all.slice(0,3), all: all };
+}
+
+function deltaRow(d){
+  var cls = d.delta>0 ? 'dplus' : 'dminus';
+  var sign = d.delta>0 ? '+' : '';
+  var unit = d.unit || '';
+  var nums = 'You ' + d.you + unit + ' • Tour ' + d.tour + unit;
+  return '' +
+    '<div class="delta">' +
+      '<div class="name">' + d.label + '</div>' +
+      '<span class="dchip ' + cls + '">' + sign + d.delta + unit + '</span>' +
+      '<div class="nums">' + nums + '</div>' +
+    '</div>';
+}
+
+var last = null;
+function renderReport(data){
+  last = data || {};
+  var dateEl = document.getElementById('date');
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString();
+  if (data.discipline){
+    var mode = /putt/i.test(data.discipline) ? 'Putting' :
+               (/chip/i.test(data.discipline) ? 'Chipping' : 'Full Swing');
+    var mEl = document.getElementById('modeLabel'); if (mEl) mEl.textContent = mode;
+  }
+  if (data.swings!=null){
+    var sc = document.getElementById('swingCount'); if (sc) sc.textContent = String(data.swings);
   }
 
-  function tagFundamental(cand){
-    const l = cand.label.toLowerCase();
-    for (let i=0;i<FUNDAMENTALS_PRIORITY.length;i++){
-      const f = FUNDAMENTALS_PRIORITY[i];
-      if (f.match.test(l)) return { ...cand, fkey:f.key, fidx:i, unit: cand.unit || f.unit || '' };
-    }
-    return { ...cand, fkey:null, fidx:999 };
+  var phases = Array.isArray(data.phases)? data.phases : [];
+  var plist = document.getElementById('plist');
+  if (plist) plist.innerHTML = phases.length ? phases.map(phaseRow).join('') : '<div class="content sub">No phases found in report.</div>';
+
+  var posEl = document.getElementById('position');
+  if (posEl) posEl.innerHTML = (data.position_metrics||[]).map(metricRow).join('') || '<div class="sub">No position metrics.</div>';
+
+  var swingEl = document.getElementById('swing');
+  if (swingEl) swingEl.innerHTML = (data.swing_metrics||[]).map(metricRow).join('') || '<div class="sub">No swing metrics.</div>';
+
+  var p = data.power || {score:0, tempo:'—', release_timing:0};
+  var ps = +p.score||0, rt = +p.release_timing||0, tempo = p.tempo||'—';
+  var powerEl = document.getElementById('power');
+  if (powerEl) {
+    powerEl.innerHTML =
+      '<div class="metric"><div class="name">Power Score</div><div class="bar"><span class="' + band(ps) + '" style="width:' + ps + '%"></span></div><div class="pct">' + ps + '%</div></div>' +
+      '<div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">' + tempo + '</div></div>' +
+      '<div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="' + band(rt) + '" style="width:' + rt + '%"></span></div><div class="pct">' + rt + '%</div></div>';
   }
 
-  function buildCohortLine(data){
-    const c = data.cohort || data.intake || {};
-    const bits = [];
-    const cap = s=> String(s||'').replace(/^\w/,m=>m.toUpperCase());
-    if (c.hand || c.handedness) bits.push(`${cap(c.hand||c.handedness)}-hand`);
-    if (c.eye || c.eye_dominance) bits.push(`${cap(c.eye||c.eye_dominance)}-eye`);
-    if (c.gender) bits.push(cap(c.gender));
-    if (c.height) bits.push(`${c.height} in`);
-    if (c.bodyShape || c.build) bits.push(cap(c.bodyShape||c.build));
-    return bits.length ? `Matched cohort: ${bits.join(', ')}` : '';
+  // Video buttons
+  var vbtns = document.querySelectorAll('.videoBtn');
+  for (var i=0;i<vbtns.length;i++){
+    vbtns[i].addEventListener('click', function(){ openViewer(this.dataset.href); });
   }
 
-  function rankFundamentals(data){
-    const cands = collectMetricCandidates(data).map(tagFundamental);
-    // Compute deltas
-    cands.forEach(c=> c.delta = +(c.you - c.tour).toFixed(1));
+  // Cohort + deltas
+  var cohortText = buildCohortLine(data);
+  var cohortEl = document.getElementById('cohortLine');
+  if (cohortEl){ cohortEl.textContent = cohortText || ''; cohortEl.style.display = cohortText ? 'block' : 'none'; }
 
-    // preferred fundamentals first, sorted by |delta|
-    const preferred = cands.filter(c=> c.fkey).sort((a,b)=> a.fidx - b.fidx || Math.abs(b.delta) - Math.abs(a.delta));
-    // others next
-    const others = cands.filter(c=> !c.fkey).sort((a,b)=> Math.abs(b.delta) - Math.abs(a.delta));
+  var ranked = rankFundamentals(data);
+  var deltaEl = document.getElementById('tourDelta');
+  if (deltaEl) deltaEl.innerHTML = ranked.top3.length ? ranked.top3.map(deltaRow).join('') : '<div class="sub">No cohort comparison available yet.</div>';
+  var allEl = document.getElementById('allFundamentals');
+  if (allEl) allEl.innerHTML = ranked.all.length ? ranked.all.map(deltaRow).join('') : '<div class="sub">Waiting on more metrics.</div>';
+}
 
-    const all = [...preferred, ...others];
-    const top3 = all.slice(0,3);
-    return { top3, all };
+// status pill helpers
+function ensureStatusPill(){
+  var pill = document.getElementById('statusPill');
+  if (!pill) {
+    var hdr = document.querySelector('.hdr');
+    pill = document.createElement('span');
+    pill.id = 'statusPill';
+    pill.className = 'badge';
+    pill.style.marginLeft = '8px';
+    if (hdr) hdr.appendChild(pill);
   }
+  return pill;
+}
+function setPill(text, ok){
+  var pill = ensureStatusPill();
+  pill.textContent = text;
+  pill.style.borderColor = ok ? '#2a6' : 'rgba(255,255,255,.18)';
+  pill.style.background = ok ? 'rgba(25,195,125,.18)' : 'rgba(255,255,255,.10)';
+}
 
-  function deltaRow(d){
-    const cls = d.delta>0 ? 'dplus' : 'dminus';
-    const sign = d.delta>0 ? '+' : '';
-    const unit = d.unit || '';
-    const nums = `You ${d.you}${unit} • Tour ${d.tour}${unit}`;
-    return `<div class="delta">
-      <div class="name">${d.label}</div>
-      <span class="dchip ${cls}">${sign}${d.delta}${unit}</span>
-      <div class="nums">${nums}</div>
-    </div>`;
+// loaders
+async function loadReport(url){
+  try{
+    var res = await fetch(url, { cache:'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    var txt = await res.text();
+    if (txt.charCodeAt(0) === 0xFEFF) txt = txt.slice(1);
+    var data = JSON.parse(txt);
+    renderReport(data);
+    try{ localStorage.setItem('vc_last_report', JSON.stringify(data)); }catch(e){}
+    setPill('Loaded ✓', true);
+  }catch(err){
+    console.error('Report load failed:', err);
+    setPill('Load failed', false);
+    document.querySelector('main').insertAdjacentHTML('afterbegin',
+      '<div class="card" style="margin-bottom:10px"><div class="content" style="color:#ffd1d1">Failed to load report: ' + String(err && err.message || err) + '</div></div>');
   }
+}
+function tryLocal() {
+  try {
+    var rawLocal = localStorage.getItem('vc_last_report') || sessionStorage.getItem('vc_report') || '';
+    if (rawLocal) { renderReport(JSON.parse(rawLocal)); setPill('Loaded (cached) ✓', true); return true; }
+  } catch(e) {}
+  return false;
+}
 
-  let last = null;
-  function renderReport(data){
-    last = data || {};
-    document.getElementById('date').textContent = new Date().toLocaleDateString();
-    if(data.discipline){
-      document.getElementById('modeLabel').textContent =
-        /putt/i.test(data.discipline) ? 'Putting' :
-        /chip/i.test(data.discipline) ? 'Chipping' : 'Full Swing';
-    }
-    if(data.swings!=null){ document.getElementById('swingCount').textContent = String(data.swings); }
-
-    const phases = Array.isArray(data.phases)? data.phases : [];
-    document.getElementById('plist').innerHTML = phases.map(phaseRow).join('') || '<div class="content sub">No phases found in report.</div>';
-
-    document.getElementById('position').innerHTML = (data.position_metrics||[]).map(metricRow).join('') || '<div class="sub">No position metrics.</div>';
-    document.getElementById('swing').innerHTML    = (data.swing_metrics||[]).map(metricRow).join('')    || '<div class="sub">No swing metrics.</div>';
-
-    const p = data.power||{score:0, tempo:'—', release_timing:0};
-    document.getElementById('power').innerHTML = `
-      <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="${band(+p.score||0)}" style="width:${+p.score||0}%"></span></div><div class="pct">${+p.score||0}%</div></div>
-      <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo||'—'}</div></div>
-      <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing||0)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
-
-    // Video buttons
-    document.querySelectorAll('.videoBtn').forEach(b=> b.addEventListener('click', ()=> openViewer(b.dataset.href)));
-
-    // Cohort line + fundamentals ranking
-    const cohortText = buildCohortLine(data);
-    const cohortEl = document.getElementById('cohortLine');
-    cohortEl.textContent = cohortText || '';
-    cohortEl.style.display = cohortText ? 'block' : 'none';
-
-    const { top3, all } = rankFundamentals(data);
-    document.getElementById('tourDelta').innerHTML =
-      top3.length ? top3.map(deltaRow).join('') : '<div class="sub">No cohort comparison available yet.</div>';
-    document.getElementById('allFundamentals').innerHTML =
-      all.length ? all.map(deltaRow).join('') : '<div class="sub">Waiting on more metrics.</div>';
-  }
-
-  // Status pill (for dynamic check mode)
-  function ensureStatusPill(){
-    let pill = document.getElementById('statusPill');
-    if (!pill) {
-      const hdr = document.querySelector('.hdr');
-      pill = document.createElement('span');
-      pill.id = 'statusPill';
-      pill.className = 'badge';
-      pill.style.marginLeft = '8px';
-      hdr && hdr.appendChild(pill);
-    }
-    return pill;
-  }
-  function setPill(text, ok){
-    const pill = ensureStatusPill();
-    pill.textContent = text;
-    pill.style.borderColor = ok ? '#2a6' : 'rgba(255,255,255,.18)';
-    pill.style.background = ok ? 'rgba(25,195,125,.18)' : 'rgba(255,255,255,.10)';
-  }
-
-  // Loaders
-  async function loadReport(url){
+async function fetchAnalyze(key){
+  var r = await fetch('/api/analyze?key=' + encodeURIComponent(key), { cache: 'no-store' });
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+var __pollTimer = null;
+async function bootFromKey(key){
+  setPill('Checking…', false);
+  async function tick(){
     try{
-      const res = await fetch(url, { cache:'no-store' });
-      if(!res.ok) throw new Error('HTTP '+res.status);
-      const txt = await res.text();
-      const data = JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
-      renderReport(data);
-      try{ localStorage.setItem('vc_last_report', JSON.stringify(data)); }catch{}
-      setPill('Loaded ✓', true);
-    }catch(err){
-      console.error('Report load failed:', err);
-      setPill('Load failed', false);
-      document.querySelector('main').insertAdjacentHTML('afterbegin',
-        `<div class="card" style="margin-bottom:10px"><div class="content" style="color:#ffd1d1">Failed to load report: ${String(err.message||err)}</div></div>`);
-    }
-  }
-  function tryLocal() {
-    try {
-      const rawLocal = localStorage.getItem('vc_last_report') || sessionStorage.getItem('vc_report') || '';
-      if (rawLocal) { renderReport(JSON.parse(rawLocal)); setPill('Loaded (cached) ✓', true); return true; }
-    } catch(e) {}
-    return false;
-  }
-
-  async function fetchAnalyze(key){
-    const r = await fetch(`/api/analyze?key=${encodeURIComponent(key)}`, { cache: 'no-store' });
-    if (!r.ok) throw new Error('HTTP '+r.status);
-    return r.json();
-  }
-  let __pollTimer = null;
-  async function bootFromKey(key){
-    setPill('Checking…', false);
-    const tick = async ()=>{
-      try{
-        const data = await fetchAnalyze(key);
-        if (data.status === 'ready') {
-          clearInterval(__pollTimer); __pollTimer = null;
-          setPill('Ready ✓', true);
-          if (data.report) {
-            renderReport(data.report);
-            try{ localStorage.setItem('vc_last_report', JSON.stringify(data.report)); }catch{}
-          } else {
-            document.querySelector('main').insertAdjacentHTML('afterbegin',
-              `<div class="card"><div class="content">Your report is ready: <a class="btn primary" href="/${data.key}" target="_blank" rel="noopener">Open HTML Report</a></div></div>`);
-          }
+      var data = await fetchAnalyze(key);
+      if (data.status === 'ready') {
+        clearInterval(__pollTimer); __pollTimer = null;
+        setPill('Ready ✓', true);
+        if (data.report) {
+          renderReport(data.report);
+          try{ localStorage.setItem('vc_last_report', JSON.stringify(data.report)); }catch(e){}
         } else {
-          setPill('Processing…', false);
+          document.querySelector('main').insertAdjacentHTML('afterbegin',
+            '<div class="card"><div class="content">Your report is ready: <a class="btn primary" href="/' + data.key + '" target="_blank" rel="noopener">Open HTML Report</a></div></div>');
         }
-      }catch(e){
-        console.warn('Status check failed:', e);
-        setPill('Checking…', false);
-      }
-    };
-    await tick();
-    if (!__pollTimer) __pollTimer = setInterval(tick, 7000);
-  }
-
-  (function boot(){
-    document.getElementById('date').textContent = new Date().toLocaleDateString();
-    if (keyParam) { bootFromKey(keyParam); return; }
-    if (src === 'session' || src === 'local') {
-      if (tryLocal()) return;
-      if (fileSrc) return loadReport(fileSrc);
-      alert('No saved report found. Go to Upload and try again.');
-    } else if (fileSrc) {
-      setPill('Loading…', false);
-      loadReport(fileSrc);
-    } else if (!tryLocal()) {
-      alert('No report found.');
-    }
-  })();
-
-  function shareUrl(){
-    try{
-      const u = new URL(location.href);
-      u.searchParams.delete('src');
-      if (keyParam) {
-        u.searchParams.set('key', keyParam);
-        u.searchParams.delete('report');
       } else {
-        u.searchParams.set('report', reportParam || '/report.json');
+        setPill('Processing…', false);
       }
-      return u.toString();
-    }catch{ return location.href; }
+    }catch(e){
+      logWarn('Status check failed:', e);
+      setPill('Checking…', false);
+    }
   }
-  document.getElementById('btnCopy').addEventListener('click', async ()=>{
-    const link = shareUrl();
+  await tick();
+  if (!__pollTimer) __pollTimer = setInterval(tick, 7000);
+}
+
+// boot
+(function boot(){
+  var d = document.getElementById('date');
+  if (d) d.textContent = new Date().toLocaleDateString();
+  if (keyParam) { bootFromKey(keyParam); return; }
+  if (src === 'session' || src === 'local') {
+    if (tryLocal()) return;
+    if (fileSrc) return loadReport(fileSrc);
+    alert('No saved report found. Go to Upload and try again.');
+  } else if (fileSrc) {
+    setPill('Loading…', false);
+    loadReport(fileSrc);
+  } else if (!tryLocal()) {
+    alert('No report found.');
+  }
+})();
+
+// share/copy
+function shareUrl(){
+  try{
+    var u = new URL(location.href);
+    u.searchParams.delete('src');
+    if (keyParam) {
+      u.searchParams.set('key', keyParam);
+      u.searchParams.delete('report');
+    } else {
+      u.searchParams.set('report', reportParam || '/report.json');
+    }
+    return u.toString();
+  }catch(e){ return location.href; }
+}
+var btnCopy = document.getElementById('btnCopy');
+if (btnCopy) {
+  btnCopy.addEventListener('click', async function(){
+    var link = shareUrl();
     try{ await navigator.clipboard.writeText(link); alert('Share link copied'); }
-    catch{ prompt('Copy link:', link); }
+    catch(e){ prompt('Copy link:', link); }
   });
-  document.getElementById('btnSend').addEventListener('click', ()=>{
-    const email = prompt('Coach email (e.g. coach@example.com):'); if(!email) return;
-    const p = (last && last.power) ? `Power ${last.power.score||'-'}%  Tempo ${last.power.tempo||'-'}  Release ${last.power.release_timing||'-'}%` : '';
-    const subject = encodeURIComponent('Virtual Coach AI Swing Report');
-    const body = encodeURIComponent(`Here is my swing report:\n${shareUrl()}\n\n${p}\n\n— sent from virtualcoachai.net`);
-    location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+}
+var btnSend = document.getElementById('btnSend');
+var lastPayload = function(){ try{ return last || {}; }catch(e){ return {}; } };
+if (btnSend) {
+  btnSend.addEventListener('click', function(){
+    var email = prompt('Coach email (e.g. coach@example.com):'); if(!email) return;
+    var lp = lastPayload(), p = (lp.power) ? ('Power ' + (lp.power.score||'-') + '%  Tempo ' + (lp.power.tempo||'-') + '  Release ' + (lp.power.release_timing||'-') + '%') : '';
+    var subject = encodeURIComponent('Virtual Coach AI Swing Report');
+    var body = encodeURIComponent('Here is my swing report:\n' + shareUrl() + '\n\n' + p + '\n\n— sent from virtualcoachai.net');
+    location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
   });
+}
 
-  // === Portable HTML download ===
-  function buildPortableHtml(){
-    const css = `
-      body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;margin:24px;background:#0b1520;color:#ecf3f7}
-      .card{background:#0e1b25;border:1px solid #123;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3);margin:12px 0}
-      .card h3{margin:0;padding:14px 16px;border-bottom:1px solid #123}
-      .content{padding:12px 16px}
-      .title{font-size:26px;font-weight:800}
-      .sub{color:#cfe0e6;font-size:13px}
-      .badge{display:inline-block;background:#0d2230;border:1px solid #234;color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
-      .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-      @media(max-width:960px){.grid2{grid-template-columns:1fr}}
-      .metric{display:flex;align-items:center;gap:10px;margin:9px 0}
-      .metric .name{flex:0 0 210px;color:#d8ebf2}
-      .bar{flex:1;height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}
-      .bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
-      .ok{background:linear-gradient(90deg,#19c37d,#2bd897)}
-      .warn{background:linear-gradient(90deg,#f6c453,#ffd479)}
-      .bad{background:linear-gradient(90deg,#ff6b6b,#ff8f8f)}
-      .pct{width:52px;text-align:right;color:#cfe3ee}
-      details.panel{background:#0e1b25;border:1px solid #123;border-radius:12px}
-      summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer}
-      summary::-webkit-details-marker{display:none}
-      .pnum{width:34px;height:34px;border-radius:10px;background:#0c1820;border:1px solid #123;display:grid;place-items:center;font-weight:800}
-      .pname{font-weight:700}
-      .gchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;margin-left:8px}
-      .g-good{background:#19c37d;color:#fff}
-      .g-ok{background:#f6c453;color:#2a2300}
-      .g-bad{background:#ff6b6b;color:#fff}
-      .delta{display:flex;align-items:center;gap:10px;margin:10px 0}
-      .delta .name{flex:1;font-weight:700}
-      .dchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;border:1px solid #234}
-      .dplus{background:rgba(246,196,83,.18);border-color:#b8860b}
-      .dminus{background:rgba(25,195,125,.18);border-color:#2a6}
-    `.trim();
+// portable HTML (no template strings)
+function buildPortableHtml(){
+  var css = [
+    'body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;margin:24px;background:#0b1520;color:#ecf3f7}',
+    '.card{background:#0e1b25;border:1px solid #123;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3);margin:12px 0}',
+    '.card h3{margin:0;padding:14px 16px;border-bottom:1px solid #123}',
+    '.content{padding:12px 16px}',
+    '.title{font-size:26px;font-weight:800}',
+    '.sub{color:#cfe0e6;font-size:13px}',
+    '.badge{display:inline-block;background:#0d2230;border:1px solid #234;color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}',
+    '.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}',
+    '@media(max-width:960px){.grid2{grid-template-columns:1fr}}',
+    '.metric{display:flex;align-items:center;gap:10px;margin:9px 0}',
+    '.metric .name{flex:0 0 210px;color:#d8ebf2}',
+    '.bar{flex:1;height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}',
+    '.bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px}',
+    '.ok{background:linear-gradient(90deg,#19c37d,#2bd897)}',
+    '.warn{background:linear-gradient(90deg,#f6c453,#ffd479)}',
+    '.bad{background:linear-gradient(90deg,#ff6b6b,#ff8f8f)}',
+    '.pct{width:52px;text-align:right;color:#cfe3ee}',
+    'details.panel{background:#0e1b25;border:1px solid #123;border-radius:12px}',
+    'summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer}',
+    'summary::-webkit-details-marker{display:none}',
+    '.pnum{width:34px;height:34px;border-radius:10px;background:#0c1820;border:1px solid #123;display:grid;place-items:center;font-weight:800}',
+    '.pname{font-weight:700}',
+    '.gchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;margin-left:8px}',
+    '.g-good{background:#19c37d;color:#fff}',
+    '.g-ok{background:#f6c453;color:#2a2300}',
+    '.g-bad{background:#ff6b6b;color:#fff}',
+    '.delta{display:flex;align-items:center;gap:10px;margin:10px 0}',
+    '.delta .name{flex:1;font-weight:700}',
+    '.dchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;border:1px solid #234}',
+    '.dplus{background:rgba(246,196,83,.18);border-color:#b8860b}',
+    '.dminus{background:rgba(25,195,125,.18);border-color:#2a6}'
+  ].join('');
 
-    const titleBlock = document.querySelector('.title')?.textContent || 'Swing Report — P1–P9';
-    const dateTxt = document.getElementById('date')?.textContent || '';
-    const modeTxt = document.getElementById('modeLabel')?.textContent || 'Full Swing';
-    const swings = document.getElementById('swingCount')?.textContent || '—';
+  function get(id){ var el=document.getElementById(id); return el?el.innerHTML:''; }
+  function getText(id){ var el=document.getElementById(id); return el?el.textContent:''; }
 
-    const phases = document.getElementById('plist')?.innerHTML || '';
-    const pos    = document.getElementById('position')?.innerHTML || '';
-    const swg    = document.getElementById('swing')?.innerHTML || '';
-    const power  = document.getElementById('power')?.innerHTML || '';
-    const cohort = document.getElementById('cohortLine')?.innerHTML || '';
-    const top3   = document.getElementById('tourDelta')?.innerHTML || '';
-    const allF   = document.getElementById('allFundamentals')?.innerHTML || '';
+  var titleBlock = (document.querySelector('.title') && document.querySelector('.title').textContent) || 'Swing Report — P1–P9';
+  var dateTxt = getText('date');
+  var modeTxt = getText('modeLabel') || 'Full Swing';
+  var swings = getText('swingCount') || '—';
 
-    const json = JSON.stringify(last || {}, null, 2);
+  var phases = get('plist');
+  var pos    = get('position');
+  var swg    = get('swing');
+  var power  = get('power');
+  var cohort = get('cohortLine');
+  var top3   = get('tourDelta');
+  var allF   = get('allFundamentals');
 
-    return `<!doctype html>
-<html lang="en"><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>${titleBlock}</title>
-<style>${css}</style>
-</head><body>
-<header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-  <div>
-    <div class="title">${titleBlock}</div>
-    <div class="sub">Date: <strong>${dateTxt}</strong> • Mode: <strong>${modeTxt}</strong></div>
-  </div>
-  <div><span class="badge">Swings: <span>${swings}</span></span></div>
-</header>
+  var json = '';
+  try { json = JSON.stringify(last || {}, null, 2); } catch(e){ json = '{}'; }
+  json = json.replace(/<\/script>/gi, '<\\/script>');
 
-<section class="card"><h3>P1–P9</h3><div class="content">${phases}</div></section>
+  var html = [];
+  html.push('<!doctype html>');
+  html.push('<html lang="en"><head>');
+  html.push('<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>');
+  html.push('<title>' + titleBlock.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</title>');
+  html.push('<style>' + css + '</style>');
+  html.push('</head><body>');
 
-<section class="grid2">
-  <div class="card"><h3>Position Consistency</h3><div class="content">${pos}</div></div>
-  <div class="card"><h3>Swing Consistency</h3><div class="content">${swg}</div></div>
-</section>
+  html.push('<header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">');
+  html.push('  <div>');
+  html.push('    <div class="title">' + titleBlock + '</div>');
+  html.push('    <div class="sub">Date: <strong>' + dateTxt + '</strong> • Mode: <strong>' + modeTxt + '</strong></div>');
+  html.push('  </div>');
+  html.push('  <div><span class="badge">Swings: <span>' + swings + '</span></span></div>');
+  html.push('</header>');
 
-<section class="card"><h3>Power Score Summary</h3><div class="content">${power}</div></section>
+  html.push('<section class="card"><h3>P1–P9</h3><div class="content">' + phases + '</div></section>');
 
-<section class="card">
-  <h3>Tour-Player Delta — Top 3 Fundamentals</h3>
-  <div class="content">${cohort ? `<div class="sub" style="padding-bottom:8px">${cohort}</div>` : ''}${top3}</div>
-  <details class="panel" style="margin:10px"><summary><span class="pname">See all fundamentals</span></summary>
-    <div class="content">${allF}</div>
-  </details>
-</section>
+  html.push('<section class="grid2">');
+  html.push('  <div class="card"><h3>Position Consistency</h3><div class="content">' + pos + '</div></div>');
+  html.push('  <div class="card"><h3>Swing Consistency</h3><div class="content">' + swg + '</div></div>');
+  html.push('</section>');
 
-<script type="application/json" id="report-data">${json.replace(/<\/script>/gi,'<\\/script>')}</script>
-</body></html>`;
-  }
+  html.push('<section class="card"><h3>Power Score Summary</h3><div class="content">' + power + '</div></section>');
 
-  document.getElementById('btnDownload').addEventListener('click', ()=>{
-    // Build a portable (offline-safe) HTML with embedded data & styles
-    const portable = buildPortableHtml();
-    const blob = new Blob([portable], {type:'text/html'});
-    const a = document.createElement('a');
+  html.push('<section class="card">');
+  html.push('  <h3>Tour-Player Delta — Top 3 Fundamentals</h3>');
+  html.push('  <div class="content">' + (cohort ? '<div class="sub" style="padding-bottom:8px">' + cohort + '</div>' : '') + top3 + '</div>');
+  html.push('  <details class="panel" style="margin:10px"><summary><span class="pname">See all fundamentals</span></summary>');
+  html.push('    <div class="content">' + allF + '</div>');
+  html.push('  </details>');
+  html.push('</section>');
+
+  html.push('<script type="application/json" id="report-data">' + json + '</script>');
+  html.push('</body></html>');
+  return html.join('\n');
+}
+
+var btnDownload = document.getElementById('btnDownload');
+if (btnDownload) {
+  btnDownload.addEventListener('click', function(){
+    var portable = buildPortableHtml();
+    var blob = new Blob([portable], {type:'text/html'});
+    var a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'swing-report.html';
     document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
   });
+}
 
-  // popovers
-  (function helpPopovers(){
-    let openPop = null;
-    function togglePop(btn){
-      const id = 'pop-' + btn.dataset.pop;
-      const pop = document.getElementById(id);
-      if (!pop) return;
-      if (openPop && openPop !== pop) { openPop.classList.remove('show'); openPop = null; }
-      pop.classList.toggle('show');
-      openPop = pop.classList.contains('show') ? pop : null;
-      if (openPop) {
-        const rect = pop.getBoundingClientRect();
-        if (rect.right > window.innerWidth - 8) {
-          pop.style.right = `${Math.max(0, rect.right - window.innerWidth + 16)}px`;
-        }
+// help popovers
+(function(){
+  var openPop = null;
+  function togglePop(btn){
+    var id = 'pop-' + btn.getAttribute('data-pop');
+    var pop = document.getElementById(id);
+    if (!pop) return;
+    if (openPop && openPop !== pop) { pop.classList.remove('show'); openPop = null; }
+    pop.classList.toggle('show');
+    openPop = pop.classList.contains('show') ? pop : null;
+    if (openPop) {
+      var rect = pop.getBoundingClientRect();
+      if (rect.right > window.innerWidth - 8) {
+        pop.style.right = Math.max(0, rect.right - window.innerWidth + 16) + 'px';
       }
     }
-    document.querySelectorAll('.qbtn').forEach(btn=>{
-      btn.addEventListener('click', (e)=>{ e.stopPropagation(); togglePop(btn); });
-    });
-    document.addEventListener('click', ()=>{ if(openPop){ openPop.classList.remove('show'); openPop=null; }});
-    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && openPop){ openPop.classList.remove('show'); openPop=null; }});
-  })();
+  }
+  var qs = document.querySelectorAll('.qbtn');
+  for (var i=0;i<qs.length;i++){
+    qs[i].addEventListener('click', function(e){ e.stopPropagation(); togglePop(this); });
+  }
+  document.addEventListener('click', function(){ if(openPop){ openPop.classList.remove('show'); openPop=null; }});
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && openPop){ openPop.classList.remove('show'); openPop=null; }});
+})();
 </script>
 </body>
 </html>
