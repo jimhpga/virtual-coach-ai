@@ -1,135 +1,146 @@
 <!doctype html>
-<meta charset="utf-8">
-<title>Upload → Report → Analyze</title>
-<style>
-  body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
-  .row { margin: 8px 0; }
-  button { padding: 8px 14px; border-radius: 8px; border: 1px solid #ccc; cursor: pointer; }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
-  #log { white-space: pre-wrap; background: #111; color: #ddd; padding: 12px; border-radius: 8px; min-height: 120px; }
-</style>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Upload → Report → Analyze</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
+    .row { margin: 8px 0; }
+    button { padding: 8px 14px; border-radius: 8px; border: 1px solid #ccc; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    #log { white-space: pre-wrap; background: #111; color: #ddd; padding: 12px; border-radius: 8px; min-height: 120px; }
+    #key { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  </style>
+</head>
+<body>
+  <h1>Upload → Report → Analyze</h1>
 
-<h1>Upload → Report → Analyze</h1>
+  <div class="row">
+    <input id="file" type="file" />
+    <button id="go">Upload &amp; Process</button>
+  </div>
 
-<div class="row">
-  <input id="file" type="file" />
-  <button id="go">Upload & Process</button>
-</div>
+  <div class="row"><b>Key:</b> <span id="key">(none)</span></div>
+  <div class="row" id="log">Ready.</div>
 
-<div class="row"><b>Key:</b> <span id="key">(none)</span></div>
-<div class="row" id="log">Ready.</div>
+  <script>
+    // ---------- tiny logger ----------
+    const log = (m) => (document.getElementById('log').textContent += "\n" + m);
+    const setKey = (k) => (document.getElementById('key').textContent = k || "(none)");
 
-<script>
-// ------- helpers -------
-const log = (m) => (document.getElementById('log').textContent += "\n" + m);
-const setKey = (k) => (document.getElementById('key').textContent = k || "(none)");
+    // ---------- helpers ----------
+    function jobIdFromKey(key) {
+      const base = String(key || "").replace(/^uploads\//, "");
+      return base.replace(/\.[^.]+$/, "");
+    }
 
-function jobIdFromKey(key) {
-  const base = String(key).replace(/^uploads\//, "");
-  return base.replace(/\.[^.]+$/, "");
-}
+    async function reportReady({ key, jobId, status = "ready", data = {} }) {
+      if (!jobId && key) jobId = jobIdFromKey(key);
+      if (!jobId) throw new Error("reportReady: missing jobId or key");
 
-async function reportReady({ key, jobId, status = "ready", data = {} }) {
-  if (!jobId && key) jobId = jobIdFromKey(key);
-  if (!jobId) throw new Error("reportReady: missing jobId or key");
-  const r = await fetch("/api/report", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ jobId, status, data, key })
-  });
-  const j = await r.json().catch(() => ({}));
-  if (!r.ok || j.ok === false) {
-    throw new Error(`reportReady failed: ${r.status} ${j.error || ""}`);
-  }
-  return j;
-}
+      const r = await fetch("/api/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId, status, data, key })
+      });
 
-async function pollAnalyze({ key, jobId, intervalMs = 1500, maxAttempts = 40, onTick = ()=>{} }) {
-  if (!jobId && key) jobId = jobIdFromKey(key);
-  if (!jobId && !key) throw new Error("pollAnalyze: missing jobId or key");
-  let attempt = 0, delay = intervalMs;
-  while (attempt < maxAttempts) {
-    const qs = key ? `key=${encodeURIComponent(key)}` : `jobId=${encodeURIComponent(jobId)}`;
-    const res = await fetch(`/api/analyze?${qs}`);
-    const txt = await res.text();
-    let j; try { j = JSON.parse(txt); } catch { j = { status: "error", error: "invalid JSON", raw: txt }; }
-    onTick({ attempt, response: j });
-    if (j.status === "ready") return j;
-    if (j.status && j.status !== "pending") { const e = new Error(j.error || j.status); e.details = j; throw e; }
-    await new Promise(r => setTimeout(r, delay));
-    delay = Math.min(Math.round(delay * 1.5), 8000);
-    attempt++;
-  }
-  throw new Error("pollAnalyze timeout");
-}
+      let j = {};
+      try { j = await r.json(); } catch {}
+      if (!r.ok || j.ok === false) {
+        throw new Error(`reportReady failed: HTTP ${r.status} ${j.error || ""}`);
+      }
+      return j; // { ok:true, bucket, key, wrote:{...} }
+    }
 
-// ------- main flow -------
-document.getElementById('go').onclick = async () => {
-  const btn = document.getElementById('go');
-  const f = document.getElementById('file').files[0];
-  if (!f) { alert("Choose a file first."); return; }
+    async function pollAnalyze({ key, jobId, intervalMs = 1500, maxAttempts = 40, onTick = ()=>{} }) {
+      if (!jobId && key) jobId = jobIdFromKey(key);
+      if (!jobId && !key) throw new Error("pollAnalyze: missing jobId or key");
 
-  btn.disabled = true;
-  document.getElementById('log').textContent = "Starting…";
+      let attempt = 0, delay = intervalMs;
+      while (attempt < maxAttempts) {
+        const qs = key ? `key=${encodeURIComponent(key)}` : `jobId=${encodeURIComponent(jobId)}`;
+        const res = await fetch(`/api/analyze?${qs}`);
+        const txt = await res.text();
 
-  try {
-    // 1) build a safe key
-    const safeName = f.name.replace(/[^a-zA-Z0-9._-]+/g, "_");
-    const key = `uploads/${Date.now()}-${safeName}`;
-    setKey(key);
+        let j;
+        try { j = JSON.parse(txt); } catch { j = { status: "error", error: "invalid JSON", raw: txt }; }
 
-    // 2) ask backend for a signed URL to PUT to S3
-    log("Requesting signed URL…");
-    const up = await fetch("/api/upload", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key, contentType: f.type || "application/octet-stream" })
-    });
-    const upj = await up.json().catch(()=> ({}));
-    log(`upload api: ${up.status} ${JSON.stringify(upj)}`);
-    if (!up.ok || !upj.url) throw new Error(`upload api failed ${up.status}`);
+        onTick({ attempt, delay, response: j });
 
-    // 3) PUT the file to S3
-    log("PUT to S3…");
-    const put = await fetch(upj.url, { method: "PUT", body: f });
-    log(`PUT result: ${put.status}`);
-    if (!(put.status === 200 || put.status === 204)) throw new Error(`PUT failed ${put.status}`);
-    const etag = put.headers.get("etag") || null;
+        if (j.status === "ready") return j;
+        if (j.status && j.status !== "pending") {
+          const e = new Error(j.error || j.status);
+          e.details = j;
+          throw e;
+        }
 
-    // 4) Report ready
-    log("Reporting ready…");
-    const rep = await reportReady({
-      key,
-      status: "ready",
-      data: { size: f.size, type: f.type || "application/octet-stream", etag, t: Date.now() }
-    });
-    log(`report: ${JSON.stringify(rep)}`);
+        await new Promise(r => setTimeout(r, delay));
+        delay = Math.min(Math.round(delay * 1.5), 8000);
+        attempt++;
+      }
+      throw new Error("pollAnalyze: timed out waiting for ready");
+    }
 
-    // 5) Poll analyze until done
-    log("Polling analyze…");
-    const result = await pollAnalyze({
-      key,
-      onTick: ({ attempt, response }) => log(`tick ${attempt}: ${JSON.stringify(response)}`)
-    });
+    // ---------- main flow ----------
+    document.getElementById('go').onclick = async () => {
+      const btn = document.getElementById('go');
+      const f = document.getElementById('file').files[0];
+      if (!f) { alert("Choose a file first."); return; }
 
-    log(`DONE: ${JSON.stringify(result)}`);
-    alert("Processing complete!");
-  } catch (e) {
-    log("ERROR: " + (e?.message || e));
-    console.error(e);
-    alert("Upload failed: " + (e?.message || e));
-  } finally {
-    btn.disabled = false;
-  }
-};
-  <!-- If your project is plain <script> (no bundler), load as a module: -->
-<script type="module">
-  import { reportReady, pollAnalyze, jobIdFromKey } from './helpers-upload.js';
+      btn.disabled = true;
+      document.getElementById('log').textContent = "Starting…";
 
-  // Make them globally accessible if your existing code expects window.*
-  window.reportReady = reportReady;
-  window.pollAnalyze = pollAnalyze;
-  window.jobIdFromKey = jobIdFromKey;
-</script>
+      try {
+        // 1) Build a safe S3 key
+        const safeName = f.name.replace(/[^a-zA-Z0-9._-]+/g, "_");
+        const key = `uploads/${Date.now()}-${safeName}`;
+        setKey(key);
 
-</script>
+        // 2) Ask backend for signed URL
+        log("Requesting signed URL…");
+        const up = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key, contentType: f.type || "application/octet-stream" })
+        });
+        const upj = await up.json().catch(() => ({}));
+        log(`upload api: ${up.status} ${JSON.stringify(upj)}`);
+        if (!up.ok || !upj.url) throw new Error(`upload api failed ${up.status}`);
+
+        // 3) PUT the file to S3
+        log("PUT to S3…");
+        const put = await fetch(upj.url, { method: "PUT", body: f });
+        log(`PUT result: ${put.status}`);
+        if (!(put.status === 200 || put.status === 204)) throw new Error(`PUT failed ${put.status}`);
+        const etag = put.headers.get("etag") || null;
+
+        // 4) Report ready
+        log("Reporting ready…");
+        const rep = await reportReady({
+          key,
+          status: "ready",
+          data: { size: f.size, type: f.type || "application/octet-stream", etag, t: Date.now() }
+        });
+        log(`report: ${JSON.stringify(rep)}`);
+
+        // 5) Poll analyze until done
+        log("Polling analyze…");
+        const result = await pollAnalyze({
+          key,
+          onTick: ({ attempt, response }) => log(`tick ${attempt}: ${JSON.stringify(response)}`)
+        });
+
+        log(`DONE: ${JSON.stringify(result)}`);
+        alert("Processing complete!");
+      } catch (e) {
+        log("ERROR: " + (e?.message || e));
+        console.error(e);
+        alert("Upload failed: " + (e?.message || e));
+      } finally {
+        btn.disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>
