@@ -1,14 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [
-        { "type": "host", "value": "virtualcoachai.net" }
-      ],
-      "destination": "https://www.virtualcoachai.net/$1",
-      "permanent": true
-    }
-  ],
   "cleanUrls": true,
   "trailingSlash": false
 }
