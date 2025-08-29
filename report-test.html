@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Report Test</title>
+</head>
+<body>
+  <h1>Test /api/report → /api/analyze</h1>
+  <pre id="out">Running...</pre>
+  <script>
+    const out = (m)=>{ 
+      document.getElementById('out').textContent += "\n" + m; 
+    };
+    (async()=>{
+      try {
+        out("Posting to /api/report...");
+        const resp = await fetch('/api/report',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ jobId:'smoke', status:'ready', data:{ t: Date.now() }})
+        });
+        const json = await resp.json();
+        out("Report response: " + JSON.stringify(json));
+
+        out("Checking /api/analyze...");
+        const a = await fetch('/api/analyze?jobId=smoke');
+        out("Analyze: " + await a.text());
+      } catch(e) {
+        out("Error: " + e.message);
+      }
+    })();
+  </script>
+</body>
+</html>
