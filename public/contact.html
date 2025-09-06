@@ -1,0 +1,128 @@
+<body>
+  <div id="navMount"></div>
+  <script src="/nav.js" defer></script>
+
+  <!-- your existing page content starts here -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Contact — Virtual Coach AI</title>
+  <link rel="preload" as="image" href="/homepage-background.png" />
+  <style>
+    :root{
+      --nav: rgba(7,68,32,.96);     /* dark green nav */
+      --scrim: rgba(0,0,0,.05);     /* brighter background */
+      --panel: rgba(0,0,0,.30);     /* card translucency */
+      --line: rgba(255,255,255,.12);
+      --text: #f2f7f9;
+      --muted:#cfe0e6;
+      --maxw: 1100px;
+      --radius: 14px;
+      --shadow: 0 10px 24px rgba(0,0,0,.22);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--text);
+      font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
+      background:url('/homepage-background.png') center/cover fixed no-repeat;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+    .scrim{min-height:100vh;background:var(--scrim)}
+
+    /* NAV (shared) */
+    header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+    .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
+    .brand img{height:30px;width:auto;display:block}
+    nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+    nav a:hover{background:rgba(255,255,255,.08)}
+    nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+
+    /* MAIN */
+    main{width:min(var(--maxw),94%);margin:0 auto;padding:20px 0 40px;display:grid;gap:18px}
+    h1{margin:2px 0 4px}
+    p.lead{color:var(--muted);margin:0 0 14px}
+
+    .grid{display:grid;gap:14px}
+    @media(min-width:780px){.grid{grid-template-columns:1fr 1fr}}
+
+    .card{
+      padding:14px;border:1px solid var(--line);border-radius:var(--radius);
+      background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow)
+    }
+    .card h3{margin:0 0 8px}
+
+    label{display:block;margin:8px 0 6px;font-weight:600}
+    input,textarea{
+      width:100%;padding:10px 12px;border-radius:10px;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(255,255,255,.10);color:#fff;font-size:1rem
+    }
+    input::placeholder,textarea::placeholder{color:#cfe0e6}
+    button{
+      background:rgba(0,255,153,.16);border:1px solid #0a7;color:#fff;
+      border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;margin-top:10px
+    }
+    button:hover{background:rgba(0,255,153,.22)}
+    footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <header>
+    <div class="navwrap">
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
+      <nav aria-label="Primary">
+        <a href="/index.html">Home</a>
+        <a href="/report.html?report=/report.json">Reports</a>
+        <a href="/coming-soon.html">Coming&nbsp;Soon</a>
+        <a href="/pricing.html">Pricing</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contact.html" aria-current="page">Contact</a>
+        <a href="/login.html">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="scrim">
+    <main>
+      <h1>Contact</h1>
+      <p class="lead">Questions about Virtual Coach AI, coaching programs, or early access? Send us a note.</p>
+
+      <div class="grid">
+        <!-- Form -->
+        <form class="card" action="https://formspree.io/f/xbjnpqyk" method="POST">
+          <label for="name">Name</label>
+          <input id="name" name="name" placeholder="Your name" required />
+
+          <label for="email">Email</label>
+          <input id="email" name="_replyto" type="email" placeholder="you@example.com" required />
+
+          <label for="msg">Message</label>
+          <textarea id="msg" name="message" rows="6" placeholder="How can we help?" required></textarea>
+
+          <button type="submit">Send</button>
+          <p style="color:#cfe0e6;font-size:.9em;margin-top:8px">We typically reply within one business day.</p>
+        </form>
+
+        <!-- Info card -->
+        <div class="card">
+          <h3>Other ways to reach us</h3>
+          <p><strong>Email:</strong> <a href="mailto:support@virtualcoachai.net" style="color:#fff;text-decoration:underline">support@virtualcoachai.net</a></p>
+          <p><strong>Instagram:</strong> <a href="https://instagram.com/virtualcoachai" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">@virtualcoachai</a></p>
+          <p><strong>Location:</strong> Orange County, CA</p>
+          <hr style="border:0;border-top:1px solid var(--line);margin:10px 0">
+          <p>Coaches & partners: ask about early access and white-label options.</p>
+        </div>
+      </div>
+    </main>
+
+    <footer>© <span id="y"></span> Virtual Coach AI</footer>
+  </div>
+
+  <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+</body>
+</html>
