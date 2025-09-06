@@ -1,8 +1,8 @@
-﻿{
+{
   "version": 2,
   "cleanUrls": true,
   "trailingSlash": false,
-  "routes": [
-    { "src": "^/api/(.*)$", "dest": "/api/$1.js" }
-  ]
+  "functions": { "api/**.js": { "runtime": "nodejs20.x" } },
+  "routes": [ { "src": "^/api/(.*)$", "dest": "/api/$1.js" } ]
 }
+
