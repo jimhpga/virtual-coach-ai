@@ -1,32 +1,48 @@
-﻿import { S3Client } from "@aws-sdk/client-s3";
-import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+// api/s3-presign.js
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const BUCKET = process.env.S3_BUCKET;
-const REGION = process.env.S3_REGION || "us-west-1";
-const PREFIX = process.env.S3_PREFIX || "uploads/";
-const MAX_MB = parseInt(process.env.S3_MAX_MB || "500", 10);
+const { S3_BUCKET, S3_REGION, S3_PREFIX, S3_MAX_MB,
+        AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY } = process.env;
 
-const s3 = new S3Client({ region: REGION });
+const bad = (res, code, error, extra={}) => {
+  res.setHeader("Content-Type","application/json");
+  res.status(code).send(JSON.stringify({ error, ...extra }));
+};
 
 export default async function handler(req, res) {
-  if (req.method !== "GET") return res.status(405).end();
+  if (req.method !== "GET") return bad(res, 405, "method_not_allowed");
+
+  const filename = (req.query.filename || "").toString();
+  const contentType = (req.query.contentType || "application/octet-stream").toString();
+  if (!filename) return bad(res, 400, "missing_filename");
+
+  const maxBytes = parseInt(S3_MAX_MB || "500", 10) * 1024 * 1024;
+  const key = `${S3_PREFIX || ""}${filename}`.replace(/^\/+/, "");
+
+  const s3 = new S3Client({
+    region: S3_REGION,
+    credentials: { accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY },
+  });
+
   try {
-    const filename = (req.query.filename || "upload.mp4").toString().replace(/\s+/g,"_");
-    const contentType = (req.query.contentType || "application/octet-stream").toString();
-    const key = `${PREFIX}${Date.now()}_${filename}`;
-    const { url, fields } = await createPresignedPost(s3, {
-      Bucket: BUCKET,
+    const cmd = new PutObjectCommand({
+      Bucket: S3_BUCKET,
       Key: key,
-      Conditions: [
-        ["content-length-range", 0, MAX_MB * 1024 * 1024],
-        ["starts-with", "$Content-Type", ""]
-      ],
-      Fields: { "Content-Type": contentType },
-      Expires: 3600
+      ContentType: contentType,
+      // Do NOT set any Checksum* fields
     });
-    res.status(200).json({ url, fields });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "presign_failed" });
+
+    // Disable flexible checksums so no x-amz-checksum-* gets signed
+    try { cmd.middlewareStack.remove("flexibleChecksumsMiddleware"); } catch {}
+
+    const url = await getSignedUrl(s3, cmd, { expiresIn: 60 });
+    res.setHeader("Content-Type","application/json");
+    res.status(200).send(JSON.stringify({
+      ok: true, method: "PUT", url, key, bucket: S3_BUCKET, region: S3_REGION, maxBytes
+    }));
+  } catch (e) {
+    console.error("presign_error", { name: e?.name, message: e?.message, bucket: S3_BUCKET, region: S3_REGION, key });
+    return bad(res, 500, "presign_failed", { name: e?.name, message: e?.message });
   }
 }
