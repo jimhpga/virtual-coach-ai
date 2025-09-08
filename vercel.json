@@ -1,5 +1,9 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "framework": "vite"
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "destination": "https://virtual-coach-ai-jimhs-projects-1c225018.vercel.app/$1",
+      "permanent": true
+    }
+  ]
 }
