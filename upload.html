@@ -43,7 +43,7 @@
 
       status.textContent = `Key: uploads/${file.name}\nStarting…`;
 
-      // --- File size cap (matches backend env) ---
+      // --- File size cap ---
       const MAX_MB = 500;
       if (file.size > MAX_MB * 1024 * 1024) {
         status.textContent = `Too big. Max ${MAX_MB} MB.`;
@@ -77,6 +77,18 @@
           document.createTextNode('Upload complete:\n'),
           a
         );
+
+        // --- Stub: notify backend to start processing (safe no-op if not implemented yet) ---
+        await fetch('/api/process-upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            key: pre.key,
+            bucket: pre.bucket,
+            size: file.size,
+            contentType: file.type || 'application/octet-stream'
+          })
+        }).catch(() => {});
 
       } catch (err) {
         console.error(err);
