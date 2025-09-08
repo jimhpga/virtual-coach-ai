@@ -1,5 +1,4 @@
-@'
-const express = require("express");
+﻿const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -28,4 +27,3 @@ app.post("/api/analyze", (req, res) => {
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`✅ API listening on http://localhost:${port} (LOCAL STUB)`));
-'@ | Set-Content -Encoding UTF8 .\server.js
