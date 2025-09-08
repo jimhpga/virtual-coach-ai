@@ -1,36 +1,37 @@
 {
-  "name": "virtualcoachai",
-  "version": "1.0.0",
-  "description": "Virtual Coach AI App",
-  "main": "index.js",
-  "license": "MIT",
-  "private": true,
-  "scripts": {
-    "preflight": "node scripts/preflight.js",
-    "clean": "rimraf dist build .pack && shx mkdir -p .pack",
-    "build": "npm run clean && npm run _build",
-    "_build": "vite build",
-    "pack": "node scripts/pack.js",
-    "zip": "node scripts/zip.js",
-    "release": "npm-run-all -s preflight build pack zip",
-    "dev": "vite",
-    "start": "vite preview"
-  },
-  "dependencies": {
-    "@aws-sdk/client-s3": "^3.883.0",
-    "@aws-sdk/s3-presigned-post": "^3.883.0",
-    "body-parser": "^2.2.0",
-    "express": "^5.1.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
-  "devDependencies": {
-    "chalk": "^5.3.0",
-    "cross-zip": "^4.0.0",
-    "npm-run-all": "^4.1.5",
-    "rimraf": "^5.0.10",
-    "shx": "^0.3.4",
-    "simple-git": "^3.27.0",
-    "vite": "^5.3.0"
-  }
+    "name": "virtualcoachai",
+    "version": "1.0.0",
+    "description": "Virtual Coach AI App",
+    "main": "index.js",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "preflight": "node scripts/preflight.js",
+        "clean": "rimraf dist build .pack && shx mkdir -p .pack",
+        "build": "npm run clean && npm run _build",
+        "_build": "vite build",
+        "pack": "node scripts/pack.js",
+        "zip": "node scripts/zip.js",
+        "release": "npm-run-all -s preflight build pack zip",
+        "dev": "vite",
+        "start": "vite preview"
+    },
+    "dependencies": {
+        "@aws-sdk/client-s3": "^3.883.0",
+        "@aws-sdk/s3-presigned-post": "^3.883.0",
+        "body-parser": "^2.2.0",
+        "express": "^5.1.0",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
+    },
+    "devDependencies": {
+        "chalk": "^5.3.0",
+        "cross-zip": "^4.0.0",
+        "esbuild": "^0.25.9",
+        "npm-run-all": "^4.1.5",
+        "rimraf": "^5.0.10",
+        "shx": "^0.3.4",
+        "simple-git": "^3.27.0",
+        "vite": "^7.1.5"
+    }
 }
