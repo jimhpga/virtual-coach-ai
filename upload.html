@@ -1,125 +1,88 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>S3 Upload Test</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: system-ui, sans-serif; margin: 24px; }
-    .row { margin: 12px 0; }
-    #status { white-space: pre-wrap; }
-    progress { width: 100%; }
-    code { background: #f4f4f4; padding: 2px 6px; border-radius: 6px; }
+    body {
+      font-family: sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+      line-height: 1.5;
+    }
+    #status {
+      margin-top: 1rem;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      background: #f9f9f9;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    a {
+      color: #0070f3;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
   <h1>S3 Upload Test</h1>
-
-  <div class="row">
-    <input id="file" type="file" />
-  </div>
-
-  <div class="row">
-    <button id="btn">Upload</button>
-  </div>
-
-  <div class="row">
-    <progress id="bar" value="0" max="100" style="display:none"></progress>
-  </div>
-
-  <div class="row">
-    <div id="status"></div>
-  </div>
+  <input type="file" id="fileInput" />
+  <br />
+  <small>Accepted: .mov, .mp4 (H.264/HEVC), up to 500MB</small>
+  <div id="status"></div>
 
   <script>
-    const $ = (id) => document.getElementById(id);
-    const fileInput = $('file');
-    const btn = $('btn');
-    const bar = $('bar');
-    const status = $('status');
+    const input = document.getElementById('fileInput');
+    const status = document.getElementById('status');
 
-    function log(msg, obj) {
-      const line = (typeof obj === 'undefined') ? msg : msg + ' ' + JSON.stringify(obj);
-      status.textContent += (status.textContent ? '\n' : '') + line;
-      console.log(msg, obj);
-    }
+    input.addEventListener('change', async () => {
+      const file = input.files[0];
+      if (!file) return;
 
-    btn.addEventListener('click', async () => {
-      const file = fileInput.files?.[0];
-      if (!file) {
-        log('Choose a file first.');
+      status.textContent = `Key: uploads/${file.name}\nStarting…`;
+
+      // --- File size cap (matches backend env) ---
+      const MAX_MB = 500;
+      if (file.size > MAX_MB * 1024 * 1024) {
+        status.textContent = `Too big. Max ${MAX_MB} MB.`;
         return;
       }
-      status.textContent = '';
-      bar.style.display = 'block';
-      bar.value = 0;
 
       try {
-        log('Starting…');
-
-        const contentType = file.type || 'application/octet-stream';
+        // --- Request presign URL ---
+        status.textContent += `\nRequesting signed URL…`;
         const qs = new URLSearchParams({
           filename: file.name,
-          contentType
+          contentType: file.type || 'application/octet-stream'
+        });
+        const pre = await fetch(`/api/s3-presign?${qs}`).then(r => r.json());
+
+        // --- Upload to S3 ---
+        await fetch(pre.url, {
+          method: 'PUT',
+          headers: { 'Content-Type': file.type || 'application/octet-stream' },
+          body: file
         });
 
-        log('Requesting signed URL…');
-        const res = await fetch(`/api/s3-presign?${qs.toString()}`);
-        if (!res.ok) {
-          const txt = await res.text().catch(()=>'');
-          throw new Error(`presign failed ${res.status} ${txt}`);
-        }
-        const pre = await res.json();
-        log('Got URL.');
-
-        // Upload with PUT to S3 (streamed + progress UI)
-        await uploadWithProgress(pre.url, file, contentType, (pct) => {
-          bar.value = pct;
-        });
-
-        log('S3 PUT complete.');
-
-        // Public URL to verify
         const publicUrl = `https://${pre.bucket}.s3.${pre.region}.amazonaws.com/${pre.key}`;
-        log('Upload complete:');
+
+        // --- Display success with clickable link ---
         const a = document.createElement('a');
         a.href = publicUrl;
         a.target = '_blank';
-        a.rel = 'noopener';
         a.textContent = publicUrl;
-        status.appendChild(document.createElement('br'));
-        status.appendChild(a);
-      } catch (e) {
-        console.error(e);
-        log('ERROR: ' + (e?.message || e));
-      } finally {
-        setTimeout(() => { bar.style.display = 'none'; }, 800);
+        status.replaceChildren(
+          document.createTextNode('Upload complete:\n'),
+          a
+        );
+
+      } catch (err) {
+        console.error(err);
+        status.textContent = `Upload failed: ${err.message || err}`;
       }
     });
-
-    async function uploadWithProgress(url, file, contentType, onPct) {
-      // Use XHR for reliable progress events
-      onPct?.(0);
-      await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('PUT', url, true);
-        xhr.setRequestHeader('Content-Type', contentType);
-
-        xhr.upload.onprogress = (evt) => {
-          if (evt.lengthComputable) {
-            const pct = Math.round((evt.loaded / evt.total) * 100);
-            onPct?.(pct);
-          }
-        };
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) resolve();
-          else reject(new Error(`S3 PUT failed ${xhr.status}`));
-        };
-        xhr.onerror = () => reject(new Error('Network error during S3 PUT'));
-        xhr.send(file);
-      });
-      onPct?.(100);
-    }
   </script>
 </body>
 </html>
