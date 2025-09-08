@@ -2,8 +2,12 @@
   "CORSRules": [
     {
       "AllowedHeaders": ["*"],
-      "AllowedMethods": ["POST","GET","PUT","HEAD"],
-      "AllowedOrigins": ["*"],
+      "AllowedMethods": ["GET","PUT","HEAD","POST"],
+      "AllowedOrigins": [
+        "https://virtual-coach-*.vercel.app",
+        "https://*.vercel.app",
+        "https://virtualcoachai.net"
+      ],
       "ExposeHeaders": ["ETag","Location"],
       "MaxAgeSeconds": 3000
     }
