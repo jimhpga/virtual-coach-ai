@@ -1,14 +1,11 @@
-cd "C:\Users\jimh\OneDrive\Documents\GitHub\virtual-coach-ai"
-
 @'
 const express = require("express");
 const bodyParser = require("body-parser");
-
 const app = express();
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(bodyParser.text({ type: "application/json" }));
 
-function makeReport(key) {
+function makeReport(key){
   const jobId = String(key || "uploads/demo.mov").replace(/^uploads\//,"").replace(/\.[^.]+$/, "");
   return {
     ok: true, status: "ready", jobId, stub: true, mode: "local",
