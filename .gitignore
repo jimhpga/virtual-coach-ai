@@ -2,3 +2,5 @@
 node_modules/
 dist/
 public/data/
+dist/
+public/data/
