@@ -34,7 +34,7 @@
     { "id": "P4", "name": "Top of Swing", "grade": "bad", "short": "Full coil", "long": "Pressure into trail heel; trail hip deep; lead wrist nearer flat/bowed. Avoid across-the-line/laid-off extremes." },
     { "id": "P5", "name": "Lead Arm Parallel (Downswing)", "grade": "good", "short": "Sequencing", "long": "Pelvis -> torso -> arms. Shaft shallows; trail elbow in front of side seam; lead-wrist flexion maintained." },
     { "id": "P6", "name": "Shaft Parallel (Downswing)", "grade": "good", "short": "Deliver", "long": "Hands slightly ahead; face in the window; pelvis keeps turning (no stall)." },
-    { "id": "P7", "name": "Impact", "grade": "ok", "short": "Forward lean", "long": "Forward shaft lean; low point forward. Pelvis 30–45° open; chest 10–20° open; lead leg braced." },
+    { "id": "P7", "name": "Impact", "grade": "ok", "short": "Forward lean", "long": "Forward shaft lean; low point forward. Pelvis 30â€“45Â° open; chest 10â€“20Â° open; lead leg braced." },
     { "id": "P8", "name": "Trail Arm Parallel (Follow-Through)", "grade": "good", "short": "Extension", "long": "Trail arm extends; handle works around; control rate of closure (no flip)." },
     { "id": "P9", "name": "Finish", "grade": "good", "short": "Balanced", "long": "Pressure fully lead side; belt buckle and chest to target; hold the pose." }
   ],
@@ -66,11 +66,11 @@
       {
         "title": "Lead-leg brake",
         "short": "Post into lead side",
-        "long": "Why: verticals/braking create speed. Feel plant of lead heel from P4; straighten lead leg through P5–P6. Drill: towel under lead heel; 10 rehearsals then 5 balls. Cue: zipper to target; head stays behind ball."
+        "long": "Why: verticals/braking create speed. Feel plant of lead heel from P4; straighten lead leg through P5â€“P6. Drill: towel under lead heel; 10 rehearsals then 5 balls. Cue: zipper to target; head stays behind ball."
       },
       {
         "title": "Late release timing",
-        "short": "Speed at P7–P8",
+        "short": "Speed at P7â€“P8",
         "long": "Why: early throw wastes speed. Feel hold to P6 then unhinge through. Drill: two-tee gate (one at ball, one 4 in forward). Clip both tees after impact. Do 2x5; video last 2."
       }
     ]

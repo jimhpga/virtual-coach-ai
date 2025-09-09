@@ -33,7 +33,7 @@
     { "id": "P4", "name": "Top of Swing", "short": "Full coil", "long": "Pressure into trail heel; trail hip deep; lead wrist closer to flat/bowed; head steady.", "grade": "bad" },
     { "id": "P5", "name": "Lead Arm Parallel (Downswing)", "short": "Arm drops inside", "long": "Pelvis leads, then torso, then arms; shaft shallows; pressure shifts to lead mid-foot.", "grade": "good" },
     { "id": "P6", "name": "Shaft Parallel (Downswing)", "short": "Shallowing, trail elbow leads", "long": "Hands slightly ahead of clubhead; face in path window; pelvis still turning.", "grade": "good" },
-    { "id": "P7", "name": "Impact", "short": "Hips open, shaft lean", "long": "Forward handle; low point forward; pelvis 30–45° open; chest 10–20° open; lead leg braced.", "grade": "ok" },
+    { "id": "P7", "name": "Impact", "short": "Hips open, shaft lean", "long": "Forward handle; low point forward; pelvis 30â€“45Â° open; chest 10â€“20Â° open; lead leg braced.", "grade": "ok" },
     { "id": "P8", "name": "Trail Arm Parallel (Follow-Through)", "short": "Balanced extension", "long": "Trail arm extends; handle moves around (not down the line); no flip.", "grade": "good" },
     { "id": "P9", "name": "Finish", "short": "Upright, balanced", "long": "Weight fully lead side; belt buckle/chest to target; stable hold-the-pose.", "grade": "good" }
   ]
