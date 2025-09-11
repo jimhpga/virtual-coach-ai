@@ -3,7 +3,7 @@ module.exports = async (req, res) => {
   try {
     if (req.method !== "POST") return res.status(405).json({ ok:false, error:"Method Not Allowed" });
 
-    const rawKey = req.headers["x-api-key"] ?? req.query?.key ?? req.body?.key;
+    const rawKey   = req.headers["x-api-key"] ?? req.query?.key ?? req.body?.key;
     const incoming = String(rawKey ?? "").trim();
     const expected = String(process.env.REPORT_API_KEY ?? "").trim();
 
