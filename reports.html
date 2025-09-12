@@ -1,161 +1,159 @@
 ﻿<!doctype html>
+<html lang="en">
 <meta charset="utf-8"/>
-<title>Virtual Coach — Reports</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>VC Reports</title>
 <style>
-  :root { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-  body{max-width:900px;margin:40px auto;padding:0 16px}
-  h1{font-size:20px;margin:0 0 12px}
-  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
-  input,button,select{font-size:14px;padding:8px 10px;border:1px solid #ccc;border-radius:8px}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;margin:0;padding:24px;line-height:1.4}
+  header{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  input,button,select{font:inherit;padding:8px;border:1px solid #ccc;border-radius:8px}
   button{cursor:pointer}
-  table{width:100%;border-collapse:collapse;margin-top:12px}
-  th,td{border-bottom:1px solid #eee;padding:8px;text-align:left;font-size:14px}
-  .muted{color:#666}
-  .actions button{margin-right:6px}
-  pre{background:#f7f7f7;border:1px solid #eee;border-radius:10px;padding:12px;overflow:auto;max-height:300px}
-  .pill{display:inline-block;background:#eef;border:1px solid #dde;padding:2px 8px;border-radius:999px;font-size:12px;margin-left:8px}
+  .row{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
+  #log{margin-top:12px;color:#a00;white-space:pre-wrap}
+  #json{margin-top:16px;padding:12px;background:#f7f7f7;border-radius:8px;max-height:50vh;overflow:auto;font-family:ui-monospace,Consolas,monospace}
 </style>
-<h1>Virtual Coach — Reports <span id="prefix" class="pill"></span></h1>
+
+<header>
+  <strong>VC Reports</strong>
+</header>
 
 <div class="row">
-  <label>API Key:</label>
-  <input id="key" type="password" placeholder="REPORT_API_KEY" style="width:260px">
+  <label>API key</label>
+  <input id="apiKey" type="password" placeholder="vc-..." size="36"/>
   <button id="saveKey">Save</button>
   <button id="clearKey">Clear</button>
-  <span class="muted" id="keyState"></span>
 </div>
 
 <div class="row">
-  <label>Client:</label>
-  <input id="clientId" placeholder="e.g. jim-hartnett" style="width:220px">
-  <label>Limit:</label>
-  <select id="limit">
-    <option>20</option><option selected>50</option><option>100</option><option>200</option>
-  </select>
-  <button id="load">Load</button>
-  <span id="status" class="muted"></span>
+  <label>Client ID</label>
+  <input id="clientId" placeholder="jim-hartnett" size="20"/>
+  <button id="loadList">Load Reports</button>
+  <select id="sel" style="min-width:320px"></select>
+  <button id="openJson">Open JSON</button>
+  <button id="share">Share URL</button>
 </div>
 
-<table id="tbl" hidden>
-  <thead>
-    <tr><th>Key</th><th>Size</th><th>Last Modified</th><th>Actions</th></tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
-<div id="viewer" hidden>
-  <h3>Report JSON</h3>
-  <pre id="json"></pre>
-</div>
+<div id="log"></div>
+<pre id="json"></pre>
 
 <script>
-const Base = location.origin; // same origin (api.virtualcoachai.net)
 const els = {
-  key: document.getElementById('key'),
+  key: document.getElementById('apiKey'),
   saveKey: document.getElementById('saveKey'),
   clearKey: document.getElementById('clearKey'),
-  keyState: document.getElementById('keyState'),
   clientId: document.getElementById('clientId'),
-  limit: document.getElementById('limit'),
-  load: document.getElementById('load'),
-  status: document.getElementById('status'),
-  tbl: document.getElementById('tbl'),
-  tbody: document.querySelector('#tbl tbody'),
-  prefix: document.getElementById('prefix'),
-  viewer: document.getElementById('viewer'),
+  loadList: document.getElementById('loadList'),
+  sel: document.getElementById('sel'),
+  openJson: document.getElementById('openJson'),
+  share: document.getElementById('share'),
+  log: document.getElementById('log'),
   json: document.getElementById('json'),
 };
 
-function getKey(){ return localStorage.getItem('vc_key')?.trim() || ''; }
-function setKey(v){ localStorage.setItem('vc_key', v.trim()); }
-function clearKey(){ localStorage.removeItem('vc_key'); }
-
-function fmtBytes(n){
-  if (n == null) return '';
-  const u = ['B','KB','MB','GB']; let i=0, x=Number(n);
-  while(x>=1024 && i<u.length-1){ x/=1024; i++; }
-  return `${x.toFixed(x<10?1:0)} ${u[i]}`;
+function log(msg, isErr=false){
+  els.log.textContent = (isErr ? "❌ " : "ℹ️ ") + msg;
+  if(isErr) console.error(msg); else console.log(msg);
 }
 
-async function listReports(){
+function getKey(){
+  const u = new URL(location.href);
+  const fromUrl = u.searchParams.get('key');
+  if(fromUrl){ localStorage.setItem('vc_api_key', fromUrl); return fromUrl; }
+  return localStorage.getItem('vc_api_key') || '';
+}
+function setKey(k){
+  localStorage.setItem('vc_api_key', k || '');
+  els.key.value = k || '';
+}
+function getClientId(){
+  const u = new URL(location.href);
+  return u.searchParams.get('clientId') || localStorage.getItem('vc_client_id') || 'jim-hartnett';
+}
+function setClientId(cid){
+  localStorage.setItem('vc_client_id', cid || '');
+  els.clientId.value = cid || '';
+}
+function setLastKey(objKey){ localStorage.setItem('vc_last_obj', objKey || ''); }
+function getLastKey(){ return localStorage.getItem('vc_last_obj') || ''; }
+
+async function api(path, opts={}){
   const key = getKey();
-  if(!key){ els.status.textContent = 'Set API key first.'; return; }
-
-  const clientId = els.clientId.value.trim();
-  const limit = els.limit.value;
-  els.status.textContent = 'Loading...';
-  els.viewer.hidden = true;
-  els.json.textContent = '';
-
-  const qs = new URLSearchParams(); if(clientId) qs.set('clientId', clientId); qs.set('limit', limit);
-  const url = `${Base}/api/reports?${qs.toString()}`;
-  const r = await fetch(url, { headers: { 'x-api-key': key }});
-  const text = await r.text();
-  let data; try{ data = JSON.parse(text) }catch{}
-  if(!r.ok){ els.status.textContent = `Error ${r.status}`; console.log(text); return; }
-
-  els.prefix.textContent = data.prefix || '';
-  els.tbody.innerHTML = '';
-  (data.items||[]).forEach(item => {
-    const tr = document.createElement('tr');
-    const ts = item.key.replace(/^.*\//,'').replace('.json','');
-    tr.innerHTML = `
-      <td><code>${item.key}</code></td>
-      <td>${fmtBytes(item.size)}</td>
-      <td>${new Date(item.lastModified).toLocaleString()}</td>
-      <td class="actions">
-        <button data-k="${item.key}" data-ts="${ts}" class="view">View</button>
-        <button data-k="${item.key}" class="link">Copy Link</button>
-        <button data-k="${item.key}" data-ts="${ts}" class="email">Email</button>
-      </td>`;
-    els.tbody.appendChild(tr);
+  const r = await fetch(path, {
+    ...opts,
+    headers: { 'x-api-key': key, 'content-type':'application/json', ...(opts.headers||{}) }
   });
-  els.tbl.hidden = false;
-  els.status.textContent = `${(data.items||[]).length} item(s)`;
+  return r;
 }
 
-async function viewJson(key){
-  const r = await fetch(`${Base}/api/reports?objKey=${encodeURIComponent(key)}`, { headers: {'x-api-key': getKey()} });
-  const text = await r.text();
-  els.viewer.hidden = false;
-  try{ els.json.textContent = JSON.stringify(JSON.parse(text), null, 2); }
-  catch{ els.json.textContent = text; }
+async function loadListAndMaybeSelect(preferredKey){
+  const cid = els.clientId.value.trim();
+  if(!cid){ log('Client ID required', true); return; }
+  log('Loading list…');
+  const r = await api(`/api/reports?clientId=${encodeURIComponent(cid)}`);
+  if(!r.ok){ log(`List failed: HTTP ${r.status}`, true); return; }
+  const { items=[] } = await r.json();
+  els.sel.innerHTML = '';
+  items.forEach(it=>{
+    const opt = document.createElement('option');
+    opt.value = it.key;
+    opt.textContent = `${new Date(it.lastModified).toLocaleString()} — ${it.key.split('/').pop()}`;
+    els.sel.appendChild(opt);
+  });
+  if(items.length===0){ log('No reports found for this client.', true); els.json.textContent=''; return; }
+
+  let chosen = preferredKey || getLastKey();
+  if(!chosen || !items.some(x=>x.key===chosen)){ chosen = items[0].key; }
+  els.sel.value = chosen;
+  await loadOne(chosen, /*on404Fallback*/ true);
 }
 
-async function copyLink(key){
-  const r = await fetch(`${Base}/api/share?objKey=${encodeURIComponent(key)}`, { headers: {'x-api-key': getKey()} });
-  const { url } = await r.json();
-  await navigator.clipboard.writeText(url);
-  els.status.textContent = 'Signed link copied.';
+async function loadOne(objKey, fallback){
+  log('Loading report…');
+  const r = await api(`/api/reports?objKey=${encodeURIComponent(objKey)}`);
+  if(!r.ok){
+    log(`Failed to load (HTTP ${r.status}).${fallback ? ' Trying latest…' : ''}`, true);
+    if(fallback){
+      setLastKey('');  // clear bad memory
+      // refresh list and load newest
+      return loadListAndMaybeSelect('');
+    }
+    return;
+  }
+  const data = await r.json();
+  setLastKey(objKey);
+  els.json.textContent = JSON.stringify(data.data || data, null, 2);
+  log('Loaded.');
 }
 
-async function emailReport(key, ts){
-  let to = prompt('Send to email address:');
-  if(!to) return;
-  const share = await fetch(`${Base}/api/share?objKey=${encodeURIComponent(key)}`, { headers: {'x-api-key': getKey()} }).then(r=>r.json());
-  const subject = `Swing report ${ts}`;
-  const html = `<p>Your swing report:</p><p><a href="${share.url}">${share.url}</a></p>`;
-  const body = { to, subject, html, key: getKey() }; // your /api/email accepts key in body or header
-  const r = await fetch(`${Base}/api/email`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-  const text = await r.text();
-  if(r.ok){ els.status.textContent = 'Email sent.'; } else { els.status.textContent = `Email failed (${r.status})`; console.log(text); }
-}
+els.saveKey.onclick = ()=> setKey(els.key.value.trim());
+els.clearKey.onclick = ()=> { setKey(''); setLastKey(''); log('Key cleared.'); };
+els.loadList.onclick = ()=> { setClientId(els.clientId.value.trim()); loadListAndMaybeSelect(getLastKey()); };
 
-els.saveKey.onclick = ()=>{ setKey(els.key.value); els.key.value=''; els.keyState.textContent='Saved.'; };
-els.clearKey.onclick = ()=>{ clearKey(); els.keyState.textContent='Cleared.'; };
-els.load.onclick = listReports;
+els.sel.onchange = ()=> loadOne(els.sel.value, false);
 
-els.tbody.addEventListener('click', (e) => {
-  const b = e.target.closest('button'); if(!b) return;
-  const key = b.getAttribute('data-k'); const ts = b.getAttribute('data-ts') || '';
-  if(b.classList.contains('view')) viewJson(key);
-  if(b.classList.contains('link')) copyLink(key);
-  if(b.classList.contains('email')) emailReport(key, ts);
-});
+els.openJson.onclick = ()=>{
+  const k = els.sel.value;
+  if(!k) return;
+  const key = getKey();
+  const u = `/api/reports?objKey=${encodeURIComponent(k)}&key=${encodeURIComponent(key)}`;
+  window.open(u, '_blank');
+};
+els.share.onclick = async ()=>{
+  const k = els.sel.value;
+  if(!k) return;
+  const r = await api(`/api/share?objKey=${encodeURIComponent(k)}`);
+  const j = await r.json();
+  if(!r.ok || !j.url){ log(`Share failed: HTTP ${r.status}`, true); return; }
+  navigator.clipboard.writeText(j.url).catch(()=>{});
+  log('Signed URL copied to clipboard.');
+};
 
-// Convenience: support ?key= and ?clientId= in the URL once
+// boot
+setKey(getKey());
+setClientId(getClientId());
 const url = new URL(location.href);
-if(url.searchParams.get('key')) { setKey(url.searchParams.get('key')); url.searchParams.delete('key'); history.replaceState({},'',url); }
-if(url.searchParams.get('clientId')) { els.clientId.value = url.searchParams.get('clientId'); }
-
+// optional ?clear=1 to wipe cached key/selection
+if(url.searchParams.get('clear')==='1'){ localStorage.removeItem('vc_last_obj'); }
+loadListAndMaybeSelect(url.searchParams.get('objKey') || '');
 </script>
+</html>
