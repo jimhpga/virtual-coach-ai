@@ -38,7 +38,7 @@
         <p><a href="${j2.url}">Open report JSON</a> (expires in ~10 minutes)</p>
       </div>`;
 
-    const viewer = `https://api.virtualcoachai.net/view.html?url=${encodeURIComponent(j2.url)}`;
+    const viewer = `https://api.virtualcoachai.net/api/view?url=${encodeURIComponent(j2.url)}`;
     const r3 = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Authorization": `Bearer ${RESEND}`, "Content-Type": "application/json" },
@@ -53,4 +53,5 @@
     return res.status(500).json({ ok:false, error:String(e?.message ?? e) });
   }
 };
+
 
