@@ -38,17 +38,19 @@
         <p><a href="${j2.url}">Open report JSON</a> (expires in ~10 minutes)</p>
       </div>`;
 
+    const viewer = `https://api.virtualcoachai.net/view.html?url=${encodeURIComponent(j2.url)}`;
     const r3 = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Authorization": `Bearer ${RESEND}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM, to, subject, html })
+      body: JSON.stringify({ from: FROM, to, subject, html: html || `<p>Your latest report is ready.</p><p><a href="${viewer}">Open Report</a></p>` })
     });
     const text = await r3.text();
     let data; try { data = JSON.parse(text) } catch {}
     if (!r3.ok) return res.status(r3.status).json({ ok:false, provider:"resend", body:text });
 
-    return res.status(200).json({ ok:true, id: data?.id ?? null, key: j1.key, share: j2.url });
+    return res.status(200).json({ ok:true, id: data?.id ?? null, key: j1.key, share: j2.url, viewer });
   } catch (e) {
     return res.status(500).json({ ok:false, error:String(e?.message ?? e) });
   }
 };
+
