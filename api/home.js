@@ -63,7 +63,7 @@ async function uploadUsingPresign(base, key, file, clientId, note){
     /\.m4v$/i.test(file.name)  ? "video/x-m4v" : "application/octet-stream"
   );
   const preBody = { filename:file.name, contentType:ct, metadata:{ clientId, note } };
-  const r = await fetch(\`\${base}/api/upload-signed\`, {
+  const r = await fetch(\`\/api/upload-signed\`, {
     method:"POST", headers:{ "x-api-key":key, "content-type":"application/json" },
     body: JSON.stringify(preBody)
   });
@@ -107,7 +107,7 @@ async function run(){
     log("Writing rich report...","ok");
     const body = { clientId:cid, note, score: sc?Number(sc):undefined,
                    uploadKey:objKey, filename:file.name, contentType:file.type, bytes:file.size };
-    const r2 = await fetch(\`\${base}/api/report-from-upload\`,{
+    const r2 = await fetch(\`\/api/report-from-upload\`,{
       method:"POST", headers:{ "x-api-key":key, "content-type":"application/json" },
       body: JSON.stringify(body)
     });
@@ -126,3 +126,4 @@ async function run(){
 document.getElementById("go").addEventListener("click", run);
 </script>`);
 };
+
