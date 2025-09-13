@@ -156,4 +156,87 @@ const url = new URL(location.href);
 if(url.searchParams.get('clear')==='1'){ localStorage.removeItem('vc_last_obj'); }
 loadListAndMaybeSelect(url.searchParams.get('objKey') || '');
 </script>
+<script id="vc-normalize">
+(function(){
+  function normalizeReport(r){
+    const out = {...r};
+
+    // meta → top-level convenience
+    if (r.meta){
+      out.mode   = out.mode   ?? r.meta.mode;
+      out.swings = out.swings ?? r.meta.swings;
+      out.date   = out.date   ?? r.meta.date;
+    }
+
+    // top fixes / priority
+    if (!out.top3PriorityFixes && Array.isArray(r.topFixes)) out.top3PriorityFixes = r.topFixes;
+    if (!out.top3PowerFixes    && Array.isArray(r.powerFixes)) out.top3PowerFixes = r.powerFixes;
+
+    // coaching card: string → object
+    if (typeof r.coachingCard === 'string'){
+      out.coachingCard = { summary: r.coachingCard, cues: [], drills: [] };
+    }
+
+    // consistency → split fields expected by UI
+    if (r.consistency){
+      if (!out.swingConsistency && (typeof r.consistency.swing === 'number' || typeof r.consistency.swing === 'object')){
+        out.swingConsistency = typeof r.consistency.swing === 'number'
+          ? { value: r.consistency.swing }
+          : r.consistency.swing;
+      }
+      if (!out.positionConsistency && Array.isArray(r.consistency.position)){
+        out.positionConsistency = r.consistency.position.map(p => ({
+          position: p.position || p.pos || p.id || "",
+          value:    p.value ?? p.score ?? 0
+        }));
+      }
+    }
+
+    // power → summary value (+keep breakdown if present)
+    if (r.power){
+      if (!out.powerScoreSummary && (typeof r.power.score === 'number' || typeof r.power === 'number')){
+        out.powerScoreSummary = { value: (typeof r.power === 'number' ? r.power : r.power.score), notes: "" };
+      }
+    }
+
+    // phases: ensure objects include id/title; tolerate name/label variants
+    if (Array.isArray(r.phases)){
+      out.phases = r.phases.map(p => ({
+        id:    p.id    ?? p.position ?? p.pos ?? "",
+        title: p.title ?? p.name ?? "",
+        label: p.label ?? p.note ?? ""
+      }));
+    }
+
+    // ensure swingScore exists at top-level (some renderers use this)
+    if (out.swingScore == null && typeof r.power?.score === 'number') out.swingScore = r.power.score;
+
+    return out;
+  }
+
+  // Hook: after fetch -> before render
+  const _fetch = window.fetch;
+  window.fetch = async function(url, init){
+    const res = await _fetch(url, init);
+    try{
+      // Only intercept the report JSON call the page makes
+      if (typeof url === 'string' && url.includes('/api/reports')){
+        const clone = res.clone();
+        const data  = await clone.json();
+        if (data && data.data && data.data.report){
+          data.data.report = normalizeReport(data.data.report);
+          // Return a Response with the normalized payload
+          return new Response(JSON.stringify(data), {
+            status: res.status,
+            statusText: res.statusText,
+            headers: {'Content-Type':'application/json'}
+          });
+        }
+      }
+    }catch{}
+    return res;
+  };
+})();
+</script>
 </html>
+
