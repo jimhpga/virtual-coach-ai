@@ -89,7 +89,7 @@ async function loadListAndMaybeSelect(preferredKey){
   const cid = els.clientId.value.trim();
   if(!cid){ log('Client ID required', true); return; }
   log('Loading list…');
-  const r = await api(`/api/reports?clientId=${encodeURIComponent(cid)}`);
+  const r = await api(`/api/report-compat?clientId=${encodeURIComponent(cid)}`);
   if(!r.ok){ log(`List failed: HTTP ${r.status}`, true); return; }
   const { items=[] } = await r.json();
   els.sel.innerHTML = '';
@@ -109,7 +109,7 @@ async function loadListAndMaybeSelect(preferredKey){
 
 async function loadOne(objKey, fallback){
   log('Loading report…');
-  const r = await api(`/api/reports?objKey=${encodeURIComponent(objKey)}`);
+  const r = await api(`/api/report-compat?objKey=${encodeURIComponent(objKey)}`);
   if(!r.ok){
     log(`Failed to load (HTTP ${r.status}).${fallback ? ' Trying latest…' : ''}`, true);
     if(fallback){
@@ -135,7 +135,7 @@ els.openJson.onclick = ()=>{
   const k = els.sel.value;
   if(!k) return;
   const key = getKey();
-  const u = `/api/reports?objKey=${encodeURIComponent(k)}&key=${encodeURIComponent(key)}`;
+  const u = `/api/report-compat?objKey=${encodeURIComponent(k)}&key=${encodeURIComponent(key)}`;
   window.open(u, '_blank');
 };
 els.share.onclick = async ()=>{
@@ -220,7 +220,7 @@ loadListAndMaybeSelect(url.searchParams.get('objKey') || '');
     const res = await _fetch(url, init);
     try{
       // Only intercept the report JSON call the page makes
-      if (typeof url === 'string' && url.includes('/api/reports')){
+      if (typeof url === 'string' && url.includes('/api/report-compat')){
         const clone = res.clone();
         const data  = await clone.json();
         if (data && data.data && data.data.report){
@@ -239,4 +239,5 @@ loadListAndMaybeSelect(url.searchParams.get('objKey') || '');
 })();
 </script>
 </html>
+
 
