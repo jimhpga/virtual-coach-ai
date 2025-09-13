@@ -1,0 +1,76 @@
+﻿<!doctype html>
+<meta charset="utf-8" />
+<title>VC Mini Report</title>
+<style>
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;margin:24px;max-width:900px}
+  h1{margin:0 0 8px 0} .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{border:1px solid #e3e3e3;border-radius:12px;padding:16px}
+  .k{color:#666}
+  ul{margin:8px 0 0 20px}
+  code{background:#f6f6f6;padding:2px 6px;border-radius:6px}
+</style>
+<h1>Virtual Coach – Mini Report</h1>
+<div id="meta" class="k"></div>
+<div id="err" style="color:#b00020;margin:8px 0 12px 0;"></div>
+<div class="grid">
+  <div class="card"><h3>Top 3 Priority Fixes</h3><ul id="prio"></ul></div>
+  <div class="card"><h3>Top 3 Power Fixes</h3><ul id="power"></ul></div>
+  <div class="card"><h3>Coaching Card</h3><div id="coach"></div></div>
+  <div class="card"><h3>Position Consistency</h3><ul id="pos"></ul></div>
+  <div class="card"><h3>Swing Consistency</h3><div id="swing"></div></div>
+  <div class="card"><h3>Power Score Summary</h3><div id="psum"></div></div>
+</div>
+<p class="k">Debug: <code id="dbg"></code></p>
+<script>
+(async function(){
+  const qs   = new URL(location.href).searchParams;
+  const key  = qs.get('key')      || localStorage.getItem('KEY')       || '';
+  const obj  = qs.get('objKey')   || localStorage.getItem('ReportKey') || '';
+  const cid  = qs.get('clientId') || localStorage.getItem('ClientId')  || '';
+
+  function $(id){ return document.getElementById(id) }
+  function li(t){ const li=document.createElement('li'); li.textContent=t; return li }
+
+  if(!key){ $('err').textContent = 'Missing API key (?key=...)'; return }
+  if(!obj && !cid){ $('err').textContent = 'Provide ?objKey=… or ?clientId=…'; return }
+
+  // Resolve objKey if only clientId was given
+  let objKey = obj;
+  if(!objKey && cid){
+    const r0 = await fetch(`/api/latest?clientId=${encodeURIComponent(cid)}`, {headers:{'x-api-key':key}});
+    const j0 = await r0.json(); objKey = j0.key;
+  }
+  $('dbg').textContent = objKey || '(none)';
+
+  // Try compat first; fallback to raw
+  async function get(u){
+    const r = await fetch(u, {headers:{'x-api-key':key}});
+    const t = await r.text(); try { return JSON.parse(t) } catch { return {ok:false, parseError:t} }
+  }
+  const uCompat = `/api/report-compat?objKey=${encodeURIComponent(objKey)}`;
+  const uRaw    = `/api/reports?objKey=${encodeURIComponent(objKey)}`;
+
+  let j = await get(uCompat);
+  if(!j?.ok || !j?.data?.report){ j = await get(uRaw) }
+
+  const rep = j?.data?.report || j?.report || null;
+  if(!rep){ $('err').textContent = 'No report fields found in payload'; console.log('payload:', j); return }
+
+  // Render meta
+  $('meta').textContent = `${rep.date || ''} • Mode: ${rep.mode || ''} • Swings: ${rep.swings ?? ''} • Score: ${rep.swingScore ?? ''}`;
+
+  // Render lists
+  (rep.top3PriorityFixes || rep.priorityFixes || []).forEach(x => $('prio').appendChild(li(x.title || x.detail || x)));
+  (rep.top3PowerFixes    || rep.powerFixes    || []).forEach(x => $('power').appendChild(li(x.title || x.detail || x)));
+
+  $('coach').textContent = (rep.coachingCard && (rep.coachingCard.summary || rep.coachingCard)) || '';
+
+  (rep.positionConsistency || []).forEach(p => $('pos').appendChild(li(`${p.position || p.pos || p.id}: ${p.value ?? p.score ?? ''}`)));
+
+  const sv = rep.swingConsistency?.value ?? rep.consistency?.swing ?? '';
+  $('swing').textContent = sv ? `Value: ${sv}` : '';
+
+  const pv = rep.powerScoreSummary?.value ?? rep.power?.score ?? rep.power ?? '';
+  $('psum').textContent = pv ? `Value: ${pv}` : '';
+})();
+</script>
