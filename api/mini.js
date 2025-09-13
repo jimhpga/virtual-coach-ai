@@ -1,8 +1,15 @@
 ﻿module.exports = async (req, res) => {
   const url = new URL(req.url, `https://${req.headers.host}`);
   const key = (req.headers["x-api-key"] || url.searchParams.get("key") || "").toString();
-  const obj = url.searchParams.get("objKey") || "";
-  if(!key || !obj) return res.status(400).send("Missing key or objKey");
+  const objFromQuery = url.searchParams.get("objKey") || "";
+const cid = url.searchParams.get("clientId") || "";
+let obj = objFromQuery;
+  if(!key) return res.status(400).send("Missing key");
+if(!obj && cid){
+  const r0 = await fetch(`https://${req.headers.host}/api/latest?clientId=${encodeURIComponent(cid)}`, { headers:{ "x-api-key":key } });
+  const j0 = await r0.json(); obj = j0?.key || "";
+}
+if(!obj) return res.status(400).send("Missing objKey");
 
   const compat = await fetch(`https://${req.headers.host}/api/report-compat?objKey=${encodeURIComponent(obj)}`, {
     headers: { "x-api-key": key }
@@ -48,3 +55,4 @@
 </div>
 <details style="margin-top:16px"><summary>Raw normalized JSON</summary><pre>${esc(JSON.stringify(rep,null,2))}</pre></details>`);
 };
+
