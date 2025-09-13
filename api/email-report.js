@@ -1,57 +1,44 @@
 ﻿module.exports = async (req, res) => {
-  try {
-    const expected = String(process.env.REPORT_API_KEY || "").trim();
-    const incoming = String(req.headers["x-api-key"] || req.query.key || (req.body && req.body.key) || "").trim();
-    if (!expected) return res.status(500).json({ ok:false, error:"Server REPORT_API_KEY not set" });
-    if (!incoming || incoming !== expected) return res.status(401).json({ ok:false, error:"Bad API key" });
+  const bad=(r,s,m)=>r.status(s).json({ok:false,error:m}); const ok=(r,o)=>r.status(200).json({ok:true,...o});
+  try{
+    const expected = String(process.env.REPORT_API_KEY||'').trim();
+    const incoming = String(req.headers["x-api-key"] || (req.query&&req.query.key) || (req.body&&req.body.key) || '').trim();
+    if(!expected) return bad(res,500,"Server REPORT_API_KEY not set");
+    if(!incoming || incoming!==expected) return bad(res,401,"Bad API key");
 
-    const RESEND = String(process.env.RESEND_API_KEY || "").trim();
-    const FROM   = String(process.env.EMAIL_FROM || "onboarding@resend.dev").trim();
+    const clientId = String((req.body&&req.body.clientId) || process.env.CLIENT_ID || '').trim() || 'unknown';
+    const to       = String((req.body&&req.body.to)       || process.env.CLIENT_EMAIL || '').trim();
+    if(!to) return bad(res,400,"Missing 'to'");
 
-    const body = req.body || {};
-    const clientId = String(req.query.clientId || body.clientId || "").trim();
-    const to       = String(req.query.to || body.to || "").trim();
-    const subject  = String(body.subject || `Your Virtual Coach report`).trim();
+    const base = `https://${req.headers.host}`;
+    const j1 = await fetch(`${base}/api/latest?clientId=${encodeURIComponent(clientId)}`, { headers: { 'x-api-key': expected }});
+    const latest = await j1.json(); if(!j1.ok) return bad(res,j1.status,JSON.stringify(latest));
+    const objKey = latest.key;
 
-    if (!clientId) return res.status(400).json({ ok:false, error:"Missing clientId" });
-    if (!to)       return res.status(400).json({ ok:false, error:"Missing to" });
+    const j2 = await fetch(`${base}/api/share?objKey=${encodeURIComponent(objKey)}`, { headers: { 'x-api-key': expected }});
+    const share = await j2.json(); if(!j2.ok) return bad(res,j2.status,JSON.stringify(share));
+    const url = share.url;
+    const viewer = `${base}/api/view?url=${encodeURIComponent(url)}`;
 
-    // fetch latest -> share URL
-    const origin = `${req.headers["x-forwarded-proto"] || "https"}://${req.headers.host}`;
+    const RESEND = String(process.env.RESEND_API_KEY||'').trim();
+    const FROM   = String(process.env.EMAIL_FROM||'onboarding@resend.dev').trim();
+    const SUBJECT= `Your Swing Report • ${clientId}`;
 
-    const r1 = await fetch(`${origin}/api/latest?clientId=${encodeURIComponent(clientId)}`, {
-      headers: { "x-api-key": incoming }
-    });
-    const j1 = await r1.json();
-    if (!r1.ok) return res.status(r1.status).json({ ok:false, via:"latest", ...j1 });
+    const card = `
+      <div style="font:14px/1.5 -apple-system,BlinkMacSystemFont,Segoe UI,Arial">
+        <h2 style="margin:0 0 8px">Swing Report</h2>
+        <p style="margin:0 0 8px">Client: <b>${clientId}</b></p>
+        <p style="margin:0 0 12px"><a href="${viewer}">Open viewer</a> • <a href="${url}">Raw JSON</a></p>
+      </div>`.trim();
 
-    const r2 = await fetch(`${origin}/api/share?objKey=${encodeURIComponent(j1.key)}`, {
-      headers: { "x-api-key": incoming }
-    });
-    const j2 = await r2.json();
-    if (!r2.ok) return res.status(r2.status).json({ ok:false, via:"share", ...j2 });
-
-    const html = `
-      <div style="font-family:system-ui,Segoe UI,Roboto,Inter,Arial,sans-serif">
-        <h2>Virtual Coach – Latest Report</h2>
-        <p>Client: <b>${clientId}</b></p>
-        <p><a href="${j2.url}">Open report JSON</a> (expires in ~10 minutes)</p>
-      </div>`;
-
-    const viewer = `https://api.virtualcoachai.net/api/view?url=${encodeURIComponent(j2.url)}`;
     const r3 = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { "Authorization": `Bearer ${RESEND}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM, to, subject, html: html || `<p>Your latest report is ready.</p><p><a href="${viewer}">Open Report</a></p>` })
+      body: JSON.stringify({ from: FROM, to, subject: SUBJECT, html: card })
     });
-    const text = await r3.text();
-    let data; try { data = JSON.parse(text) } catch {}
-    if (!r3.ok) return res.status(r3.status).json({ ok:false, provider:"resend", body:text });
+    const text = await r3.text(); let data; try{ data=JSON.parse(text) }catch{}
+    if(!r3.ok) return res.status(r3.status).json({ ok:false, provider:"resend", body:text });
 
-    return res.status(200).json({ ok:true, id: data?.id ?? null, key: j1.key, share: j2.url, viewer });
-  } catch (e) {
-    return res.status(500).json({ ok:false, error:String(e?.message ?? e) });
-  }
+    return ok(res, { id: data?.id ?? null, key: objKey, share: url, viewer });
+  }catch(e){ return bad(res,500,String(e?.message||e)) }
 };
-
-
