@@ -77,8 +77,13 @@
       return `<li>${esc(pos)}: ${esc(val)}</li>`}).join('')}</ul></div>
   <div class="card"><h3>Swing Consistency</h3><div>${
     (rep.swingConsistency?.value ?? rep.consistency?.swing ?? '') ? `Value: ${esc(rep.swingConsistency?.value ?? rep.consistency?.swing)}` : ''}</div></div>
-  <div class="card"><h3>Power Score Summary</h3><div>${
-    (rep.powerScoreSummary?.value ?? rep.power?.score ?? rep.power ?? '') ? `Value: ${esc(rep.powerScoreSummary?.value ?? rep.power?.score ?? rep.power)}` : ''}</div></div>
+  <div class="card"><h3>Power Score Summary</h3><div>${(Number.isFinite(rep?.powerScoreSummary?.value)
+  ? `Value: ${esc(rep.powerScoreSummary.value)}`
+  : Number.isFinite(rep?.power?.score)
+    ? `Value: ${esc(rep.power.score)}`
+    : (typeof rep?.power === 'number'
+        ? `Value: ${esc(rep.power)}`
+        : ''))}</div></div>
 </div>`);
   } catch (e) {
     console.error('PRINT_ERROR', e);
@@ -87,3 +92,4 @@
   }
 };
 module.exports.config = { maxDuration: 10 };
+
