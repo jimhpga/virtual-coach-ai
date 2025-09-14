@@ -5,8 +5,13 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 module.exports = async (req, res) => {
   try {
     const url = new URL(req.url, `https://${req.headers.host}`);
+    if (url.searchParams.get("probe") === "1") {
+      res.setHeader("X-Upload-Rev", "v3");
+      return res.status(200).send("upload-signed alive");
+    }
+
     const apiKey = (req.headers["x-api-key"] || url.searchParams.get("key") || "").toString();
-    if (!apiKey) return res.status(400).json({ ok: false, error: "Missing API key" });
+    if (!apiKey) return res.status(400).json({ ok:false, error:"Missing API key" });
 
     // read JSON body
     const chunks = [];
@@ -18,7 +23,7 @@ module.exports = async (req, res) => {
     }
 
     // env
-    const bucket = process.env.S3_BUCKET;            // e.g. "virtualcoachai-swings"
+    const bucket = process.env.S3_BUCKET;      // e.g. "virtualcoachai-swings"
     const region = process.env.AWS_REGION || "us-west-1";
     if (!bucket) return res.status(500).json({ ok:false, error:"Missing S3_BUCKET env" });
 
@@ -32,7 +37,7 @@ module.exports = async (req, res) => {
     const safe  = filename.replace(/[^\w.\- ]+/g, "_");
     const key   = `uploads/${clientId}/${stamp}-${safe}`;
 
-    const s3 = new S3Client({ region /* credentials come from env */ });
+    const s3 = new S3Client({ region });
 
     const cmd = new PutObjectCommand({
       Bucket: bucket,
@@ -41,10 +46,8 @@ module.exports = async (req, res) => {
       Metadata: { clientid: clientId, note }
     });
 
-    // 10 minutes
-    const signedUrl = await getSignedUrl(s3, cmd, { expiresIn: 600 });
-
-    return res.status(200).json({ ok: true, key, url: signedUrl });
+    const urlPut = await getSignedUrl(s3, cmd, { expiresIn: 600 }); // 10 min
+    return res.status(200).json({ ok:true, key, url: urlPut });
   } catch (e) {
     return res.status(500).json({ ok:false, error: String(e?.message || e) });
   }
