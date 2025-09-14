@@ -2,7 +2,7 @@
   try {
     const url = new URL(req.url, "http://local");
     if (url.searchParams.get("probe") === "1") {
-      res.setHeader("X-Print-Rev", "r8");
+      res.setHeader("X-Print-Rev", "r9");
       return res.status(200).send("print alive");
     }
 
@@ -12,7 +12,6 @@
 
     const origin = process.env.PRINT_ORIGIN || `https://${req.headers["x-forwarded-host"] || req.headers.host}`;
 
-    // Timeout to avoid hanging
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 8000);
 
@@ -30,52 +29,23 @@
     }
 
     const text = await r.text();
-    let j; try { j = JSON.parse(text) } catch {
-      return res.status(502).send("compat not JSON:\n" + text);
-    }
-
-    const rep = j?.data?.report;
+    let j; try { j = JSON.parse(text) } catch { return res.status(502).send("compat not JSON:\n" + text); }
+    const rep = j?.data?.report || j?.report;
     if (!rep) return res.status(404).send("No report fields.");
 
-    const esc = s => String(s ?? "").replace(/[&<>]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c]));
+    const esc = s => String(s ?? "").replace(/[&<>]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;" }[c]));
 
-    const meta = [
-      rep.date || "",
-      rep.mode ? `Mode: ${rep.mode}` : "",
-      (rep.swings ?? "") ? `Swings: ${rep.swings}` : "",
-      (rep.swingScore ?? "") ? `Score: ${rep.swingScore}` : "",
-    ].filter(Boolean).join(" • ");
+    // ---- Compat fallbacks (OLD → NEW) ----
+    const date   = rep.date  ?? rep.meta?.date  ?? "";
+    const mode   = rep.mode  ?? rep.meta?.mode  ?? "";
+    const swings = (rep.swings ?? rep.meta?.swings);
+    const score  = (rep.swingScore ?? rep.power?.score ?? rep.power);
 
-    // Normalize phases to include short/long/status/url consistently
-    const phases = (rep.phases || []).map(p => ({
-      id:     p.id    ?? p.pos ?? p.position ?? "",
-      title:  p.title ?? p.name ?? "",
-      short:  p.short ?? p.label ?? p.note ?? "",
-      long:   p.long  ?? p.description ?? p.detail ?? "",
-      status: (p.status ?? p.color ?? (
-        (typeof p.score === "number") ? (p.score >= 80 ? "green" : (p.score >= 60 ? "yellow" : "red")) : ""
-      )),
-      url:    p.url   ?? p.video ?? p.href
-    }));
+    const prioList = rep.top3PriorityFixes || rep.priorityFixes || rep.topFixes || [];
+    const powList  = rep.top3PowerFixes    || rep.powerFixes    || (Array.isArray(rep.power?.fixes) ? rep.power.fixes : []);
 
-    const renderPhases = () => {
-      return phases.map(p => {
-        const badge = p.status ? `<span class="badge ${p.status}">${(p.status || "").toUpperCase()}</span>` : "";
-        const head  = [p.id, p.title].filter(Boolean).join(" ").trim();
-        const short = esc(p.short || "");
-        const more  = p.long ? `<details><summary>Details</summary><div>${esc(p.long)}</div></details>` : "";
-        const linkOpen  = p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">` : "";
-        const linkClose = p.url ? `</a>` : "";
-        return `<li>${badge}${linkOpen}${esc(head)}${linkClose}${short ? ` — ${short}` : ""}${more}</li>`;
-      }).join("");
-    };
-
-    const li = arr => (arr || []).map(x => {
-      const s = (typeof x === "string") ? x : (x.title || x.detail || JSON.stringify(x));
-      return `<li>${esc(s)}</li>`;
-    }).join("");
-
-    const posList = (rep.positionConsistency || []).map(p => {
+    const posSrc = rep.positionConsistency || rep.consistency?.position || rep.consistency?.positions || [];
+    const posList = posSrc.map(p => {
       const pos = p.position || p.pos || p.id || "";
       const val = (p.value ?? p.score ?? "");
       return `<li>${esc(pos)}: ${esc(val)}</li>`;
@@ -84,8 +54,35 @@
     const swingVal = rep.swingConsistency?.value ?? rep.consistency?.swing ?? "";
     const powerVal = rep.powerScoreSummary?.value ?? rep.power?.score ?? rep.power ?? "";
 
+    const phasesRaw = rep.phases || [];
+    const phases = phasesRaw.map(p => ({
+      id:     p.id    ?? p.pos ?? p.position ?? "",
+      title:  p.title ?? p.name ?? "",
+      short:  p.short ?? p.label ?? p.note ?? "",
+      long:   p.long  ?? p.description ?? p.detail ?? "",
+      status: (p.status ?? p.color ?? ((typeof p.score === "number") ? (p.score >= 80 ? "green" : (p.score >= 60 ? "yellow" : "red")) : "")),
+      url:    p.url   ?? p.video ?? p.href
+    }));
+    const renderPhases = () => phases.map(p => {
+      const badge = p.status ? `<span class="badge ${p.status}">${(p.status || "").toUpperCase()}</span>` : "";
+      const head  = [p.id, p.title].filter(Boolean).join(" ").trim();
+      const short = esc(p.short || "");
+      const more  = p.long ? `<details><summary>Details</summary><div>${esc(p.long)}</div></details>` : "";
+      const linkOpen  = p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener">` : "";
+      const linkClose = p.url ? `</a>` : "";
+      return `<li>${badge}${linkOpen}${esc(head)}${linkClose}${short ? ` — ${short}` : ""}${more}</li>`;
+    }).join("");
+
+    const li = arr => (arr || []).map(x => {
+      const s = (typeof x === "string") ? x : (x.title || x.detail || JSON.stringify(x));
+      return `<li>${esc(s)}</li>`;
+    }).join("");
+
+    const metaLine = [date, mode && `Mode: ${mode}`, (swings ?? "") && `Swings: ${swings}`, (score ?? "") && `Score: ${score}`]
+      .filter(Boolean).join(" • ");
+
     res.setHeader("Content-Type","text/html; charset=utf-8");
-    res.setHeader("X-Print-Rev","r8");
+    res.setHeader("X-Print-Rev","r9");
     return res.status(200).send(`<!doctype html>
 <meta charset="utf-8"><title>Swing Report — P1–P9</title>
 <style>
@@ -105,12 +102,11 @@
   .debug{margin-top:8px;color:#777;font-size:12px}
 </style>
 <h2>Swing Report — P1–P9</h2>
-<p class="muted">${esc(meta)}</p>
+<p class="muted">${esc(metaLine)}</p>
 <p class="debug"><small>Debug key: ${esc(obj)}</small></p>
-
 <div class="grid">
-  <div class="card"><h3>Top 3 Priority Fixes</h3><ul>${li(rep.top3PriorityFixes || rep.priorityFixes)}</ul></div>
-  <div class="card"><h3>Top 3 Power Fixes</h3><ul>${li(rep.top3PowerFixes || rep.powerFixes)}</ul></div>
+  <div class="card"><h3>Top 3 Priority Fixes</h3><ul>${li(prioList)}</ul></div>
+  <div class="card"><h3>Top 3 Power Fixes</h3><ul>${li(powList)}</ul></div>
   <div class="card"><h3>Coaching Card</h3><div>${esc((rep.coachingCard && (rep.coachingCard.summary || rep.coachingCard)) || "")}</div></div>
   <div class="card"><h3>Position Consistency</h3><ul>${posList}</ul></div>
   <div class="card"><h3>Swing Consistency</h3><div>${swingVal ? `Value: ${esc(swingVal)}` : ""}</div></div>
