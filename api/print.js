@@ -55,6 +55,13 @@
   .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
   .card{border:1px solid #ddd;border-radius:10px;padding:12px}
   ul{margin:8px 0 0 18px}
+  .badge{display:inline-block;font-size:12px;padding:2px 6px;border-radius:6px;margin-right:6px;border:1px solid #ccc}
+  .badge.green {background:#d1fae5;border-color:#a7f3d0;color:#065f46}
+  .badge.yellow{background:#fef9c3;border-color:#fde68a;color:#854d0e}
+  .badge.red   {background:#fee2e2;border-color:#fecaca;color:#991b1b}
+  details{margin-top:6px}
+  details>summary{cursor:pointer;user-select:none;list-style:none}
+  details>summary::-webkit-details-marker{display:none}
 </style>
 <h2>Swing Report — P1–P9</h2>
 <p class="muted">${esc(meta)}</p>
@@ -92,4 +99,5 @@
   }
 };
 module.exports.config = { maxDuration: 10 };
+
 
