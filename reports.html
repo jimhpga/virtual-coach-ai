@@ -1,243 +1,408 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>VC Reports</title>
-<style>
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;margin:0;padding:24px;line-height:1.4}
-  header{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-  input,button,select{font:inherit;padding:8px;border:1px solid #ccc;border-radius:8px}
-  button{cursor:pointer}
-  .row{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
-  #log{margin-top:12px;color:#a00;white-space:pre-wrap}
-  #json{margin-top:16px;padding:12px;background:#f7f7f7;border-radius:8px;max-height:50vh;overflow:auto;font-family:ui-monospace,Consolas,monospace}
-</style>
-
-<header>
-  <strong>VC Reports</strong>
-</header>
-
-<div class="row">
-  <label>API key</label>
-  <input id="apiKey" type="password" placeholder="vc-..." size="36"/>
-  <button id="saveKey">Save</button>
-  <button id="clearKey">Clear</button>
-</div>
-
-<div class="row">
-  <label>Client ID</label>
-  <input id="clientId" placeholder="jim-hartnett" size="20"/>
-  <button id="loadList">Load Reports</button>
-  <select id="sel" style="min-width:320px"></select>
-  <button id="openJson">Open JSON</button>
-  <button id="share">Share URL</button>
-</div>
-
-<div id="log"></div>
-<pre id="json"></pre>
-
-<script>
-const els = {
-  key: document.getElementById('apiKey'),
-  saveKey: document.getElementById('saveKey'),
-  clearKey: document.getElementById('clearKey'),
-  clientId: document.getElementById('clientId'),
-  loadList: document.getElementById('loadList'),
-  sel: document.getElementById('sel'),
-  openJson: document.getElementById('openJson'),
-  share: document.getElementById('share'),
-  log: document.getElementById('log'),
-  json: document.getElementById('json'),
-};
-
-function log(msg, isErr=false){
-  els.log.textContent = (isErr ? "❌ " : "ℹ️ ") + msg;
-  if(isErr) console.error(msg); else console.log(msg);
-}
-
-function getKey(){
-  const u = new URL(location.href);
-  const fromUrl = u.searchParams.get('key');
-  if(fromUrl){ localStorage.setItem('vc_api_key', fromUrl); return fromUrl; }
-  return localStorage.getItem('vc_api_key') || '';
-}
-function setKey(k){
-  localStorage.setItem('vc_api_key', k || '');
-  els.key.value = k || '';
-}
-function getClientId(){
-  const u = new URL(location.href);
-  return u.searchParams.get('clientId') || localStorage.getItem('vc_client_id') || 'jim-hartnett';
-}
-function setClientId(cid){
-  localStorage.setItem('vc_client_id', cid || '');
-  els.clientId.value = cid || '';
-}
-function setLastKey(objKey){ localStorage.setItem('vc_last_obj', objKey || ''); }
-function getLastKey(){ return localStorage.getItem('vc_last_obj') || ''; }
-
-async function api(path, opts={}){
-  const key = getKey();
-  const r = await fetch(path, {
-    ...opts,
-    headers: { 'x-api-key': key, 'content-type':'application/json', ...(opts.headers||{}) }
-  });
-  return r;
-}
-
-async function loadListAndMaybeSelect(preferredKey){
-  const cid = els.clientId.value.trim();
-  if(!cid){ log('Client ID required', true); return; }
-  log('Loading list…');
-  const r = await api(`/api/report-compat?clientId=${encodeURIComponent(cid)}`);
-  if(!r.ok){ log(`List failed: HTTP ${r.status}`, true); return; }
-  const { items=[] } = await r.json();
-  els.sel.innerHTML = '';
-  items.forEach(it=>{
-    const opt = document.createElement('option');
-    opt.value = it.key;
-    opt.textContent = `${new Date(it.lastModified).toLocaleString()} — ${it.key.split('/').pop()}`;
-    els.sel.appendChild(opt);
-  });
-  if(items.length===0){ log('No reports found for this client.', true); els.json.textContent=''; return; }
-
-  let chosen = preferredKey || getLastKey();
-  if(!chosen || !items.some(x=>x.key===chosen)){ chosen = items[0].key; }
-  els.sel.value = chosen;
-  await loadOne(chosen, /*on404Fallback*/ true);
-}
-
-async function loadOne(objKey, fallback){
-  log('Loading report…');
-  const r = await api(`/api/report-compat?objKey=${encodeURIComponent(objKey)}`);
-  if(!r.ok){
-    log(`Failed to load (HTTP ${r.status}).${fallback ? ' Trying latest…' : ''}`, true);
-    if(fallback){
-      setLastKey('');  // clear bad memory
-      // refresh list and load newest
-      return loadListAndMaybeSelect('');
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Virtual Coach AI • Swing Report</title>
+  <link rel="icon" href="/favicon.ico">
+  <style>
+    :root{
+      --bg:#0b0d12;--card:#141824;--ink:#e8ecf4;--muted:#a7b0c2;--hit:#1f2433;--accent:#4da3ff;--good:#1ec28b;--warn:#ffb020;--bad:#ff5b6b;
     }
-    return;
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:linear-gradient(180deg,#0b0d12,#0a0c12);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    header{position:sticky;top:0;z-index:2;background:rgba(10,12,18,.8);backdrop-filter: blur(6px);border-bottom:1px solid #1c2130}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .brand{display:flex;align-items:center;gap:10px}
+    .mark{width:28px;height:28px;border-radius:8px;background:
+      conic-gradient(from 210deg,#8ab7ff,#53e9bf 40%,#8ab7ff 80%);}
+    .h1{font-weight:700;font-size:16px;letter-spacing:.2px}
+    .spacer{flex:1}
+    .btn{background:#1a2130;border:1px solid #2a3550;padding:8px 12px;border-radius:10px;color:var(--ink);cursor:pointer}
+    .btn:hover{background:#20283b}
+    .btn.primary{background:var(--accent);border-color:transparent;color:#06101e}
+    .badge{background:#182034;color:#a7c9ff;border:1px solid #2b3b60;padding:4px 8px;border-radius:999px;font-size:12px}
+    main{max-width:1100px;margin:18px auto;padding:0 16px 60px}
+    .grid{display:grid;gap:14px}
+    .g-2{grid-template-columns:repeat(2,1fr)}
+    .g-3{grid-template-columns:repeat(3,1fr)}
+    .g-4{grid-template-columns:repeat(4,1fr)}
+    @media (max-width:900px){.g-3,.g-4{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:640px){.g-2,.g-3,.g-4{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid #1e2433;border-radius:14px;padding:16px}
+    .card h3{margin:0 0 8px 0;font-size:15px}
+    .muted{color:var(--muted)}
+    .score{font-size:34px;font-weight:800}
+    .score.good{color:var(--good)} .score.warn{color:var(--warn)} .score.bad{color:var(--bad)}
+    .pill{display:inline-flex;align-items:center;gap:8px;background:#111523;border:1px solid #20273a;border-radius:999px;padding:6px 10px}
+    .fault{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px dashed #2a3245}
+    .fault:last-child{border-bottom:0}
+    .sev{font-weight:700;text-transform:capitalize}
+    .sev.high{color:var(--bad)} .sev.medium{color:var(--warn)} .sev.low{color:#9bd6b9}
+    .drill{border:1px solid #26314b;background:#101525;border-radius:12px;padding:12px;margin:8px 0}
+    .drill h4{margin:0 0 6px 0;font-size:14px}
+    .kv{display:grid;grid-template-columns:120px 1fr;gap:10px;margin:6px 0}
+    .kv b{color:#cdd6e8}
+    .chip{display:inline-block;background:#0f1626;border:1px solid #273250;border-radius:999px;padding:4px 8px;margin:2px 4px 2px 0}
+    .pos{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid #22304a;border-radius:10px;background:#0e1423}
+    .pos .id{font-weight:700;width:28px;text-align:center;background:#172037;border-radius:8px;padding:6px 0;color:#b6c8ff}
+    .pos .body{flex:1}
+    .err{background:#2a1220;border:1px solid #6b223e;padding:12px;border-radius:10px}
+    .ok{background:#122a20;border:1px solid #246b4e;padding:12px;border-radius:10px}
+    details.json {margin-top:12px}
+    pre{overflow:auto;max-height:50vh;background:#0c111b;border:1px solid #1b2233;border-radius:10px;padding:12px}
+    /* Modal */
+    .modal{position:fixed;inset:0;background:rgba(4,8,16,.75);display:none;align-items:center;justify-content:center;padding:20px;z-index:5}
+    .modal.open{display:flex}
+    .modal > .panel{background:#0b0f19;border:1px solid #24314a;border-radius:12px;padding:10px;max-width:920px;width:100%}
+    .modal header{position:unset;background:unset;border:0}
+    iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:8px;background:#000}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap row">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"></div>
+        <div class="h1">Virtual Coach AI — Swing Report</div>
+      </div>
+      <span class="spacer"></span>
+      <a id="printLink" class="btn" target="_blank" rel="noopener">Print PDF</a>
+      <span id="schemaBadge" class="badge">schema —</span>
+    </div>
+  </header>
+
+  <main>
+    <div id="status"></div>
+
+    <section id="summary" class="grid g-3" style="margin-top:14px"></section>
+
+    <section class="grid g-2" style="margin-top:14px">
+      <div id="positions" class="card">
+        <h3>Positions (P1–P9)</h3>
+        <div id="posList" class="grid g-2"></div>
+      </div>
+      <div id="faults" class="card">
+        <h3>Top Faults</h3>
+        <div id="faultList"></div>
+      </div>
+    </section>
+
+    <section id="drills" class="card" style="margin-top:14px">
+      <h3>Drill Prescriptions</h3>
+      <div id="drillList"></div>
+    </section>
+
+    <section id="media" class="grid g-2" style="margin-top:14px"></section>
+
+    <details class="json">
+      <summary>Raw JSON</summary>
+      <pre id="raw"></pre>
+    </details>
+  </main>
+
+  <!-- Inline YouTube modal -->
+  <div id="ytModal" class="modal" role="dialog" aria-modal="true" aria-label="Video">
+    <div class="panel">
+      <div class="wrap row" style="padding:8px 8px 12px 8px">
+        <div class="h1">Drill Video</div>
+        <span class="spacer"></span>
+        <button class="btn" id="ytClose">Close</button>
+      </div>
+      <div style="padding:0 10px 12px 10px">
+        <iframe id="ytFrame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ---------- URL helpers ----------
+  const qs = new URLSearchParams(location.search);
+  const fullDecode = s => { if(!s) return s; let p; do { p = s; try{s = decodeURIComponent(s);}catch{break} } while (s !== p); return s; };
+
+  // Accept either:
+  // 1) ?report=<encoded absolute URL to JSON>   OR
+  // 2) ?objKey=... [&key=...]  -> fetched via /api/report-compat
+  function resolveFetchUrl(){
+    const reportParam = qs.get('report');
+    if (reportParam){
+      const url = fullDecode(reportParam);
+      try { new URL(url); return { mode:'absolute', url }; } catch {}
+      throw new Error("Bad ?report URL.");
+    }
+    const objKey = qs.get('objKey');
+    if (objKey){
+      const key = qs.get('key') || localStorage.getItem('vc_api_key') || '';
+      return { mode:'compat', url: `/api/report-compat?objKey=${encodeURIComponent(objKey)}${key ? `&key=${encodeURIComponent(key)}`:''}` };
+    }
+    throw new Error("Missing ?report= or ?objKey= in URL.");
   }
-  const data = await r.json();
-  setLastKey(objKey);
-  els.json.textContent = JSON.stringify(data.data || data, null, 2);
-  log('Loaded.');
-}
 
-els.saveKey.onclick = ()=> setKey(els.key.value.trim());
-els.clearKey.onclick = ()=> { setKey(''); setLastKey(''); log('Key cleared.'); };
-els.loadList.onclick = ()=> { setClientId(els.clientId.value.trim()); loadListAndMaybeSelect(getLastKey()); };
+  // ---------- Schema guard ----------
+  const REQUIRED = ['version','status','clientId','createdUtc','checkpoints','faults','drills'];
+  function validateReport(r){
+    for (const k of REQUIRED) if (!(k in r)) throw new Error(`Missing field: ${k}`);
+  }
 
-els.sel.onchange = ()=> loadOne(els.sel.value, false);
-
-els.openJson.onclick = ()=>{
-  const k = els.sel.value;
-  if(!k) return;
-  const key = getKey();
-  const u = `/api/report-compat?objKey=${encodeURIComponent(k)}&key=${encodeURIComponent(key)}`;
-  window.open(u, '_blank');
-};
-els.share.onclick = async ()=>{
-  const k = els.sel.value;
-  if(!k) return;
-  const r = await api(`/api/share?objKey=${encodeURIComponent(k)}`);
-  const j = await r.json();
-  if(!r.ok || !j.url){ log(`Share failed: HTTP ${r.status}`, true); return; }
-  navigator.clipboard.writeText(j.url).catch(()=>{});
-  log('Signed URL copied to clipboard.');
-};
-
-// boot
-setKey(getKey());
-setClientId(getClientId());
-const url = new URL(location.href);
-// optional ?clear=1 to wipe cached key/selection
-if(url.searchParams.get('clear')==='1'){ localStorage.removeItem('vc_last_obj'); }
-loadListAndMaybeSelect(url.searchParams.get('objKey') || '');
-</script>
-<script id="vc-normalize">
-(function(){
+  // ---------- Normalizer (tolerates variants) ----------
   function normalizeReport(r){
     const out = {...r};
-
-    // meta → top-level convenience
-    if (r.meta){
-      out.mode   = out.mode   ?? r.meta.mode;
-      out.swings = out.swings ?? r.meta.swings;
-      out.date   = out.date   ?? r.meta.date;
+    // Swing score fallbacks
+    if (out.swingScore == null){
+      if (typeof r.power?.score === 'number') out.swingScore = r.power.score;
+      else if (typeof r.consistency?.swing === 'number') out.swingScore = r.consistency.swing;
     }
-
-    // top fixes / priority
-    if (!out.top3PriorityFixes && Array.isArray(r.topFixes)) out.top3PriorityFixes = r.topFixes;
-    if (!out.top3PowerFixes    && Array.isArray(r.powerFixes)) out.top3PowerFixes = r.powerFixes;
-
-    // coaching card: string → object
-    if (typeof r.coachingCard === 'string'){
-      out.coachingCard = { summary: r.coachingCard, cues: [], drills: [] };
+    // Ensure checkpoints object (P1..P9). If array, map it.
+    if (Array.isArray(out.checkpoints)) {
+      const obj = {};
+      out.checkpoints.forEach(x => { if (x && x.id) obj[x.id] = x; });
+      out.checkpoints = obj;
     }
-
-    // consistency → split fields expected by UI
-    if (r.consistency){
-      if (!out.swingConsistency && (typeof r.consistency.swing === 'number' || typeof r.consistency.swing === 'object')){
-        out.swingConsistency = typeof r.consistency.swing === 'number'
-          ? { value: r.consistency.swing }
-          : r.consistency.swing;
-      }
-      if (!out.positionConsistency && Array.isArray(r.consistency.position)){
-        out.positionConsistency = r.consistency.position.map(p => ({
-          position: p.position || p.pos || p.id || "",
-          value:    p.value ?? p.score ?? 0
-        }));
-      }
+    // Faults: coerce to array of {code,severity,desc}
+    out.faults = (out.faults || []).map(f => ({
+      code: f.code || f.id || f.name || 'unknown',
+      severity: (f.severity || 'medium').toLowerCase(),
+      desc: f.desc || f.description || ''
+    }));
+    // Drills: coerce, extract youtube if present
+    out.drills = (out.drills || []).map(d => ({
+      for: d.for || d.target || '',
+      title: d.title || d.name || 'Drill',
+      why: d.why || d.reason || '',
+      how: d.how || d.steps || d.instructions || '',
+      youtube: d.youtube || d.video || ''
+    }));
+    // Videos block
+    if (!out.video && (r.faceOn || r.downTheLine)){
+      out.video = { faceOn: r.faceOn || '', downTheLine: r.downTheLine || '' };
     }
-
-    // power → summary value (+keep breakdown if present)
-    if (r.power){
-      if (!out.powerScoreSummary && (typeof r.power.score === 'number' || typeof r.power === 'number')){
-        out.powerScoreSummary = { value: (typeof r.power === 'number' ? r.power : r.power.score), notes: "" };
-      }
-    }
-
-    // phases: ensure objects include id/title; tolerate name/label variants
-    if (Array.isArray(r.phases)){
-      out.phases = r.phases.map(p => ({
-        id:    p.id    ?? p.position ?? p.pos ?? "",
-        title: p.title ?? p.name ?? "",
-        label: p.label ?? p.note ?? ""
-      }));
-    }
-
-    // ensure swingScore exists at top-level (some renderers use this)
-    if (out.swingScore == null && typeof r.power?.score === 'number') out.swingScore = r.power.score;
-
     return out;
   }
 
-  // Hook: after fetch -> before render
-  const _fetch = window.fetch;
-  window.fetch = async function(url, init){
-    const res = await _fetch(url, init);
+  // ---------- Rendering ----------
+  const el = id => document.getElementById(id);
+  function setSchemaBadge(v){ el('schemaBadge').textContent = `schema ${v || '1.0'}`; }
+
+  function scoreClass(v){
+    if (v >= 80) return 'good';
+    if (v >= 60) return 'warn';
+    return 'bad';
+  }
+
+  function renderSummary(r){
+    const box = el('summary');
+    const created = new Date(r.createdUtc).toLocaleString();
+    const swing = (r.swingScore ?? '—');
+    box.innerHTML = `
+      <div class="card">
+        <h3>Client</h3>
+        <div class="kv"><b>Client ID</b><span>${r.clientId}</span></div>
+        <div class="kv"><b>Created</b><span>${created}</span></div>
+        <div class="kv"><b>Status</b><span class="pill">${r.status}</span></div>
+      </div>
+      <div class="card">
+        <h3>Swing Score</h3>
+        <div class="score ${typeof swing==='number'?scoreClass(swing):''}">${swing}</div>
+        ${r.note ? `<div class="muted" style="margin-top:6px">${r.note}</div>` : ''}
+      </div>
+      <div class="card">
+        <h3>Highlights</h3>
+        <div>
+          ${(r.top3PriorityFixes||[]).map(x=>`<span class="chip">${x}</span>`).join('') ||
+            (r.faults.slice(0,3).map(f=>`<span class="chip">${f.code}</span>`).join('')) || '<span class="muted">—</span>'}
+        </div>
+      </div>`;
+  }
+
+  function renderPositions(r){
+    const grid = el('posList');
+    const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
+    grid.innerHTML = order.map(id=>{
+      const p = r.checkpoints?.[id] || {};
+      const label = p.title || p.label || '';
+      const notes = p.notes || p.desc || '';
+      return `<div class="pos">
+        <div class="id">${id}</div>
+        <div class="body">
+          <div><b>${label || '—'}</b></div>
+          ${notes ? `<div class="muted" style="margin-top:4px">${notes}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderFaults(r){
+    const box = el('faultList');
+    if (!r.faults?.length){ box.innerHTML = `<div class="muted">No faults detected.</div>`; return; }
+    box.innerHTML = r.faults.map(f=>`
+      <div class="fault">
+        <div>
+          <div><b>${f.code}</b></div>
+          ${f.desc ? `<div class="muted">${f.desc}</div>`:''}
+        </div>
+        <div class="sev ${f.severity}">${f.severity}</div>
+      </div>`).join('');
+  }
+
+  function ytId(url){
+    if (!url) return '';
     try{
-      // Only intercept the report JSON call the page makes
-      if (typeof url === 'string' && url.includes('/api/report-compat')){
-        const clone = res.clone();
-        const data  = await clone.json();
-        if (data && data.data && data.data.report){
-          data.data.report = normalizeReport(data.data.report);
-          // Return a Response with the normalized payload
-          return new Response(JSON.stringify(data), {
-            status: res.status,
-            statusText: res.statusText,
-            headers: {'Content-Type':'application/json'}
-          });
-        }
+      const u = new URL(url);
+      if (u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+      if (u.hostname.includes('youtube.com')) return u.searchParams.get('v') || '';
+    }catch{}
+    return '';
+  }
+
+  function renderDrills(r){
+    const box = el('drillList');
+    if (!r.drills?.length){ box.innerHTML = `<div class="muted">No drills attached.</div>`; return; }
+    box.innerHTML = r.drills.map(d=>{
+      const id = ytId(d.youtube);
+      return `<div class="drill">
+        <h4>${d.title} ${d.for?`<span class="chip">for ${d.for}</span>`:''}</h4>
+        ${d.why ? `<div class="kv"><b>Why</b><div>${d.why}</div></div>`:''}
+        ${d.how ? `<div class="kv"><b>How</b><div>${d.how}</div></div>`:''}
+        ${id ? `<div style="margin-top:6px"><button class="btn primary" data-yt="${id}">YouTube Video</button></div>`:''}
+      </div>`;
+    }).join('');
+
+    // Wire modal buttons
+    box.querySelectorAll('[data-yt]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        openYt(btn.getAttribute('data-yt'));
+      });
+    });
+  }
+
+  function renderMedia(r){
+    const box = el('media');
+    const v = r.video || {};
+    const cards = [];
+    if (v.faceOn){
+      cards.push(`<div class="card">
+        <h3>Face-On</h3>
+        ${v.faceOn.endsWith('.mp4') || v.faceOn.includes('video')
+          ? `<video controls src="${v.faceOn}" style="width:100%;border-radius:10px;"></video>`
+          : `<a href="${v.faceOn}" target="_blank" rel="noopener">Open</a>`}
+      </div>`);
+    }
+    if (v.downTheLine){
+      cards.push(`<div class="card">
+        <h3>Down-the-Line</h3>
+        ${v.downTheLine.endsWith('.mp4') || v.downTheLine.includes('video')
+          ? `<video controls src="${v.downTheLine}" style="width:100%;border-radius:10px;"></video>`
+          : `<a href="${v.downTheLine}" target="_blank" rel="noopener">Open</a>`}
+      </div>`);
+    }
+    box.innerHTML = cards.join('') || '';
+  }
+
+  function setStatusOk(msg){ el('status').innerHTML = `<div class="ok">${msg}</div>`; }
+  function setStatusErr(msg){ el('status').innerHTML = `<div class="err">Couldn’t load report: ${msg}</div>`; }
+
+  // ---------- Print URL wiring ----------
+  function wirePrintLinkFromAbsoluteReportUrl(repUrl){
+    try{
+      const u = new URL(repUrl);
+      const key = u.searchParams.get('key');
+      const obj = u.searchParams.get('objKey');
+      if (key && obj){
+        const printUrl = `https://api.virtualcoachai.net/api/print?key=${encodeURIComponent(key)}&objKey=${encodeURIComponent(obj)}`;
+        document.getElementById('printLink').setAttribute('href', printUrl);
       }
     }catch{}
-    return res;
-  };
-})();
-</script>
+  }
+  function wirePrintLinkFromCompatPayload(payload){
+    try{
+      // /api/report-compat returns { data: { url?, key?, objKey?, report } } (variants allowed)
+      const key = payload?.data?.key;
+      const obj = payload?.data?.objKey;
+      if (key && obj){
+        const printUrl = `https://api.virtualcoachai.net/api/print?key=${encodeURIComponent(key)}&objKey=${encodeURIComponent(obj)}`;
+        document.getElementById('printLink').setAttribute('href', printUrl);
+      } else if (payload?.data?.url){
+        wirePrintLinkFromAbsoluteReportUrl(payload.data.url);
+      }
+    }catch{}
+  }
+
+  // ---------- Modal controls ----------
+  const modal = document.getElementById('ytModal');
+  const iframe = document.getElementById('ytFrame');
+  document.getElementById('ytClose').addEventListener('click', closeYt);
+  modal.addEventListener('click', (e)=>{ if(e.target === modal) closeYt(); });
+  function openYt(id){
+    iframe.src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`;
+    modal.classList.add('open');
+  }
+  function closeYt(){
+    iframe.src = '';
+    modal.classList.remove('open');
+  }
+
+  // ---------- Boot ----------
+  (async function(){
+    let fetchInfo;
+    try{
+      fetchInfo = resolveFetchUrl();
+    } catch(e){
+      setStatusErr(e.message);
+      return;
+    }
+
+    try{
+      if (fetchInfo.mode === 'absolute'){
+        const res = await fetch(fetchInfo.url, { cache:'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const reportRaw = await res.json();
+        const report = normalizeReport(reportRaw);
+        validateReport(report);
+        setSchemaBadge(report.version || '1.0');
+
+        // Render
+        renderSummary(report);
+        renderPositions(report);
+        renderFaults(report);
+        renderDrills(report);
+        renderMedia(report);
+
+        setStatusOk('Report loaded.');
+        el('raw').textContent = JSON.stringify(reportRaw, null, 2);
+        wirePrintLinkFromAbsoluteReportUrl(fetchInfo.url);
+      } else {
+        // compat flow
+        const res = await fetch(fetchInfo.url, { cache:'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const payload = await res.json();
+        const data = payload?.data || payload;
+        const reportRaw = data?.report || data;
+        const report = normalizeReport(reportRaw);
+        validateReport(report);
+        setSchemaBadge(report.version || '1.0');
+
+        renderSummary(report);
+        renderPositions(report);
+        renderFaults(report);
+        renderDrills(report);
+        renderMedia(report);
+
+        setStatusOk('Report loaded.');
+        el('raw').textContent = JSON.stringify(reportRaw, null, 2);
+        wirePrintLinkFromCompatPayload(payload);
+      }
+    } catch(e){
+      // If status !== ready, show a friendly message; otherwise surface the error.
+      const msg = (e && e.message) ? e.message : String(e);
+      setStatusErr(msg);
+      // Still dump anything we got if available for debugging
+      try{ el('raw').textContent = (await (await fetchInfo)?.text?.()) || ''; }catch{}
+    }
+  })();
+  </script>
+</body>
 </html>
-
-
