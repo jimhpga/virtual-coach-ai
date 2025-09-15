@@ -6,200 +6,131 @@
 <title>Virtual Coach AI • Upload</title>
 <link rel="icon" href="/favicon.ico">
 <style>
-  :root{--ink:#e8ecf4;--muted:#a7b0c2;--bg:#0b0d12;--card:#141824;--line:#1e2433;--accent:#4da3ff;--good:#1ec28b;--bad:#ff5b6b}
+  :root{--ink:#e8ecf4;--muted:#a7b0c2;--bg:#0b0d12;--card:#141824;--line:#1e2433;--accent:#4da3ff}
   *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#0b0d12,#0a0c12);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
   header{position:sticky;top:0;z-index:2;background:rgba(10,12,18,.8);backdrop-filter: blur(6px);border-bottom:1px solid #1c2130}
   .wrap{max-width:900px;margin:0 auto;padding:16px}
-  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-  .brand{display:flex;gap:10px;align-items:center}.mark{width:28px;height:28px;border-radius:8px;background:conic-gradient(from 210deg,#8ab7ff,#53e9bf 40%,#8ab7ff 80%)}
-  .h1{font-weight:700;font-size:16px}
-  .btn{background:#1a2130;border:1px solid #2a3550;padding:8px 12px;border-radius:10px;color:var(--ink);cursor:pointer}
-  .btn.primary{background:var(--accent);border-color:transparent;color:#06101e}
+  .row{display:flex;gap:12px;align-items:center}
+  .btn{background:#1a2130;border:1px solid #2a3550;padding:8px 12px;border-radius:10px;color:#e8ecf4;text-decoration:none;cursor:pointer}
+  .btn:hover{background:#20283b}
   main{max-width:900px;margin:18px auto;padding:0 16px 60px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
-  .muted{color:var(--muted)}
   .drop{border:2px dashed #2a3550;border-radius:16px;padding:28px;text-align:center;background:#0e1423}
   .drop.drag{background:#0f1a2e;border-color:#38508a}
-  .prog{height:10px;background:#0d1321;border:1px solid #22304a;border-radius:999px;overflow:hidden}
+  .prog{height:10px;background:#0d1321;border:1px solid #22304a;border-radius:999px;overflow:hidden;margin-top:12px}
   .bar{height:100%;width:0;background:linear-gradient(90deg,#53e9bf,#8ab7ff)}
   .kv{display:grid;grid-template-columns:140px 1fr;gap:10px;margin-top:8px}
-  input,select{font:inherit;padding:8px;border-radius:10px;border:1px solid #2a3550;background:#0e1423;color:var(--ink)}
+  input{font:inherit;padding:8px;border-radius:10px;border:1px solid #2a3550;background:#0e1423;color:var(--ink)}
   .ok{background:#122a20;border:1px solid #246b4e;padding:12px;border-radius:10px;margin-top:10px}
   .err{background:#2a1220;border:1px solid #6b223e;padding:12px;border-radius:10px;margin-top:10px}
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap row">
-    <div class="brand"><div class="mark"></div><div class="h1">Virtual Coach AI — Upload</div></div>
-    <span style="flex:1"></span>
-    <a href="/report.html" class="btn">Open a Report</a>
-  </div>
-</header>
-
-<main>
-  <div class="card">
-    <h3>Upload Your Swing</h3>
-    <div class="muted">Drop a video (MP4/MOV) or pick a file. We’ll upload, create your report, and take you to it.</div>
-
-    <div id="drop" class="drop" style="margin:14px 0">
-      <input id="file" type="file" accept="video/*" hidden>
-      <div style="margin-bottom:10px">Drag & drop here, or</div>
-      <button id="pick" class="btn primary">Choose File</button>
-      <div id="sel" class="muted" style="margin-top:10px">No file selected.</div>
+  <header>
+    <div class="wrap">
+      <div id="site-header"></div>
     </div>
+  </header>
+  <script>
+  fetch('/partials/header.html?v=20250915')
+    .then(r => r.text())
+    .then(h => { document.getElementById('site-header').innerHTML = h; })
+    .catch(() => { document.getElementById('site-header').innerHTML =
+      '<div style="padding:12px;border-bottom:1px solid #2a3550">Virtual Coach AI</div>'; });
+  </script>
 
-    <div class="kv">
-      <label>Client ID</label>
-      <input id="clientId" placeholder="jim-hartnett" value="jim-hartnett">
-      <label>Note</label>
-      <input id="note" placeholder="e.g., Driver DTL, sunny day">
+  <main>
+    <div class="card">
+      <h3>Upload Your Swing</h3>
+      <div class="drop" id="drop" style="margin:14px 0">
+        <input id="file" type="file" accept="video/*" hidden>
+        <div style="margin-bottom:10px">Drag & drop here, or</div>
+        <button id="pick" class="btn">Choose File</button>
+        <div id="sel" style="opacity:.8;margin-top:10px">No file selected.</div>
+      </div>
+
+      <div class="kv">
+        <label>Client ID</label><input id="clientId" value="jim-hartnett">
+        <label>Note</label><input id="note" placeholder="e.g., Driver DTL, sunny day">
+        <label>API Key</label><input id="apiKey" type="password" placeholder="vc-...">
+      </div>
+
+      <div style="margin-top:14px">
+        <button id="go" class="btn">Upload & Create Report</button>
+        <button id="save" class="btn">Save Key</button>
+        <button id="clear" class="btn">Clear Key</button>
+      </div>
+
+      <div id="msg"></div>
+      <div class="prog"><div id="bar" class="bar"></div></div>
     </div>
+  </main>
 
-    <div class="kv" style="margin-top:10px">
-      <label>API Key (saved)</label>
-      <input id="apiKey" type="password" placeholder="vc-..." />
-    </div>
+  <script>
+  const els={drop:document.getElementById('drop'),file:document.getElementById('file'),pick:document.getElementById('pick'),sel:document.getElementById('sel'),
+             clientId:document.getElementById('clientId'),note:document.getElementById('note'),apiKey:document.getElementById('apiKey'),
+             go:document.getElementById('go'),save:document.getElementById('save'),clear:document.getElementById('clear'),
+             msg:document.getElementById('msg'),bar:document.getElementById('bar')};
+  function logOk(t){els.msg.innerHTML=`<div class="ok">${t}</div>`} function logErr(t){els.msg.innerHTML=`<div class="err">${t}</div>`}
+  function setBar(p){els.bar.style.width=`${Math.max(0,Math.min(100,p))}%`}
 
-    <div style="margin-top:14px">
-      <button id="go" class="btn primary">Upload & Create Report</button>
-      <button id="save" class="btn">Save Key</button>
-      <button id="clear" class="btn">Clear Key</button>
-    </div>
-
-    <div id="msg"></div>
-
-    <div class="prog" style="margin-top:14px"><div id="bar" class="bar"></div></div>
-  </div>
-</main>
-
-<script>
-const els = {
-  drop: document.getElementById('drop'),
-  file: document.getElementById('file'),
-  pick: document.getElementById('pick'),
-  sel: document.getElementById('sel'),
-  clientId: document.getElementById('clientId'),
-  note: document.getElementById('note'),
-  apiKey: document.getElementById('apiKey'),
-  go: document.getElementById('go'),
-  save: document.getElementById('save'),
-  clear: document.getElementById('clear'),
-  msg: document.getElementById('msg'),
-  bar: document.getElementById('bar'),
-};
-
-function logOk(t){ els.msg.innerHTML = `<div class="ok">${t}</div>`; }
-function logErr(t){ els.msg.innerHTML = `<div class="err">${t}</div>`; }
-function setBar(p){ els.bar.style.width = `${Math.max(0, Math.min(100, p))}%`; }
-
-function getKey(){
-  const fromUrl = new URL(location.href).searchParams.get('key');
-  if (fromUrl){ localStorage.setItem('vc_api_key', fromUrl); return fromUrl; }
-  return localStorage.getItem('vc_api_key') || '';
-}
-function setKey(k){ localStorage.setItem('vc_api_key', k||''); els.apiKey.value = k||''; }
-setKey(getKey());
-
-els.save.onclick = ()=> setKey(els.apiKey.value.trim());
-els.clear.onclick = ()=> { setKey(''); logOk('Key cleared.'); };
-
-els.pick.onclick = ()=> els.file.click();
-['dragenter','dragover'].forEach(ev=>els.drop.addEventListener(ev, e=>{e.preventDefault(); els.drop.classList.add('drag')}))
-;['dragleave','drop'].forEach(ev=>els.drop.addEventListener(ev, e=>{e.preventDefault(); els.drop.classList.remove('drag')}))
-els.drop.addEventListener('drop', e=>{ const f = e.dataTransfer.files?.[0]; if (f) setFile(f); });
-els.file.addEventListener('change', e=>{ const f = e.target.files?.[0]; if (f) setFile(f); });
-
-let chosen = null;
-function setFile(f){
-  chosen = f;
-  els.sel.textContent = `${f.name} — ${(f.size/1e6).toFixed(1)} MB`;
-}
-
-async function signUpload(ext, type){
-  const r = await fetch('/api/sign-upload', {
-    method:'POST',
-    headers:{'content-type':'application/json','x-api-key':getKey()},
-    body: JSON.stringify({ ext, type })
-  });
-  if(!r.ok) throw new Error(`sign-upload HTTP ${r.status}`);
-  return r.json(); // { url, headers, objKey }
-}
-
-async function putWithProgress(url, headers, file){
-  return new Promise((resolve, reject)=>{
-    const xhr = new XMLHttpRequest();
-    xhr.open('PUT', url, true);
-    for (const [k,v] of Object.entries(headers||{})) xhr.setRequestHeader(k, v);
-    xhr.upload.onprogress = (e)=>{ if (e.lengthComputable) setBar(e.loaded/e.total*100); };
-    xhr.onload = ()=> (xhr.status>=200 && xhr.status<300) ? resolve() : reject(new Error(`PUT ${xhr.status}`));
-    xhr.onerror = ()=> reject(new Error('Network error'));
-    xhr.send(file);
-  });
-}
-
-async function createReport({clientId, note, uploadObjKey}){
-  const r = await fetch('/api/report', {
-    method:'POST',
-    headers:{'content-type':'application/json','x-api-key':getKey()},
-    body: JSON.stringify({
-      clientId,
-      note,
-      sourceUpload: uploadObjKey,
-      // emit a "ready" stub for MVP; swap to "processing" if analysis runs async
-      report: {
-        version:"1.0",
-        status:"ready",
-        note: note || "",
-        clientId,
-        createdUtc: new Date().toISOString(),
-        swingScore: 80,
-        checkpoints: {P1:{title:"Setup"},P2:{},P3:{},P4:{},P5:{},P6:{},P7:{title:"Impact"},P8:{},P9:{title:"Finish"}},
-        faults: [{code:"early_extension",severity:"high",desc:"Hips moving towards ball on downswing"}],
-        drills: [{for:"early_extension",title:"Wall-Sit Hip Hinge",why:"Keeps pelvis back",how:"Back to wall, hinge, maintain pressure",youtube:"https://youtu.be/dQw4w9WgXcQ"}],
-        video: { downTheLine: "", faceOn: "" }
-      }
-    })
-  });
-  if(!r.ok) throw new Error(`report HTTP ${r.status}`);
-  return r.json(); // { viewerUrl, printUrl }
-}
-
-els.go.onclick = async ()=>{
-  try{
-    els.msg.innerHTML = ''; setBar(0);
-    if(!chosen) throw new Error('Pick a file.');
-    const clientId = els.clientId.value.trim() || 'anonymous';
-    const note = els.note.value.trim();
-
-    // 1) Sign
-    const ext = '.' + (chosen.name.split('.').pop() || 'mp4');
-    const type = chosen.type || 'video/mp4';
-    const { url, headers, objKey } = await signUpload(ext, type);
-
-    // 2) Upload with retries
-    let tries = 0;
-    for(;;){
-      try{ await putWithProgress(url, headers||{}, chosen); break; }
-      catch(err){ if(++tries>=3) throw err; await new Promise(s=>setTimeout(s,[1000,3000,7000][tries-1])); }
-    }
-    setBar(100); logOk('Upload complete. Creating report…');
-
-    // 3) Create report + redirect
-    const { viewerUrl, printUrl } = await createReport({clientId, note, uploadObjKey: objKey});
-    if (printUrl) localStorage.setItem('vc_last_print', printUrl);
-    if (viewerUrl){ location.href = viewerUrl; return; }
-
-    // Fallback: if server returns obj info instead of viewerUrl:
-    if (objKey && getKey()){
-      const fallback = `/report.html?objKey=${encodeURIComponent(objKey)}&key=${encodeURIComponent(getKey())}`;
-      location.href = fallback; return;
-    }
-    logOk('Report created, but no viewer URL returned.');
-  }catch(e){
-    logErr(e.message||String(e));
+  function getKey(){
+    const fromUrl=new URL(location.href).searchParams.get('key');
+    if(fromUrl){localStorage.setItem('vc_api_key',fromUrl);return fromUrl}
+    return localStorage.getItem('vc_api_key')||''
   }
-};
-</script>
+  function setKey(k){localStorage.setItem('vc_api_key',k||'');els.apiKey.value=k||''}
+  setKey(getKey());
+
+  els.save.onclick=()=>setKey(els.apiKey.value.trim());
+  els.clear.onclick=()=>{setKey('');logOk('Key cleared.')}
+
+  els.pick.onclick=()=>els.file.click();
+  ['dragenter','dragover'].forEach(ev=>els.drop.addEventListener(ev,e=>{e.preventDefault();els.drop.classList.add('drag')}))
+  ;['dragleave','drop'].forEach(ev=>els.drop.addEventListener(ev,e=>{e.preventDefault();els.drop.classList.remove('drag')}))
+  els.drop.addEventListener('drop',e=>{const f=e.dataTransfer.files?.[0]; if(f) setFile(f)});
+  els.file.addEventListener('change',e=>{const f=e.target.files?.[0]; if(f) setFile(f)});
+
+  let chosen=null; function setFile(f){chosen=f;els.sel.textContent=`${f.name} — ${(f.size/1e6).toFixed(1)} MB`}
+
+  async function signUpload(ext,type){
+    const r=await fetch('/api/sign-upload',{method:'POST',headers:{'content-type':'application/json','x-api-key':getKey()},body:JSON.stringify({ext,type})});
+    if(!r.ok) throw new Error(`sign-upload HTTP ${r.status}`); return r.json() // {url,headers,objKey}
+  }
+  async function putWithProgress(url,headers,file){
+    return new Promise((res,rej)=>{const x=new XMLHttpRequest();x.open('PUT',url,true);
+      for(const[k,v]of Object.entries(headers||{}))x.setRequestHeader(k,v);
+      x.upload.onprogress=e=>{if(e.lengthComputable)setBar(e.loaded/e.total*100)};
+      x.onload=()=> (x.status>=200&&x.status<300)?res():rej(new Error(`PUT ${x.status}`));
+      x.onerror=()=>rej(new Error('Network error')); x.send(file);
+    });
+  }
+  async function createReport({clientId,note,uploadObjKey}){
+    const r=await fetch('/api/report',{method:'POST',headers:{'content-type':'application/json','x-api-key':getKey()},body:JSON.stringify({
+      clientId,note,sourceUpload:uploadObjKey,
+      report:{version:"1.0",status:"ready",note:note||"",clientId,createdUtc:new Date().toISOString(),
+      swingScore:80,checkpoints:{P1:{title:"Setup"},P2:{},P3:{},P4:{},P5:{},P6:{},P7:{title:"Impact"},P8:{},P9:{title:"Finish"}},
+      faults:[{code:"early_extension",severity:"high",desc:"Hips move towards ball on downswing"}],
+      drills:[{for:"early_extension",title:"Wall-Sit Hip Hinge",why:"Keeps pelvis back",how:"Back to wall, hinge, maintain pressure",youtube:"https://youtu.be/dQw4w9WgXcQ"}],
+      video:{downTheLine:"",faceOn:""}}})});
+    if(!r.ok) throw new Error(`report HTTP ${r.status}`); return r.json() // {viewerUrl,printUrl}
+  }
+
+  els.go.onclick=async()=>{try{
+    els.msg.innerHTML=''; setBar(0); if(!chosen) throw new Error('Pick a file.');
+    const clientId=els.clientId.value.trim()||'anonymous', note=els.note.value.trim();
+    const ext='.'+(chosen.name.split('.').pop()||'mp4'), type=chosen.type||'video/mp4';
+    const {url,headers,objKey}=await signUpload(ext,type);
+    let tries=0; for(;;){try{await putWithProgress(url,headers||{},chosen);break}
+      catch(e){if(++tries>=3)throw e;await new Promise(s=>setTimeout(s,[1000,3000,7000][tries-1]))}}
+    setBar(100); logOk('Upload complete. Creating report…');
+    const {viewerUrl,printUrl}=await createReport({clientId,note,uploadObjKey:objKey});
+    if(printUrl) localStorage.setItem('vc_last_print',printUrl);
+    if(viewerUrl){location.href=viewerUrl;return}
+    if(objKey && getKey()){location.href=`/report.html?objKey=${encodeURIComponent(objKey)}&key=${encodeURIComponent(getKey())}`;return}
+    logOk('Report created, but no viewer URL returned.')
+  }catch(e){logErr(e.message||String(e))}};
+  </script>
 </body>
 </html>
+
