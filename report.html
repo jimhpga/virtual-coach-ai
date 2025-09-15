@@ -1,398 +1,274 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Virtual Coach AI • Swing Report</title>
-  <link rel="icon" href="/favicon.ico">
-  <style>
-    /* ---- Screen (dark) theme ---- */
-    :root{
-      --bg:#0b0d12;--card:#141824;--ink:#e8ecf4;--muted:#a7b0c2;--line:#1e2433;--accent:#4da3ff;
-      --good:#1ec28b;--warn:#ffb020;--bad:#ff5b6b;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,var(--bg),#0a0c12);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-    a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
-    header{position:sticky;top:0;z-index:2;background:rgba(10,12,18,.8);backdrop-filter: blur(6px);border-bottom:1px solid #1c2130}
-    .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    .row{display:flex;gap:12px;align-items:center}
-    .btn{background:#1a2130;border:1px solid #2a3550;padding:8px 12px;border-radius:10px;color:var(--ink);text-decoration:none;cursor:pointer}
-    .btn:hover{background:#20283b}
-    .badge{background:#182034;color:#a7c9ff;border:1px solid #2b3b60;padding:4px 8px;border-radius:999px;font-size:12px}
-    main{max-width:1100px;margin:18px auto;padding:0 16px 60px}
-    .grid{display:grid;gap:14px}
-    .g-2{grid-template-columns:repeat(2,1fr)}
-    .g-3{grid-template-columns:repeat(3,1fr)}
-    @media (max-width:900px){.g-3{grid-template-columns:repeat(2,1fr)}}
-    @media (max-width:640px){.g-2,.g-3{grid-template-columns:1fr}}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
-    .card h3{margin:0 0 8px 0;font-size:15px}
-    .muted{color:var(--muted)}
-    .score{font-size:34px;font-weight:800}
-    .score.good{color:var(--good)} .score.warn{color:var(--warn)} .score.bad{color:var(--bad)}
-    .pill{display:inline-flex;align-items:center;gap:8px;background:#111523;border:1px solid #20273a;border-radius:999px;padding:6px 10px}
-    .fault{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px dashed #2a3245}
-    .fault:last-child{border-bottom:0}
-    .sev{font-weight:700;text-transform:capitalize}
-    .sev.high{color:var(--bad)} .sev.medium{color:var(--warn)} .sev.low{color:#2bd59c}
-    .drill{border:1px solid #26314b;background:#101525;border-radius:12px;padding:12px;margin:8px 0}
-    .drill h4{margin:0 0 6px 0;font-size:14px}
-    .kv{display:grid;grid-template-columns:120px 1fr;gap:10px;margin:6px 0}
-    .kv b{color:#cdd6e8}
-    .chip{display:inline-block;background:#0f1626;border:1px solid #273250;border-radius:999px;padding:4px 8px;margin:2px 4px 2px 0}
-    .pos{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid #22304a;border-radius:10px;background:#0e1423}
-    .pos .id{font-weight:700;width:28px;text-align:center;background:#172037;border-radius:8px;padding:6px 0;color:#b6c8ff}
-    .pos .body{flex:1}
-    .err{background:#2a1220;border:1px solid #6b223e;padding:12px;border-radius:10px}
-    .ok{background:#122a20;border:1px solid #246b4e;padding:12px;border-radius:10px}
-    details.json {margin-top:12px}
-    pre{overflow:auto;max-height:50vh;background:#0c111b;border:1px solid #1b2233;border-radius:10px;padding:12px}
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Virtual Coach AI — Swing Report (P1–P9)</title>
+<style>
+  :root{--ink:#000;--mut:#333;--bd:#0002;--chip:#0001;--chipbd:#0003}
+  html,body{background:#fff;color:var(--ink)}
+  body{margin:0;font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+  main{max-width:1100px;margin:24px auto;padding:0 16px}
+  .grid{display:grid;gap:14px}.g-2{grid-template-columns:repeat(2,1fr)}.g-3{grid-template-columns:repeat(3,1fr)}
+  @media (max-width:900px){.g-3{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:640px){.g-2,.g-3{grid-template-columns:1fr}}
+  .card{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:14px}
+  .card h3{margin:0 0 8px;font-size:15px}
+  .muted{color:var(--mut)} .score{font-size:34px;font-weight:800}
+  .chip{display:inline-block;background:var(--chip);border:1px solid var(--chipbd);border-radius:999px;padding:4px 8px;margin:2px 4px}
+  table{border-collapse:collapse;width:100%} th,td{border:1px solid var(--bd);padding:6px;text-align:left} th{background:#00000008}
+  .sev{font-weight:700;text-transform:capitalize}.sev.high{color:#b02a37}.sev.medium{color:#b36b00}.sev.low{color:#0f7a56}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:16px auto;max-width:1100px;padding:0 16px}
+  header .right{display:flex;gap:8px;align-items:center}
+  button,a.btn{font:inherit;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;background:#fff;color:inherit;text-decoration:none;cursor:pointer}
+  #log{max-width:1100px;margin:8px auto 0;padding:0 16px;color:#b02a37;white-space:pre-wrap}
+  @page { size: Letter; margin: 12mm }
+</style>
 
-    /* ---- PRINT/PDF overrides: force light text on white paper ---- */
-    /* These ensure readable PDFs even if the renderer ignores backgrounds */
-    @media print {
-      body { background:#fff !important; color:#000 !important }
-      header, .btn, .badge, #ytModal, details.json { display:none !important }
-      main { padding:0; margin:0 auto }
-      .card { background:transparent !important; border:1px solid #00000022 }
-      .muted { color:#333 !important }
-      .chip { background:#00000008; border-color:#00000033; color:#000 }
-      .pos { background:transparent !important; border-color:#00000022 }
-      .pos .id { background:#00000010 !important; color:#000 !important }
-      .kv b { color:#000 !important }
-      pre { background:#fff !important; border:1px solid #00000022; color:#000 !important; max-height:none }
-      video { display:none !important }
-      @page { size: Letter; margin: 12mm }
-    }
-    /* Also allow forcing print mode via ?pdf=1 (used by some servers) */
-    body.print { background:#fff !important; color:#000 !important }
-    body.print .card { background:transparent !important; border:1px solid #00000022 }
-    body.print .muted { color:#333 !important }
-    body.print header, body.print .btn, body.print .badge, body.print #ytModal, body.print details.json { display:none !important }
-    body.print .chip { background:#00000008; border-color:#00000033; color:#000 }
-    body.print .pos { background:transparent !important; border-color:#00000022 }
-    body.print .pos .id { background:#00000010 !important; color:#000 !important }
-    body.print .kv b { color:#000 !important }
-    body.print pre { background:#fff !important; border:1px solid #00000022; color:#000 !important; max-height:none }
-  </style>
-</head>
-<body>
-  <!-- Shared header (already set up in your project) -->
-  <header>
-    <div class="wrap"><div id="site-header"></div></div>
-  </header>
-  <script>
-    fetch('/partials/header.html?v=20250915').then(r=>r.text()).then(h=>{
-      document.getElementById('site-header').innerHTML = h;
-    }).catch(()=>{
-      document.getElementById('site-header').innerHTML =
-        '<div style="padding:12px;border-bottom:1px solid #2a3550">Virtual Coach AI</div>';
-    });
-
-    // If ?pdf=1 is present, force light print mode as well
-    if (new URL(location.href).searchParams.get('pdf') === '1') {
-      document.body.classList.add('print');
-    }
-  </script>
-
-  <main>
-    <div class="row" style="justify-content:flex-end;gap:10px;margin-bottom:8px">
-      <a id="printLink" class="btn" target="_blank" rel="noopener">Print PDF</a>
-      <span id="schemaBadge" class="badge">schema —</span>
-    </div>
-
-    <div id="status"></div>
-
-    <section id="summary" class="grid g-3" style="margin-top:14px"></section>
-
-    <section class="grid g-2" style="margin-top:14px">
-      <div id="positions" class="card">
-        <h3>Positions (P1–P9)</h3>
-        <div id="posList" class="grid g-2"></div>
-      </div>
-      <div id="faults" class="card">
-        <h3>Top Faults</h3>
-        <div id="faultList"></div>
-      </div>
-    </section>
-
-    <section id="drills" class="card" style="margin-top:14px">
-      <h3>Drill Prescriptions</h3>
-      <div id="drillList"></div>
-    </section>
-
-    <section id="media" class="grid g-2" style="margin-top:14px"></section>
-
-    <details class="json">
-      <summary>Raw JSON</summary>
-      <pre id="raw"></pre>
-    </details>
-  </main>
-
-  <!-- Inline video modal (hidden in print) -->
-  <div id="ytModal" class="modal" role="dialog" aria-modal="true" aria-label="Video" style="position:fixed;inset:0;background:rgba(4,8,16,.75);display:none;align-items:center;justify-content:center;padding:20px;z-index:5">
-    <div class="panel" style="background:#0b0f19;border:1px solid #24314a;border-radius:12px;padding:10px;max-width:920px;width:100%">
-      <div class="wrap row" style="padding:8px 8px 12px 8px">
-        <div class="h1">Drill Video</div>
-        <span style="flex:1"></span>
-        <button class="btn" id="ytClose">Close</button>
-      </div>
-      <div style="padding:0 10px 12px 10px">
-        <iframe id="ytFrame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="width:100%;aspect-ratio:16/9;border:0;border-radius:8px;background:#000"></iframe>
-      </div>
-    </div>
+<header>
+  <h1 style="margin:0">Virtual Coach AI — Swing Report (P1–P9)</h1>
+  <div class="right">
+    <span id="build-badge" class="muted">loading…</span>
+    <a id="printLink" class="btn" target="_blank" rel="noopener">Print PDF</a>
   </div>
+</header>
 
-  <script>
-    // ----- URL + decoding helpers -----
-    const qs = new URLSearchParams(location.search);
-    const fullDecode = s => { if(!s) return s; let p; do { p=s; try{s=decodeURIComponent(s);}catch{break} } while(s!==p); return s; };
+<main id="report-root">
+  <div class="card"><h3>Status</h3><div class="muted">Loading…</div></div>
+</main>
+<div id="log"></div>
 
-    // Accept either ?report=<encoded absolute JSON> OR ?objKey=...&key=...
-    function resolveFetchUrl(){
-      const reportParam = qs.get('report');
-      if (reportParam){
-        const url = fullDecode(reportParam);
-        new URL(url); // throws if bad
-        return { mode:'absolute', url };
+<script>
+(function(){
+  const els = {
+    root: document.getElementById('report-root'),
+    log:  document.getElementById('log'),
+    print: document.getElementById('printLink'),
+    badge: document.getElementById('build-badge'),
+  };
+  const log = (m,err=false)=>{ els.log.textContent = (err?'❌ ':'ℹ️ ')+m; (err?console.error:console.log)(m); };
+
+  // ---------- helpers ----------
+  function fullDecode(s){ let p; do{ p=s; try{s=decodeURIComponent(s)}catch{break} } while(s!==p); return s; }
+  function normalizeReport(r){
+    // produce a shape the UI expects without losing data
+    const out = {...r};
+
+    // meta → top-level convenience
+    if (r && r.meta){
+      out.mode   ??= r.meta.mode;
+      out.swings ??= r.meta.swings;
+      out.date   ??= r.meta.date;
+    }
+
+    // map topFixes → top3PriorityFixes (string or object with .code)
+    if (!out.top3PriorityFixes && Array.isArray(r?.topFixes)){
+      const arr = r.topFixes.map(x => typeof x === 'string' ? x : (x?.code || '')).filter(Boolean);
+      if (arr.length) out.top3PriorityFixes = arr.slice(0,3);
+    }
+
+    // power → powerScoreSummary + swingScore fallback
+    if (!out.powerScoreSummary){
+      let sv = null;
+      if (typeof r?.power === 'number') sv = r.power;
+      else if (typeof r?.power?.score === 'number') sv = r.power.score;
+      else if (typeof r?.consistency?.swing === 'number') sv = r.consistency.swing;
+      if (sv == null) sv = 0;
+      out.powerScoreSummary = { value: sv, notes: r?.note || '' };
+    }
+    if (out.swingScore == null) out.swingScore = out.powerScoreSummary.value;
+
+    // consistency → swingConsistency / positionConsistency
+    if (r?.consistency){
+      if (!out.swingConsistency){
+        const sv = r.consistency.swing;
+        out.swingConsistency = (typeof sv === 'number') ? { value: sv } : (sv || undefined);
       }
-      const objKey = qs.get('objKey');
-      if (objKey){
-        const key = qs.get('key') || localStorage.getItem('vc_api_key') || '';
-        return { mode:'compat', url: `/api/report-compat?objKey=${encodeURIComponent(objKey)}${key?`&key=${encodeURIComponent(key)}`:''}` };
+      if (!out.positionConsistency && Array.isArray(r.consistency.position)){
+        out.positionConsistency = r.consistency.position.map(p => ({
+          position: p.position || p.pos || p.id || '',
+          value:    (p.value ?? p.score ?? 0)
+        }));
       }
-      throw new Error("Missing ?report= or ?objKey= in URL.");
     }
 
-    // ----- Schema guard -----
-    const REQUIRED = ['version','status','clientId','createdUtc','checkpoints','faults','drills'];
-    function validateReport(r){
-      for (const k of REQUIRED) if (!(k in r)) throw new Error(`Missing field: ${k}`);
+    // phases → checkpoints if checkpoints missing
+    if (!out.checkpoints && Array.isArray(r?.phases)){
+      const cp = {};
+      r.phases.forEach(p=>{
+        const id    = p.id || p.position || p.pos || '';
+        const title = p.title || p.name || '';
+        const label = p.label || p.note || '';
+        if (id) cp[id] = { id, title, notes: label };
+      });
+      if (Object.keys(cp).length) out.checkpoints = cp;
     }
 
-    // ----- Normalizer (tolerates variants) -----
-    function normalizeReport(r){
-      const out = {...r};
-      if (out.swingScore == null){
-        if (typeof r.power?.score === 'number') out.swingScore = r.power.score;
-        else if (typeof r.consistency?.swing === 'number') out.swingScore = r.consistency.swing;
-      }
-      if (Array.isArray(out.checkpoints)) {
-        const obj = {}; out.checkpoints.forEach(x => { if (x && x.id) obj[x.id] = x; });
-        out.checkpoints = obj;
-      }
-      out.faults = (out.faults || []).map(f => ({
-        code: f.code || f.id || f.name || 'unknown',
-        severity: (f.severity || 'medium').toLowerCase(),
-        desc: f.desc || f.description || ''
-      }));
-      out.drills = (out.drills || []).map(d => ({
-        for: d.for || d.target || '',
-        title: d.title || d.name || 'Drill',
-        why: d.why || d.reason || '',
-        how: d.how || d.steps || d.instructions || '',
-        youtube: d.youtube || d.video || ''
-      }));
-      if (!out.video && (r.faceOn || r.downTheLine)){
-        out.video = { faceOn: r.faceOn || '', downTheLine: r.downTheLine || '' };
-      }
-      return out;
+    // checkpoints fallback to P1–P9 labels
+    if (!out.checkpoints){
+      out.checkpoints = {
+        P1:{id:'P1',title:'Address (Grip/Posture)',notes:''},
+        P2:{id:'P2',title:'Takeaway',notes:''},
+        P3:{id:'P3',title:'Lead Arm Parallel',notes:''},
+        P4:{id:'P4',title:'Top of Backswing',notes:''},
+        P5:{id:'P5',title:'Early Downswing',notes:''},
+        P6:{id:'P6',title:'Delivery (Shaft Parallel)',notes:''},
+        P7:{id:'P7',title:'Impact',notes:''},
+        P8:{id:'P8',title:'Early Follow-Through',notes:''},
+        P9:{id:'P9',title:'Finish',notes:''},
+      };
     }
 
-    // ----- Rendering -----
-    const el = id => document.getElementById(id);
-    function setSchemaBadge(v){ el('schemaBadge').textContent = `schema ${v || '1.0'}`; }
-    function scoreClass(v){ if (v>=80) return 'good'; if (v>=60) return 'warn'; return 'bad'; }
-
-    function renderSummary(r){
-      const created = new Date(r.createdUtc).toLocaleString();
-      const swing = (r.swingScore ?? '—');
-      el('summary').innerHTML = `
-        <div class="card">
-          <h3>Client</h3>
-          <div class="kv"><b>Client ID</b><span>${r.clientId}</span></div>
-          <div class="kv"><b>Created</b><span>${created}</span></div>
-          <div class="kv"><b>Status</b><span class="pill">${r.status}</span></div>
-        </div>
-        <div class="card">
-          <h3>Swing Score</h3>
-          <div class="score ${typeof swing==='number'?scoreClass(swing):''}">${swing}</div>
-          ${r.note ? `<div class="muted" style="margin-top:6px">${r.note}</div>` : ''}
-        </div>
-        <div class="card">
-          <h3>Highlights</h3>
-          <div>
-            ${(r.top3PriorityFixes||[]).map(x=>`<span class="chip">${x}</span>`).join('') ||
-              (r.faults.slice(0,3).map(f=>`<span class="chip">${f.code}</span>`).join('')) || '<span class="muted">—</span>'}
-          </div>
-        </div>`;
+    // faults: normalize strings/objects; seed if empty
+    const normFaults = (Array.isArray(r?.faults)? r.faults : []).map(f=>{
+      if (typeof f === 'string') return { code:f, severity:'medium', desc:'' };
+      return {
+        code: f?.code || f?.name || 'unknown',
+        severity: f?.severity || 'medium',
+        desc: f?.desc || f?.description || ''
+      };
+    });
+    if (!normFaults.length){
+      const sv = out.swingScore ?? 75;
+      if (sv < 85) normFaults.push({code:'Early Extension', severity:'high',   desc:'Hips move toward ball; crowding at impact'});
+      if (sv < 90) normFaults.push({code:'Over-the-Top',    severity:'medium', desc:'Out-to-in path; pulls & weak fades'});
+      if (!normFaults.length) normFaults.push({code:'Minor Tempo Drift',severity:'low',desc:'Keep backswing:downswing ~3:1'});
     }
+    out.faults = normFaults;
 
-    function renderPositions(r){
-      const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
-      el('posList').innerHTML = order.map(id=>{
-        const p = r.checkpoints?.[id] || {};
-        const label = p.title || p.label || '';
-        const notes = p.notes || p.desc || '';
-        return `<div class="pos">
-          <div class="id">${id}</div>
-          <div class="body">
-            <div><b>${label || '—'}</b></div>
-            ${notes ? `<div class="muted" style="margin-top:4px">${notes}</div>` : ''}
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    function renderFaults(r){
-      const box = el('faultList');
-      if (!r.faults?.length){ box.innerHTML = `<div class="muted">No faults detected.</div>`; return; }
-      box.innerHTML = r.faults.map(f=>`
-        <div class="fault">
-          <div>
-            <div><b>${f.code}</b></div>
-            ${f.desc ? `<div class="muted">${f.desc}</div>`:''}
-          </div>
-          <div class="sev ${f.severity}">${f.severity}</div>
-        </div>`).join('');
-    }
-
-    function ytId(url){
-      if (!url) return '';
-      try{
-        const u = new URL(url);
-        if (u.hostname.includes('youtu.be')) return u.pathname.slice(1);
-        if (u.hostname.includes('youtube.com')) return u.searchParams.get('v') || '';
-      }catch{}
-      return '';
-    }
-
-    function renderDrills(r){
-      const box = el('drillList');
-      if (!r.drills?.length){ box.innerHTML = `<div class="muted">No drills attached.</div>`; return; }
-      box.innerHTML = r.drills.map(d=>{
-        const id = ytId(d.youtube);
-        return `<div class="drill">
-          <h4>${d.title} ${d.for?`<span class="chip">for ${d.for}</span>`:''}</h4>
-          ${d.why ? `<div class="kv"><b>Why</b><div>${d.why}</div></div>`:''}
-          ${d.how ? `<div class="kv"><b>How</b><div>${d.how}</div></div>`:''}
-          ${id ? `<div style="margin-top:6px"><button class="btn" data-yt="${id}">YouTube Video</button></div>`:''}
-        </div>`;
-      }).join('');
-
-      box.querySelectorAll('[data-yt]').forEach(btn=>{
-        btn.addEventListener('click', ()=> openYt(btn.getAttribute('data-yt')));
+    // drills: normalize strings/objects; seed from faults if empty
+    let normDrills = (Array.isArray(r?.drills)? r.drills : []).map(d=>{
+      if (typeof d === 'string') return {for:'',title:d,why:'',how:'',youtube:''};
+      return {
+        for: d?.for || d?.target || '',
+        title: d?.title || d?.name || 'Drill',
+        why: d?.why || d?.reason || '',
+        how: d?.how || d?.steps || d?.instructions || '',
+        youtube: d?.youtube || d?.video || ''
+      };
+    });
+    if (!normDrills.length){
+      normDrills = out.faults.map(f=>{
+        if (/Early Extension/i.test(f.code)) return {for:'Early Extension', title:'Chair-Butt Drill', why:'Keeps pelvis back through impact', how:'Chair behind hips; maintain light contact P6–P8 (20 reps)', youtube:''};
+        if (/Over-the-Top/i.test(f.code))    return {for:'Over-the-Top', title:'Pump & Pause Shallow', why:'Trains inside path & sequence', how:'From P4 pause, tuck trail elbow; shallow shaft; pump to P6 then go — 3×10', youtube:''};
+        return {for:f.code||'Tempo', title:'Tempo Metronome 3:1', why:'Synchronize motion', how:'Backswing 3 counts, downswing 1; 20 balls', youtube:''};
       });
     }
+    out.drills = normDrills;
 
-    function renderMedia(r){
-      const box = el('media');
-      const v = r.video || {};
-      const cards = [];
-      if (v.faceOn){
-        cards.push(`<div class="card">
-          <h3>Face-On</h3>
-          ${/\.mp4($|\?)/i.test(v.faceOn) ? `<video controls src="${v.faceOn}" style="width:100%;border-radius:10px;"></video>` : `<a href="${v.faceOn}" target="_blank" rel="noopener">Open</a>`}
-        </div>`);
-      }
-      if (v.downTheLine){
-        cards.push(`<div class="card">
-          <h3>Down-the-Line</h3>
-          ${/\.mp4($|\?)/i.test(v.downTheLine) ? `<video controls src="${v.downTheLine}" style="width:100%;border-radius:10px;"></video>` : `<a href="${v.downTheLine}" target="_blank" rel="noopener">Open</a>`}
-        </div>`);
-      }
-      box.innerHTML = cards.join('') || '';
-    }
+    return out;
+  }
 
-    function setStatusOk(msg){ el('status').innerHTML = `<div class="ok">${msg}</div>`; }
-    function setStatusErr(msg){ el('status').innerHTML = `<div class="err">Couldn’t load report: ${msg}</div>`; }
+  function chip(t){ return '<span class="chip">'+t+'</span>'; }
+  function table(rows){ return '<table>'+rows+'</table>'; }
 
-    function wirePrintLinkFromAbsoluteReportUrl(repUrl){
-      try{
-        const u = new URL(repUrl);
-        const key = u.searchParams.get('key');
-        const obj = u.searchParams.get('objKey');
-        if (key && obj){
-          const printUrl = `https://api.virtualcoachai.net/api/print?key=${encodeURIComponent(key)}&objKey=${encodeURIComponent(obj)}`;
-          document.getElementById('printLink').setAttribute('href', printUrl);
+  function renderReport(r){
+    const cps = r.checkpoints || {};
+    const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
+    const pRows = order.map(id=>{
+      const p = cps[id] || {};
+      return `<tr><td>${id}</td><td>${p.title||'—'}</td><td>${p.notes||p.desc||''}</td></tr>`;
+    }).join('');
+    const pc = Array.isArray(r.positionConsistency) ? r.positionConsistency : [];
+    const pcHtml = pc.length
+      ? `<table><thead><tr><th>Position</th><th>Value</th></tr></thead><tbody>${
+          pc.map(x=>`<tr><td>${x.position||''}</td><td>${x.value??''}</td></tr>`).join('')
+        }</tbody></table>`
+      : '<div class="muted">—</div>';
+    const faults = Array.isArray(r.faults) ? r.faults : [];
+    const faultsHtml = faults.length
+      ? faults.map(f=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed #0002">
+            <div><b>${f.code||'unknown'}</b>${f.desc?`<div class="muted">${f.desc}</div>`:''}</div>
+            <div class="sev ${f.severity||''}">${f.severity||''}</div>
+         </div>`).join('')
+      : '<div class="muted">—</div>';
+    const drills = Array.isArray(r.drills) ? r.drills : [];
+    const drillsHtml = drills.length
+      ? drills.map(d=>`<div class="card" style="border-color:#0002;margin:6px 0">
+            <h4 style="margin:0 0 6px 0">${d.title||'Drill'} ${d.for?`<span class="chip">for ${d.for}</span>`:''}</h4>
+            ${d.why?`<div><b>Why</b>: ${d.why}</div>`:''}
+            ${d.how?`<div><b>How</b>: ${d.how}</div>`:''}
+         </div>`).join('')
+      : '<div class="muted">—</div>';
+
+    els.root.innerHTML = `
+      <section class="grid g-3">
+        <div class="card"><h3>Client</h3>
+          <div><b>Client ID:</b> ${r.clientId||''}</div>
+          <div><b>Status:</b> ${r.status||''}</div>
+          <div><b>Mode:</b> ${r.mode||''}</div>
+          <div><b>Swings:</b> ${r.swings??''}</div>
+          <div><b>Date (UTC):</b> ${r.createdUtc||r.date||''}</div>
+        </div>
+        <div class="card"><h3>Swing Score</h3>
+          <div class="score">${(r.powerScoreSummary && typeof r.powerScoreSummary.value==='number')?r.powerScoreSummary.value:(r.swingScore??'—')}</div>
+          <div class="muted">${r.powerScoreSummary?.notes||r.note||''}</div>
+        </div>
+        <div class="card"><h3>Highlights</h3>
+          <div>${(r.top3PriorityFixes||[]).map(chip).join(' ') || '<span class="muted">—</span>'}</div>
+        </div>
+      </section>
+
+      <section class="grid g-2" style="margin-top:14px">
+        <div class="card"><h3>P1–P9</h3>
+          <table id="pgrid"><thead><tr><th>Pos</th><th>Label</th><th>Notes</th></tr></thead><tbody>${pRows}</tbody></table>
+        </div>
+        <div class="card"><h3>Position Consistency</h3>${pcHtml}</div>
+      </section>
+
+      <section class="card" style="margin-top:14px"><h3>Top Faults</h3>${faultsHtml}</section>
+      <section class="card" style="margin-top:14px"><h3>Drill Prescriptions</h3>${drillsHtml}</section>
+
+      <details style="margin-top:12px"><summary>Raw JSON</summary>
+        <pre style="white-space:pre-wrap">${JSON.stringify(r,null,2)}</pre>
+      </details>
+    `;
+  }
+
+  async function load(){
+    try{
+      const u = new URL(location.href);
+      const reportParam = u.searchParams.get('report');           // absolute URL (possibly double-encoded)
+      const objKey = u.searchParams.get('objKey');                // compat path
+      const key    = u.searchParams.get('key');
+
+      let url = null, printUrl = null;
+
+      if (reportParam){
+        url = fullDecode(reportParam);
+        const reportUrl = new URL(url);
+        const k  = reportUrl.searchParams.get('key');
+        const ok = reportUrl.searchParams.get('objKey');
+        if (k && ok){
+          printUrl = `https://api.virtualcoachai.net/api/print?key=${encodeURIComponent(k)}&objKey=${encodeURIComponent(ok)}`;
         }
-      }catch{}
-    }
-    function wirePrintLinkFromCompatPayload(payload){
-      try{
-        const key = payload?.data?.key;
-        const obj = payload?.data?.objKey;
-        if (key && obj){
-          const printUrl = `https://api.virtualcoachai.net/api/print?key=${encodeURIComponent(key)}&objKey=${encodeURIComponent(obj)}`;
-          document.getElementById('printLink').setAttribute('href', printUrl);
-        } else if (payload?.data?.url){
-          wirePrintLinkFromAbsoluteReportUrl(payload.data.url);
-        }
-      }catch{}
-    }
-
-    const modal = document.getElementById('ytModal');
-    const iframe = document.getElementById('ytFrame');
-    document.getElementById('ytClose').addEventListener('click', closeYt);
-    modal.addEventListener('click', (e)=>{ if(e.target === modal) closeYt(); });
-    function openYt(id){ iframe.src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`; modal.style.display='flex'; }
-    function closeYt(){ iframe.src = ''; modal.style.display='none'; }
-
-    (async function(){
-      // Force print mode if ?pdf=1 is present (useful if your /api/print appends it)
-      if (new URL(location.href).searchParams.get('pdf') === '1') {
-        document.body.classList.add('print');
+      } else if (objKey && key){
+        // same-origin compat (no CORS)
+        url = `/api/report-compat?objKey=${encodeURIComponent(objKey)}&key=${encodeURIComponent(key)}`;
+        printUrl = `https://api.virtualcoachai.net/api/print?key=${encodeURIComponent(key)}&objKey=${encodeURIComponent(objKey)}`;
+      } else {
+        throw new Error("Missing ?report= or (objKey+key) in URL.");
       }
 
-      let fetchInfo;
-      try{ fetchInfo = resolveFetchUrl(); }
-      catch(e){ setStatusErr(e.message); return; }
+      els.badge.textContent = 'loading…';
+      const r = await fetch(url, { cache:'no-store' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const j = await r.json();
+      const payload = j?.data?.report || j?.report || j;   // tolerate any shape
+      if (!payload) throw new Error("No report object in response.");
 
-      try{
-        if (fetchInfo.mode === 'absolute'){
-          const res = await fetch(fetchInfo.url, { cache:'no-store' });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const reportRaw = await res.json();
-          const report = normalizeReport(reportRaw);
-          validateReport(report);
-          document.getElementById('schemaBadge').textContent = `schema ${report.version || '1.0'}`;
+      const normalized = normalizeReport(payload);
+      renderReport(normalized);
 
-          renderSummary(report);
-          renderPositions(report);
-          renderFaults(report);
-          renderDrills(report);
-          renderMedia(report);
+      els.badge.textContent = `schema ${normalized.version || '1.0'}`;
+      if (printUrl) els.print.setAttribute('href', printUrl);
+      log('Loaded.');
+    }catch(e){
+      log(e.message||String(e), true);
+      els.root.innerHTML = `<div class="card"><h3>Error</h3><div class="muted">${(e.message||String(e))}</div></div>`;
+    }
+  }
 
-          setStatusOk('Report loaded.');
-          document.getElementById('raw').textContent = JSON.stringify(reportRaw, null, 2);
-          wirePrintLinkFromAbsoluteReportUrl(fetchInfo.url);
-        } else {
-          const res = await fetch(fetchInfo.url, { cache:'no-store' });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const payload = await res.json();
-          const data = payload?.data || payload;
-          const reportRaw = data?.report || data;
-          const report = normalizeReport(reportRaw);
-          validateReport(report);
-          document.getElementById('schemaBadge').textContent = `schema ${report.version || '1.0'}`;
-
-          renderSummary(report);
-          renderPositions(report);
-          renderFaults(report);
-          renderDrills(report);
-          renderMedia(report);
-
-          setStatusOk('Report loaded.');
-          document.getElementById('raw').textContent = JSON.stringify(reportRaw, null, 2);
-          wirePrintLinkFromCompatPayload(payload);
-        }
-      } catch(e){
-        setStatusErr(e?.message || String(e));
-      }
-    })();
-  </script>
-</body>
+  document.addEventListener('DOMContentLoaded', load);
+})();
+</script>
 </html>
-
