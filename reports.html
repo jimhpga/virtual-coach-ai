@@ -16,15 +16,13 @@
     a:hover{text-decoration:underline}
     header{position:sticky;top:0;z-index:2;background:rgba(10,12,18,.8);backdrop-filter: blur(6px);border-bottom:1px solid #1c2130}
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .row{display:flex;gap:12px;align-items:center}
+    .btn{background:#1a2130;border:1px solid #2a3550;padding:8px 12px;border-radius:10px;color:var(--ink);text-decoration:none;cursor:pointer}
+    .btn:hover{background:#20283b}
     .brand{display:flex;align-items:center;gap:10px}
     .mark{width:28px;height:28px;border-radius:8px;background:
       conic-gradient(from 210deg,#8ab7ff,#53e9bf 40%,#8ab7ff 80%);}
     .h1{font-weight:700;font-size:16px;letter-spacing:.2px}
-    .spacer{flex:1}
-    .btn{background:#1a2130;border:1px solid #2a3550;padding:8px 12px;border-radius:10px;color:var(--ink);cursor:pointer}
-    .btn:hover{background:#20283b}
-    .btn.primary{background:var(--accent);border-color:transparent;color:#06101e}
     .badge{background:#182034;color:#a7c9ff;border:1px solid #2b3b60;padding:4px 8px;border-radius:999px;font-size:12px}
     main{max-width:1100px;margin:18px auto;padding:0 16px 60px}
     .grid{display:grid;gap:14px}
@@ -55,7 +53,6 @@
     .ok{background:#122a20;border:1px solid #246b4e;padding:12px;border-radius:10px}
     details.json {margin-top:12px}
     pre{overflow:auto;max-height:50vh;background:#0c111b;border:1px solid #1b2233;border-radius:10px;padding:12px}
-    /* Modal */
     .modal{position:fixed;inset:0;background:rgba(4,8,16,.75);display:none;align-items:center;justify-content:center;padding:20px;z-index:5}
     .modal.open{display:flex}
     .modal > .panel{background:#0b0f19;border:1px solid #24314a;border-radius:12px;padding:10px;max-width:920px;width:100%}
@@ -65,18 +62,24 @@
 </head>
 <body>
   <header>
-    <div class="wrap row">
-      <div class="brand">
-        <div class="mark" aria-hidden="true"></div>
-        <div class="h1">Virtual Coach AI — Swing Report</div>
-      </div>
-      <span class="spacer"></span>
+    <div class="wrap">
+      <div id="site-header"></div>
+    </div>
+  </header>
+  <script>
+  fetch('/partials/header.html?v=20250915')
+    .then(r => r.text())
+    .then(h => { document.getElementById('site-header').innerHTML = h; })
+    .catch(() => { document.getElementById('site-header').innerHTML =
+      '<div style="padding:12px;border-bottom:1px solid #2a3550">Virtual Coach AI</div>'; });
+  </script>
+
+  <main>
+    <div class="row" style="justify-content:flex-end;gap:10px;margin-bottom:8px">
       <a id="printLink" class="btn" target="_blank" rel="noopener">Print PDF</a>
       <span id="schemaBadge" class="badge">schema —</span>
     </div>
-  </header>
 
-  <main>
     <div id="status"></div>
 
     <section id="summary" class="grid g-3" style="margin-top:14px"></section>
@@ -105,12 +108,11 @@
     </details>
   </main>
 
-  <!-- Inline YouTube modal -->
   <div id="ytModal" class="modal" role="dialog" aria-modal="true" aria-label="Video">
     <div class="panel">
       <div class="wrap row" style="padding:8px 8px 12px 8px">
         <div class="h1">Drill Video</div>
-        <span class="spacer"></span>
+        <span style="flex:1"></span>
         <button class="btn" id="ytClose">Close</button>
       </div>
       <div style="padding:0 10px 12px 10px">
@@ -120,13 +122,9 @@
   </div>
 
   <script>
-  // ---------- URL helpers ----------
   const qs = new URLSearchParams(location.search);
   const fullDecode = s => { if(!s) return s; let p; do { p = s; try{s = decodeURIComponent(s);}catch{break} } while (s !== p); return s; };
 
-  // Accept either:
-  // 1) ?report=<encoded absolute URL to JSON>   OR
-  // 2) ?objKey=... [&key=...]  -> fetched via /api/report-compat
   function resolveFetchUrl(){
     const reportParam = qs.get('report');
     if (reportParam){
@@ -142,33 +140,26 @@
     throw new Error("Missing ?report= or ?objKey= in URL.");
   }
 
-  // ---------- Schema guard ----------
   const REQUIRED = ['version','status','clientId','createdUtc','checkpoints','faults','drills'];
   function validateReport(r){
     for (const k of REQUIRED) if (!(k in r)) throw new Error(`Missing field: ${k}`);
   }
 
-  // ---------- Normalizer (tolerates variants) ----------
   function normalizeReport(r){
     const out = {...r};
-    // Swing score fallbacks
     if (out.swingScore == null){
       if (typeof r.power?.score === 'number') out.swingScore = r.power.score;
       else if (typeof r.consistency?.swing === 'number') out.swingScore = r.consistency.swing;
     }
-    // Ensure checkpoints object (P1..P9). If array, map it.
     if (Array.isArray(out.checkpoints)) {
-      const obj = {};
-      out.checkpoints.forEach(x => { if (x && x.id) obj[x.id] = x; });
+      const obj = {}; out.checkpoints.forEach(x => { if (x && x.id) obj[x.id] = x; });
       out.checkpoints = obj;
     }
-    // Faults: coerce to array of {code,severity,desc}
     out.faults = (out.faults || []).map(f => ({
       code: f.code || f.id || f.name || 'unknown',
       severity: (f.severity || 'medium').toLowerCase(),
       desc: f.desc || f.description || ''
     }));
-    // Drills: coerce, extract youtube if present
     out.drills = (out.drills || []).map(d => ({
       for: d.for || d.target || '',
       title: d.title || d.name || 'Drill',
@@ -176,22 +167,15 @@
       how: d.how || d.steps || d.instructions || '',
       youtube: d.youtube || d.video || ''
     }));
-    // Videos block
     if (!out.video && (r.faceOn || r.downTheLine)){
       out.video = { faceOn: r.faceOn || '', downTheLine: r.downTheLine || '' };
     }
     return out;
   }
 
-  // ---------- Rendering ----------
   const el = id => document.getElementById(id);
   function setSchemaBadge(v){ el('schemaBadge').textContent = `schema ${v || '1.0'}`; }
-
-  function scoreClass(v){
-    if (v >= 80) return 'good';
-    if (v >= 60) return 'warn';
-    return 'bad';
-  }
+  function scoreClass(v){ if (v>=80) return 'good'; if (v>=60) return 'warn'; return 'bad'; }
 
   function renderSummary(r){
     const box = el('summary');
@@ -267,15 +251,12 @@
         <h4>${d.title} ${d.for?`<span class="chip">for ${d.for}</span>`:''}</h4>
         ${d.why ? `<div class="kv"><b>Why</b><div>${d.why}</div></div>`:''}
         ${d.how ? `<div class="kv"><b>How</b><div>${d.how}</div></div>`:''}
-        ${id ? `<div style="margin-top:6px"><button class="btn primary" data-yt="${id}">YouTube Video</button></div>`:''}
+        ${id ? `<div style="margin-top:6px"><button class="btn" data-yt="${id}">YouTube Video</button></div>`:''}
       </div>`;
     }).join('');
 
-    // Wire modal buttons
     box.querySelectorAll('[data-yt]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        openYt(btn.getAttribute('data-yt'));
-      });
+      btn.addEventListener('click', ()=> openYt(btn.getAttribute('data-yt')));
     });
   }
 
@@ -286,17 +267,13 @@
     if (v.faceOn){
       cards.push(`<div class="card">
         <h3>Face-On</h3>
-        ${v.faceOn.endsWith('.mp4') || v.faceOn.includes('video')
-          ? `<video controls src="${v.faceOn}" style="width:100%;border-radius:10px;"></video>`
-          : `<a href="${v.faceOn}" target="_blank" rel="noopener">Open</a>`}
+        ${/\.mp4($|\?)/i.test(v.faceOn) ? `<video controls src="${v.faceOn}" style="width:100%;border-radius:10px;"></video>` : `<a href="${v.faceOn}" target="_blank" rel="noopener">Open</a>`}
       </div>`);
     }
     if (v.downTheLine){
       cards.push(`<div class="card">
         <h3>Down-the-Line</h3>
-        ${v.downTheLine.endsWith('.mp4') || v.downTheLine.includes('video')
-          ? `<video controls src="${v.downTheLine}" style="width:100%;border-radius:10px;"></video>`
-          : `<a href="${v.downTheLine}" target="_blank" rel="noopener">Open</a>`}
+        ${/\.mp4($|\?)/i.test(v.downTheLine) ? `<video controls src="${v.downTheLine}" style="width:100%;border-radius:10px;"></video>` : `<a href="${v.downTheLine}" target="_blank" rel="noopener">Open</a>`}
       </div>`);
     }
     box.innerHTML = cards.join('') || '';
@@ -305,7 +282,6 @@
   function setStatusOk(msg){ el('status').innerHTML = `<div class="ok">${msg}</div>`; }
   function setStatusErr(msg){ el('status').innerHTML = `<div class="err">Couldn’t load report: ${msg}</div>`; }
 
-  // ---------- Print URL wiring ----------
   function wirePrintLinkFromAbsoluteReportUrl(repUrl){
     try{
       const u = new URL(repUrl);
@@ -319,7 +295,6 @@
   }
   function wirePrintLinkFromCompatPayload(payload){
     try{
-      // /api/report-compat returns { data: { url?, key?, objKey?, report } } (variants allowed)
       const key = payload?.data?.key;
       const obj = payload?.data?.objKey;
       if (key && obj){
@@ -331,29 +306,17 @@
     }catch{}
   }
 
-  // ---------- Modal controls ----------
   const modal = document.getElementById('ytModal');
   const iframe = document.getElementById('ytFrame');
   document.getElementById('ytClose').addEventListener('click', closeYt);
   modal.addEventListener('click', (e)=>{ if(e.target === modal) closeYt(); });
-  function openYt(id){
-    iframe.src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`;
-    modal.classList.add('open');
-  }
-  function closeYt(){
-    iframe.src = '';
-    modal.classList.remove('open');
-  }
+  function openYt(id){ iframe.src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`; modal.classList.add('open'); }
+  function closeYt(){ iframe.src = ''; modal.classList.remove('open'); }
 
-  // ---------- Boot ----------
   (async function(){
     let fetchInfo;
-    try{
-      fetchInfo = resolveFetchUrl();
-    } catch(e){
-      setStatusErr(e.message);
-      return;
-    }
+    try{ fetchInfo = resolveFetchUrl(); }
+    catch(e){ setStatusErr(e.message); return; }
 
     try{
       if (fetchInfo.mode === 'absolute'){
@@ -364,7 +327,6 @@
         validateReport(report);
         setSchemaBadge(report.version || '1.0');
 
-        // Render
         renderSummary(report);
         renderPositions(report);
         renderFaults(report);
@@ -375,7 +337,6 @@
         el('raw').textContent = JSON.stringify(reportRaw, null, 2);
         wirePrintLinkFromAbsoluteReportUrl(fetchInfo.url);
       } else {
-        // compat flow
         const res = await fetch(fetchInfo.url, { cache:'no-store' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const payload = await res.json();
@@ -396,11 +357,7 @@
         wirePrintLinkFromCompatPayload(payload);
       }
     } catch(e){
-      // If status !== ready, show a friendly message; otherwise surface the error.
-      const msg = (e && e.message) ? e.message : String(e);
-      setStatusErr(msg);
-      // Still dump anything we got if available for debugging
-      try{ el('raw').textContent = (await (await fetchInfo)?.text?.()) || ''; }catch{}
+      setStatusErr(e?.message || String(e));
     }
   })();
   </script>
