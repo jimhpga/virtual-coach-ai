@@ -1,365 +1,176 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Virtual Coach AI • Swing Report</title>
-  <link rel="icon" href="/favicon.ico">
-  <style>
-    :root{
-      --bg:#0b0d12;--card:#141824;--ink:#e8ecf4;--muted:#a7b0c2;--hit:#1f2433;--accent:#4da3ff;--good:#1ec28b;--warn:#ffb020;--bad:#ff5b6b;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0;background:linear-gradient(180deg,#0b0d12,#0a0c12);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-    a{color:var(--accent);text-decoration:none}
-    a:hover{text-decoration:underline}
-    header{position:sticky;top:0;z-index:2;background:rgba(10,12,18,.8);backdrop-filter: blur(6px);border-bottom:1px solid #1c2130}
-    .wrap{max-width:1100px;margin:0 auto;padding:16px}
-    .row{display:flex;gap:12px;align-items:center}
-    .btn{background:#1a2130;border:1px solid #2a3550;padding:8px 12px;border-radius:10px;color:var(--ink);text-decoration:none;cursor:pointer}
-    .btn:hover{background:#20283b}
-    .brand{display:flex;align-items:center;gap:10px}
-    .mark{width:28px;height:28px;border-radius:8px;background:
-      conic-gradient(from 210deg,#8ab7ff,#53e9bf 40%,#8ab7ff 80%);}
-    .h1{font-weight:700;font-size:16px;letter-spacing:.2px}
-    .badge{background:#182034;color:#a7c9ff;border:1px solid #2b3b60;padding:4px 8px;border-radius:999px;font-size:12px}
-    main{max-width:1100px;margin:18px auto;padding:0 16px 60px}
-    .grid{display:grid;gap:14px}
-    .g-2{grid-template-columns:repeat(2,1fr)}
-    .g-3{grid-template-columns:repeat(3,1fr)}
-    .g-4{grid-template-columns:repeat(4,1fr)}
-    @media (max-width:900px){.g-3,.g-4{grid-template-columns:repeat(2,1fr)}}
-    @media (max-width:640px){.g-2,.g-3,.g-4{grid-template-columns:1fr}}
-    .card{background:var(--card);border:1px solid #1e2433;border-radius:14px;padding:16px}
-    .card h3{margin:0 0 8px 0;font-size:15px}
-    .muted{color:var(--muted)}
-    .score{font-size:34px;font-weight:800}
-    .score.good{color:var(--good)} .score.warn{color:var(--warn)} .score.bad{color:var(--bad)}
-    .pill{display:inline-flex;align-items:center;gap:8px;background:#111523;border:1px solid #20273a;border-radius:999px;padding:6px 10px}
-    .fault{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px dashed #2a3245}
-    .fault:last-child{border-bottom:0}
-    .sev{font-weight:700;text-transform:capitalize}
-    .sev.high{color:var(--bad)} .sev.medium{color:var(--warn)} .sev.low{color:#9bd6b9}
-    .drill{border:1px solid #26314b;background:#101525;border-radius:12px;padding:12px;margin:8px 0}
-    .drill h4{margin:0 0 6px 0;font-size:14px}
-    .kv{display:grid;grid-template-columns:120px 1fr;gap:10px;margin:6px 0}
-    .kv b{color:#cdd6e8}
-    .chip{display:inline-block;background:#0f1626;border:1px solid #273250;border-radius:999px;padding:4px 8px;margin:2px 4px 2px 0}
-    .pos{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid #22304a;border-radius:10px;background:#0e1423}
-    .pos .id{font-weight:700;width:28px;text-align:center;background:#172037;border-radius:8px;padding:6px 0;color:#b6c8ff}
-    .pos .body{flex:1}
-    .err{background:#2a1220;border:1px solid #6b223e;padding:12px;border-radius:10px}
-    .ok{background:#122a20;border:1px solid #246b4e;padding:12px;border-radius:10px}
-    details.json {margin-top:12px}
-    pre{overflow:auto;max-height:50vh;background:#0c111b;border:1px solid #1b2233;border-radius:10px;padding:12px}
-    .modal{position:fixed;inset:0;background:rgba(4,8,16,.75);display:none;align-items:center;justify-content:center;padding:20px;z-index:5}
-    .modal.open{display:flex}
-    .modal > .panel{background:#0b0f19;border:1px solid #24314a;border-radius:12px;padding:10px;max-width:920px;width:100%}
-    .modal header{position:unset;background:unset;border:0}
-    iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:8px;background:#000}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>VCAI Report</title>
+<style>
+  :root { --fg:#111; --muted:#666; --card:#fff; --bg:#f7f7f8; --line:#e5e7eb; }
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,Segoe UI,Arial}
+  .wrap{max-width:1024px;margin:24px auto;padding:0 16px}
+  .row{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:900px){ .row{grid-template-columns:2fr 1fr} }
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  h1{margin:12px 0 4px} h2{margin:0 0 8px;font-size:18px} h3{margin:0 0 6px;font-size:16px}
+  .meta{color:var(--muted);font-size:13px;margin-bottom:8px}
+  .tag{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-size:12px;margin-right:6px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .kvs{display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:center}
+  .bar{height:10px;background:#ddd;border-radius:6px;overflow:hidden}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,#6ee7b7,#22d3ee);width:0%}
+  video,iframe{width:100%;max-width:100%;border:0;border-radius:10px;display:block}
+  pre{white-space:pre-wrap;background:#fafafa;border:1px solid var(--line);padding:12px;border-radius:10px}
+  button{padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .list{display:grid;gap:10px}
+  .fault{display:flex;justify-content:space-between;gap:8px}
+  .severity{font-size:12px;color:#fff;border-radius:6px;padding:2px 6px}
+  .sev-high{background:#ef4444}.sev-medium{background:#f59e0b}.sev-low{background:#10b981}
+  .small{font-size:12px;color:var(--muted)}
+</style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <div id="site-header"></div>
-    </div>
-  </header>
-  <script>
-  fetch('/partials/header.html?v=20250915')
-    .then(r => r.text())
-    .then(h => { document.getElementById('site-header').innerHTML = h; })
-    .catch(() => { document.getElementById('site-header').innerHTML =
-      '<div style="padding:12px;border-bottom:1px solid #2a3550">Virtual Coach AI</div>'; });
-  </script>
-
-  <main>
-    <div class="row" style="justify-content:flex-end;gap:10px;margin-bottom:8px">
-      <a id="printLink" class="btn" target="_blank" rel="noopener">Print PDF</a>
-      <span id="schemaBadge" class="badge">schema —</span>
+  <div class="wrap">
+    <div style="display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div><h1>Virtual Coach AI — Swing Report</h1></div>
+      <div>
+        <button onclick="window.print()">Print</button>
+        <a id="jsonBtn" target="_blank"><button>View JSON</button></a>
+      </div>
     </div>
 
-    <div id="status"></div>
+    <div class="row">
+      <div class="card" id="videoCard"><div class="meta">Loading video…</div></div>
 
-    <section id="summary" class="grid g-3" style="margin-top:14px"></section>
-
-    <section class="grid g-2" style="margin-top:14px">
-      <div id="positions" class="card">
-        <h3>Positions (P1–P9)</h3>
-        <div id="posList" class="grid g-2"></div>
+      <div class="card" id="scoreCard">
+        <h2>Summary</h2>
+        <div class="meta" id="metaLine"></div>
+        <div class="chips" id="topFixes"></div>
+        <div style="margin-top:8px" class="small" id="noteLine"></div>
       </div>
-      <div id="faults" class="card">
-        <h3>Top Faults</h3>
-        <div id="faultList"></div>
+    </div>
+
+    <div class="row" style="margin-top:16px">
+      <div class="card">
+        <h2>Position Consistency</h2>
+        <div id="posBars" class="list"></div>
       </div>
-    </section>
+      <div class="card">
+        <h2>Faults</h2>
+        <div id="faults" class="list"></div>
+        <h2 style="margin-top:16px">Drills</h2>
+        <div id="drills" class="list"></div>
+      </div>
+    </div>
 
-    <section id="drills" class="card" style="margin-top:14px">
-      <h3>Drill Prescriptions</h3>
-      <div id="drillList"></div>
-    </section>
+    <div class="card" style="margin-top:16px">
+      <h2>Checkpoints (P1–P9)</h2>
+      <div id="cps" class="grid"></div>
+    </div>
 
-    <section id="media" class="grid g-2" style="margin-top:14px"></section>
-
-    <details class="json">
+    <details class="card" style="margin-top:16px">
       <summary>Raw JSON</summary>
-      <pre id="raw"></pre>
+      <pre id="raw">Loading…</pre>
     </details>
-  </main>
-
-  <div id="ytModal" class="modal" role="dialog" aria-modal="true" aria-label="Video">
-    <div class="panel">
-      <div class="wrap row" style="padding:8px 8px 12px 8px">
-        <div class="h1">Drill Video</div>
-        <span style="flex:1"></span>
-        <button class="btn" id="ytClose">Close</button>
-      </div>
-      <div style="padding:0 10px 12px 10px">
-        <iframe id="ytFrame" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-      </div>
-    </div>
   </div>
 
-  <script>
-  const qs = new URLSearchParams(location.search);
-  const fullDecode = s => { if(!s) return s; let p; do { p = s; try{s = decodeURIComponent(s);}catch{break} } while (s !== p); return s; };
+<script>
+(async function(){
+  const params = new URL(location.href).searchParams;
+  const report = params.get('report') || '/data/latest.json';
+  document.getElementById('jsonBtn').href = report;
 
-  function resolveFetchUrl(){
-    const reportParam = qs.get('report');
-    if (reportParam){
-      const url = fullDecode(reportParam);
-      try { new URL(url); return { mode:'absolute', url }; } catch {}
-      throw new Error("Bad ?report URL.");
-    }
-    const objKey = qs.get('objKey');
-    if (objKey){
-      const key = qs.get('key') || localStorage.getItem('vc_api_key') || '';
-      return { mode:'compat', url: `/api/report-compat?objKey=${encodeURIComponent(objKey)}${key ? `&key=${encodeURIComponent(key)}`:''}` };
-    }
-    throw new Error("Missing ?report= or ?objKey= in URL.");
+  let j;
+  try {
+    j = await (await fetch(report,{cache:'no-store'})).json();
+  } catch (e) {
+    document.getElementById('raw').textContent = String(e);
+    return;
   }
 
-  const REQUIRED = ['version','status','clientId','createdUtc','checkpoints','faults','drills'];
-  function validateReport(r){
-    for (const k of REQUIRED) if (!(k in r)) throw new Error(`Missing field: ${k}`);
+  // ---- Title/meta
+  document.title = `VCAI Report • Score ${j?.swingScore ?? ''}`;
+  const meta = document.getElementById('metaLine');
+  meta.textContent = `Score ${j?.swingScore ?? '—'} • Swings ${j?.meta?.swings ?? j?.swings ?? '—'} • ${j?.meta?.mode || j?.mode || '—'} • ${j?.meta?.date || j?.date || ''}`;
+
+  // ---- Top fixes
+  const fixes = (j?.top3PriorityFixes || []).slice(0,3);
+  const fixesEl = document.getElementById('topFixes');
+  fixes.forEach(f => {
+    const s=document.createElement('span'); s.className='tag'; s.textContent=f; fixesEl.appendChild(s);
+  });
+  document.getElementById('noteLine').textContent = j?.powerScoreSummary?.notes || j?.note || '';
+
+  // ---- Video
+  const url = j?.video?.url || '';
+  const vc = document.getElementById('videoCard');
+  function ytId(u){ const m=String(u).match(/(?:youtu\.be\/|v=)([^&?#]+)/); return m?m[1]:null; }
+  if (/youtu\.be|youtube\.com/i.test(url) && ytId(url)) {
+    const id=ytId(url);
+    vc.innerHTML = `<div class="meta">YouTube</div>
+      <div style="aspect-ratio:16/9;"><iframe src="https://www.youtube.com/embed/${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>
+      <div class="small">Source: ${url}</div>`;
+  } else {
+    const type = url.endsWith('.mov') ? 'video/quicktime' : 'video/mp4';
+    vc.innerHTML = `<div class="meta">Local video</div>
+      <video controls playsinline><source src="${url}" type="${type}"></video>
+      <div class="small">Source: ${url}</div>`;
   }
 
-  function normalizeReport(r){
-    const out = {...r};
-    if (out.swingScore == null){
-      if (typeof r.power?.score === 'number') out.swingScore = r.power.score;
-      else if (typeof r.consistency?.swing === 'number') out.swingScore = r.consistency.swing;
-    }
-    if (Array.isArray(out.checkpoints)) {
-      const obj = {}; out.checkpoints.forEach(x => { if (x && x.id) obj[x.id] = x; });
-      out.checkpoints = obj;
-    }
-    out.faults = (out.faults || []).map(f => ({
-      code: f.code || f.id || f.name || 'unknown',
-      severity: (f.severity || 'medium').toLowerCase(),
-      desc: f.desc || f.description || ''
-    }));
-    out.drills = (out.drills || []).map(d => ({
-      for: d.for || d.target || '',
-      title: d.title || d.name || 'Drill',
-      why: d.why || d.reason || '',
-      how: d.how || d.steps || d.instructions || '',
-      youtube: d.youtube || d.video || ''
-    }));
-    if (!out.video && (r.faceOn || r.downTheLine)){
-      out.video = { faceOn: r.faceOn || '', downTheLine: r.downTheLine || '' };
-    }
-    return out;
-  }
+  // ---- Faults
+  const faults = Array.isArray(j?.faults)? j.faults : [];
+  const fWrap = document.getElementById('faults');
+  if (faults.length === 0) fWrap.innerHTML = '<div class="small">No faults listed.</div>';
+  faults.forEach(f=>{
+    const sev = (f.severity||'').toLowerCase();
+    const sevClass = sev==='high'?'sev-high':sev==='medium'?'sev-medium':'sev-low';
+    const div=document.createElement('div'); div.className='fault';
+    div.innerHTML = `<div><strong>${f.code}</strong><div class="small">${f.desc||''}</div></div>
+                     <div class="severity ${sevClass}">${f.severity||''}</div>`;
+    fWrap.appendChild(div);
+  });
 
-  const el = id => document.getElementById(id);
-  function setSchemaBadge(v){ el('schemaBadge').textContent = `schema ${v || '1.0'}`; }
-  function scoreClass(v){ if (v>=80) return 'good'; if (v>=60) return 'warn'; return 'bad'; }
+  // ---- Drills (for the listed faults)
+  const drills = Array.isArray(j?.drills)? j.drills : [];
+  const dWrap = document.getElementById('drills');
+  if (drills.length === 0) dWrap.innerHTML = '<div class="small">No drills listed.</div>';
+  drills.forEach(d=>{
+    const div=document.createElement('div'); div.className='card'; div.style.padding='12px'; div.style.margin='0';
+    div.innerHTML = `<h3>${d.title}</h3>
+      <div class="small" style="margin-bottom:6px">For: ${d.for||''}</div>
+      <div><strong>How:</strong> ${d.how||''}</div>
+      <div class="small" style="margin-top:6px"><strong>Why:</strong> ${d.why||''}</div>`;
+    dWrap.appendChild(div);
+  });
 
-  function renderSummary(r){
-    const box = el('summary');
-    const created = new Date(r.createdUtc).toLocaleString();
-    const swing = (r.swingScore ?? '—');
-    box.innerHTML = `
-      <div class="card">
-        <h3>Client</h3>
-        <div class="kv"><b>Client ID</b><span>${r.clientId}</span></div>
-        <div class="kv"><b>Created</b><span>${created}</span></div>
-        <div class="kv"><b>Status</b><span class="pill">${r.status}</span></div>
-      </div>
-      <div class="card">
-        <h3>Swing Score</h3>
-        <div class="score ${typeof swing==='number'?scoreClass(swing):''}">${swing}</div>
-        ${r.note ? `<div class="muted" style="margin-top:6px">${r.note}</div>` : ''}
-      </div>
-      <div class="card">
-        <h3>Highlights</h3>
-        <div>
-          ${(r.top3PriorityFixes||[]).map(x=>`<span class="chip">${x}</span>`).join('') ||
-            (r.faults.slice(0,3).map(f=>`<span class="chip">${f.code}</span>`).join('')) || '<span class="muted">—</span>'}
-        </div>
-      </div>`;
-  }
+  // ---- Position Consistency bars
+  const bars = Array.isArray(j?.positionConsistency)? j.positionConsistency : [];
+  const pWrap = document.getElementById('posBars');
+  if (bars.length === 0) pWrap.innerHTML = '<div class="small">No consistency data.</div>';
+  bars.forEach(p=>{
+    const row=document.createElement('div'); row.className='kvs';
+    const label=document.createElement('div'); label.textContent = `${p.position||''}`;
+    const bar=document.createElement('div'); bar.className='bar';
+    const fill=document.createElement('i'); fill.style.width = ((+p.value||0)) + '%';
+    bar.appendChild(fill);
+    row.appendChild(label); row.appendChild(bar);
+    pWrap.appendChild(row);
+  });
 
-  function renderPositions(r){
-    const grid = el('posList');
-    const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
-    grid.innerHTML = order.map(id=>{
-      const p = r.checkpoints?.[id] || {};
-      const label = p.title || p.label || '';
-      const notes = p.notes || p.desc || '';
-      return `<div class="pos">
-        <div class="id">${id}</div>
-        <div class="body">
-          <div><b>${label || '—'}</b></div>
-          ${notes ? `<div class="muted" style="margin-top:4px">${notes}</div>` : ''}
-        </div>
-      </div>`;
-    }).join('');
-  }
+  // ---- Checkpoints grid (ordered P1..P9)
+  const order=['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
+  const cps = j?.checkpoints || {};
+  const cpWrap = document.getElementById('cps');
+  order.forEach(k=>{
+    const c = cps[k]; if (!c) return;
+    const cell=document.createElement('div'); cell.className='card';
+    cell.innerHTML = `<h3>${k} — ${c.title||''}</h3><div class="small">${c.notes||''}</div>`;
+    cpWrap.appendChild(cell);
+  });
 
-  function renderFaults(r){
-    const box = el('faultList');
-    if (!r.faults?.length){ box.innerHTML = `<div class="muted">No faults detected.</div>`; return; }
-    box.innerHTML = r.faults.map(f=>`
-      <div class="fault">
-        <div>
-          <div><b>${f.code}</b></div>
-          ${f.desc ? `<div class="muted">${f.desc}</div>`:''}
-        </div>
-        <div class="sev ${f.severity}">${f.severity}</div>
-      </div>`).join('');
-  }
-
-  function ytId(url){
-    if (!url) return '';
-    try{
-      const u = new URL(url);
-      if (u.hostname.includes('youtu.be')) return u.pathname.slice(1);
-      if (u.hostname.includes('youtube.com')) return u.searchParams.get('v') || '';
-    }catch{}
-    return '';
-  }
-
-  function renderDrills(r){
-    const box = el('drillList');
-    if (!r.drills?.length){ box.innerHTML = `<div class="muted">No drills attached.</div>`; return; }
-    box.innerHTML = r.drills.map(d=>{
-      const id = ytId(d.youtube);
-      return `<div class="drill">
-        <h4>${d.title} ${d.for?`<span class="chip">for ${d.for}</span>`:''}</h4>
-        ${d.why ? `<div class="kv"><b>Why</b><div>${d.why}</div></div>`:''}
-        ${d.how ? `<div class="kv"><b>How</b><div>${d.how}</div></div>`:''}
-        ${id ? `<div style="margin-top:6px"><button class="btn" data-yt="${id}">YouTube Video</button></div>`:''}
-      </div>`;
-    }).join('');
-
-    box.querySelectorAll('[data-yt]').forEach(btn=>{
-      btn.addEventListener('click', ()=> openYt(btn.getAttribute('data-yt')));
-    });
-  }
-
-  function renderMedia(r){
-    const box = el('media');
-    const v = r.video || {};
-    const cards = [];
-    if (v.faceOn){
-      cards.push(`<div class="card">
-        <h3>Face-On</h3>
-        ${/\.mp4($|\?)/i.test(v.faceOn) ? `<video controls src="${v.faceOn}" style="width:100%;border-radius:10px;"></video>` : `<a href="${v.faceOn}" target="_blank" rel="noopener">Open</a>`}
-      </div>`);
-    }
-    if (v.downTheLine){
-      cards.push(`<div class="card">
-        <h3>Down-the-Line</h3>
-        ${/\.mp4($|\?)/i.test(v.downTheLine) ? `<video controls src="${v.downTheLine}" style="width:100%;border-radius:10px;"></video>` : `<a href="${v.downTheLine}" target="_blank" rel="noopener">Open</a>`}
-      </div>`);
-    }
-    box.innerHTML = cards.join('') || '';
-  }
-
-  function setStatusOk(msg){ el('status').innerHTML = `<div class="ok">${msg}</div>`; }
-  function setStatusErr(msg){ el('status').innerHTML = `<div class="err">Couldn’t load report: ${msg}</div>`; }
-
-  function wirePrintLinkFromAbsoluteReportUrl(repUrl){
-    try{
-      const u = new URL(repUrl);
-      const key = u.searchParams.get('key');
-      const obj = u.searchParams.get('objKey');
-      if (key && obj){
-        const printUrl = `https://api.virtualcoachai.net/api/print?key=${encodeURIComponent(key)}&objKey=${encodeURIComponent(obj)}`;
-        document.getElementById('printLink').setAttribute('href', printUrl);
-      }
-    }catch{}
-  }
-  function wirePrintLinkFromCompatPayload(payload){
-    try{
-      const key = payload?.data?.key;
-      const obj = payload?.data?.objKey;
-      if (key && obj){
-        const printUrl = `https://api.virtualcoachai.net/api/print?key=${encodeURIComponent(key)}&objKey=${encodeURIComponent(obj)}`;
-        document.getElementById('printLink').setAttribute('href', printUrl);
-      } else if (payload?.data?.url){
-        wirePrintLinkFromAbsoluteReportUrl(payload.data.url);
-      }
-    }catch{}
-  }
-
-  const modal = document.getElementById('ytModal');
-  const iframe = document.getElementById('ytFrame');
-  document.getElementById('ytClose').addEventListener('click', closeYt);
-  modal.addEventListener('click', (e)=>{ if(e.target === modal) closeYt(); });
-  function openYt(id){ iframe.src = `https://www.youtube.com/embed/${id}?rel=0&modestbranding=1&autoplay=1`; modal.classList.add('open'); }
-  function closeYt(){ iframe.src = ''; modal.classList.remove('open'); }
-
-  (async function(){
-    let fetchInfo;
-    try{ fetchInfo = resolveFetchUrl(); }
-    catch(e){ setStatusErr(e.message); return; }
-
-    try{
-      if (fetchInfo.mode === 'absolute'){
-        const res = await fetch(fetchInfo.url, { cache:'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const reportRaw = await res.json();
-        const report = normalizeReport(reportRaw);
-        validateReport(report);
-        setSchemaBadge(report.version || '1.0');
-
-        renderSummary(report);
-        renderPositions(report);
-        renderFaults(report);
-        renderDrills(report);
-        renderMedia(report);
-
-        setStatusOk('Report loaded.');
-        el('raw').textContent = JSON.stringify(reportRaw, null, 2);
-        wirePrintLinkFromAbsoluteReportUrl(fetchInfo.url);
-      } else {
-        const res = await fetch(fetchInfo.url, { cache:'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const payload = await res.json();
-        const data = payload?.data || payload;
-        const reportRaw = data?.report || data;
-        const report = normalizeReport(reportRaw);
-        validateReport(report);
-        setSchemaBadge(report.version || '1.0');
-
-        renderSummary(report);
-        renderPositions(report);
-        renderFaults(report);
-        renderDrills(report);
-        renderMedia(report);
-
-        setStatusOk('Report loaded.');
-        el('raw').textContent = JSON.stringify(reportRaw, null, 2);
-        wirePrintLinkFromCompatPayload(payload);
-      }
-    } catch(e){
-      setStatusErr(e?.message || String(e));
-    }
-  })();
-  </script>
+  // ---- Raw dump
+  document.getElementById('raw').textContent = JSON.stringify(j,null,2);
+})();
+</script>
 </body>
 </html>
