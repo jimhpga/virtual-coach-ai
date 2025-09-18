@@ -12,22 +12,95 @@
     .row{display:flex;gap:12px;align-items:center}
     .btn{background:#1a2130;border:1px solid #2a3550;padding:8px 12px;border-radius:10px;color:#e8ecf4;text-decoration:none}
     .btn:hover{background:#20283b}
+    .btn.secondary{background:#121724}
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+    .card{background:#0f131d;border:1px solid #1c2130;border-radius:12px;padding:14px}
+    .muted{color:#9fb0c7}
     main{max-width:900px;margin:24px auto;padding:0 16px}
+    .pill{display:inline-block;font-weight:600;background:#121a2a;border:1px solid #223252;border-radius:999px;padding:4px 8px;margin-right:6px}
+    .hide{display:none}
+    .thumb{width:100%;max-width:480px;border-radius:10px;border:1px solid #1c2130;display:block}
   </style>
 </head>
 <body>
   <header><div class="wrap"><div id="site-header"></div></div></header>
   <script>
-  fetch('/partials/header.html?v=20250915')
-    .then(r => r.text())
-    .then(h => { document.getElementById('site-header').innerHTML = h; })
-    .catch(() => { document.getElementById('site-header').innerHTML =
-      '<div style="padding:12px;border-bottom:1px solid #2a3550">Virtual Coach AI</div>'; });
+    fetch('/partials/header.html?v=20250915')
+      .then(r => r.text())
+      .then(h => { document.getElementById('site-header').innerHTML = h; })
+      .catch(() => { document.getElementById('site-header').innerHTML =
+        '<div style="padding:12px;border-bottom:1px solid #2a3550">Virtual Coach AI</div>'; });
   </script>
+
   <main class="wrap">
-    <h1 style="margin:0 0 8px 0">Virtual Coach AI</h1>
-    <p>Go to <a class="btn" href="/upload.html">Upload</a> or open a <a class="btn" href="/report.html">Report</a>.</p>
+    <section style="margin-bottom:14px">
+      <h1 style="margin:0 0 6px">Virtual Coach AI</h1>
+      <p class="muted" id="latest-sub">Your latest swing report, one click away.</p>
+      <div class="row" style="flex-wrap:wrap;gap:10px;margin-top:6px">
+        <a id="open-latest" class="btn" href="/exports/jim-hartnett/latest/index.html">Open Latest Report</a>
+        <a id="btn-pdf" class="btn secondary hide" href="/exports/jim-hartnett/latest.pdf">Download PDF</a>
+        <a id="btn-zip" class="btn secondary hide" href="/exports/jim-hartnett/latest.zip">Download ZIP</a>
+        <a class="btn secondary" href="/upload.html">Upload</a>
+        <a class="btn secondary" href="/report.html">Sample Report</a>
+      </div>
+    </section>
+
+    <div class="grid" style="margin-top:18px">
+      <div class="card">
+        <h3 style="margin:0 0 8px">Latest snapshot</h3>
+        <a id="latest-link" href="/exports/jim-hartnett/latest/index.html">
+          <img id="latest-thumb" class="thumb hide" alt="Latest swing poster">
+        </a>
+        <div id="latest-meta" class="muted" style="margin-top:8px">Loading…</div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px">How it works</h3>
+        <ol class="muted" style="margin:0 0 8px 18px">
+          <li>Copy a video to <code>%USERPROFILE%\Videos</code> (or <code>%USERPROFILE%\OneDrive\Desktop\swing videos</code>).</li>
+          <li>Wait ~15s. The watcher exports & publishes your report.</li>
+          <li>Open “Latest Report” above. Download the PDF if you want to share.</li>
+        </ol>
+        <div class="muted">Watched folders → <code class="pill">%USERPROFILE%\Videos</code> <code class="pill">%USERPROFILE%\OneDrive\Desktop\swing videos</code></div>
+      </div>
+    </div>
   </main>
+
+  <script>
+    // reveal PDF/ZIP if they exist
+    ['pdf','zip'].forEach(function(kind){
+      var url = '/exports/jim-hartnett/latest.'+kind;
+      fetch(url, { method:'HEAD', cache:'no-store' }).then(function(r){
+        if (r.ok) document.getElementById('btn-'+kind).classList.remove('hide');
+      }).catch(function(){});
+    });
+
+    // pull latest.json for score/date and a poster if present
+    (function(){
+      var j = '/exports/jim-hartnett/latest/latest.json?ts=' + Date.now();
+      fetch(j, { cache:'no-store' })
+        .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
+        .then(function(data){
+          var score = data.swingScore ?? data.score;
+          var swings = data.meta && data.meta.swings;
+          var mode = data.meta && data.meta.mode;
+          var when = data.meta && data.meta.date;
+          var d = when ? new Date(when) : null;
+          var nice = d ? d.toLocaleString() : '(time unknown)';
+          document.getElementById('latest-meta').textContent =
+            (score?('Score '+score+' • '):'') + (swings?('Swings '+swings+' • '):'') + (mode||'') + (mode?' • ':'') + nice;
+
+          // poster
+          var poster = '/exports/jim-hartnett/latest/assets/poster.jpg';
+          var img = document.getElementById('latest-thumb');
+          fetch(poster,{method:'HEAD',cache:'no-store'}).then(function(r){
+            if(r.ok){ img.src = poster; img.classList.remove('hide'); }
+          });
+        })
+        .catch(function(){
+          document.getElementById('latest-meta').textContent = 'Latest report is ready at the link above.';
+        });
+    })();
+  </script>
 </body>
 </html>
-
