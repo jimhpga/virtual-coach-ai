@@ -6,101 +6,89 @@
   <title>Virtual Coach AI — Home</title>
   <link rel="icon" href="/favicon.ico">
   <style>
-    body{margin:0;background:#0b0d12;color:#e8ecf4;font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-    header{position:sticky;top:0;background:#0b0d12;border-bottom:1px solid #1c2130}
+    :root{--bg:#0b0d12;--ink:#e8ecf4;--line:#1c2130}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+    a{color:inherit}
+    header{position:sticky;top:0;background:rgba(11,13,18,.92);backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--line);z-index:100}
     .wrap{max-width:900px;margin:0 auto;padding:16px}
     .row{display:flex;gap:12px;align-items:center}
-    .btn{background:#1a2130;border:1px solid #2a3550;padding:8px 12px;border-radius:10px;color:#e8ecf4;text-decoration:none}
+    .btn{background:#1a2130;border:1px solid #2a3550;padding:8px 12px;border-radius:10px;color:inherit;text-decoration:none}
     .btn:hover{background:#20283b}
-    .btn.secondary{background:#121724}
-    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-    .card{background:#0f131d;border:1px solid #1c2130;border-radius:12px;padding:14px}
-    .muted{color:#9fb0c7}
+    .muted{opacity:.85}
     main{max-width:900px;margin:24px auto;padding:0 16px}
-    .pill{display:inline-block;font-weight:600;background:#121a2a;border:1px solid #223252;border-radius:999px;padding:4px 8px;margin-right:6px}
-    .hide{display:none}
-    .thumb{width:100%;max-width:480px;border-radius:10px;border:1px solid #1c2130;display:block}
+    /* hero: try local file first; if missing, fall back to GitHub raw */
+    .hero{position:relative;min-height:52vh;display:flex;align-items:flex-end;border-bottom:1px solid var(--line);overflow:hidden}
+    .hero::before{
+      content:"";
+      position:absolute;inset:0;
+      background:
+        url("/assets/homepage-background.png") center/cover no-repeat,
+        url("https://raw.githubusercontent.com/jimhpga/virtual-coach-ai/main/homepage-background.png") center/cover no-repeat;
+      transform:scale(1.02);
+    }
+    .hero::after{
+      content:"";position:absolute;inset:0;
+      /* lighter than before so the photo reads */
+      background:linear-gradient(180deg,rgba(11,13,18,.10) 0%, rgba(11,13,18,.40) 55%, rgba(11,13,18,.90) 100%);
+    }
+    .hero .content{position:relative;padding:48px 16px;width:100%}
   </style>
 </head>
 <body>
-  <header><div class="wrap"><div id="site-header"></div></div></header>
-  <script>
-    fetch('/partials/header.html?v=20250915')
-      .then(r => r.text())
-      .then(h => { document.getElementById('site-header').innerHTML = h; })
-      .catch(() => { document.getElementById('site-header').innerHTML =
-        '<div style="padding:12px;border-bottom:1px solid #2a3550">Virtual Coach AI</div>'; });
-  </script>
-
-  <main class="wrap">
-    <section style="margin-bottom:14px">
-      <h1 style="margin:0 0 6px">Virtual Coach AI</h1>
-      <p class="muted" id="latest-sub">Your latest swing report, one click away.</p>
-      <div class="row" style="flex-wrap:wrap;gap:10px;margin-top:6px">
-        <a id="open-latest" class="btn" href="/exports/jim-hartnett/latest/index.html">Open Latest Report</a>
-        <a id="btn-pdf" class="btn secondary hide" href="/exports/jim-hartnett/latest.pdf">Download PDF</a>
-        <a id="btn-zip" class="btn secondary hide" href="/exports/jim-hartnett/latest.zip">Download ZIP</a>
-        <a class="btn secondary" href="/upload.html">Upload</a>
-        <a class="btn secondary" href="/report.html">Sample Report</a>
-      </div>
-    </section>
-
-    <div class="grid" style="margin-top:18px">
-      <div class="card">
-        <h3 style="margin:0 0 8px">Latest snapshot</h3>
-        <a id="latest-link" href="/exports/jim-hartnett/latest/index.html">
-          <img id="latest-thumb" class="thumb hide" alt="Latest swing poster">
-        </a>
-        <div id="latest-meta" class="muted" style="margin-top:8px">Loading…</div>
-      </div>
-
-      <div class="card">
-        <h3 style="margin:0 0 8px">How it works</h3>
-        <ol class="muted" style="margin:0 0 8px 18px">
-          <li>Copy a video to <code>%USERPROFILE%\Videos</code> (or <code>%USERPROFILE%\OneDrive\Desktop\swing videos</code>).</li>
-          <li>Wait ~15s. The watcher exports & publishes your report.</li>
-          <li>Open “Latest Report” above. Download the PDF if you want to share.</li>
-        </ol>
-        <div class="muted">Watched folders → <code class="pill">%USERPROFILE%\Videos</code> <code class="pill">%USERPROFILE%\OneDrive\Desktop\swing videos</code></div>
+  <!-- Site navbar (no external partials; guaranteed to render) -->
+  <header>
+    <div class="wrap">
+      <div class="row" style="justify-content:space-between">
+        <div class="row" style="gap:10px">
+          <a class="btn" href="/" style="padding:6px 10px">Virtual Coach AI</a>
+        </div>
+        <nav class="row">
+          <a class="btn" href="/upload.html">Upload</a>
+          <a class="btn" href="/report.html">Sample Report</a>
+          <a class="btn" href="/exports/jim-hartnett/latest/index.html">Latest</a>
+        </nav>
       </div>
     </div>
-  </main>
+  </header>
 
-  <script>
-    // reveal PDF/ZIP if they exist
-    ['pdf','zip'].forEach(function(kind){
-      var url = '/exports/jim-hartnett/latest.'+kind;
-      fetch(url, { method:'HEAD', cache:'no-store' }).then(function(r){
-        if (r.ok) document.getElementById('btn-'+kind).classList.remove('hide');
-      }).catch(function(){});
-    });
+  <section class="hero">
+    <div class="content">
+      <div class="wrap">
+        <h1 style="margin:0 0 6px 0">Virtual Coach AI</h1>
+        <p class="muted" style="margin:0 0 12px 0">Your latest swing report, one click away.</p>
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <a class="btn" href="/exports/jim-hartnett/latest/index.html">Open Latest Report</a>
+          <a class="btn" href="/upload.html">Upload</a>
+          <a class="btn" href="/report.html">Sample Report</a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    // pull latest.json for score/date and a poster if present
-    (function(){
-      var j = '/exports/jim-hartnett/latest/latest.json?ts=' + Date.now();
-      fetch(j, { cache:'no-store' })
-        .then(function(r){ if(!r.ok) throw new Error(); return r.json(); })
-        .then(function(data){
-          var score = data.swingScore ?? data.score;
-          var swings = data.meta && data.meta.swings;
-          var mode = data.meta && data.meta.mode;
-          var when = data.meta && data.meta.date;
-          var d = when ? new Date(when) : null;
-          var nice = d ? d.toLocaleString() : '(time unknown)';
+  <main class="wrap">
+    <h2 style="margin:16px 0 8px">Latest snapshot</h2>
+    <div id="latest-meta" class="muted">Loading…</div>
+    <script>
+      (async () => {
+        try {
+          const res = await fetch('/exports/jim-hartnett/latest/latest.json?v=' + Date.now());
+          if (!res.ok) throw new Error();
+          const j = await res.json();
+          const dt = (j.meta && j.meta.date) ? new Date(j.meta.date) : null;
+          const s = [
+            j.swingScore != null ? 'Score ' + j.swingScore : '',
+            j.meta && j.meta.swings ? 'Swings ' + j.meta.swings : '',
+            j.meta && j.meta.mode ? j.meta.mode : '',
+            dt ? dt.toLocaleString() : ''
+          ].filter(Boolean).join(' • ');
+          document.getElementById('latest-meta').textContent = s || 'Latest report is ready at the link above.';
+        } catch {
           document.getElementById('latest-meta').textContent =
-            (score?('Score '+score+' • '):'') + (swings?('Swings '+swings+' • '):'') + (mode||'') + (mode?' • ':'') + nice;
-
-          // poster
-          var poster = '/exports/jim-hartnett/latest/assets/poster.jpg';
-          var img = document.getElementById('latest-thumb');
-          fetch(poster,{method:'HEAD',cache:'no-store'}).then(function(r){
-            if(r.ok){ img.src = poster; img.classList.remove('hide'); }
-          });
-        })
-        .catch(function(){
-          document.getElementById('latest-meta').textContent = 'Latest report is ready at the link above.';
-        });
-    })();
-  </script>
+            'Watched folders → %USERPROFILE%\\Videos   %USERPROFILE%\\OneDrive\\Desktop\\swing videos';
+        }
+      })();
+    </script>
+  </main>
 </body>
 </html>
