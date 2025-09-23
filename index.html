@@ -1,94 +1,52 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Virtual Coach AI — Home</title>
-  <link rel="icon" href="/favicon.ico">
-  <style>
-    :root{--bg:#0b0d12;--ink:#e8ecf4;--line:#1c2130}
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-    a{color:inherit}
-    header{position:sticky;top:0;background:rgba(11,13,18,.92);backdrop-filter:saturate(150%) blur(8px);border-bottom:1px solid var(--line);z-index:100}
-    .wrap{max-width:900px;margin:0 auto;padding:16px}
-    .row{display:flex;gap:12px;align-items:center}
-    .btn{background:#1a2130;border:1px solid #2a3550;padding:8px 12px;border-radius:10px;color:inherit;text-decoration:none}
-    .btn:hover{background:#20283b}
-    .muted{opacity:.85}
-    main{max-width:900px;margin:24px auto;padding:0 16px}
-    /* hero: try local file first; if missing, fall back to GitHub raw */
-    .hero{position:relative;min-height:52vh;display:flex;align-items:flex-end;border-bottom:1px solid var(--line);overflow:hidden}
-    .hero::before{
-      content:"";
-      position:absolute;inset:0;
-      background:
-        url("/assets/homepage-background.png") center/cover no-repeat,
-        url("https://raw.githubusercontent.com/jimhpga/virtual-coach-ai/main/homepage-background.png") center/cover no-repeat;
-      transform:scale(1.02);
-    }
-    .hero::after{
-      content:"";position:absolute;inset:0;
-      /* lighter than before so the photo reads */
-      background:linear-gradient(180deg,rgba(11,13,18,.10) 0%, rgba(11,13,18,.40) 55%, rgba(11,13,18,.90) 100%);
-    }
-    .hero .content{position:relative;padding:48px 16px;width:100%}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI â€” Home</title>
+<link rel="preload" as="image" href="homepage-background.png" />
+<style>:root{
+  --nav:#0b2b12; --brand:#ffffff;
+  --scrim: rgba(0,0,0,.16); --panel: rgba(10,18,24,.35);
+  --line: rgba(255,255,255,.12); --text:#ecf3f7; --muted:#cfe0e6;
+  --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
+}
+*{box-sizing:border-box} html,body{height:100%}
+body{
+  margin:0;color:var(--text);
+  background:#071c10 url('homepage-background.png') center/cover no-repeat fixed;
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
+}
+.scrim{min-height:100vh;background:var(--scrim)}
+header.top{position:sticky;top:0;z-index:100;background:var(--nav);
+  border-bottom:1px solid rgba(255,255,255,.12);backdrop-filter:blur(2px)}
+.navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+.brand-logo{width:160px;height:36px;background:#fff;
+  -webkit-mask:url('virtualcoach-logo-transparent.png') center/contain no-repeat;mask:url('virtualcoach-logo-transparent.png') center/contain no-repeat}
+nav.nav{display:flex;gap:8px}
+nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+.wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.20);backdrop-filter:blur(1.5px)}
+.card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
+.card .content{padding:12px 16px}
+.btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}</style>
+<style>/* fallback: hide logo box when image not present */ .brand-logo{display:none}</style>
 </head>
 <body>
-  <!-- Site navbar (no external partials; guaranteed to render) -->
-  <header>
-    <div class="wrap">
-      <div class="row" style="justify-content:space-between">
-        <div class="row" style="gap:10px">
-          <a class="btn" href="/" style="padding:6px 10px">Virtual Coach AI</a>
-        </div>
-        <nav class="row">
-          <a class="btn" href="/upload.html">Upload</a>
-          <a class="btn" href="/report.html">Sample Report</a>
-          <a class="btn" href="/exports/jim-hartnett/latest/index.html">Latest</a>
-        </nav>
-      </div>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="content">
-      <div class="wrap">
-        <h1 style="margin:0 0 6px 0">Virtual Coach AI</h1>
-        <p class="muted" style="margin:0 0 12px 0">Your latest swing report, one click away.</p>
-        <div class="row" style="gap:8px;flex-wrap:wrap">
-          <a class="btn" href="/exports/jim-hartnett/latest/index.html">Open Latest Report</a>
-          <a class="btn" href="/upload.html">Upload</a>
-          <a class="btn" href="/report.html">Sample Report</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <main class="wrap">
-    <h2 style="margin:16px 0 8px">Latest snapshot</h2>
-    <div id="latest-meta" class="muted">Loading…</div>
-    <script>
-      (async () => {
-        try {
-          const res = await fetch('/exports/jim-hartnett/latest/latest.json?v=' + Date.now());
-          if (!res.ok) throw new Error();
-          const j = await res.json();
-          const dt = (j.meta && j.meta.date) ? new Date(j.meta.date) : null;
-          const s = [
-            j.swingScore != null ? 'Score ' + j.swingScore : '',
-            j.meta && j.meta.swings ? 'Swings ' + j.meta.swings : '',
-            j.meta && j.meta.mode ? j.meta.mode : '',
-            dt ? dt.toLocaleString() : ''
-          ].filter(Boolean).join(' • ');
-          document.getElementById('latest-meta').textContent = s || 'Latest report is ready at the link above.';
-        } catch {
-          document.getElementById('latest-meta').textContent =
-            'Watched folders → %USERPROFILE%\\Videos   %USERPROFILE%\\OneDrive\\Desktop\\swing videos';
-        }
-      })();
-    </script>
-  </main>
+<header class="top" id="site-header">
+  <div class="navwrap">
+    <a class="brand" href="/"><div class="brand-logo" aria-label="Virtual Coach AI"></div><span>Virtual Coach AI</span></a>
+    <nav class="nav" aria-label="Primary">
+      <a href="/index.html" aria-current="page">Home</a>
+      <a href="/upload.html">Upload</a>
+      <a href="/report-hybrid.html">Reports</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/contact.html">Contact</a>
+    </nav>
+  </div>
+</header>
+<div class="scrim"><main class="wrap">C:\Users\jimh</main></div>
 </body>
 </html>
