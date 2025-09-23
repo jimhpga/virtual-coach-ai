@@ -1,19 +1,39 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Virtual Coach AI — Upload</title>
-<link rel="stylesheet" href="index.css" />
-<style>
-/* same styles as index.html */
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Virtual Coach AI — Upload</title>
+  <style>
+    :root{
+      --nav:#0b2b12; --text:#ecf3f7; --muted:#cfe0e6;
+      --scrim:rgba(0,0,0,.25); --panel:rgba(10,18,24,.45); --line:rgba(255,255,255,.12);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;color:var(--text);
+      font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+      background:#071c10 url("homepage-background.png") center/cover no-repeat fixed;
+    }
+    .scrim{min-height:100vh;background:var(--scrim)}
+    header{position:sticky;top:0;z-index:10;background:var(--nav);border-bottom:1px solid var(--line)}
+    .nav{width:min(1100px,92%);margin:0 auto;padding:10px 0;display:flex;gap:10px;align-items:center;justify-content:space-between}
+    .brand{color:#fff;text-decoration:none;font-weight:800}
+    .links a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+    .links a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+    .wrap{width:min(1100px,92%);margin:32px auto}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+    input[type=file]{display:block;margin:12px 0}
+    .btn{display:inline-block;margin-top:8px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;text-decoration:none}
+  </style>
 </head>
-<body><div class="scrim">
-  <header class="top">
-    <div class="navwrap">
-      <a class="brand" href="index.html"><span class="dot"></span>Virtual Coach AI</a>
-      <nav>
+<body>
+<div class="scrim">
+  <header>
+    <div class="nav">
+      <a class="brand" href="index.html">Virtual Coach AI</a>
+      <nav class="links" aria-label="Primary">
         <a href="index.html">Home</a>
         <a href="upload.html" aria-current="page">Upload</a>
         <a href="report-hybrid.html">Reports</a>
@@ -24,13 +44,13 @@
   </header>
 
   <main class="wrap">
-    <section class="card"><h3>Upload</h3><div class="content">
-      <p>This is a static demo page. Hook this input to your backend when ready.</p>
-      <input type="file" class="btn" accept="video/*" />
-      <p class="sub">Accepted: any video; we’ll analyze and generate P1–P9 on the Reports page.</p>
-    </div></section>
+    <div class="card">
+      <h1>Upload a swing</h1>
+      <p>Choose a video to generate a P1–P9 breakdown with drills.</p>
+      <input type="file" accept="video/*">
+      <a class="btn" href="report-hybrid.html">Generate sample report →</a>
+    </div>
   </main>
-
-  <footer class="wrap">© 2025 Virtual Coach AI</footer>
-</div></body>
+</div>
+</body>
 </html>
