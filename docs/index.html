@@ -1,11 +1,63 @@
-<!doctype html><meta charset="utf-8">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual Coach AI — Home</title>
-<h1>Virtual Coach AI</h1>
-<nav>
-  <a href="upload.html">Upload</a> ·
-  <a href="report-hybrid.html">Reports</a> ·
-  <a href="pricing.html">Pricing</a> ·
-  <a href="contact.html">Contact</a>
-</nav>
-<p>Home page placeholder. We’ll fill the real content after it’s live.</p>
+<style>
+:root{
+  --nav:#0b2b12; --text:#ecf3f7; --muted:#cfe0e6;
+  --panel:rgba(10,18,24,.40); --line:rgba(255,255,255,.12);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+  background:
+    radial-gradient(1200px 800px at 70% 15%, rgba(0,0,0,.18), rgba(0,0,0,0) 60%),
+    linear-gradient(180deg,#0a1c11 0%, #132d1f 35%, #243d30 100%);
+}
+.scrim{min-height:100vh;background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.10))}
+header.top{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid var(--line)}
+.navwrap{width:min(1100px,92%);margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 0}
+.brand{display:flex;gap:10px;align-items:center;color:#fff;text-decoration:none;font-weight:800}
+.brand .dot{width:10px;height:10px;border-radius:9999px;background:#6ee7b7;display:inline-block}
+nav a{color:#fff;text-decoration:none;padding:8px 12px;border-radius:10px;border:1px solid transparent}
+nav a[aria-current="page"]{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.15)}
+.wrap{width:min(1100px,92%);margin:0 auto;padding:22px 0 42px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:14px 0}
+.card h3{margin:0;padding:10px 12px;border-bottom:1px solid var(--line)}
+.card .content{padding:12px}
+.btn{display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid var(--line);color:#fff;text-decoration:none}
+.btn:hover{background:rgba(255,255,255,.06)}
+.sub{opacity:.8}
+footer{color:#cfe0e6;opacity:.9;padding:16px 0}
+</style>
+</head>
+<body><div class="scrim">
+  <header class="top">
+    <div class="navwrap">
+      <a class="brand" href="index.html"><span class="dot"></span>Virtual Coach AI</a>
+      <nav>
+        <a href="index.html" aria-current="page">Home</a>
+        <a href="upload.html">Upload</a>
+        <a href="report-hybrid.html">Reports</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
 
+  <main class="wrap">
+    <section class="card"><h3>Welcome</h3><div class="content">
+      <p>Upload a swing and get a clear P1–P9 breakdown with drills in seconds.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a class="btn" href="upload.html">Upload Swing</a>
+        <a class="btn" href="report-hybrid.html">View Sample Report</a>
+      </div>
+    </div></section>
+  </main>
+
+  <footer class="wrap">© 2025 Virtual Coach AI</footer>
+</div></body>
+</html>
