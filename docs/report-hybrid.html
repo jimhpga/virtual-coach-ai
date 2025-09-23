@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI — Report</title>
+<style>
+/* same styles as index.html plus a few bars */
+:root{ --nav:#0b2b12; --text:#ecf3f7; --muted:#cfe0e6; --panel:rgba(10,18,24,.40); --line:rgba(255,255,255,.12); }
+*{box-sizing:border-box} html,body{height:100%}
+body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+background:radial-gradient(1200px 800px at 70% 15%, rgba(0,0,0,.18), rgba(0,0,0,0) 60%),linear-gradient(180deg,#0a1c11 0%, #132d1f 35%, #243d30 100%);}
+.scrim{min-height:100vh;background:linear-gradient(180deg,rgba(0,0,0,.10),rgba(0,0,0,.10))}
+header.top{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid var(--line)}
+.navwrap{width:min(1100px,92%);margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 0}
+.brand{display:flex;gap:10px;align-items:center;color:#fff;text-decoration:none;font-weight:800}
+.brand .dot{width:10px;height:10px;border-radius:9999px;background:#6ee7b7;display:inline-block}
+nav a{color:#fff;text-decoration:none;padding:8px 12px;border-radius:10px;border:1px solid transparent}
+nav a[aria-current="page"]{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.15)}
+.wrap{width:min(1100px,92%);margin:0 auto;padding:22px 0 42px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin:14px 0}
+.card h3{margin:0;padding:10px 12px;border-bottom:1px solid var(--line)}
+.card .content{padding:12px}
+.btn{display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid var(--line);color:#fff;text-decoration:none}
+.sub{opacity:.8}
+.grid{display:grid;gap:12px}
+.bar{height:8px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}
+.fill{height:100%;background:#fbbf24;width:0}
+.small{font-size:.9rem}
+footer{color:#cfe0e6;opacity:.9;padding:16px 0}
+</style>
+</head>
+<body><div class="scrim">
+  <header class="top">
+    <div class="navwrap">
+      <a class="brand" href="index.html"><span class="dot"></span>Virtual Coach AI</a>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="upload.html">Upload</a>
+        <a href="report-hybrid.html" aria-current="page">Reports</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="card"><h3>Swing Report — P1–P9</h3><div class="content">
+      <p class="sub">Mode: Full Swing • 12 swings • Score: 67%</p>
+
+      <div class="grid" style="grid-template-columns:1fr">
+        <div class="card"><h3 style="border:0;padding:10px 12px">P1–P9</h3>
+          <div class="content small">
+            <p><b>P1 Setup:</b> Neutral grip, balanced. <a class="btn" href="https://youtube.com" target="_blank">YouTube</a></p>
+            <p><b>P2 Shaft Parallel (Backswing):</b> Slightly inside. <span class="sub">Match club to spine angle at P2.</span></p>
+            <p><b>P3 Lead Arm Parallel:</b> Lead wrist near flat. Trail arm support; avoid over-tilt.</p>
+            <p><b>P4 Top of Swing:</b> Turn short, trail elbow high → complete turn; trail elbow ~90°.</p>
+            <p><b>P5 Lead Arm Parallel (Down):</b> Slight cast — pump &amp; shallow.</p>
+            <p><b>P6 Delivery:</b> Steep, face open → shallow sooner; flex lead wrist.</p>
+            <p><b>P7 Impact:</b> Slightly too much forward shaft lean.</p>
+            <p><b>P8 Early Follow-Through:</b> Avoid chicken wing; extend arms.</p>
+            <p><b>P9 Finish:</b> Balanced, belt buckle at target.</p>
+          </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div class="card"><h3>Position Consistency</h3><div class="content">
+            <div>Spine-Angle Match 62%<div class="bar"><div class="fill" style="width:62%"></div></div></div>
+            <div>Top Position Window 55%<div class="bar"><div class="fill" style="width:55%"></div></div></div>
+            <div>Delivery Window 48%<div class="bar"><div class="fill" style="width:48%"></div></div></div>
+            <div>Impact Window 70%<div class="bar"><div class="fill" style="width:70%"></div></div></div>
+          </div></div>
+          <div class="card"><h3>Swing Consistency</h3><div class="content">
+            <div>Tempo Ratio (3:1 target) 72%<div class="bar"><div class="fill" style="width:72%"></div></div></div>
+            <div>Face→Path Variance 58%<div class="bar"><div class="fill" style="width:58%"></div></div></div>
+            <div>Release Timing Consistency 64%<div class="bar"><div class="fill" style="width:64%"></div></div></div>
+          </div></div>
+        </div>
+
+        <div class="card"><h3>Power Score Summary</h3><div class="content">
+          <div>Power Score 67%<div class="bar"><div class="fill" style="width:67%"></div></div></div>
+          <div>Tempo 81%<div class="bar"><div class="fill" style="width:81%"></div></div></div>
+          <div>Release Timing 61%<div class="bar"><div class="fill" style="width:61%"></div></div></div>
+        </div></div>
+
+        <div class="card"><h3>Drills</h3><div class="content small">
+          <ol>
+            <li>Chair-Butt Drill (20 reps): chair behind hips; keep pelvis back through impact.</li>
+            <li>Pump &amp; Pause Shallow (3×10): pause at P4, tuck trail elbow; pump to P6 then go.</li>
+            <li>Split-Grip Half Swings (3×15): train face control and extension.</li>
+          </ol>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+            <a class="btn" href="https://www.youtube.com/results?search_query=golf+chair+butt+drill" target="_blank">Chair-Butt (YouTube)</a>
+            <a class="btn" href="https://www.youtube.com/results?search_query=pump+and+pause+shallow+golf+drill" target="_blank">Pump &amp; Pause (YouTube)</a>
+          </div>
+        </div></div>
+
+        <div class="card"><h3>Download</h3><div class="content">
+          <a class="btn" id="btnDownload">Download HTML Report</a>
+          <span class="sub">Saves this page as a self-contained .html</span>
+        </div></div>
+      </div>
+    </div></section>
+  </main>
+
+  <footer class="wrap">© 2025 Virtual Coach AI</footer>
+</div>
+<script>
+document.getElementById('btnDownload').addEventListener('click', ()=>{
+  const blob = new Blob([document.documentElement.outerHTML],{type:'text/html'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='swing-report.html';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),800);
+});
+</script>
+</body>
+</html>
