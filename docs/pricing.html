@@ -1,43 +1,66 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Virtual Coach AI — Pricing</title>
   <style>
-    :root{--nav:#0b2b12;--text:#ecf3f7;--muted:#cfe0e6;--scrim:rgba(0,0,0,.25);--panel:rgba(10,18,24,.45);--line:rgba(255,255,255,.12)}
+    :root{--nav:#0b2b12;--scrim:rgba(0,0,0,.18);--panel:rgba(10,18,24,.35);--line:rgba(255,255,255,.12);--text:#ecf3f7}
     *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:#071c10 url("homepage-background.png") center/cover no-repeat fixed}
+    body{margin:0;color:var(--text);background:#071c10 url("homepage-background.png") center/cover no-repeat fixed;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
+    header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.12)}
+    .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+    .brand-dot{width:10px;height:10px;border-radius:50%;background:#4ade80}
+    nav.nav{display:flex;gap:8px}
+    nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+    nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
     .scrim{min-height:100vh;background:var(--scrim)}
-    header{position:sticky;top:0;z-index:10;background:var(--nav);border-bottom:1px solid var(--line)}
-    .nav{width:min(1100px,92%);margin:0 auto;padding:10px 0;display:flex;gap:10px;align-items:center;justify-content:space-between}
-    .brand{color:#fff;text-decoration:none;font-weight:800}
-    .links a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
-    .links a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-    .wrap{width:min(1100px,92%);margin:32px auto;display:grid;gap:16px}
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
+    .wrap{width:min(1080px,92%);margin:0 auto;padding:28px 0 60px}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+    .price{font-size:32px;font-weight:800;margin:8px 0}
+    .btn{display:inline-block;margin-top:10px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;color:#fff;text-decoration:none;background:rgba(255,255,255,.06)}
   </style>
 </head>
 <body>
-<div class="scrim">
-  <header>
-    <div class="nav">
-      <a class="brand" href="index.html">Virtual Coach AI</a>
-      <nav class="links" aria-label="Primary">
-        <a href="index.html">Home</a>
-        <a href="upload.html">Upload</a>
-        <a href="report-hybrid.html">Reports</a>
-        <a href="pricing.html" aria-current="page">Pricing</a>
-        <a href="contact.html">Contact</a>
-      </nav>
-    </div>
-  </header>
-  <main class="wrap">
-    <div class="card"><h1>Pricing</h1>
-      <p>Starter: Free — sample reports.</p>
-      <p>Plus: $9/mo — unlimited uploads, saved history.</p>
-      <p>Pro: $29/mo — coaching notes & drill library.</p>
-    </div>
-  </main>
-</div>
+  <div class="scrim">
+    <header class="top">
+      <div class="navwrap">
+        <a class="brand" href="index.html"><span class="brand-dot"></span>Virtual Coach AI</a>
+        <nav class="nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="upload.html">Upload</a>
+          <a href="report-hybrid.html">Reports</a>
+          <a href="pricing.html" aria-current="page">Pricing</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <h1>Pricing</h1>
+      <div class="grid">
+        <div class="card">
+          <strong>Starter</strong>
+          <div class="price">$0</div>
+          <p>1 swing / day, sample drills.</p>
+          <a class="btn" href="upload.html">Start Free</a>
+        </div>
+        <div class="card">
+          <strong>Plus</strong>
+          <div class="price">$9/mo</div>
+          <p>Unlimited uploads, drill library, saved reports.</p>
+          <a class="btn" href="upload.html">Go Plus</a>
+        </div>
+        <div class="card">
+          <strong>Pro</strong>
+          <div class="price">$29/mo</div>
+          <p>Coach tools, comparisons, export.</p>
+          <a class="btn" href="upload.html">Go Pro</a>
+        </div>
+      </div>
+    </main>
+  </div>
 </body>
 </html>
