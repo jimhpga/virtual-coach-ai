@@ -1,4 +1,4 @@
-:root{
+﻿:root{
   --bg:#0e1a22; --panel:#16242e; --muted:#8aa5b5; --text:#ecf3f7; --accent:#5eb3ff;
   --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b; --chip:#1d2f3b; --radius:16px;
   --shadow:0 8px 24px rgba(0,0,0,.35);
@@ -6,7 +6,7 @@
 *{box-sizing:border-box} html,body{height:100%}
 body{margin:0;color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif;background:#0e1a22}
 
-/* background – brighter to match Home/About */
+/* background â€“ brighter to match Home/About */
 .bg{position:fixed;inset:0;background:url('/golf-course-bg.jpg') center/cover no-repeat fixed;opacity:.55;filter:brightness(1.8) saturate(1.2);z-index:-1}
 .bg::after{content:"";position:absolute;inset:0;background:transparent}
 
@@ -75,3 +75,5 @@ details[open] .caret{transform:rotate(180deg)}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .video-mount{aspect-ratio:16/9;display:grid;place-items:center;border:1px dashed #29424f;border-radius:12px;color:var(--muted)}
+
+

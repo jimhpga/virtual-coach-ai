@@ -1,0 +1,463 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Swing Report (Hybrid)</title>
+<link rel="preload" as="image" href="homepage-background.png" />
+<style>  /* VC:BASECSS START */
+  :root{
+    --nav:#0b2b12; --brand:#ffffff;
+    --scrim: rgba(0,0,0,.16); --panel: rgba(10,18,24,.35);
+    --line: rgba(255,255,255,.12); --text:#ecf3f7; --muted:#cfe0e6;
+    --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{
+    margin:0;color:var(--text);
+    background:#071c10 url("homepage-background.png") center/cover no-repeat fixed;
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
+  }
+  .scrim{min-height:100vh;background:var(--scrim)}
+  header.top{
+    position:sticky; top:0; z-index:100;
+    background: var(--nav);
+    border-bottom:1px solid rgba(255,255,255,.12);
+    backdrop-filter: blur(2px);
+  }
+  .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .brand-logo{
+    width:160px;height:36px;background:#fff;
+    -webkit-mask:url("virtualcoach-logo-transparent.png") center/contain no-repeat;
+            mask:url("virtualcoach-logo-transparent.png") center/contain no-repeat;
+  }
+  nav.nav{display:flex;gap:8px}
+  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+  .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.20);backdrop-filter:blur(1.5px)}
+  /* VC:BASECSS END */  :root{
+    --nav:#0b2b12; --brand:#ffffff;
+    --scrim: rgba(0,0,0,.16); --panel: rgba(10,18,24,.35);
+    --line: rgba(255,255,255,.12); --text:#ecf3f7; --muted:#cfe0e6;
+    --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{
+    margin:0;color:var(--text);
+    background:#071c10 url("homepage-background.png") center/cover no-repeat fixed;
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
+  }
+  .scrim{min-height:100vh;background:var(--scrim)}
+
+  /* Solid dark-green navbar */
+  
+  .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .brand-logo{
+    width:160px;height:36px;background:#fff;
+    -webkit-mask:url("virtualcoach-logo-transparent.png") center/contain no-repeat;
+            mask:url("virtualcoach-logo-transparent.png") center/contain no-repeat;
+  }
+  nav.nav{display:flex;gap:8px}
+  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+
+  .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
+  .title{font-size:26px;font-weight:800}
+  .sub{color:var(--muted);font-size:13px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.20);backdrop-filter:blur(1.5px)}
+  .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .card .content{padding:12px 16px}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
+  :root{ --nav:#0b2b12; --brand:#fff; --scrim: rgba(0,0,0,.16); --panel: rgba(10,18,24,.35); --line: rgba(255,255,255,.12); --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20); }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{
+    margin:0;color:var(--text);
+    background:#071c10 url("homepage-background.png") center/cover no-repeat fixed;
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
+  }
+  .scrim{min-height:100vh;background:var(--scrim)}
+
+  /* NAV (proper, readable on photo) */
+  
+  .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .brand-logo{
+    width:160px;height:36px;background:#fff;
+    -webkit-mask:url("virtualcoach-logo-transparent.png") center/contain no-repeat;
+            mask:url("virtualcoach-logo-transparent.png") center/contain no-repeat;
+  }
+  nav.nav{display:flex;gap:8px}
+  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+
+  .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
+  .title{font-size:26px;font-weight:800}
+  .sub{color:var(--muted);font-size:13px}
+  .badge{background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
+
+  .card,details.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px)}
+  .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .card .content{padding:12px 16px}
+  .hdr{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .actions{display:flex;gap:8px;margin-bottom:8px}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
+
+  /* P rows (neutral chip) */
+  summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer}
+  summary::-webkit-details-marker{display:none}
+  .pnum{width:34px;height:34px;border-radius:10px;background:#0c1820;border:1px solid var(--line);display:grid;place-items:center;font-weight:800}
+  .pname{font-weight:700}
+  .gchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;margin-left:8px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#eaf5ff}
+  .caret{margin-left:auto;transition:transform .2s}
+  details[open] .caret{transform:rotate(180deg)}
+
+  /* METRICS ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â colored bars are BACK */
+  .metric{display:flex;align-items:center;gap:10px;margin:9px 0}
+  .metric .name{flex:0 0 210px;color:#d8ebf2}
+  .bar{flex:1;height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}
+  .bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
+  .ok{background:linear-gradient(90deg,#19c37d,#2bd897)}
+  .warn{background:linear-gradient(90deg,#f6c453,#ffd479)}
+  .bad{background:linear-gradient(90deg,#ff6b6b,#ff8f8f)}
+  .pct{width:52px;text-align:right;color:#cfe3ee}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:960px){.grid2{grid-template-columns:1fr}}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{background:rgba(255,255,255,.10);border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-size:12px}
+  .kv{margin:8px 0}
+  .kv b{display:inline-block;min-width:130px}
+  .fault{margin:10px 0}
+  .fault .sev{font-weight:800;margin-left:6px}
+  .drill{margin:10px 0}
+  .drill .tag{font-size:12px;opacity:.9;margin-left:6px}
+  .hr{height:1px;background:var(--line);margin:10px 0}
+
+  /* Modal */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
+  .modal.open{display:flex}
+  .modal .box{width:min(960px,95vw);background:#0b1520;border:1px solid #123;border-radius:12px}
+  .modal .content{padding:14px 16px}
+  .modal h4{margin:0 0 8px}
+  .modal iframe,.modal video{width:100%;height:min(72vh,56vw);background:#000;border-radius:8px}
+</style>
+<style>/* fallback: hide logo box when image not present */ .brand-logo{display:none}</style>
+</head>
+<body>
+<header class=""top"" id=""site-header"">
+  <div class=""navwrap"">
+    <a class=""brand"" href=""/""><div class=""brand-logo"" aria-label=""Virtual Coach AI""></div><span>Virtual Coach AI</span></a>
+    <nav class=""nav"" aria-label=""Primary"">
+      <a href=""/index.html"">Home</a>
+      <a href=""/upload.html"">Upload</a>
+      <a href=""/report-hybrid.html"" aria-current=""page"">Reports</a>
+      <a href=""/pricing.html"">Pricing</a>
+      <a href=""/contact.html"">Contact</a>
+    </nav>
+  </div>
+</header>
+  
+
+  <div class="scrim">
+    <main class="wrap">
+      <header class="hdr" style="margin-bottom:10px">
+        <div>
+          <div class="title">Swing Report &mdash; P1&ndash;P9</div>
+          <div class="sub">Date: <span id="date"></span> ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Mode: <span id="modeLabel">Full Swing</span></div>
+        </div>
+        <div><span class="badge">Swings: <span id="swingCount">1</span></span></div>
+      </header>
+
+      <div class="actions">
+        <button id="btnDownload" class="btn">Download</button>
+        <button id="btnCopy" class="btn">Copy Share Link</button>
+      </div>
+
+      <!-- P1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“P9 -->
+      <section class="card" id="phasesCard" style="margin-top:6px">
+        <h3 class="hdr"><span>P1ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“P9</span></h3>
+        <div id="plist" class="content"></div>
+      </section>
+
+      <!-- Summary + Measured -->
+      <section class="card" id="summaryCard" style="margin-top:12px">
+        <h3 class="hdr"><span>Summary</span></h3>
+        <div class="content" id="summaryBody">ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â</div>
+      </section>
+
+      <section class="card" id="measuredCard" style="margin-top:12px">
+        <h3 class="hdr"><span>Measured Metrics</span></h3>
+        <div class="content" id="measuredChips"></div>
+      </section>
+
+      <section class="grid2" style="margin-top:12px">
+        <div class="card">
+          <h3 class="hdr"><span>Position Consistency</span></h3>
+          <div id="position" class="content"></div>
+        </div>
+        <div class="card">
+          <h3 class="hdr"><span>Swing Consistency</span></h3>
+          <div id="swing" class="content"></div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:12px">
+        <h3 class="hdr"><span>Power Score Summary</span></h3>
+        <div id="power" class="content"></div>
+      </section>
+
+      <!-- Coaching lists -->
+      <section class="card" style="margin-top:12px">
+        <h3 class="hdr"><span>Top 3 Fundamentals</span></h3>
+        <div class="content" id="fundamentals"></div>
+      </section>
+
+      <section class="card" style="margin-top:12px">
+        <h3 class="hdr"><span>Top 3 Power Errors</span></h3>
+        <div class="content" id="powerErrors"></div>
+      </section>
+
+      <section class="card" style="margin-top:12px">
+        <h3 class="hdr"><span>Top 3 Quick Fixes</span></h3>
+        <div class="content" id="quickFixes"></div>
+      </section>
+
+      <!-- Faults + Drills -->
+      <section class="card" id="faultsCard" style="margin-top:12px">
+        <h3 class="hdr"><span>Faults</span></h3>
+        <div class="content" id="faultsBody"></div>
+      </section>
+
+      <section class="card" id="drillsCard" style="margin-top:12px">
+        <h3 class="hdr"><span>Drills</span></h3>
+        <div class="content" id="drillsBody"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal viewer -->
+  <div id="viewer" class="modal" role="dialog" aria-modal="true">
+    <div class="box">
+      <div class="content" id="viewerBody"></div>
+    </div>
+  </div>
+
+  <!-- Inline JSON fallback -->
+  <script id="vc_inline_json" type="application/json">{
+  "discipline":"full_swing",
+  "swings":12,
+  "phases":[
+    {"id":"P1","name":"Setup","grade":"good","short":"Neutral grip; balanced 55/45.","long":"Hip hinge ~25ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°, neutral grip, eyes level.","ref":"https://youtu.be/dQw4w9WgXcQ"},
+    {"id":"P2","name":"Shaft Parallel (Backswing)","grade":"ok","short":"Slightly inside; face matches arc.","long":"Match club to spine-angle at P2.","ref":"https://youtu.be/dQw4w9WgXcQ"},
+    {"id":"P3","name":"Lead Arm Parallel","grade":"ok","short":"Lead wrist near flat.","long":"Trail arm supports; avoid over-fold.","ref":"https://youtu.be/dQw4w9WgXcQ"},
+    {"id":"P4","name":"Top of Swing","grade":"bad","short":"Turn short; trail elbow high.","long":"Complete turn; trail elbow ~90ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â°.","ref":"https://youtu.be/dQw4w9WgXcQ"},
+    {"id":"P5","name":"Lead Arm Parallel (Down)","grade":"ok","short":"Slight cast.","long":"Pump drillÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â3 rehearsals then hit.","ref":"https://youtu.be/dQw4w9WgXcQ"},
+    {"id":"P6","name":"Delivery (Shaft Parallel Down)","grade":"bad","short":"Shaft steep; face open.","long":"Slot under trail forearm; add lead-wrist flex.","ref":"https://youtu.be/dQw4w9WgXcQ"},
+    {"id":"P7","name":"Impact","grade":"ok","short":"More forward shaft lean needed.","long":"Pressure left ~85%; handle ahead.","ref":"https://youtu.be/dQw4w9WgXcQ"},
+    {"id":"P8","name":"Early Follow-Through","grade":"ok","short":"Slight chicken wing.","long":"Extend arms; chest keeps turning.","ref":"https://youtu.be/dQw4w9WgXcQ"},
+    {"id":"P9","name":"Finish","grade":"good","short":"Balanced; tall.","long":"Belt buckle at target; hold 3s.","ref":"https://youtu.be/dQw4w9WgXcQ"}
+  ],
+  "position_metrics":[
+    {"label":"P2 Spine-Angle Match","value":62},
+    {"label":"P4 Top Position Window","value":55},
+    {"label":"P6 Delivery Window","value":48},
+    {"label":"P7 Impact Window","value":70}
+  ],
+  "swing_metrics":[
+    {"label":"Tempo Ratio (3:1 target)","value":72},
+    {"label":"Face-to-Path Variance","value":58},
+    {"label":"Release Timing Consistency","value":64}
+  ],
+  "power":{"score":67,"tempo":"3.2:1","release_timing":61},
+  "cohort":{"hand":"right","eye":"right","gender":"male","height":72,"build":"athletic"},
+  "coaching":{
+    "priority_fixes":[
+      {"title":"Early Extension","severity":"High","short":"Hips move toward ball; crowding at impact."},
+      {"title":"Open Face at P6","severity":"Medium","short":"Trail wrist extends too long; face lags shut."}
+    ],
+    "drills":[
+      {"title":"Chair-Butt Drill","fault":"Early Extension","how":"Chair behind hips; light contact P6ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“P8 (20 reps).","why":"Keeps pelvis back through impact.","ref":"https://youtu.be/dQw4w9WgXcQ"},
+      {"title":"Pump & Pause Shallow","fault":"Open Face / Steep P6","how":"From P4: pause, tuck trail elbow; pump to P6 then go ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â 3ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â10.","why":"Trains inside path & sequence.","ref":"https://youtu.be/dQw4w9WgXcQ"}
+    ]
+  }
+}
+  </script>
+
+<script>
+const $ = s => document.querySelector(s);
+const qp = new URLSearchParams(location.search);
+const reportParam = qp.get('report');
+const fileSrc = (reportParam === 'local') ? null : (reportParam || './report.json');
+
+const fmt  = v => `${v}%`;
+const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';  // colored bars are back
+const chip = () => 'gchip'; // neutral phase chip
+
+function toYouTubeEmbed(url){
+  try{
+    const u = new URL(url);
+    if (u.hostname.includes('youtube.com')){
+      if (u.pathname === '/watch' && u.searchParams.get('v')) return `https://www.youtube.com/embed/${u.searchParams.get('v')}`;
+      if (u.pathname.startsWith('/embed/')) return url;
+    }
+    if (u.hostname === 'youtu.be') return `https://www.youtube.com/embed/${u.pathname.slice(1)}`;
+  }catch{}
+  return null;
+}
+function openViewerHTML(title, innerHTML){
+  const viewer = document.getElementById('viewer');
+  const body = document.getElementById('viewerBody');
+  body.innerHTML = title ? `<h4>${title}</h4>` + innerHTML : innerHTML;
+  viewer.classList.add('open');
+}
+function openViewer(href){
+  const yt = toYouTubeEmbed(href);
+  if (yt){ openViewerHTML('Video', `<iframe src="${yt}" frameborder="0" allowfullscreen></iframe>`); return; }
+  if (/^https?:/.test(href)){ openViewerHTML('Video', `<video controls playsinline src="${href}"></video>`); return; }
+  window.open(href, '_blank', 'noopener');
+}
+document.addEventListener('click', e=>{ if (e.target.id==='viewer') e.target.classList.remove('open'); });
+
+function metricRow(m){
+  const v = m.value||0;
+  return `<div class="metric"><div class="name">${m.label||m.p}</div><div class="bar"><span class="${band(v)}" style="width:${v}%"></span></div><div class="pct">${fmt(v)}</div></div>`;
+}
+
+// extend short with first sentence of long (to ~140 chars)
+function extendShort(short, long){
+  const max = 140;
+  if (!long) return short||'';
+  if ((short||'').length >= 80) return short;
+  const firstSentence = String(long).split(/(?<=\.)\s+/)[0] || '';
+  const merged = (short? short + ' ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ' : '') + firstSentence;
+  return merged.length > max ? merged.slice(0,max-1)+'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦' : merged;
+}
+
+function phaseRow(ph,i){
+  const id = ph.id || ('P'+(i+1));
+  const gRaw = String(ph.grade||'').toLowerCase();
+  const gradeText = (gRaw==='good') ? 'GOOD' : 'OK'; // "bad" shown as OK per your preference
+  const ref   = ph.ref || ph.video || ph.video_url || '';
+  const shortTxt = extendShort(ph.short||'', ph.long||'');
+  const longBtn  = ph.long ? `<button class="btn longBtn" data-title="${id} ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ${ph.name||''}" data-text="${(ph.long||'').replace(/"/g,'&quot;')}">Details</button>` : '';
+  const ytBtn    = ref ? `<button class="btn videoBtn" data-href="${ref}">${/youtu(\.be|be\.com)/.test(ref)?'YouTube':'Video'}</button>` : '';
+  return `
+  <details class="panel" ${i===0?'open':''}>
+    <summary>
+      <span class="pnum">${id}</span>
+      <span class="pname">${ph.name||''}</span>
+      <span class="${chip()}">${gradeText}</span>
+      <span class="sub" style="margin-left:8px">${shortTxt}</span>
+      <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </summary>
+    <div class="content">
+      <div class="sub" style="margin-bottom:8px">${shortTxt}</div>
+      ${ph.long?`<div style="margin-bottom:10px">${ph.long}</div>`:''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${ytBtn}${longBtn}</div>
+    </div>
+  </details>`;
+}
+
+function metricChip(label, value){ return `<span class="chip">${label}: ${value}</span>`; }
+function listItems(arr){ if(!arr || !arr.length) return '<div class="sub">None listed.</div>'; return '<ul style="margin:0;padding-left:20px">' + arr.map(x=>`<li>${x}</li>`).join('') + '</ul>'; }
+
+function renderSummary(data){
+  const score = (data.power && data.power.score!=null) ? `${data.power.score}%` : 'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â';
+  const swings = (data.swings!=null) ? data.swings : 'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â';
+  const mode   = document.getElementById('modeLabel').textContent;
+  document.getElementById('summaryBody').innerHTML =
+    `<div class="kv"><b>Swing Score</b> ${score}</div>
+     <div class="kv"><b>Swings</b> ${swings}</div>
+     <div class="kv"><b>Mode</b> ${mode}</div>`;
+}
+
+function renderMeasuredChips(data){
+  const chips = [];
+  (data.position_metrics||[]).forEach(m=>{ if(m && m.label && m.value!=null) chips.push(metricChip(m.label, `${m.value}%`)); });
+  const faceVar = (data.swing_metrics||[]).find(m=>/face.*path|face/i.test(m.label||''));
+  const tempo   = (data.swing_metrics||[]).find(m=>/tempo/i.test(m.label||''));
+  if (tempo && tempo.value!=null) chips.push(metricChip('Tempo', (data.power && data.power.tempo) ? data.power.tempo : `${tempo.value}%`));
+  if (faceVar && faceVar.value!=null) chips.push(metricChip('Face control', `${faceVar.value}%`));
+  document.getElementById('measuredChips').innerHTML = chips.length ? `<div class="chips">${chips.join('')}</div>` : `<div class="sub">No headline metrics.</div>`;
+}
+
+function renderLists(data){
+  const c = data.coaching || {};
+  document.getElementById('fundamentals').innerHTML = listItems(c.fundamentals);
+  document.getElementById('powerErrors').innerHTML  = listItems(c.power_errors);
+  document.getElementById('quickFixes').innerHTML   = listItems(c.quick_fixes);
+}
+
+function renderReport(data){
+  document.getElementById('date').textContent = new Date().toLocaleDateString();
+  document.getElementById('modeLabel').textContent =
+    data.discipline && /putt/i.test(data.discipline) ? 'Putting' :
+    data.discipline && /chip/i.test(data.discipline) ? 'Chipping' : 'Full Swing';
+  if(data.swings!=null){ document.getElementById('swingCount').textContent = String(data.swings); }
+
+  const phases = Array.isArray(data.phases)? data.phases : [];
+  document.getElementById('plist').innerHTML = phases.map(phaseRow).join('') || '<div class="content sub">No phases found in report.</div>';
+
+  document.getElementById('position').innerHTML = (data.position_metrics||[]).map(metricRow).join('') || '<div class="sub">No position metrics.</div>';
+  document.getElementById('swing').innerHTML    = (data.swing_metrics||[]).map(metricRow).join('')    || '<div class="sub">No swing metrics.</div>';
+
+  const p = data.power||{score:0, tempo:'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â', release_timing:0};
+  document.getElementById('power').innerHTML = `
+    <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="${band(+p.score||0)}" style="width:${+p.score||0}%"></span></div><div class="pct">${+p.score||0}%</div></div>
+    <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo||'ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â'}</div></div>
+    <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing||0)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
+
+  renderSummary(data);
+  renderMeasuredChips(data);
+  renderLists(data);
+
+  document.querySelectorAll('.videoBtn').forEach(b=> b.addEventListener('click', ()=> openViewer(b.dataset.href)));
+  document.querySelectorAll('.longBtn').forEach(b=> b.addEventListener('click', ()=> openViewerHTML(b.dataset.title, `<div class="sub">${b.dataset.text}</div>`)));
+}
+
+async function boot(){
+  document.getElementById('date').textContent = new Date().toLocaleDateString();
+
+  // Inline fallback (file:// safe)
+  try{
+    const tag = document.getElementById('vc_inline_json');
+    if (tag && tag.textContent.trim()){
+      const data = JSON.parse(tag.textContent);
+      renderReport(data);
+    }
+  }catch(e){ console.warn('Inline JSON parse failed', e); }
+
+  // Optional fetch (?report=) if running http(s)
+  if (fileSrc && location.protocol.startsWith('http')){
+    try{
+      const res = await fetch(fileSrc, {cache:'no-store'});
+      if(res.ok){
+        const txt = await res.text(); const data = JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
+        renderReport(data);
+        try{ localStorage.setItem('vc_last_report', JSON.stringify(data)); }catch{}
+      }
+    }catch(e){ console.warn('Fetch report failed', e); }
+  }
+}
+boot();
+
+document.getElementById('btnCopy').addEventListener('click', async ()=>{
+  const link = location.href.includes('report=') ? location.href : (location.href + (location.href.includes('?')?'&':'?') + 'report=./report.json');
+  try{ await navigator.clipboard.writeText(link); alert('Share link copied'); }
+  catch{ prompt('Copy link:', link); }
+});
+document.getElementById('btnDownload').addEventListener('click', ()=>{
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'swing-report.html';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+﻿<!doctype html><html lang="en"><head>
+<title>Virtual Coach AI — Home</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preload" as="image" href="homepage-background.png" />
+<style>
+  :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim:rgba(0,0,0,.06); --panel:rgba(10,18,24,.24);
+         --line:rgba(255,255,255,.10); --text:#ecf3f7; --muted:#cfe0e6; --radius:14px; --maxw:1100px; }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+       background:url('homepage-background.png') center/cover fixed no-repeat}
+  .scrim{min-height:100vh;background:var(--scrim)}
+  header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+  .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .brand-logo{width:160px;height:36px;background:var(--brand);
+    -webkit-mask:url('virtualcoach-logo-transparent.png') center/contain no-repeat;
+            mask:url('virtualcoach-logo-transparent.png') center/contain no-repeat;}
+  .menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
+  nav.nav{display:flex;gap:8px}
+  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  nav.nav a:hover{background:rgba(255,255,255,.08)}
+  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+  @media(max-width:820px){
+    .menu-toggle{display:inline-flex}
+    nav.nav{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
+    header.top.open nav.nav{display:flex}
+  }
+  main{width:min(var(--maxw),92%);margin:0 auto;padding:22px 0 56px}
+  h1{margin:0 0 8px;color:#86efac}
+  .lead{color:var(--muted)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(1px)}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
+  .btn:hover{background:rgba(255,255,255,.16)}
+  footer{text-align:center;color:#cbd5cb;font-size:12px;padding:18px 0 26px}
+</style>
+<script>
+  // tiny nav toggler (works offline)
+  addEventListener('DOMContentLoaded', ()=>{
+    const header = document.getElementById('site-header');
+    const btn = document.getElementById('menuBtn');
+    const nav = document.getElementById('siteNav');
+    if(!btn || !nav || !header) return;
+    btn.addEventListener('click', ()=>{
+      const open = header.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    nav.addEventListener('click', e=>{
+      if(e.target && e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+    });
+  });
+</script>
+</head><body>
+<header class="top" id="site-header">
+  <div class="navwrap">
+    <a class="brand" href="index.html"><div class="brand-logo"></div><span>Virtual Coach AI</span></a>
+    <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
+    <nav class="nav" id="siteNav" aria-label="Primary">
+      <a href="index.html"         aria-current="page">Home</a>
+      <a href="upload.html"        >Upload</a>
+      <a href="report.html?report=report.json" >Reports</a>
+      <a href="coming-soon.html"   >Coming&nbsp;Soon</a>
+      <a href="pricing.html"       >Pricing</a>
+      <a href="contact.html"       >Contact</a>
+      <a href="login.html"         >Login</a>
+    </nav>
+  </div>
+</header>
+<div class="scrim">
+  <main>
+    <h1>Virtual Coach AI</h1>
+    <p class="lead">Your latest swing report, one click away. Upload a video, get a clean, coach-ready report.</p>
+    <div class="card" style="display:flex;gap:12px;flex-wrap:wrap">
+      <a class="btn" href="upload.html">Upload</a>
+      <a class="btn" href="report.html?report=report.json">Open Sample Report</a>
+      <a class="btn" href="coming-soon.html">Roadmap</a>
+    </div>
+  </main>
+  <footer>© <span id="y"></span> Virtual Coach AI</footer>
+</div>
+<script>document.getElementById('y').textContent=new Date().getFullYear()</script>
+</body></html>
