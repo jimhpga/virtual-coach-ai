@@ -1,66 +1,52 @@
-<script>
-/* ---------- Virtual Coach AI — shared header injection ---------- */
-(function(){
-  const mount = document.getElementById('navMount') || (function(){
-    const d=document.createElement('div'); d.id='navMount'; document.body.insertBefore(d, document.body.firstChild); return d;
-  })();
+/* docs/nav.js */
+(function () {
+  const css = `
+  :root{--nav:#0b2b12;--scrim:rgba(0,0,0,.05);--line:rgba(255,255,255,.12);--text:#ecf3f7;--maxw:1100px}
+  header.vc {position:sticky;top:0;z-index:1000;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+  .vc-wrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .vc-brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .vc-img{height:32px;width:auto;display:block}
+  nav.vc-menu{display:flex;gap:8px}
+  nav.vc-menu a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  nav.vc-menu a:hover{background:rgba(255,255,255,.08)}
+  nav.vc-menu a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+  .vc-btn{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
+  @media (max-width:820px){
+    .vc-btn{display:inline-flex}
+    nav.vc-menu{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
+    header.vc.open nav.vc-menu{display:flex}
+  }`;
+  const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 
-  // Resolve current page for active state
-  const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  const html = `
+  <header class="vc" id="vc-header">
+    <div class="vc-wrap">
+      <a class="vc-brand" href="index.html">
+        <img class="vc-img" src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI"/>
+        <span>Virtual Coach AI</span>
+      </a>
+      <button class="vc-btn" id="vc-toggle" aria-expanded="false">Menu ▾</button>
+      <nav class="vc-menu" id="vc-menu" aria-label="Primary">
+        <a href="index.html">Home</a>
+        <a href="upload.html">Upload</a>
+        <a href="report.html?report=report.json">Reports</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>`;
+  document.body.insertAdjacentHTML('afterbegin', html);
 
-  const LINKS = [
-    {href:'index.html', label:'Home', match:['','index.html']},
-    {href:'upload.html', label:'Upload', match:['upload','upload.html']},
-    // For reports we’ll consider any page that includes "report"
-    {href:'report.html?report=report.json', label:'Reports', match:['report']},
-    {href:'pricing.html', label:'Pricing', match:['pricing','pricing.html']},
-    {href:'contact.html', label:'Contact', match:['contact','contact.html']},
-    {href:'coming-soon.html', label:'Coming Soon', match:['coming-soon']},
-    {href:'login.html', label:'Login', match:['login','login.html']},
-  ];
+  const hdr = document.getElementById('vc-header');
+  const btn = document.getElementById('vc-toggle');
+  const menu = document.getElementById('vc-menu');
+  btn?.addEventListener('click', ()=>{ const o = hdr.classList.toggle('open'); btn.setAttribute('aria-expanded', o?'true':'false'); });
+  menu?.addEventListener('click', e=>{ if(e.target.tagName==='A'){ hdr.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }});
 
-  function isActive(link){
-    const p = path || 'index.html';
-    return link.match.some(m => p.includes(m));
-  }
-
-  mount.innerHTML = `
-    <header class="vc-header" id="vcHeader">
-      <div class="vc-navwrap">
-        <a class="vc-brand" href="index.html">
-          <div class="vc-brand-logo" aria-hidden="true"></div><span>Virtual Coach AI</span>
-        </a>
-        <button class="vc-menu-toggle" id="vcMenuBtn" aria-expanded="false">Menu ▾</button>
-        <nav class="vc-nav" id="vcNav" aria-label="Primary">
-          ${LINKS.map(l => `<a href="${l.href}" ${isActive(l)?'aria-current="page"':''}>${l.label}</a>`).join('')}
-        </nav>
-      </div>
-    </header>
-  `;
-
-  // Mobile toggle
-  const header = document.getElementById('vcHeader');
-  const btn = document.getElementById('vcMenuBtn');
-  const nav = document.getElementById('vcNav');
-  if (btn){
-    btn.addEventListener('click', ()=>{
-      const open = header.classList.toggle('open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-  }
-  if (nav){
-    nav.addEventListener('click', e=>{
-      if (e.target && e.target.tagName==='A'){ header.classList.remove('open'); btn && btn.setAttribute('aria-expanded','false'); }
-    });
-  }
-
-  // Optional: light footer if a page wants one
-  if (!document.querySelector('.vc-footer')){
-    const f = document.createElement('footer');
-    f.className = 'vc-footer';
-    f.innerHTML = `© <span id="vcYear"></span> Virtual Coach AI`;
-    document.body.appendChild(f);
-    const y = f.querySelector('#vcYear'); if (y) y.textContent = new Date().getFullYear();
-  }
+  // mark current page
+  const page = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+  menu?.querySelectorAll('a').forEach(a=>{
+    const name=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+    if (name===page || (name==='report.html' && page==='report.html')) a.setAttribute('aria-current','page');
+  });
 })();
-</script>
