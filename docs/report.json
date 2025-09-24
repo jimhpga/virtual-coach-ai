@@ -1,20 +1,22 @@
-{
-  "report": {
-    "date": "2025-02-01",
-    "mode": "Full Swing",
-    "swings": 12,
-    "phases": [
-      { "id": "P1", "title": "Setup", "label": "Balanced, neutral grip", "grade": "ok" },
-      { "id": "P4", "title": "Top", "label": "Lead wrist slightly extended", "grade": "good", "url": "https://youtu.be/dQw4w9WgXcQ" },
-      { "id": "P7", "title": "Impact", "label": "Shaft slightly forward", "grade": "ok" }
-    ],
-    "positionConsistency": [
-      { "position": "P2", "value": 62 },
-      { "position": "P4", "value": 74 },
-      { "position": "P6", "value": 58 },
-      { "position": "P7", "value": 69 }
-    ],
-    "swingConsistency": { "value": 71 },
-    "powerScoreSummary": { "value": 64 }
-  }
+﻿{
+  "date": "2025-09-23",
+  "mode": "Full Swing",
+  "swings": 6,
+  "phases": [
+    { "id": "P1", "title": "Setup", "label": "Grip neutral, stance square", "grade": "ok" },
+    { "id": "P2", "title": "Takeaway", "label": "Club just outside hands", "grade": "good" },
+    { "id": "P4", "title": "Top", "label": "Lead arm across chest", "grade": "ok" },
+    { "id": "P6", "title": "Shaft Parallel Down", "label": "Shaft slightly shallow", "grade": "good" },
+    { "id": "P7", "title": "Impact", "label": "Hands ahead, face square", "grade": "ok" }
+  ],
+  "position_metrics": [
+    { "label": "P2 Window", "value": 72 },
+    { "label": "P4 Window", "value": 66 },
+    { "label": "P6 Window", "value": 78 },
+    { "label": "Impact Window", "value": 74 }
+  ],
+  "swing_metrics": [
+    { "label": "Tempo Ratio", "value": 76 }
+  ],
+  "power": { "score": 68 }
 }
