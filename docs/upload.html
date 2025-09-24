@@ -1,56 +1,53 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Virtual Coach AI — Upload</title>
   <style>
-    :root{
-      --nav:#0b2b12; --text:#ecf3f7; --muted:#cfe0e6;
-      --scrim:rgba(0,0,0,.25); --panel:rgba(10,18,24,.45); --line:rgba(255,255,255,.12);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;color:var(--text);
-      font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-      background:#071c10 url("homepage-background.png") center/cover no-repeat fixed;
-    }
+    :root{--nav:#0b2b12;--scrim:rgba(0,0,0,.18);--panel:rgba(10,18,24,.35);--line:rgba(255,255,255,.12);--text:#ecf3f7}
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;color:var(--text);background:#071c10 url("homepage-background.png") center/cover no-repeat fixed;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
+    header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.12)}
+    .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+    .brand-dot{width:10px;height:10px;border-radius:50%;background:#4ade80}
+    nav.nav{display:flex;gap:8px}
+    nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+    nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
     .scrim{min-height:100vh;background:var(--scrim)}
-    header{position:sticky;top:0;z-index:10;background:var(--nav);border-bottom:1px solid var(--line)}
-    .nav{width:min(1100px,92%);margin:0 auto;padding:10px 0;display:flex;gap:10px;align-items:center;justify-content:space-between}
-    .brand{color:#fff;text-decoration:none;font-weight:800}
-    .links a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
-    .links a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-    .wrap{width:min(1100px,92%);margin:32px auto}
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px}
-    input[type=file]{display:block;margin:12px 0}
-    .btn{display:inline-block;margin-top:8px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;text-decoration:none}
+    .wrap{width:min(1080px,92%);margin:0 auto;padding:28px 0 60px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .btn{display:inline-block;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;text-decoration:none}
+    input[type=file]{accent-color:#4ade80}
   </style>
 </head>
 <body>
-<div class="scrim">
-  <header>
-    <div class="nav">
-      <a class="brand" href="index.html">Virtual Coach AI</a>
-      <nav class="links" aria-label="Primary">
-        <a href="index.html">Home</a>
-        <a href="upload.html" aria-current="page">Upload</a>
-        <a href="report-hybrid.html">Reports</a>
-        <a href="pricing.html">Pricing</a>
-        <a href="contact.html">Contact</a>
-      </nav>
-    </div>
-  </header>
+  <div class="scrim">
+    <header class="top">
+      <div class="navwrap">
+        <a class="brand" href="index.html"><span class="brand-dot"></span>Virtual Coach AI</a>
+        <nav class="nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="upload.html" aria-current="page">Upload</a>
+          <a href="report-hybrid.html">Reports</a>
+          <a href="pricing.html">Pricing</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </header>
 
-  <main class="wrap">
-    <div class="card">
+    <main class="wrap">
       <h1>Upload a swing</h1>
-      <p>Choose a video to generate a P1–P9 breakdown with drills.</p>
-      <input type="file" accept="video/*">
-      <a class="btn" href="report-hybrid.html">Generate sample report →</a>
-    </div>
-  </main>
-</div>
+      <div class="card">
+        <div class="row">
+          <input type="file" accept="video/*,.mp4,.mov,.webm" />
+          <a class="btn" href="report-hybrid.html">Process &rarr;</a>
+        </div>
+        <p style="opacity:.8;margin-top:12px">Pick a swing file to see a sample pipeline (demo link goes to the report page).</p>
+      </div>
+    </main>
+  </div>
 </body>
 </html>
