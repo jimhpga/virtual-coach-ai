@@ -1,0 +1,8 @@
+{
+  "framework": "other",
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "functions": {
+    "api/**/*.[jt]s": { "runtime": "nodejs20.x" }
+  }
+}
