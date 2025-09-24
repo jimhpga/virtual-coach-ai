@@ -1,46 +1,66 @@
 <script>
+/* ---------- Virtual Coach AI — shared header injection ---------- */
 (function(){
-  const mount = document.getElementById('navMount');
-  if(!mount) return;
+  const mount = document.getElementById('navMount') || (function(){
+    const d=document.createElement('div'); d.id='navMount'; document.body.insertBefore(d, document.body.firstChild); return d;
+  })();
 
-  function markCurrent(){
-    const here = location.pathname.replace(/\/+$/,'') || '/index.html';
-    mount.querySelectorAll('a[data-nav]').forEach(a=>{
-      const u = new URL(a.getAttribute('href'), location.origin);
-      if(u.pathname.replace(/\/+$/,'') === here){ a.setAttribute('aria-current','page'); }
+  // Resolve current page for active state
+  const path = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+
+  const LINKS = [
+    {href:'index.html', label:'Home', match:['','index.html']},
+    {href:'upload.html', label:'Upload', match:['upload','upload.html']},
+    // For reports we’ll consider any page that includes "report"
+    {href:'report.html?report=report.json', label:'Reports', match:['report']},
+    {href:'pricing.html', label:'Pricing', match:['pricing','pricing.html']},
+    {href:'contact.html', label:'Contact', match:['contact','contact.html']},
+    {href:'coming-soon.html', label:'Coming Soon', match:['coming-soon']},
+    {href:'login.html', label:'Login', match:['login','login.html']},
+  ];
+
+  function isActive(link){
+    const p = path || 'index.html';
+    return link.match.some(m => p.includes(m));
+  }
+
+  mount.innerHTML = `
+    <header class="vc-header" id="vcHeader">
+      <div class="vc-navwrap">
+        <a class="vc-brand" href="index.html">
+          <div class="vc-brand-logo" aria-hidden="true"></div><span>Virtual Coach AI</span>
+        </a>
+        <button class="vc-menu-toggle" id="vcMenuBtn" aria-expanded="false">Menu ▾</button>
+        <nav class="vc-nav" id="vcNav" aria-label="Primary">
+          ${LINKS.map(l => `<a href="${l.href}" ${isActive(l)?'aria-current="page"':''}>${l.label}</a>`).join('')}
+        </nav>
+      </div>
+    </header>
+  `;
+
+  // Mobile toggle
+  const header = document.getElementById('vcHeader');
+  const btn = document.getElementById('vcMenuBtn');
+  const nav = document.getElementById('vcNav');
+  if (btn){
+    btn.addEventListener('click', ()=>{
+      const open = header.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+  if (nav){
+    nav.addEventListener('click', e=>{
+      if (e.target && e.target.tagName==='A'){ header.classList.remove('open'); btn && btn.setAttribute('aria-expanded','false'); }
     });
   }
 
-  function fallback(){
-    mount.innerHTML = `
-<nav class="topbar">
-  <div class="brand"><a href="/index.html">Virtual Coach AI</a></div>
-  <div class="nav" role="navigation" aria-label="Primary">
-    <a href="/index.html" data-nav>Home</a>
-    <a href="/report.html?report=/report.json" data-nav>Reports</a>
-    <a href="/coming-soon.html" data-nav>Coming Soon</a>
-    <a href="/pricing.html" data-nav>Pricing</a>
-    <a href="/faq.html" data-nav>FAQ</a>
-    <a href="/contact.html" data-nav>Contact</a>
-    <a href="/upload.html" data-nav>Upload</a>
-    <a href="/login.html" data-nav>Login</a>
-  </div>
-</nav>
-<style>
-  .topbar{position:sticky;top:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;background:#0b2b12;border-bottom:1px solid rgba(255,255,255,.08)}
-  .topbar .brand a{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px;white-space:nowrap}
-  .topbar .nav{display:flex;gap:6px;align-items:center;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-ms-overflow-style:none;max-width:100%}
-  .topbar .nav::-webkit-scrollbar{display:none}
-  .topbar .nav a{color:#fff;text-decoration:none;margin:0 2px;padding:8px 10px;border-radius:10px;flex:0 0 auto}
-  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
-  .topbar .nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:4px}
-</style>`;
-    markCurrent();
+  // Optional: light footer if a page wants one
+  if (!document.querySelector('.vc-footer')){
+    const f = document.createElement('footer');
+    f.className = 'vc-footer';
+    f.innerHTML = `© <span id="vcYear"></span> Virtual Coach AI`;
+    document.body.appendChild(f);
+    const y = f.querySelector('#vcYear'); if (y) y.textContent = new Date().getFullYear();
   }
-
-  fetch('/nav.html?v='+Date.now(), {cache:'no-store'})
-    .then(r=>r.ok?r.text():Promise.reject(r))
-    .then(h=>{ mount.innerHTML=h; markCurrent(); })
-    .catch(fallback);
 })();
 </script>
