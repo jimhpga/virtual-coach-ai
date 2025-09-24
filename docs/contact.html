@@ -14,8 +14,8 @@
   .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
   .brand-logo{width:160px;height:36px;background:var(--brand);
-    -webkit-mask:url('virtualcoach-logo-transparent.png') center/contain no-repeat;
-            mask:url('virtualcoach-logo-transparent.png') center/contain no-repeat;}
+
+
   .menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
   nav.nav{display:flex;gap:8px}
   nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
@@ -63,7 +63,7 @@ button:hover{background:rgba(0,255,153,.22)}
 </head><body>
 <header class="top" id="site-header">
   <div class="navwrap">
-    <a class="brand" href="index.html"><div class="brand-logo"></div><span>Virtual Coach AI</span></a>
+    <a class="brand" href="index.html"><img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo"><span>Virtual Coach AI</span></a>
     <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
     <nav class="nav" id="siteNav" aria-label="Primary">
       <a href="index.html"         >Home</a>
@@ -98,3 +98,5 @@ button:hover{background:rgba(0,255,153,.22)}
 </main><footer>© <span id="y"></span> Virtual Coach AI</footer></div>
 <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
 </body></html>
+
+

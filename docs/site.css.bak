@@ -1,0 +1,52 @@
+/* ---------- Virtual Coach AI — global site styles ---------- */
+:root{
+  --nav:#0b2b12;             /* dark green */
+  --brand:#0b2b12;           /* logo mask color */
+  --scrim:rgba(0,0,0,.35);   /* page glass overlay */
+  --line:rgba(255,255,255,.12);
+  --text:#ecf3f7;
+  --muted:#cfe0e6;
+  --maxw:1100px;
+  --radius:12px;
+}
+
+/* Reset-ish */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  color:var(--text);
+  font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
+  /* IMPORTANT: relative path (no leading /) so it works on GitHub Pages */
+  background:url('homepage-background.png') center/cover fixed no-repeat;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+
+/* A soft darkening layer you can wrap your page content in */
+.scrim{min-height:100vh;background:var(--scrim)}
+
+/* ---------- Shared NAV (injected by nav.js) ---------- */
+.vc-header{position:sticky;top:0;z-index:1000;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+.vc-navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.vc-brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+.vc-brand-logo{width:160px;height:36px;background:var(--brand);
+  -webkit-mask:url('virtualcoach-logo-transparent.png') center/contain no-repeat;
+          mask:url('virtualcoach-logo-transparent.png') center/contain no-repeat;}
+.vc-menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
+.vc-nav{display:flex;gap:8px;align-items:center}
+.vc-nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+.vc-nav a:hover{background:rgba(255,255,255,.08)}
+.vc-nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+
+@media (max-width:820px){
+  .vc-menu-toggle{display:inline-flex}
+  .vc-nav{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
+  .vc-header.open .vc-nav{display:flex}
+}
+
+/* Hide any legacy page-specific headers so we only have ONE nav */
+header.top, header#site-header{display:none !important}
+
+/* Small helpers */
+.vc-container{width:min(var(--maxw),94%);margin:0 auto}
+.vc-footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}

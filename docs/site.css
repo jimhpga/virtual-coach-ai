@@ -1,4 +1,4 @@
-/* ---------- Virtual Coach AI — global site styles ---------- */
+﻿/* ---------- Virtual Coach AI â€” global site styles ---------- */
 :root{
   --nav:#0b2b12;             /* dark green */
   --brand:#0b2b12;           /* logo mask color */
@@ -30,8 +30,8 @@ body{
 .vc-navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
 .vc-brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
 .vc-brand-logo{width:160px;height:36px;background:var(--brand);
-  -webkit-mask:url('virtualcoach-logo-transparent.png') center/contain no-repeat;
-          mask:url('virtualcoach-logo-transparent.png') center/contain no-repeat;}
+
+
 .vc-menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
 .vc-nav{display:flex;gap:8px;align-items:center}
 .vc-nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
@@ -50,3 +50,5 @@ header.top, header#site-header{display:none !important}
 /* Small helpers */
 .vc-container{width:min(var(--maxw),94%);margin:0 auto}
 .vc-footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
+
+

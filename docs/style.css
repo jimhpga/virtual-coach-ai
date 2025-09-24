@@ -1,5 +1,5 @@
-/* =======================================================================
-   Virtual Coach AI – Global Styles (drop-in)
+﻿/* =======================================================================
+   Virtual Coach AI â€“ Global Styles (drop-in)
    - Unified background across all pages
    - iPad/iOS cutoff fix
    - Light utility system: layout, typography, buttons, cards, forms
@@ -18,7 +18,7 @@
   --primary-contrast: #fff;
 
   /* Background image + brightness (edit these) */
-  --bg-image: url('/virtualcoach-bg.png'); /* ← swap if needed */
+  --bg-image: url('/virtualcoach-bg.png'); /* â† swap if needed */
   --bg-brightness: 0.85;
 
   /* Layout */
@@ -52,7 +52,7 @@ body{
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* Make the background match About’s look */
+  /* Make the background match Aboutâ€™s look */
   filter: brightness(var(--bg-brightness));
   -webkit-filter: brightness(var(--bg-brightness));
 }
@@ -111,7 +111,7 @@ p{ margin: 0 0 1em; color: var(--text-color); }
 
 /* Page wrappers (in case individual pages set their own background) */
 .page-container, .about-page, .coming-soon-page{
-  background: none;                  /* inherit body’s background */
+  background: none;                  /* inherit bodyâ€™s background */
   filter: brightness(var(--bg-brightness));
   -webkit-filter: brightness(var(--bg-brightness));
 }
@@ -244,3 +244,5 @@ p{ margin: 0 0 1em; color: var(--text-color); }
   background-color: transparent !important;
   background-image: none !important;
 }
+
+

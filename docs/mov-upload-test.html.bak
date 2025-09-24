@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Coach AI</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-image: url('homepage-background.png');
+      background-size: cover;
+      background-position: center;
+      font-family: Arial, sans-serif;
+      color: white;
+      text-align: center;
+    }
+
+    .container {
+      padding: 40px 20px;
+    }
+
+    .logo {
+      width: 500px;
+      max-width: 90%;
+      margin: 0 auto 20px;
+      display: block;
+    }
+
+    .tagline {
+      font-size: 1.2rem;
+      margin: 10px 0;
+      font-style: italic;
+    }
+
+    h1 {
+      margin: 0 0 20px;
+      font-size: 2.5rem;
+    }
+
+    .dropdowns {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    select {
+      padding: 5px 10px;
+      font-size: 0.9rem;
+      border-radius: 5px;
+    }
+
+    .upload-section {
+      margin-top: 20px;
+    }
+
+    .upload-btn {
+      background-color: #00cc88;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .logo {
+        width: 300px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI Logo" class="logo">
+
+    <div class="tagline">Welcome to the Beta Test of Virtual Coach AI</div>
+
+    <h1>Virtual Coach AI</h1>
+
+    <div class="dropdowns">
+      <label>
+        Eye Dominance:
+        <select id="eyeDominance">
+          <option value="right">Right Eye</option>
+          <option value="left">Left Eye</option>
+        </select>
+      </label>
+      <label>
+        Handedness:
+        <select id="handedness">
+          <option value="right">Right-Handed</option>
+          <option value="left">Left-Handed</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="upload-section">
+      <label for="videoUpload" class="upload-btn">Upload Your Swing</label>
+      <input type="file" id="videoUpload" accept="video/*">
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('videoUpload');
+    input.addEventListener('change', async () => {
+      const file = input.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('video', file);
+      formData.append('eye', document.getElementById('eyeDominance').value);
+      formData.append('hand', document.getElementById('handedness').value);
+
+      try {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          window.location.href = '/report.html';
+        } else {
+          alert('Upload failed. Please try again.');
+        }
+      } catch (err) {
+        alert('Error uploading video.');
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
+
