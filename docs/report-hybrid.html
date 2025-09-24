@@ -1,59 +1,80 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Virtual Coach AI — Swing Report</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Coach AI — Report</title>
   <style>
-    :root{--nav:#0b2b12;--text:#ecf3f7;--muted:#cfe0e6;--scrim:rgba(0,0,0,.25);--panel:rgba(10,18,24,.45);--line:rgba(255,255,255,.12)}
+    :root{--nav:#0b2b12;--scrim:rgba(0,0,0,.18);--panel:rgba(10,18,24,.35);--line:rgba(255,255,255,.12);--text:#ecf3f7}
     *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:#071c10 url("homepage-background.png") center/cover no-repeat fixed}
+    body{margin:0;color:var(--text);background:#071c10 url("homepage-background.png") center/cover no-repeat fixed;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
+    header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.12)}
+    .navwrap{width:min(1200px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+    .brand-dot{width:10px;height:10px;border-radius:50%;background:#4ade80}
+    nav.nav{display:flex;gap:8px}
+    nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+    nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
     .scrim{min-height:100vh;background:var(--scrim)}
-    header{position:sticky;top:0;z-index:10;background:var(--nav);border-bottom:1px solid var(--line)}
-    .nav{width:min(1100px,92%);margin:0 auto;padding:10px 0;display:flex;gap:10px;align-items:center;justify-content:space-between}
-    .brand{color:#fff;text-decoration:none;font-weight:800}
-    .links a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
-    .links a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-    .wrap{width:min(1100px,92%);margin:24px auto;display:grid;gap:16px}
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
-    .pill{display:inline-block;background:rgba(255,255,255,.08);border:1px solid var(--line);padding:4px 8px;border-radius:999px;margin-right:6px}
-    .bar{height:10px;background:rgba(255,255,255,.12);border-radius:999px;overflow:hidden}
-    .bar>i{display:block;height:100%;background:#9ad67c;width:72%}
-    .btn{display:inline-block;margin-top:8px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff;text-decoration:none}
+    .wrap{width:min(1200px,92%);margin:0 auto;padding:24px 0 60px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin:12px 0}
+    h1{margin:0 0 12px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .bar{height:10px;background:rgba(255,255,255,.15);border-radius:999px;overflow:hidden}
+    .bar span{display:block;height:100%;background:#4ade80}
+    .btn{display:inline-block;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.06);color:#fff;text-decoration:none}
   </style>
 </head>
 <body>
-<div class="scrim">
-  <header>
-    <div class="nav">
-      <a class="brand" href="index.html">Virtual Coach AI</a>
-      <nav class="links" aria-label="Primary">
-        <a href="index.html">Home</a>
-        <a href="upload.html">Upload</a>
-        <a href="report-hybrid.html" aria-current="page">Reports</a>
-        <a href="pricing.html">Pricing</a>
-        <a href="contact.html">Contact</a>
-      </nav>
-    </div>
-  </header>
+  <div class="scrim">
+    <header class="top">
+      <div class="navwrap">
+        <a class="brand" href="index.html"><span class="brand-dot"></span>Virtual Coach AI</a>
+        <nav class="nav" aria-label="Primary">
+          <a href="index.html">Home</a>
+          <a href="upload.html">Upload</a>
+          <a href="report-hybrid.html" aria-current="page">Reports</a>
+          <a href="pricing.html">Pricing</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </header>
 
-  <main class="wrap">
-    <div class="card"><h2>Summary</h2><p class="pill">Score 85</p><p class="pill">Swings 31</p><p class="pill">Full Swing</p></div>
-    <div class="card"><h2>Measured Metrics</h2><p class="pill">Hip clearance: 22°</p><p class="pill">Face control: 78%</p><p class="pill">Tempo: 3:1</p><p class="pill">Face→Path: −2°</p></div>
-    <div class="card"><h2>Consistency</h2><div class="bar"><i></i></div></div>
-    <div class="card">
-      <h2>Download</h2>
-      <a class="btn" id="btnDownload">Download HTML Report</a>
-      <p class="muted">Saves this page as a self-contained .html</p>
-    </div>
-  </main>
-</div>
-<script>
-document.getElementById('btnDownload')?.addEventListener('click', ()=>{
-  const blob = new Blob([document.documentElement.outerHTML],{type:'text/html'});
-  const a = Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'swing-report.html'});
-  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 800);
-});
-</script>
+    <main class="wrap">
+      <h1>Swing Report — P1–P9</h1>
+
+      <div class="card">
+        <strong>Summary</strong>
+        <div class="grid">
+          <div>
+            <p>Swing Score</p>
+            <div class="bar"><span style="width:67%"></span></div>
+          </div>
+          <div>
+            <p>Tempo</p>
+            <div class="bar"><span style="width:72%"></span></div>
+          </div>
+        </div>
+        <div style="margin-top:12px">
+          <a class="btn" href="upload.html">Analyze another swing</a>
+          <a class="btn" href="index.html">Back to Home</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <strong>P1–P9 Notes (sample)</strong>
+        <ul>
+          <li>P1 Setup — Neutral grip, balanced, eyes level.</li>
+          <li>P2 Shaft Parallel — Slightly inside, matches spine angle.</li>
+          <li>P3 Lead Arm Parallel — Lead wrist near flat, trail arm supports.</li>
+          <li>P4 Top — Short elbow fold, compact turn.</li>
+          <li>P5 Lead Arm Down — Club slightly steep; match to spine angle at P6.</li>
+          <li>P7 Impact — Hands ahead, pressure left, face control 58%.</li>
+          <li>P9 Finish — Balanced, left side facing target.</li>
+        </ul>
+      </div>
+    </main>
+  </div>
 </body>
 </html>
+
