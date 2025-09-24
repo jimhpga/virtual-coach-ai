@@ -25,4 +25,90 @@
     html,body{height:100%}
     body{
       margin:0; color:var(--text);
-      fo
+      font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
+      background:url("homepage-background.png") center/cover fixed no-repeat;
+    }
+    .scrim{min-height:100vh;background:var(--scrim)}
+    /* NAV */
+    header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+    .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px;white-space:nowrap}
+    .brand img{height:30px;width:auto;display:block}
+    .vh{position:absolute;clip:rect(0 0 0 0);clip-path:inset(50%);width:1px;height:1px;overflow:hidden;white-space:nowrap}
+    nav{display:flex;gap:6px;flex-wrap:wrap}
+    nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+    nav a:hover{background:rgba(255,255,255,.08)}
+    nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+    /* LAYOUT */
+    main{width:min(var(--maxw),94%);margin:0 auto;padding:var(--padTop) 0 40px;display:grid;gap:18px}
+    .card{padding:16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);backdrop-filter:blur(2px);box-shadow:var(--shadow)}
+    h1{color:var(--accent1);margin:0 0 12px;font-size:2rem;line-height:1.2}
+    h2{color:var(--accent2);margin:22px 0 8px}
+    p{margin:0 0 14px}
+    .muted{color:var(--muted)}
+    ul{margin:6px 0 0 18px;line-height:1.7}
+    footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
+    @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto}}
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <header>
+    <div class="navwrap">
+      <!-- Left logo (three-box mark) -->
+      <a class="brand" href="/">
+        <img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI logo">
+        <span class="vh">Virtual Coach AI</span>
+      </a>
+      <nav aria-label="Primary">
+        <a href="index.html">Home</a>
+        <a href="report.html?report=report.json">Reports</a>
+        <a href="coming-soon.html">Coming&nbsp;Soon</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html">Login</a>
+        <a href="about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="scrim">
+    <main>
+      <section class="card">
+        <h1>About Virtual Coach AI</h1>
+        <p><strong>Jim Hartnett</strong> is a PGA professional with 30+ years of coaching experience at top facilities including Kapalua, PGA West, and <strong>Sahalee Country Club</strong>. He has worked with legendary coach <strong>Jim McLean</strong> and studied the methods of the top instructors in the country.</p>
+        <p>For decades Jim tracked the great players in detail — video, charts, and yes, mountains of Excel — studying biomechanics and the mental game to find what actually moves the needle for real golfers.</p>
+        <p>Now, with AI, that same tour-level analysis happens instantly. Virtual Coach AI brings the <strong>complete tour experience</strong> — biomechanical diagnostics, precise comparisons, mental training, and data-driven practice plans — to every golfer, anywhere.</p>
+
+        <h2>Why AI Changes the Game</h2>
+        <ul>
+          <li><strong>Sees what humans miss:</strong> subtle patterns and micro-movements most instructors can’t reliably spot in real time.</li>
+          <li><strong>Objective, repeatable:</strong> frame-by-frame checkpoints (P1–P9) with consistent scoring — not “good day / bad day” bias.</li>
+          <li><strong>Personalized drills:</strong> prescriptions based on your body, tendencies, and goals — not generic tips.</li>
+          <li><strong>Progress you can prove:</strong> trends over time for swing, decisions, and scoring — so you know what’s working.</li>
+        </ul>
+
+        <h2>Mission</h2>
+        <p>Bring tour-player clarity to every golfer: better decisions, better swings, lower scores. If it doesn’t help your golf, it doesn’t ship.</p>
+        <p class="muted">P1–P9, Tour DNA Match, and report formatting match the MVP spec so this page feels consistent with Reports.</p>
+      </section>
+    </main>
+
+    <footer>&copy; <span id="y"></span> Virtual Coach AI</footer>
+  </div>
+
+  <script>
+    // Year
+    document.getElementById('y').textContent = new Date().getFullYear();
+    // Highlight current nav link
+    (function(){
+      const here = location.pathname.split('/').pop() || 'index.html';
+      document.querySelectorAll('nav a').forEach(a=>{
+        const href = a.getAttribute('href');
+        if (href && href.split('?')[0] === here) a.setAttribute('aria-current','page');
+      });
+    })();
+  </script>
+</body>
+</html>
