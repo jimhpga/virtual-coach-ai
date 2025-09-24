@@ -1,26 +1,23 @@
-﻿<body>
-  <div id="navMount"></div>
-  <script src="/nav.js" defer></script>
-
-  <!-- your existing page content starts here -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <title>FAQ — Virtual Coach AI</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FAQ â€” Virtual Coach AI</title>
+  <link rel="icon" href="favicon.ico">
   <link rel="preload" as="image" href="homepage-background.png" />
   <style>
     :root{
-      --nav: rgba(7,68,32,.96);     /* dark green nav (matches Home) */
-      --scrim: rgba(0,0,0,.05);     /* lighter = brighter background */
-      --panel: rgba(0,0,0,.30);     /* translucent card */
+      --nav: rgba(7,68,32,.96);
+      --scrim: rgba(0,0,0,.05);
+      --panel: rgba(0,0,0,.30);
       --line: rgba(255,255,255,.12);
-      --text: #f2f7f9; 
+      --text: #f2f7f9;
       --muted:#cfe0e6;
       --maxw: 980px;
       --radius: 14px;
       --shadow: 0 10px 24px rgba(0,0,0,.22);
+      --accent:#86efac;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -29,41 +26,58 @@
       font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
       background:url('homepage-background.png') center/cover fixed no-repeat;
     }
-    .scrim{min-height:100vh; background:var(--scrim)}
-
-    /* NAV (inline, same as index.html) */
+    .scrim{min-height:100vh;background:var(--scrim)}
+    /* NAV */
     header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
     .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
-    .brand img{height:30px;width:auto;display:block}
-    nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .brand-logo{width:160px;height:36px;background:#fff; /* white logo */
+      -webkit-mask:url('virtualcoach-logo-transparent.png') center/contain no-repeat;
+              mask:url('virtualcoach-logo-transparent.png') center/contain no-repeat;}
+    .vh{position:absolute;clip:rect(0 0 0 0);clip-path:inset(50%);width:1px;height:1px;overflow:hidden;white-space:nowrap}
+    nav{display:flex;gap:8px;flex-wrap:wrap}
+    nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
     nav a:hover{background:rgba(255,255,255,.08)}
     nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-
     /* PAGE */
     main{width:min(var(--maxw),94%);margin:0 auto;padding:18px 0 40px}
     .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(2px);box-shadow:var(--shadow);margin:12px 0}
-    h1{margin:6px 0 10px}
-
+    h1{margin:6px 0 10px;color:var(--accent)}
     details{border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.06);margin:10px 0}
     summary{cursor:pointer;font-weight:800;padding:10px 12px}
     details > div{padding:0 12px 12px}
     .a{color:var(--muted);margin-top:6px}
-
     footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
   </style>
+  <script>
+    // Auto-highlight current nav link
+    addEventListener('DOMContentLoaded', ()=>{
+      const here = (location.pathname.split('/').pop() || 'index.html').split('?')[0];
+      document.querySelectorAll('nav a').forEach(a=>{
+        const href = a.getAttribute('href');
+        if(href && href.split('?')[0] === here) a.setAttribute('aria-current','page');
+      });
+      // Footer year
+      const y = document.getElementById('y'); if (y) y.textContent = new Date().getFullYear();
+    });
+  </script>
 </head>
 <body>
   <!-- NAV -->
   <header>
     <div class="navwrap">
-      <a class="brand" href="/"><img src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
+      <!-- Logo only (left) -->
+      <a class="brand" href="index.html" aria-label="Virtual Coach AI">
+        <div class="brand-logo" aria-hidden="true"></div>
+        <span class="vh">Virtual Coach AI</span>
+      </a>
       <nav aria-label="Primary">
         <a href="index.html">Home</a>
+        <a href="upload.html">Upload</a>
         <a href="report.html?report=report.json">Reports</a>
         <a href="coming-soon.html">Coming&nbsp;Soon</a>
         <a href="pricing.html">Pricing</a>
-        <a href="faq.html" aria-current="page">FAQ</a>
+        <a href="faq.html">FAQ</a>
         <a href="contact.html">Contact</a>
         <a href="login.html">Login</a>
       </nav>
@@ -77,7 +91,7 @@
 
         <details open>
           <summary>What is Virtual Coach AI?</summary>
-          <div class="a">A simple system that turns your swing video into a structured report (P1â€“P9 checkpoints), two consistency scores, and a 14-day practice plan youâ€™ll actually do.</div>
+          <div class="a">A simple system that turns your swing video into a structured report (P1–P9 checkpoints), two consistency scores, and a 14-day practice plan you’ll actually do.</div>
         </details>
 
         <details>
@@ -86,12 +100,12 @@
         </details>
 
         <details>
-          <summary>What are P1â€“P9?</summary>
+          <summary>What are P1–P9?</summary>
           <div class="a">Nine checkpoints from setup (P1) to finish (P9). Clear language, quick video references, and one actionable cue per checkpoint.</div>
         </details>
 
         <details>
-          <summary>What do â€œSwing Consistencyâ€ and â€œPosition Consistencyâ€ mean?</summary>
+          <summary>What do “Swing Consistency” and “Position Consistency” mean?</summary>
           <div class="a"><strong>Position Consistency</strong> = how reliably you match each P-position. <strong>Swing Consistency</strong> = repeatability of motion patterns across swings (tempo, face, path, etc.).</div>
         </details>
 
@@ -101,21 +115,18 @@
         </details>
 
         <details>
-          <summary>What if I donâ€™t improve?</summary>
-          <div class="a">Thatâ€™s on us to simplify. Short blocks, clear constraints, and feedback loops (video + checkpoints) make change stick. If it doesnâ€™t help your golf, it doesnâ€™t ship.</div>
+          <summary>What if I don’t improve?</summary>
+          <div class="a">Then we simplify until you do. Short blocks, clear constraints, and feedback loops (video + checkpoints) make change stick. If it doesn’t help your golf, it doesn’t ship.</div>
         </details>
 
         <details>
           <summary>Pricing?</summary>
-          <div class="a">Weâ€™ll announce it soon on the Pricing page.</div>
+          <div class="a">We’ll announce it soon on the <a href="pricing.html">Pricing</a> page.</div>
         </details>
       </div>
     </main>
 
-    <footer>Â© <span id="y"></span> Virtual Coach AI</footer>
+    <footer>&copy; <span id="y"></span> Virtual Coach AI</footer>
   </div>
-
-  <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
 </body>
 </html>
-
