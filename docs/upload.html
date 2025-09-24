@@ -1,53 +1,131 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Coach AI — Upload</title>
-  <style>
-    :root{--nav:#0b2b12;--scrim:rgba(0,0,0,.18);--panel:rgba(10,18,24,.35);--line:rgba(255,255,255,.12);--text:#ecf3f7}
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;color:var(--text);background:#071c10 url("homepage-background.png") center/cover no-repeat fixed;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
-    header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.12)}
-    .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
-    .brand-dot{width:10px;height:10px;border-radius:50%;background:#4ade80}
-    nav.nav{display:flex;gap:8px}
-    nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
-    nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-    .scrim{min-height:100vh;background:var(--scrim)}
-    .wrap{width:min(1080px,92%);margin:0 auto;padding:28px 0 60px}
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
-    .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-    .btn{display:inline-block;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff;text-decoration:none}
-    input[type=file]{accent-color:#4ade80}
-  </style>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Virtual Coach AI — Upload</title>
+<link rel="preload" as="image" href="./homepage-background.png"/>
+<style>
+  :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06); --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08); --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);}
+  *{box-sizing:border-box} html,body{height:100%}
+  body{
+    margin:0;color:var(--text);
+    background: radial-gradient(1200px 600px at 50% -10%, #22352a 0, #0a1810 60%, #07130d 100%); /* gradient fallback */
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
+  }
+  body.has-bg{ background:url('./homepage-background.png') center/cover fixed no-repeat; }
+  .scrim{min-height:100vh;background:var(--scrim)}
+
+  /* NAV */
+  header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+  .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .brand-logo{width:160px;height:36px;background:var(--brand);
+    -webkit-mask:url('./virtualcoach-logo-transparent.png') center/contain no-repeat;
+            mask:url('./virtualcoach-logo-transparent.png') center/contain no-repeat;}
+  .menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
+  nav.nav{display:flex;gap:8px}
+  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  nav.nav a:hover{background:rgba(255,255,255,.08)}
+  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+  @media(max-width:820px){
+    .menu-toggle{display:inline-flex}
+    nav.nav{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
+    header.top.open nav.nav{display:flex}
+  }
+
+  .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
+  .title{font-size:26px;font-weight:800}
+  .sub{color:var(--muted);font-size:13px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px)}
+  .card .content{padding:16px}
+  .row{margin:12px 0}
+  .picker{border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+  input[type=file]{display:none}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
+  .btn:hover{background:rgba(255,255,255,.16)}
+  .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  #log{white-space:pre-wrap;background:#0b1520;border:1px solid #123;border-radius:10px;padding:12px;min-height:120px;color:#dfe9f2;font-size:13px}
+  .badge{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
+  .right{margin-left:auto}
+</style>
 </head>
 <body>
-  <div class="scrim">
-    <header class="top">
-      <div class="navwrap">
-        <a class="brand" href="index.html"><span class="brand-dot"></span>Virtual Coach AI</a>
-        <nav class="nav" aria-label="Primary">
-          <a href="index.html">Home</a>
-          <a href="upload.html" aria-current="page">Upload</a>
-          <a href="report-hybrid.html">Reports</a>
-          <a href="pricing.html">Pricing</a>
-          <a href="contact.html">Contact</a>
-        </nav>
-      </div>
-    </header>
+  <header class="top" id="site-header">
+    <div class="navwrap">
+      <a class="brand" href="./index.html"><div class="brand-logo"></div><span>Virtual Coach AI</span></a>
+      <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
+      <nav class="nav" id="siteNav" aria-label="Primary">
+        <a href="./index.html">Home</a>
+        <a href="./upload.html" aria-current="page">Upload</a>
+        <a href="./report.html?report=./report.json">Reports</a>
+        <a href="./coming-soon.html">Coming&nbsp;Soon</a>
+        <a href="./pricing.html">Pricing</a>
+        <a href="./faq.html">FAQ</a>
+        <a href="./contact.html">Contact</a>
+        <a href="./login.html">Login</a>
+      </nav>
+    </div>
+  </header>
 
+  <div class="scrim">
     <main class="wrap">
-      <h1>Upload a swing</h1>
-      <div class="card">
-        <div class="row">
-          <input type="file" accept="video/*,.mp4,.mov,.webm" />
-          <a class="btn" href="report-hybrid.html">Process &rarr;</a>
+      <header style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div class="title">Upload → Report → Analyze</div>
+        <span class="badge right" id="keyBadge">(no file)</span>
+      </header>
+
+      <section class="card">
+        <div class="content">
+          <div class="picker">
+            <label class="btn">Choose File
+              <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v"/>
+            </label>
+            <button id="go" class="btn primary">Upload & Generate Report</button>
+          </div>
+          <div class="row" id="log">Ready.</div>
         </div>
-        <p style="opacity:.8;margin-top:12px">Pick a swing file to see a sample pipeline (demo link goes to the report page).</p>
-      </div>
+      </section>
     </main>
   </div>
+
+<script>
+/* bg swap if the image exists */
+(async () => {
+  try { const r = await fetch('./homepage-background.png', {method:'HEAD'}); if (r.ok) document.body.classList.add('has-bg'); } catch(e){}
+})();
+
+/* NAV */
+const header = document.getElementById('site-header');
+const menuBtn = document.getElementById('menuBtn');
+menuBtn.addEventListener('click', ()=>{
+  const open = header.classList.toggle('open');
+  menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+});
+document.getElementById('siteNav').addEventListener('click', e=>{
+  if(e.target.tagName==='A'){ header.classList.remove('open'); menuBtn.setAttribute('aria-expanded','false'); }
+});
+
+/* Simple demo flow (GitHub Pages can't run APIs) */
+const log = (m)=>{ const el=document.getElementById('log'); el.textContent += (el.textContent ? "\n" : "") + m; };
+const setKey = (k)=>{ document.getElementById('keyBadge').textContent = k || "(no file)"; };
+
+document.getElementById('file').addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  if (!f) return;
+  const safe = f.name.replace(/[^a-zA-Z0-9._-]+/g,"_");
+  const key = `uploads/${Date.now()}-${safe}`;
+  setKey(key);
+  log(`Selected: ${safe}`);
+});
+
+document.getElementById('go').addEventListener('click', ()=>{
+  const f = document.getElementById('file').files[0];
+  if (!f){ alert("Pick a video first."); return; }
+  log("Demo mode: redirecting to sample report…");
+  location.href = "./report.html?report=./report.json";
+});
+</script>
 </body>
 </html>
