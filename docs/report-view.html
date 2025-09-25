@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Virtual Coach AI â€” Report Viewer</title>
+  <title>Virtual Coach AI — Report Viewer</title>
   <style>
     body{font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:900px;margin:40px auto;padding:0 16px;line-height:1.5}
     pre{background:#111;color:#eee;padding:12px;border-radius:8px;overflow:auto}
@@ -15,7 +15,7 @@
   <p class="muted">Pass <code>?statusKey=...</code> in the URL. Example:
   <code>report-view.html?statusKey=status/1757313922-trigger-check.json</code></p>
 
-  <pre id="output">Loadingâ€¦</pre>
+  <pre id="output">Loading…</pre>
 
   <script>
     async function fetchReport() {
@@ -24,7 +24,7 @@
         const params = new URLSearchParams(window.location.search);
         const statusKey = params.get("statusKey");
         if (!statusKey) {
-          out.textContent = "âŒ No statusKey provided in the URL.";
+          out.textContent = "❌ No statusKey provided in the URL.";
           return;
         }
         const res = await fetch("/api/report", {
@@ -35,12 +35,13 @@
         const data = await res.json();
         out.textContent = JSON.stringify(data, null, 2);
       } catch (e) {
-        out.textContent = "âŒ " + (e?.message || String(e));
+        out.textContent = "❌ " + (e?.message || String(e));
       }
     }
     fetchReport();
   </script>
 </body>
 </html>
+
 
 
