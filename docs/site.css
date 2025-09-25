@@ -1,4 +1,4 @@
-﻿/* ---------- Virtual Coach AI â€” global site styles ---------- */
+﻿/* ---------- Virtual Coach AI — global site styles ---------- */
 :root{
   --nav:#0b2b12;             /* dark green */
   --brand:#0b2b12;           /* logo mask color */
@@ -50,5 +50,6 @@ header.top, header#site-header{display:none !important}
 /* Small helpers */
 .vc-container{width:min(var(--maxw),94%);margin:0 auto}
 .vc-footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
+
 
 
