@@ -1,22 +1,81 @@
 ﻿{
-  "date": "2025-09-23",
-  "mode": "Full Swing",
-  "swings": 6,
-  "phases": [
-    { "id": "P1", "title": "Setup", "label": "Grip neutral, stance square", "grade": "ok" },
-    { "id": "P2", "title": "Takeaway", "label": "Club just outside hands", "grade": "good" },
-    { "id": "P4", "title": "Top", "label": "Lead arm across chest", "grade": "ok" },
-    { "id": "P6", "title": "Shaft Parallel Down", "label": "Shaft slightly shallow", "grade": "good" },
-    { "id": "P7", "title": "Impact", "label": "Hands ahead, face square", "grade": "ok" }
-  ],
-  "position_metrics": [
-    { "label": "P2 Window", "value": 72 },
-    { "label": "P4 Window", "value": 66 },
-    { "label": "P6 Window", "value": 78 },
-    { "label": "Impact Window", "value": 74 }
-  ],
-  "swing_metrics": [
-    { "label": "Tempo Ratio", "value": 76 }
-  ],
-  "power": { "score": 68 }
+    "date":  "2025-09-23",
+    "mode":  "Full Swing",
+    "swings":  6,
+    "phases":  [
+                   {
+                       "id":  "P1",
+                       "title":  "Setup",
+                       "label":  "Grip neutral, stance square",
+                       "grade":  "ok"
+                   },
+                   {
+                       "id":  "P2",
+                       "title":  "Takeaway",
+                       "label":  "Club just outside hands",
+                       "grade":  "good"
+                   },
+                   {
+                       "id":  "P4",
+                       "title":  "Top",
+                       "label":  "Lead arm across chest",
+                       "grade":  "ok"
+                   },
+                   {
+                       "id":  "P6",
+                       "title":  "Shaft Parallel Down",
+                       "label":  "Shaft slightly shallow",
+                       "grade":  "good"
+                   },
+                   {
+                       "id":  "P7",
+                       "title":  "Impact",
+                       "label":  "Hands ahead, face square",
+                       "grade":  "ok"
+                   }
+               ],
+    "position_metrics":  [
+                             {
+                                 "label":  "P2 Window",
+                                 "value":  72
+                             },
+                             {
+                                 "label":  "P4 Window",
+                                 "value":  66
+                             },
+                             {
+                                 "label":  "P6 Window",
+                                 "value":  78
+                             },
+                             {
+                                 "label":  "Impact Window",
+                                 "value":  74
+                             }
+                         ],
+    "swing_metrics":  [
+                          {
+                              "label":  "Tempo Ratio",
+                              "value":  76
+                          }
+                      ],
+    "power":  {
+                  "score":  68
+              },
+    "coaching":  {
+                     "quick_fixes":  [
+                                         "Chair-butt drill (light contact P6–P8), 20 reps",
+                                         "Pump \u0026 Pause to P6 (tuck trail elbow), 3×10",
+                                         "Impact bag—hands ahead, 15–20 strikes"
+                                     ],
+                     "fundamentals":  [
+                                          "Athletic setup: ~25° hip hinge, chin up",
+                                          "Neutral grip; lead wrist flat at P3–P4",
+                                          "Ball position: 7i slightly forward of center"
+                                      ],
+                     "power_errors":  [
+                                          "Early extension (hips toward ball)",
+                                          "Open face at P6 (trail wrist extends too long)",
+                                          "Steep delivery window (shaft above trail forearm)"
+                                      ]
+                 }
 }
