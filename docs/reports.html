@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Virtual Coach AI â€” Swing Report</title>
+<title>Virtual Coach AI — Swing Report</title>
 <link rel="preload" as="image" href="homepage-background.png" />
 <style>
   :root{
@@ -103,8 +103,8 @@
     <main class="wrap">
       <header class="hdr" style="margin-bottom:10px">
         <div>
-          <div class="title">Swing Report â€” P1â€“P9</div>
-          <div class="sub">Date: <span id="date"></span> â€¢ Mode: <span id="modeLabel">Full Swing</span></div>
+          <div class="title">Swing Report — P1–P9</div>
+          <div class="sub">Date: <span id="date"></span> • Mode: <span id="modeLabel">Full Swing</span></div>
         </div>
         <div><span class="badge">Swings: <span id="swingCount">1</span></span></div>
       </header>
@@ -117,9 +117,9 @@
 
       <section class="card" id="phasesCard" style="margin-top:6px">
         <h3 class="hdr">
-          <span>P1â€“P9</span>
+          <span>P1–P9</span>
           <details style="display:inline-block"><summary class="info btn">Info</summary>
-            <div class="content">If a phase has a YouTube URL, it opens in an in-page player. Local videos (blob:) also play inside. If the data only has a label (e.g., â€œReviewWithCoachâ€), weâ€™ll show a YouTube search in a new tab.</div>
+            <div class="content">If a phase has a YouTube URL, it opens in an in-page player. Local videos (blob:) also play inside. If the data only has a label (e.g., “ReviewWithCoach”), we’ll show a YouTube search in a new tab.</div>
           </details>
         </h3>
         <div id="plist" class="content"></div>
@@ -303,10 +303,10 @@ function renderReport(data){
   $('#position').innerHTML = (data.position_metrics||[]).map(metricRow).join('') || '<div class="sub">No position metrics.</div>';
   $('#swing').innerHTML    = (data.swing_metrics||[]).map(metricRow).join('')    || '<div class="sub">No swing metrics.</div>';
 
-  const p = data.power||{score:0, tempo:'â€”', release_timing:0};
+  const p = data.power||{score:0, tempo:'—', release_timing:0};
   $('#power').innerHTML = `
     <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="${band(+p.score||0)}" style="width:${+p.score||0}%"></span></div><div class="pct">${+p.score||0}%</div></div>
-    <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo||'â€”'}</div></div>
+    <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo||'—'}</div></div>
     <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing||0)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
 }
 
@@ -352,7 +352,7 @@ document.getElementById('btnSend').addEventListener('click', ()=>{
   if(!email) return;
   const p = (last && last.power) ? `Power ${last.power.score||'-'}%  Tempo ${last.power.tempo||'-'}  Release ${last.power.release_timing||'-'}%` : '';
   const subject = encodeURIComponent('Virtual Coach AI Swing Report');
-  const body = encodeURIComponent(`Here is my swing report:\n${shareUrl()}\n\n${p}\n\nâ€” sent from virtualcoachai.net`);
+  const body = encodeURIComponent(`Here is my swing report:\n${shareUrl()}\n\n${p}\n\n— sent from virtualcoachai.net`);
   location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 });
 
@@ -420,6 +420,7 @@ if (src === 'session') {
 </script>
 </body>
 </html>
+
 
 
 
