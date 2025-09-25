@@ -4,3 +4,4 @@ dist/
 public/data/
 dist/
 public/data/
+*.bak
