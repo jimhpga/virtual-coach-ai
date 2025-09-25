@@ -77,5 +77,25 @@
                                           "Open face at P6 (trail wrist extends too long)",
                                           "Steep delivery window (shaft above trail forearm)"
                                       ]
-                 }
+                 },
+    "fundamentals":  [
+                         "Neutral grip with soft forearms",
+                         "Athletic posture; weight centered over arches",
+                         "Stable head; balanced finish"
+                     ],
+    "errors":  [
+                   "Early extension on the downswing",
+                   "Casting from P4 to P5",
+                   "Open clubface approaching impact"
+               ],
+    "quickFixes":  [
+                       "Pump drill (P4→P5 with shaft lean)",
+                       "Alignment-stick hip check",
+                       "Half-speed rehearsals focusing on sequence"
+                   ],
+    "drills":  [
+                   "Feet-together swings (tempo \u0026 balance)",
+                   "Slow-motion P1–P9 (positions awareness)",
+                   "Step-change drill (weight shift timing)"
+               ]
 }
