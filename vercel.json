@@ -1,18 +1,9 @@
 ﻿{
   "version": 2,
-  "cleanUrls": true,
-  "trailingSlash": false,
-
+  "builds": [{ "src": "docs/**", "use": "@vercel/static" }],
   "routes": [
     { "handle": "filesystem" },
-    { "src": "/$",     "dest": "/docs/index.html" },
-    { "src": "/(.*)",  "dest": "/docs/$1" }
-  ],
-
-  "headers": [
-    {
-      "source": "/docs/(.*)\\.(png|jpg|jpeg|gif|webp|svg|ico|woff2|ttf|mp4)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
-    }
+    { "src": "/", "dest": "/docs/index.html" },
+    { "src": "/(.*)", "dest": "/docs/$1" }
   ]
 }
