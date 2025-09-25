@@ -1,8 +1,9 @@
-{
-  "framework": "other",
-  "buildCommand": "",
-  "outputDirectory": ".",
-  "functions": {
-    "api/**/*.[jt]s": { "runtime": "nodejs20.x" }
-  }
+﻿{
+  "version": 2,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/docs/$1" }
+  ]
 }
