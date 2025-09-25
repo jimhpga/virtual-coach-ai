@@ -58,12 +58,14 @@
 <div class="scrim">
   <main>
     <h1>Upload → Report → Analyze</h1>
-    <p class="lead">Pick a swing video (.mp4/.mov). Keep the club and ball in frame.</p>
+    <p class="lead">Face-on or down-the-line works best. Keep the camera steady and the swing in frame.</p>
     <section class="card">
       <div class="picker" id="drop">
-        <label class="btn" for="file">Choose File</label>
-        <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v" />
-        <span class="badge" id="keyBadge">(no file)</span>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <label class="btn" for="file">Choose File</label>
+          <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v" />
+          <span class="badge" id="keyBadge">(no file)</span>
+        </div>
         <button id="go" class="btn primary">Upload &amp; Generate Report</button>
       </div>
       <div class="row" id="log">Ready.</div>
@@ -75,7 +77,7 @@
   const logEl=document.getElementById('log');
   const fileEl=document.getElementById('file');
   const keyBadge=document.getElementById('keyBadge');
-  const log=(m)=>{logEl.textContent += '\\n'+m; logEl.scrollTop=logEl.scrollHeight;}
+  const log=(m)=>{logEl.textContent += '\n'+m; logEl.scrollTop=logEl.scrollHeight;}
   const setKey=(k)=>{keyBadge.textContent=k||'(no file)'}
   function chosen(f){
     if(!f){setKey('(no file)');return}
