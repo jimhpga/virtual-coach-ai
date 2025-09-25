@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -95,7 +95,7 @@
 
         <details open>
           <summary>What is Virtual Coach AI?</summary>
-          <div class="a">A simple system that turns your swing video into a structured report (P1–P9 checkpoints), two consistency scores, and a 14-day practice plan you’ll actually do.</div>
+          <div class="a">A simple system that turns your swing video into a structured report (P1–P9 checkpoints), two consistency scores, and a 14-day practice plan you€™ll actually do.</div>
         </details>
 
         <details>
@@ -109,7 +109,7 @@
         </details>
 
         <details>
-          <summary>What do “Swing Consistency” and “Position Consistency” mean?</summary>
+          <summary>What do €œSwing Consistency€ and €œPosition Consistency€ mean?</summary>
           <div class="a"><strong>Position Consistency</strong> = how reliably you match each P-position. <strong>Swing Consistency</strong> = repeatability of motion patterns across swings (tempo, face, path, etc.).</div>
         </details>
 
@@ -119,19 +119,41 @@
         </details>
 
         <details>
-          <summary>What if I don’t improve?</summary>
-          <div class="a">Then we simplify until you do. Short blocks, clear constraints, and feedback loops (video + checkpoints) make change stick. If it doesn’t help your golf, it doesn’t ship.</div>
+          <summary>What if I don€™t improve?</summary>
+          <div class="a">Then we simplify until you do. Short blocks, clear constraints, and feedback loops (video + checkpoints) make change stick. If it doesn€™t help your golf, it doesn€™t ship.</div>
         </details>
 
         <details>
           <summary>Pricing?</summary>
-          <div class="a">We’ll announce it soon on the <a href="pricing.html">Pricing</a> page.</div>
+          <div class="a">We€™ll announce it soon on the <a href="pricing.html">Pricing</a> page.</div>
         </details>
       </div>
     </main>
 
     <footer>&copy; <span id="y"></span> Virtual Coach AI</footer>
   </div>
+<script id="vc-nav-js">
+document.addEventListener('DOMContentLoaded', ()=>{
+  const header=document.getElementById('site-header');
+  const btn=document.getElementById('menuBtn');
+  const nav=document.getElementById('siteNav');
+  if(btn&&nav&&header){
+    btn.addEventListener('click', ()=>{
+      const open=header.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open?'true':'false');
+    });
+    nav.addEventListener('click', e=>{
+      if(e.target&&e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+    });
+  }
+  const here=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
+  document.querySelectorAll('nav a').forEach(a=>{
+    const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+    if(h===here) a.setAttribute('aria-current','page');
+  });
+  const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
+});
+</script>
 </body>
 </html>
 <<<<<<< HEAD
@@ -140,3 +162,4 @@
 
 
 >>>>>>> ee0fc23 (Swap to <img> logo, remove mask lines, point to virtualcoach-logo.png)
+

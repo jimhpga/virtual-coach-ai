@@ -63,7 +63,31 @@ function bindUI(){const getPath=()=>new URLSearchParams(location.search).get('re
 bindUI();document.addEventListener('DOMContentLoaded',bindUI);
 document.getElementById('plist').addEventListener('click',e=>{const btn=e.target.closest('.view-video');if(!btn)return;const url=btn.getAttribute('data-url');const mount=document.getElementById('videoMount');if(mount){mount.innerHTML='';if(url){const v=document.createElement('video');v.controls=true;v.playsInline=true;v.style.width='100%';v.src=url;mount.appendChild(v)}else{mount.textContent='No video for this phase.'}const ov=document.getElementById('videoOverlay');if(ov)ov.hidden=false}});
 const auto=new URLSearchParams(location.search).get('report')||document.body.dataset.reportSrc||'/reports/demo/report.json';if(auto)loadReport(auto);
-</script></body></html>
+</script><footer>© <span id="y"></span> Virtual Coach AI</footer>
+<script id="vc-nav-js">
+document.addEventListener('DOMContentLoaded', ()=>{
+  const header=document.getElementById('site-header');
+  const btn=document.getElementById('menuBtn');
+  const nav=document.getElementById('siteNav');
+  if(btn&&nav&&header){
+    btn.addEventListener('click', ()=>{
+      const open=header.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open?'true':'false');
+    });
+    nav.addEventListener('click', e=>{
+      if(e.target&&e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+    });
+  }
+  const here=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
+  document.querySelectorAll('nav a').forEach(a=>{
+    const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+    if(h===here) a.setAttribute('aria-current','page');
+  });
+  const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
+});
+</script>
+</body></html>
+
 
 
 
