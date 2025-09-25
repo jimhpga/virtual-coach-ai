@@ -262,8 +262,31 @@
     }
   });
 </script>
+<script id="vc-nav-js">
+document.addEventListener('DOMContentLoaded', ()=>{
+  const header=document.getElementById('site-header');
+  const btn=document.getElementById('menuBtn');
+  const nav=document.getElementById('siteNav');
+  if(btn&&nav&&header){
+    btn.addEventListener('click', ()=>{
+      const open=header.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open?'true':'false');
+    });
+    nav.addEventListener('click', e=>{
+      if(e.target&&e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+    });
+  }
+  const here=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
+  document.querySelectorAll('nav a').forEach(a=>{
+    const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+    if(h===here) a.setAttribute('aria-current','page');
+  });
+  const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
+});
+</script>
 </body>
 </html>
+
 
 
 

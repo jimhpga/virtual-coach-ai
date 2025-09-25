@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+﻿<<<<<<< HEAD
 <!doctype html>
 <html lang="en">
 <head>
@@ -71,7 +71,7 @@
         });
         nav.addEventListener('click',
 =======
-﻿<!doctype html><html lang="en"><head>
+ï»¿<!doctype html><html lang="en"><head>
 <title>Pricing — Virtual Coach AI</title>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -127,7 +127,7 @@
 <header class="top" id="site-header">
   <div class="navwrap">
     <a class="brand" href="index.html"><img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo"><span>Virtual Coach AI</span></a>
-    <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
+    <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu –¾</button>
     <nav class="nav" id="siteNav" aria-label="Primary">
       <a href="index.html"         >Home</a>
       <a href="upload.html"        >Upload</a>
@@ -140,12 +140,35 @@
   </div>
 </header>
 <div class="scrim"><main>
-  <h1>Pricing</h1><p class="lead">Starter is free while we’re in public beta. Pro adds coach sharing and trend dashboards.</p>
+  <h1>Pricing</h1><p class="lead">Starter is free while we€™re in public beta. Pro adds coach sharing and trend dashboards.</p>
   <div class="card"><strong>Starter</strong><br/> — Upload, sample report, basic metrics.</div>
   <div class="card"><strong>Pro (Beta)</strong><br/>/mo — Trend dashboard, coach share link, roadmap access.</div>
 </main><footer>© <span id="y"></span> Virtual Coach AI</footer></div>
 <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
+<script id="vc-nav-js">
+document.addEventListener('DOMContentLoaded', ()=>{
+  const header=document.getElementById('site-header');
+  const btn=document.getElementById('menuBtn');
+  const nav=document.getElementById('siteNav');
+  if(btn&&nav&&header){
+    btn.addEventListener('click', ()=>{
+      const open=header.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open?'true':'false');
+    });
+    nav.addEventListener('click', e=>{
+      if(e.target&&e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+    });
+  }
+  const here=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
+  document.querySelectorAll('nav a').forEach(a=>{
+    const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+    if(h===here) a.setAttribute('aria-current','page');
+  });
+  const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
+});
+</script>
 </body></html>
 
 
 >>>>>>> ee0fc23 (Swap to <img> logo, remove mask lines, point to virtualcoach-logo.png)
+

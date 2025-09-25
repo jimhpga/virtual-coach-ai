@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+﻿<<<<<<< HEAD
 <!doctype html>
 <html lang="en">
 <head>
@@ -79,7 +79,7 @@
         if(href && href.split('?')[0] === here){ a.setAttribute('aria-current','page'); }
       });
 =======
-﻿<!doctype html><html lang="en"><head>
+ï»¿<!doctype html><html lang="en"><head>
 <title>Coming Soon — Virtual Coach AI</title>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -138,10 +138,10 @@
       <div class="brand-logo" aria-hidden="true"></div>
       <span class="vh">Virtual Coach AI</span>
     </a>
-    <button class="menu-toggle" id="menuBtn" aria-expanded="false" aria-controls="siteNav">Menu ▾</button>
+    <button class="menu-toggle" id="menuBtn" aria-expanded="false" aria-controls="siteNav">Menu –¾</button>
 =======
     <a class="brand" href="index.html"><img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo"><span>Virtual Coach AI</span></a>
-    <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
+    <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu –¾</button>
 >>>>>>> ee0fc23 (Swap to <img> logo, remove mask lines, point to virtualcoach-logo.png)
     <nav class="nav" id="siteNav" aria-label="Primary">
       <a href="index.html">Home</a>
@@ -196,7 +196,7 @@
       <article class="card">
         <h2>Want Early Access?</h2>
         <p class="lead">Be a tester. Get features before the masses and help us sharpen the edge.</p>
-        <a class="btn" href="contact.html">Join the tester list →</a>
+        <a class="btn" href="contact.html">Join the tester list †’</a>
       </article>
     </section>
   </main>
@@ -205,18 +205,63 @@
 </div>
 
 <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+<script id="vc-nav-js">
+document.addEventListener('DOMContentLoaded', ()=>{
+  const header=document.getElementById('site-header');
+  const btn=document.getElementById('menuBtn');
+  const nav=document.getElementById('siteNav');
+  if(btn&&nav&&header){
+    btn.addEventListener('click', ()=>{
+      const open=header.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open?'true':'false');
+    });
+    nav.addEventListener('click', e=>{
+      if(e.target&&e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+    });
+  }
+  const here=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
+  document.querySelectorAll('nav a').forEach(a=>{
+    const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+    if(h===here) a.setAttribute('aria-current','page');
+  });
+  const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
+});
+</script>
 </body>
 </html>
 =======
 <div class="scrim"><main>
   <h1>Coming Soon</h1>
   <p class="lead">No fluff—just upgrades that lower scores. These ship next.</p>
-  <div class="card"><strong>Next Drops (2–4 weeks)</strong><br/>• Mental Game Scoring v1 • End-of-Round Report • Trend Dashboard v0 • Junior Program v1</div>
-  <div class="card"><strong>In Progress</strong><br/>• Pro Comparison P1–P9 • Torque (alpha) • Course Management</div>
-  <div class="card"><strong>On the Horizon</strong><br/>• Live Capture Assist • Coach Mode • Practice Blocks • Personal Baselines • Offline Mode</div>
+  <div class="card"><strong>Next Drops (2–4 weeks)</strong><br/>€¢ Mental Game Scoring v1 €¢ End-of-Round Report €¢ Trend Dashboard v0 €¢ Junior Program v1</div>
+  <div class="card"><strong>In Progress</strong><br/>€¢ Pro Comparison P1–P9 €¢ Torque (alpha) €¢ Course Management</div>
+  <div class="card"><strong>On the Horizon</strong><br/>€¢ Live Capture Assist €¢ Coach Mode €¢ Practice Blocks €¢ Personal Baselines €¢ Offline Mode</div>
 </main><footer>© <span id="y"></span> Virtual Coach AI</footer></div>
 <script>document.getElementById('y').textContent=new Date().getFullYear()</script>
+<script id="vc-nav-js">
+document.addEventListener('DOMContentLoaded', ()=>{
+  const header=document.getElementById('site-header');
+  const btn=document.getElementById('menuBtn');
+  const nav=document.getElementById('siteNav');
+  if(btn&&nav&&header){
+    btn.addEventListener('click', ()=>{
+      const open=header.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open?'true':'false');
+    });
+    nav.addEventListener('click', e=>{
+      if(e.target&&e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
+    });
+  }
+  const here=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
+  document.querySelectorAll('nav a').forEach(a=>{
+    const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+    if(h===here) a.setAttribute('aria-current','page');
+  });
+  const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
+});
+</script>
 </body></html>
 
 
 >>>>>>> ee0fc23 (Swap to <img> logo, remove mask lines, point to virtualcoach-logo.png)
+
