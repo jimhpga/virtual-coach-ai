@@ -6,7 +6,7 @@
 *{box-sizing:border-box} html,body{height:100%}
 body{margin:0;color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif;background:#0e1a22}
 
-/* background â€“ brighter to match Home/About */
+/* background – brighter to match Home/About */
 .bg{position:fixed;inset:0;background:url('/golf-course-bg.jpg') center/cover no-repeat fixed;opacity:.55;filter:brightness(1.8) saturate(1.2);z-index:-1}
 .bg::after{content:"";position:absolute;inset:0;background:transparent}
 
@@ -75,5 +75,6 @@ details[open] .caret{transform:rotate(180deg)}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 .video-mount{aspect-ratio:16/9;display:grid;place-items:center;border:1px dashed #29424f;border-radius:12px;color:var(--muted)}
+
 
 
