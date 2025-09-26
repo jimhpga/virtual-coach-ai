@@ -1,4 +1,4 @@
-// script.js — S3 presign + direct upload + preview + redirect
+﻿// script.js — S3 presign + direct upload + preview + redirect
 
 function setStatus(text, isError = false) {
   const box = document.getElementById('status');
@@ -96,3 +96,4 @@ export async function uploadVideo() {
     btn.dataset._bound = '1';
   }
 })();
+
