@@ -33,8 +33,8 @@
     .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
     .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
     .brand-logo{width:160px;height:36px;background:#fff; /* white logo per preference */
-      -webkit-mask:url('virtualcoach-logo.png') center/contain no-repeat;
-              mask:url('virtualcoach-logo.png') center/contain no-repeat;}
+
+
     .vh{position:absolute;clip:rect(0 0 0 0);clip-path:inset(50%);width:1px;height:1px;overflow:hidden;white-space:nowrap}
     .menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
     nav.nav{display:flex;gap:8px;flex-wrap:wrap}
@@ -135,7 +135,7 @@
 <<<<<<< HEAD
     <!-- Logo only on the far left -->
     <a class="brand" href="index.html" aria-label="Virtual Coach AI">
-      <div class="brand-logo" aria-hidden="true"></div>
+      <img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo" />
       <span class="vh">Virtual Coach AI</span>
     </a>
     <button class="menu-toggle" id="menuBtn" aria-expanded="false" aria-controls="siteNav">Menu –¾</button>
@@ -264,5 +264,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 
 >>>>>>> ee0fc23 (Swap to <img> logo, remove mask lines, point to virtualcoach-logo.png)
+
+
 
 
