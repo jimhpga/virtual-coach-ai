@@ -1,120 +1,56 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual Coach AI — Swing Report</title>
 <link rel="preload" as="image" href="homepage-background.png" />
-<style>  /* VC:BASECSS START */
-  :root{
-    --nav:#0b2b12; --brand:#ffffff;
-    --scrim: rgba(0,0,0,.16); --panel: rgba(10,18,24,.35);
-    --line: rgba(255,255,255,.12); --text:#ecf3f7; --muted:#cfe0e6;
-    --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
-  }
+<style>
+  :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06); --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08); --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);}
   *{box-sizing:border-box} html,body{height:100%}
-  body{
-    margin:0;color:var(--text);
-    background:#071c10 url("homepage-background.png") center/cover no-repeat fixed;
-    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
-  }
-  .scrim{min-height:100vh;background:var(--scrim)}
-  header.top{
-    position:sticky; top:0; z-index:100;
-    background: var(--nav);
-    border-bottom:1px solid rgba(255,255,255,.12);
-    backdrop-filter: blur(2px);
-  }
-  .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
-  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
-  .brand-logo{
-    width:160px;height:36px;background:#fff;
-
-
-  }
-  nav.nav{display:flex;gap:8px}
-  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
-  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-  .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.20);backdrop-filter:blur(1.5px)}
-  /* VC:BASECSS END */  :root{
-    --nav:#0b2b12; --brand:#ffffff;
-    --scrim: rgba(0,0,0,.16); --panel: rgba(10,18,24,.35);
-    --line: rgba(255,255,255,.12); --text:#ecf3f7; --muted:#cfe0e6;
-    --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
-  }
-  *{box-sizing:border-box} html,body{height:100%}
-  body{
-    margin:0;color:var(--text);
-    background:#071c10 url("homepage-background.png") center/cover no-repeat fixed;
-    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
-  }
+  body{margin:0;color:var(--text);background:url('homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
   .scrim{min-height:100vh;background:var(--scrim)}
 
-  /* Solid dark-green navbar */
-  
+  /* NAV */
+  header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
-  .brand-logo{
-    width:160px;height:36px;background:#fff;
-
-
-  }
+  .brand-logo-img{height:28px;width:auto;display:block}
+  .menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
   nav.nav{display:flex;gap:8px}
   nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  nav.nav a:hover{background:rgba(255,255,255,.08)}
   nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-
-  .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
-  .title{font-size:26px;font-weight:800}
-  .sub{color:var(--muted);font-size:13px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.20);backdrop-filter:blur(1.5px)}
-  .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
-  .card .content{padding:12px 16px}
-  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
-  :root{ --nav:#0b2b12; --brand:#fff; --scrim: rgba(0,0,0,.16); --panel: rgba(10,18,24,.35); --line: rgba(255,255,255,.12); --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20); }
-  *{box-sizing:border-box} html,body{height:100%}
-  body{
-    margin:0;color:var(--text);
-    background:#071c10 url("homepage-background.png") center/cover no-repeat fixed;
-    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
+  @media(max-width:820px){
+    .menu-toggle{display:inline-flex}
+    nav.nav{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
+    header.top.open nav.nav{display:flex}
   }
-  .scrim{min-height:100vh;background:var(--scrim)}
-
-  /* NAV (proper, readable on photo) */
-  
-  .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
-  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
-  .brand-logo{
-    width:160px;height:36px;background:#fff;
-
-
-  }
-  nav.nav{display:flex;gap:8px}
-  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
-  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
 
   .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
   .title{font-size:26px;font-weight:800}
   .sub{color:var(--muted);font-size:13px}
   .badge{background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
-
   .card,details.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px)}
   .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
   .card .content{padding:12px 16px}
-  .hdr{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .actions{display:flex;gap:8px;margin-bottom:8px}
-  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
-
-  /* P rows (neutral chip) */
+  .hdr{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative}
+  .actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
+  .btn:hover{background:rgba(255,255,255,.16)}
+  .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6;}
+  .btn.warn{background:rgba(246,196,83,.18);border-color:#b8860b;}
+  .btn.ghost{background:rgba(255,255,255,.06);}
   summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer}
   summary::-webkit-details-marker{display:none}
   .pnum{width:34px;height:34px;border-radius:10px;background:#0c1820;border:1px solid var(--line);display:grid;place-items:center;font-weight:800}
   .pname{font-weight:700}
-  .gchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;margin-left:8px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#eaf5ff}
   .caret{margin-left:auto;transition:transform .2s}
   details[open] .caret{transform:rotate(180deg)}
-
-  /* METRICS — colored bars are BACK */
+  .gchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;margin-left:8px}
+  .g-good{background:#19c37d;color:#fff}
+  .g-ok{background:#f6c453;color:#2a2300}
+  .g-bad{background:#ff6b6b;color:#fff}
   .metric{display:flex;align-items:center;gap:10px;margin:9px 0}
   .metric .name{flex:0 0 210px;color:#d8ebf2}
   .bar{flex:1;height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}
@@ -123,375 +59,546 @@
   .warn{background:linear-gradient(90deg,#f6c453,#ffd479)}
   .bad{background:linear-gradient(90deg,#ff6b6b,#ff8f8f)}
   .pct{width:52px;text-align:right;color:#cfe3ee}
-
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(max-width:960px){.grid2{grid-template-columns:1fr}}
+  .info{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:6px 10px;border-radius:10px;cursor:pointer}
+  .info:hover{background:rgba(255,255,255,.16)}
 
-  .chips{display:flex;flex-wrap:wrap;gap:8px}
-  .chip{background:rgba(255,255,255,.10);border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-size:12px}
-  .kv{margin:8px 0}
-  .kv b{display:inline-block;min-width:130px}
-  .fault{margin:10px 0}
-  .fault .sev{font-weight:800;margin-left:6px}
-  .drill{margin:10px 0}
-  .drill .tag{font-size:12px;opacity:.9;margin-left:6px}
-  .hr{height:1px;background:var(--line);margin:10px 0}
-
-  /* Modal */
+  /* Modal viewer */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
   .modal.open{display:flex}
-  .modal .box{width:min(960px,95vw);background:#0b1520;border:1px solid #123;border-radius:12px}
-  .modal .content{padding:14px 16px}
-  .modal h4{margin:0 0 8px}
-  .modal iframe,.modal video{width:100%;height:min(72vh,56vw);background:#000;border-radius:8px}
-</style>
+  .modal .box{width:min(960px,95vw);background:#0b1520;border:1px solid #123;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.4)}
+  .modal header.mh{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid #123}
+  .modal header.mh h4{margin:0;font-size:16px}
+  .modal .content{padding:10px 12px}
+  .modal iframe, .modal video{width:100%;height:min(72vh,56vw);background:#000;border-radius:8px}
+  .closebtn{background:transparent;color:#fff;border:1px solid #345;padding:6px 10px;border-radius:8px;cursor:pointer}
 
+  /* help popovers */
+  .qbtn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;margin-left:8px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;font-weight:800;cursor:pointer;line-height:1}
+  .qbtn:hover{background:rgba(255,255,255,.16)}
+  .pop{position:absolute;top:calc(100% + 8px);right:0;z-index:20;max-width:min(520px,92vw);padding:12px 14px;border-radius:12px;background:rgba(12,24,32,.96);border:1px solid var(--line);box-shadow:0 10px 28px rgba(0,0,0,.35);color:var(--text);display:none}
+  .pop.show{display:block}
+  .pop::after{content:"";position:absolute;top:-8px;right:12px;border-width:8px;border-style:solid;border-color:transparent transparent rgba(12,24,32,.96) transparent}
+  .pop h4{margin:0 0 6px;font-size:14px}
+  .pop p{margin:6px 0;font-size:13px;color:var(--muted)}
+  .pop ul{margin:6px 0 0 18px;padding:0}
+  .pop li{margin:4px 0;font-size:13px;color:var(--muted)}
+
+  /* tour delta */
+  .delta{display:flex;align-items:center;gap:10px;margin:10px 0}
+  .delta .name{flex:1;font-weight:700}
+  .delta .nums{font-size:12px;color:#d8ebf2}
+  .dchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;border:1px solid var(--line)}
+  .dplus{background:rgba(246,196,83,.18);border-color:#b8860b}
+  .dminus{background:rgba(25,195,125,.18);border-color:#2a6}
+
+  footer{width:min(1080px,92%);margin:24px auto;color:#cfe0e6;font-size:12px}
+</style>
 </head>
 <body>
-<header class="top" id="site-header">
-  <div class="navwrap">
-    <a class="brand" href="/"><div class="brand-logo" aria-label="Virtual Coach AI"></div><span>Virtual Coach AI</span></a>
-    <nav class="nav" aria-label="Primary">
-      <a href="/index.html">Home</a>
-      <a href="/upload.html">Upload</a>
-      <a href="/report-hybrid.html" aria-current="page">Reports</a>
-      <a href="/pricing.html">Pricing</a>
-      <a href="/contact.html">Contact</a>
-    </nav>
-  </div>
-</header>
-  
+  <header class="top" id="site-header">
+    <div class="navwrap">
+      <a class="brand" href="index.html" aria-label="Virtual Coach AI">
+        <img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo-img" />
+        <span>Virtual Coach AI</span>
+      </a>
+      <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
+      <nav class="nav" id="siteNav" aria-label="Primary">
+        <a href="index.html">Home</a>
+        <a href="upload.html">Upload</a>
+        <a href="report.html?report=report.json" aria-current="page">Reports</a>
+        <a href="coming-soon.html">Coming&nbsp;Soon</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html">Login</a>
+      </nav>
+    </div>
+  </header>
 
   <div class="scrim">
-    <main class="wrap">
+    <main class="wrap" id="report-root">
       <header class="hdr" style="margin-bottom:10px">
         <div>
-          <div class="title">Swing Report &mdash; P1&ndash;P9</div>
-          <div class="sub">Date: <span id="date"></span> — Mode: <span id="modeLabel">Full Swing</span></div>
+          <div class="title">Swing Report — P1–P9</div>
+          <div class="sub">Date: <span id="date"></span> • Mode: <span id="modeLabel">Full Swing</span></div>
         </div>
-        <div><span class="badge">Swings: <span id="swingCount">1</span></span></div>
+        <div>
+          <span class="badge">Swings: <span id="swingCount">—</span></span>
+          <span class="badge" id="statusPill" style="margin-left:8px">Loading…</span>
+        </div>
       </header>
 
       <div class="actions">
-        <button id="btnDownload" class="btn">Download</button>
-        <button id="btnCopy" class="btn">Copy Share Link</button>
+        <button id="btnDownload" class="btn primary">Download</button>
+        <button id="btnSend" class="btn warn">Send to Coach</button>
+        <button id="btnCopy" class="btn ghost">Copy Share Link</button>
       </div>
 
-      <!-- P1–P9 -->
       <section class="card" id="phasesCard" style="margin-top:6px">
-        <h3 class="hdr"><span>P1–P9</span></h3>
+        <h3 class="hdr">
+          <span>P1–P9</span>
+          <details style="display:inline-block"><summary class="info">Info</summary>
+            <div class="content">Nine checkpoints from setup to finish. Click “Video” to view inside this page.</div>
+          </details>
+        </h3>
         <div id="plist" class="content"></div>
-      </section>
-
-      <!-- Summary + Measured -->
-      <section class="card" id="summaryCard" style="margin-top:12px">
-        <h3 class="hdr"><span>Summary</span></h3>
-        <div class="content" id="summaryBody">ÃƒÆ’Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ¢Ã¢”š¬Ã‚</div>
-      </section>
-
-      <section class="card" id="measuredCard" style="margin-top:12px">
-        <h3 class="hdr"><span>Measured Metrics</span></h3>
-        <div class="content" id="measuredChips"></div>
       </section>
 
       <section class="grid2" style="margin-top:12px">
         <div class="card">
-          <h3 class="hdr"><span>Position Consistency</span></h3>
+          <h3 class="hdr">
+            <span>Position Consistency</span>
+            <button class="qbtn" data-pop="position-consistency" aria-label="What is Position Consistency?">?</button>
+            <div class="pop" id="pop-position-consistency">
+              <h4>Position Consistency</h4>
+              <p>How reliably each swing matches the target window at the nine P-positions (P1–P9).</p>
+              <ul>
+                <li><strong>Source:</strong> pose landmarks vs. reference “windows.”</li>
+                <li><strong>Weighting:</strong> P2, P4, P6, P7 count the most (setup, top, shaft-parallel down, impact).</li>
+                <li><strong>Score:</strong> 0–100. 100 = you’re in-window nearly every swing.</li>
+              </ul>
+            </div>
+          </h3>
           <div id="position" class="content"></div>
         </div>
         <div class="card">
-          <h3 class="hdr"><span>Swing Consistency</span></h3>
+          <h3 class="hdr">
+            <span>Swing Consistency</span>
+            <button class="qbtn" data-pop="swing-consistency" aria-label="What is Swing Consistency?">?</button>
+            <div class="pop" id="pop-swing-consistency">
+              <h4>Swing Consistency</h4>
+              <p>How repeatable your swings are across the session.</p>
+              <ul>
+                <li><strong>Tempo ratio</strong> stability (backswing : downswing ≈ 3:1).</li>
+                <li><strong>Club path & face</strong> variance (lower spread is better).</li>
+                <li><strong>Release timing</strong> variance (how consistently you time speed).</li>
+              </ul>
+            </div>
+          </h3>
           <div id="swing" class="content"></div>
         </div>
       </section>
 
       <section class="card" style="margin-top:12px">
-        <h3 class="hdr"><span>Power Score Summary</span></h3>
+        <h3 class="hdr">
+          <span>Power Score Summary</span>
+          <button class="qbtn" data-pop="power-summary" aria-label="What is Power Score?">?</button>
+          <div class="pop" id="pop-power-summary">
+            <h4>Power Score</h4>
+            <p>Composite of speed proxies and sequencing (scaled 0–100).</p>
+            <ul>
+              <li><strong>Kinematic sequence:</strong> pelvis → thorax → arm → club.</li>
+              <li><strong>Speed curve:</strong> build → peak near P7 (impact) without dumping early.</li>
+              <li><strong>Release timing:</strong> later (but controlled) is typically better.</li>
+            </ul>
+          </div>
+        </h3>
         <div id="power" class="content"></div>
       </section>
 
-      <!-- Coaching lists -->
+      <!-- Tour-player delta -->
       <section class="card" style="margin-top:12px">
-        <h3 class="hdr"><span>Top 3 Fundamentals</span></h3>
-        <div class="content" id="fundamentals"></div>
+        <h3 class="hdr">
+          <span>Tour-Player Delta — Top 3 Fundamentals</span>
+          <button class="qbtn" data-pop="delta" aria-label="How we pick these?">?</button>
+          <div class="pop" id="pop-delta">
+            <h4>What this means</h4>
+            <p>We compare your fundamentals to a tour cohort that matches your traits (hand, eye, gender, height, build). The biggest gaps surface first. Close these for the fastest gains.</p>
+            <ul>
+              <li><strong>Delta:</strong> You − Tour average (units vary, % or °).</li>
+              <li><strong>Method:</strong> Prefer your priority fundamentals; fall back to any available metrics.</li>
+            </ul>
+          </div>
+        </h3>
+        <div id="cohortLine" class="content sub" style="padding-bottom:0"></div>
+        <div id="tourDelta" class="content"></div>
+
+        <details class="panel" style="margin:10px">
+          <summary><span class="pname">See all fundamentals</span>
+            <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div id="allFundamentals" class="content"></div>
+        </details>
       </section>
 
+      <!-- Key Terms -->
       <section class="card" style="margin-top:12px">
-        <h3 class="hdr"><span>Top 3 Power Errors</span></h3>
-        <div class="content" id="powerErrors"></div>
-      </section>
-
-      <section class="card" style="margin-top:12px">
-        <h3 class="hdr"><span>Top 3 Quick Fixes</span></h3>
-        <div class="content" id="quickFixes"></div>
-      </section>
-
-      <!-- Faults + Drills -->
-      <section class="card" id="faultsCard" style="margin-top:12px">
-        <h3 class="hdr"><span>Faults</span></h3>
-        <div class="content" id="faultsBody"></div>
-      </section>
-
-      <section class="card" id="drillsCard" style="margin-top:12px">
-        <h3 class="hdr"><span>Drills</span></h3>
-        <div class="content" id="drillsBody"></div>
+        <h3 class="hdr">
+          <span>Definitions & Key Terms</span>
+          <button class="qbtn" data-pop="terms" aria-label="Key Terms">?</button>
+          <div class="pop" id="pop-terms">
+            <h4>Key Terms</h4>
+            <ul>
+              <li><strong>Grip:</strong> relative hand placement & strength.</li>
+              <li><strong>Posture:</strong> spine angle & hip hinge at setup.</li>
+              <li><strong>Club-head in/out:</strong> takeaway path vs. target line (often at P2).</li>
+              <li><strong>Shaft plane/pitch:</strong> club angle vs. reference plane (P4–P7 checkpoints).</li>
+              <li><strong>P2/P4/P5/P6/P7/P8:</strong> standard swing checkpoints (takeaway, top, mid-down, shaft-parallel down, impact, early finish).</li>
+              <li><strong>Leg movement:</strong> knees/pelvis sway & rotation control.</li>
+              <li><strong>Arm bend:</strong> right/left elbow flexion control through the swing.</li>
+              <li><strong>Head movement:</strong> vertical/horizontal drift vs. setup.</li>
+            </ul>
+          </div>
+        </h3>
+        <div class="content sub">Tap the “?” anywhere for a plain-English definition.</div>
       </section>
     </main>
-<footer>© <span id="y"></span> Virtual Coach AI</footer>
+    <footer>© <span id="y"></span> Virtual Coach AI</footer>
   </div>
 
   <!-- Modal viewer -->
-  <div id="viewer" class="modal" role="dialog" aria-modal="true">
+  <div id="viewer" class="modal" role="dialog" aria-modal="true" aria-label="Video">
     <div class="box">
+      <header class="mh"><h4>Video</h4><button class="closebtn" id="viewerClose">Close</button></header>
       <div class="content" id="viewerBody"></div>
     </div>
   </div>
 
-  <!-- Inline JSON fallback -->
-  <script id="vc_inline_json" type="application/json">{
-  "discipline":"full_swing",
-  "swings":12,
-  "phases":[
-    {"id":"P1","name":"Setup","grade":"good","short":"Neutral grip; balanced 55/45.","long":"Hip hinge ~25ÃƒÆ’Ã¢‚¬Å¡Ãƒ”šÃ‚°, neutral grip, eyes level.","ref":"https://youtu.be/dQw4w9WgXcQ"},
-    {"id":"P2","name":"Shaft Parallel (Backswing)","grade":"ok","short":"Slightly inside; face matches arc.","long":"Match club to spine-angle at P2.","ref":"https://youtu.be/dQw4w9WgXcQ"},
-    {"id":"P3","name":"Lead Arm Parallel","grade":"ok","short":"Lead wrist near flat.","long":"Trail arm supports; avoid over-fold.","ref":"https://youtu.be/dQw4w9WgXcQ"},
-    {"id":"P4","name":"Top of Swing","grade":"bad","short":"Turn short; trail elbow high.","long":"Complete turn; trail elbow ~90ÃƒÆ’Ã¢‚¬Å¡Ãƒ”šÃ‚°.","ref":"https://youtu.be/dQw4w9WgXcQ"},
-    {"id":"P5","name":"Lead Arm Parallel (Down)","grade":"ok","short":"Slight cast.","long":"Pump drillÃƒÆ’Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ¢Ã¢”š¬Ã‚3 rehearsals then hit.","ref":"https://youtu.be/dQw4w9WgXcQ"},
-    {"id":"P6","name":"Delivery (Shaft Parallel Down)","grade":"bad","short":"Shaft steep; face open.","long":"Slot under trail forearm; add lead-wrist flex.","ref":"https://youtu.be/dQw4w9WgXcQ"},
-    {"id":"P7","name":"Impact","grade":"ok","short":"More forward shaft lean needed.","long":"Pressure left ~85%; handle ahead.","ref":"https://youtu.be/dQw4w9WgXcQ"},
-    {"id":"P8","name":"Early Follow-Through","grade":"ok","short":"Slight chicken wing.","long":"Extend arms; chest keeps turning.","ref":"https://youtu.be/dQw4w9WgXcQ"},
-    {"id":"P9","name":"Finish","grade":"good","short":"Balanced; tall.","long":"Belt buckle at target; hold 3s.","ref":"https://youtu.be/dQw4w9WgXcQ"}
-  ],
-  "position_metrics":[
-    {"label":"P2 Spine-Angle Match","value":62},
-    {"label":"P4 Top Position Window","value":55},
-    {"label":"P6 Delivery Window","value":48},
-    {"label":"P7 Impact Window","value":70}
-  ],
-  "swing_metrics":[
-    {"label":"Tempo Ratio (3:1 target)","value":72},
-    {"label":"Face-to-Path Variance","value":58},
-    {"label":"Release Timing Consistency","value":64}
-  ],
-  "power":{"score":67,"tempo":"3.2:1","release_timing":61},
-  "cohort":{"hand":"right","eye":"right","gender":"male","height":72,"build":"athletic"},
-  "coaching":{
-    "priority_fixes":[
-      {"title":"Early Extension","severity":"High","short":"Hips move toward ball; crowding at impact."},
-      {"title":"Open Face at P6","severity":"Medium","short":"Trail wrist extends too long; face lags shut."}
-    ],
-    "drills":[
-      {"title":"Chair-Butt Drill","fault":"Early Extension","how":"Chair behind hips; light contact P6ÃƒÆ’Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ¢Ã¢”š¬Ã…“P8 (20 reps).","why":"Keeps pelvis back through impact.","ref":"https://youtu.be/dQw4w9WgXcQ"},
-      {"title":"Pump & Pause Shallow","fault":"Open Face / Steep P6","how":"From P4: pause, tuck trail elbow; pump to P6 then go ÃƒÆ’Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ¢Ã¢”š¬Ã‚ 3ÃƒÆ’Ã†’Ãƒ¢Ã¢”š¬Ã¢‚¬10.","why":"Trains inside path & sequence.","ref":"https://youtu.be/dQw4w9WgXcQ"}
-    ]
-  }
-}
-  </script>
-
 <script>
+/* ====== tiny utils ====== */
 const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const band = v => (+v>=75?'ok':+v>=55?'warn':'bad');
 const qp = new URLSearchParams(location.search);
 const reportParam = qp.get('report');
-const fileSrc = (reportParam === 'local') ? null : (reportParam || './report.json');
+const keyParam    = qp.get('key');
 
-const fmt  = v => `${v}%`;
-const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';  // colored bars are back
-const chip = () => 'gchip'; // neutral phase chip
-
-function toYouTubeEmbed(url){
-  try{
-    const u = new URL(url);
-    if (u.hostname.includes('youtube.com')){
-      if (u.pathname === '/watch' && u.searchParams.get('v')) return `https://www.youtube.com/embed/${u.searchParams.get('v')}`;
-      if (u.pathname.startsWith('/embed/')) return url;
-    }
-    if (u.hostname === 'youtu.be') return `https://www.youtube.com/embed/${u.pathname.slice(1)}`;
-  }catch{}
-  return null;
-}
-function openViewerHTML(title, innerHTML){
-  const viewer = document.getElementById('viewer');
-  const body = document.getElementById('viewerBody');
-  body.innerHTML = title ? `<h4>${title}</h4>` + innerHTML : innerHTML;
-  viewer.classList.add('open');
-}
-function openViewer(href){
-  const yt = toYouTubeEmbed(href);
-  if (yt){ openViewerHTML('Video', `<iframe src="${yt}" frameborder="0" allowfullscreen></iframe>`); return; }
-  if (/^https?:/.test(href)){ openViewerHTML('Video', `<video controls playsinline src="${href}"></video>`); return; }
-  window.open(href, '_blank', 'noopener');
-}
-document.addEventListener('click', e=>{ if (e.target.id==='viewer') e.target.classList.remove('open'); });
-
-function metricRow(m){
-  const v = m.value||0;
-  return `<div class="metric"><div class="name">${m.label||m.p}</div><div class="bar"><span class="${band(v)}" style="width:${v}%"></span></div><div class="pct">${fmt(v)}</div></div>`;
-}
-
-// extend short with first sentence of long (to ~140 chars)
-function extendShort(short, long){
-  const max = 140;
-  if (!long) return short||'';
-  if ((short||'').length >= 80) return short;
-  const firstSentence = String(long).split(/(?<=\.)\s+/)[0] || '';
-  const merged = (short? short + ' ÃƒÆ’Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ¢Ã¢”š¬Ã‚ ' : '') + firstSentence;
-  return merged.length > max ? merged.slice(0,max-1)+'ÃƒÆ’Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ”šÃ‚¦' : merged;
-}
-
-function phaseRow(ph,i){
-  const id = ph.id || ('P'+(i+1));
-  const gRaw = String(ph.grade||'').toLowerCase();
-  const gradeText = (gRaw==='good') ? 'GOOD' : 'OK'; // "bad" shown as OK per your preference
-  const ref   = ph.ref || ph.video || ph.video_url || '';
-  const shortTxt = extendShort(ph.short||'', ph.long||'');
-  const longBtn  = ph.long ? `<button class="btn longBtn" data-title="${id} ÃƒÆ’Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ¢Ã¢”š¬Ã‚ ${ph.name||''}" data-text="${(ph.long||'').replace(/"/g,'&quot;')}">Details</button>` : '';
-  const ytBtn    = ref ? `<button class="btn videoBtn" data-href="${ref}">${/youtu(\.be|be\.com)/.test(ref)?'YouTube':'Video'}</button>` : '';
-  return `
-  <details class="panel" ${i===0?'open':''}>
-    <summary>
-      <span class="pnum">${id}</span>
-      <span class="pname">${ph.name||''}</span>
-      <span class="${chip()}">${gradeText}</span>
-      <span class="sub" style="margin-left:8px">${shortTxt}</span>
-      <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </summary>
-    <div class="content">
-      <div class="sub" style="margin-bottom:8px">${shortTxt}</div>
-      ${ph.long?`<div style="margin-bottom:10px">${ph.long}</div>`:''}
-      <div style="display:flex;gap:8px;flex-wrap:wrap">${ytBtn}${longBtn}</div>
-    </div>
-  </details>`;
-}
-
-function metricChip(label, value){ return `<span class="chip">${label}: ${value}</span>`; }
-function listItems(arr){ if(!arr || !arr.length) return '<div class="sub">None listed.</div>'; return '<ul style="margin:0;padding-left:20px">' + arr.map(x=>`<li>${x}</li>`).join('') + '</ul>'; }
-
-function renderSummary(data){
-  const score = (data.power && data.power.score!=null) ? `${data.power.score}%` : 'ÃƒÆ’Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ¢Ã¢”š¬Ã‚';
-  const swings = (data.swings!=null) ? data.swings : 'ÃƒÆ’Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ¢Ã¢”š¬Ã‚';
-  const mode   = document.getElementById('modeLabel').textContent;
-  document.getElementById('summaryBody').innerHTML =
-    `<div class="kv"><b>Swing Score</b> ${score}</div>
-     <div class="kv"><b>Swings</b> ${swings}</div>
-     <div class="kv"><b>Mode</b> ${mode}</div>`;
-}
-
-function renderMeasuredChips(data){
-  const chips = [];
-  (data.position_metrics||[]).forEach(m=>{ if(m && m.label && m.value!=null) chips.push(metricChip(m.label, `${m.value}%`)); });
-  const faceVar = (data.swing_metrics||[]).find(m=>/face.*path|face/i.test(m.label||''));
-  const tempo   = (data.swing_metrics||[]).find(m=>/tempo/i.test(m.label||''));
-  if (tempo && tempo.value!=null) chips.push(metricChip('Tempo', (data.power && data.power.tempo) ? data.power.tempo : `${tempo.value}%`));
-  if (faceVar && faceVar.value!=null) chips.push(metricChip('Face control', `${faceVar.value}%`));
-  document.getElementById('measuredChips').innerHTML = chips.length ? `<div class="chips">${chips.join('')}</div>` : `<div class="sub">No headline metrics.</div>`;
-}
-
-function renderLists(data){
-  const c = data.coaching || {};
-  document.getElementById('fundamentals').innerHTML = listItems(c.fundamentals);
-  document.getElementById('powerErrors').innerHTML  = listItems(c.power_errors);
-  document.getElementById('quickFixes').innerHTML   = listItems(c.quick_fixes);
-}
-
-function renderReport(data){
-  document.getElementById('date').textContent = new Date().toLocaleDateString();
-  document.getElementById('modeLabel').textContent =
-    data.discipline && /putt/i.test(data.discipline) ? 'Putting' :
-    data.discipline && /chip/i.test(data.discipline) ? 'Chipping' : 'Full Swing';
-  if(data.swings!=null){ document.getElementById('swingCount').textContent = String(data.swings); }
-
-  const phases = Array.isArray(data.phases)? data.phases : [];
-  document.getElementById('plist').innerHTML = phases.map(phaseRow).join('') || '<div class="content sub">No phases found in report.</div>';
-
-  document.getElementById('position').innerHTML = (data.position_metrics||[]).map(metricRow).join('') || '<div class="sub">No position metrics.</div>';
-  document.getElementById('swing').innerHTML    = (data.swing_metrics||[]).map(metricRow).join('')    || '<div class="sub">No swing metrics.</div>';
-
-  const p = data.power||{score:0, tempo:'ÃƒÆ’Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ¢Ã¢”š¬Ã‚', release_timing:0};
-  document.getElementById('power').innerHTML = `
-    <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="${band(+p.score||0)}" style="width:${+p.score||0}%"></span></div><div class="pct">${+p.score||0}%</div></div>
-    <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo||'ÃƒÆ’Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ¢Ã¢”š¬Ã‚'}</div></div>
-    <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing||0)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
-
-  renderSummary(data);
-  renderMeasuredChips(data);
-  renderLists(data);
-
-  document.querySelectorAll('.videoBtn').forEach(b=> b.addEventListener('click', ()=> openViewer(b.dataset.href)));
-  document.querySelectorAll('.longBtn').forEach(b=> b.addEventListener('click', ()=> openViewerHTML(b.dataset.title, `<div class="sub">${b.dataset.text}</div>`)));
-}
-
-async function boot(){
-  document.getElementById('date').textContent = new Date().toLocaleDateString();
-
-  // Inline fallback (file:// safe)
-  try{
-    const tag = document.getElementById('vc_inline_json');
-    if (tag && tag.textContent.trim()){
-      const data = JSON.parse(tag.textContent);
-      renderReport(data);
-    }
-  }catch(e){ console.warn('Inline JSON parse failed', e); }
-
-  // Optional fetch (?report=) if running http(s)
-  if (fileSrc && location.protocol.startsWith('http')){
-    try{
-      const res = await fetch(fileSrc, {cache:'no-store'});
-      if(res.ok){
-        const txt = await res.text(); const data = JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
-        renderReport(data);
-        try{ localStorage.setItem('vc_last_report', JSON.stringify(data)); }catch{}
-      }
-    }catch(e){ console.warn('Fetch report failed', e); }
-  }
-}
-boot();
-
-document.getElementById('btnCopy').addEventListener('click', async ()=>{
-  const link = location.href.includes('report=') ? location.href : (location.href + (location.href.includes('?')?'&':'?') + 'report=./report.json');
-  try{ await navigator.clipboard.writeText(link); alert('Share link copied'); }
-  catch{ prompt('Copy link:', link); }
-});
-document.getElementById('btnDownload').addEventListener('click', ()=>{
-  const html = document.documentElement.outerHTML;
-  const blob = new Blob([html], {type:'text/html'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = 'swing-report.html';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-});
-</script>
-<script id="vc-nav-js">
-document.addEventListener('DOMContentLoaded', ()=>{
-  const header=document.getElementById('site-header');
-  const btn=document.getElementById('menuBtn');
-  const nav=document.getElementById('siteNav');
-  if(btn&&nav&&header){
-    btn.addEventListener('click', ()=>{
-      const open=header.classList.toggle('open');
-      btn.setAttribute('aria-expanded', open?'true':'false');
-    });
-    nav.addEventListener('click', e=>{
-      if(e.target&&e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
-    });
-  }
+/* NAV */
+(function(){
+  const header = $('#site-header'); const btn = $('#menuBtn'); const nav = $('#siteNav');
+  btn && btn.addEventListener('click', ()=>{ const open=header.classList.toggle('open'); btn.setAttribute('aria-expanded', open?'true':'false'); });
+  nav && nav.addEventListener('click', e=>{ if (e.target && e.target.tagName==='A'){ header.classList.remove('open'); btn && btn.setAttribute('aria-expanded','false'); }});
+  // highlight current page
   const here=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
   document.querySelectorAll('nav a').forEach(a=>{
     const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
     if(h===here) a.setAttribute('aria-current','page');
   });
-  const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
+})();
+
+/* Viewer */
+function toYouTubeEmbed(url){
+  try{
+    const u=new URL(url);
+    if (u.hostname.includes('youtube.com')) {
+      if (u.pathname==='/watch' && u.searchParams.get('v')) return 'https://www.youtube.com/embed/'+u.searchParams.get('v');
+      if (u.pathname.startsWith('/embed/')) return url;
+    }
+    if (u.hostname==='youtu.be') return 'https://www.youtube.com/embed/'+u.pathname.slice(1);
+  }catch(_){}
+  return null;
+}
+function openViewer(href){
+  const viewer = $('#viewer'), body = $('#viewerBody'); body.innerHTML='';
+  const yt = toYouTubeEmbed(href);
+  if (yt) body.innerHTML = `<iframe src="${esc(yt)}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+  else if (/^https?:/.test(href)) body.innerHTML = `<video controls playsinline src="${esc(href)}"></video>`;
+  else { window.open(href,'_blank','noopener'); return; }
+  viewer.classList.add('open');
+}
+(function(){
+  const vc = $('#viewerClose'), v = $('#viewer');
+  vc && vc.addEventListener('click', ()=> v.classList.remove('open'));
+  v && v.addEventListener('click', e=>{ if(e.target.id==='viewer') v.classList.remove('open'); });
+})();
+
+/* Rows */
+function metricRow(label, value){
+  const v = +value || 0;
+  return `
+    <div class="metric">
+      <div class="name">${esc(label)}</div>
+      <div class="bar"><span class="${band(v)}" style="width:${v}%"></span></div>
+      <div class="pct">${v}%</div>
+    </div>`;
+}
+function phaseRow(p, i){
+  const id    = p.id || ('P'+(i+1));
+  const name  = p.title || p.name || '';
+  const short = p.label || p.short || '';
+  const long  = p.long  || p.description || '';
+  const gRaw  = (p.grade || p.status || 'ok').toString().toLowerCase();
+  const grade = (gRaw==='bad') ? 'NEEDS HELP' : gRaw.toUpperCase();
+  const ref   = p.url || p.ref || p.video || p.video_url || '';
+  const btn   = ref ? `<button class="btn videoBtn" data-href="${esc(ref)}">${/youtu(\.be|be\.com)/.test(ref)?'YouTube':'Video'}</button>` : '';
+  return `
+    <details class="panel" ${i===0?'open':''}>
+      <summary>
+        <span class="pnum">${esc(id)}</span>
+        <span class="pname">${esc(name)}</span>
+        <span class="gchip ${gRaw==='good'?'g-good':gRaw==='ok'?'g-ok':'g-bad'}">${grade}</span>
+        <span class="sub" style="margin-left:8px">${esc(short)}</span>
+        <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </summary>
+      <div class="content">
+        ${short?`<div class="sub" style="margin-bottom:8px">${esc(short)}</div>`:''}
+        ${long?`<div style="margin-bottom:10px">${esc(long)}</div>`:''}
+        ${btn}
+      </div>
+    </details>`;
+}
+
+/* Fundamentals (works if legacy metrics exist) */
+const FUNDAMENTALS_PRIORITY = [
+  {key:'grip',             match:/\bgrip\b/i, unit:''},
+  {key:'posture',          match:/posture|spine\s*angle|setup spine/i, unit:'°'},
+  {key:'club_head_in_out', match:/club[-\s]?head.*(inside|outside)|takeaway.*(inside|outside)|\bP2\b.*(club|shaft)/i, unit:'°'},
+  {key:'shaft_plane',      match:/shaft\s*(plane|pitch|angle)|swing\s*plane/i, unit:'°'},
+  {key:'P4',               match:/\bP4\b|top\b/i, unit:'°'},
+  {key:'P5',               match:/\bP5\b/i, unit:'°'},
+  {key:'P6',               match:/\bP6\b|shaft.*parallel.*down/i, unit:'°'},
+  {key:'P7',               match:/\bP7\b|impact\b/i, unit:'°'},
+  {key:'P8',               match:/\bP8\b/i, unit:'°'},
+  {key:'leg_movement',     match:/leg|knee|pelvis\s*(sway|thrust|slide|rotation)|hip\s*(slide|sway)/i, unit:'°'},
+  {key:'right_arm_bend',   match:/right.*(arm|elbow).*(bend|flex|angle)/i, unit:'°'},
+  {key:'left_arm_bend',    match:/left.*(arm|elbow).*(bend|flex|angle)/i, unit:'°'},
+  {key:'head_movement',    match:/head\s*(movement|drift|tilt|drop|rise|sway)/i, unit:'in'}
+];
+function safeNum(v){ const n = Number(v); return isFinite(n) ? n : null; }
+function collectMetricCandidates(data){
+  const out=[]; const push = arr => { if(!Array.isArray(arr)) return;
+    for(const m of arr){
+      const label = (m.label || m.p || m.name || '');
+      const you = safeNum(m.value);
+      const tour = safeNum(m.tour ?? m.pro ?? m.target ?? (m.ref && m.ref.tour));
+      if (you==null || tour==null) continue;
+      out.push({ label:String(label), you:+you, tour:+tour, unit:m.unit||'' });
+    }
+  };
+  push(data.position_metrics);
+  push(data.swing_metrics);
+  if (data.power && safeNum(data.power.score)!=null){
+    let t = safeNum(data.power.tour); if (t==null) t = 85;
+    out.push({ label:'Power Score', you:+data.power.score, tour:t, unit:'%' });
+  }
+  return out;
+}
+function tagFundamental(cand){
+  const l = cand.label.toLowerCase();
+  for (let i=0;i<FUNDAMENTALS_PRIORITY.length;i++){
+    const f = FUNDAMENTALS_PRIORITY[i];
+    if (f.match.test(l)) return { fkey:f.key, fidx:i, unit:(cand.unit||f.unit||''), label:cand.label, you:cand.you, tour:cand.tour };
+  }
+  return { fkey:null, fidx:999, unit:(cand.unit||''), label:cand.label, you:cand.you, tour:cand.tour };
+}
+function rankFundamentals(data){
+  const cands = collectMetricCandidates(data).map(tagFundamental);
+  for (const c of cands){ c.delta = +(c.you - c.tour).toFixed(1); }
+  const preferred = cands.filter(c=>!!c.fkey)
+                         .sort((a,b)=>(a.fidx-b.fidx)||(Math.abs(b.delta)-Math.abs(a.delta)));
+  const others    = cands.filter(c=>!c.fkey)
+                         .sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+  const all = preferred.concat(others);
+  return { top3: all.slice(0,3), all };
+}
+function deltaRow(d){
+  const cls  = d.delta>0 ? 'dplus' : 'dminus';
+  const sign = d.delta>0 ? '+' : '';
+  const unit = d.unit || '';
+  const nums = `You ${d.you}${unit} • Tour ${d.tour}${unit}`;
+  return `<div class="delta"><div class="name">${esc(d.label)}</div><span class="dchip ${cls}">${sign}${d.delta}${unit}</span><div class="nums">${esc(nums)}</div></div>`;
+}
+
+/* Rendering — supports both ROM and legacy */
+let __lastReport = null;
+
+function renderROM(rom){
+  __lastReport = rom;
+  $('#date').textContent = rom.date || new Date().toLocaleDateString();
+  $('#modeLabel').textContent = rom.mode || 'Full Swing';
+  if (rom.swings!=null) $('#swingCount').textContent = String(rom.swings);
+
+  // P1–P9
+  const phases = Array.isArray(rom.phases) ? rom.phases : [];
+  $('#plist').innerHTML = phases.length ? phases.map(phaseRow).join('') : '<div class="sub">No phases found.</div>';
+
+  // Position consistency
+  const pos = Array.isArray(rom.positionConsistency) ? rom.positionConsistency : [];
+  $('#position').innerHTML = pos.length ? pos.map(p => metricRow(p.position||p.id||p.pos||'', p.value??p.score??0)).join('') : '<div class="sub">No position metrics.</div>';
+
+  // Swing consistency
+  const sv = rom.swingConsistency?.value;
+  $('#swing').innerHTML = (sv!=null) ? metricRow('Swing Consistency', sv) : '<div class="sub">No swing metrics.</div>';
+
+  // Power score
+  const pv = rom.powerScoreSummary?.value;
+  $('#power').innerHTML = (pv!=null) ? metricRow('Power Score', pv) : '<div class="sub">No power metrics.</div>';
+
+  // Tour delta (if present via legacy fields inside rom)
+  const ranked = rankFundamentals(rom || {});
+  $('#cohortLine').textContent = '';
+  $('#tourDelta').innerHTML = ranked.top3.length ? ranked.top3.map(deltaRow).join('') : '<div class="sub">No cohort comparison available yet.</div>';
+  $('#allFundamentals').innerHTML = ranked.all.length ? ranked.all.map(deltaRow).join('') : '<div class="sub">Waiting on more metrics.</div>';
+
+  document.querySelectorAll('.videoBtn').forEach(b => b.addEventListener('click', function(){ openViewer(this.dataset.href); }));
+
+  setPill(true);
+}
+
+function renderLegacy(data){
+  __lastReport = data;
+  $('#date').textContent = new Date().toLocaleDateString();
+  const mode = data.discipline? (/putt/i.test(data.discipline)?'Putting':(/chip/i.test(data.discipline)?'Chipping':'Full Swing')) : 'Full Swing';
+  $('#modeLabel').textContent = mode;
+  if (data.swings!=null) $('#swingCount').textContent = String(data.swings);
+
+  const phases = Array.isArray(data.phases) ? data.phases : [];
+  $('#plist').innerHTML = phases.length ? phases.map(phaseRow).join('') : '<div class="sub">No phases found.</div>';
+
+  $('#position').innerHTML = (data.position_metrics||[]).map(m => metricRow(m.label||m.p||'', m.value)).join('') || '<div class="sub">No position metrics.</div>';
+  $('#swing').innerHTML    = (data.swing_metrics||[]).map(m => metricRow(m.label||m.p||'', m.value)).join('')    || '<div class="sub">No swing metrics.</div>';
+
+  const p = data.power || {score:null, tempo:'—', release_timing:null};
+  $('#power').innerHTML =
+    (p.score!=null ? metricRow('Power Score', p.score) : '') +
+    `<div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${esc(p.tempo||'—')}</div></div>` +
+    (p.release_timing!=null ? metricRow('Release Timing', p.release_timing) : '');
+
+  const ranked = rankFundamentals(data);
+  $('#cohortLine').textContent = '';
+  $('#tourDelta').innerHTML = ranked.top3.length ? ranked.top3.map(deltaRow).join('') : '<div class="sub">No cohort comparison available yet.</div>';
+  $('#allFundamentals').innerHTML = ranked.all.length ? ranked.all.map(deltaRow).join('') : '<div class="sub">Waiting on more metrics.</div>';
+
+  document.querySelectorAll('.videoBtn').forEach(b => b.addEventListener('click', function(){ openViewer(this.dataset.href); }));
+
+  setPill(true);
+}
+
+function setPill(ok){
+  const pill = $('#statusPill');
+  pill.textContent = ok ? 'Loaded ✓' : 'Load failed';
+  pill.style.borderColor = ok ? '#2a6' : 'rgba(255,255,255,.18)';
+  pill.style.background  = ok ? 'rgba(25,195,125,.18)' : 'rgba(255,255,255,.10)';
+}
+
+/* Boot: fetch ?report= URL (ROM), else fall back to report.json (relative) */
+(async function boot(){
+  $('#date').textContent = new Date().toLocaleDateString();
+
+  // help popovers
+  (function(){
+    let openPop=null;
+    function toggle(btn){
+      const id='pop-'+btn.getAttribute('data-pop'); const pop=document.getElementById(id); if(!pop) return;
+      if (openPop && openPop!==pop){ openPop.classList.remove('show'); openPop=null; }
+      pop.classList.toggle('show'); openPop = pop.classList.contains('show') ? pop : null;
+      if (openPop){ const rect=pop.getBoundingClientRect(); if(rect.right>window.innerWidth-8){ pop.style.right=Math.max(0, rect.right-window.innerWidth+16)+'px'; } }
+    }
+    document.querySelectorAll('.qbtn').forEach(q=> q.addEventListener('click', e=>{ e.stopPropagation(); toggle(q); }));
+    document.addEventListener('click', ()=>{ if(openPop){ openPop.classList.remove('show'); openPop=null; }});
+    document.addEventListener('keydown', e=>{ if(e.key==='Escape' && openPop){ openPop.classList.remove('show'); openPop=null; }});
+  })();
+
+  const srcUrl = (reportParam && reportParam !== 'local') ? reportParam : 'report.json';
+  try{
+    const r = await fetch(srcUrl, { cache:'no-store' });
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    const j = await r.json();
+
+    // normalize: ROM {data:{report}} | {report} | raw legacy
+    const rom = j?.data?.report || j?.report;
+    if (rom) renderROM(rom);
+    else renderLegacy(j);
+  } catch (e){
+    setPill(false);
+    $('#plist').innerHTML = '<div class="sub">Failed to load report.</div>';
+    console.error('Report load failed:', e);
+  }
+})();
+
+/* Share / copy */
+function shareUrl(){
+  try{
+    const u = new URL(location.href);
+    if (keyParam){ u.searchParams.set('key', keyParam); u.searchParams.delete('report'); }
+    else if (reportParam){ u.searchParams.set('report', reportParam); }
+    return u.toString();
+  }catch(_){ return location.href; }
+}
+$('#btnCopy')?.addEventListener('click', async ()=>{
+  const link = shareUrl();
+  try{ await navigator.clipboard.writeText(link); alert('Share link copied'); }
+  catch(_){ prompt('Copy link:', link); }
 });
+$('#btnSend')?.addEventListener('click', ()=>{
+  const email = prompt('Coach email (e.g. coach@example.com):'); if(!email) return;
+  const p = __lastReport?.powerScoreSummary?.value ?? __lastReport?.power?.score ?? '-';
+  const subject = encodeURIComponent('Virtual Coach AI Swing Report');
+  const body = encodeURIComponent('Here is my swing report:\n' + shareUrl() + '\n\nPower ' + p + '%\n\n— sent from virtualcoachai.net');
+  location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
+});
+
+/* Download portable HTML (captures rendered content) */
+function buildPortableHtml(){
+  const css = [
+    'body{font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;margin:24px;background:#0b1520;color:#ecf3f7}',
+    '.card{background:#0e1b25;border:1px solid #123;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.3);margin:12px 0}',
+    '.card h3{margin:0;padding:14px 16px;border-bottom:1px solid #123}',
+    '.content{padding:12px 16px}',
+    '.title{font-size:26px;font-weight:800}',
+    '.sub{color:#cfe0e6;font-size:13px}',
+    '.badge{display:inline-block;background:#0d2230;border:1px solid #234;color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}',
+    '.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}',
+    '@media(max-width:960px){.grid2{grid-template-columns:1fr}}',
+    '.metric{display:flex;align-items:center;gap:10px;margin:9px 0}',
+    '.metric .name{flex:0 0 210px;color:#d8ebf2}',
+    '.bar{flex:1;height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}',
+    '.bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px}',
+    '.ok{background:linear-gradient(90deg,#19c37d,#2bd897)}',
+    '.warn{background:linear-gradient(90deg,#f6c453,#ffd479)}',
+    '.bad{background:linear-gradient(90deg,#ff6b6b,#ff8f8f)}',
+    '.pct{width:52px;text-align:right;color:#cfe3ee}',
+    'details.panel{background:#0e1b25;border:1px solid #123;border-radius:12px}',
+    'summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer}',
+    'summary::-webkit-details-marker{display:none}',
+    '.pnum{width:34px;height:34px;border-radius:10px;background:#0c1820;border:1px solid #123;display:grid;place-items:center;font-weight:800}',
+    '.pname{font-weight:700}',
+    '.gchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;margin-left:8px}',
+    '.g-good{background:#19c37d;color:#fff}',
+    '.g-ok{background:#f6c453;color:#2a2300}',
+    '.g-bad{background:#ff6b6b;color:#fff}',
+    '.delta{display:flex;align-items:center;gap:10px;margin:10px 0}',
+    '.delta .name{flex:1;font-weight:700}',
+    '.dchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;border:1px solid #234}',
+    '.dplus{background:rgba(246,196,83,.18);border-color:#b8860b}',
+    '.dminus{background:rgba(25,195,125,.18);border-color:#2a6}'
+  ].join('');
+  const get = id => (document.getElementById(id)?.innerHTML) || '';
+  const getText = id => (document.getElementById(id)?.textContent) || '';
+  const titleBlock = (document.querySelector('.title')?.textContent) || 'Swing Report — P1–P9';
+  const dateTxt = getText('date'); const modeTxt = getText('modeLabel'); const swings = getText('swingCount') || '—';
+  const phases = get('plist'); const pos = get('position'); const swg = get('swing'); const power = get('power');
+  const cohort = get('cohortLine'); const top3 = get('tourDelta'); const allF = get('allFundamentals');
+
+  let json = '{}'; try{ json = JSON.stringify(__lastReport||{}, null, 2).replace(/<\/script>/gi,'<\\/script>'); }catch(_){}
+  const html = [];
+  html.push('<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>');
+  html.push('<title>'+esc(titleBlock)+'</title><style>'+css+'</style></head><body>');
+  html.push('<header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">');
+  html.push('<div><div class="title">'+esc(titleBlock)+'</div><div class="sub">Date: <strong>'+esc(dateTxt)+'</strong> • Mode: <strong>'+esc(modeTxt)+'</strong></div></div>');
+  html.push('<div><span class="badge">Swings: <span>'+esc(swings)+'</span></span></div></header>');
+  html.push('<section class="card"><h3>P1–P9</h3><div class="content">'+phases+'</div></section>');
+  html.push('<section class="grid2"><div class="card"><h3>Position Consistency</h3><div class="content">'+pos+'</div></div>');
+  html.push('<div class="card"><h3>Swing Consistency</h3><div class="content">'+swg+'</div></div></section>');
+  html.push('<section class="card"><h3>Power Score Summary</h3><div class="content">'+power+'</div></section>');
+  html.push('<section class="card"><h3>Tour-Player Delta — Top 3 Fundamentals</h3><div class="content">'+(cohort?('<div class="sub" style="padding-bottom:8px">'+cohort+'</div>'):'')+top3+'</div>');
+  html.push('<details class="panel" style="margin:10px"><summary><span class="pname">See all fundamentals</span></summary><div class="content">'+allF+'</div></details></section>');
+  html.push('<script type="application/json" id="report-data">'+json+'</script></body></html>');
+  return html.join('\n');
+}
+$('#btnDownload')?.addEventListener('click', ()=>{
+  const portable = buildPortableHtml();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([portable], {type:'text/html'}));
+  a.download = 'swing-report.html';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
+});
+
+// footer year
+document.getElementById('y').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
