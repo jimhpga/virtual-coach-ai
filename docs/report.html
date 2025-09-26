@@ -1,9 +1,9 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Virtual Coach AI — Swing Report</title>
+<title>Virtual Coach AI â€” Swing Report</title>
 <link rel="preload" as="image" href="homepage-background.png" />
 <style>
   :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06); --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08); --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);}
@@ -103,7 +103,7 @@
         <img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo-img" />
         <span>Virtual Coach AI</span>
       </a>
-      <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
+      <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu â–¾</button>
       <nav class="nav" id="siteNav" aria-label="Primary">
         <a href="index.html">Home</a>
         <a href="upload.html">Upload</a>
@@ -121,12 +121,12 @@
     <main class="wrap" id="report-root">
       <header class="hdr" style="margin-bottom:10px">
         <div>
-          <div class="title">Swing Report — P1–P9</div>
-          <div class="sub">Date: <span id="date"></span> • Mode: <span id="modeLabel">Full Swing</span></div>
+          <div class="title">Swing Report â€” P1â€“P9</div>
+          <div class="sub">Date: <span id="date"></span> â€¢ Mode: <span id="modeLabel">Full Swing</span></div>
         </div>
         <div>
-          <span class="badge">Swings: <span id="swingCount">—</span></span>
-          <span class="badge" id="statusPill" style="margin-left:8px">Loading…</span>
+          <span class="badge">Swings: <span id="swingCount">â€”</span></span>
+          <span class="badge" id="statusPill" style="margin-left:8px">Loadingâ€¦</span>
         </div>
       </header>
 
@@ -138,9 +138,9 @@
 
       <section class="card" id="phasesCard" style="margin-top:6px">
         <h3 class="hdr">
-          <span>P1–P9</span>
+          <span>P1â€“P9</span>
           <details style="display:inline-block"><summary class="info">Info</summary>
-            <div class="content">Nine checkpoints from setup to finish. Click “Video” to view inside this page.</div>
+            <div class="content">Nine checkpoints from setup to finish. Click â€œVideoâ€ to view inside this page.</div>
           </details>
         </h3>
         <div id="plist" class="content"></div>
@@ -153,11 +153,11 @@
             <button class="qbtn" data-pop="position-consistency" aria-label="What is Position Consistency?">?</button>
             <div class="pop" id="pop-position-consistency">
               <h4>Position Consistency</h4>
-              <p>How reliably each swing matches the target window at the nine P-positions (P1–P9).</p>
+              <p>How reliably each swing matches the target window at the nine P-positions (P1â€“P9).</p>
               <ul>
-                <li><strong>Source:</strong> pose landmarks vs. reference “windows.”</li>
+                <li><strong>Source:</strong> pose landmarks vs. reference â€œwindows.â€</li>
                 <li><strong>Weighting:</strong> P2, P4, P6, P7 count the most (setup, top, shaft-parallel down, impact).</li>
-                <li><strong>Score:</strong> 0–100. 100 = you’re in-window nearly every swing.</li>
+                <li><strong>Score:</strong> 0â€“100. 100 = youâ€™re in-window nearly every swing.</li>
               </ul>
             </div>
           </h3>
@@ -171,7 +171,7 @@
               <h4>Swing Consistency</h4>
               <p>How repeatable your swings are across the session.</p>
               <ul>
-                <li><strong>Tempo ratio</strong> stability (backswing : downswing ≈ 3:1).</li>
+                <li><strong>Tempo ratio</strong> stability (backswing : downswing â‰ˆ 3:1).</li>
                 <li><strong>Club path & face</strong> variance (lower spread is better).</li>
                 <li><strong>Release timing</strong> variance (how consistently you time speed).</li>
               </ul>
@@ -187,10 +187,10 @@
           <button class="qbtn" data-pop="power-summary" aria-label="What is Power Score?">?</button>
           <div class="pop" id="pop-power-summary">
             <h4>Power Score</h4>
-            <p>Composite of speed proxies and sequencing (scaled 0–100).</p>
+            <p>Composite of speed proxies and sequencing (scaled 0â€“100).</p>
             <ul>
-              <li><strong>Kinematic sequence:</strong> pelvis → thorax → arm → club.</li>
-              <li><strong>Speed curve:</strong> build → peak near P7 (impact) without dumping early.</li>
+              <li><strong>Kinematic sequence:</strong> pelvis â†’ thorax â†’ arm â†’ club.</li>
+              <li><strong>Speed curve:</strong> build â†’ peak near P7 (impact) without dumping early.</li>
               <li><strong>Release timing:</strong> later (but controlled) is typically better.</li>
             </ul>
           </div>
@@ -201,13 +201,13 @@
       <!-- Tour-player delta -->
       <section class="card" style="margin-top:12px">
         <h3 class="hdr">
-          <span>Tour-Player Delta — Top 3 Fundamentals</span>
+          <span>Tour-Player Delta â€” Top 3 Fundamentals</span>
           <button class="qbtn" data-pop="delta" aria-label="How we pick these?">?</button>
           <div class="pop" id="pop-delta">
             <h4>What this means</h4>
             <p>We compare your fundamentals to a tour cohort that matches your traits (hand, eye, gender, height, build). The biggest gaps surface first. Close these for the fastest gains.</p>
             <ul>
-              <li><strong>Delta:</strong> You − Tour average (units vary, % or °).</li>
+              <li><strong>Delta:</strong> You âˆ’ Tour average (units vary, % or Â°).</li>
               <li><strong>Method:</strong> Prefer your priority fundamentals; fall back to any available metrics.</li>
             </ul>
           </div>
@@ -234,7 +234,7 @@
               <li><strong>Grip:</strong> relative hand placement & strength.</li>
               <li><strong>Posture:</strong> spine angle & hip hinge at setup.</li>
               <li><strong>Club-head in/out:</strong> takeaway path vs. target line (often at P2).</li>
-              <li><strong>Shaft plane/pitch:</strong> club angle vs. reference plane (P4–P7 checkpoints).</li>
+              <li><strong>Shaft plane/pitch:</strong> club angle vs. reference plane (P4â€“P7 checkpoints).</li>
               <li><strong>P2/P4/P5/P6/P7/P8:</strong> standard swing checkpoints (takeaway, top, mid-down, shaft-parallel down, impact, early finish).</li>
               <li><strong>Leg movement:</strong> knees/pelvis sway & rotation control.</li>
               <li><strong>Arm bend:</strong> right/left elbow flexion control through the swing.</li>
@@ -242,10 +242,10 @@
             </ul>
           </div>
         </h3>
-        <div class="content sub">Tap the “?” anywhere for a plain-English definition.</div>
+        <div class="content sub">Tap the â€œ?â€ anywhere for a plain-English definition.</div>
       </section>
     </main>
-    <footer>© <span id="y"></span> Virtual Coach AI</footer>
+    <footer>Â© <span id="y"></span> Virtual Coach AI</footer>
   </div>
 
   <!-- Modal viewer -->
@@ -343,17 +343,17 @@ function phaseRow(p, i){
 /* Fundamentals (works if legacy metrics exist) */
 const FUNDAMENTALS_PRIORITY = [
   {key:'grip',             match:/\bgrip\b/i, unit:''},
-  {key:'posture',          match:/posture|spine\s*angle|setup spine/i, unit:'°'},
-  {key:'club_head_in_out', match:/club[-\s]?head.*(inside|outside)|takeaway.*(inside|outside)|\bP2\b.*(club|shaft)/i, unit:'°'},
-  {key:'shaft_plane',      match:/shaft\s*(plane|pitch|angle)|swing\s*plane/i, unit:'°'},
-  {key:'P4',               match:/\bP4\b|top\b/i, unit:'°'},
-  {key:'P5',               match:/\bP5\b/i, unit:'°'},
-  {key:'P6',               match:/\bP6\b|shaft.*parallel.*down/i, unit:'°'},
-  {key:'P7',               match:/\bP7\b|impact\b/i, unit:'°'},
-  {key:'P8',               match:/\bP8\b/i, unit:'°'},
-  {key:'leg_movement',     match:/leg|knee|pelvis\s*(sway|thrust|slide|rotation)|hip\s*(slide|sway)/i, unit:'°'},
-  {key:'right_arm_bend',   match:/right.*(arm|elbow).*(bend|flex|angle)/i, unit:'°'},
-  {key:'left_arm_bend',    match:/left.*(arm|elbow).*(bend|flex|angle)/i, unit:'°'},
+  {key:'posture',          match:/posture|spine\s*angle|setup spine/i, unit:'Â°'},
+  {key:'club_head_in_out', match:/club[-\s]?head.*(inside|outside)|takeaway.*(inside|outside)|\bP2\b.*(club|shaft)/i, unit:'Â°'},
+  {key:'shaft_plane',      match:/shaft\s*(plane|pitch|angle)|swing\s*plane/i, unit:'Â°'},
+  {key:'P4',               match:/\bP4\b|top\b/i, unit:'Â°'},
+  {key:'P5',               match:/\bP5\b/i, unit:'Â°'},
+  {key:'P6',               match:/\bP6\b|shaft.*parallel.*down/i, unit:'Â°'},
+  {key:'P7',               match:/\bP7\b|impact\b/i, unit:'Â°'},
+  {key:'P8',               match:/\bP8\b/i, unit:'Â°'},
+  {key:'leg_movement',     match:/leg|knee|pelvis\s*(sway|thrust|slide|rotation)|hip\s*(slide|sway)/i, unit:'Â°'},
+  {key:'right_arm_bend',   match:/right.*(arm|elbow).*(bend|flex|angle)/i, unit:'Â°'},
+  {key:'left_arm_bend',    match:/left.*(arm|elbow).*(bend|flex|angle)/i, unit:'Â°'},
   {key:'head_movement',    match:/head\s*(movement|drift|tilt|drop|rise|sway)/i, unit:'in'}
 ];
 function safeNum(v){ const n = Number(v); return isFinite(n) ? n : null; }
@@ -397,11 +397,11 @@ function deltaRow(d){
   const cls  = d.delta>0 ? 'dplus' : 'dminus';
   const sign = d.delta>0 ? '+' : '';
   const unit = d.unit || '';
-  const nums = `You ${d.you}${unit} • Tour ${d.tour}${unit}`;
+  const nums = `You ${d.you}${unit} â€¢ Tour ${d.tour}${unit}`;
   return `<div class="delta"><div class="name">${esc(d.label)}</div><span class="dchip ${cls}">${sign}${d.delta}${unit}</span><div class="nums">${esc(nums)}</div></div>`;
 }
 
-/* Rendering — supports both ROM and legacy */
+/* Rendering â€” supports both ROM and legacy */
 let __lastReport = null;
 
 function renderROM(rom){
@@ -410,7 +410,7 @@ function renderROM(rom){
   $('#modeLabel').textContent = rom.mode || 'Full Swing';
   if (rom.swings!=null) $('#swingCount').textContent = String(rom.swings);
 
-  // P1–P9
+  // P1â€“P9
   const phases = Array.isArray(rom.phases) ? rom.phases : [];
   $('#plist').innerHTML = phases.length ? phases.map(phaseRow).join('') : '<div class="sub">No phases found.</div>';
 
@@ -450,10 +450,10 @@ function renderLegacy(data){
   $('#position').innerHTML = (data.position_metrics||[]).map(m => metricRow(m.label||m.p||'', m.value)).join('') || '<div class="sub">No position metrics.</div>';
   $('#swing').innerHTML    = (data.swing_metrics||[]).map(m => metricRow(m.label||m.p||'', m.value)).join('')    || '<div class="sub">No swing metrics.</div>';
 
-  const p = data.power || {score:null, tempo:'—', release_timing:null};
+  const p = data.power || {score:null, tempo:'â€”', release_timing:null};
   $('#power').innerHTML =
     (p.score!=null ? metricRow('Power Score', p.score) : '') +
-    `<div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${esc(p.tempo||'—')}</div></div>` +
+    `<div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${esc(p.tempo||'â€”')}</div></div>` +
     (p.release_timing!=null ? metricRow('Release Timing', p.release_timing) : '');
 
   const ranked = rankFundamentals(data);
@@ -468,7 +468,7 @@ function renderLegacy(data){
 
 function setPill(ok){
   const pill = $('#statusPill');
-  pill.textContent = ok ? 'Loaded ✓' : 'Load failed';
+  pill.textContent = ok ? 'Loaded âœ“' : 'Load failed';
   pill.style.borderColor = ok ? '#2a6' : 'rgba(255,255,255,.18)';
   pill.style.background  = ok ? 'rgba(25,195,125,.18)' : 'rgba(255,255,255,.10)';
 }
@@ -526,7 +526,7 @@ $('#btnSend')?.addEventListener('click', ()=>{
   const email = prompt('Coach email (e.g. coach@example.com):'); if(!email) return;
   const p = __lastReport?.powerScoreSummary?.value ?? __lastReport?.power?.score ?? '-';
   const subject = encodeURIComponent('Virtual Coach AI Swing Report');
-  const body = encodeURIComponent('Here is my swing report:\n' + shareUrl() + '\n\nPower ' + p + '%\n\n— sent from virtualcoachai.net');
+  const body = encodeURIComponent('Here is my swing report:\n' + shareUrl() + '\n\nPower ' + p + '%\n\nâ€” sent from virtualcoachai.net');
   location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
 });
 
@@ -567,8 +567,8 @@ function buildPortableHtml(){
   ].join('');
   const get = id => (document.getElementById(id)?.innerHTML) || '';
   const getText = id => (document.getElementById(id)?.textContent) || '';
-  const titleBlock = (document.querySelector('.title')?.textContent) || 'Swing Report — P1–P9';
-  const dateTxt = getText('date'); const modeTxt = getText('modeLabel'); const swings = getText('swingCount') || '—';
+  const titleBlock = (document.querySelector('.title')?.textContent) || 'Swing Report â€” P1â€“P9';
+  const dateTxt = getText('date'); const modeTxt = getText('modeLabel'); const swings = getText('swingCount') || 'â€”';
   const phases = get('plist'); const pos = get('position'); const swg = get('swing'); const power = get('power');
   const cohort = get('cohortLine'); const top3 = get('tourDelta'); const allF = get('allFundamentals');
 
@@ -577,13 +577,13 @@ function buildPortableHtml(){
   html.push('<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>');
   html.push('<title>'+esc(titleBlock)+'</title><style>'+css+'</style></head><body>');
   html.push('<header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">');
-  html.push('<div><div class="title">'+esc(titleBlock)+'</div><div class="sub">Date: <strong>'+esc(dateTxt)+'</strong> • Mode: <strong>'+esc(modeTxt)+'</strong></div></div>');
+  html.push('<div><div class="title">'+esc(titleBlock)+'</div><div class="sub">Date: <strong>'+esc(dateTxt)+'</strong> â€¢ Mode: <strong>'+esc(modeTxt)+'</strong></div></div>');
   html.push('<div><span class="badge">Swings: <span>'+esc(swings)+'</span></span></div></header>');
-  html.push('<section class="card"><h3>P1–P9</h3><div class="content">'+phases+'</div></section>');
+  html.push('<section class="card"><h3>P1â€“P9</h3><div class="content">'+phases+'</div></section>');
   html.push('<section class="grid2"><div class="card"><h3>Position Consistency</h3><div class="content">'+pos+'</div></div>');
   html.push('<div class="card"><h3>Swing Consistency</h3><div class="content">'+swg+'</div></div></section>');
   html.push('<section class="card"><h3>Power Score Summary</h3><div class="content">'+power+'</div></section>');
-  html.push('<section class="card"><h3>Tour-Player Delta — Top 3 Fundamentals</h3><div class="content">'+(cohort?('<div class="sub" style="padding-bottom:8px">'+cohort+'</div>'):'')+top3+'</div>');
+  html.push('<section class="card"><h3>Tour-Player Delta â€” Top 3 Fundamentals</h3><div class="content">'+(cohort?('<div class="sub" style="padding-bottom:8px">'+cohort+'</div>'):'')+top3+'</div>');
   html.push('<details class="panel" style="margin:10px"><summary><span class="pname">See all fundamentals</span></summary><div class="content">'+allF+'</div></details></section>');
   html.push('<script type="application/json" id="report-data">'+json+'</script></body></html>');
   return html.join('\n');
@@ -602,3 +602,4 @@ document.getElementById('y').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
+
