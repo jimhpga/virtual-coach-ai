@@ -1,176 +1,264 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Virtual Coach AI — FAQ</title>
+<link rel="preload" as="image" href="homepage-background.png"/>
 <meta http-equiv="Cache-Control" content="no-store, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-  <meta charset="utf-8" />
-  <title>FAQ — Virtual Coach AI</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="icon" href="favicon.ico">
-  <link rel="preload" as="image" href="homepage-background.png" />
-  <style>
-    :root{
-      --nav: rgba(7,68,32,.96);
-      --scrim: rgba(0,0,0,.05);
-      --panel: rgba(0,0,0,.30);
-      --line: rgba(255,255,255,.12);
-      --text: #f2f7f9;
-      --muted:#cfe0e6;
-      --maxw: 980px;
-      --radius: 14px;
-      --shadow: 0 10px 24px rgba(0,0,0,.22);
-      --accent:#86efac;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; color:var(--text);
-      font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
-      background:url('homepage-background.png') center/cover fixed no-repeat;
-    }
-    .scrim{min-height:100vh;background:var(--scrim)}
-    /* NAV */
-    header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
-    .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
-    .brand-logo{width:160px;height:36px;background:#fff; /* white logo */
+<style>
+  :root{
+    --nav:#0b2b12; --scrim:rgba(0,0,0,.06);
+    --panel:rgba(10,18,24,.24); --line:rgba(255,255,255,.12);
+    --text:#ecf3f7; --muted:#cfe0e6; --radius:14px; --maxw:1040px;
+    --accent:#19c37d; --accent2:#f6c453;
+    --shadow:0 10px 24px rgba(0,0,0,.22);
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{
+    margin:0;color:var(--text);
+    font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
+    background:url('homepage-background.png') center/cover fixed no-repeat;
+  }
+  .scrim{min-height:100vh;background:var(--scrim)}
 
+  /* NAV */
+  header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+  .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .brand-logo{height:36px;width:auto;display:block}
+  nav.nav{display:flex;gap:8px;flex-wrap:wrap}
+  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
+  nav.nav a:hover{background:rgba(255,255,255,.08)}
+  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
 
-    .vh{position:absolute;clip:rect(0 0 0 0);clip-path:inset(50%);width:1px;height:1px;overflow:hidden;white-space:nowrap}
-    nav{display:flex;gap:8px;flex-wrap:wrap}
-    nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
-    nav a:hover{background:rgba(255,255,255,.08)}
-    nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-    /* PAGE */
-    main{width:min(var(--maxw),94%);margin:0 auto;padding:18px 0 40px}
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(2px);box-shadow:var(--shadow);margin:12px 0}
-    h1{margin:6px 0 10px;color:var(--accent)}
-    details{border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.06);margin:10px 0}
-    summary{cursor:pointer;font-weight:800;padding:10px 12px}
-    details > div{padding:0 12px 12px}
-    .a{color:var(--muted);margin-top:6px}
-    footer{width:min(var(--maxw),94%);margin:10px auto 26px;text-align:center;color:#cbd9de;font-size:12px}
-  </style>
-  <script>
-    // Auto-highlight current nav link
-    addEventListener('DOMContentLoaded', ()=>{
-      const here = (location.pathname.split('/').pop() || 'index.html').split('?')[0];
-      document.querySelectorAll('nav a').forEach(a=>{
-        const href = a.getAttribute('href');
-        if(href && href.split('?')[0] === here) a.setAttribute('aria-current','page');
-      });
-      // Footer year
-      const y = document.getElementById('y'); if (y) y.textContent = new Date().getFullYear();
-    });
-  </script>
+  /* PAGE */
+  main{width:min(var(--maxw),94%);margin:0 auto;padding:26px 0 56px;display:grid;gap:18px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);backdrop-filter:blur(2px)}
+  .hero{display:grid;gap:10px}
+  h1{margin:0;font-size:2rem;color:#86efac}
+  h2{margin:0 0 6px;font-size:1.35rem}
+  .muted{color:var(--muted)}
+  .kicker{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#bfe9d4;font-weight:800}
+
+  /* DETAILS / ACCORDION */
+  .faq{display:grid;gap:12px}
+  details{background:rgba(0,0,0,.18);border:1px solid var(--line);border-radius:12px;padding:12px}
+  summary{cursor:pointer;font-weight:700;outline:none}
+  details[open]{background:rgba(0,0,0,.24)}
+  details > div{margin-top:8px;color:#e6f3fa}
+
+  /* Two-column blocks on wide view */
+  .twocol{display:grid;gap:12px}
+  @media(min-width:900px){ .twocol{grid-template-columns:1fr 1fr} }
+
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.12);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:600;display:inline-block}
+  .btn:hover{background:rgba(255,255,255,.18)}
+  .btn.primary{background:color-mix(in srgb, var(--accent) 22%, transparent);border-color:#0a7}
+
+  footer{text-align:center;color:#cbd5cb;font-size:12px;padding:18px 0 26px}
+  .small{font-size:.9rem}
+  ul { margin:8px 0 0 18px }
+</style>
 </head>
 <body>
-  <!-- NAV -->
-  <header>
-<meta http-equiv="Cache-Control" content="no-store, max-age=0">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-    <div class="navwrap">
-<<<<<<< HEAD
-      <!-- Logo only (left) -->
-      <a class="brand" href="index.html" aria-label="Virtual Coach AI">
-        <img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo" />
-        <span class="vh">Virtual Coach AI</span>
-      </a>
-=======
-      <a class="brand" href=""><img src="virtualcoach-logo.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
->>>>>>> ee0fc23 (Swap to <img> logo, remove mask lines, point to virtualcoach-logo.png)
-      <nav aria-label="Primary">
-        <a href="index.html">Home</a>
-        <a href="upload.html">Upload</a>
-        <a href="report.html?report=report.json">Reports</a>
-        <a href="coming-soon.html">Coming&nbsp;Soon</a>
-        <a href="pricing.html">Pricing</a>
-        <a href="faq.html">FAQ</a>
-        <a href="contact.html">Contact</a>
-        <a href="login.html">Login</a>
-      </nav>
-    </div>
-  </header>
+<header class="top">
+  <div class="navwrap">
+    <a class="brand" href="index.html">
+      <img class="brand-logo" src="virtualcoach-logo.png" alt="Virtual Coach AI"/>
+      <span>Virtual Coach AI</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="index.html">Home</a>
+      <a href="upload.html">Upload</a>
+      <a href="report.html?report=report.json">Reports</a>
+      <a href="coming-soon.html">Coming&nbsp;Soon</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="faq.html" aria-current="page">FAQ</a>
+      <a href="contact.html">Contact</a>
+      <a href="login.html">Login</a>
+    </nav>
+  </div>
+</header>
 
-  <div class="scrim">
-    <main>
-      <div class="card">
-        <h1>Frequently Asked Questions</h1>
+<div class="scrim">
+  <main>
+
+    <!-- HERO / ONE-PAGER HISTORY -->
+    <section class="card hero">
+      <div class="kicker">From gut feel to Virtual Coach AI</div>
+      <h1>A short history of golf instruction — and why AI is the next natural step</h1>
+      <p class="muted">
+        Golf coaching started as art and intuition. Then **video** made the invisible visible.
+        **Physics** replaced folklore with ball-flight laws and cause/effect. **Wearables** tracked
+        tempo, load, and patterns so practice became measurable. Now **AI** ties it all together—
+        connecting your swing video, ball flight, club delivery, and on-course stats into one clear,
+        personal plan.
+      </p>
+      <div class="twocol">
+        <div>
+          <h2>What changed with AI?</h2>
+          <ul>
+            <li><strong>Explains the why</strong> behind the what video shows.</li>
+            <li><strong>Prioritizes</strong> the one or two fixes that move your needle.</li>
+            <li><strong>Adapts</strong> drills to your progress and availability.</li>
+            <li><strong>Personalizes</strong> targets and course strategy to <em>your</em> dispersion, not a tour pro’s.</li>
+          </ul>
+        </div>
+        <div>
+          <h2>Why Virtual Coach AI?</h2>
+          <ul>
+            <li><strong>Unified brain:</strong> video + data → one plan in plain English.</li>
+            <li><strong>Physics-first, player-specific:</strong> fundamentals tuned to your mobility and goals.</li>
+            <li><strong>Coach-ready reports:</strong> P1–P9 checkpoints, power/consistency bars, top fixes, drills.</li>
+          </ul>
+          <p><a class="btn primary" href="report.html?report=report.json">Open the sample report</a></p>
+        </div>
+      </div>
+      <p class="small muted">Video made teaching visible. Sensors made it measurable. AI makes it actionable—every session, every swing.</p>
+    </section>
+
+    <!-- CORE FAQ -->
+    <section class="card">
+      <h2 style="margin-bottom:10px">Frequently Asked Questions</h2>
+      <div class="faq">
 
         <details open>
-          <summary>What is Virtual Coach AI?</summary>
-          <div class="a">A simple system that turns your swing video into a structured report (P1–P9 checkpoints), two consistency scores, and a 14-day practice plan you€™ll actually do.</div>
+          <summary>How should I film my swing for the best results?</summary>
+          <div>
+            Face-on <em>or</em> down-the-line both work great. Quick checklist:
+            <ul>
+              <li>Camera at roughly <strong>hip height</strong>, about <strong>8–12 feet</strong> away.</li>
+              <li>Keep the <strong>entire club and hands</strong> in the frame at all times.</li>
+              <li>Aim level: no steep tilt. Lock focus/exposure if you can.</li>
+              <li>60–120fps helps, but standard phone video is fine.</li>
+              <li>Steady mount (tripod, bag clip, or a friend with still hands).</li>
+            </ul>
+            Prefer down-the-line? Stand the camera on the target line, just outside the hands. Face-on? Square to the stance line.
+          </div>
         </details>
 
         <details>
-          <summary>How do I upload my swing?</summary>
-          <div class="a">From the Home page, click <strong>Upload Your Swing</strong>. Face-on and down-the-line angles work best.</div>
+          <summary>What’s inside the report?</summary>
+          <div>
+            A coach-ready breakdown you can act on immediately:
+            <ul>
+              <li><strong>P1–P9</strong> checkpoints with GOOD / OK / NEEDS HELP tags.</li>
+              <li><strong>Position & swing consistency</strong> bars (tempo ratio, release timing, windows).</li>
+              <li><strong>Power Score</strong> summary and top deltas.</li>
+              <li><strong>Top 3 Fundamentals</strong>, <strong>Top 3 Power Errors</strong>, <strong>Top 3 Quick Fixes</strong>, plus <strong>drills</strong>.</li>
+              <li><strong>14-day practice plan</strong> concept to turn fixes into habits.</li>
+            </ul>
+          </div>
         </details>
 
         <details>
-          <summary>What are P1–P9?</summary>
-          <div class="a">Nine checkpoints from setup (P1) to finish (P9). Clear language, quick video references, and one actionable cue per checkpoint.</div>
+          <summary>Does this replace my coach?</summary>
+          <div>
+            No. Virtual Coach AI amplifies great coaching. Share reports, save lesson time for higher-value work,
+            and keep accountability between lessons. Coaches can use our reports as a clean, common language.
+          </div>
         </details>
 
         <details>
-          <summary>What do €œSwing Consistency€ and €œPosition Consistency€ mean?</summary>
-          <div class="a"><strong>Position Consistency</strong> = how reliably you match each P-position. <strong>Swing Consistency</strong> = repeatability of motion patterns across swings (tempo, face, path, etc.).</div>
+          <summary>Which devices and file types are supported?</summary>
+          <div>
+            Modern iOS/Android phones and recent desktop browsers work best. Typical video formats like <strong>.mp4</strong>, <strong>.mov</strong>, and <strong>.m4v</strong> are supported.
+          </div>
         </details>
 
         <details>
-          <summary>Do the scores use real metrics?</summary>
-          <div class="a">Yes. We map measured/estimated metrics to each section (tempo, face-to-path, hand path, pressure shift, etc.). No fluff numbers.</div>
+          <summary>How long does processing take?</summary>
+          <div>
+            In most cases, you’ll see your report <em>within minutes</em> after upload. If the connection is slow or the
+            video is unusually large, it may take longer. You’ll see status updates during processing.
+          </div>
         </details>
 
         <details>
-          <summary>What if I don€™t improve?</summary>
-          <div class="a">Then we simplify until you do. Short blocks, clear constraints, and feedback loops (video + checkpoints) make change stick. If it doesn€™t help your golf, it doesn€™t ship.</div>
+          <summary>How do you handle privacy and data?</summary>
+          <div>
+            Your swings are yours. We store only what’s needed to generate and improve your reports.
+            You can request deletion of your recordings at any time. For coaches/teams, we offer org-level
+            access controls. (More in our Privacy & Terms on release.)
+          </div>
         </details>
 
         <details>
-          <summary>Pricing?</summary>
-          <div class="a">We€™ll announce it soon on the <a href="pricing.html">Pricing</a> page.</div>
+          <summary>What are the pricing options?</summary>
+          <div>
+            We’ll publish specific pricing soon. Planned options include:
+            <ul>
+              <li><strong>One-time report:</strong> $10 per upload</li>
+              <li><strong>Monthly tiers:</strong> Personal plans with more reports & features</li>
+              <li><strong>Annual pass:</strong> Best value for frequent players</li>
+              <li><strong>Coach plan:</strong> Multi-player management & sharing</li>
+              <li><strong>Organization plan:</strong> Academies, HS/College teams, facilities</li>
+            </ul>
+            See <a class="btn" href="pricing.html">Pricing</a> for updates.
+          </div>
         </details>
+
+        <details>
+          <summary>Can juniors use it?</summary>
+          <div>
+            Yes, with parent/guardian consent as required in your region. We also plan junior-friendly summaries
+            and progress visuals (see the Roadmap).
+          </div>
+        </details>
+
+        <details>
+          <summary>What if my range/net space is tight?</summary>
+          <div>
+            Short-space filming (garage nets, basement setups) is fine—just keep the full club in frame and ensure
+            the camera isn’t too close (target ~8–12 ft when possible). If framing is tight, favor face-on.
+          </div>
+        </details>
+
+        <details>
+          <summary>Where can I get help?</summary>
+          <div>
+            Email <a class="btn" href="mailto:support@virtualcoachai.net">support@virtualcoachai.net</a> or DM
+            <a class="btn" href="https://instagram.com/virtualcoachai" target="_blank" rel="noopener">@virtualcoachai</a>.
+            Coaches & partners: ask about early access and white-label options.
+          </div>
+        </details>
+
       </div>
-    </main>
+    </section>
 
-    <footer>&copy; <span id="y"></span> Virtual Coach AI</footer>
-  </div>
-<script id="vc-nav-js">
-document.addEventListener('DOMContentLoaded', ()=>{
-  const header=document.getElementById('site-header');
-  const btn=document.getElementById('menuBtn');
-  const nav=document.getElementById('siteNav');
-  if(btn&&nav&&header){
-    btn.addEventListener('click', ()=>{
-      const open=header.classList.toggle('open');
-      btn.setAttribute('aria-expanded', open?'true':'false');
-    });
-    nav.addEventListener('click', e=>{
-      if(e.target&&e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
-    });
-  }
-  const here=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
+    <!-- QUICK LINKS -->
+    <section class="card twocol">
+      <div>
+        <h2>New here?</h2>
+        <p class="muted">Start with the filming tips, upload a swing, and compare against the sample report.</p>
+        <p>
+          <a class="btn primary" href="upload.html">Upload a swing</a>
+          <a class="btn" href="report.html?report=report.json">Open sample report</a>
+        </p>
+      </div>
+      <div>
+        <h2>For coaches & academies</h2>
+        <p class="muted">Use reports for before/after visuals, remote follow-ups, and consistent language.</p>
+        <p><a class="btn" href="contact.html">Contact us</a> <a class="btn" href="coming-soon.html">See the roadmap</a></p>
+      </div>
+    </section>
+
+  </main>
+  <footer>© <span id="y"></span> Virtual Coach AI • Last updated automatically</footer>
+</div>
+
+<script>
+  document.getElementById('y').textContent = new Date().getFullYear();
+  // highlight current link if loaded from a different path casing
+  const here=(location.pathname.split('/').pop()||'faq.html').split('?')[0].toLowerCase();
   document.querySelectorAll('nav a').forEach(a=>{
     const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
     if(h===here) a.setAttribute('aria-current','page');
   });
-  const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
-});
 </script>
 </body>
 </html>
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> ee0fc23 (Swap to <img> logo, remove mask lines, point to virtualcoach-logo.png)
-
-
-
-
-
-
