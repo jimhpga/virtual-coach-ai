@@ -1,29 +1,21 @@
 ﻿<!doctype html>
 <html lang="en">
 <head>
+<meta charset="utf-8" />
+<title>Virtual Coach AI — Upload</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preload" as="image" href="homepage-background.png" />
 <meta http-equiv="Cache-Control" content="no-store, max-age=0">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta charset="utf-8" />
-<title>Virtual Coach AI â€” Upload</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="preload" as="image" href="homepage-background.png" />
 <style>
-  :root{
-    --nav:#0b2b12; --scrim:rgba(0,0,0,.06); --panel:rgba(10,18,24,.24);
-    --line:rgba(255,255,255,.10); --text:#ecf3f7; --muted:#cfe0e6;
-    --radius:14px; --maxw:1100px; --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b;
-    --shadow:0 10px 28px rgba(0,0,0,.22);
-  }
+  :root{ --nav:#0b2b12; --scrim:rgba(0,0,0,.06); --panel:rgba(10,18,24,.24);
+         --line:rgba(255,255,255,.10); --text:#ecf3f7; --muted:#cfe0e6; --radius:14px; --maxw:1100px;
+         --accent:#19c37d; --accent2:#6aa8ff; --accent3:#f6c453; --shadow:0 10px 28px rgba(0,0,0,.25); }
   *{box-sizing:border-box} html,body{height:100%}
-  body{
-    margin:0;color:var(--text);
-    font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-    background:url('homepage-background.png') center/cover fixed no-repeat;
-  }
+  body{margin:0;color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+       background:url("homepage-background.png") center/cover fixed no-repeat}
   .scrim{min-height:100vh;background:var(--scrim)}
-
-  /* NAV */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
@@ -31,59 +23,39 @@
   nav.nav{display:flex;gap:8px;flex-wrap:wrap}
   nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
   nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-
-  /* Page */
-  main{width:min(var(--maxw),92%);margin:0 auto;padding:22px 0 56px}
-  h1{margin:0 0 8px;color:#86efac}
+  main{width:min(var(--maxw),92%);margin:0 auto;padding:22px 0 56px;display:grid;gap:14px}
+  h1{margin:0 0 6px;color:#86efac}
   .lead{color:var(--muted)}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(1px);box-shadow:var(--shadow)}
-  .row{margin:12px 0}
-
-  /* Uploader */
-  .picker{border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;transition:.15s border-color,.15s background}
-  .picker.drag{border-color:#7ae8b6;background:rgba(25,195,125,.08)}
+  .picker{border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
   input[type=file]{display:none}
-  .badge{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
-  #log{white-space:pre-wrap;background:#0b1520;border:1px solid #123;border-radius:10px;padding:12px;min-height:120px;color:#dfe9f2;font-size:13px}
   .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
   .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6}
-
-  /* Guide */
-  .guide{display:grid;gap:14px;margin-top:14px}
-  @media(min-width:900px){ .guide{grid-template-columns:1fr 1fr} }
-  .gcard h3{margin:0 0 8px;font-size:1.05rem}
-  .list{margin:0;padding:0;list-style:none}
-  .list li{display:flex;gap:10px;align-items:flex-start;margin:8px 0;color:#e6f3f8}
-  .dot{flex:0 0 22px;height:22px;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center}
-  .ok{background:rgba(25,195,125,.15)}
-  .bad{background:rgba(255,107,107,.18)}
-  .muted{color:var(--muted)}
-  .small{font-size:12px}
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-  .chip{border:1px solid var(--line);border-radius:999px;padding:4px 8px;font-size:12px;background:rgba(255,255,255,.06)}
-  .callout{border-left:3px solid #7ae8b6;padding-left:10px}
-  .grid3{display:grid;gap:12px}
-  @media(min-width:900px){ .grid3{grid-template-columns:repeat(3,1fr)} }
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .badge{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
+  #log{white-space:pre-wrap;background:#0b1520;border:1px solid #123;border-radius:10px;padding:12px;min-height:120px;color:#dfe9f2;font-size:13px}
+  .grid{display:grid;gap:12px}
+  @media(min-width:940px){ .grid.two{grid-template-columns:1.1fr .9fr} }
+  .tip{display:flex;gap:10px;align-items:flex-start}
+  .dot{flex:0 0 22px;height:22px;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center;background:rgba(255,255,255,.10)}
+  .dot svg{display:block}
+  .tips h2{margin:0 0 6px;font-size:1.12rem}
   footer{text-align:center;color:#cbd5cb;font-size:12px;padding:18px 0 26px}
 </style>
 <script>
   addEventListener('DOMContentLoaded', ()=>{
     const here=(location.pathname.split('/').pop()||'index.html').split('?')[0];
-    document.querySelectorAll('nav a').forEach(a=>{
-      const h=a.getAttribute('href'); if(h&&h.split('?')[0]===here) a.setAttribute('aria-current','page');
-    });
+    document.querySelectorAll('nav a').forEach(a=>{ const h=a.getAttribute('href'); if(h&&h.split('?')[0]===here) a.setAttribute('aria-current','page'); });
     const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
   });
 </script>
 </head>
 <body>
 <header class="top" id="site-header">
-<meta http-equiv="Cache-Control" content="no-store, max-age=0">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
   <div class="navwrap">
     <a class="brand" href="index.html" aria-label="Virtual Coach AI">
       <img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo" />
+      <span style="color:#fff;font-weight:800">Virtual Coach AI</span>
     </a>
     <nav class="nav" id="siteNav" aria-label="Primary">
       <a href="index.html">Home</a>
@@ -99,149 +71,183 @@
 </header>
 
 <div class="scrim">
-  <main>
-    <h1>Upload â†’ Report â†’ Analyze</h1>
-    <p class="lead">Face-on or down-the-line works best. Keep the camera steady and the whole swing in frame.</p>
-
-    <!-- Uploader -->
+  <main class="grid two">
+    <!-- Left: uploader -->
     <section class="card">
+      <h1>Upload → Report → Analyze</h1>
+      <p class="lead">Pick a single swing video. We’ll upload, analyze, and open your live report automatically.</p>
+
       <div class="picker" id="drop">
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-          <label class="btn" for="file">Choose File</label>
+          <label class="btn" for="file">Choose Video</label>
           <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v" />
           <span class="badge" id="keyBadge">(no file)</span>
         </div>
-        <button id="go" class="btn primary">Upload &amp; Generate Report</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button id="go" class="btn primary" disabled>Upload &amp; Generate Report</button>
+          <a class="btn" href="report.html?report=report.json">Open Sample</a>
+        </div>
       </div>
-      <div class="row small muted">
-        Tip: You can also drag a video anywhere into the box above.
-      </div>
-      <div class="row" id="log">Ready.</div>
+
+      <div id="log" class="card" style="margin-top:12px">Ready.</div>
     </section>
 
-    <!-- Quick Checklist -->
-    <section class="card callout">
-      <h3 style="margin:0 0 6px">Quick checklist (best results)</h3>
-      <div class="chips">
-        <span class="chip">Camera height: <strong>hip-high</strong></span>
-        <span class="chip">Distance: <strong>~8â€“10 ft</strong></span>
-        <span class="chip">Orientation: <strong>landscape</strong></span>
-        <span class="chip">Frame: <strong>feet â†’ clubhead</strong></span>
-        <span class="chip">Lighting: <strong>sun behind camera</strong></span>
-        <span class="chip">Stability: <strong>tripod or bag</strong></span>
-      </div>
-    </section>
+    <!-- Right: filming tips -->
+    <section class="card tips">
+      <h2 style="margin:0 0 10px;font-size:1.25rem;color:#8bf0b9">How to film (best results)</h2>
 
-    <!-- Recording Guide -->
-    <section class="guide">
-      <div class="card gcard">
-        <h3>Face-On (FO)</h3>
-        <ul class="list">
-          <li><span class="dot ok">âœ“</span><div>Stand the camera **across** from your lead hip, about hip height (belt level), ~8â€“10 feet away.</div></li>
-          <li><span class="dot ok">âœ“</span><div>Center your **chest** in frame; include feet at setup and the **full clubhead** at the top/finish.</div></li>
-          <li><span class="dot ok">âœ“</span><div>Keep the lens **level**; set phone to landscape. Use a tripod or lean on your bag for stability.</div></li>
-          <li><span class="dot bad">Ã—</span><div>Donâ€™t shoot from knee or eye levelâ€”angle distortion makes posture and arm angles hard to read.</div></li>
-        </ul>
-        <p class="small muted">Great for: grip, posture, pressure shift, shaft lean at impact, and finish balance.</p>
-      </div>
+      <div class="tip"><span class="dot">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <div><b>Angles:</b> Record <em>Face-On</em> (chest-high camera, square to target) and/or <em>Down-the-Line</em> (behind, on target line).</div></div>
 
-      <div class="card gcard">
-        <h3>Down-the-Line (DTL)</h3>
-        <ul class="list">
-          <li><span class="dot ok">âœ“</span><div>Set the camera **on the hand line** (between feet and ball), hip-high, ~8â€“10 ft behind you.</div></li>
-          <li><span class="dot ok">âœ“</span><div>Aim straight down the **target line**; keep the ball and clubhead visible through the whole swing.</div></li>
-          <li><span class="dot ok">âœ“</span><div>Landscape orientation; keep horizon level to avoid fake â€œflat/steepâ€ reads.</div></li>
-          <li><span class="dot bad">Ã—</span><div>Donâ€™t set the camera too far inside your feet or directly behind the ballâ€”both skew swing-plane visuals.</div></li>
-        </ul>
-        <p class="small muted">Great for: club path, face control, shaft pitch (P2/P6), and alignment.</p>
-      </div>
-    </section>
+      <div class="tip"><span class="dot">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <div><b>Height & Distance:</b> Set camera roughly <em>hip- to chest-high</em>, ~<em>7–9 ft</em> away. Keep the lens level.</div></div>
 
-    <!-- Pro Tips -->
-    <section class="grid3">
-      <div class="card">
-        <h3 style="margin:0 0 6px">Keep the whole club</h3>
-        <p class="muted">Frame **feet to clubhead**. At the top (P4) and finish (P9), the head shouldnâ€™t leave the screen.</p>
-      </div>
-      <div class="card">
-        <h3 style="margin:0 0 6px">Lighting & focus</h3>
-        <p class="muted">Best when the **light is behind the camera**. Tap-to-focus on your chest; avoid heavy backlight.</p>
-      </div>
-      <div class="card">
-        <h3 style="margin:0 0 6px">Playback speed</h3>
-        <p class="muted">Normal speed is perfect. 60fps is nice; super slow-mo is optional and not required.</p>
-      </div>
+      <div class="tip"><span class="dot">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <div><b>Framing:</b> Capture <em>the entire clubhead</em> through the swing, with feet and ball fully in frame.</div></div>
+
+      <div class="tip"><span class="dot">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <div><b>Stability:</b> Use a tripod or prop your phone; bright, even lighting beats slow-mo in the dark.</div></div>
+
+      <div class="tip"><span class="dot">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </span>
+      <div><b>Optional:</b> 60–240fps is great <em>if</em> lighting is solid. Otherwise keep it standard frame-rate to avoid blur.</div></div>
     </section>
   </main>
 
-  <footer>Â© <span id="y"></span> Virtual Coach AI</footer>
+  <footer>© <span id="y"></span> Virtual Coach AI</footer>
 </div>
 
 <script>
-  const drop=document.getElementById('drop');
-  const logEl=document.getElementById('log');
-  const fileEl=document.getElementById('file');
-  const keyBadge=document.getElementById('keyBadge');
+  const logEl = document.getElementById('log');
+  const fileEl = document.getElementById('file');
+  const keyBadge = document.getElementById('keyBadge');
+  const goBtn = document.getElementById('go');
+  const drop = document.getElementById('drop');
 
-  const log=(m)=>{ logEl.textContent += '\\n'+m; logEl.scrollTop=logEl.scrollHeight; };
-  const setKey=(k)=> keyBadge.textContent = k || '(no file)';
-  const okRE=/video\\/|\\.mp4$|\\.mov$|\\.m4v$/i;
+  const log = (m) => { logEl.textContent += '\\n' + m; logEl.scrollTop = logEl.scrollHeight; };
+  const setKey = (k) => { keyBadge.textContent = k || '(no file)'; };
+  const safeName = (s) => (s||'video').replace(/[^a-zA-Z0-9._-]+/g,'_');
 
-  function chosen(f){
-    if(!f){ setKey('(no file)'); return; }
-    if(!okRE.test(f.type) && !okRE.test(f.name)){
+  function onChosen(file){
+    if(!file){ setKey('(no file)'); goBtn.disabled = true; return; }
+    const ok = /video\\//i;
+    if(!ok.test(file.type) && !/\\.(mp4|mov|m4v)$/i.test(file.name)){
       alert('Please choose a video (.mp4, .mov, .m4v).');
-      fileEl.value=''; setKey('(no file)'); return;
+      fileEl.value = ''; setKey('(no file)'); goBtn.disabled = true; return;
     }
-    const safe=f.name.replace(/[^a-zA-Z0-9._-]+/g,'_'); setKey(safe);
+    setKey(safeName(file.name));
+    goBtn.disabled = false;
+  }
+  fileEl.addEventListener('change', e => onChosen(e.target.files[0]));
+
+  // Drag & drop
+  ;['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault(); drop.style.borderColor='#2a6';}));
+  ;['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault(); drop.style.borderColor='rgba(255,255,255,.25)';}));
+  drop.addEventListener('drop', e=>{
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if(f){ fileEl.files = e.dataTransfer.files; onChosen(f); }
+  });
+
+  // --- Upload → Report ---
+  function apiBase(){
+    // On GitHub Pages, send to vercel domain; on vercel/custom domain, use same origin.
+    return location.hostname.endsWith('github.io') ? 'https://virtualcoachai.net' : '';
   }
 
-  fileEl.addEventListener('change', e=> chosen(e.target.files[0]));
+  async function tryEndpoints(fd){
+    // We’ll try a few common endpoints; first one that returns 200/201 wins.
+    const eps = ['/api/upload','/api/analyze','/api/report'];
+    for(const ep of eps){
+      try{
+        const r = await fetch(apiBase()+ep, { method:'POST', body:fd, credentials:'include', mode:'cors' });
+        if(r.status === 202){
+          // Poll a Location if provided
+          const loc = r.headers.get('Location');
+          log('Queued (202). Polling status…');
+          if(loc){
+            for(let i=0;i<20;i++){
+              await new Promise(res=>setTimeout(res, 1000));
+              const s = await fetch(apiBase()+loc, {credentials:'include'});
+              if(s.ok){
+                const j = await s.json().catch(()=>null);
+                if(j && (j.reportUrl || j.url || j.report)){ return j; }
+              }
+            }
+          }
+        }
+        if(r.ok){
+          const j = await r.json().catch(()=>null);
+          if(j) return j;
+        }
+      }catch(e){ /* keep trying */ }
+    }
+    return null;
+  }
 
-  // Drag & Drop
-  ;['dragenter','dragover'].forEach(evt=>{
-    drop.addEventListener(evt, e=>{ e.preventDefault(); e.stopPropagation(); drop.classList.add('drag'); });
-  });
-  ;['dragleave','drop'].forEach(evt=>{
-    drop.addEventListener(evt, e=>{ e.preventDefault(); e.stopPropagation(); drop.classList.remove('drag'); });
-  });
-  drop.addEventListener('drop', e=>{
-    const f=e.dataTransfer.files && e.dataTransfer.files[0];
-    if(f){ fileEl.files=e.dataTransfer.files; chosen(f); }
-  });
+  function deriveReportHref(j){
+    // Accept multiple shapes from the API and convert to report.html?report=…
+    // Examples supported:
+    // { reportUrl: "report.html?report=/tmp/abc.json" }
+    // { url: "https://…/report.html?report=…" }
+    // { report: { json: "/tmp/abc.json" } }
+    // { id: "abc123" } or { key:"abc123" }  => reports/abc123.json
+    if(!j) return null;
 
-  // Demo flow
-  document.getElementById('go').onclick=()=>{
-    const f=fileEl.files[0];
+    // Direct URL (already report.html?report=…)
+    if(j.reportUrl && /report\.html\?report=/i.test(j.reportUrl)) return j.reportUrl;
+    if(j.url && /report\.html\?report=/i.test(j.url)) return j.url;
+
+    // JSON path
+    const jsonPath = j?.report?.json || j?.jsonPath || j?.json || j?.path;
+    if(jsonPath){
+      const p = String(jsonPath);
+      // If absolute URL, keep it; else make relative
+      const q = /^https?:\/\//i.test(p) ? p : p.replace(/^\/+/,'');
+      return 'report.html?report=' + encodeURIComponent(q);
+    }
+
+    // ID / key → standard location
+    const id = j.id || j.key || j.reportKey;
+    if(id){
+      return 'report.html?report=' + encodeURIComponent(`reports/${id}.json`);
+    }
+
+    return null;
+  }
+
+  document.getElementById('go').onclick = async ()=>{
+    const f = fileEl.files[0];
     if(!f){ alert('Pick a video first.'); return; }
-    log('Uploadingâ€¦ (demo: opening sample report)');
-    setTimeout(()=> location.href='report.html?report=report.json', 500);
+
+    goBtn.disabled = true;
+    log('Uploading…');
+
+    const fd = new FormData();
+    fd.append('file', f, safeName(f.name));
+    fd.append('filename', safeName(f.name));
+    // you can add user/session fields here: fd.append('user','…')
+
+    const resp = await tryEndpoints(fd);
+    const href = deriveReportHref(resp);
+
+    if(href){
+      log('Opening your live report…');
+      // If href is absolute report.html?report=http(s)://…, it still works.
+      location.href = href;
+      return;
+    }
+
+    log('API not available, opening sample report.');
+    location.href = 'report.html?report=report.json';
   };
 </script>
-
-<script id="vc-nav-js">
-document.addEventListener('DOMContentLoaded', ()=>{
-  const header=document.getElementById('site-header');
-  const btn=document.getElementById('menuBtn');
-  const nav=document.getElementById('siteNav');
-  if(btn&&nav&&header){
-    btn.addEventListener('click', ()=>{
-      const open=header.classList.toggle('open');
-      btn.setAttribute('aria-expanded', open?'true':'false');
-    });
-    nav.addEventListener('click', e=>{
-      if(e.target&&e.target.tagName==='A'){ header.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
-    });
-  }
-  const here=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
-  document.querySelectorAll('nav a').forEach(a=>{
-    const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
-    if(h===here) a.setAttribute('aria-current','page');
-  });
-  const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
-});
-</script>
-</body>
-</html>
-
-
+</body></html>
