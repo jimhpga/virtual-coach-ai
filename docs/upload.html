@@ -5,13 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Virtual Coach AI — Upload</title>
 <link rel="preload" as="image" href="homepage-background.png"/>
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <style>
-  :root{ --nav:#0b2b12; --scrim:rgba(0,0,0,.06); --panel:rgba(10,18,24,.24);
-         --line:rgba(255,255,255,.10); --text:#ecf3f7; --muted:#cfe0e6; --radius:14px; --maxw:1100px; }
+  :root{
+    --nav:#0b2b12; --scrim:rgba(0,0,0,.06);
+    --panel:rgba(10,18,24,.24); --line:rgba(255,255,255,.10);
+    --text:#ecf3f7; --muted:#cfe0e6; --radius:14px; --maxw:1100px;
+    --accent:#19c37d;
+  }
   *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-       background:url('homepage-background.png') center/cover fixed no-repeat}
+  body{
+    margin:0;color:var(--text);
+    font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
+    background:url('homepage-background.png') center/cover fixed no-repeat;
+  }
   .scrim{min-height:100vh;background:var(--scrim)}
+
+  /* NAV */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;font-weight:800}
@@ -19,23 +31,39 @@
   nav.nav{display:flex;gap:8px;flex-wrap:wrap}
   nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
   nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-  main{width:min(var(--maxw),92%);margin:0 auto;padding:22px 0 56px}
-  h1{margin:0 0 8px;color:#86efac}
-  .lead{color:var(--muted)}
+
+  /* LAYOUT */
+  main{width:min(var(--maxw),92%);margin:0 auto;padding:22px 0 56px;display:grid;gap:14px}
+  h1{margin:0 0 8px;font-size:2.0rem;color:#86efac}
+  .lead{color:var(--muted);margin-bottom:6px}
+
+  /* CARDS */
   .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(1px)}
-  .picker{border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .picker{border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  .picker.drag{outline:2px dashed var(--accent); outline-offset:4px; background:rgba(25,195,125,.06)}
   input[type=file]{display:none}
   .badge{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
-  #log{white-space:pre-wrap;background:#0b1520;border:1px solid #123;border-radius:10px;padding:12px;min-height:120px;color:#dfe9f2;font-size:13px}
   .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
   .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6}
+  .btn.small{padding:6px 10px;font-size:.92rem}
+  #log{white-space:pre-wrap;background:#0b1520;border:1px solid #123;border-radius:10px;padding:12px;min-height:120px;color:#dfe9f2;font-size:13px}
+
+  /* TIPS GRID */
+  .grid{display:grid;gap:12px}
+  @media(min-width:900px){ .grid.two{grid-template-columns:1fr 1fr} }
+  .h2{margin:0 0 6px;font-size:1.15rem}
+  .li{display:flex;gap:10px;align-items:flex-start;margin:8px 0;color:#e6f6ee}
+  .li .dot{flex:0 0 22px;height:22px;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center;background:rgba(255,255,255,.08);font-size:.9rem}
+
   footer{text-align:center;color:#cbd5cb;font-size:12px;padding:18px 0 26px}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="navwrap">
-    <a class="brand" href="index.html"><img src="virtualcoach-logo.png" alt="" class="brand-logo"/><span>Virtual Coach AI</span></a>
+    <a class="brand" href="index.html">
+      <img src="virtualcoach-logo.png" alt="" class="brand-logo"/><span>Virtual Coach AI</span>
+    </a>
     <nav class="nav">
       <a href="index.html">Home</a>
       <a href="upload.html" aria-current="page">Upload</a>
@@ -51,64 +79,125 @@
 
 <div class="scrim">
   <main>
-    <h1>Upload → Status → Report</h1>
-    <p class="lead">Face-on or down-the-line. Camera ~hip-high, ~8–12 ft away. Keep the whole club in frame.</p>
+    <div>
+      <h1>Upload → Status → Report</h1>
+      <p class="lead">Face-on or down-the-line works great. Camera ~<strong>hip-high</strong>, ~<strong>8–12 ft</strong> away. Keep the <strong>entire club</strong> in frame through the swing.</p>
+    </div>
+
+    <!-- Upload widget -->
     <section class="card">
       <div class="picker" id="drop">
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
           <label class="btn" for="file">Choose Video</label>
           <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v"/>
           <span class="badge" id="keyBadge">(no file)</span>
+          <span class="badge">.mp4 / .mov • 15–30s is perfect</span>
         </div>
-        <button id="go" class="btn primary">Upload &amp; Generate Report</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <a class="btn small" href="report.html?report=report.json" title="Open the demo report">Open Sample Report</a>
+          <button id="go" class="btn primary">Upload &amp; Generate Report</button>
+        </div>
       </div>
-      <div class="row" id="log">Ready.</div>
+      <div id="log" style="margin-top:12px">Ready.</div>
+    </section>
+
+    <!-- Capture guidance -->
+    <section class="grid two">
+      <div class="card">
+        <h2 class="h2">🎥 Face-On (front view)</h2>
+        <div class="li"><span class="dot">1</span><div>Camera at <strong>hip height</strong>, straight in front of you (roughly ball-to-target line is left/right across frame).</div></div>
+        <div class="li"><span class="dot">2</span><div><strong>8–12 ft</strong> away. Frame head to feet plus room for the clubhead at the top of the swing.</div></div>
+        <div class="li"><span class="dot">3</span><div>Use <strong>landscape</strong> (horizontal). Lock focus/exposure if your phone allows.</div></div>
+        <div class="li"><span class="dot">4</span><div>Keep the <strong>entire club</strong> visible at address, top, and finish.</div></div>
+      </div>
+
+      <div class="card">
+        <h2 class="h2">📐 Down-The-Line (side view)</h2>
+        <div class="li"><span class="dot">1</span><div>Stand camera on the <strong>hand line</strong> (handle line), not the toe line, aimed through the ball toward the target.</div></div>
+        <div class="li"><span class="dot">2</span><div>Again <strong>hip-high</strong>, <strong>8–12 ft</strong> back. Include your trail foot and top of backswing in the frame.</div></div>
+        <div class="li"><span class="dot">3</span><div>Avoid heavy shadows. If indoors, place light in front of you (behind camera).</div></div>
+        <div class="li"><span class="dot">4</span><div>Tripod/bench is ideal—shaky video = noisy measurements.</div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2 class="h2">✅ Quick checklist</h2>
+      <div class="li"><span class="dot">•</span><div>Turn <strong>slo-mo OFF</strong> — 30/60 fps normal video is perfect and lighter to upload.</div></div>
+      <div class="li"><span class="dot">•</span><div>Hit one swing; trim extra seconds. <strong>15–30s</strong> clips upload fast.</div></div>
+      <div class="li"><span class="dot">•</span><div>For drivers, center the ball and keep tee/club fully visible post-impact.</div></div>
+      <div class="li"><span class="dot">•</span><div>If the range is busy, step back a touch so the whole motion stays in frame.</div></div>
     </section>
   </main>
+
   <footer>© <span id="y"></span> Virtual Coach AI</footer>
 </div>
 
 <script>
-  (function(){
-    const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
-    const logEl=document.getElementById('log');
-    const fileEl=document.getElementById('file');
-    const keyBadge=document.getElementById('keyBadge');
-    const log = m => { logEl.textContent += '\\n' + m; logEl.scrollTop = logEl.scrollHeight; };
-    const setKey = k => keyBadge.textContent = k || '(no file)';
+(function(){
+  // Year
+  const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
 
-    fileEl.addEventListener('change', e=>{
-      const f=e.target.files[0];
-      if(!f){ setKey('(no file)'); return; }
-      const ok=/video\/|\.mp4$|\.mov$|\.m4v$/i;
-      if(!ok.test(f.type)&&!ok.test(f.name)){ alert('Choose a video (.mp4, .mov, .m4v).'); fileEl.value=''; setKey('(no file)'); return; }
-      setKey(f.name.replace(/[^a-zA-Z0-9._-]+/g,'_'));
-    });
+  const logEl=document.getElementById('log');
+  const fileEl=document.getElementById('file');
+  const keyBadge=document.getElementById('keyBadge');
+  const drop=document.getElementById('drop');
 
-    document.getElementById('go').addEventListener('click', async ()=>{
-      const f=fileEl.files[0];
-      if(!f){ alert('Pick a video first.'); return; }
-      log('Uploading…');
-      const r = await fetch('/api/upload', { method:'POST', body:f }).then(r=>r.json()).catch(err=>({error:String(err)}));
-      if(r.error){ log('Error: '+r.error); return; }
-      log('Job created: '+r.jobId+' — checking status…');
+  const log = m => { logEl.textContent += '\\n' + m; logEl.scrollTop = logEl.scrollHeight; };
+  const setKey = k => keyBadge.textContent = k || '(no file)';
 
-      // Poll until done
-      let tries=0;
-      async function poll(){
-        tries++;
-        const s = await fetch(r.statusUrl).then(r=>r.json()).catch(()=>null);
-        if(!s){ log('status check failed'); return setTimeout(poll, 1500); }
-        if(s.state==='done' && s.reportUrl){
-          log('Report ready — opening viewer…');
-          location.href = 'report.html?report=' + encodeURIComponent(s.reportUrl);
-          return;
-        }
-        if(tries<60){ setTimeout(poll, 1500); } else { log('Still processing… keep this tab open.'); setTimeout(poll, 4000); }
+  // Choose file
+  fileEl.addEventListener('change', e=>{
+    const f=e.target.files[0];
+    if(!f){ setKey('(no file)'); return; }
+    const ok=/video\\/|\\.mp4$|\\.mov$|\\.m4v$/i;
+    if(!ok.test(f.type)&&!ok.test(f.name)){
+      alert('Please choose a video (.mp4, .mov, .m4v).');
+      fileEl.value=''; setKey('(no file)'); return;
+    }
+    setKey(f.name.replace(/[^a-zA-Z0-9._-]+/g,'_'));
+  });
+
+  // Drag & drop
+  ;['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev, e=>{
+    e.preventDefault(); e.stopPropagation(); drop.classList.add('drag');
+  }));
+  ;['dragleave','drop'].forEach(ev=>drop.addEventListener(ev, e=>{
+    e.preventDefault(); e.stopPropagation(); drop.classList.remove('drag');
+  }));
+  drop.addEventListener('drop', e=>{
+    const f=e.dataTransfer.files?.[0];
+    if(f){ fileEl.files=e.dataTransfer.files; fileEl.dispatchEvent(new Event('change')); }
+  });
+
+  // Upload flow → /api/upload → poll /api/job-status → open report viewer
+  document.getElementById('go').addEventListener('click', async ()=>{
+    const f=fileEl.files[0];
+    if(!f){ alert('Pick a video first.'); return; }
+    log('Uploading…');
+    let r;
+    try {
+      r = await fetch('/api/upload', { method:'POST', body:f }).then(r=>r.json());
+    } catch (e) {
+      log('Upload error: '+e); return;
+    }
+    if(r.error){ log('Error: '+r.error); return; }
+    log('Job created: '+r.jobId+' — checking status…');
+
+    let tries=0;
+    async function poll(){
+      tries++;
+      const s = await fetch(r.statusUrl).then(r=>r.json()).catch(()=>null);
+      if(!s){ log('Status check failed, retrying…'); return setTimeout(poll, 1500); }
+      if(s.state==='done' && s.reportUrl){
+        log('Report ready — opening viewer…');
+        location.href = 'report.html?report=' + encodeURIComponent(s.reportUrl);
+        return;
       }
-      poll();
-    });
-  })();
+      if(tries<60){ setTimeout(poll, 1500); } else { log('Still processing… keep this tab open.'); setTimeout(poll, 4000); }
+    }
+    poll();
+  });
+})();
 </script>
 </body>
 </html>
