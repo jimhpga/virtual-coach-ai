@@ -192,7 +192,7 @@
     if(f){ validateAndSet(f); fileEl.files = e.dataTransfer.files; }
   });
 
-  // Environment: if running on GitHub Pages, use sample
+  // Environment: GitHub Pages uses sample report
   const isGithubPages = /github\\.io$/i.test(location.host);
 
   btn.addEventListener('click', async ()=>{
@@ -200,7 +200,7 @@
     if(!f){ alert('Pick a video first.'); return; }
 
     if(isGithubPages){
-      log('GitHub Pages environment detected → opening sample report.');
+      log('GitHub Pages detected → opening sample report.');
       location.href='report.html?report=report.json';
       return;
     }
@@ -213,36 +213,36 @@
       log('Uploading…');
       btn.disabled = true;
 
+      // Use absolute path on Vercel (keeps /api separate from /docs)
       const r = await fetch('/api/upload', { method:'POST', body: fd });
       if(!r.ok){
-        log('Upload failed (' + r.status + ').'); alert('Upload failed.'); btn.disabled=false; return;
+        const msg = 'Upload failed (' + r.status + ').';
+        log(msg); alert(msg); btn.disabled=false; return;
       }
       const data = await r.json();
       const { jobId, reportUrl } = data || {};
 
-      log('Processing started' + (jobId ? ' (job '+jobId+')' : '') + '…');
+      log('Processing complete' + (jobId ? ' (job '+jobId+')' : '') + '. Opening report…');
 
-      // If your API returns a direct report URL, use it
+      // ✅ Open viewer with the report URL
       if(reportUrl){
-        location.href = reportUrl;
+        location.href = 'report.html?report=' + encodeURIComponent(reportUrl);
         return;
       }
 
-      // Otherwise open the conventional JSON path (you can change this to your actual output location)
+      // Fallback: conventional path if your analyzer writes to /reports/<jobId>.json
       if(jobId){
-        location.href = `report.html?report=reports/${jobId}.json`;
+        location.href = 'report.html?report=' + encodeURIComponent('reports/' + jobId + '.json');
       }else{
-        // Absolute fallback
-        log('No jobId/reportUrl in response → opening sample report.');
+        log('No jobId/reportUrl → opening sample report.');
         location.href = 'report.html?report=report.json';
       }
     }catch(err){
       console.error(err);
       log('Error: ' + (err && err.message || err));
+      btn.disabled=false;
       if(confirm('Upload failed. Open the sample report instead?')){
         location.href='report.html?report=report.json';
-      }else{
-        btn.disabled=false;
       }
     }
   });
