@@ -1,9 +1,12 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Virtual Coach AI — Swing Report</title>
+<title>Virtual Coach AI â€” Swing Report</title>
 <link rel="preload" as="image" href="homepage-background.png"/>
 <style>
   :root{
@@ -67,7 +70,7 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(max-width:960px){.grid2{grid-template-columns:1fr}}
 
-  /* Bars (“graphs”) */
+  /* Bars (â€œgraphsâ€) */
   .metric{display:flex;align-items:center;gap:10px;margin:9px 0}
   .metric .name{flex:0 0 210px;color:#d8ebf2}
   .bar{flex:1;height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}
@@ -93,12 +96,15 @@
 </head>
 <body>
   <header class="top" id="site-header">
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
     <div class="navwrap">
       <a class="brand" href="index.html">
         <img class="brand-logo" src="virtualcoach-logo.png" alt="Virtual Coach AI"/>
         <span>Virtual Coach AI</span>
       </a>
-      <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
+      <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu â–¾</button>
       <nav class="nav" id="siteNav" aria-label="Primary">
         <a href="index.html">Home</a>
         <a href="upload.html">Upload</a>
@@ -115,13 +121,16 @@
   <div class="scrim">
     <main class="wrap">
       <header class="hdr" style="margin-bottom:10px">
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
         <div>
-          <div class="title">Swing Report — P1–P9</div>
-          <div class="sub">Date: <span id="date"></span> • Mode: <span id="modeLabel">Full Swing</span></div>
+          <div class="title">Swing Report â€” P1â€“P9</div>
+          <div class="sub">Date: <span id="date"></span> â€¢ Mode: <span id="modeLabel">Full Swing</span></div>
         </div>
         <div>
-          <span class="badge">Swings: <span id="swingCount">—</span></span>
-          <span class="badge" id="statusPill" style="margin-left:8px">Loading…</span>
+          <span class="badge">Swings: <span id="swingCount">â€”</span></span>
+          <span class="badge" id="statusPill" style="margin-left:8px">Loadingâ€¦</span>
         </div>
       </header>
 
@@ -131,9 +140,9 @@
         <button id="btnCopy" class="btn">Copy Share Link</button>
       </div>
 
-      <!-- P1–P9 -->
+      <!-- P1â€“P9 -->
       <section class="card" style="margin-top:6px">
-        <h3 class="hdr"><span>P1–P9</span></h3>
+        <h3 class="hdr"><span>P1â€“P9</span></h3>
         <div id="plist" class="content"></div>
       </section>
 
@@ -180,13 +189,16 @@
       </section>
     </main>
 
-    <footer>© <span id="y"></span> Virtual Coach AI</footer>
+    <footer>Â© <span id="y"></span> Virtual Coach AI</footer>
   </div>
 
   <!-- Video modal -->
   <div id="viewer" class="modal" role="dialog" aria-modal="true" aria-label="Video">
     <div class="box">
-      <header class="mh"><h4 style="margin:0">Video</h4><button class="closebtn" id="viewerClose">Close</button></header>
+      <header class="mh">
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0"><h4 style="margin:0">Video</h4><button class="closebtn" id="viewerClose">Close</button></header>
       <div class="content" id="viewerBody"></div>
     </div>
   </div>
@@ -204,8 +216,8 @@ const band = v => (+v>=75 ? 'ok' : +v>=55 ? 'warn' : 'bad');
 function deMoji(s){
   // fix the common mojibake we saw in your JSON
   return String(s ?? '')
-    .replace(/â€”/g,'—').replace(/â€“/g,'–').replace(/â€¦/g,'…')
-    .replace(/Ã—/g,'×').replace(/Â/g,'').replace(/\s+/g,' ').trim();
+    .replace(/Ã¢â‚¬â€/g,'â€”').replace(/Ã¢â‚¬â€œ/g,'â€“').replace(/Ã¢â‚¬Â¦/g,'â€¦')
+    .replace(/Ãƒâ€”/g,'Ã—').replace(/Ã‚/g,'').replace(/\s+/g,' ').trim();
 }
 
 document.getElementById('y').textContent = new Date().getFullYear();
@@ -287,8 +299,8 @@ function drillsBlock(drills){
   return `<ul class="clean">` + drills.map(d=>{
     const bits = [
       deMoji(d.title || d.name || 'Drill'),
-      d.fault ? ` — ${deMoji(d.fault)}` : '',
-      d.how   ? ` — ${deMoji(d.how)}`   : ''
+      d.fault ? ` â€” ${deMoji(d.fault)}` : '',
+      d.how   ? ` â€” ${deMoji(d.how)}`   : ''
     ].join('');
     const ref = d.ref || d.url || d.video;
     const link = ref ? ` <a class="btn" style="padding:2px 8px;margin-left:6px" href="${esc(ref)}" target="_blank" rel="noopener">Video</a>` : '';
@@ -332,7 +344,7 @@ function render(data){
 }
 function setPill(ok){
   const pill = $('#statusPill');
-  pill.textContent = ok ? 'Loaded ✓' : 'Load failed';
+  pill.textContent = ok ? 'Loaded âœ“' : 'Load failed';
   pill.style.borderColor = ok ? '#2a6' : 'rgba(255,255,255,.18)';
   pill.style.background  = ok ? 'rgba(25,195,125,.18)' : 'rgba(255,255,255,.10)';
 }
@@ -367,7 +379,7 @@ $('#btnSend')?.addEventListener('click', ()=>{
   const email = prompt('Coach email (e.g. coach@example.com):'); if(!email) return;
   const p = __lastReport?.powerScoreSummary?.value ?? __lastReport?.power?.score ?? '-';
   const subject = encodeURIComponent('Virtual Coach AI Swing Report');
-  const body = encodeURIComponent('Here is my swing report:\n' + shareUrl() + '\n\nPower ' + p + '%\n\n— sent from virtualcoachai.net');
+  const body = encodeURIComponent('Here is my swing report:\n' + shareUrl() + '\n\nPower ' + p + '%\n\nâ€” sent from virtualcoachai.net');
   location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
 });
 $('#btnDownload')?.addEventListener('click', ()=>{
@@ -375,11 +387,17 @@ $('#btnDownload')?.addEventListener('click', ()=>{
   const sect = id => (document.getElementById(id)?.innerHTML)||'';
   const txt = id => (document.getElementById(id)?.textContent)||'';
   const html = [
-    '<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>',
-    '<title>Virtual Coach AI — Swing Report</title><style>'+css+'</style></head><body style="background:#0b1520">',
+    '<!doctype html><html lang="en"><head>
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0"><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>',
+    '<title>Virtual Coach AI â€” Swing Report</title><style>'+css+'</style></head><body style="background:#0b1520">',
     '<main class="wrap" style="width:900px;max-width:94%;margin:20px auto">',
-    '<header class="hdr" style="margin-bottom:10px"><div><div class="title">Swing Report — P1–P9</div><div class="sub">Date: <strong>'+esc(txt('date'))+'</strong> • Mode: <strong>'+esc(txt('modeLabel'))+'</strong></div></div><div><span class="badge">Swings: <span>'+esc(txt('swingCount'))+'</span></span></div></header>',
-    '<section class="card"><h3>P1–P9</h3><div class="content">'+sect('plist')+'</div></section>',
+    '<header class="hdr" style="margin-bottom:10px">
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0"><div><div class="title">Swing Report â€” P1â€“P9</div><div class="sub">Date: <strong>'+esc(txt('date'))+'</strong> â€¢ Mode: <strong>'+esc(txt('modeLabel'))+'</strong></div></div><div><span class="badge">Swings: <span>'+esc(txt('swingCount'))+'</span></span></div></header>',
+    '<section class="card"><h3>P1â€“P9</h3><div class="content">'+sect('plist')+'</div></section>',
     '<section class="grid2"><div class="card"><h3>Position Consistency</h3><div class="content">'+sect('position')+'</div></div><div class="card"><h3>Swing Consistency</h3><div class="content">'+sect('swing')+'</div></div></section>',
     '<section class="card"><h3>Power Score Summary</h3><div class="content">'+sect('power')+'</div></section>',
     '<section class="card"><h3>Top 3 Fundamentals</h3><div class="content">'+sect('fundamentals')+'</div></section>',
@@ -398,3 +416,4 @@ $('#btnDownload')?.addEventListener('click', ()=>{
 </script>
 </body>
 </html>
+

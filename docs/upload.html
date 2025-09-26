@@ -1,8 +1,11 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta charset="utf-8" />
-<title>Virtual Coach AI — Upload</title>
+<title>Virtual Coach AI â€” Upload</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="preload" as="image" href="homepage-background.png" />
 <style>
@@ -75,6 +78,9 @@
 </head>
 <body>
 <header class="top" id="site-header">
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
   <div class="navwrap">
     <a class="brand" href="index.html" aria-label="Virtual Coach AI">
       <img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo" />
@@ -94,7 +100,7 @@
 
 <div class="scrim">
   <main>
-    <h1>Upload → Report → Analyze</h1>
+    <h1>Upload â†’ Report â†’ Analyze</h1>
     <p class="lead">Face-on or down-the-line works best. Keep the camera steady and the whole swing in frame.</p>
 
     <!-- Uploader -->
@@ -118,9 +124,9 @@
       <h3 style="margin:0 0 6px">Quick checklist (best results)</h3>
       <div class="chips">
         <span class="chip">Camera height: <strong>hip-high</strong></span>
-        <span class="chip">Distance: <strong>~8–10 ft</strong></span>
+        <span class="chip">Distance: <strong>~8â€“10 ft</strong></span>
         <span class="chip">Orientation: <strong>landscape</strong></span>
-        <span class="chip">Frame: <strong>feet → clubhead</strong></span>
+        <span class="chip">Frame: <strong>feet â†’ clubhead</strong></span>
         <span class="chip">Lighting: <strong>sun behind camera</strong></span>
         <span class="chip">Stability: <strong>tripod or bag</strong></span>
       </div>
@@ -131,10 +137,10 @@
       <div class="card gcard">
         <h3>Face-On (FO)</h3>
         <ul class="list">
-          <li><span class="dot ok">✓</span><div>Stand the camera **across** from your lead hip, about hip height (belt level), ~8–10 feet away.</div></li>
-          <li><span class="dot ok">✓</span><div>Center your **chest** in frame; include feet at setup and the **full clubhead** at the top/finish.</div></li>
-          <li><span class="dot ok">✓</span><div>Keep the lens **level**; set phone to landscape. Use a tripod or lean on your bag for stability.</div></li>
-          <li><span class="dot bad">×</span><div>Don’t shoot from knee or eye level—angle distortion makes posture and arm angles hard to read.</div></li>
+          <li><span class="dot ok">âœ“</span><div>Stand the camera **across** from your lead hip, about hip height (belt level), ~8â€“10 feet away.</div></li>
+          <li><span class="dot ok">âœ“</span><div>Center your **chest** in frame; include feet at setup and the **full clubhead** at the top/finish.</div></li>
+          <li><span class="dot ok">âœ“</span><div>Keep the lens **level**; set phone to landscape. Use a tripod or lean on your bag for stability.</div></li>
+          <li><span class="dot bad">Ã—</span><div>Donâ€™t shoot from knee or eye levelâ€”angle distortion makes posture and arm angles hard to read.</div></li>
         </ul>
         <p class="small muted">Great for: grip, posture, pressure shift, shaft lean at impact, and finish balance.</p>
       </div>
@@ -142,10 +148,10 @@
       <div class="card gcard">
         <h3>Down-the-Line (DTL)</h3>
         <ul class="list">
-          <li><span class="dot ok">✓</span><div>Set the camera **on the hand line** (between feet and ball), hip-high, ~8–10 ft behind you.</div></li>
-          <li><span class="dot ok">✓</span><div>Aim straight down the **target line**; keep the ball and clubhead visible through the whole swing.</div></li>
-          <li><span class="dot ok">✓</span><div>Landscape orientation; keep horizon level to avoid fake “flat/steep” reads.</div></li>
-          <li><span class="dot bad">×</span><div>Don’t set the camera too far inside your feet or directly behind the ball—both skew swing-plane visuals.</div></li>
+          <li><span class="dot ok">âœ“</span><div>Set the camera **on the hand line** (between feet and ball), hip-high, ~8â€“10 ft behind you.</div></li>
+          <li><span class="dot ok">âœ“</span><div>Aim straight down the **target line**; keep the ball and clubhead visible through the whole swing.</div></li>
+          <li><span class="dot ok">âœ“</span><div>Landscape orientation; keep horizon level to avoid fake â€œflat/steepâ€ reads.</div></li>
+          <li><span class="dot bad">Ã—</span><div>Donâ€™t set the camera too far inside your feet or directly behind the ballâ€”both skew swing-plane visuals.</div></li>
         </ul>
         <p class="small muted">Great for: club path, face control, shaft pitch (P2/P6), and alignment.</p>
       </div>
@@ -155,7 +161,7 @@
     <section class="grid3">
       <div class="card">
         <h3 style="margin:0 0 6px">Keep the whole club</h3>
-        <p class="muted">Frame **feet to clubhead**. At the top (P4) and finish (P9), the head shouldn’t leave the screen.</p>
+        <p class="muted">Frame **feet to clubhead**. At the top (P4) and finish (P9), the head shouldnâ€™t leave the screen.</p>
       </div>
       <div class="card">
         <h3 style="margin:0 0 6px">Lighting & focus</h3>
@@ -168,7 +174,7 @@
     </section>
   </main>
 
-  <footer>© <span id="y"></span> Virtual Coach AI</footer>
+  <footer>Â© <span id="y"></span> Virtual Coach AI</footer>
 </div>
 
 <script>
@@ -208,7 +214,7 @@
   document.getElementById('go').onclick=()=>{
     const f=fileEl.files[0];
     if(!f){ alert('Pick a video first.'); return; }
-    log('Uploading… (demo: opening sample report)');
+    log('Uploadingâ€¦ (demo: opening sample report)');
     setTimeout(()=> location.href='report.html?report=report.json', 500);
   };
 </script>
@@ -237,4 +243,5 @@ document.addEventListener('DOMContentLoaded', ()=>{
 </script>
 </body>
 </html>
+
 

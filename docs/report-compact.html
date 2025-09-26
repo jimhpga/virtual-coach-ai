@@ -1,4 +1,7 @@
-﻿<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Virtual Coach AI — Swing Report</title><style>
+﻿<!doctype html><html lang="en"><head>
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0"><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Virtual Coach AI — Swing Report</title><style>
 :root{--bg:#0e1a22;--panel:#16242e;--muted:#8aa5b5;--text:#0e1a22;--accent:#5eb3ff;--ok:#19c37d;--warn:#f6c453;--bad:#ff6b6b;--chip:#f2f7fb;--radius:16px;--shadow:0 8px 24px rgba(0,0,0,.25)}
 *{box-sizing:border-box}html,body{height:100%}body{margin:0;color:#0f2330;font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif;background:#e9f4fb}
 .bg{position:fixed;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(255,255,255,.50),rgba(255,255,255,.50)),url('homepage-background.png') center/cover no-repeat fixed,url('/golf-course-bg.jpg') center/cover no-repeat fixed,url('/virtualcoach-bg.png') center/cover no-repeat fixed;background-color:#e9f4fb}
@@ -23,7 +26,10 @@ summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16
 .busy[hidden]{display:none!important}.spinner{width:18px;height:18px;border:3px solid #e0edf5;border-top-color:#5eb3ff;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 </style></head><body data-report-src="reports/demo/report.json"><div class="bg" aria-hidden="true"></div>
 <div id="busy" class="busy" hidden><span class="spinner" aria-hidden="true"></span><span id="busyText">Processing…</span></div>
-<div class="wrap"><header><div><div class="title">Swing Report — P1–P9</div><div class="sub">Date: <span id="date"></span> • Mode: <span id="modeLabel">Full Swing</span></div></div>
+<div class="wrap"><header>
+<meta http-equiv="Cache-Control" content="no-store, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0"><div><div class="title">Swing Report — P1–P9</div><div class="sub">Date: <span id="date"></span> • Mode: <span id="modeLabel">Full Swing</span></div></div>
 <div class="toolbar"><label class="badge">Swings: <span id="swingCount">1</span></label>
 <select id="discipline" class="select" title="Shot type"><option value="full-swing" selected>Full Swing</option><option value="chipping">Chipping</option><option value="putting">Putting</option></select>
 <select id="focus" class="select" title="Focus filter"><option value="all" selected>Focus: All</option><optgroup label="Upper Body"><option value="right-wrist">Right Wrist</option><option value="left-wrist">Left Wrist</option><option value="arm-bend">Arm Bend</option><option value="hand-path">Hand Path</option><option value="shoulder-turn">Shoulder Turn</option></optgroup><optgroup label="Lower Body"><option value="hip-movement">Hip Movement</option><option value="knee-movement">Knee Movement</option><option value="foot-movement">Foot / Pressure</option><option value="lead-leg-brake">Lead Leg Braking</option></optgroup><optgroup label="Club"><option value="club-path">Club Path</option><option value="face-angle">Club Face Angle</option><option value="tempo">Timing & Tempo</option></optgroup></select>
@@ -87,6 +93,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 </script>
 </body></html>
+
 
 
 
