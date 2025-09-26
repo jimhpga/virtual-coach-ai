@@ -18,7 +18,7 @@
   --primary-contrast: #fff;
 
   /* Background image + brightness (edit these) */
-  --bg-image: url('/virtualcoach-bg.png'); /* † swap if needed */
+  --bg-image: url('virtualcoach-bg.png'); /* † swap if needed */
   --bg-brightness: 0.85;
 
   /* Layout */
@@ -244,6 +244,8 @@ p{ margin: 0 0 1em; color: var(--text-color); }
   background-color: transparent !important;
   background-image: none !important;
 }
+
+
 
 
 

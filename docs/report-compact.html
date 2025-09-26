@@ -21,7 +21,7 @@ summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16
 .grid{display:grid;grid-template-columns:1fr;gap:14px}@media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
 .busy{position:fixed;top:12px;right:12px;background:#ffffff;border:1px solid #d3e3ee;border-radius:999px;padding:8px 12px;display:flex;gap:8px;align-items:center;box-shadow:var(--shadow);z-index:10000}
 .busy[hidden]{display:none!important}.spinner{width:18px;height:18px;border:3px solid #e0edf5;border-top-color:#5eb3ff;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
-</style></head><body data-report-src="/reports/demo/report.json"><div class="bg" aria-hidden="true"></div>
+</style></head><body data-report-src="reports/demo/report.json"><div class="bg" aria-hidden="true"></div>
 <div id="busy" class="busy" hidden><span class="spinner" aria-hidden="true"></span><span id="busyText">Processing…</span></div>
 <div class="wrap"><header><div><div class="title">Swing Report — P1–P9</div><div class="sub">Date: <span id="date"></span> • Mode: <span id="modeLabel">Full Swing</span></div></div>
 <div class="toolbar"><label class="badge">Swings: <span id="swingCount">1</span></label>
@@ -87,6 +87,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 </script>
 </body></html>
+
+
 
 
 
