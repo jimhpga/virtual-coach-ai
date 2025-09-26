@@ -4,20 +4,18 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Virtual Coach AI — Swing Report</title>
-<link rel="preload" as="image" href="/homepage-background.png" />
+<link rel="preload" as="image" href="homepage-background.png" />
 <style>
   :root{ --nav:#0b2b12; --brand:#0b2b12; --scrim: rgba(0,0,0,.06); --panel: rgba(10,18,24,.24); --line: rgba(255,255,255,.08); --text:#ecf3f7; --muted:#cfe0e6; --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);}
   *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
+  body{margin:0;color:var(--text);background:url('homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
   .scrim{min-height:100vh;background:var(--scrim)}
 
   /* NAV */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
-  .brand-logo{width:160px;height:36px;background:var(--brand);
-    -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
-            mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;}
+  .brand-logo-img{height:28px;width:auto;display:block}
   .menu-toggle{display:none;align-items:center;gap:8px;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:6px 10px;cursor:pointer}
   nav.nav{display:flex;gap:8px}
   nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
@@ -94,22 +92,27 @@
   .dchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;border:1px solid var(--line)}
   .dplus{background:rgba(246,196,83,.18);border-color:#b8860b}
   .dminus{background:rgba(25,195,125,.18);border-color:#2a6}
+
+  footer{width:min(1080px,92%);margin:24px auto;color:#cfe0e6;font-size:12px}
 </style>
 </head>
 <body>
   <header class="top" id="site-header">
     <div class="navwrap">
-      <a class="brand" href="/"><div class="brand-logo"></div><span>Virtual Coach AI</span></a>
+      <a class="brand" href="index.html" aria-label="Virtual Coach AI">
+        <img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo-img" />
+        <span>Virtual Coach AI</span>
+      </a>
       <button class="menu-toggle" id="menuBtn" aria-expanded="false">Menu ▾</button>
       <nav class="nav" id="siteNav" aria-label="Primary">
-        <a href="/index.html">Home</a>
-        <a href="/upload.html">Upload</a>
-        <a href="/report.html?report=/report.json" aria-current="page">Reports</a>
-        <a href="/coming-soon.html">Coming&nbsp;Soon</a>
-        <a href="/pricing.html">Pricing</a>
-        <a href="/faq.html">FAQ</a>
-        <a href="/contact.html">Contact</a>
-        <a href="/login.html">Login</a>
+        <a href="index.html">Home</a>
+        <a href="upload.html">Upload</a>
+        <a href="report.html?report=report.json" aria-current="page">Reports</a>
+        <a href="coming-soon.html">Coming&nbsp;Soon</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html">Login</a>
       </nav>
     </div>
   </header>
@@ -242,6 +245,7 @@
         <div class="content sub">Tap the “?” anywhere for a plain-English definition.</div>
       </section>
     </main>
+    <footer>© <span id="y"></span> Virtual Coach AI</footer>
   </div>
 
   <!-- Modal viewer -->
@@ -266,6 +270,12 @@ const keyParam    = qp.get('key');
   const header = $('#site-header'); const btn = $('#menuBtn'); const nav = $('#siteNav');
   btn && btn.addEventListener('click', ()=>{ const open=header.classList.toggle('open'); btn.setAttribute('aria-expanded', open?'true':'false'); });
   nav && nav.addEventListener('click', e=>{ if (e.target && e.target.tagName==='A'){ header.classList.remove('open'); btn && btn.setAttribute('aria-expanded','false'); }});
+  // highlight current page
+  const here=(location.pathname.split('/').pop()||'index.html').split('?')[0].toLowerCase();
+  document.querySelectorAll('nav a').forEach(a=>{
+    const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+    if(h===here) a.setAttribute('aria-current','page');
+  });
 })();
 
 /* Viewer */
@@ -377,9 +387,9 @@ function rankFundamentals(data){
   const cands = collectMetricCandidates(data).map(tagFundamental);
   for (const c of cands){ c.delta = +(c.you - c.tour).toFixed(1); }
   const preferred = cands.filter(c=>!!c.fkey)
-                         .sort((a,b)=> (a.fidx-b.fidx) || (Math.abs(b.delta)-Math.abs(a.delta)));
+                         .sort((a,b)=>(a.fidx-b.fidx)||(Math.abs(b.delta)-Math.abs(a.delta)));
   const others    = cands.filter(c=>!c.fkey)
-                         .sort((a,b)=> Math.abs(b.delta)-Math.abs(a.delta));
+                         .sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
   const all = preferred.concat(others);
   return { top3: all.slice(0,3), all };
 }
@@ -418,11 +428,10 @@ function renderROM(rom){
 
   // Tour delta (if present via legacy fields inside rom)
   const ranked = rankFundamentals(rom || {});
-  $('#cohortLine').textContent = ''; // not in ROM by default
+  $('#cohortLine').textContent = '';
   $('#tourDelta').innerHTML = ranked.top3.length ? ranked.top3.map(deltaRow).join('') : '<div class="sub">No cohort comparison available yet.</div>';
   $('#allFundamentals').innerHTML = ranked.all.length ? ranked.all.map(deltaRow).join('') : '<div class="sub">Waiting on more metrics.</div>';
 
-  // Wire video buttons
   document.querySelectorAll('.videoBtn').forEach(b => b.addEventListener('click', function(){ openViewer(this.dataset.href); }));
 
   setPill(true);
@@ -448,7 +457,7 @@ function renderLegacy(data){
     (p.release_timing!=null ? metricRow('Release Timing', p.release_timing) : '');
 
   const ranked = rankFundamentals(data);
-  $('#cohortLine').textContent = ''; // not guaranteed
+  $('#cohortLine').textContent = '';
   $('#tourDelta').innerHTML = ranked.top3.length ? ranked.top3.map(deltaRow).join('') : '<div class="sub">No cohort comparison available yet.</div>';
   $('#allFundamentals').innerHTML = ranked.all.length ? ranked.all.map(deltaRow).join('') : '<div class="sub">Waiting on more metrics.</div>';
 
@@ -464,7 +473,7 @@ function setPill(ok){
   pill.style.background  = ok ? 'rgba(25,195,125,.18)' : 'rgba(255,255,255,.10)';
 }
 
-/* Boot: fetch ?report= URL (ROM), else fall back to /report.json */
+/* Boot: fetch ?report= URL (ROM), else fall back to report.json (relative) */
 (async function boot(){
   $('#date').textContent = new Date().toLocaleDateString();
 
@@ -482,7 +491,7 @@ function setPill(ok){
     document.addEventListener('keydown', e=>{ if(e.key==='Escape' && openPop){ openPop.classList.remove('show'); openPop=null; }});
   })();
 
-  const srcUrl = (reportParam && reportParam !== 'local') ? reportParam : '/report.json';
+  const srcUrl = (reportParam && reportParam !== 'local') ? reportParam : 'report.json';
   try{
     const r = await fetch(srcUrl, { cache:'no-store' });
     if (!r.ok) throw new Error('HTTP '+r.status);
@@ -587,6 +596,9 @@ $('#btnDownload')?.addEventListener('click', ()=>{
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
 });
+
+// footer year
+document.getElementById('y').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
