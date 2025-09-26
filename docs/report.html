@@ -20,6 +20,7 @@
     font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
   }
   .scrim{min-height:100vh;background:var(--scrim)}
+
   /* NAV */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(var(--maxw),92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
@@ -35,7 +36,8 @@
     nav.nav{position:absolute;right:0;top:100%;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1);display:none;flex-direction:column;padding:8px}
     header.top.open nav.nav{display:flex}
   }
-  /* Page */
+
+  /* Layout */
   .wrap{width:min(var(--maxw),92%);margin:0 auto;padding:18px 0 42px}
   .title{font-size:26px;font-weight:800}
   .sub{color:var(--muted);font-size:13px}
@@ -45,10 +47,12 @@
   .btn:hover{background:rgba(255,255,255,.16)}
   .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6}
   .btn.warn{background:rgba(246,196,83,.18);border-color:#b8860b}
+
   .card,details.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px)}
   .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
   .card .content{padding:12px 16px}
   .hdr{display:flex;align-items:center;justify-content:space-between;gap:10px}
+
   summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer}
   summary::-webkit-details-marker{display:none}
   .pnum{width:34px;height:34px;border-radius:10px;background:#0c1820;border:1px solid var(--line);display:grid;place-items:center;font-weight:800}
@@ -59,8 +63,11 @@
   .g-bad{background:#ff6b6b;color:#fff}
   .caret{margin-left:auto;transition:transform .2s}
   details[open] .caret{transform:rotate(180deg)}
+
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(max-width:960px){.grid2{grid-template-columns:1fr}}
+
+  /* Bars (“graphs”) */
   .metric{display:flex;align-items:center;gap:10px;margin:9px 0}
   .metric .name{flex:0 0 210px;color:#d8ebf2}
   .bar{flex:1;height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}
@@ -69,9 +76,11 @@
   .warn{background:linear-gradient(90deg,#f6c453,#ffd479)}
   .bad{background:linear-gradient(90deg,#ff6b6b,#ff8f8f)}
   .pct{width:52px;text-align:right;color:#cfe3ee}
+
   ul.clean{margin:8px 0 0 18px}
   ul.clean li{margin:6px 0}
   footer{width:min(var(--maxw),92%);margin:14px auto 26px;text-align:left;color:#cbd9de;font-size:12px}
+
   /* Modal */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:9999}
   .modal.open{display:flex}
@@ -108,7 +117,7 @@
       <header class="hdr" style="margin-bottom:10px">
         <div>
           <div class="title">Swing Report — P1–P9</div>
-          <div class="sub">Date: <span id="date"></span> — Mode: <span id="modeLabel">Full Swing</span></div>
+          <div class="sub">Date: <span id="date"></span> • Mode: <span id="modeLabel">Full Swing</span></div>
         </div>
         <div>
           <span class="badge">Swings: <span id="swingCount">—</span></span>
@@ -183,16 +192,25 @@
   </div>
 
 <script>
-/* ===== tiny utils ===== */
+/* ===== utils ===== */
 const $ = s => document.querySelector(s);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const band = v => (+v>=75 ? 'ok' : +v>=55 ? 'warn' : 'bad');
 const qp = new URLSearchParams(location.search);
 const reportParam = qp.get('report');
 
+const esc = s => String(s ?? '')
+  .replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const band = v => (+v>=75 ? 'ok' : +v>=55 ? 'warn' : 'bad');
+
+function deMoji(s){
+  // fix the common mojibake we saw in your JSON
+  return String(s ?? '')
+    .replace(/â€”/g,'—').replace(/â€“/g,'–').replace(/â€¦/g,'…')
+    .replace(/Ã—/g,'×').replace(/Â/g,'').replace(/\s+/g,' ').trim();
+}
+
 document.getElementById('y').textContent = new Date().getFullYear();
 
-/* NAV toggle */
+/* NAV */
 (function(){
   const header = $('#site-header'), btn = $('#menuBtn'), nav = $('#siteNav');
   btn && btn.addEventListener('click', ()=>{ const open=header.classList.toggle('open'); btn.setAttribute('aria-expanded', open?'true':'false'); });
@@ -225,21 +243,21 @@ function openViewer(href){
   v && v.addEventListener('click', e=>{ if(e.target.id==='viewer') v.classList.remove('open'); });
 })();
 
-/* Render helpers */
+/* Rows */
 function metricRow(label, value){
   const v = +value || 0;
   return `
     <div class="metric">
-      <div class="name">${esc(label)}</div>
+      <div class="name">${esc(deMoji(label))}</div>
       <div class="bar"><span class="${band(v)}" style="width:${v}%"></span></div>
       <div class="pct">${v}%</div>
     </div>`;
 }
 function phaseRow(p, i){
   const id    = p.id || ('P'+(i+1));
-  const name  = p.title || p.name || '';
-  const short = p.label || p.short || '';
-  const long  = p.long  || p.description || '';
+  const name  = deMoji(p.title || p.name || '');
+  const short = deMoji(p.label || p.short || '');
+  const long  = deMoji(p.long  || p.description || '');
   const gRaw  = (p.grade || p.status || 'ok').toString().toLowerCase();
   const grade = (gRaw==='bad') ? 'NEEDS HELP' : gRaw.toUpperCase();
   const ref   = p.url || p.ref || p.video || p.video_url || '';
@@ -250,7 +268,7 @@ function phaseRow(p, i){
         <span class="pnum">${esc(id)}</span>
         <span class="pname">${esc(name)}</span>
         <span class="gchip ${gRaw==='good'?'g-good':gRaw==='ok'?'g-ok':'g-bad'}">${grade}</span>
-        <span class="sub" style="margin-left:8px">${esc(short)}</span>
+        ${short?`<span class="sub" style="margin-left:8px">${esc(short)}</span>`:''}
         <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </summary>
       <div class="content">
@@ -262,15 +280,15 @@ function phaseRow(p, i){
 }
 function listBlock(items){
   if (!items || !items.length) return '<div class="sub">None listed.</div>';
-  return `<ul class="clean">` + items.map(x=>`<li>${esc(x.title||x.name||x)}</li>`).join('') + `</ul>`;
+  return `<ul class="clean">` + items.map(x=>`<li>${esc(deMoji(x.title||x.name||x))}</li>`).join('') + `</ul>`;
 }
 function drillsBlock(drills){
   if (!drills || !drills.length) return '<div class="sub">None listed.</div>';
   return `<ul class="clean">` + drills.map(d=>{
     const bits = [
-      d.title || d.name || 'Drill',
-      d.fault ? ` — ${d.fault}` : '',
-      d.how   ? ` — ${d.how}`   : ''
+      deMoji(d.title || d.name || 'Drill'),
+      d.fault ? ` — ${deMoji(d.fault)}` : '',
+      d.how   ? ` — ${deMoji(d.how)}`   : ''
     ].join('');
     const ref = d.ref || d.url || d.video;
     const link = ref ? ` <a class="btn" style="padding:2px 8px;margin-left:6px" href="${esc(ref)}" target="_blank" rel="noopener">Video</a>` : '';
@@ -278,36 +296,32 @@ function drillsBlock(drills){
   }).join('') + `</ul>`;
 }
 
-/* Main render (legacy JSON + ROM compatibility) */
+/* Render (legacy + ROM) */
 let __lastReport = null;
 function render(data){
   __lastReport = data;
 
-  // Header bits
-  $('#date').textContent = data.date || new Date().toLocaleDateString();
-  $('#modeLabel').textContent = data.mode || data.discipline || 'Full Swing';
+  $('#date').textContent = deMoji(data.date) || new Date().toLocaleDateString();
+  $('#modeLabel').textContent = deMoji(data.mode || data.discipline || 'Full Swing');
   if (data.swings != null) $('#swingCount').textContent = String(data.swings);
 
-  // Phases
   const phases = Array.isArray(data.phases) ? data.phases : [];
   $('#plist').innerHTML = phases.length ? phases.map(phaseRow).join('') : '<div class="sub">No phases found.</div>';
   document.querySelectorAll('.videoBtn').forEach(b => b.addEventListener('click', function(){ openViewer(this.dataset.href); }));
 
-  // Metrics
   const pos = data.positionConsistency || data.position_metrics || [];
   $('#position').innerHTML = pos.length ? pos.map(m => metricRow(m.label||m.position||m.p||m.name||'', m.value)).join('') : '<div class="sub">No position metrics.</div>';
 
-  const swing = data.swingConsistency ? [{label:'Swing Consistency', value:data.swingConsistency.value}] : (data.swing_metrics || []);
+  const swing = data.swingConsistency ? [{label:'Tempo Ratio', value:data.swingConsistency.value}] : (data.swing_metrics || []);
   $('#swing').innerHTML = swing.length ? swing.map(m => metricRow(m.label||m.name||'', m.value)).join('') : '<div class="sub">No swing metrics.</div>';
 
   const p = data.powerScoreSummary || data.power || {};
   const pHtml =
     (p.value!=null ? metricRow('Power Score', p.value) : (p.score!=null ? metricRow('Power Score', p.score) : '')) +
-    (p.tempo ? `<div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${esc(p.tempo)}</div></div>` : '') +
+    (p.tempo ? `<div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${esc(deMoji(p.tempo))}</div></div>` : '') +
     (p.release_timing!=null ? metricRow('Release Timing', p.release_timing) : '');
   $('#power').innerHTML = pHtml || '<div class="sub">No power metrics.</div>';
 
-  // Lists
   $('#fundamentals').innerHTML = listBlock(data.fundamentals || data.top3_fundamentals || []);
   $('#powerErrors').innerHTML  = listBlock(data.power_errors   || data.errors || data.top3_power_errors || []);
   $('#quickFixes').innerHTML   = listBlock(data.quick_fixes    || data.quickFixes || data.top3_quick_fixes || []);
@@ -331,7 +345,6 @@ function setPill(ok){
     const r = await fetch(srcUrl, {cache:'no-store'});
     if(!r.ok) throw new Error('HTTP '+r.status);
     const j = await r.json();
-    // ROM {data:{report}} | {report} | raw legacy
     render(j?.data?.report || j?.report || j);
   }catch(e){
     console.error(e);
@@ -340,13 +353,10 @@ function setPill(ok){
   }
 })();
 
-/* Share / copy & email */
+/* Share / download */
 function shareUrl(){
-  try{
-    const u = new URL(location.href);
-    if (reportParam) u.searchParams.set('report', reportParam);
-    return u.toString();
-  }catch(_){ return location.href; }
+  try{ const u = new URL(location.href); if (reportParam) u.searchParams.set('report', reportParam); return u.toString(); }
+  catch(_){ return location.href; }
 }
 $('#btnCopy')?.addEventListener('click', async ()=>{
   const link = shareUrl();
@@ -360,37 +370,27 @@ $('#btnSend')?.addEventListener('click', ()=>{
   const body = encodeURIComponent('Here is my swing report:\n' + shareUrl() + '\n\nPower ' + p + '%\n\n— sent from virtualcoachai.net');
   location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
 });
-
-/* Download portable HTML */
-function buildPortableHtml(){
-  const css = document.querySelector('style').textContent;
-  const get = id => (document.getElementById(id)?.innerHTML) || '';
-  const getText = id => (document.getElementById(id)?.textContent) || '';
-  const titleBlock = (document.querySelector('.title')?.textContent) || 'Swing Report — P1–P9';
-  const dateTxt = getText('date'); const modeTxt = getText('modeLabel'); const swings = getText('swingCount') || '—';
-  const phases = get('plist'); const pos = get('position'); const swg = get('swing'); const power = get('power');
-  const f = get('fundamentals'); const pe = get('powerErrors'); const qf = get('quickFixes'); const faults = get('faults'); const drills = get('drills');
-  let json = '{}'; try{ json = JSON.stringify(__lastReport||{}, null, 2).replace(/<\/script>/gi,'<\\/script>'); }catch(_){}
-  return [
-   '<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>',
-   '<title>'+esc(titleBlock)+'</title><style>'+css+'</style></head><body style="background:#0b1520">',
-   '<main class="wrap" style="width:900px;max-width:94%;margin:20px auto">',
-   '<header class="hdr" style="margin-bottom:10px"><div><div class="title">'+esc(titleBlock)+'</div><div class="sub">Date: <strong>'+esc(dateTxt)+'</strong> — Mode: <strong>'+esc(modeTxt)+'</strong></div></div><div><span class="badge">Swings: <span>'+esc(swings)+'</span></span></div></header>',
-   '<section class="card"><h3>P1–P9</h3><div class="content">'+phases+'</div></section>',
-   '<section class="grid2"><div class="card"><h3>Position Consistency</h3><div class="content">'+pos+'</div></div><div class="card"><h3>Swing Consistency</h3><div class="content">'+swg+'</div></div></section>',
-   '<section class="card"><h3>Power Score Summary</h3><div class="content">'+power+'</div></section>',
-   '<section class="card"><h3>Top 3 Fundamentals</h3><div class="content">'+f+'</div></section>',
-   '<section class="card"><h3>Top 3 Power Errors</h3><div class="content">'+pe+'</div></section>',
-   '<section class="card"><h3>Top 3 Quick Fixes</h3><div class="content">'+qf+'</div></section>',
-   '<section class="card"><h3>Faults</h3><div class="content">'+faults+'</div></section>',
-   '<section class="card"><h3>Drills</h3><div class="content">'+drills+'</div></section>',
-   '<script type="application/json" id="report-data">'+json+'</script></main></body></html>'
-  ].join('\n');
-}
 $('#btnDownload')?.addEventListener('click', ()=>{
-  const portable = buildPortableHtml();
+  const css = document.querySelector('style').textContent;
+  const sect = id => (document.getElementById(id)?.innerHTML)||'';
+  const txt = id => (document.getElementById(id)?.textContent)||'';
+  const html = [
+    '<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>',
+    '<title>Virtual Coach AI — Swing Report</title><style>'+css+'</style></head><body style="background:#0b1520">',
+    '<main class="wrap" style="width:900px;max-width:94%;margin:20px auto">',
+    '<header class="hdr" style="margin-bottom:10px"><div><div class="title">Swing Report — P1–P9</div><div class="sub">Date: <strong>'+esc(txt('date'))+'</strong> • Mode: <strong>'+esc(txt('modeLabel'))+'</strong></div></div><div><span class="badge">Swings: <span>'+esc(txt('swingCount'))+'</span></span></div></header>',
+    '<section class="card"><h3>P1–P9</h3><div class="content">'+sect('plist')+'</div></section>',
+    '<section class="grid2"><div class="card"><h3>Position Consistency</h3><div class="content">'+sect('position')+'</div></div><div class="card"><h3>Swing Consistency</h3><div class="content">'+sect('swing')+'</div></div></section>',
+    '<section class="card"><h3>Power Score Summary</h3><div class="content">'+sect('power')+'</div></section>',
+    '<section class="card"><h3>Top 3 Fundamentals</h3><div class="content">'+sect('fundamentals')+'</div></section>',
+    '<section class="card"><h3>Top 3 Power Errors</h3><div class="content">'+sect('powerErrors')+'</div></section>',
+    '<section class="card"><h3>Top 3 Quick Fixes</h3><div class="content">'+sect('quickFixes')+'</div></section>',
+    '<section class="card"><h3>Faults</h3><div class="content">'+sect('faults')+'</div></section>',
+    '<section class="card"><h3>Drills</h3><div class="content">'+sect('drills')+'</div></section>',
+    '</main></body></html>'
+  ].join('\n');
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([portable], {type:'text/html'}));
+  a.href = URL.createObjectURL(new Blob([html], {type:'text/html'}));
   a.download = 'swing-report.html';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
