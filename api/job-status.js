@@ -1,14 +1,12 @@
-// Poll if /reports/<id>.json exists; if yes, return done + URL
+// api/job-status.js
+import { kv } from '@vercel/kv';
+
 export default async function handler(req, res) {
-  const id = (req.query?.id || "").toString();
-  if (!id) return res.status(400).json({ error: "missing id" });
+  const jobId = (req.query.jobId || req.body?.jobId || '').toString();
+  if (!jobId) return res.status(400).json({ error: 'jobId required' });
 
-  const host = process.env.PUBLIC_BASE_URL || `https://${req.headers.host}`;
-  const url = `${host}/reports/${id}.json`;
-  const head = await fetch(url, { method: "HEAD" }).catch(() => null);
+  const job = await kv.hgetall(`job:${jobId}`);
+  if (!job) return res.status(404).json({ error: 'job not found' });
 
-  if (head && head.ok) {
-    return res.status(200).json({ state: "done", reportUrl: `/reports/${id}.json` });
-  }
-  return res.status(200).json({ state: "processing" });
+  res.status(200).json(job);
 }
