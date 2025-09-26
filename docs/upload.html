@@ -1,11 +1,10 @@
-<<<<<<< HEAD
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Virtual Coach AI — Upload</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="preload" as="image" href="homepage-background.png" />
+<link rel="preload" as="image" href="homepage-background.png"/>
 <style>
   :root{ --nav:#0b2b12; --scrim:rgba(0,0,0,.06); --panel:rgba(10,18,24,.24);
          --line:rgba(255,255,255,.10); --text:#ecf3f7; --muted:#cfe0e6; --radius:14px; --maxw:1100px; }
@@ -21,37 +20,23 @@
   nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
   nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
   main{width:min(var(--maxw),92%);margin:0 auto;padding:22px 0 56px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(2px)}
   h1{margin:0 0 8px;color:#86efac}
-  .lead{color:var(--muted);margin:0 0 12px}
-  .grid{display:grid;gap:12px}
-  @media (min-width:880px){ .grid.two{grid-template-columns:1fr 1fr} }
-  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
-  .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6}
+  .lead{color:var(--muted)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(1px)}
   .picker{border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
   input[type=file]{display:none}
   .badge{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
   #log{white-space:pre-wrap;background:#0b1520;border:1px solid #123;border-radius:10px;padding:12px;min-height:120px;color:#dfe9f2;font-size:13px}
-  .steps li{margin:6px 0}
-  .protip{font-size:.95rem;color:#dfe;opacity:.9}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
+  .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6}
   footer{text-align:center;color:#cbd5cb;font-size:12px;padding:18px 0 26px}
 </style>
-<script>
-addEventListener('DOMContentLoaded', ()=>{
-  const here=(location.pathname.split('/').pop()||'index.html').split('?')[0];
-  document.querySelectorAll('nav a').forEach(a=>{ const h=a.getAttribute('href'); if(h&&h.split('?')[0]===here) a.setAttribute('aria-current','page'); });
-  const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
-});
-</script>
 </head>
 <body>
-<header class="top" id="site-header">
+<header class="top">
   <div class="navwrap">
-    <a class="brand" href="index.html" aria-label="Virtual Coach AI">
-      <img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo" />
-      <span>Virtual Coach AI</span>
-    </a>
-    <nav class="nav" id="siteNav" aria-label="Primary">
+    <a class="brand" href="index.html"><img src="virtualcoach-logo.png" alt="" class="brand-logo"/><span>Virtual Coach AI</span></a>
+    <nav class="nav">
       <a href="index.html">Home</a>
       <a href="upload.html" aria-current="page">Upload</a>
       <a href="report.html?report=report.json">Reports</a>
@@ -65,93 +50,65 @@ addEventListener('DOMContentLoaded', ()=>{
 </header>
 
 <div class="scrim">
-  <main class="grid two">
-    <!-- Left: uploader -->
+  <main>
+    <h1>Upload → Status → Report</h1>
+    <p class="lead">Face-on or down-the-line. Camera ~hip-high, ~8–12 ft away. Keep the whole club in frame.</p>
     <section class="card">
-      <h1>Upload → Report → Improve</h1>
-      <p class="lead">Face-on or down-the-line both work. Keep the camera steady and the full club in frame.</p>
-
       <div class="picker" id="drop">
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
           <label class="btn" for="file">Choose Video</label>
-          <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v" />
+          <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v"/>
           <span class="badge" id="keyBadge">(no file)</span>
         </div>
         <button id="go" class="btn primary">Upload &amp; Generate Report</button>
       </div>
-
-      <div id="log" class="card" style="margin-top:12px">Ready.</div>
-    </section>
-
-    <!-- Right: how to film -->
-    <section class="card">
-      <h2 style="margin:0 0 8px">How to film (best results)</h2>
-      <ul class="steps">
-        <li><strong>Angles:</strong> Take <em>Face-On</em> and <em>Down-the-Line</em> (both if possible).</li>
-        <li><strong>Height & distance:</strong> Camera at roughly <em>hip height</em>, about <em>8–10 feet</em> away.</li>
-        <li><strong>Keep the whole swing:</strong> Make sure the <em>entire clubhead</em>, hands and feet stay in frame.</li>
-        <li><strong>Stability:</strong> Use a tripod or prop the phone; avoid zoom; 60 fps if your phone supports it.</li>
-        <li><strong>Lighting:</strong> Avoid strong backlight; bright and even lighting helps the tracker.</li>
-      </ul>
-      <p class="protip">Pro tip: record two swings per angle—if one is shaky, you’ve got a backup.</p>
+      <div class="row" id="log">Ready.</div>
     </section>
   </main>
-
   <footer>© <span id="y"></span> Virtual Coach AI</footer>
 </div>
 
 <script>
-  const logEl=document.getElementById('log');
-  const fileEl=document.getElementById('file');
-  const keyBadge=document.getElementById('keyBadge');
-  const goBtn=document.getElementById('go');
-  const log=(m)=>{logEl.textContent += '\\n'+m; logEl.scrollTop=logEl.scrollHeight;}
-  const setKey=(k)=>{keyBadge.textContent=k||'(no file)'}
+  (function(){
+    const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
+    const logEl=document.getElementById('log');
+    const fileEl=document.getElementById('file');
+    const keyBadge=document.getElementById('keyBadge');
+    const log = m => { logEl.textContent += '\\n' + m; logEl.scrollTop = logEl.scrollHeight; };
+    const setKey = k => keyBadge.textContent = k || '(no file)';
 
-  function chosen(f){
-    if(!f){setKey('(no file)');return}
-    const ok=/video\\/|\\.mp4$|\\.mov$|\\.m4v$/i
-    if(!ok.test(f.type)&&!ok.test(f.name)){alert('Please choose a video (.mp4, .mov, .m4v).');fileEl.value='';setKey('(no file)');return}
-    const safe=f.name.replace(/[^a-zA-Z0-9._-]+/g,'_'); setKey(safe);
-  }
-  fileEl.addEventListener('change',e=>chosen(e.target.files[0]));
+    fileEl.addEventListener('change', e=>{
+      const f=e.target.files[0];
+      if(!f){ setKey('(no file)'); return; }
+      const ok=/video\/|\.mp4$|\.mov$|\.m4v$/i;
+      if(!ok.test(f.type)&&!ok.test(f.name)){ alert('Choose a video (.mp4, .mov, .m4v).'); fileEl.value=''; setKey('(no file)'); return; }
+      setKey(f.name.replace(/[^a-zA-Z0-9._-]+/g,'_'));
+    });
 
-  // If running on GitHub Pages (no server), fall back to sample report.
-  const onGithubPages = /github\\.io$/i.test(location.hostname);
+    document.getElementById('go').addEventListener('click', async ()=>{
+      const f=fileEl.files[0];
+      if(!f){ alert('Pick a video first.'); return; }
+      log('Uploading…');
+      const r = await fetch('/api/upload', { method:'POST', body:f }).then(r=>r.json()).catch(err=>({error:String(err)}));
+      if(r.error){ log('Error: '+r.error); return; }
+      log('Job created: '+r.jobId+' — checking status…');
 
-  goBtn.onclick = async () => {
-    const f=fileEl.files[0];
-    if (!f) { alert('Pick a video first.'); return; }
-
-    if (onGithubPages) {
-      log('Static preview: opening sample report…');
-      setTimeout(()=> location.href='report.html?report=report.json', 400);
-      return;
-    }
-
-    const fd = new FormData(); fd.append('file', f, f.name);
-    log('Uploading…');
-    const up = await fetch('/api/upload', { method:'POST', body: fd });
-    if (!up.ok) { alert('Upload failed'); return; }
-    const { statusUrl } = await up.json();
-    log('Processing…');
-
-    const poll = async () => {
-      const r = await fetch(statusUrl).then(r=>r.json());
-      if (r.state === 'done' && r.reportUrl) {
-        location.href = 'report.html?report=' + encodeURIComponent(r.reportUrl);
-      } else if (r.state === 'error') {
-        alert('Processing error.');
-      } else {
-        setTimeout(poll, 1200);
+      // Poll until done
+      let tries=0;
+      async function poll(){
+        tries++;
+        const s = await fetch(r.statusUrl).then(r=>r.json()).catch(()=>null);
+        if(!s){ log('status check failed'); return setTimeout(poll, 1500); }
+        if(s.state==='done' && s.reportUrl){
+          log('Report ready — opening viewer…');
+          location.href = 'report.html?report=' + encodeURIComponent(s.reportUrl);
+          return;
+        }
+        if(tries<60){ setTimeout(poll, 1500); } else { log('Still processing… keep this tab open.'); setTimeout(poll, 4000); }
       }
-    };
-    poll();
-  };
+      poll();
+    });
+  })();
 </script>
 </body>
 </html>
-=======
-﻿<!doctype html>
-<!-- (paste the entire upload.html from above here) -->
->>>>>>> 7c251c6 (Wire Upload → Status → Report (stubbed backend); route /docs with vercel.json)
