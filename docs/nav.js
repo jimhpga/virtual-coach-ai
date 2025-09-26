@@ -1,4 +1,4 @@
-/* docs/nav.js */
+﻿/* docs/nav.js */
 (function () {
   const css = `
   :root{--nav:#0b2b12;--scrim:rgba(0,0,0,.05);--line:rgba(255,255,255,.12);--text:#ecf3f7;--maxw:1100px}
@@ -25,7 +25,7 @@
         <img class="vc-img" src="virtualcoach-logo-transparent.png" alt="Virtual Coach AI"/>
         <span>Virtual Coach AI</span>
       </a>
-      <button class="vc-btn" id="vc-toggle" aria-expanded="false">Menu ▾</button>
+      <button class="vc-btn" id="vc-toggle" aria-expanded="false">Menu –¾</button>
       <nav class="vc-menu" id="vc-menu" aria-label="Primary">
         <a href="index.html">Home</a>
         <a href="upload.html">Upload</a>
@@ -50,3 +50,4 @@
     if (name===page || (name==='report.html' && page==='report.html')) a.setAttribute('aria-current','page');
   });
 })();
+
