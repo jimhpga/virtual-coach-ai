@@ -36,4 +36,3 @@ $vercel = @'
 '@
 
 Set-Content -Path .\vercel.json -Value $vercel -Encoding utf8
-
