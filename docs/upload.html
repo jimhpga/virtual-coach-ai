@@ -1,15 +1,26 @@
-﻿<!doctype html><html lang="en"><head>
+<!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8" />
 <title>Virtual Coach AI — Upload</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="preload" as="image" href="homepage-background.png" />
 <style>
-  :root{ --nav:#0b2b12; --scrim:rgba(0,0,0,.06); --panel:rgba(10,18,24,.24);
-         --line:rgba(255,255,255,.10); --text:#ecf3f7; --muted:#cfe0e6; --radius:14px; --maxw:1100px; }
+  :root{
+    --nav:#0b2b12; --scrim:rgba(0,0,0,.06); --panel:rgba(10,18,24,.24);
+    --line:rgba(255,255,255,.10); --text:#ecf3f7; --muted:#cfe0e6;
+    --radius:14px; --maxw:1100px; --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b;
+    --shadow:0 10px 28px rgba(0,0,0,.22);
+  }
   *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;color:var(--text);font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-       background:url('homepage-background.png') center/cover fixed no-repeat}
+  body{
+    margin:0;color:var(--text);
+    font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+    background:url('homepage-background.png') center/cover fixed no-repeat;
+  }
   .scrim{min-height:100vh;background:var(--scrim)}
+
+  /* NAV */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
@@ -17,27 +28,52 @@
   nav.nav{display:flex;gap:8px;flex-wrap:wrap}
   nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
   nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+
+  /* Page */
   main{width:min(var(--maxw),92%);margin:0 auto;padding:22px 0 56px}
   h1{margin:0 0 8px;color:#86efac}
   .lead{color:var(--muted)}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(1px)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(1px);box-shadow:var(--shadow)}
   .row{margin:12px 0}
-  .picker{border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+
+  /* Uploader */
+  .picker{border:1px dashed rgba(255,255,255,.25);border-radius:12px;padding:16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;transition:.15s border-color,.15s background}
+  .picker.drag{border-color:#7ae8b6;background:rgba(25,195,125,.08)}
   input[type=file]{display:none}
   .badge{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
   #log{white-space:pre-wrap;background:#0b1520;border:1px solid #123;border-radius:10px;padding:12px;min-height:120px;color:#dfe9f2;font-size:13px}
   .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
   .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6}
+
+  /* Guide */
+  .guide{display:grid;gap:14px;margin-top:14px}
+  @media(min-width:900px){ .guide{grid-template-columns:1fr 1fr} }
+  .gcard h3{margin:0 0 8px;font-size:1.05rem}
+  .list{margin:0;padding:0;list-style:none}
+  .list li{display:flex;gap:10px;align-items:flex-start;margin:8px 0;color:#e6f3f8}
+  .dot{flex:0 0 22px;height:22px;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center}
+  .ok{background:rgba(25,195,125,.15)}
+  .bad{background:rgba(255,107,107,.18)}
+  .muted{color:var(--muted)}
+  .small{font-size:12px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+  .chip{border:1px solid var(--line);border-radius:999px;padding:4px 8px;font-size:12px;background:rgba(255,255,255,.06)}
+  .callout{border-left:3px solid #7ae8b6;padding-left:10px}
+  .grid3{display:grid;gap:12px}
+  @media(min-width:900px){ .grid3{grid-template-columns:repeat(3,1fr)} }
   footer{text-align:center;color:#cbd5cb;font-size:12px;padding:18px 0 26px}
 </style>
 <script>
   addEventListener('DOMContentLoaded', ()=>{
     const here=(location.pathname.split('/').pop()||'index.html').split('?')[0];
-    document.querySelectorAll('nav a').forEach(a=>{ const h=a.getAttribute('href'); if(h&&h.split('?')[0]===here) a.setAttribute('aria-current','page'); });
+    document.querySelectorAll('nav a').forEach(a=>{
+      const h=a.getAttribute('href'); if(h&&h.split('?')[0]===here) a.setAttribute('aria-current','page');
+    });
     const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
   });
 </script>
-</head><body>
+</head>
+<body>
 <header class="top" id="site-header">
   <div class="navwrap">
     <a class="brand" href="index.html" aria-label="Virtual Coach AI">
@@ -55,10 +91,13 @@
     </nav>
   </div>
 </header>
+
 <div class="scrim">
   <main>
     <h1>Upload → Report → Analyze</h1>
-    <p class="lead">Face-on or down-the-line works best. Keep the camera steady and the swing in frame.</p>
+    <p class="lead">Face-on or down-the-line works best. Keep the camera steady and the whole swing in frame.</p>
+
+    <!-- Uploader -->
     <section class="card">
       <div class="picker" id="drop">
         <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
@@ -68,29 +107,112 @@
         </div>
         <button id="go" class="btn primary">Upload &amp; Generate Report</button>
       </div>
+      <div class="row small muted">
+        Tip: You can also drag a video anywhere into the box above.
+      </div>
       <div class="row" id="log">Ready.</div>
     </section>
+
+    <!-- Quick Checklist -->
+    <section class="card callout">
+      <h3 style="margin:0 0 6px">Quick checklist (best results)</h3>
+      <div class="chips">
+        <span class="chip">Camera height: <strong>hip-high</strong></span>
+        <span class="chip">Distance: <strong>~8–10 ft</strong></span>
+        <span class="chip">Orientation: <strong>landscape</strong></span>
+        <span class="chip">Frame: <strong>feet → clubhead</strong></span>
+        <span class="chip">Lighting: <strong>sun behind camera</strong></span>
+        <span class="chip">Stability: <strong>tripod or bag</strong></span>
+      </div>
+    </section>
+
+    <!-- Recording Guide -->
+    <section class="guide">
+      <div class="card gcard">
+        <h3>Face-On (FO)</h3>
+        <ul class="list">
+          <li><span class="dot ok">✓</span><div>Stand the camera **across** from your lead hip, about hip height (belt level), ~8–10 feet away.</div></li>
+          <li><span class="dot ok">✓</span><div>Center your **chest** in frame; include feet at setup and the **full clubhead** at the top/finish.</div></li>
+          <li><span class="dot ok">✓</span><div>Keep the lens **level**; set phone to landscape. Use a tripod or lean on your bag for stability.</div></li>
+          <li><span class="dot bad">×</span><div>Don’t shoot from knee or eye level—angle distortion makes posture and arm angles hard to read.</div></li>
+        </ul>
+        <p class="small muted">Great for: grip, posture, pressure shift, shaft lean at impact, and finish balance.</p>
+      </div>
+
+      <div class="card gcard">
+        <h3>Down-the-Line (DTL)</h3>
+        <ul class="list">
+          <li><span class="dot ok">✓</span><div>Set the camera **on the hand line** (between feet and ball), hip-high, ~8–10 ft behind you.</div></li>
+          <li><span class="dot ok">✓</span><div>Aim straight down the **target line**; keep the ball and clubhead visible through the whole swing.</div></li>
+          <li><span class="dot ok">✓</span><div>Landscape orientation; keep horizon level to avoid fake “flat/steep” reads.</div></li>
+          <li><span class="dot bad">×</span><div>Don’t set the camera too far inside your feet or directly behind the ball—both skew swing-plane visuals.</div></li>
+        </ul>
+        <p class="small muted">Great for: club path, face control, shaft pitch (P2/P6), and alignment.</p>
+      </div>
+    </section>
+
+    <!-- Pro Tips -->
+    <section class="grid3">
+      <div class="card">
+        <h3 style="margin:0 0 6px">Keep the whole club</h3>
+        <p class="muted">Frame **feet to clubhead**. At the top (P4) and finish (P9), the head shouldn’t leave the screen.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 6px">Lighting & focus</h3>
+        <p class="muted">Best when the **light is behind the camera**. Tap-to-focus on your chest; avoid heavy backlight.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 6px">Playback speed</h3>
+        <p class="muted">Normal speed is perfect. 60fps is nice; super slow-mo is optional and not required.</p>
+      </div>
+    </section>
   </main>
+
   <footer>© <span id="y"></span> Virtual Coach AI</footer>
 </div>
+
 <script>
+  const drop=document.getElementById('drop');
   const logEl=document.getElementById('log');
   const fileEl=document.getElementById('file');
   const keyBadge=document.getElementById('keyBadge');
-  const log=(m)=>{logEl.textContent += '\n'+m; logEl.scrollTop=logEl.scrollHeight;}
-  const setKey=(k)=>{keyBadge.textContent=k||'(no file)'}
+
+  const log=(m)=>{ logEl.textContent += '\\n'+m; logEl.scrollTop=logEl.scrollHeight; };
+  const setKey=(k)=> keyBadge.textContent = k || '(no file)';
+  const okRE=/video\\/|\\.mp4$|\\.mov$|\\.m4v$/i;
+
   function chosen(f){
-    if(!f){setKey('(no file)');return}
-    const ok=/video\/|\.mp4$|\.mov$|\.m4v$/i
-    if(!ok.test(f.type)&&!ok.test(f.name)){alert('Please choose a video (.mp4, .mov, .m4v).');fileEl.value='';setKey('(no file)');return}
+    if(!f){ setKey('(no file)'); return; }
+    if(!okRE.test(f.type) && !okRE.test(f.name)){
+      alert('Please choose a video (.mp4, .mov, .m4v).');
+      fileEl.value=''; setKey('(no file)'); return;
+    }
     const safe=f.name.replace(/[^a-zA-Z0-9._-]+/g,'_'); setKey(safe);
   }
-  fileEl.addEventListener('change',e=>chosen(e.target.files[0]));
+
+  fileEl.addEventListener('change', e=> chosen(e.target.files[0]));
+
+  // Drag & Drop
+  ;['dragenter','dragover'].forEach(evt=>{
+    drop.addEventListener(evt, e=>{ e.preventDefault(); e.stopPropagation(); drop.classList.add('drag'); });
+  });
+  ;['dragleave','drop'].forEach(evt=>{
+    drop.addEventListener(evt, e=>{ e.preventDefault(); e.stopPropagation(); drop.classList.remove('drag'); });
+  });
+  drop.addEventListener('drop', e=>{
+    const f=e.dataTransfer.files && e.dataTransfer.files[0];
+    if(f){ fileEl.files=e.dataTransfer.files; chosen(f); }
+  });
+
+  // Demo flow
   document.getElementById('go').onclick=()=>{
-    const f=fileEl.files[0]; if(!f){alert('Pick a video first.'); return;}
-    log('Demo mode: opening sample report…'); setTimeout(()=> location.href='report.html?report=report.json', 500);
+    const f=fileEl.files[0];
+    if(!f){ alert('Pick a video first.'); return; }
+    log('Uploading… (demo: opening sample report)');
+    setTimeout(()=> location.href='report.html?report=report.json', 500);
   };
 </script>
+
 <script id="vc-nav-js">
 document.addEventListener('DOMContentLoaded', ()=>{
   const header=document.getElementById('site-header');
@@ -113,6 +235,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
 });
 </script>
-</body></html>
-
+</body>
+</html>
 
