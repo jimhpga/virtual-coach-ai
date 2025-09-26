@@ -60,14 +60,23 @@
   .tick{flex:0 0 22px;height:22px;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center;background:rgba(255,255,255,.10)}
   .tick svg{display:block}
 
-  /* Founder */
+  /* Founder (base) */
   .founder{display:grid;gap:14px;align-items:center}
   @media(min-width:820px){.founder{grid-template-columns:160px 1fr}}
   .headshot{width:160px;height:160px;border-radius:50%;object-fit:cover;border:1px solid var(--line);box-shadow:var(--shadow);background:rgba(0,0,0,.2)}
 
-  /* Founder: center everything */
-  .card.founder{ text-align:center; }
+  /* Founder: center everything (override the 2-column layout) */
+  .card.founder{
+    text-align:center;
+    display:grid;
+    grid-template-columns:1fr;   /* override the 160px | 1fr split */
+    justify-items:center;        /* center items in the grid */
+  }
+  @media (min-width:820px){
+    .card.founder{ grid-template-columns:1fr; } /* be explicit at desktop */
+  }
   .card.founder .headshot{ display:block; margin:0 auto 12px; }
+  .card.founder > div{ max-width:720px; margin:0 auto; } /* contain text width */
   .card.founder .subtle{ max-width:720px; margin:0 auto; }
   .card.founder .actions{ justify-content:center; }
 
@@ -215,3 +224,4 @@
 </script>
 </body>
 </html>
+
