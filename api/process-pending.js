@@ -1,32 +1,33 @@
-// api/process-pending.js
-export default async function handler(req, res) {
-  try {
-    const tokenParam = req.query.token || req.headers['x-cron-token'] || '';
-    const envToken = process.env.CRON_TOKEN;
+﻿const crypto = require("node:crypto");
 
-    // If a token is configured, require it and never echo it back
-    if (envToken) {
-      if (!tokenParam || tokenParam !== envToken) {
-        return res.status(401).json({ ok: false, error: 'unauthorized' });
-      }
-    }
+/**
+ * Cron/Manual kick to process pending jobs.
+ * Auth: pass ?token=CRON_TOKEN or header x-cron-token: CRON_TOKEN
+ * Returns: { ok, runId, processed, pending }
+ */
+module.exports = async (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
 
-    // ---- Stubbed "cron" work (replace with real job advancing) ----
-    const now = new Date().toISOString();
-    const jobsFound = 0;
-    const jobsAdvanced = 0;
-    const cleaned = true;
-    // ---------------------------------------------------------------
+  const token = (req.query && req.query.token) || req.headers["x-cron-token"];
+  const expected = process.env.CRON_TOKEN;
 
-    return res.status(200).json({
-      ok: true,
-      tick: now,
-      jobsFound,
-      jobsAdvanced,
-      cleaned
-    });
-  } catch (err) {
-    console.error('[cron] error', err);
-    return res.status(500).json({ ok: false, error: 'server_error' });
+  if (!expected || token !== expected) {
+    return res.status(401).json({ ok: false, error: "unauthorized" });
   }
-}
+
+  if (req.method !== "GET" && req.method !== "POST") {
+    res.setHeader("Allow", "GET, POST");
+    return res.status(405).json({ ok: false, error: "method_not_allowed" });
+  }
+
+  // TODO: pull real pending jobs and process them.
+  // Stubbed behavior (keeps the endpoint working like your last test):
+  const runId = crypto.randomBytes(16).toString("hex");
+
+  return res.status(200).json({
+    ok: true,
+    runId,         // e.g. "9f43f5ca…"
+    processed: 0,  // increment when real jobs are processed
+    pending: 0     // report queue size if available
+  });
+};
