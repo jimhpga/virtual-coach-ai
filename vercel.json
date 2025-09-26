@@ -1,18 +1,12 @@
-cd C:\Sites\virtual-coach-ai
-
-$vercel = @'
-{
+﻿{
   "cleanUrls": true,
   "trailingSlash": false,
-
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/reports/:path*", "destination": "/reports/:path*" },
-
     { "source": "/", "destination": "/docs/index.html" },
     { "source": "/:path*", "destination": "/docs/:path*" }
   ],
-
   "headers": [
     {
       "source": "/(.*)\\.(html|json)",
@@ -23,16 +17,11 @@ $vercel = @'
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     }
   ],
-
   "redirects": [
     { "source": "/index", "destination": "/", "permanent": true },
     { "source": "https://www.virtualcoachai.net/(.*)", "destination": "https://virtualcoachai.net/$1", "permanent": true }
   ],
-
   "crons": [
     { "path": "/api/process-pending", "schedule": "*/2 * * * *" }
   ]
 }
-'@
-
-Set-Content -Path .\vercel.json -Value $vercel -Encoding utf8
