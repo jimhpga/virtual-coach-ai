@@ -1,49 +1,32 @@
 // api/process-pending.js
-// Runs via Vercel Cron (GET), or manually by visiting /api/process-pending?token=YOUR_TOKEN
-
-export const config = {
-  runtime: "edge" // fast cold start; okay for light work
-};
-
-function ok(json, status = 200) {
-  return new Response(JSON.stringify(json), {
-    status,
-    headers: { "content-type": "application/json; charset=utf-8" }
-  });
-}
-
-export default async function handler(req) {
+export default async function handler(req, res) {
   try {
-    const url = new URL(req.url);
-    const isCron = req.headers.get("x-vercel-cron") === "1";
-    const token = url.searchParams.get("token");
-    const required = process.env.CRON_TOKEN; // set in Vercel → Settings → Environment Variables
+    const tokenParam = req.query.token || req.headers['x-cron-token'] || '';
+    const envToken = process.env.CRON_TOKEN;
 
-    // Optional gate: allow Vercel Cron OR manual calls with a token
-    if (!isCron && required && token !== required) {
-      return ok({ ok: false, error: "unauthorized" }, 401);
+    // If a token is configured, require it and never echo it back
+    if (envToken) {
+      if (!tokenParam || tokenParam !== envToken) {
+        return res.status(401).json({ ok: false, error: 'unauthorized' });
+      }
     }
 
-    // TODO: replace these stubs with real work:
-    // - find uploads in "queued" (e.g., from KV/DB/object store)
-    // - dispatch processing / advance job state
-    // - clean temporary files
-    // - mark stale jobs as failed with a friendly message
-
+    // ---- Stubbed "cron" work (replace with real job advancing) ----
     const now = new Date().toISOString();
-    console.log("[cron] tick", now);
+    const jobsFound = 0;
+    const jobsAdvanced = 0;
+    const cleaned = true;
+    // ---------------------------------------------------------------
 
-    // Example "no-op" work:
-    const summary = {
+    return res.status(200).json({
+      ok: true,
       tick: now,
-      jobsFound: 0,
-      jobsAdvanced: 0,
-      cleaned: true
-    };
-
-    return ok({ ok: true, ...summary });
+      jobsFound,
+      jobsAdvanced,
+      cleaned
+    });
   } catch (err) {
-    console.error("process-pending error", err);
-    return ok({ ok: false, error: String(err) }, 500);
+    console.error('[cron] error', err);
+    return res.status(500).json({ ok: false, error: 'server_error' });
   }
 }
