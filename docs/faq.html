@@ -36,7 +36,6 @@
 
   /* PAGE */
   main{width:min(var(--maxw),94%);margin:0 auto;padding:26px 0 56px;display:grid;gap:18px}
-
   .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);backdrop-filter:blur(2px)}
   .hero{display:grid;gap:10px}
   h1{margin:0;font-size:2rem;color:#86efac}
@@ -57,7 +56,7 @@
 
   .btn{border:1px solid var(--line);background:rgba(255,255,255,.12);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;font-weight:600;display:inline-block}
   .btn:hover{background:rgba(255,255,255,.18)}
-  .btn.primary{background:color-mix(in srgb, var(--accent) 22%, transparent);border-color:#0a7}
+  .btn.primary{background:rgba(25,195,125,.18);border-color:#0a7}
 
   footer{text-align:center;color:#cbd5cb;font-size:12px;padding:18px 0 26px}
   .small{font-size:.9rem}
@@ -92,20 +91,19 @@
       <div class="kicker">From gut feel to Virtual Coach AI</div>
       <h1>A short history of golf instruction — and why AI is the next natural step</h1>
       <p class="muted">
-        Golf coaching started as art and intuition. Then **video** made the invisible visible.
-        **Physics** replaced folklore with ball-flight laws and cause/effect. **Wearables** tracked
-        tempo, load, and patterns so practice became measurable. Now **AI** ties it all together—
-        connecting your swing video, ball flight, club delivery, and on-course stats into one clear,
-        personal plan.
+        Golf coaching started as art and intuition. Then <strong>video</strong> made the invisible visible.
+        <strong>Physics</strong> replaced folklore with ball-flight laws and cause/effect. <strong>Wearables</strong> tracked
+        tempo, load, and patterns so practice became measurable. Now <strong>AI</strong> ties it all together—
+        connecting your swing video, ball flight, club delivery, and on-course stats into one clear, personal plan.
       </p>
       <div class="twocol">
         <div>
           <h2>What changed with AI?</h2>
           <ul>
-            <li><strong>Explains the why</strong> behind the what video shows.</li>
+            <li><strong>Explains the why</strong> behind what video shows.</li>
             <li><strong>Prioritizes</strong> the one or two fixes that move your needle.</li>
-            <li><strong>Adapts</strong> drills to your progress and availability.</li>
-            <li><strong>Personalizes</strong> targets and course strategy to <em>your</em> dispersion, not a tour pro’s.</li>
+            <li><strong>Adapts</strong> drills to your progress and schedule.</li>
+            <li><strong>Personalizes</strong> targets/strategy to <em>your</em> dispersion, not a tour pro’s.</li>
           </ul>
         </div>
         <div>
@@ -113,7 +111,7 @@
           <ul>
             <li><strong>Unified brain:</strong> video + data → one plan in plain English.</li>
             <li><strong>Physics-first, player-specific:</strong> fundamentals tuned to your mobility and goals.</li>
-            <li><strong>Coach-ready reports:</strong> P1–P9 checkpoints, power/consistency bars, top fixes, drills.</li>
+            <li><strong>Coach-ready reports:</strong> P1–P9 checkpoints, consistency bars, power, fixes, drills.</li>
           </ul>
           <p><a class="btn primary" href="report.html?report=report.json">Open the sample report</a></p>
         </div>
@@ -133,23 +131,23 @@
             <ul>
               <li>Camera at roughly <strong>hip height</strong>, about <strong>8–12 feet</strong> away.</li>
               <li>Keep the <strong>entire club and hands</strong> in the frame at all times.</li>
-              <li>Aim level: no steep tilt. Lock focus/exposure if you can.</li>
+              <li>Level horizon; lock focus/exposure if possible.</li>
               <li>60–120fps helps, but standard phone video is fine.</li>
               <li>Steady mount (tripod, bag clip, or a friend with still hands).</li>
             </ul>
-            Prefer down-the-line? Stand the camera on the target line, just outside the hands. Face-on? Square to the stance line.
+            Down-the-line: set the lens on the target line, just outside the hands. Face-on: square to the stance line.
           </div>
         </details>
 
         <details>
           <summary>What’s inside the report?</summary>
           <div>
-            A coach-ready breakdown you can act on immediately:
+            Coach-ready breakdown:
             <ul>
-              <li><strong>P1–P9</strong> checkpoints with GOOD / OK / NEEDS HELP tags.</li>
+              <li><strong>P1–P9</strong> with GOOD / OK / NEEDS HELP tags.</li>
               <li><strong>Position & swing consistency</strong> bars (tempo ratio, release timing, windows).</li>
-              <li><strong>Power Score</strong> summary and top deltas.</li>
-              <li><strong>Top 3 Fundamentals</strong>, <strong>Top 3 Power Errors</strong>, <strong>Top 3 Quick Fixes</strong>, plus <strong>drills</strong>.</li>
+              <li><strong>Power Score</strong> summary and deltas.</li>
+              <li><strong>Top 3 Fundamentals</strong>, <strong>Top 3 Power Errors</strong>, <strong>Top 3 Quick Fixes</strong>, plus drills.</li>
               <li><strong>14-day practice plan</strong> concept to turn fixes into habits.</li>
             </ul>
           </div>
@@ -158,7 +156,7 @@
         <details>
           <summary>Does this replace my coach?</summary>
           <div>
-            No. Virtual Coach AI amplifies great coaching. Share reports, save lesson time for higher-value work,
+            No—Virtual Coach AI amplifies great coaching. Share reports, save lesson time for higher-value work,
             and keep accountability between lessons. Coaches can use our reports as a clean, common language.
           </div>
         </details>
@@ -166,34 +164,32 @@
         <details>
           <summary>Which devices and file types are supported?</summary>
           <div>
-            Modern iOS/Android phones and recent desktop browsers work best. Typical video formats like <strong>.mp4</strong>, <strong>.mov</strong>, and <strong>.m4v</strong> are supported.
+            Modern iOS/Android phones and recent desktop browsers. Typical formats: <strong>.mp4</strong>, <strong>.mov</strong>, <strong>.m4v</strong>.
           </div>
         </details>
 
         <details>
           <summary>How long does processing take?</summary>
           <div>
-            In most cases, you’ll see your report <em>within minutes</em> after upload. If the connection is slow or the
-            video is unusually large, it may take longer. You’ll see status updates during processing.
+            Usually minutes after upload. Very large files/slow connections may take longer; the status indicator updates as it goes.
           </div>
         </details>
 
         <details>
           <summary>How do you handle privacy and data?</summary>
           <div>
-            Your swings are yours. We store only what’s needed to generate and improve your reports.
-            You can request deletion of your recordings at any time. For coaches/teams, we offer org-level
-            access controls. (More in our Privacy & Terms on release.)
+            Your swings are yours. We store only what’s needed to generate/improve reports. You can request deletion anytime.
+            Coaches/teams get org-level access controls. (Full policies ship before GA.)
           </div>
         </details>
 
         <details>
           <summary>What are the pricing options?</summary>
           <div>
-            We’ll publish specific pricing soon. Planned options include:
+            We’ll publish specific pricing soon. Planned options:
             <ul>
               <li><strong>One-time report:</strong> $10 per upload</li>
-              <li><strong>Monthly tiers:</strong> Personal plans with more reports & features</li>
+              <li><strong>Monthly tiers:</strong> Personal plans with more reports/features</li>
               <li><strong>Annual pass:</strong> Best value for frequent players</li>
               <li><strong>Coach plan:</strong> Multi-player management & sharing</li>
               <li><strong>Organization plan:</strong> Academies, HS/College teams, facilities</li>
@@ -205,16 +201,14 @@
         <details>
           <summary>Can juniors use it?</summary>
           <div>
-            Yes, with parent/guardian consent as required in your region. We also plan junior-friendly summaries
-            and progress visuals (see the Roadmap).
+            Yes (with guardian consent where required). Junior-friendly summaries are on the roadmap.
           </div>
         </details>
 
         <details>
           <summary>What if my range/net space is tight?</summary>
           <div>
-            Short-space filming (garage nets, basement setups) is fine—just keep the full club in frame and ensure
-            the camera isn’t too close (target ~8–12 ft when possible). If framing is tight, favor face-on.
+            Short-space filming is fine—keep the full club in frame and target ~8–12 ft if you can. If framing is tight, favor face-on.
           </div>
         </details>
 
@@ -253,7 +247,6 @@
 
 <script>
   document.getElementById('y').textContent = new Date().getFullYear();
-  // highlight current link if loaded from a different path casing
   const here=(location.pathname.split('/').pop()||'faq.html').split('?')[0].toLowerCase();
   document.querySelectorAll('nav a').forEach(a=>{
     const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
