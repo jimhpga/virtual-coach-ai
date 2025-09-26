@@ -2,65 +2,6 @@
     "date":  "2025-09-23",
     "mode":  "Full Swing",
     "swings":  6,
-    "phases":  [
-                   {
-                       "id":  "P1",
-                       "title":  "Setup",
-                       "label":  "Grip neutral, stance square",
-                       "grade":  "ok"
-                   },
-                   {
-                       "id":  "P2",
-                       "title":  "Takeaway",
-                       "label":  "Club just outside hands",
-                       "grade":  "good"
-                   },
-                   {
-                       "id":  "P4",
-                       "title":  "Top",
-                       "label":  "Lead arm across chest",
-                       "grade":  "ok"
-                   },
-                   {
-                       "id":  "P6",
-                       "title":  "Shaft Parallel Down",
-                       "label":  "Shaft slightly shallow",
-                       "grade":  "good"
-                   },
-                   {
-                       "id":  "P7",
-                       "title":  "Impact",
-                       "label":  "Hands ahead, face square",
-                       "grade":  "ok"
-                   }
-               ],
-    "position_metrics":  [
-                             {
-                                 "label":  "P2 Window",
-                                 "value":  72
-                             },
-                             {
-                                 "label":  "P4 Window",
-                                 "value":  66
-                             },
-                             {
-                                 "label":  "P6 Window",
-                                 "value":  78
-                             },
-                             {
-                                 "label":  "Impact Window",
-                                 "value":  74
-                             }
-                         ],
-    "swing_metrics":  [
-                          {
-                              "label":  "Tempo Ratio",
-                              "value":  76
-                          }
-                      ],
-    "power":  {
-                  "score":  68
-              },
     "coaching":  {
                      "quick_fixes":  [
                                          "Chair-butt drill (light contact P6–P8), 20 reps",
@@ -78,11 +19,6 @@
                                           "Steep delivery window (shaft above trail forearm)"
                                       ]
                  },
-    "fundamentals":  [
-                         "Neutral grip with soft forearms",
-                         "Athletic posture; weight centered over arches",
-                         "Stable head; balanced finish"
-                     ],
     "errors":  [
                    "Early extension on the downswing",
                    "Casting from P4 to P5",
@@ -97,5 +33,96 @@
                    "Feet-together swings (tempo \u0026 balance)",
                    "Slow-motion P1–P9 (positions awareness)",
                    "Step-change drill (weight shift timing)"
-               ]
+               ],
+    "fundamentals":  [
+                         "Neutral grip with soft forearms",
+                         "Athletic posture; weight centered over arches",
+                         "Stable head; balanced finish"
+                     ],
+    "phases":  [
+                   {
+                       "short":  "Neutral grip; athletic posture.",
+                       "name":  "Setup",
+                       "id":  "P1",
+                       "grade":  "ok",
+                       "long":  "Soft forearms, weight over arches."
+                   },
+                   {
+                       "short":  "Club just outside hands.",
+                       "name":  "Takeaway",
+                       "id":  "P2",
+                       "grade":  "good",
+                       "long":  "Clubhead slightly outside hands by P2."
+                   },
+                   {
+                       "short":  "Across the line.",
+                       "name":  "Top",
+                       "id":  "P4",
+                       "grade":  "bad",
+                       "long":  "Soften trail wrist; feel more laid off."
+                   },
+                   {
+                       "short":  "Steep into ball.",
+                       "name":  "Delivery",
+                       "id":  "P6",
+                       "grade":  "bad",
+                       "long":  "Shallow under trail forearm by P6."
+                   },
+                   {
+                       "short":  "Need more shaft lean.",
+                       "name":  "Impact",
+                       "id":  "P7",
+                       "grade":  "ok",
+                       "long":  "Pressure ~85% lead; handle ahead."
+                   }
+               ],
+    "positionConsistency":  [
+                                {
+                                    "value":  86,
+                                    "position":  "P1"
+                                },
+                                {
+                                    "value":  78,
+                                    "position":  "P2"
+                                },
+                                {
+                                    "value":  61,
+                                    "position":  "P4"
+                                },
+                                {
+                                    "value":  55,
+                                    "position":  "P6"
+                                },
+                                {
+                                    "value":  72,
+                                    "position":  "P7"
+                                }
+                            ],
+    "swingConsistency":  {
+                             "value":  68
+                         },
+    "powerScoreSummary":  {
+                              "value":  64
+                          },
+    "power":  {
+                  "score":  64,
+                  "release_timing":  74,
+                  "tempo":  "3:1"
+              },
+    "position_metrics":  [
+                             {
+                                 "label":  "P4 Shaft Pitch",
+                                 "unit":  "°",
+                                 "tour":  80,
+                                 "value":  60
+                             }
+                         ],
+    "swing_metrics":  [
+                          {
+                              "label":  "Club Path Std Dev",
+                              "unit":  "%",
+                              "tour":  75,
+                              "value":  62
+                          }
+                      ]
 }
