@@ -1,25 +1,42 @@
-// api/upload-url.js (Edge)
-export const config = { runtime: 'edge' };
-import { generateUploadURL } from '@vercel/blob';
+// API: POST /api/upload-url
+// Body: { filename: "clip.mp4" }
+// Returns: { uploadUrl: "https://blob.vercel-storage.com/..." }
 
-const j = (o, s=200) =>
-  new Response(JSON.stringify(o), { status:s, headers:{'content-type':'application/json'} });
-
-export default async function handler(req) {
-  if (req.method !== 'POST') return j({ ok:false, error:'Method not allowed' }, 405);
-
+export default async function handler(req, res) {
   try {
-    const { filename } = await req.json();
-    const safe = (filename || `swing-${Date.now()}.mp4`).replace(/[^a-zA-Z0-9._-]+/g,'_');
+    if (req.method !== 'POST') {
+      res.status(405).json({ error: 'Method not allowed' });
+      return;
+    }
 
-    const { url } = await generateUploadURL({
-      access: 'public',
-      token: process.env.BLOB_READ_WRITE_TOKEN,
-      contentType: 'video/*'
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) {
+      res.status(500).json({ error: 'Missing BLOB_READ_WRITE_TOKEN' });
+      return;
+    }
+
+    // (Optional) read filename from body; not required for presign
+    // const { filename } = req.body || {};
+
+    // Ask Vercel for a one-time upload URL
+    const presign = await fetch('https://api.vercel.com/v2/blob/upload-url', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({}),
     });
 
-    return j({ ok:true, uploadUrl: url, suggestedName: `swings/${safe}` });
-  } catch (e) {
-    return j({ ok:false, error: String(e?.message || e) }, 500);
+    if (!presign.ok) {
+      const t = await presign.text();
+      res.status(502).json({ error: 'upload-url failed', detail: t });
+      return;
+    }
+
+    const { url } = await presign.json();
+    res.status(200).json({ uploadUrl: url });
+  } catch (err) {
+    res.status(500).json({ error: String(err && err.message || err) });
   }
 }
