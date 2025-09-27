@@ -13,7 +13,8 @@
     --nav:#0b2b12; --scrim:rgba(0,0,0,.06);
     --panel:rgba(10,18,24,.24); --line:rgba(255,255,255,.12);
     --text:#ecf3f7; --muted:#cfe0e6; --radius:14px; --maxw:1100px;
-    --accent:#19c37d; --accent2:#f6c453; --shadow:0 10px 24px rgba(0,0,0,.22);
+    --accent:#19c37d; --shadow:0 10px 24px rgba(0,0,0,.22);
+    --warn:#dc2626;
   }
   *{box-sizing:border-box} html,body{height:100%}
   body{
@@ -23,7 +24,6 @@
   }
   .scrim{min-height:100vh;background:var(--scrim)}
 
-  /* NAV */
   header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
@@ -33,41 +33,32 @@
   nav.nav a:hover{background:rgba(255,255,255,.08)}
   nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
 
-  /* PAGE */
   main{width:min(var(--maxw),92%);margin:0 auto;padding:24px 0 60px;display:grid;gap:16px}
   h1{margin:0 0 6px;color:#86efac}
   .lead{color:var(--muted);margin:0 0 8px}
 
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(1px);box-shadow:var(--shadow)}
-
   .grid{display:grid;gap:16px}
   @media(min-width:980px){.grid.two{grid-template-columns:1.05fr .95fr}}
 
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(1px);box-shadow:var(--shadow)}
   .uploader{display:grid;gap:12px}
-  .picker{
-    border:1px dashed rgba(255,255,255,.28);
-    border-radius:12px;padding:18px;
-    display:grid;gap:12px;justify-items:center;text-align:center;
-    background:rgba(0,0,0,.18)
-  }
+  .picker{border:1px dashed rgba(255,255,255,.28);border-radius:12px;padding:18px;display:grid;gap:12px;justify-items:center;text-align:center;background:rgba(0,0,0,.18)}
   .picker.drag{background:rgba(0,0,0,.28); border-color:#2a6}
   .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer;font-weight:600}
   .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6}
+  .btn.warn{border-color:var(--warn);color:#fff}
   .btn:disabled{opacity:.5;cursor:not-allowed}
   input[type=file]{display:none}
   .badge{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
   #log{white-space:pre-wrap;background:#0b1520;border:1px solid #123;border-radius:10px;padding:12px;min-height:140px;color:#dfe9f2;font-size:13px}
-
   .h2{margin:0 0 6px;font-size:1.15rem}
   ul.check{list-style:none;margin:8px 0 0;padding:0}
   ul.check li{margin:6px 0;padding-left:26px;position:relative}
-  ul.check li:before{
-    content:""; position:absolute; left:0; top:4px;
-    width:18px; height:18px; border-radius:6px;
-    border:1px solid var(--line); background:rgba(255,255,255,.1);
-  }
+  ul.check li:before{content:""; position:absolute; left:0; top:4px; width:18px; height:18px; border-radius:6px; border:1px solid var(--line); background:rgba(255,255,255,.1);}
   .tip{color:#cfe0e6;font-size:.96rem}
   .foot{text-align:center;color:#cbd5cb;font-size:12px;padding:18px 0 26px}
+  .errorbar{display:none;background:rgba(220,38,38,.16);border:1px solid rgba(220,38,38,.5);color:#fecaca;padding:10px;border-radius:10px}
+  .errorbar.show{display:block}
 </style>
 </head>
 <body>
@@ -93,21 +84,29 @@
 <div class="scrim">
   <main class="grid two">
 
-    <!-- LEFT: Uploader -->
+    <!-- LEFT -->
     <section class="card uploader">
       <div>
         <h1>Upload → Report → Improve</h1>
         <p class="lead">Face-on or down-the-line both work. Keep the camera steady and the full club in frame.</p>
       </div>
 
+      <div id="err" class="errorbar" role="alert">A JavaScript error occurred. Try reloading the page.</div>
+
       <div class="picker" id="drop" aria-label="Upload area (drag & drop supported)">
-        <div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <!-- Label path -->
           <label class="btn" for="file">Choose Video</label>
-          <!-- accept widened for iOS/QuickTime/HEVC edge cases -->
-          <input id="file"
-                 type="file"
-                 accept="video/*,video/quicktime,image/heic,image/heif,.mov,.mp4,.m4v" />
+          <!-- Direct click path -->
+          <button type="button" id="browse" class="btn">Browse Files</button>
         </div>
+
+        <!-- WIDE accept list; inline onchange fallback -->
+        <input id="file"
+               type="file"
+               accept="video/*,video/quicktime,image/heic,image/heif,.mov,.mp4,.m4v"
+               onchange="window.vcOnFileChange && window.vcOnFileChange(event)" />
+
         <div><span class="badge" id="keyBadge">(no file)</span></div>
         <div class="tip">…or drag & drop your clip here</div>
         <div><button id="go" class="btn primary" disabled>Upload &amp; Generate Report</button></div>
@@ -116,15 +115,15 @@
       <div id="log" role="status" aria-live="polite">Ready.</div>
     </section>
 
-    <!-- RIGHT: Filming guidance -->
+    <!-- RIGHT -->
     <section class="card">
       <h2 class="h2">How to film (best results)</h2>
       <ul class="check tip">
-        <li><strong>Angles:</strong> Take <em>Face-On</em> and <em>Down-the-Line</em> (both if possible).</li>
-        <li><strong>Height &amp; distance:</strong> Camera at roughly <em>hip height</em>, about <em>8–10 feet</em> away.</li>
-        <li><strong>Keep the whole swing:</strong> Make sure the <em>entire clubhead</em>, hands and feet stay in frame.</li>
-        <li><strong>Stability:</strong> Tripod/bag clip or prop the phone; avoid zoom; 60 fps helps.</li>
-        <li><strong>Lighting:</strong> Avoid strong backlight; bright and even lighting helps the tracker.</li>
+        <li><strong>Angles:</strong> Face-On and Down-the-Line.</li>
+        <li><strong>Height &amp; distance:</strong> Hip height, ~8–10 ft away.</li>
+        <li><strong>Keep the whole swing:</strong> Entire clubhead visible.</li>
+        <li><strong>Stability:</strong> Tripod/bag clip; avoid zoom; 60 fps helps.</li>
+        <li><strong>Lighting:</strong> Bright, even; avoid strong backlight.</li>
       </ul>
       <p class="tip" style="margin-top:10px">Pro tip: record two swings per angle—if one is shaky, you’ve got a backup.</p>
     </section>
@@ -134,8 +133,27 @@
 </div>
 
 <script>
-(() => {
-  // Highlight current nav + footer year
+(function(){
+  const errBar = document.getElementById('err');
+  const logEl  = document.getElementById('log');
+  const fileEl = document.getElementById('file');
+  const badge  = document.getElementById('keyBadge');
+  const btn    = document.getElementById('go');
+  const drop   = document.getElementById('drop');
+  const browse = document.getElementById('browse');
+
+  const log = m => { logEl.textContent += (logEl.textContent ? '\\n' : '') + m; logEl.scrollTop = logEl.scrollHeight; };
+  const setBadge = t => badge.textContent = t || '(no file)';
+  const enable = on => btn.disabled = !on;
+  const bytes = n => n>=1e9? (n/1e9).toFixed(2)+' GB' : n>=1e6? (n/1e6).toFixed(2)+' MB' : (n/1e3).toFixed(1)+' KB';
+
+  // Safety: capture errors that might stop our handlers from binding
+  window.addEventListener('error', (e)=> {
+    errBar.classList.add('show');
+    log('JS error: ' + (e.message||e.error||'unknown'));
+  });
+
+  // Nav highlight + year
   const here=(location.pathname.split('/').pop()||'upload.html').split('?')[0].toLowerCase();
   document.querySelectorAll('nav a').forEach(a=>{
     const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
@@ -143,48 +161,52 @@
   });
   const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
 
-  // Elements
-  const logEl   = document.getElementById('log');
-  const fileEl  = document.getElementById('file');
-  const badgeEl = document.getElementById('keyBadge');
-  const btnEl   = document.getElementById('go');
-  const dropEl  = document.getElementById('drop');
+  // Startup health
+  log('Script loaded. UA=' + navigator.userAgent);
 
-  // Helpers
-  const log = (m)=>{ logEl.textContent += (logEl.textContent ? '\\n' : '') + m; logEl.scrollTop = logEl.scrollHeight; };
-  const setBadge = (t)=>{ badgeEl.textContent = t || '(no file)'; };
-  const enableBtn = (on)=>{ btnEl.disabled = !on; };
-  const looksVideo = (f)=>{
-    if(!f) return false;
-    const rx=/video\\/|\\.mp4$|\\.mov$|\\.m4v$|quicktime/i; // permissive
-    return rx.test(f.type||'') || rx.test((f.name||'')); 
+  // Fallback global handler (fires from inline onchange)
+  window.vcOnFileChange = (e) => {
+    const f = e && e.target && e.target.files && e.target.files[0];
+    if (f) onChosen(f, 'inline-onchange');
   };
-  const bytes = n => n>=1e9? (n/1e9).toFixed(2)+' GB' : n>=1e6? (n/1e6).toFixed(2)+' MB' : (n/1e3).toFixed(1)+' KB';
 
-  function setChosen(file){
-    if(!file){ setBadge('(no file)'); enableBtn(false); return; }
-    const safe=(file.name||'video').replace(/[^a-zA-Z0-9._-]+/g,'_');
-    setBadge(safe);
-    // Always enable once a file is selected—some Safari builds omit MIME type
-    enableBtn(true);
-    log(`Selected: ${safe}` + (file.type?`  type=${file.type}`:'  type=?') + (file.size?`  size=${bytes(file.size)}`:''));
-    if(!looksVideo(file)){
-      log('Note: File type/extension is unusual for a video. We will still try to upload.');
-    }
-  }
-
-  // File select + drag/drop
-  fileEl.addEventListener('change', e=> setChosen(e.target.files && e.target.files[0]));
-  ['dragenter','dragover'].forEach(ev=> dropEl.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); dropEl.classList.add('drag'); }));
-  ['dragleave','drop'].forEach(ev=> dropEl.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); dropEl.classList.remove('drag'); }));
-  dropEl.addEventListener('drop', e=>{
-    const f = e.dataTransfer.files && e.dataTransfer.files[0];
-    if(f){ setChosen(f); fileEl.files = e.dataTransfer.files; }
+  // Redundant listeners (some WebViews only fire one of these)
+  fileEl.addEventListener('change', e=>{
+    const f=e.target.files && e.target.files[0];
+    if(f) onChosen(f, 'change');
+  });
+  fileEl.addEventListener('input', e=>{
+    const f=e.target.files && e.target.files[0];
+    if(f) onChosen(f, 'input');
   });
 
-  // Upload flow (direct-to-Blob) with GitHub Pages fallback
-  btnEl.addEventListener('click', async ()=>{
-    const f = fileEl.files && fileEl.files[0];
+  // Explicit browse button
+  browse.addEventListener('click', ()=>{
+    try { fileEl.click(); log('Opening picker…'); } catch(e){ log('Could not open picker: ' + e); }
+  });
+
+  // Drag & drop
+  ['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{
+    e.preventDefault(); e.stopPropagation(); drop.classList.add('drag');
+  }));
+  ['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{
+    e.preventDefault(); e.stopPropagation(); drop.classList.remove('drag');
+  }));
+  drop.addEventListener('drop', e=>{
+    const f=e.dataTransfer.files && e.dataTransfer.files[0];
+    if(f){ onChosen(f, 'drop'); fileEl.files = e.dataTransfer.files; }
+  });
+
+  function onChosen(file, via){
+    const safe=(file.name||'video').replace(/[^a-zA-Z0-9._-]+/g,'_');
+    setBadge(safe);
+    enable(true);
+    log(`Selected (${via}): ${safe}` + (file.type?`  type=${file.type}`:'  type=?') + (file.size?`  size=${bytes(file.size)}`:''));
+  }
+
+  // Upload flow
+  btn.addEventListener('click', async ()=>{
+    const f=fileEl.files && fileEl.files[0];
     if(!f){ alert('Pick a video first.'); return; }
 
     if(/github\\.io$/i.test(location.host)){
@@ -194,45 +216,33 @@
     }
 
     try{
-      enableBtn(false);
-
-      // 1) get one-time upload URL
+      enable(false);
       log('Requesting upload URL…');
       const up = await fetch('/api/upload-url', {
         method:'POST',
         headers:{'content-type':'application/json'},
-        body: JSON.stringify({ filename: badgeEl.textContent || f.name })
+        body: JSON.stringify({ filename: badge.textContent || f.name })
       });
       if(!up.ok){
-        const t=await up.text();
-        log('Upload-URL error: HTTP ' + up.status + ' — ' + t);
-        alert('Could not get upload URL.'); enableBtn(true); return;
+        const t=await up.text(); log('Upload-URL error: '+up.status+' — '+t);
+        alert('Could not get upload URL.'); enable(true); return;
       }
       const upJson = await up.json().catch(()=>null);
-      if(!upJson || !upJson.uploadUrl){
-        log('Upload-URL response missing uploadUrl. Raw: ' + JSON.stringify(upJson));
-        alert('Upload URL response invalid.'); enableBtn(true); return;
-      }
-      const { uploadUrl } = upJson;
+      const uploadUrl = upJson && upJson.uploadUrl;
+      if(!uploadUrl){ log('uploadUrl missing in response: '+JSON.stringify(upJson)); alert('Upload URL response invalid.'); enable(true); return; }
 
-      // 2) PUT file to Blob
       log('Uploading to Blob…');
       const putRes = await fetch(uploadUrl, { method:'PUT', body:f });
       if(!putRes.ok){
-        const t=await putRes.text();
-        log('Direct upload failed: HTTP ' + putRes.status + ' — ' + t);
-        alert('Upload failed.'); enableBtn(true); return;
+        const t=await putRes.text(); log('Direct upload failed: '+putRes.status+' — '+t);
+        alert('Upload failed.'); enable(true); return;
       }
-      let putJson = null;
-      try { putJson = await putRes.json(); } catch(e) {
-        // Some providers return 200 with empty body; handle gracefully
-        log('PUT response had no JSON body; continuing.');
-        putJson = {};
-      }
+
+      let putJson={};
+      try{ putJson = await putRes.json(); }catch{}
       const videoUrl  = putJson.url || putJson.downloadUrl || putJson.publicUrl || '';
       const videoPath = putJson.pathname || putJson.path || '';
 
-      // 3) create starter report that references this video
       log('Creating report…');
       const rep = await fetch('/api/create-report', {
         method:'POST',
@@ -240,23 +250,19 @@
         body: JSON.stringify({ filename: f.name, videoUrl, videoPath })
       });
       if(!rep.ok){
-        const t=await rep.text();
-        log('Report creation failed: HTTP ' + rep.status + ' — ' + t);
-        alert('Report creation failed.'); enableBtn(true); return;
+        const t=await rep.text(); log('Report creation failed: '+rep.status+' — '+t);
+        alert('Report creation failed.'); enable(true); return;
       }
       const repJson = await rep.json().catch(()=>null);
       const reportUrl = repJson && repJson.reportUrl;
+
       log('Opening report…');
       location.href = reportUrl || 'report.html?report=report.json';
     }catch(err){
-      console.error(err);
       log('Error: ' + (err?.message || err));
-      enableBtn(true);
+      enable(true);
     }
   });
-
-  // Initial state
-  enableBtn(false);
 })();
 </script>
 </body>
