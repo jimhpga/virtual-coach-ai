@@ -69,17 +69,6 @@
   .tip{color:#cfe0e6;font-size:.96rem}
   .foot{text-align:center;color:#cbd5cb;font-size:12px;padding:18px 0 26px}
 </style>
-<script>
-  document.addEventListener('DOMContentLoaded', ()=>{
-    // highlight current link
-    const here=(location.pathname.split('/').pop()||'upload.html').split('?')[0].toLowerCase();
-    document.querySelectorAll('nav a').forEach(a=>{
-      const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
-      if(h===here) a.setAttribute('aria-current','page');
-    });
-    const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
-  });
-</script>
 </head>
 <body>
 <header class="top" id="site-header">
@@ -114,7 +103,7 @@
       <div class="picker" id="drop">
         <div>
           <label class="btn" for="file">Choose Video</label>
-          <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v" />
+          <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v,.mkv" />
         </div>
         <div>
           <span class="badge" id="keyBadge">(no file)</span>
@@ -157,6 +146,16 @@
 </div>
 
 <script>
+  // Basic UI boot
+  (function(){
+    const here=(location.pathname.split('/').pop()||'upload.html').split('?')[0].toLowerCase();
+    document.querySelectorAll('nav a').forEach(a=>{
+      const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+      if(h===here) a.setAttribute('aria-current','page');
+    });
+    const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
+  })();
+
   // Elements
   const logEl = document.getElementById('log');
   const fileEl = document.getElementById('file');
@@ -164,14 +163,14 @@
   const btn = document.getElementById('go');
   const drop = document.getElementById('drop');
 
-  const log = (m)=>{ logEl.textContent += '\\n' + m; logEl.scrollTop = logEl.scrollHeight; }
+  const log = (m)=>{ logEl.textContent += '\n' + m; logEl.scrollTop = logEl.scrollHeight; }
   const setKey=(k)=>{ keyBadge.textContent = k || '(no file)'; }
 
   function validateAndSet(f){
     if(!f){ setKey('(no file)'); btn.disabled = true; return; }
-    const ok=/video\\/|\\.mp4$|\\.mov$|\\.m4v$/i;
+    const ok=/video\/|\.mp4$|\.mov$|\.m4v$|\.mkv$/i;
     if(!ok.test(f.type) && !ok.test(f.name)){
-      alert('Please choose a video (.mp4, .mov, .m4v).');
+      alert('Please choose a video (.mp4, .mov, .m4v, .mkv).');
       fileEl.value=''; setKey('(no file)'); btn.disabled = true; return;
     }
     const safe=f.name.replace(/[^a-zA-Z0-9._-]+/g,'_');
@@ -181,10 +180,10 @@
   fileEl.addEventListener('change', e=> validateAndSet(e.target.files[0]));
 
   // Drag & drop
-  ;['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{
+  ['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{
     e.preventDefault(); e.stopPropagation(); drop.classList.add('drag');
   }));
-  ;['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{
+  ['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{
     e.preventDefault(); e.stopPropagation(); drop.classList.remove('drag');
   }));
   drop.addEventListener('drop', e=>{
@@ -192,56 +191,64 @@
     if(f){ validateAndSet(f); fileEl.files = e.dataTransfer.files; }
   });
 
-  // Environment: GitHub Pages uses sample report
-  const isGithubPages = /github\\.io$/i.test(location.host);
+  const isGithubPages = /github\.io$/i.test(location.host);
 
-  btn.addEventListener('click', async ()=>{
-    const f=fileEl.files[0];
-    if(!f){ alert('Pick a video first.'); return; }
+  // Direct-to-Blob upload flow
+  btn.addEventListener('click', async () => {
+    const f = fileEl.files[0];
+    if (!f) { alert('Pick a video first.'); return; }
 
-    if(isGithubPages){
+    if (isGithubPages) {
       log('GitHub Pages detected → opening sample report.');
       location.href='report.html?report=report.json';
       return;
     }
 
-    try{
-      const fd = new FormData();
-      fd.append('file', f, keyBadge.textContent || f.name);
-      fd.append('source', 'upload.html');
-
-      log('Uploading…');
+    try {
       btn.disabled = true;
+      log('Requesting upload URL…');
 
-      // Use absolute path on Vercel (keeps /api separate from /docs)
-      const r = await fetch('/api/upload', { method:'POST', body: fd });
-      if(!r.ok){
-        const msg = 'Upload failed (' + r.status + ').';
-        log(msg); alert(msg); btn.disabled=false; return;
+      // 1) Ask API for one-time upload URL
+      const up = await fetch('/api/upload-url', {
+        method: 'POST',
+        headers: { 'content-type':'application/json' },
+        body: JSON.stringify({ filename: keyBadge.textContent || f.name })
+      });
+      if (!up.ok) {
+        const t = await up.text(); log('Upload-URL error: ' + t);
+        alert('Upload URL failed.'); btn.disabled=false; return;
       }
-      const data = await r.json();
-      const { jobId, reportUrl } = data || {};
+      const { uploadUrl } = await up.json();
 
-      log('Processing complete' + (jobId ? ' (job '+jobId+')' : '') + '. Opening report…');
-
-      // ✅ Open viewer with the report URL
-      if(reportUrl){
-        location.href = 'report.html?report=' + encodeURIComponent(reportUrl);
-        return;
+      // 2) Direct upload to Vercel Blob
+      log('Uploading to Blob…');
+      const putRes = await fetch(uploadUrl, { method:'PUT', body:f });
+      if (!putRes.ok) {
+        const t = await putRes.text(); log('Direct upload failed: ' + t);
+        alert('Upload failed.'); btn.disabled=false; return;
       }
+      const putJson = await putRes.json();  // Blob returns JSON
+      const { url: videoUrl, pathname: videoPath } = putJson;
 
-      // Fallback: conventional path if your analyzer writes to /reports/<jobId>.json
-      if(jobId){
-        location.href = 'report.html?report=' + encodeURIComponent('reports/' + jobId + '.json');
-      }else{
-        log('No jobId/reportUrl → opening sample report.');
-        location.href = 'report.html?report=report.json';
+      // 3) Create starter report that references this video
+      log('Creating report…');
+      const rep = await fetch('/api/create-report', {
+        method:'POST',
+        headers: { 'content-type':'application/json' },
+        body: JSON.stringify({ filename: f.name, videoUrl, videoPath })
+      });
+      if (!rep.ok) {
+        const t = await rep.text(); log('Report creation failed: ' + t);
+        alert('Report failed.'); btn.disabled=false; return;
       }
-    }catch(err){
-      console.error(err);
-      log('Error: ' + (err && err.message || err));
-      btn.disabled=false;
-      if(confirm('Upload failed. Open the sample report instead?')){
+      const { reportUrl } = await rep.json();
+
+      // 4) Navigate
+      location.href = reportUrl || 'report.html?report=report.json';
+    } catch (err) {
+      console.error(err); log('Error: ' + (err?.message || err));
+      btn.disabled = false;
+      if (confirm('Upload failed. Open the sample report instead?')) {
         location.href='report.html?report=report.json';
       }
     }
