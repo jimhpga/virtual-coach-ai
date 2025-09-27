@@ -1,11 +1,10 @@
-﻿{
+{
   "cleanUrls": true,
   "trailingSlash": false,
 
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/reports/:path*", "destination": "/reports/:path*" },
-
     { "source": "/", "destination": "/docs/index.html" },
     { "source": "/:path*", "destination": "/docs/:path*" }
   ],
@@ -23,7 +22,14 @@
 
   "redirects": [
     { "source": "/index", "destination": "/", "permanent": true },
-    { "source": "https://www.virtualcoachai.net/(.*)", "destination": "https://virtualcoachai.net/$1", "permanent": true }
+
+    /* ✅ Correct way to “www → apex” on Vercel */
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "www.virtualcoachai.net" }],
+      "destination": "https://virtualcoachai.net/$1",
+      "permanent": true
+    }
   ],
 
   "crons": [
