@@ -18,7 +18,7 @@
   *{box-sizing:border-box} html,body{height:100%}
   body{
     margin:0;color:var(--text);
-    font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+    font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial,sans-serif;
     background:url('homepage-background.png') center/cover fixed no-repeat;
   }
   .scrim{min-height:100vh;background:var(--scrim)}
@@ -40,6 +40,9 @@
 
   .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(1px);box-shadow:var(--shadow)}
 
+  .grid{display:grid;gap:16px}
+  @media(min-width:980px){.grid.two{grid-template-columns:1.05fr .95fr}}
+
   .uploader{display:grid;gap:12px}
   .picker{
     border:1px dashed rgba(255,255,255,.28);
@@ -54,9 +57,6 @@
   input[type=file]{display:none}
   .badge{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
   #log{white-space:pre-wrap;background:#0b1520;border:1px solid #123;border-radius:10px;padding:12px;min-height:120px;color:#dfe9f2;font-size:13px}
-
-  .grid{display:grid;gap:12px}
-  @media(min-width:920px){.grid.two{grid-template-columns:1fr 1fr}}
 
   .h2{margin:0 0 6px;font-size:1.15rem}
   ul.check{list-style:none;margin:8px 0 0;padding:0}
@@ -91,54 +91,39 @@
 </header>
 
 <div class="scrim">
-  <main>
+  <main class="grid two">
 
-    <!-- Uploader -->
+    <!-- LEFT: Uploader -->
     <section class="card uploader">
       <div>
-        <h1>Upload → Report → Analyze</h1>
-        <p class="lead">Face-on or down-the-line both work great. Keep the camera steady and the swing in frame.</p>
+        <h1>Upload → Report → Improve</h1>
+        <p class="lead">Face-on or down-the-line both work. Keep the camera steady and the full club in frame.</p>
       </div>
 
-      <div class="picker" id="drop">
+      <div class="picker" id="drop" aria-label="Upload area (drag & drop supported)">
         <div>
           <label class="btn" for="file">Choose Video</label>
-          <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v,.mkv" />
+          <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v" />
         </div>
-        <div>
-          <span class="badge" id="keyBadge">(no file)</span>
-        </div>
+        <div><span class="badge" id="keyBadge">(no file)</span></div>
         <div class="tip">…or drag & drop your clip here</div>
-        <div>
-          <button id="go" class="btn primary" disabled>Upload &amp; Generate Report</button>
-        </div>
+        <div><button id="go" class="btn primary" disabled>Upload &amp; Generate Report</button></div>
       </div>
 
-      <div id="log">Ready.</div>
+      <div id="log" role="status" aria-live="polite">Ready.</div>
     </section>
 
-    <!-- Filming guidance -->
-    <section class="grid two">
-      <article class="card">
-        <h2 class="h2">Face-On Setup</h2>
-        <ul class="check tip">
-          <li>Camera around <strong>hip height</strong> (belt buckle).</li>
-          <li><strong>8–12 feet</strong> away; level with the stance line.</li>
-          <li>Keep the <strong>entire club and hands</strong> in frame at all times.</li>
-          <li>Lock focus/exposure if your phone allows.</li>
-          <li>60–120 fps is nice, but normal phone video works.</li>
-        </ul>
-      </article>
-      <article class="card">
-        <h2 class="h2">Down-the-Line Setup</h2>
-        <ul class="check tip">
-          <li>Stand the camera on/just outside the <strong>target line</strong>.</li>
-          <li>Similar distance: about <strong>8–12 feet</strong>.</li>
-          <li>Level horizon—avoid tilt/diagonal angles.</li>
-          <li>Tripod, bag clip, or a steady friend = better results.</li>
-          <li>Make sure the <strong>clubhead stays visible</strong> through impact.</li>
-        </ul>
-      </article>
+    <!-- RIGHT: Filming guidance -->
+    <section class="card">
+      <h2 class="h2">How to film (best results)</h2>
+      <ul class="check tip">
+        <li><strong>Angles:</strong> Take <em>Face-On</em> and <em>Down-the-Line</em> (both if possible).</li>
+        <li><strong>Height &amp; distance:</strong> Camera at roughly <em>hip height</em>, about <em>8–10 feet</em> away.</li>
+        <li><strong>Keep the whole swing:</strong> Make sure the <em>entire clubhead</em>, hands and feet stay in frame.</li>
+        <li><strong>Stability:</strong> Tripod/bag clip or prop the phone; avoid zoom; 60 fps helps.</li>
+        <li><strong>Lighting:</strong> Avoid strong backlight; bright and even lighting helps the tracker.</li>
+      </ul>
+      <p class="tip" style="margin-top:10px">Pro tip: record two swings per angle—if one is shaky, you’ve got a backup.</p>
     </section>
 
   </main>
@@ -146,113 +131,118 @@
 </div>
 
 <script>
-  // Basic UI boot
-  (function(){
-    const here=(location.pathname.split('/').pop()||'upload.html').split('?')[0].toLowerCase();
-    document.querySelectorAll('nav a').forEach(a=>{
-      const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
-      if(h===here) a.setAttribute('aria-current','page');
-    });
-    const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
-  })();
+(() => {
+  // Highlight current nav + footer year
+  const here=(location.pathname.split('/').pop()||'upload.html').split('?')[0].toLowerCase();
+  document.querySelectorAll('nav a').forEach(a=>{
+    const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
+    if(h===here) a.setAttribute('aria-current','page');
+  });
+  const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
 
   // Elements
-  const logEl = document.getElementById('log');
-  const fileEl = document.getElementById('file');
-  const keyBadge = document.getElementById('keyBadge');
-  const btn = document.getElementById('go');
-  const drop = document.getElementById('drop');
+  const logEl   = document.getElementById('log');
+  const fileEl  = document.getElementById('file');
+  const badgeEl = document.getElementById('keyBadge');
+  const btnEl   = document.getElementById('go');
+  const dropEl  = document.getElementById('drop');
 
-  const log = (m)=>{ logEl.textContent += '\n' + m; logEl.scrollTop = logEl.scrollHeight; }
-  const setKey=(k)=>{ keyBadge.textContent = k || '(no file)'; }
+  // Helpers
+  const log = (m)=>{ logEl.textContent += (logEl.textContent ? '\\n' : '') + m; logEl.scrollTop = logEl.scrollHeight; };
+  const setBadge = (t)=>{ badgeEl.textContent = t || '(no file)'; };
+  const enableBtn = (on)=>{ btnEl.disabled = !on; };
+  const okVideo = (f)=>{
+    if(!f) return false;
+    const rx=/video\\/|\\.mp4$|\\.mov$|\\.m4v$/i;
+    return rx.test(f.type||'') || rx.test(f.name||'');
+  };
 
-  function validateAndSet(f){
-    if(!f){ setKey('(no file)'); btn.disabled = true; return; }
-    const ok=/video\/|\.mp4$|\.mov$|\.m4v$|\.mkv$/i;
-    if(!ok.test(f.type) && !ok.test(f.name)){
-      alert('Please choose a video (.mp4, .mov, .m4v, .mkv).');
-      fileEl.value=''; setKey('(no file)'); btn.disabled = true; return;
+  function setChosen(file){
+    if(!file){ setBadge('(no file)'); enableBtn(false); return; }
+    if(!okVideo(file)){
+      alert('Please choose a video (.mp4, .mov, .m4v).');
+      setBadge('(no file)'); enableBtn(false);
+      try{ fileEl.value=''; }catch{}
+      return;
     }
-    const safe=f.name.replace(/[^a-zA-Z0-9._-]+/g,'_');
-    setKey(safe); btn.disabled = false;
+    const safe=(file.name||'video').replace(/[^a-zA-Z0-9._-]+/g,'_');
+    setBadge(safe); enableBtn(true);
+    log('Selected: ' + safe + (file.type?` (${file.type})`:''));
   }
 
-  fileEl.addEventListener('change', e=> validateAndSet(e.target.files[0]));
-
-  // Drag & drop
-  ['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{
-    e.preventDefault(); e.stopPropagation(); drop.classList.add('drag');
-  }));
-  ['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{
-    e.preventDefault(); e.stopPropagation(); drop.classList.remove('drag');
-  }));
-  drop.addEventListener('drop', e=>{
+  // File select + drag/drop
+  fileEl.addEventListener('change', e=> setChosen(e.target.files && e.target.files[0]));
+  ['dragenter','dragover'].forEach(ev=> dropEl.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); dropEl.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(ev=> dropEl.addEventListener(ev, e=>{ e.preventDefault(); e.stopPropagation(); dropEl.classList.remove('drag'); }));
+  dropEl.addEventListener('drop', e=>{
     const f = e.dataTransfer.files && e.dataTransfer.files[0];
-    if(f){ validateAndSet(f); fileEl.files = e.dataTransfer.files; }
+    if(f){ setChosen(f); fileEl.files = e.dataTransfer.files; }
   });
 
-  const isGithubPages = /github\.io$/i.test(location.host);
+  // Upload flow (direct-to-Blob) with GitHub Pages fallback
+  btnEl.addEventListener('click', async ()=>{
+    const f = fileEl.files && fileEl.files[0];
+    if(!f){ alert('Pick a video first.'); return; }
+    if(!okVideo(f)){ alert('That file is not a supported video.'); return; }
 
-  // Direct-to-Blob upload flow
-  btn.addEventListener('click', async () => {
-    const f = fileEl.files[0];
-    if (!f) { alert('Pick a video first.'); return; }
-
-    if (isGithubPages) {
+    // Demo fallback for GitHub Pages
+    if(/github\\.io$/i.test(location.host)){
       log('GitHub Pages detected → opening sample report.');
       location.href='report.html?report=report.json';
       return;
     }
 
-    try {
-      btn.disabled = true;
+    try{
+      enableBtn(false);
+      // 1) get one-time upload URL
       log('Requesting upload URL…');
-
-      // 1) Ask API for one-time upload URL
       const up = await fetch('/api/upload-url', {
-        method: 'POST',
-        headers: { 'content-type':'application/json' },
-        body: JSON.stringify({ filename: keyBadge.textContent || f.name })
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body: JSON.stringify({ filename: badgeEl.textContent || f.name })
       });
-      if (!up.ok) {
-        const t = await up.text(); log('Upload-URL error: ' + t);
-        alert('Upload URL failed.'); btn.disabled=false; return;
+      if(!up.ok){
+        const t=await up.text(); log('Upload-URL error: ' + t);
+        alert('Could not get upload URL.'); enableBtn(true); return;
       }
       const { uploadUrl } = await up.json();
+      if(!uploadUrl){ log('Upload-URL response missing uploadUrl'); enableBtn(true); return; }
 
-      // 2) Direct upload to Vercel Blob
+      // 2) PUT file to Blob
       log('Uploading to Blob…');
       const putRes = await fetch(uploadUrl, { method:'PUT', body:f });
-      if (!putRes.ok) {
-        const t = await putRes.text(); log('Direct upload failed: ' + t);
-        alert('Upload failed.'); btn.disabled=false; return;
+      if(!putRes.ok){
+        const t=await putRes.text(); log('Direct upload failed: ' + t);
+        alert('Upload failed.'); enableBtn(true); return;
       }
-      const putJson = await putRes.json();  // Blob returns JSON
-      const { url: videoUrl, pathname: videoPath } = putJson;
+      const putJson = await putRes.json(); // { url, pathname, … }
+      const videoUrl  = putJson.url;
+      const videoPath = putJson.pathname || '';
 
-      // 3) Create starter report that references this video
+      // 3) create starter report that references this video
       log('Creating report…');
       const rep = await fetch('/api/create-report', {
         method:'POST',
-        headers: { 'content-type':'application/json' },
+        headers:{'content-type':'application/json'},
         body: JSON.stringify({ filename: f.name, videoUrl, videoPath })
       });
-      if (!rep.ok) {
-        const t = await rep.text(); log('Report creation failed: ' + t);
-        alert('Report failed.'); btn.disabled=false; return;
+      if(!rep.ok){
+        const t=await rep.text(); log('Report creation failed: ' + t);
+        alert('Report creation failed.'); enableBtn(true); return;
       }
       const { reportUrl } = await rep.json();
-
-      // 4) Navigate
+      log('Opening report…');
       location.href = reportUrl || 'report.html?report=report.json';
-    } catch (err) {
-      console.error(err); log('Error: ' + (err?.message || err));
-      btn.disabled = false;
-      if (confirm('Upload failed. Open the sample report instead?')) {
-        location.href='report.html?report=report.json';
-      }
+    }catch(err){
+      console.error(err);
+      log('Error: ' + (err?.message || err));
+      enableBtn(true);
     }
   });
+
+  // Initial state
+  enableBtn(false);
+})();
 </script>
 </body>
 </html>
