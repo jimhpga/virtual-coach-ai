@@ -56,7 +56,7 @@
   .btn:disabled{opacity:.5;cursor:not-allowed}
   input[type=file]{display:none}
   .badge{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
-  #log{white-space:pre-wrap;background:#0b1520;border:1px solid #123;border-radius:10px;padding:12px;min-height:120px;color:#dfe9f2;font-size:13px}
+  #log{white-space:pre-wrap;background:#0b1520;border:1px solid #123;border-radius:10px;padding:12px;min-height:140px;color:#dfe9f2;font-size:13px}
 
   .h2{margin:0 0 6px;font-size:1.15rem}
   ul.check{list-style:none;margin:8px 0 0;padding:0}
@@ -103,7 +103,10 @@
       <div class="picker" id="drop" aria-label="Upload area (drag & drop supported)">
         <div>
           <label class="btn" for="file">Choose Video</label>
-          <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v" />
+          <!-- accept widened for iOS/QuickTime/HEVC edge cases -->
+          <input id="file"
+                 type="file"
+                 accept="video/*,video/quicktime,image/heic,image/heif,.mov,.mp4,.m4v" />
         </div>
         <div><span class="badge" id="keyBadge">(no file)</span></div>
         <div class="tip">…or drag & drop your clip here</div>
@@ -151,23 +154,23 @@
   const log = (m)=>{ logEl.textContent += (logEl.textContent ? '\\n' : '') + m; logEl.scrollTop = logEl.scrollHeight; };
   const setBadge = (t)=>{ badgeEl.textContent = t || '(no file)'; };
   const enableBtn = (on)=>{ btnEl.disabled = !on; };
-  const okVideo = (f)=>{
+  const looksVideo = (f)=>{
     if(!f) return false;
-    const rx=/video\\/|\\.mp4$|\\.mov$|\\.m4v$/i;
-    return rx.test(f.type||'') || rx.test(f.name||'');
+    const rx=/video\\/|\\.mp4$|\\.mov$|\\.m4v$|quicktime/i; // permissive
+    return rx.test(f.type||'') || rx.test((f.name||'')); 
   };
+  const bytes = n => n>=1e9? (n/1e9).toFixed(2)+' GB' : n>=1e6? (n/1e6).toFixed(2)+' MB' : (n/1e3).toFixed(1)+' KB';
 
   function setChosen(file){
     if(!file){ setBadge('(no file)'); enableBtn(false); return; }
-    if(!okVideo(file)){
-      alert('Please choose a video (.mp4, .mov, .m4v).');
-      setBadge('(no file)'); enableBtn(false);
-      try{ fileEl.value=''; }catch{}
-      return;
-    }
     const safe=(file.name||'video').replace(/[^a-zA-Z0-9._-]+/g,'_');
-    setBadge(safe); enableBtn(true);
-    log('Selected: ' + safe + (file.type?` (${file.type})`:''));
+    setBadge(safe);
+    // Always enable once a file is selected—some Safari builds omit MIME type
+    enableBtn(true);
+    log(`Selected: ${safe}` + (file.type?`  type=${file.type}`:'  type=?') + (file.size?`  size=${bytes(file.size)}`:''));
+    if(!looksVideo(file)){
+      log('Note: File type/extension is unusual for a video. We will still try to upload.');
+    }
   }
 
   // File select + drag/drop
@@ -183,9 +186,7 @@
   btnEl.addEventListener('click', async ()=>{
     const f = fileEl.files && fileEl.files[0];
     if(!f){ alert('Pick a video first.'); return; }
-    if(!okVideo(f)){ alert('That file is not a supported video.'); return; }
 
-    // Demo fallback for GitHub Pages
     if(/github\\.io$/i.test(location.host)){
       log('GitHub Pages detected → opening sample report.');
       location.href='report.html?report=report.json';
@@ -194,6 +195,7 @@
 
     try{
       enableBtn(false);
+
       // 1) get one-time upload URL
       log('Requesting upload URL…');
       const up = await fetch('/api/upload-url', {
@@ -202,22 +204,33 @@
         body: JSON.stringify({ filename: badgeEl.textContent || f.name })
       });
       if(!up.ok){
-        const t=await up.text(); log('Upload-URL error: ' + t);
+        const t=await up.text();
+        log('Upload-URL error: HTTP ' + up.status + ' — ' + t);
         alert('Could not get upload URL.'); enableBtn(true); return;
       }
-      const { uploadUrl } = await up.json();
-      if(!uploadUrl){ log('Upload-URL response missing uploadUrl'); enableBtn(true); return; }
+      const upJson = await up.json().catch(()=>null);
+      if(!upJson || !upJson.uploadUrl){
+        log('Upload-URL response missing uploadUrl. Raw: ' + JSON.stringify(upJson));
+        alert('Upload URL response invalid.'); enableBtn(true); return;
+      }
+      const { uploadUrl } = upJson;
 
       // 2) PUT file to Blob
       log('Uploading to Blob…');
       const putRes = await fetch(uploadUrl, { method:'PUT', body:f });
       if(!putRes.ok){
-        const t=await putRes.text(); log('Direct upload failed: ' + t);
+        const t=await putRes.text();
+        log('Direct upload failed: HTTP ' + putRes.status + ' — ' + t);
         alert('Upload failed.'); enableBtn(true); return;
       }
-      const putJson = await putRes.json(); // { url, pathname, … }
-      const videoUrl  = putJson.url;
-      const videoPath = putJson.pathname || '';
+      let putJson = null;
+      try { putJson = await putRes.json(); } catch(e) {
+        // Some providers return 200 with empty body; handle gracefully
+        log('PUT response had no JSON body; continuing.');
+        putJson = {};
+      }
+      const videoUrl  = putJson.url || putJson.downloadUrl || putJson.publicUrl || '';
+      const videoPath = putJson.pathname || putJson.path || '';
 
       // 3) create starter report that references this video
       log('Creating report…');
@@ -227,10 +240,12 @@
         body: JSON.stringify({ filename: f.name, videoUrl, videoPath })
       });
       if(!rep.ok){
-        const t=await rep.text(); log('Report creation failed: ' + t);
+        const t=await rep.text();
+        log('Report creation failed: HTTP ' + rep.status + ' — ' + t);
         alert('Report creation failed.'); enableBtn(true); return;
       }
-      const { reportUrl } = await rep.json();
+      const repJson = await rep.json().catch(()=>null);
+      const reportUrl = repJson && repJson.reportUrl;
       log('Opening report…');
       location.href = reportUrl || 'report.html?report=report.json';
     }catch(err){
