@@ -37,4 +37,4 @@ export default async function handler(req) {
       headers: { 'content-type': 'application/json' },
     });
   }
-}.
+}
