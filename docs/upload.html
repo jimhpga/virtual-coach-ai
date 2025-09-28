@@ -1,224 +1,72 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Virtual Coach AI — Upload</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="preload" as="image" href="homepage-background.png" />
-<meta http-equiv="Cache-Control" content="no-store, max-age=0">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<link rel="stylesheet" href="site.css">
 <style>
-  :root{
-    --nav:#0b2b12; --scrim:rgba(0,0,0,.06);
-    --panel:rgba(10,18,24,.24); --line:rgba(255,255,255,.12);
-    --text:#ecf3f7; --muted:#cfe0e6; --radius:14px; --maxw:1100px;
-    --accent:#19c37d; --accent2:#f6c453; --shadow:0 10px 24px rgba(0,0,0,.22);
-  }
-  *{box-sizing:border-box} html,body{height:100%}
-  body{
-    margin:0;color:var(--text);
-    font:16px/1.55 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-    background:url('homepage-background.png') center/cover fixed no-repeat;
-  }
-  .scrim{min-height:100vh;background:var(--scrim)}
-
-  /* NAV */
-  header.top{position:sticky;top:0;z-index:100;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
-  .navwrap{width:min(var(--maxw),94%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
-  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
-  .brand-logo{height:36px;width:auto;display:block}
-  nav.nav{display:flex;gap:8px;flex-wrap:wrap}
-  nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
-  nav.nav a:hover{background:rgba(255,255,255,.08)}
-  nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-
-  /* PAGE */
-  main{width:min(var(--maxw),92%);margin:0 auto;padding:24px 0 60px;display:grid;gap:16px}
-  h1{margin:0 0 6px;color:#86efac}
-  .lead{color:var(--muted);margin:0 0 8px}
-
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;backdrop-filter:blur(1px);box-shadow:var(--shadow)}
-
-  .uploader{display:grid;gap:12px}
-  .picker{
-    border:1px dashed rgba(255,255,255,.28);
-    border-radius:12px;padding:18px;
-    display:grid;gap:12px;justify-items:center;text-align:center;
-    background:rgba(0,0,0,.18)
-  }
-  .picker.drag{background:rgba(0,0,0,.28); border-color:#2a6}
-  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer;font-weight:600}
-  .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6}
-  .btn:disabled{opacity:.5;cursor:not-allowed}
-  /* IMPORTANT: do NOT use display:none for file inputs (breaks Firefox/others) */
-  input[type=file]{
-    position:absolute; left:-9999px; width:0; height:0; opacity:0; pointer-events:none;
-  }
-  .badge{display:inline-block;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
-  #log{white-space:pre-wrap;background:#0b1520;border:1px solid #123;border-radius:10px;padding:12px;min-height:120px;color:#dfe9f2;font-size:13px}
-
-  .grid{display:grid;gap:12px}
-  @media(min-width:920px){.grid.two{grid-template-columns:1fr 1fr}}
-
-  .h2{margin:0 0 6px;font-size:1.15rem}
-  ul.check{list-style:none;margin:8px 0 0;padding:0}
-  ul.check li{margin:6px 0;padding-left:26px;position:relative}
-  ul.check li:before{
-    content:""; position:absolute; left:0; top:4px;
-    width:18px; height:18px; border-radius:6px;
-    border:1px solid var(--line); background:rgba(255,255,255,.1);
-  }
-  .tip{color:#cfe0e6;font-size:.96rem}
-  .foot{text-align:center;color:#cbd5cb;font-size:12px;padding:18px 0 26px}
+  .log {white-space:pre-wrap;border:1px solid #ccc;padding:10px;border-radius:8px;background:#111;color:#0f0;margin-top:10px}
 </style>
-<script>
-  document.addEventListener('DOMContentLoaded', ()=>{
-    // highlight current link
-    const here=(location.pathname.split('/').pop()||'upload.html').split('?')[0].toLowerCase();
-    document.querySelectorAll('nav a').forEach(a=>{
-      const h=(a.getAttribute('href')||'').split('?')[0].toLowerCase();
-      if(h===here) a.setAttribute('aria-current','page');
-    });
-    const y=document.getElementById('y'); if(y) y.textContent=new Date().getFullYear();
-  });
-</script>
 </head>
 <body>
-<header class="top" id="site-header">
-  <div class="navwrap">
-    <a class="brand" href="index.html" aria-label="Virtual Coach AI">
-      <img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo" />
-      <span>Virtual Coach AI</span>
-    </a>
-    <nav class="nav" id="siteNav" aria-label="Primary">
-      <a href="index.html">Home</a>
-      <a href="upload.html" aria-current="page">Upload</a>
-      <a href="report.html?report=report.json">Reports</a>
-      <a href="coming-soon.html">Coming&nbsp;Soon</a>
-      <a href="pricing.html">Pricing</a>
-      <a href="faq.html">FAQ</a>
-      <a href="contact.html">Contact</a>
-      <a href="login.html">Login</a>
-    </nav>
-  </div>
-</header>
+<h1>Upload → Report → Improve</h1>
 
-<div class="scrim">
-  <main>
+<input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v" />
+<button id="uploadBtn">Upload & Generate Report</button>
 
-    <!-- Uploader -->
-    <section class="card uploader">
-      <div>
-        <h1>Upload → Report → Improve</h1>
-        <p class="lead">Face-on or down-the-line both work. Keep the camera steady and the whole club in frame.</p>
-      </div>
-
-      <div class="picker" id="drop">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <button id="pick" class="btn" type="button">Choose Video</button>
-          <input id="file" type="file" accept="video/*,.mov,.mp4,.m4v,.mkv" />
-          <span class="badge" id="keyBadge">(no file)</span>
-        </div>
-        <div class="tip">…or drag & drop your clip here</div>
-        <div>
-          <button id="go" class="btn primary" disabled>Upload &amp; Generate Report</button>
-        </div>
-      </div>
-
-      <div id="log">Ready.</div>
-    </section>
-
-    <!-- Filming guidance -->
-    <section class="grid two">
-      <article class="card">
-        <h2 class="h2">Face-On Setup</h2>
-        <ul class="check tip">
-          <li>Camera ~<strong>hip height</strong> (belt buckle).</li>
-          <li><strong>8–12 ft</strong> away; level with the stance line.</li>
-          <li>Keep the <strong>entire club & hands</strong> in frame.</li>
-          <li>Lock focus/exposure if possible.</li>
-          <li>60–120 fps is nice, normal phone video is fine.</li>
-        </ul>
-      </article>
-      <article class="card">
-        <h2 class="h2">Down-the-Line Setup</h2>
-        <ul class="check tip">
-          <li>Place camera just outside the <strong>target line</strong>.</li>
-          <li>Same distance: about <strong>8–12 ft</strong>.</li>
-          <li>Level horizon—avoid diagonal tilt.</li>
-          <li>Tripod, bag clip, or a steady friend helps.</li>
-          <li>Ensure the <strong>clubhead stays visible</strong> through impact.</li>
-        </ul>
-      </article>
-    </section>
-
-  </main>
-  <footer class="foot">© <span id="y"></span> Virtual Coach AI</footer>
-</div>
+<div id="log" class="log">Ready.</div>
 
 <script>
-  // Elements
-  const logEl = document.getElementById('log');
-  const fileEl = document.getElementById('file');
-  const keyBadge = document.getElementById('keyBadge');
-  const btn = document.getElementById('go');
-  const drop = document.getElementById('drop');
-  const pickBtn = document.getElementById('pick');
+const fileInput = document.getElementById('fileInput');
+const uploadBtn = document.getElementById('uploadBtn');
+const logEl = document.getElementById('log');
+const log = m => logEl.textContent += '\n' + m;
 
-  const log = (m)=>{ logEl.textContent += '\n' + m; logEl.scrollTop = logEl.scrollHeight; }
-  const setKey=(k)=>{ keyBadge.textContent = k || '(no file)'; }
+window.addEventListener('error',e=>log('JS error: '+(e.message||e.error)));
 
-  // Explicitly open file picker (reliable across browsers)
-  pickBtn.addEventListener('click', ()=> {
-    log('Pick button clicked');
-    fileEl.click();
-  });
+fileInput.addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if (f) log(`Selected: ${f.name} (${f.type}) size=${f.size}`);
+});
 
-  function validateAndSet(f){
-    if(!f){ setKey('(no file)'); btn.disabled = true; log('No file after picker (user canceled?).'); return; }
-    const ok=/video\/|\.mp4$|\.mov$|\.m4v$|\.mkv$/i;
-    if(!ok.test(f.type) && !ok.test(f.name)){
-      alert('Please choose a video (.mp4, .mov, .m4v, .mkv).');
-      fileEl.value=''; setKey('(no file)'); btn.disabled = true; log('Rejected file: '+f.name+' type='+f.type); return;
-    }
-    const safe=f.name.replace(/[^a-zA-Z0-9._-]+/g,'_');
-    setKey(safe); btn.disabled = false; log('Selected: '+safe+'  type='+f.type+'  size='+f.size);
+uploadBtn.addEventListener('click', async ()=>{
+  const file = fileInput.files[0];
+  if (!file) {
+    log('No file selected');
+    return;
   }
+  log('Requesting upload URL…');
 
-  // Change/Input listeners (catch all cases)
-  fileEl.addEventListener('change', e=> validateAndSet(e.target.files[0]));
-  fileEl.addEventListener('input',  e=> validateAndSet(e.target.files[0]));
+  try {
+    // Step 1: ask backend for upload URL
+    const r = await fetch('/api/upload-url', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name:file.name, type:file.type})
+    });
+    const {url} = await r.json();
+    log('Got URL: '+url);
 
-  // Drag & drop
-  ;['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{
-    e.preventDefault(); e.stopPropagation(); drop.classList.add('drag');
-  }));
-  ;['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{
-    e.preventDefault(); e.stopPropagation(); drop.classList.remove('drag');
-  }));
-  drop.addEventListener('drop', e=>{
-    const f = e.dataTransfer.files && e.dataTransfer.files[0];
-    if(f){ fileEl.files = e.dataTransfer.files; validateAndSet(f); }
-  });
+    // Step 2: upload file to Blob storage
+    const up = await fetch(url, {method:'PUT', body:file});
+    if (!up.ok) throw new Error(`Upload failed ${up.status}`);
+    log('Upload complete');
 
-  // If running on GitHub Pages, open sample report
-  const isGithubPages = /github\.io$/i.test(location.host);
-  if(isGithubPages){
-    log('GitHub Pages detected → opening sample report.');
-    location.href='report.html?report=report.json';
+    // Step 3: hit your create-report endpoint if you want
+    const report = await fetch('/api/create-report',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({fileName:file.name})
+    });
+    const reportRes = await report.json();
+    log('Report queued: '+JSON.stringify(reportRes));
+
+  } catch(err){
+    log('Error: '+err.message);
+    console.error(err);
   }
-
-  // Upload click (kept simple; you can wire your Blob/API flow here)
-  btn.addEventListener('click', async ()=>{
-    const f=fileEl.files[0];
-    if(!f){ alert('Pick a video first.'); return; }
-    log('Demo: opening sample report. (Wire to /api when ready.)');
-    location.href='report.html?report=report.json';
-  });
-
-  // Show environment info once
-  log('Ready. UA='+navigator.userAgent);
+});
 </script>
 </body>
 </html>
