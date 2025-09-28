@@ -1,42 +1,72 @@
-// API: POST /api/upload-url
-// Body: { filename: "clip.mp4" }
-// Returns: { uploadUrl: "https://blob.vercel-storage.com/..." }
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Virtual Coach AI — Upload</title>
+<link rel="stylesheet" href="site.css">
+<style>
+  .log {white-space:pre-wrap;border:1px solid #ccc;padding:10px;border-radius:8px;background:#111;color:#0f0;margin-top:10px}
+</style>
+</head>
+<body>
+<h1>Upload → Report → Improve</h1>
 
-export default async function handler(req, res) {
-  try {
-    if (req.method !== 'POST') {
-      res.status(405).json({ error: 'Method not allowed' });
-      return;
-    }
+<input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v" />
+<button id="uploadBtn">Upload & Generate Report</button>
 
-    const token = process.env.BLOB_READ_WRITE_TOKEN;
-    if (!token) {
-      res.status(500).json({ error: 'Missing BLOB_READ_WRITE_TOKEN' });
-      return;
-    }
+<div id="log" class="log">Ready.</div>
 
-    // (Optional) read filename from body; not required for presign
-    // const { filename } = req.body || {};
+<script>
+const fileInput = document.getElementById('fileInput');
+const uploadBtn = document.getElementById('uploadBtn');
+const logEl = document.getElementById('log');
+const log = m => logEl.textContent += '\n' + m;
 
-    // Ask Vercel for a one-time upload URL
-    const presign = await fetch('https://api.vercel.com/v2/blob/upload-url', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({}),
-    });
+window.addEventListener('error',e=>log('JS error: '+(e.message||e.error)));
 
-    if (!presign.ok) {
-      const t = await presign.text();
-      res.status(502).json({ error: 'upload-url failed', detail: t });
-      return;
-    }
+fileInput.addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if (f) log(`Selected: ${f.name} (${f.type}) size=${f.size}`);
+});
 
-    const { url } = await presign.json();
-    res.status(200).json({ uploadUrl: url });
-  } catch (err) {
-    res.status(500).json({ error: String(err && err.message || err) });
+uploadBtn.addEventListener('click', async ()=>{
+  const file = fileInput.files[0];
+  if (!file) {
+    log('No file selected');
+    return;
   }
-}
+  log('Requesting upload URL…');
+
+  try {
+    // Step 1: ask backend for upload URL
+    const r = await fetch('/api/upload-url', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name:file.name, type:file.type})
+    });
+    const {url} = await r.json();
+    log('Got URL: '+url);
+
+    // Step 2: upload file to Blob storage
+    const up = await fetch(url, {method:'PUT', body:file});
+    if (!up.ok) throw new Error(`Upload failed ${up.status}`);
+    log('Upload complete');
+
+    // Step 3: hit your create-report endpoint if you want
+    const report = await fetch('/api/create-report',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({fileName:file.name})
+    });
+    const reportRes = await report.json();
+    log('Report queued: '+JSON.stringify(reportRes));
+
+  } catch(err){
+    log('Error: '+err.message);
+    console.error(err);
+  }
+});
+</script>
+</body>
+</html>
