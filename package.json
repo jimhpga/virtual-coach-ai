@@ -15,6 +15,7 @@
         "release": "npm-run-all -s preflight build pack zip",
         "dev": "vite",
         "start": "vite preview"
+      "dev:api": "node server-api.mjs"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.888.0",
