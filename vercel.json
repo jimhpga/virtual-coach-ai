@@ -1,4 +1,4 @@
-{
+﻿{
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
@@ -27,6 +27,10 @@
     }
   ],
   "functions": {
+<<<<<<< HEAD
     "api/**": { "runtime": "nodejs20.x" }
+=======
+    "api/**.js": { "runtime": "nodejs20.x" }
+>>>>>>> 3ee03a6 (Vercel: force Node runtime for API, keep routes/headers)
   }
 }
