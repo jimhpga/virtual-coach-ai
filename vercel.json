@@ -1,12 +1,14 @@
 ﻿{
   "cleanUrls": true,
   "trailingSlash": false,
+
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/reports/:path*", "destination": "/reports/:path*" },
     { "source": "/", "destination": "/docs/index.html" },
     { "source": "/:path*", "destination": "/docs/:path*" }
   ],
+
   "headers": [
     {
       "source": "/(.*)\\.(html|json)",
@@ -17,6 +19,7 @@
       "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     }
   ],
+
   "redirects": [
     { "source": "/index", "destination": "/", "permanent": true },
     {
@@ -26,11 +29,8 @@
       "permanent": true
     }
   ],
+
   "functions": {
-<<<<<<< HEAD
-    "api/**": { "runtime": "nodejs20.x" }
-=======
     "api/**.js": { "runtime": "nodejs20.x" }
->>>>>>> 3ee03a6 (Vercel: force Node runtime for API, keep routes/headers)
   }
 }
