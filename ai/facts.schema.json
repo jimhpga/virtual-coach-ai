@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VCAI_Facts",
+  "type": "object",
+  "required": ["player_id", "session_id", "club", "checkpoints"],
+  "properties": {
+    "player_id": {"type":"string"},
+    "session_id": {"type":"string"},
+    "club": {"type":"string"},
+    "dna": {
+      "type":"object",
+      "properties": {
+        "eye":{"type":"string","enum":["left","right","unknown"]},
+        "mobility":{"type":"string"},
+        "tempo":{"type":"string"}
+      }
+    },
+    "goals": {"type":"array","items":{"type":"string"}},
+    "history": {
+      "type":"object",
+      "properties": {
+        "last_faults":{"type":"array","items":{"type":"string"}},
+        "helped_drills":{"type":"array","items":{"type":"string"}}
+      }
+    },
+    "checkpoints": {
+      "type":"array",
+      "items":{
+        "type":"object",
+        "required":["p","issue","severity"],
+        "properties":{
+          "p":{"type":"string","pattern":"^P[1-9]$"},
+          "issue":{"type":"string"},
+          "delta_deg":{"type":"number"},
+          "delta_mm":{"type":"number"},
+          "severity":{"type":"string","enum":["low","med","high"]}
+        }
+      }
+    }
+  }
+}
