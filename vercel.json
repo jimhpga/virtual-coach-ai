@@ -28,5 +28,9 @@
       "destination": "https://virtualcoachai.net/$1",
       "permanent": true
     }
-  ]
+  ],
+
+  "functions": {
+    "api/**.js": { "runtime": "nodejs20.x" }
+  }
 }
