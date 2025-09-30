@@ -1,30 +1,52 @@
-// api/upload.js
-// Force Node runtime (NOT Edge)
-export const config = { runtime: 'nodejs' };
-
-// Minimal POST handler that returns a stub report URL.
-// This unblocks the Upload page and your deploy.
-// Later we can parse FormData and store the video (S3/Blob) and create a real report.
+// /api/upload.js
 export default async function handler(req, res) {
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
   try {
-    if (req.method !== 'POST') {
-      res.setHeader('Allow', 'POST');
-      return res.status(405).json({ ok: false, error: 'Method Not Allowed' });
-    }
+    // We accept either FormData (file) or JSON ({ videoUrl, clientId, mode })
+    // For now we ignore the actual bytes and produce a known-good demo report.
+    const now = new Date().toISOString();
 
-    // If you want to confirm it’s being called:
-    // const contentType = req.headers['content-type'] || '';
-    // console.log('upload content-type:', contentType);
+    const report = {
+      schema: "1.0",
+      title: "Virtual Coach AI - Swing Report",
+      client: {
+        id: "jim-hartnett",
+        note: "Remote demo run",
+        createdAt: now
+      },
+      session: {
+        status: "ready",
+        mode: "Full Swing",
+        swings: 12,
+        dateUtc: now
+      },
+      swingScore: 85,
+      highlights: ["Hip clearance", "Face control", "Tempo"],
+      faults: [
+        { code: "face-to-path cleanup", severity: "med" },
+        { code: "tempo inconsistency", severity: "low" }
+      ],
+      checkpoints: [
+        { pos: "P1", label: "Setup", notes: "Neutral grip; hip hinge 25°; 55/45" },
+        { pos: "P2", label: "Shaft parallel (BS)", notes: "Face matches spine-angle; path neutral" },
+        { pos: "P3", label: "Lead arm parallel", notes: "Lead wrist flat; shaft slightly inside" },
+        { pos: "P4", label: "Top", notes: "Trail elbow ~90°; full turn without sway" },
+        { pos: "P5", label: "Transition", notes: "Belt buckle leads; shallow 5–10°" },
+        { pos: "P6", label: "Delivery", notes: "Shaft under trail forearm; handle forward" },
+        { pos: "P7", label: "Impact", notes: "Forward shaft lean; ~85% lead side" },
+        { pos: "P8", label: "Trail arm parallel (FT)", notes: "Arms extend; chest left of target" },
+        { pos: "P9", label: "Finish", notes: "Tall, balanced; buckle at target" }
+      ]
+    };
 
-    const jobId = Math.random().toString(36).slice(2);
-    // Keep using the existing viewer; this opens the sample for now
-    const reportUrl = '/docs/report.html?report=report.json';
-
-    res.setHeader('Content-Type', 'application/json');
-    return res.status(200).send(JSON.stringify({ ok: true, jobId, reportUrl }));
+    // Return the report so the frontend can encode and redirect with it.
+    return res.status(200).json({ ok: true, report });
   } catch (err) {
-    console.error('upload error', err);
-    res.setHeader('Content-Type', 'application/json');
-    return res.status(500).send(JSON.stringify({ ok: false, error: String(err && err.message || err) }));
+    console.error(err);
+    return res.status(500).json({ ok: false, error: "Upload processing failed." });
   }
 }
