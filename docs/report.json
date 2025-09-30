@@ -1,128 +1,674 @@
-﻿{
-    "date":  "2025-09-23",
-    "mode":  "Full Swing",
-    "swings":  6,
-    "coaching":  {
-                     "quick_fixes":  [
-                                         "Chair-butt drill (light contact P6–P8), 20 reps",
-                                         "Pump \u0026 Pause to P6 (tuck trail elbow), 3×10",
-                                         "Impact bag—hands ahead, 15–20 strikes"
-                                     ],
-                     "fundamentals":  [
-                                          "Athletic setup: ~25° hip hinge, chin up",
-                                          "Neutral grip; lead wrist flat at P3–P4",
-                                          "Ball position: 7i slightly forward of center"
-                                      ],
-                     "power_errors":  [
-                                          "Early extension (hips toward ball)",
-                                          "Open face at P6 (trail wrist extends too long)",
-                                          "Steep delivery window (shaft above trail forearm)"
-                                      ]
-                 },
-    "errors":  [
-                   "Early extension on the downswing",
-                   "Casting from P4 to P5",
-                   "Open clubface approaching impact"
-               ],
-    "quickFixes":  [
-                       "Pump drill (P4→P5 with shaft lean)",
-                       "Alignment-stick hip check",
-                       "Half-speed rehearsals focusing on sequence"
-                   ],
-    "drills":  [
-                   "Feet-together swings (tempo \u0026 balance)",
-                   "Slow-motion P1–P9 (positions awareness)",
-                   "Step-change drill (weight shift timing)"
-               ],
-    "fundamentals":  [
-                         "Neutral grip with soft forearms",
-                         "Athletic posture; weight centered over arches",
-                         "Stable head; balanced finish"
-                     ],
-    "phases":  [
-                   {
-                       "short":  "Neutral grip; athletic posture.",
-                       "name":  "Setup",
-                       "id":  "P1",
-                       "grade":  "ok",
-                       "long":  "Soft forearms, weight over arches."
-                   },
-                   {
-                       "short":  "Club just outside hands.",
-                       "name":  "Takeaway",
-                       "id":  "P2",
-                       "grade":  "good",
-                       "long":  "Clubhead slightly outside hands by P2."
-                   },
-                   {
-                       "short":  "Across the line.",
-                       "name":  "Top",
-                       "id":  "P4",
-                       "grade":  "bad",
-                       "long":  "Soften trail wrist; feel more laid off."
-                   },
-                   {
-                       "short":  "Steep into ball.",
-                       "name":  "Delivery",
-                       "id":  "P6",
-                       "grade":  "bad",
-                       "long":  "Shallow under trail forearm by P6."
-                   },
-                   {
-                       "short":  "Need more shaft lean.",
-                       "name":  "Impact",
-                       "id":  "P7",
-                       "grade":  "ok",
-                       "long":  "Pressure ~85% lead; handle ahead."
-                   }
-               ],
-    "positionConsistency":  [
-                                {
-                                    "value":  86,
-                                    "position":  "P1"
-                                },
-                                {
-                                    "value":  78,
-                                    "position":  "P2"
-                                },
-                                {
-                                    "value":  61,
-                                    "position":  "P4"
-                                },
-                                {
-                                    "value":  55,
-                                    "position":  "P6"
-                                },
-                                {
-                                    "value":  72,
-                                    "position":  "P7"
-                                }
-                            ],
-    "swingConsistency":  {
-                             "value":  68
-                         },
-    "powerScoreSummary":  {
-                              "value":  64
-                          },
-    "power":  {
-                  "score":  64,
-                  "release_timing":  74,
-                  "tempo":  "3:1"
-              },
-    "position_metrics":  [
-                             {
-                                 "label":  "P4 Shaft Pitch",
-                                 "unit":  "°",
-                                 "tour":  80,
-                                 "value":  60
-                             }
-                         ],
-    "swing_metrics":  [
-                          {
-                              "label":  "Club Path Std Dev",
-                              "unit":  "%",
-                              "tour":  75,
-                              "value":  62
-                          }
-                      ]
+{
+  "header": {
+    "date": "2025-09-29",
+    "mode": "Full Swing",
+    "swings": 8
+  },
+  "summary": "Sample: P6 ~12° steep; face ~3° open through P7. We’ll shallow earlier and tidy face-to-path.",
+  "p1p9": [
+    {
+      "p": "P6",
+      "note": "Shaft steep; handle high"
+    },
+    {
+      "p": "P7",
+      "note": "Face a bit open vs path"
+    }
+  ],
+  "position_consistency": {
+    "overall": 74,
+    "by_position": [
+      {
+        "p": "P1",
+        "score": 82
+      },
+      {
+        "p": "P6",
+        "score": 63
+      },
+      {
+        "p": "P7",
+        "score": 70
+      }
+    ]
+  },
+  "swing_consistency": {
+    "tempo": "3:1",
+    "variance": 6,
+    "stability": 82
+  },
+  "power_score_summary": {
+    "total": 68,
+    "components": [
+      {
+        "name": "Levers",
+        "score": 72
+      },
+      {
+        "name": "Sequence",
+        "score": 65
+      },
+      {
+        "name": "Release",
+        "score": 67
+      }
+    ]
+  },
+  "fundamentals_top3": [
+    {
+      "label": "Shallow earlier (P3→P6)",
+      "delta": null,
+      "units": "deg"
+    },
+    {
+      "label": "Handle low/left through P6",
+      "delta": null,
+      "units": "deg"
+    },
+    {
+      "label": "Match face to path at P7",
+      "delta": null,
+      "units": "deg"
+    }
+  ],
+  "power_errors_top3": [
+    {
+      "label": "shaft steep",
+      "evidence": [
+        "P6 +12°",
+        "handle high"
+      ]
+    },
+    {
+      "label": "face to path open",
+      "evidence": [
+        "P7 +3° open"
+      ]
+    }
+  ],
+  "quick_fixes_top3": [
+    {
+      "label": "handle low/left"
+    },
+    {
+      "label": "lead hip clears"
+    }
+  ],
+  "faults": [
+    {
+      "code": "shaft_steep",
+      "why": "Handle high; shaft across trail forearm",
+      "evidence": [
+        "P6 +12°",
+        "handle high"
+      ]
+    },
+    {
+      "code": "face_to_path_open",
+      "why": "Face a bit open vs path",
+      "evidence": [
+        "P7 +3° open"
+      ]
+    }
+  ],
+  "drills": [
+    {
+      "title": "SplitGrip_P3P6",
+      "id": "SplitGrip_P3P6",
+      "steps": [
+        "Split hands 2 in",
+        "Slow P3→P6 keeping handle low-left"
+      ],
+      "reps": "3x10",
+      "cue": "handle low/left",
+      "contra": []
+    },
+    {
+      "title": "LeadArmWall",
+      "id": "LeadArmWall",
+      "steps": [
+        "Lead side near wall",
+        "Backswing: avoid wall; shallow first"
+      ],
+      "reps": "2x8",
+      "cue": "lead hip clears",
+      "contra": []
+    }
+  ],
+  "plan_14_day": [
+    {
+      "day": 1,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 2,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 3,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 4,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 5,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 6,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 7,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 8,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 9,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 10,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 11,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 12,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 13,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 14,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    }
+  ],
+  "ok": true,
+  "status": "ready",
+  "version": 1,
+  "generatedAt": "2025-09-29T22:22:15.182Z",
+  "date": "2025-09-29",
+  "mode": "Full Swing",
+  "swings": 8,
+  "positionConsistency": {
+    "overall": 74,
+    "by_position": [
+      {
+        "p": "P1",
+        "score": 82
+      },
+      {
+        "p": "P6",
+        "score": 63
+      },
+      {
+        "p": "P7",
+        "score": 70
+      }
+    ]
+  },
+  "swingConsistency": {
+    "tempo": "3:1",
+    "variance": 6,
+    "stability": 82
+  },
+  "powerScoreSummary": {
+    "total": 68,
+    "components": [
+      {
+        "name": "Levers",
+        "score": 72
+      },
+      {
+        "name": "Sequence",
+        "score": 65
+      },
+      {
+        "name": "Release",
+        "score": 67
+      }
+    ]
+  },
+  "top3Fundamentals": [
+    {
+      "label": "Shallow earlier (P3→P6)",
+      "delta": null,
+      "units": "deg"
+    },
+    {
+      "label": "Handle low/left through P6",
+      "delta": null,
+      "units": "deg"
+    },
+    {
+      "label": "Match face to path at P7",
+      "delta": null,
+      "units": "deg"
+    }
+  ],
+  "top3PowerErrors": [
+    {
+      "label": "shaft steep",
+      "evidence": [
+        "P6 +12°",
+        "handle high"
+      ]
+    },
+    {
+      "label": "face to path open",
+      "evidence": [
+        "P7 +3° open"
+      ]
+    }
+  ],
+  "top3QuickFixes": [
+    {
+      "label": "handle low/left"
+    },
+    {
+      "label": "lead hip clears"
+    }
+  ],
+  "fourteenDayPlan": [
+    {
+      "day": 1,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 2,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 3,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 4,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 5,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 6,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 7,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 8,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 9,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 10,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 11,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 12,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 13,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 14,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    }
+  ],
+  "practicePlan": [
+    {
+      "day": 1,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 2,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 3,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 4,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 5,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 6,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 7,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 8,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 9,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 10,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 11,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 12,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 13,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 14,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    }
+  ],
+  "p1ToP9": [
+    {
+      "p": "P6",
+      "note": "Shaft steep; handle high"
+    },
+    {
+      "p": "P7",
+      "note": "Face a bit open vs path"
+    }
+  ],
+  "top_3_fundamentals": [
+    {
+      "label": "Shallow earlier (P3→P6)",
+      "delta": null,
+      "units": "deg"
+    },
+    {
+      "label": "Handle low/left through P6",
+      "delta": null,
+      "units": "deg"
+    },
+    {
+      "label": "Match face to path at P7",
+      "delta": null,
+      "units": "deg"
+    }
+  ],
+  "top_3_power_errors": [
+    {
+      "label": "shaft steep",
+      "evidence": [
+        "P6 +12°",
+        "handle high"
+      ]
+    },
+    {
+      "label": "face to path open",
+      "evidence": [
+        "P7 +3° open"
+      ]
+    }
+  ],
+  "top_3_quick_fixes": [
+    {
+      "label": "handle low/left"
+    },
+    {
+      "label": "lead hip clears"
+    }
+  ],
+  "practice_plan": [
+    {
+      "day": 1,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 2,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 3,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 4,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 5,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 6,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 7,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 8,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 9,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 10,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 11,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 12,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 13,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    },
+    {
+      "day": 14,
+      "focus": [
+        "P6 shallow",
+        "face control"
+      ]
+    }
+  ]
 }
