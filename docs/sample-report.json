@@ -1,0 +1,28 @@
+﻿{
+  "summary": "Sample: P6 is ~12° steep; face ~3° open through P7. We'll shallow earlier and tidy face-to-path for center contact.",
+  "top_faults": [
+    { "code": "shaft_steep", "why": "Handle stays high; shaft across trail forearm", "evidence": ["P6 +12°", "handle high"] },
+    { "code": "face_to_path_open", "why": "Face slightly open vs path", "evidence": ["P7 +3° open"] }
+  ],
+  "drills": [
+    { "id": "SplitGrip_P3P6", "steps": ["Split hands 2 in", "Slow P3→P6 keeping handle low-left"], "reps": "3x10", "cue": "handle low/left", "contra": [] },
+    { "id": "LeadArmWall", "steps": ["Stand lead side near wall", "Backswing: avoid wall; shallow first"], "reps": "2x8", "cue": "lead hip clears", "contra": [] }
+  ],
+  "practice_plan": { "days": 14, "schedule": [1,2,3,4,5,6,7,8,9,10,11,12,13,14].map ? [] : [
+    { "day": 1, "focus": ["P6 shallow","face control"] },
+    { "day": 2, "focus": ["P6 shallow","face control"] },
+    { "day": 3, "focus": ["P6 shallow","face control"] },
+    { "day": 4, "focus": ["P6 shallow","face control"] },
+    { "day": 5, "focus": ["P6 shallow","face control"] },
+    { "day": 6, "focus": ["P6 shallow","face control"] },
+    { "day": 7, "focus": ["P6 shallow","face control"] },
+    { "day": 8, "focus": ["P6 shallow","face control"] },
+    { "day": 9, "focus": ["P6 shallow","face control"] },
+    { "day": 10, "focus": ["P6 shallow","face control"] },
+    { "day": 11, "focus": ["P6 shallow","face control"] },
+    { "day": 12, "focus": ["P6 shallow","face control"] },
+    { "day": 13, "focus": ["P6 shallow","face control"] },
+    { "day": 14, "focus": ["P6 shallow","face control"] }
+  ]},
+  "one_liner": "Crack the whip earlier; stop throwing the handle."
+}

@@ -1,0 +1,42 @@
+﻿{
+  "meta": { "title": "Swing Report — P1–P9", "date": "2025-09-29", "mode": "Full Swing", "swings": 6 },
+  "p1p9": ["P1 setup neutral","P2 club outside hands","P3 trail elbow high","P4 depth ok","P5 shallow late","P6 shaft ~12° steep; handle high","P7 face ~3° open","P8 exit low","P9 balanced"],
+  "position_consistency": { "notes": ["Setup consistent","Top varies with tempo"] },
+  "swing_consistency": "Tempo 3:1 target; transition a touch quick",
+  "power_score_summary": { "leverage": 6, "rotation": 7, "lag": 5, "sequence": 6, "notes": "Speed left on table due to late shallow" },
+  "fundamentals_top3": ["Shallow earlier (P3→P6)","Handle low/left through P6","Match face to path at P7"],
+  "top3_fundamentals": ["Shallow earlier (P3→P6)","Handle low/left through P6","Match face to path at P7"],
+  "power_errors_top3": [
+    { "label": "Shaft steep at P6", "evidence": ["P6 +12°","handle high"] },
+    { "label": "Face open vs path", "evidence": ["P7 +3° open"] },
+    { "label": "Late shallow",       "evidence": ["P3→P5 vertical handle"] }
+  ],
+  "top3_power_errors": [
+    { "label": "Shaft steep at P6", "evidence": ["P6 +12°","handle high"] },
+    { "label": "Face open vs path", "evidence": ["P7 +3° open"] },
+    { "label": "Late shallow",       "evidence": ["P3→P5 vertical handle"] }
+  ],
+  "quick_fixes_top3": [
+    "Split grip: slow P3→P6; keep handle low-left",
+    "Lead-arm wall: avoid wall; shallow first",
+    "Impact preset: trail hip back, chest open"
+  ],
+  "top3_quick_fixes": [
+    "Split grip: slow P3→P6; keep handle low-left",
+    "Lead-arm wall: avoid wall; shallow first",
+    "Impact preset: trail hip back, chest open"
+  ],
+  "faults": [
+    { "code": "shaft_steep", "why": "Handle high; shaft across trail forearm", "evidence": ["P6 +12°","handle high"] },
+    { "code": "face_to_path_open", "why": "Face slightly open vs path", "evidence": ["P7 +3° open"] }
+  ],
+  "drills": [
+    { "id": "SplitGrip_P3P6", "reps": "3x10", "cue": "handle low/left",
+      "steps": ["Split hands 2 in","Slow P3→P6 keeping handle low-left"] },
+    { "id": "LeadArmWall", "reps": "2x8", "cue": "lead hip clears",
+      "steps": ["Lead side near wall","Backswing: avoid wall; shallow first"] }
+  ],
+  "practice_plan": { "days": 14, "schedule": [ { "day": 1, "focus": ["P6 shallow","face control"] }, { "day": 2, "focus": ["P6 shallow","face control"] }, { "day": 3, "focus": ["tempo 3:1","center contact"] } ] },
+  "summary": "P6 ~12° steep; face ~3° open through P7. Shallow earlier; match face to path.",
+  "one_liner": "Crack the whip earlier; stop throwing the handle."
+}

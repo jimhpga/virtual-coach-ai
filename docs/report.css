@@ -82,3 +82,39 @@ details[open] .caret{transform:rotate(180deg)}
 
 
 .brand-logo{height:36px;width:auto;display:block}
+
+/* === VC Injected (cards/metrics/faults/drills) === */
+body.loaded .card{ background:rgba(255,255,255,.05) }
+.card.filled .content:empty{min-height:0}
+
+/* list helpers */
+.vc-list{margin:6px 0 0 18px; padding:0}
+.vc-list li{margin:2px 0}
+
+/* meter (percent bars) */
+.vc-meter{margin:6px 0 10px 0}
+.vc-meter-row{display:grid; grid-template-columns:140px 1fr 48px; align-items:center; gap:10px}
+.vc-meter-label{opacity:.9; font-weight:600}
+.vc-meter-bar{height:8px; background:rgba(255,255,255,.12); border-radius:999px; overflow:hidden}
+.vc-meter-bar > span{display:block; height:100%; background:#5fd4a4}
+.vc-meter-val{text-align:right; font-variant-numeric:tabular-nums; opacity:.9}
+
+/* faults & drills */
+.vc-fault{margin:8px 0 10px 0; padding-left:2px}
+.vc-fault h4{margin:0 0 2px 0; font-size:14px}
+.vc-fault small{opacity:.7}
+.vc-drill{margin:10px 0 14px 0}
+.vc-drill h4{margin:0 0 4px 0; font-size:14px}
+.vc-steps{margin:4px 0 0 18px}
+
+
+/* === VC meters === */
+.vc-meter{position:relative;height:8px;border-radius:999px;background:#263241;overflow:hidden}
+.vc-meter .vc-fill{height:100%;background:linear-gradient(90deg,#7fdcff,#22c1c3);box-shadow:0 0 10px #22c1c355 inset}
+.vc-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0}
+.vc-row .vc-label{opacity:.9}
+.vc-badge{display:inline-block;font:600 11px/1 system-ui,Segoe UI,Arial;padding:4px 6px;border-radius:8px;background:#1b2736;color:#cde}
+.vc-total{margin:8px 0 12px}
+.vc-kv .row{display:flex;justify-content:space-between;margin:4px 0}
+.vc-val{min-width:34px;text-align:right;opacity:.85}
+

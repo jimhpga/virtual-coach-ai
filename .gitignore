@@ -1,7 +1,14 @@
-.vercel
-node_modules/
-dist/
-public/data/
-dist/
-public/data/
-*.bak
+﻿# secrets / env
+.env
+.env.*
+*.env
+
+# archives / bundles
+*.zip
+*.7z
+*.tar
+*.tgz
+
+# local artifacts
+VirtualCoachAI_Offline.zip
+docs/access keys.txt

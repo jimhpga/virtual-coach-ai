@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Virtual Coach AI — Demo</title>
+  <style>
+    body{font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:24px;max-width:920px}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-block:18px}
+    .card{border:1px solid #ddd;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+    .btns{display:flex;gap:8px;flex-wrap:wrap;margin-block:12px}
+    button{padding:10px 14px;border-radius:10px;border:1px solid #ccc;background:#f7f7f7;cursor:pointer}
+    button:hover{background:#eee}
+    code,pre{background:#f6f8fa;border-radius:8px;padding:8px}
+    .badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef;margin:2px 6px 2px 0}
+    .pill{display:inline-block;padding:3px 8px;border-radius:999px;background:#eee;margin:1px 6px 1px 0;font-size:13px}
+    .one{border-left:5px solid #1a73e8;padding-left:10px;font-weight:600}
+    .muted{color:#666}
+    .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+    .day{border:1px solid #ddd;border-radius:10px;padding:8px;font-size:13px}
+    .ok{color:green;font-weight:600}
+    footer{margin-top:28px;color:#666;font-size:13px}
+  </style>
+</head>
+<body>
+  <header><h1>Virtual Coach AI — Live Demo</h1></header>
+
+  <div class="card">
+    <div class="btns">
+      <button id="live"><!-- Live disabled offline -->
+      <button id="sample">Load Sample (Offline)</button>
+      <span id="status" class="muted"></span>
+    </div>
+    <pre id="raw" class="muted" style="display:none"></pre>
+  </div>
+
+  <div class="row">
+    <div class="card"><h2>Summary</h2><p id="summary" class="muted">—</p><div class="one" id="one"></div></div>
+    <div class="card"><h2>Top Faults</h2><div id="faults">—</div></div>
+  </div>
+
+  <div class="row">
+    <div class="card"><h2>Drills</h2><div id="drills">—</div></div>
+    <div class="card"><h2>14-Day Plan</h2><div id="plan" class="grid">—</div></div>
+  </div>
+
+  <footer><span class="ok">Tip:</span> If Wi-Fi flakes, click <b>Load Sample</b>. Layout is identical.</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+function render(out){
+  $("summary").textContent = out.summary || "—";
+  $("one").textContent = out.one_liner || "";
+  $("faults").innerHTML = (out.top_faults||[]).map(f=>`
+    <div><span class="badge">${f.code}</span> ${f.why} <span class="muted">(${(f.evidence||[]).join(", ")})</span></div>
+  `).join("") || "—";
+  $("drills").innerHTML = (out.drills||[]).map(d=>`
+    <div style="margin-bottom:10px">
+      <span class="badge">${d.id}</span> <b>${d.reps}</b> · <span class="muted">${d.cue||""}</span>
+      <ul>${(d.steps||[]).map(s=>`<li>${s}</li>`).join("")}</ul>
+    </div>
+  `).join("") || "—";
+  $("plan").innerHTML = (out.practice_plan?.schedule||[]).map(s=>`
+    <div class="day"><b>Day ${s.day}</b><br>${(s.focus||[]).map(x=>`<span class="pill">${x}</span>`).join(" ")}</div>
+  `).join("") || "—";
+}
+async function live(){
+  $("status").textContent = "Calling /api/coach…";
+  try{
+    const facts = {
+      player_id:"demo", session_id:new Date().toISOString(), club:"Driver",
+      dna:{ eye:"right", mobility:"hamstring_limit", tempo:"3:1" },
+      goals:["reduce_slice","center_contact"],
+      checkpoints:[
+        { p:"P6", issue:"shaft_steep", delta_deg:12, severity:"high" },
+        { p:"P7", issue:"face_to_path_open", delta_deg:3, severity:"med" }
+      ]
+    };
+    const r = await fetch("/api/coach", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(facts) });
+    const out = await r.json();
+    $("raw").style.display="block"; $("raw").textContent = JSON.stringify(out, null, 2);
+    $("status").textContent = r.ok ? "Live response ?" : "Live error";
+    render(out);
+  }catch(e){ $("status").textContent = "Live call failed—use sample."; }
+}
+async function sample(){
+  $("status").textContent = "Loading sample…";
+  try{
+    const r = await fetch("/docs/sample-report.json", {cache:"no-store"});
+    const out = await r.json();
+    $("raw").style.display="block"; $("raw").textContent = JSON.stringify(out, null, 2);
+    $("status").textContent = "Sample loaded ?";
+    render(out);
+  }catch(e){ $("status").textContent = "Sample missing. Add /docs/sample-report.json"; }
+}
+$("live").onclick = live;
+$("sample").onclick = sample;
+</script>
+</body></html>

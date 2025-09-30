@@ -1,0 +1,31 @@
+﻿{
+  "header": { "date": "2025-09-29", "mode": "Full Swing", "swings": 8 },
+  "summary": "P6 ~12° steep; face ~3° open through P7. Shallow earlier; match face to path.",
+  "p1p9": [
+    { "p": "P1", "note": "" }, { "p": "P2", "note": "" }, { "p": "P3", "note": "" },
+    { "p": "P4", "note": "" }, { "p": "P5", "note": "" }, { "p": "P6", "note": "Shaft steep; handle high" },
+    { "p": "P7", "note": "Face a bit open vs path" }, { "p": "P8", "note": "" }, { "p": "P9", "note": "" }
+  ],
+  "position_consistency": { "overall": 74, "by_position": [ { "p": "P1", "score": 82 }, { "p": "P6", "score": 63 }, { "p": "P7", "score": 70 } ] },
+  "swing_consistency": { "tempo": "3:1", "variance": 6, "stability": 82 },
+  "power_score_summary": { "total": 68, "components": [ { "name": "Levers", "score": 72 }, { "name": "Sequence", "score": 65 }, { "name": "Release", "score": 67 } ] },
+  "fundamentals_top3": [
+    { "label": "Shallow earlier (P3→P6)", "delta": -12, "units": "deg" },
+    { "label": "Handle low/left through P6", "delta": -1.5, "units": "in" },
+    { "label": "Match face to path at P7", "delta": 3, "units": "deg" }
+  ],
+  "power_errors_top3": [
+    { "label": "shaft_steep", "evidence": ["P6 +12°","handle high"] },
+    { "label": "face_to_path_open", "evidence": ["P7 +3° open"] }
+  ],
+  "quick_fixes_top3": ["Crack the whip later", "Handle low/left", "Clear lead hip"],
+  "faults": [
+    { "code": "shaft_steep", "why": "Handle high; shaft across trail forearm", "evidence": ["P6 +12°","handle high"] },
+    { "code": "face_to_path_open", "why": "Face slightly open vs path", "evidence": ["P7 +3° open"] }
+  ],
+  "drills": [
+    { "id": "SplitGrip_P3P6", "reps": "3x10", "cue": "handle low/left", "steps": ["Split hands 2 in","Slow P3→P6 keeping handle low-left"] },
+    { "id": "LeadArmWall", "reps": "2x8", "cue": "lead hip clears", "steps": ["Lead side near wall","Backswing: avoid wall; shallow first"] }
+  ],
+  "plan_14_day": [ { "day": 1, "focus": ["P6 shallow","face control"] } ]
+}

@@ -1,0 +1,145 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Virtual Coach AI — Swing Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <style>
+    body{font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:#0f2a0f;color:#fff}
+    .hero{background:linear-gradient( to bottom, rgba(0,0,0,.25), rgba(0,0,0,.55) ), url('/docs/bg.jpg') center/cover no-repeat; padding:28px}
+    .wrap{max-width:1100px;margin:0 auto}
+    h1{margin:8px 0 12px;font-size:28px}
+    .bar{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+    .btn{padding:8px 12px;border-radius:10px;border:1px solid #c9e4c9;background:#eaf7ea;color:#0b3d0b;cursor:pointer}
+    .btn:hover{background:#dcf2dc}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .card{background:rgba(255,255,255,.08);backdrop-filter:blur(3px);border-radius:16px;padding:14px}
+    .muted{opacity:.8}
+    .badge{display:inline-block;background:#e6f0ff;color:#002b6b;border-radius:999px;padding:3px 8px;margin:0 6px 6px 0}
+    .pill{display:inline-block;background:#eef;border-radius:999px;color:#123;padding:3px 8px;margin:2px 5px 0 0;font-size:13px}
+    ul{margin:8px 0 0 18px}
+    .grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+    .day{background:rgba(255,255,255,.06);border-radius:10px;padding:8px;font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="wrap">
+      <h1>Swing Report — P1–P9</h1>
+      <div class="bar">
+        <button class="btn" id="download">Download</button>
+        <button class="btn" id="send">Send to Coach</button>
+        <span id="status" class="muted"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap" style="padding:18px">
+    <div class="card"><h2>Summary</h2><p id="summary" class="muted">—</p></div>
+
+    <div class="grid" style="margin-top:12px">
+      <div class="card"><h2>Top 3 Fundamentals</h2><div id="fundamentals">—</div></div>
+      <div class="card"><h2>Swing Consistency</h2><div class="muted">N/A (placeholder in MVP)</div></div>
+    </div>
+
+    <div class="grid" style="margin-top:12px">
+      <div class="card"><h2>Top 3 Power Errors</h2><div id="powerErrors">—</div></div>
+      <div class="card"><h2>Power Score Summary</h2><div class="muted">N/A (placeholder in MVP)</div></div>
+    </div>
+
+    <div class="card" style="margin-top:12px"><h2>Top 3 Quick Fixes</h2><div id="quickFixes">—</div></div>
+
+    <div class="grid" style="margin-top:12px">
+      <div class="card"><h2>Faults</h2><div id="faults">—</div></div>
+      <div class="card"><h2>Drills</h2><div id="drills">—</div></div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h2>14-Day Plan</h2>
+      <div id="plan" class="grid7">—</div>
+    </div>
+  </div>
+
+<script type="module">
+const $ = (id)=>document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const mode = params.get("mode") || "sample"; // default to sample for safety
+
+async function getReport(){
+  $("status").textContent = mode === "live" ? "Fetching live…" : "Loading sample…";
+  try{
+    let out;
+    if (mode === "live"){
+      const facts = {
+        player_id:"demo", session_id:new Date().toISOString(), club:"Driver",
+        dna:{ eye:"right", mobility:"hamstring_limit", tempo:"3:1" },
+        goals:["reduce_slice","center_contact"],
+        checkpoints:[
+          { p:"P6", issue:"shaft_steep", delta_deg:12, severity:"high" },
+          { p:"P7", issue:"face_to_path_open", delta_deg:3, severity:"med" }
+        ]
+      };
+      const r = await fetch("/api/coach",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(facts)});
+      out = await r.json();
+    } else {
+      const r = await fetch("/docs/sample-report.json",{cache:"no-store"});
+      out = await r.json();
+    }
+    render(out);
+    $("status").textContent = mode === "live" ? "Live ✔" : "Sample ✔";
+  }catch(e){
+    $("status").textContent = "Failed to load report";
+  }
+}
+
+function render(out){
+  $("summary").textContent = out.summary || "—";
+
+  // Fundamentals (simple heuristic from drills + faults)
+  const fun = [];
+  if (out.drills) fun.push(...out.drills.map(d=>d.cue).filter(Boolean));
+  if (out.top_faults) fun.push(...out.top_faults.map(f=>f.why));
+  $("fundamentals").innerHTML = (fun.slice(0,3).map(x=>`<div class="badge">${x}</div>`).join("")) || "—";
+
+  // Power Errors (heuristic: pick faults mentioning steep/early/path/face)
+  const power = (out.top_faults||[])
+    .filter(f=>/(steep|early|path|face|speed|power)/i.test(f.code+ " " + f.why))
+    .slice(0,3)
+    .map(f=>`<div><span class="badge">${f.code}</span> ${f.why}</div>`)
+    .join("");
+  $("powerErrors").innerHTML = power || "—";
+
+  // Quick fixes = first step of each drill (top 3)
+  const qf = (out.drills||[]).slice(0,3).map(d=>`<div><span class="badge">${d.id}</span> ${d.steps?.[0]||""}</div>`).join("");
+  $("quickFixes").innerHTML = qf || "—";
+
+  // Faults (with evidence)
+  $("faults").innerHTML = (out.top_faults||[]).map(f=>`
+    <div style="margin-bottom:8px">
+      <div><span class="badge">${f.code}</span> ${f.why}</div>
+      <div class="muted">${(f.evidence||[]).join(", ")}</div>
+    </div>`).join("") || "—";
+
+  // Drills
+  $("drills").innerHTML = (out.drills||[]).map(d=>`
+    <div style="margin-bottom:10px">
+      <div><span class="badge">${d.id}</span> <b>${d.reps||""}</b></div>
+      <div class="muted">${d.cue||""}</div>
+      <ul>${(d.steps||[]).map(s=>`<li>${s}</li>`).join("")}</ul>
+    </div>`).join("") || "—";
+
+  // 14-day plan
+  $("plan").innerHTML = (out.practice_plan?.schedule||[]).map(s=>`
+    <div class="day"><b>Day ${s.day}</b><br>${(s.focus||[]).map(x=>`<span class="pill">${x}</span>`).join(" ")}</div>
+  `).join("") || "—";
+}
+
+document.addEventListener("DOMContentLoaded", getReport);
+
+// Buttons (stubbed for now)
+document.getElementById("download").onclick = ()=>window.print();
+document.getElementById("send").onclick = ()=>alert("Send-to-coach coming soon");
+</script>
+</body>
+</html>

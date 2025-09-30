@@ -1,0 +1,8 @@
+﻿<!doctype html><meta charset="utf-8"><title>Report Test</title>
+<body style="font:16px system-ui;margin:24px">
+<h2>Report test</h2><pre id="out">loading…</pre>
+<script>
+const f = new URLSearchParams(location.search).get("report") || "/reports/latest.json";
+fetch(f).then(r=>r.json()).then(j=>out.textContent=JSON.stringify(j,null,2)).catch(e=>out.textContent=String(e));
+</script>
+</body>

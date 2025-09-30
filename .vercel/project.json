@@ -1,0 +1,16 @@
+{
+  "projectId": "prj_AR3eNpKF91wcgRoWgSi368fncGmo",
+  "orgId": "team_E52OTcsXyNS1kJYQgNfS50Pl",
+  "projectName": "virtual-coach-ai",
+  "settings": {
+    "createdAt": 1749576752145,
+    "framework": null,
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "22.x"
+  }
+}
