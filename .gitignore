@@ -12,3 +12,10 @@
 # local artifacts
 VirtualCoachAI_Offline.zip
 docs/access keys.txt
+# --- VC repo ignores ---
+node_modules/
+.env
+.env.*
+*.zip
+*.bak
+VirtualCoachAI_Offline.zip
