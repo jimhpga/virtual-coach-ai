@@ -4,21 +4,15 @@
     "api/*.js": { "runtime": "nodejs20.x" }
   },
   "routes": [
-    // 1) API stays first
     { "src": "^/api/(.*)$", "dest": "/api/$1" },
 
-    // 2) Canonical pretty URLs -> .html (single-level)
-    { "src": "^/(faq|pricing|upload|report|contact|login|about|analyze|reports?)/?$", "dest": "/public/$1.html" },
+    { "src": "^/(faq|pricing|upload|report|contact|login|about|analyze|coming-soon|reports?)/?$", "dest": "/public/$1.html" },
 
-    // 3) Home
     { "src": "^/$", "dest": "/public/index.html" },
 
-    // 4) Redirects / aliases
-    { "src": "^/faqs/?$", "headers": { "Location": "/faq" }, "status": 308 },
-    { "src": "^/FAQ/?$",  "headers": { "Location": "/faq" }, "status": 308 },
+    { "src": "^/faqs/?$", "status": 308, "headers": { "Location": "/faq" } },
+    { "src": "^/FAQ/?$",  "status": 308, "headers": { "Location": "/faq" } },
 
-    // 5) If you ever have nested pages and want extensionless, add more explicit rules above.
-    // Fallback: serve any other static asset or .html by exact path under /public
     { "src": "^/(.*)$", "dest": "/public/$1" }
   ]
 }
