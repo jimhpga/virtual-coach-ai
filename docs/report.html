@@ -405,7 +405,7 @@ $('#btnDownload')?.addEventListener('click', ()=>{
     '<section class="card"><h3>Top 3 Quick Fixes</h3><div class="content">'+sect('quickFixes')+'</div></section>',
     '<section class="card"><h3>Faults</h3><div class="content">'+sect('faults')+'</div></section>',
     '<section class="card"><h3>Drills</h3><div class="content">'+sect('drills')+'</div></section>',
-    '</main></body></html>'
+    '</main><script src="report-shim.js" defer></script></body></html>'
   ].join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([html], {type:'text/html'}));
@@ -414,7 +414,8 @@ $('#btnDownload')?.addEventListener('click', ()=>{
   setTimeout(()=> URL.revokeObjectURL(a.href), 1000);
 });
 </script>
-</body>
+<script src="report-shim.js" defer></script></body>
 </html>
+
 
 
