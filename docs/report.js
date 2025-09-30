@@ -1,5 +1,4 @@
-// docs/report.js
-// Robust renderer for report.html (flat /docs layout).
+// docs/report.js — robust renderer that replaces placeholders and draws meters
 (function () {
   "use strict";
 
@@ -8,28 +7,36 @@
   const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
   const esc = (s) =>
     (s == null ? "" : String(s)).replace(/[&<>"]/g, (c) => ({
-      "&": "&amp;",
-      "<": "&lt;",
-      ">": "&gt;",
-      '"': "&quot;",
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;",
     }[c]));
 
   const clamp100 = (x) => Math.max(0, Math.min(100, x | 0));
+  const li = (s) => `<li>${s}</li>`;
+  const ul = (items) => `<ul class="vc-list">${items.filter(Boolean).join("")}</ul>`;
 
-  // find a card by its <h3> title and set its .content
+  // Find a card by its <h3> title, **remove all placeholder content after <h3>**, and inject ours.
   function putInCard(title, html) {
     const h3 = $$(".card h3").find(
       (h) => h.textContent.trim().toLowerCase() === title.toLowerCase()
     );
     if (!h3) return false;
     const card = h3.closest(".card");
-    const content = $(".content", card) || card;
-    content.innerHTML = html || "";
+    // Create a real “content” slot right after the h3 and clear what was there.
+    let slot = $(".content", card);
+    if (!slot) {
+      slot = document.createElement("div");
+      slot.className = "content";
+      while (h3.nextSibling) card.removeChild(h3.nextSibling); // nuke placeholders
+      h3.after(slot);
+    } else {
+      slot.innerHTML = "";
+    }
+    slot.innerHTML = html || "";
     card.classList.add("filled");
     return true;
   }
 
-  // tiny meters (no deps)
+  // Tiny meters (bars), no libs
   function meter(label, val) {
     let num = (typeof val === "number") ? clamp100(val) : null;
     const txt = (num == null ? esc(val ?? "-") : `${num}%`);
@@ -44,15 +51,13 @@
       </div>`;
   }
 
-  const li = (s) => `<li>${s}</li>`;
-  const ul = (items) => `<ul class="vc-list">${items.filter(Boolean).join("")}</ul>`;
-
-  // inject CSS once
+  // Inject CSS once
   function ensureCSS() {
     if ($("#vc-meter-css")) return;
     const css = document.createElement("style");
     css.id = "vc-meter-css";
     css.textContent = `
+      body.loaded .card{ background:rgba(255,255,255,.05) }           /* tone down skeleton grey */
       .card.filled .content:empty{min-height:0}
       .vc-list{margin:6px 0 0 18px; padding:0}
       .vc-meter{margin:6px 0 10px 0}
@@ -71,7 +76,7 @@
     document.head.appendChild(css);
   }
 
-  // header fields used by report.html
+  // Header text used by report.html
   function setHeader(j) {
     const get = (a, b, c) => a ?? b ?? c ?? "";
     const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
@@ -80,7 +85,7 @@
     setText("swingCount", get(j.swings, j.header?.swings, ""));
   }
 
-  // sections
+  // Sections
   function renderP1P9(j) {
     const seq = j.p1p9 || j.p1ToP9 || [];
     const el = document.getElementById("plist");
@@ -96,9 +101,7 @@
     let html = "";
     if (pos.overall != null) html += meter("Overall", pos.overall);
     const by = pos.by_position || pos.byPosition || [];
-    if (by.length) {
-      html += ul(by.map(x => li(`<strong>${esc(x.p)}</strong> — ${esc(x.score)}%`)));
-    }
+    if (by.length) html += ul(by.map(x => li(`<strong>${esc(x.p)}</strong> — ${esc(x.score)}%`)));
     putInCard("Position Consistency", html);
   }
 
@@ -126,15 +129,12 @@
   }
 
   function renderTop3s(j) {
-    const f = j.fundamentals_top3 || j.top3Fundamentals || j.top_3_fundamentals || [];
+    const f  = j.fundamentals_top3 || j.top3Fundamentals || j.top_3_fundamentals || [];
     const pe = j.power_errors_top3 || j.top3PowerErrors || j.top_3_power_errors || [];
     const qf = j.quick_fixes_top3 || j.top3QuickFixes || j.top_3_quick_fixes || [];
 
-    if (f.length) putInCard("Top 3 Fundamentals", ul(f.map(x => li(esc(x.label || x)))));
-    if (pe.length) {
-      const html = ul(pe.map(x => li(`<strong>${esc(x.label||"")}</strong>${x.evidence?.length ? ": " + esc(x.evidence.join(", ")) : ""}`)));
-      putInCard("Top 3 Power Errors", html);
-    }
+    if (f.length)  putInCard("Top 3 Fundamentals", ul(f.map(x => li(esc(x.label || x)))));
+    if (pe.length) putInCard("Top 3 Power Errors", ul(pe.map(x => li(`<strong>${esc(x.label||"")}</strong>${x.evidence?.length ? ": " + esc(x.evidence.join(", ")) : ""}`))));
     if (qf.length) putInCard("Top 3 Quick Fixes", ul(qf.map(x => li(esc(x.label || x)))));
   }
 
@@ -158,6 +158,7 @@
         <h4>${esc(d.title || d.id || "Drill")}</h4>
         ${d.cue ? `<div><small>Cue:</small> ${esc(d.cue)}</div>` : ""}
         ${Array.isArray(d.steps) && d.steps.length ? `<ol class="vc-steps">${d.steps.map(s => `<li>${esc(s)}</li>`).join("")}</ol>` : ""}
+        ${d.reps ? `<div><small>Reps:</small> ${esc(d.reps)}</div>` : ""}
       </div>
     `).join("");
     putInCard("Drills", html);
@@ -166,13 +167,13 @@
   async function boot() {
     ensureCSS();
     try {
-      // report source: query ?report=… or fallback /reports/latest.json (for GitHub Pages: relative)
       const q = new URLSearchParams(location.search);
-      const src = q.get("report") || "/reports/latest.json";
+      const src = q.get("report") || "/reports/latest.json"; // works on GitHub Pages too
       const r = await fetch(src, { cache: "no-store" });
       const j = await r.json();
       window.__lastReport = j;
 
+      // header + sections
       setHeader(j);
       renderP1P9(j);
       renderPositionConsistency(j);
