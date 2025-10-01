@@ -1,55 +1,36 @@
-import { S3Client } from "@aws-sdk/client-s3";
-import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
-
-const s3 = new S3Client({
-  region: process.env.AWS_REGION || "us-west-1",
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "",
-  },
-});
+import { S3Client } from '@aws-sdk/client-s3';
+import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
-    return res.status(405).json({ error: "POST only" });
-  }
+  if (req.method !== 'POST') return res.status(405).end('Method Not Allowed');
 
-  try {
-    const body = await readJson(req);
-    const filename = (body.filename || body.name || "video.mp4").replace(/[^\w.\-.]/g, "_");
-    const contentType = body.type || "video/mp4";
-    const key = `uploads/${Date.now()}-${filename}`;
+  const { filename, type } = req.body || {};
+  const bucket = process.env.S3_BUCKET;
+  const region = process.env.AWS_REGION || 'us-west-1';
 
-    const post = await createPresignedPost(s3, {
-      Bucket: process.env.S3_BUCKET,
-      Key: key,
-      Expires: 60, // seconds
-      Conditions: [["content-length-range", 0, 500 * 1024 * 1024]], // up to 500MB
-      Fields: {
-        "Content-Type": contentType,
-        success_action_status: "201",
-      },
-    });
+  if (!bucket) return res.status(500).json({ error: 'S3_BUCKET not set' });
 
-    // Return everything the client needs to POST directly to S3
-    res.status(200).json({ ...post, key });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ error: e.message || "presign failed" });
-  }
-}
+  const safeName = (filename || 'video.mp4').replace(/[^\w.\-]+/g, '_');
+  const key = 'uploads/' + Date.now() + '-' + safeName;
 
-function readJson(req) {
-  return new Promise((resolve, reject) => {
-    let data = "";
-    req.on("data", (c) => (data += c));
-    req.on("end", () => {
-      try {
-        resolve(data ? JSON.parse(data) : {});
-      } catch (e) {
-        reject(e);
-      }
-    });
+  const s3 = new S3Client({
+    region,
+    credentials: {
+      accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ''
+    }
   });
+
+  const post = await createPresignedPost(s3, {
+    Bucket: bucket,
+    Key: key,
+    Conditions: [
+      ['content-length-range', 0, 200 * 1024 * 1024],
+      ['starts-with', '$Content-Type', (type || '').split('/')[0] || '']
+    ],
+    Expires: 300
+  });
+
+  res.setHeader('Cache-Control', 'no-store');
+  res.status(200).json({ url: post.url, fields: post.fields, key });
 }
