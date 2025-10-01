@@ -1,8 +1,12 @@
-// pages/api/presign.js
-import { S3Client } from "@aws-sdk/client-s3";
-import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+import { S3Client } from '@aws-sdk/client-s3';
+import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 
-const REGION = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || "us-west-1";
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+const BUCKET = process.env.S3_BUCKET;
+const REGION = process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'us-west-1';
+
 const s3 = new S3Client({
   region: REGION,
   credentials: {
@@ -12,28 +16,35 @@ const s3 = new S3Client({
 });
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
-  try {
-    const Bucket = process.env.S3_BUCKET;
-    if (!Bucket) return res.status(500).json({ error: "S3_BUCKET not set" });
+  // CORS (safe for your own site)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'content-type');
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  if (req.method !== 'POST') return res.status(405).json({ ok:false, error:'POST required' });
 
-    const { filename, type } = req.body || {};
-    const safe = (filename || "video.mp4").replace(/[^\w.\-]/g, "_");
-    const Key = `uploads/${Date.now()}-${safe}`;
+  try {
+    if (!BUCKET) return res.status(500).json({ ok:false, error:'Missing S3_BUCKET' });
+
+    const { filename, type } = (req.body || {});
+    const safeName = String(filename || 'video.mp4').replace(/[^a-z0-9.\-_]/gi, '_');
+    const key = `uploads/${Date.now()}-${safeName}`;
 
     const { url, fields } = await createPresignedPost(s3, {
-      Bucket,
-      Key,
+      Bucket: BUCKET,
+      Key: key,
       Conditions: [
-        ["content-length-range", 0, 1024 * 1024 * 1024], // up to 1GB
-        ["starts-with", "$Content-Type", ""],
+        ['content-length-range', 0, 100 * 1024 * 1024], // up to 100 MB
       ],
-      Fields: { "Content-Type": type || "video/mp4" },
-      Expires: 60, // seconds
+      Fields: {
+        key,
+        'Content-Type': type || 'video/mp4',
+      },
+      Expires: 300, // 5 minutes
     });
 
-    res.json({ url, fields, key: Key });
+    res.status(200).json({ ok:true, url, fields, key, bucket: BUCKET, region: REGION });
   } catch (e) {
-    res.status(500).json({ error: e.message || String(e) });
+    res.status(500).json({ ok:false, error: e?.message || String(e) });
   }
 }
