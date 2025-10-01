@@ -1,72 +1,123 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Virtual Coach AI — Upload</title>
-<link rel="stylesheet" href="site.css">
-<style>
-  .log {white-space:pre-wrap;border:1px solid #ccc;padding:10px;border-radius:8px;background:#111;color:#0f0;margin-top:10px}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Virtual Coach AI — Upload</title>
+  <link rel="stylesheet" href="site.css" />
+  <style>
+    body { max-width: 960px; margin: 40px auto; padding: 0 16px; }
+    .card { background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px; padding: 16px 20px; backdrop-filter: blur(6px); color: #fff; }
+    h1 { margin-bottom: 16px; }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .btn { padding: 10px 14px; border-radius: 10px; border: 1px solid #93c5fd;
+           background: #0b5; color: #fff; cursor: pointer; font-weight: 600; }
+    .btn[disabled] { opacity: .6; cursor: not-allowed; }
+    .log { white-space: pre-wrap; background:#0b0b0b; color:#b7f7b7; border:1px solid #244;
+           border-radius:12px; padding:12px; margin-top:14px; min-height: 120px; }
+    .hint { font-size: 12px; opacity: .85; }
+  </style>
 </head>
 <body>
-<h1>Upload → Report → Improve</h1>
+  <div class="card">
+    <h1>Upload → Analyze → View Report</h1>
 
-<input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v" />
-<button id="uploadBtn">Upload & Generate Report</button>
+    <div class="row" style="margin:12px 0 8px;">
+      <input id="file" type="file" accept="video/*" />
+      <button id="btnAnalyze" class="btn">Analyze</button>
+    </div>
+    <div class="hint">Pick a swing video (mov/mp4), then click <em>Analyze</em>. We’ll upload to S3, run the coach, and open your report.</div>
 
-<div id="log" class="log">Ready.</div>
+    <div id="log" class="log">Ready.</div>
+  </div>
 
-<script>
-const fileInput = document.getElementById('fileInput');
-const uploadBtn = document.getElementById('uploadBtn');
-const logEl = document.getElementById('log');
-const log = m => logEl.textContent += '\n' + m;
+  <script>
+    (function () {
+      const fileEl = document.getElementById("file");
+      const btn = document.getElementById("btnAnalyze");
+      const logEl = document.getElementById("log");
 
-window.addEventListener('error',e=>log('JS error: '+(e.message||e.error)));
+      function log(msg) {
+        if (!logEl) return;
+        logEl.textContent += "\\n" + msg;
+      }
+      function setStatus(msg) {
+        if (!logEl) return;
+        logEl.textContent = msg;
+      }
 
-fileInput.addEventListener('change', e=>{
-  const f = e.target.files[0];
-  if (f) log(`Selected: ${f.name} (${f.type}) size=${f.size}`);
-});
+      window.addEventListener("error", (e) => log("JS error: " + (e.message || e.error)));
 
-uploadBtn.addEventListener('click', async ()=>{
-  const file = fileInput.files[0];
-  if (!file) {
-    log('No file selected');
-    return;
-  }
-  log('Requesting upload URL…');
+      fileEl?.addEventListener("change", (e) => {
+        const f = e.target.files && e.target.files[0];
+        if (f) log("Selected: " + f.name + " (" + (f.type || "video") + ") " + f.size + " bytes");
+      });
 
-  try {
-    // Step 1: ask backend for upload URL
-    const r = await fetch('/api/upload-url', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({name:file.name, type:file.type})
-    });
-    const {url} = await r.json();
-    log('Got URL: '+url);
+      async function presign(file) {
+        // Ask our API to generate a presigned POST for S3
+        const r = await fetch("/api/presign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename: file.name, type: file.type || "video/mp4" }),
+        });
+        if (!r.ok) throw new Error("presign failed: " + r.status);
+        return r.json(); // { url, fields, key }
+      }
 
-    // Step 2: upload file to Blob storage
-    const up = await fetch(url, {method:'PUT', body:file});
-    if (!up.ok) throw new Error(`Upload failed ${up.status}`);
-    log('Upload complete');
+      async function uploadToS3(presigned, file) {
+        // Upload the file with the fields returned by the presign API
+        const fd = new FormData();
+        Object.entries(presigned.fields).forEach(([k, v]) => fd.append(k, v));
+        fd.append("file", file);
 
-    // Step 3: hit your create-report endpoint if you want
-    const report = await fetch('/api/create-report',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({fileName:file.name})
-    });
-    const reportRes = await report.json();
-    log('Report queued: '+JSON.stringify(reportRes));
+        const up = await fetch(presigned.url, { method: "POST", body: fd });
+        if (!up.ok) throw new Error("S3 upload failed: " + up.status);
+        return presigned.key; // the object key we just uploaded
+      }
 
-  } catch(err){
-    log('Error: '+err.message);
-    console.error(err);
-  }
-});
-</script>
+      async function makeReport(key) {
+        // Tell the backend which S3 object to analyze and to create a report
+        const r = await fetch("/api/make-report", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ s3_key: key }),
+        });
+        const j = await r.json();
+        if (!r.ok || !j.ok) throw new Error(j.error || "make-report failed");
+        // Prefer viewerUrl if provided; otherwise fall back to ?report=<signed-url>
+        return j.viewerUrl || ("/report/?report=" + encodeURIComponent(j.url));
+      }
+
+      btn?.addEventListener("click", async () => {
+        const file = fileEl?.files && fileEl.files[0];
+        if (!file) {
+          log("No file selected.");
+          return;
+        }
+
+        try {
+          btn.disabled = true;
+          setStatus("Uploading…");
+
+          const p = await presign(file);
+          log("Got presigned POST");
+
+          const key = await uploadToS3(p, file);
+          log("Upload complete: " + key);
+
+          setStatus("Analyzing…");
+          const viewerUrl = await makeReport(key);
+          log("Report ready → redirecting");
+
+          location.href = viewerUrl;
+        } catch (err) {
+          console.error(err);
+          log("Error: " + (err && err.message ? err.message : err));
+          btn.disabled = false;
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
