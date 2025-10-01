@@ -58,19 +58,22 @@
   const uploadBtn  = document.getElementById('uploadBtn');
   const logEl      = document.getElementById('log');
 
-  function log(msg){ logEl.textContent += '\\n' + msg; logEl.scrollTop = logEl.scrollHeight; }
+  function log(msg){
+    logEl.textContent += '\n' + msg;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
   function setBusy(b){ uploadBtn.disabled = !!b; fileInput.disabled = !!b; }
 
   window.addEventListener('error', e => log('JS error: ' + (e.message || e.error)));
 
   fileInput.addEventListener('change', e=>{
-    const f = e.target.files?.[0];
-    fileLabel.textContent = f ? `${f.name} (${f.type||'unknown'} ${f.size} bytes)` : '(no file)';
+    const f = e.target.files && e.target.files[0];
+    fileLabel.textContent = f ? `${f.name} (${f.type || 'unknown'} ${f.size} bytes)` : '(no file)';
     if (f) log(`Selected: ${f.name} type=${f.type} size=${f.size}`);
   });
 
   uploadBtn.addEventListener('click', async ()=>{
-    const file = fileInput.files?.[0];
+    const file = fileInput.files && fileInput.files[0];
     if (!file){ log('No file selected'); return; }
 
     setBusy(true);
@@ -90,7 +93,7 @@
       if (!url || !fields || !key) throw new Error('presign missing url/fields/key');
       log('Presign OK: posting to S3…');
 
-      // Build FormData for S3 *POST* (not PUT)
+      // Build FormData for S3 POST
       const form = new FormData();
       Object.entries(fields).forEach(([k,v]) => form.append(k, v));
       form.append('Content-Type', file.type || 'video/mp4');
