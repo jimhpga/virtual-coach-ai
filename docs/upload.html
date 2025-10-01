@@ -1,130 +1,57 @@
-/* Virtual Coach AI — Upload client (no inline JS, no weird escapes)
-   - Select a video
-   - POST /api/presign  -> { url, fields, key }
-   - Upload to storage with a signed POST
-   - POST /api/make-report -> { viewerUrl }
-   - Redirect to viewer
-*/
-(() => {
-  // ---- helpers ----
-  const $ = (id) => document.getElementById(id);
+=<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Coach AI — Upload</title>
+  <link rel="stylesheet" href="site.css" />
+  <link rel="icon" href="virtualcoach-logo.png" />
+  <style>
+    .glass { background: rgba(28,28,28,.40); border: 1px solid rgba(255,255,255,.08);
+             box-shadow: 0 20px 40px rgba(0,0,0,.35); border-radius: 18px; }
+    .btn { appearance: none; background:#247a3a; color:#fff; border:0; border-radius:12px;
+           padding:12px 16px; cursor:pointer; font-weight:600; }
+    .btn:disabled { opacity:.55; cursor:not-allowed; }
+    .pill { display:inline-block; font-size:12px; color:#bbb; margin-left:10px; }
+    .log { white-space:pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+           background:#0c1116; color:#a7f3d0; border:1px solid rgba(255,255,255,.08); border-radius:12px;
+           padding:14px; min-height:120px; }
+    .grid { display:grid; grid-template-columns: 1fr; gap:18px; }
+    @media (min-width: 900px){ .grid { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+<div class="container" style="max-width:1100px;margin:42px auto;padding:0 18px;">
+  <div class="grid">
+    <section class="glass" style="padding:22px 22px 26px;">
+      <h2 style="margin:0 0 6px 0; color:#b9f; font-weight:800;">Upload → Report → Improve</h2>
+      <p style="margin:0 0 16px 0; color:#ddd;">Face-on or down-the-line; keep the camera steady and the full club in frame.</p>
 
-  const fileInput = $('fileInput');
-  const fileLabel = $('fileLabel');
-  const uploadBtn = $('uploadBtn');
-  const logEl     = $('log');
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v" />
+        <span id="fileLabel" class="pill">(no file)</span>
+        <button id="uploadBtn" class="btn">Upload & Generate Report</button>
+      </div>
 
-  function log(msg) {
-    if (!logEl) return;
-    logEl.textContent += '\n' + msg;
-    logEl.scrollTop = logEl.scrollHeight;
-  }
+      <div id="log" class="log">Ready.</div>
+    </section>
 
-  function setBusy(busy) {
-    if (uploadBtn) {
-      uploadBtn.disabled = !!busy;
-      uploadBtn.textContent = busy ? 'Uploading…' : 'Upload & Generate Report';
-    }
-    if (fileInput) fileInput.disabled = !!busy;
-  }
+    <aside class="glass" style="padding:22px 22px 26px;">
+      <h3 style="margin:0 0 10px 0; color:#ddd;">How to film (best results)</h3>
+      <ul style="color:#ddd; line-height:1.55; padding-left:20px; margin:0;">
+        <li><b>Angles:</b> Take <i>Face-On</i> and <i>Down-the-Line</i>.</li>
+        <li><b>Height & distance:</b> Phone roughly hip height, about 8–10 ft away.</li>
+        <li><b>Keep the whole swing:</b> Entire clubhead in frame; hands & feet in frame.</li>
+        <li><b>Stability:</b> Tripod if possible; 60 fps is great if your phone supports it.</li>
+        <li><b>Lighting:</b> Avoid strong backlight; even lighting helps the tracker.</li>
+      </ul>
+    </aside>
+  </div>
 
-  async function postJSON(url, body) {
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body || {})
-    });
+  <p style="text-align:center; color:#aaa; margin-top:18px;">© 2025 Virtual Coach AI</p>
+</div>
 
-    // read as text first so we can surface server errors
-    let text = '';
-    try { text = await r.text(); } catch {}
-
-    if (!r.ok) {
-      throw new Error('HTTP ' + r.status + ' ' + r.statusText + ' from ' + url + (text ? ' — ' + text : ''));
-    }
-
-    try {
-      return JSON.parse(text || '{}');
-    } catch {
-      throw new Error('Non-JSON response from ' + url + ': ' + text);
-    }
-  }
-
-  // ---- UI bindings ----
-  if (fileInput) {
-    fileInput.addEventListener('change', function (e) {
-      const f = (e.target.files && e.target.files[0]) || null;
-      if (!f) {
-        if (fileLabel) fileLabel.textContent = '(no file)';
-        return;
-      }
-      const info = f.name + ' (' + (f.type || 'unknown') + ', ' + f.size + ' bytes)';
-      if (fileLabel) fileLabel.textContent = info;
-      log('Selected: ' + info);
-    });
-  }
-
-  if (uploadBtn) {
-    uploadBtn.addEventListener('click', async function () {
-      const file = (fileInput && fileInput.files && fileInput.files[0]) || null;
-      if (!file) { log('No file selected'); return; }
-
-      setBusy(true);
-      try {
-        // 1) presign
-        log('Step 1: requesting presigned POST…');
-        const pres = await postJSON('/api/presign', {
-          filename: file.name,
-          type: file.type
-        });
-
-        if (!pres || !pres.url || !pres.fields || !pres.key) {
-          throw new Error('Presign missing url/fields/key');
-        }
-
-        // 2) upload to storage (S3-style POST)
-        log('Step 2: uploading to storage…');
-        const form = new FormData();
-        Object.keys(pres.fields).forEach(function (k) {
-          form.append(k, pres.fields[k]);
-        });
-        form.append('Content-Type', file.type || 'video/mp4');
-        form.append('file', file);
-
-        const up = await fetch(pres.url, { method: 'POST', body: form });
-        if (!(up.ok || up.status === 201 || up.status === 204)) {
-          const errTxt = (await up.text().catch(function(){ return ''; })) || '';
-          throw new Error('Upload failed ' + up.status + ' ' + up.statusText + (errTxt ? ' — ' + errTxt : ''));
-        }
-        log('Upload complete ✔');
-
-        // 3) create the report
-        log('Step 3: creating report…');
-        const mk = await postJSON('/api/make-report', {
-          s3_key: pres.key,
-          name: file.name,
-          type: file.type,
-          size: file.size
-        });
-
-        const viewer = (mk && (mk.viewerUrl || mk.url || mk.reportUrl)) || '';
-        if (viewer) {
-          log('Opening viewer: ' + viewer);
-          window.location.href = viewer;
-        } else {
-          log('Report created (no viewerUrl returned). Full response: ' + JSON.stringify(mk));
-          setBusy(false);
-        }
-      } catch (err) {
-        console.error(err);
-        log('Error: ' + (err && err.message ? err.message : String(err)));
-        setBusy(false);
-      }
-    });
-  }
-
-  // Global JS error surface → log panel
-  window.addEventListener('error', function (e) {
-    log('JS error: ' + (e.message || e.error || 'unknown'));
-  });
-})();
+<!-- IMPORTANT: absolute path so it resolves to the site root -->
+<script src="/upload.client.js?v=5" defer></script>
+</body>
+</html>
