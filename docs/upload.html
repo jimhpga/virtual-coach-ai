@@ -2,17 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Virtual Coach AI — Upload</title>
 
   <link rel="preload" as="image" href="/homepage-background.png" />
   <link rel="icon" href="/virtualcoach-logo.png" />
-  <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
-  <meta http-equiv="Pragma"         content="no-cache" />
-  <meta http-equiv="Expires"        content="0" />
-  <!-- Optional CSP: blocks inline scripts so we only use external JS -->
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self'; object-src 'none'; base-uri 'self'">
-
   <style>
     :root{ --nav:#0b2b12; --panel:rgba(10,18,24,.35); --line:rgba(255,255,255,.12); --text:#ecf3f7; --scrim:rgba(0,0,0,.16) }
     *{box-sizing:border-box} html,body{height:100%}
@@ -36,7 +31,6 @@
     .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
     .card .content{padding:12px 16px}
     .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
-    .btn:disabled{opacity:.55;cursor:not-allowed}
     .pill{display:inline-block;font-size:12px;color:#cfe0e6;margin-left:10px}
     .log{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
          background:#0c1116;color:#a7f3d0;border:1px solid var(--line);border-radius:12px;padding:12px;min-height:120px}
@@ -75,7 +69,7 @@
   </main>
 </div>
 
-<!-- External JS only (no inline script) -->
-<script src="/upload.client.js?v=5" defer></script>
+<!-- IMPORTANT: serve JS from /docs path because Vercel serves /docs as the site root -->
+<script src="/docs/upload.client.js?v=6" defer></script>
 </body>
 </html>
