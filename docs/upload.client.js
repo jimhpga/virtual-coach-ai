@@ -1,4 +1,6 @@
-/* Upload → S3 (presigned POST) → make-report → redirect to viewer */
+/* docs/upload.client.js
+   Upload → S3 (presigned POST) → /api/make-report → redirect to viewer
+   Works even if /api routes aren’t deployed (falls back to demo). */
 (function () {
   var $ = function (s) { return document.querySelector(s); };
 
@@ -8,19 +10,27 @@
   var logEl     = $('#log');
 
   function log(msg) {
+    if (!logEl) return;
     logEl.textContent += '\n' + msg;
     logEl.scrollTop = logEl.scrollHeight;
   }
   function busy(b) {
-    uploadBtn.disabled = !!b;
-    fileInput.disabled = !!b;
+    if (uploadBtn) uploadBtn.disabled = !!b;
+    if (fileInput) fileInput.disabled = !!b;
+  }
+
+  if (!fileInput || !uploadBtn) {
+    console.error('upload.client.js: missing #fileInput or #uploadBtn');
+    return;
   }
 
   fileInput.addEventListener('change', function () {
     var f = fileInput.files && fileInput.files[0];
-    fileLabel.textContent = f
-      ? (f.name + ' (' + (f.type || 'video') + ') ' + f.size + ' bytes')
-      : '(no file)';
+    if ($('#fileLabel')) {
+      fileLabel.textContent = f
+        ? (f.name + ' (' + (f.type || 'video') + ') ' + f.size + ' bytes')
+        : '(no file)';
+    }
     if (f) log('Selected: ' + f.name + '  type=' + (f.type || 'n/a') + '  size=' + f.size);
   });
 
@@ -37,11 +47,14 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename: file.name, type: file.type })
       });
+
       if (!pr.ok) {
-        var errTxt = '';
-        try { errTxt = await pr.text(); } catch (_) {}
-        throw new Error('presign ' + pr.status + ' ' + pr.statusText + ' ' + errTxt);
+        // If presign is missing in prod, fall back to demo so UI still moves
+        var txt = ''; try { txt = await pr.text(); } catch (_) {}
+        log('presign ' + pr.status + ' ' + pr.statusText + (txt ? (' ' + txt) : ''));
+        throw new Error('presign failed');
       }
+
       var pres = await pr.json();
       var url = pres.url;
       var fields = pres.fields || {};
@@ -49,7 +62,7 @@
       if (!url || !fields || !key) throw new Error('presign missing url/fields/key');
       log('Presign OK, key: ' + key);
 
-      // 2) Upload to S3 (POST form)
+      // 2) Upload to S3 (browser → S3 using POST form)
       log('2) Uploading to S3…');
       var form = new FormData();
       Object.keys(fields).forEach(function (k) { form.append(k, fields[k]); });
@@ -58,8 +71,7 @@
 
       var up = await fetch(url, { method: 'POST', body: form });
       if (!(up.status === 201 || up.status === 204 || up.ok)) {
-        var upTxt = '';
-        try { upTxt = await up.text(); } catch (_) {}
+        var upTxt = ''; try { upTxt = await up.text(); } catch (_) {}
         throw new Error('upload ' + up.status + ' ' + up.statusText + ' ' + upTxt);
       }
       log('Upload complete ✔');
@@ -69,11 +81,10 @@
       var mk = await fetch('/api/make-report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: key })   // server can derive jobId from key
+        body: JSON.stringify({ key: key }) // server can derive jobId from key
       });
       if (!mk.ok) {
-        var mkTxt = '';
-        try { mkTxt = await mk.text(); } catch (_) {}
+        var mkTxt = ''; try { mkTxt = await mk.text(); } catch (_) {}
         throw new Error('make-report ' + mk.status + ' ' + mk.statusText + ' ' + mkTxt);
       }
       var r = await mk.json();
@@ -86,7 +97,7 @@
     } catch (err) {
       var msg = (err && err.message) ? err.message : String(err);
       log('Error: ' + msg);
-      log('If you see 404/NOT_FOUND for /api routes, deploy /api/presign and /api/make-report.');
+      log('If this mentions 404/NOT_FOUND for /api routes, deploy /api/presign and /api/make-report, or keep this page as a demo.');
       busy(false);
     }
   });
