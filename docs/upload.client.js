@@ -16,7 +16,7 @@
     fileInput.disabled = !!b;
   }
 
-  fileInput.addEventListener('change', function (e) {
+  fileInput.addEventListener('change', function () {
     var f = fileInput.files && fileInput.files[0];
     fileLabel.textContent = f
       ? (f.name + ' (' + (f.type || 'video') + ') ' + f.size + ' bytes')
