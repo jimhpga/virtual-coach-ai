@@ -3,38 +3,66 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Coach AI — Upload</title>
+  <title>Virtual Coach AI &mdash; Upload</title>
 
   <link rel="preload" as="image" href="/homepage-background.png" />
   <link rel="icon" href="/virtualcoach-logo.png" />
+
   <style>
-    :root{ --nav:#0b2b12; --panel:rgba(10,18,24,.35); --line:rgba(255,255,255,.12); --text:#ecf3f7; --scrim:rgba(0,0,0,.16) }
-    *{box-sizing:border-box} html,body{height:100%}
+    :root{
+      --nav:#0b2b12; --panel:rgba(10,18,24,.35); --line:rgba(255,255,255,.12);
+      --text:#ecf3f7; --muted:#cfe0e6; --scrim:rgba(0,0,0,.16)
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin:0;color:var(--text);
+      margin:0; color:var(--text);
       background:#071c10 url('/homepage-background.png') center/cover no-repeat fixed;
       font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
     }
-    .scrim{min-height:100vh;background:var(--scrim)}
-    header.top{position:sticky;top:0;z-index:100;background:var(--nav);
-      border-bottom:1px solid rgba(255,255,255,.12);backdrop-filter:blur(2px)}
-    .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
-    .brand-logo{width:160px;height:36px;background:#fff;
-      -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat}
-    nav.nav{display:flex;gap:8px}
-    nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
-    nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-    .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(1.5px)}
-    .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
+    .scrim{min-height:100vh; background:var(--scrim)}
+    header.top{
+      position:sticky; top:0; z-index:100; background:var(--nav);
+      border-bottom:1px solid rgba(255,255,255,.12); backdrop-filter:blur(2px)
+    }
+    .navwrap{
+      width:min(1080px,92%); margin:0 auto; padding:10px 0;
+      display:flex; gap:12px; align-items:center; justify-content:space-between
+    }
+    .brand{display:flex; align-items:center; gap:10px; color:#fff; text-decoration:none; font-weight:800}
+    .brand-logo{
+      width:160px; height:36px; background:#fff;
+      -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;
+      mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat
+    }
+    nav.nav{display:flex; gap:8px}
+    nav.nav a{
+      color:#fff; text-decoration:none; padding:8px 10px; border-radius:10px;
+      border:1px solid transparent; white-space:nowrap
+    }
+    nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18); background:rgba(255,255,255,.10)}
+    .wrap{width:min(1080px,92%); margin:0 auto; padding:18px 0 42px}
+    .card{
+      background:var(--panel); border:1px solid var(--line); border-radius:16px;
+      backdrop-filter:blur(1.5px)
+    }
+    .card h3{margin:0; padding:14px 16px; border-bottom:1px solid var(--line)}
     .card .content{padding:12px 16px}
-    .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
-    .pill{display:inline-block;font-size:12px;color:#cfe0e6;margin-left:10px}
-    .log{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-         background:#0c1116;color:#a7f3d0;border:1px solid var(--line);border-radius:12px;padding:12px;min-height:120px}
+    .btn{
+      border:1px solid var(--line); background:rgba(255,255,255,.10); color:#fff;
+      padding:8px 12px; border-radius:10px; cursor:pointer
+    }
+    .btn[disabled]{opacity:.55; cursor:not-allowed}
+    .pill{display:inline-block; font-size:12px; color:var(--muted); margin-left:10px}
+    .log{
+      white-space:pre-wrap; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      background:#0c1116; color:#a7f3d0; border:1px solid var(--line);
+      border-radius:12px; padding:12px; min-height:120px; max-height:240px; overflow:auto
+    }
     @media (max-width:680px){ .brand span{display:none} }
   </style>
+
+  <!-- hide logo box if image not present -->
   <style>.brand-logo{display:none}</style>
 </head>
 <body>
@@ -54,19 +82,27 @@
 <div class="scrim">
   <main class="wrap">
     <section class="card">
-      <h3>Upload → Report → Improve</h3>
+      <h3>Upload &rarr; Report &rarr; Improve</h3>
       <div class="content">
-        <p>Select a face-on or down-the-line video. We’ll analyze P1–P9 and generate a shareable report.</p>
+        <p>Select a face-on or down-the-line video. We&rsquo;ll analyze P1&ndash;P9 and generate a shareable report.</p>
+
         <div style="display:flex;align-items:center;gap:10px;margin:10px 0 12px;">
           <input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v" class="btn" />
           <span id="fileLabel" class="pill">(no file)</span>
           <button id="uploadBtn" class="btn">Upload &amp; Generate Report</button>
         </div>
+
         <div id="log" class="log">Ready.</div>
       </div>
     </section>
   </main>
 </div>
+
+<noscript>
+  <div style="color:#fff; background:#b00; padding:10px; text-align:center;">
+    JavaScript is required for upload.
+  </div>
+</noscript>
 
 <script>
 (function(){
@@ -74,17 +110,85 @@
   var fileLabel = document.getElementById('fileLabel');
   var uploadBtn = document.getElementById('uploadBtn');
   var logEl     = document.getElementById('log');
-  function log(m){ logEl.textContent += '\n' + m; logEl.scrollTop = logEl.scrollHeight; }
 
+  function log(msg){
+    logEl.textContent += '\n' + msg;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  function busy(on){
+    uploadBtn.disabled = !!on;
+    fileInput.disabled = !!on;
+  }
+
+  /* 1) show file selection immediately */
   fileInput.addEventListener('change', function(e){
-    var f = e.target.files && e.target.files[0];
-    fileLabel.textContent = f ? (f.name + ' (' + (f.type || 'video') + ') ' + f.size + ' bytes') : '(no file)';
+    var f = (e && e.target && e.target.files) ? e.target.files[0] : null;
+    fileLabel.textContent = f ? (f.name + ' (' + (f.type || 'video') + ', ' + f.size + ' bytes)') : '(no file)';
     if (f) log('Selected: ' + f.name);
   });
 
-  uploadBtn.addEventListener('click', function(){
-    if (!(fileInput.files && fileInput.files[0])) { log('No file selected'); return; }
-    log('Client JS is wired. Next step: connect presign/upload/make-report.');
+  /* 2) click -> try backend; if not present, log guidance */
+  uploadBtn.addEventListener('click', async function(){
+    var f = (fileInput.files && fileInput.files[0]) ? fileInput.files[0] : null;
+    if (!f){ log('No file selected'); return; }
+
+    busy(true);
+    try {
+      log('Requesting presigned upload (POST /api/presign)...');
+      var r = await fetch('/api/presign', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ filename:f.name, type:f.type })
+      });
+
+      if (!r.ok){
+        var t = await r.text().catch(function(){ return ''; });
+        throw new Error('presign ' + r.status + ' ' + r.statusText + ' ' + t);
+      }
+
+      var data = await r.json(); // expecting { url, fields, key }
+      if (!data || !data.url || !data.fields || !data.key){
+        throw new Error('presign response missing url/fields/key');
+      }
+      log('Presign OK. Uploading to S3...');
+
+      /* POST form-data to S3 */
+      var form = new FormData();
+      Object.keys(data.fields).forEach(function(k){ form.append(k, data.fields[k]); });
+      form.append('Content-Type', f.type || 'video/mp4');
+      form.append('file', f);
+
+      var up = await fetch(data.url, { method:'POST', body:form });
+      if (!(up.ok || up.status === 201 || up.status === 204)){
+        var ut = await up.text().catch(function(){ return ''; });
+        throw new Error('S3 upload failed ' + up.status + ' ' + up.statusText + ' ' + ut);
+      }
+      log('Upload complete.');
+
+      log('Enqueue analysis (POST /api/make-report)...');
+      var mk = await fetch('/api/make-report', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ s3_key:data.key, name:f.name, type:f.type, size:f.size })
+      });
+
+      if (!mk.ok){
+        var mt = await mk.text().catch(function(){ return ''; });
+        throw new Error('make-report ' + mk.status + ' ' + mk.statusText + ' ' + mt);
+      }
+      var res = await mk.json(); // expecting { viewerUrl, ... }
+      log('Report created.');
+
+      var viewer = (res && res.viewerUrl) ? res.viewerUrl : '/report?report=/docs/report.json';
+      log('Opening viewer: ' + viewer);
+      setTimeout(function(){ location.href = viewer; }, 600);
+
+    } catch(err){
+      log('Error: ' + (err && err.message ? err.message : String(err)));
+      log('If this says 404/NOT_FOUND: deploy the API routes /api/presign and /api/make-report,');
+      log('or keep this page as a UI-only demo.');
+      busy(false);
+    }
   });
 })();
 </script>
