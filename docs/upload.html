@@ -2,23 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self'; object-src 'none'; base-uri 'self'">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Virtual Coach AI — Upload</title>
-  <link rel="icon" href="/virtualcoach-logo.png" />
-  <link rel="preload" as="image" href="/homepage-background.png" />
-  <link rel="stylesheet" href="/site.css" />
 
+  <link rel="preload" as="image" href="/homepage-background.png" />
+  <link rel="icon" href="/virtualcoach-logo.png" />
   <style>
-    :root{
-      --nav:#0b2b12; --panel: rgba(10,18,24,.35);
-      --line: rgba(255,255,255,.12); --text:#ecf3f7;
-      --scrim: rgba(0,0,0,.16); --radius:16px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
+    :root{ --nav:#0b2b12; --panel:rgba(10,18,24,.35); --line:rgba(255,255,255,.12); --text:#ecf3f7; --scrim:rgba(0,0,0,.16) }
+    *{box-sizing:border-box} html,body{height:100%}
     body{
-      margin:0; color:var(--text);
+      margin:0;color:var(--text);
       background:#071c10 url('/homepage-background.png') center/cover no-repeat fixed;
       font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
     }
@@ -40,12 +33,12 @@
     .pill{display:inline-block;font-size:12px;color:#cfe0e6;margin-left:10px}
     .log{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
          background:#0c1116;color:#a7f3d0;border:1px solid var(--line);border-radius:12px;padding:12px;min-height:120px}
-    @media (max-width: 680px){ .brand span{display:none} }
+    @media (max-width:680px){ .brand span{display:none} }
   </style>
-  <style>/* fallback: hide logo box when image not present */ .brand-logo{display:none}</style>
+  <style>.brand-logo{display:none}</style>
 </head>
 <body>
-<header class="top" id="site-header">
+<header class="top">
   <div class="navwrap">
     <a class="brand" href="/"><div class="brand-logo" aria-label="Virtual Coach AI"></div><span>Virtual Coach AI</span></a>
     <nav class="nav" aria-label="Primary">
@@ -61,23 +54,39 @@
 <div class="scrim">
   <main class="wrap">
     <section class="card">
-      <h3>Upload &rarr; Report &rarr; Improve</h3>
+      <h3>Upload → Report → Improve</h3>
       <div class="content">
-        <p>Select a face-on or down-the-line video. We'll analyze P1–P9 and build a shareable report.</p>
-
+        <p>Select a face-on or down-the-line video. We’ll analyze P1–P9 and generate a shareable report.</p>
         <div style="display:flex;align-items:center;gap:10px;margin:10px 0 12px;">
           <input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v" class="btn" />
           <span id="fileLabel" class="pill">(no file)</span>
           <button id="uploadBtn" class="btn">Upload &amp; Generate Report</button>
         </div>
-
         <div id="log" class="log">Ready.</div>
       </div>
     </section>
   </main>
 </div>
 
-<!-- No inline JS; single external file -->
-<script src="/upload.client.js?v=3" defer></script>
+<script>
+(function(){
+  var fileInput = document.getElementById('fileInput');
+  var fileLabel = document.getElementById('fileLabel');
+  var uploadBtn = document.getElementById('uploadBtn');
+  var logEl     = document.getElementById('log');
+  function log(m){ logEl.textContent += '\n' + m; logEl.scrollTop = logEl.scrollHeight; }
+
+  fileInput.addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0];
+    fileLabel.textContent = f ? (f.name + ' (' + (f.type || 'video') + ') ' + f.size + ' bytes') : '(no file)';
+    if (f) log('Selected: ' + f.name);
+  });
+
+  uploadBtn.addEventListener('click', function(){
+    if (!(fileInput.files && fileInput.files[0])) { log('No file selected'); return; }
+    log('Client JS is wired. Next step: connect presign/upload/make-report.');
+  });
+})();
+</script>
 </body>
 </html>
