@@ -1,31 +1,55 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta http-equiv="Cache-Control" content="no-store, max-age=0">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Virtual Coach AI â€” Upload</title>
-<link rel="stylesheet" href="site.css">
-<style>
-  .log {white-space:pre-wrap;border:1px solid #ccc;padding:10px;border-radius:8px;background:#111;color:#0f0;margin-top:10px}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Virtual Coach AI ? Upload</title>
+  <link rel="stylesheet" href="site.css"/>
+  <style>
+    .glass { background: rgba(28,28,28,.40); border: 1px solid rgba(255,255,255,.08);
+             box-shadow: 0 20px 40px rgba(0,0,0,.35); border-radius: 18px; }
+    .btn { appearance: none; background:#247a3a; color:#fff; border:0; border-radius:12px;
+           padding:12px 16px; cursor:pointer; font-weight:600; }
+    .btn:disabled { opacity:.55; cursor:not-allowed; }
+    .pill { display:inline-block; font-size:12px; color:#bbb; margin-left:10px; }
+    .log { white-space:pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+           background:#0c1116; color:#a7f3d0; border:1px solid rgba(255,255,255,.08); border-radius:12px;
+           padding:14px; min-height:120px; }
+    .grid { display:grid; grid-template-columns: 1fr; gap:18px; }
+    @media (min-width: 900px){ .grid { grid-template-columns: 1fr 1fr; } }
+  </style>
 </head>
 <body>
-<h1>Upload â†’ Report â†’ Improve</h1>
+<div class="container" style="max-width:1100px;margin:42px auto;padding:0 18px;">
+  <div class="grid">
+    <section class="glass" style="padding:22px 22px 26px;">
+      <h2 style="margin:0 0 6px 0; color:#b9f; font-weight:800;">Upload ? Report ? Improve</h2>
+      <p style="margin:0 0 16px 0; color:#ddd;">Face-on or down-the-line; keep the camera steady and the full club in frame.</p>
 
-<input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v" />
-<button id="uploadBtn">Upload & Generate Report</button>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+        <input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v"/>
+        <span id="fileLabel" class="pill">(no file)</span>
+        <button id="uploadBtn" class="btn">Upload & Generate Report</button>
+      </div>
 
-<div id="log" class="log">Ready.</div>
+      <div id="log" class="log">Ready.</div>
+    </section>
 
+    <aside class="glass" style="padding:22px 22px 26px;">
+      <h3 style="margin:0 0 10px 0; color:#ddd;">How to film (best results)</h3>
+      <ul style="color:#ddd; line-height:1.55; padding-left:20px; margin:0;">
+        <li><b>Angles:</b> Take <i>Face-On</i> and <i>Down-the-Line</i>.</li>
+        <li><b>Height & distance:</b> Phone roughly hip height, about 8?10 ft away.</li>
+        <li><b>Keep the whole swing:</b> Entire clubhead in frame; hands & feet in frame.</li>
+        <li><b>Stability:</b> Tripod if possible; 60 fps is great if your phone supports it.</li>
+        <li><b>Lighting:</b> Avoid strong backlight; even lighting helps the tracker.</li>
+      </ul>
+    </aside>
+  </div>
+  <p style="text-align:center; color:#aaa; margin-top:18px;">? 2025 Virtual Coach AI</p>
+</div>
 
-  <input id="file" type="file" accept="video/*" style="display:block;margin:1rem 0" />
-  
-<script defer src="upload.client.js"></script>
+<!-- External script only; version param defeats caches -->
+<script src="upload.js?v=2" type="module" defer></script>
 </body>
 </html>
-
-
-
