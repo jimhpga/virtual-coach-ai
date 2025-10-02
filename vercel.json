@@ -6,8 +6,10 @@
   "routes": [
     { "src": "^/api/(.*)$", "dest": "/api/$1" },
 
-    { "src": "^/(faq|pricing|upload|report|contact|login|about|analyze|coming-soon|reports?)/?$", "dest": "/public/$1.html" },
+    { "src": "^/upload(?:/)?$", "dest": "/docs/upload.html" },
+    { "src": "^/docs/(.*)$", "dest": "/docs/$1" },
 
+    { "src": "^/(faq|pricing|report|contact|login|about|analyze|coming-soon|reports?)/?$", "dest": "/public/$1.html" },
     { "src": "^/$", "dest": "/public/index.html" },
 
     { "src": "^/faqs/?$", "status": 308, "headers": { "Location": "/faq" } },
