@@ -12,3 +12,10 @@ public/data/
 *.zip
 docs/access keys.txt
 
+
+# secrets & local stuff
+.env
+.env.local
+docs/access keys.txt
+*.zip
+
