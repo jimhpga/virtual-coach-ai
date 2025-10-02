@@ -1,4 +1,3 @@
-// docs/upload.client.js
 (() => {
   const $ = (s) => document.querySelector(s);
   const fileInput = $("#fileInput");
@@ -29,28 +28,25 @@
 
     busy(true);
     try {
+      // For now: skip upload, just call make-report to mint a sample report.
       const jobId = Date.now().toString();
       log("Calling /api/make-report…");
       const r = await fetch(`/api/make-report?jobId=${encodeURIComponent(jobId)}`, {
         method: "GET",
-        headers: { accept: "application/json" },
+        headers: { "accept": "application/json" },
       });
       if (!r.ok) {
-        const txt = await r.text().catch(() => "");
-        throw new Error(`make-report HTTP ${r.status} ${r.statusText} ${txt}`);
+        const txt = await r.text().catch(()=> "");
+        throw new Error(`make-report HTTP ${r.status} ${r.statusText} ${txt}`); 
       }
       const data = await r.json();
       log("Report created.");
-
-      const viewer = (data && data.viewerUrl)
-        ? data.viewerUrl
-        : "/report.html?report=/docs/report.json";
-
+      const viewer = (data && data.viewerUrl) ? data.viewerUrl : "/report.html?report=/docs/report.json";
       log("Opening viewer: " + viewer);
-      setTimeout(() => { location.href = viewer; }, 600);
+      setTimeout(() => location.href = viewer, 600);
     } catch (err) {
       log("Error: " + (err?.message || String(err)));
-      log("If this says 404/NOT_FOUND: ensure docs/upload.client.js is on main and /api routes are deployed.");
+      log("If this says 404/NOT_FOUND: ensure /public/upload.client.js is deployed and routes in vercel.json match.");
       busy(false);
     }
   });
