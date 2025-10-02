@@ -1,17 +1,34 @@
+Set-Location C:\Sites\virtual-coach-ai
+
+$json = @'
 {
   "version": 2,
-  "functions": { "api/*.js": { "runtime": "nodejs20.x" } },
+  "functions": {
+    "api/*": { "runtime": "nodejs20.x" }
+  },
   "routes": [
     { "src": "^/api/(.*)$", "dest": "/api/$1" },
+
+    { "src": "^/js/(.*)$",   "dest": "/public/js/$1" },
+    { "src": "^/css/(.*)$",  "dest": "/public/css/$1" },
+    { "src": "^/img/(.*)$",  "dest": "/public/img/$1" },
+    { "src": "^/report\\.json$", "dest": "/public/report.json" },
 
     { "src": "^/(faq|pricing|upload|report|contact|login|about|analyze|coming-soon|reports?)/?$",
       "dest": "/public/$1.html" },
 
     { "src": "^/$", "dest": "/public/index.html" },
 
-    { "src": "^/upload\\.client\\.js$", "dest": "/public/upload.client.js" },
-    { "src": "^/report-shim\\.js$",  "dest": "/public/report-shim.js" },
-
     { "src": "^/(.*)$", "dest": "/public/$1" }
   ]
 }
+'@
+
+$enc = New-Object System.Text.UTF8Encoding($false)   # UTF-8 no BOM
+[IO.File]::WriteAllText("$PWD\vercel.json", $json, $enc)
+
+# sanity check
+Get-Content -Raw .\vercel.json | ConvertFrom-Json | Out-Null
+$bytes = [IO.File]::ReadAllBytes("$PWD\vercel.json")
+if ($bytes.Length -ge 3 -and $bytes[0]-eq 239 -and $bytes[1]-eq 187 -and $bytes[2]-eq 191) { throw "BOM detected" }
+"✅ vercel.json updated"
