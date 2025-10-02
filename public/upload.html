@@ -1,71 +1,35 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Upload | Virtual Coach AI</title>
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Coach AI — Upload</title>
   <style>
-    body { font-family: system-ui, sans-serif; margin: 2rem; }
-    .box { border: 1px solid #ddd; padding: 1.5rem; border-radius: 12px; max-width: 720px; }
-    .row { margin: 0.75rem 0; }
-    button { padding: 0.6rem 1rem; border-radius: 10px; border: 0; cursor: pointer; }
-    .primary { background: #0b7; color: #fff; }
-    .muted { color: #666; font-size: 0.9rem; }
+    body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:#081a10;color:#eef}
+    .wrap{max-width:960px;margin:40px auto;padding:0 16px}
+    .card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
+    .row{display:flex;gap:10px;align-items:center;margin:12px 0}
+    .btn{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.1);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
+    .pill{font-size:12px;color:#cfe0e6}
+    .log{white-space:pre-wrap;font-family:ui-monospace,Consolas,Menlo,monospace;background:#0c1116;color:#a7f3d0;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;min-height:120px}
   </style>
 </head>
 <body>
-  <h1>Upload Your Swing</h1>
-  <div class="box">
-    <form id="upload-form">
+  <div class="wrap">
+    <div class="card">
+      <h2>Upload → Report → Improve</h2>
+      <p>Select a face-on or down-the-line video. We’ll create a sample report (wires to S3 later).</p>
       <div class="row">
-        <input type="file" id="video" accept="video/*" />
+        <input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v" class="btn" />
+        <span id="fileLabel" class="pill">(no file)</span>
+        <button id="uploadBtn" class="btn">Upload & Generate Report</button>
       </div>
-      <div class="row">
-        <button type="submit" class="primary">Analyze & View Report</button>
-      </div>
-      <p class="muted">Tip: You can submit without a file for now — this flow demo still works.</p>
-      <div id="status" class="row muted"></div>
-    </form>
+      <div id="log" class="log">Ready.</div>
+    </div>
   </div>
 
-  <script type="module">
-    // Robust Base64 for UTF-8
-    function toBase64Utf8(obj) {
-      const json = JSON.stringify(obj);
-      const bytes = new TextEncoder().encode(json);
-      let bin = "";
-      bytes.forEach(b => bin += String.fromCharCode(b));
-      return btoa(bin);
-    }
-
-    const form = document.getElementById("upload-form");
-    const statusEl = document.getElementById("status");
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      statusEl.textContent = "Uploading…";
-
-      try {
-        // Using FormData so you can wire real files later without changing the API
-        const fd = new FormData();
-        const file = document.getElementById("video").files?.[0];
-        if (file) fd.append("video", file, file.name);
-        fd.append("mode", "Full Swing");
-        fd.append("clientId", "jim-hartnett");
-
-        const res = await fetch("/api/upload", { method: "POST", body: fd });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const { ok, report, error } = await res.json();
-        if (!ok) throw new Error(error || "Unknown error");
-
-        const b64 = toBase64Utf8(report);
-        // Redirect with the report payload in the fragment (not sent to server)
-        window.location.href = `/report.html#${b64}`;
-      } catch (err) {
-        console.error(err);
-        statusEl.textContent = "Upload failed. Check console.";
-      }
-    });
-  </script>
+  <!-- Load client JS from root; vercel.json rewrites to /public/upload.client.js -->
+  <script src="/upload.client.js?v=1" defer></script>
 </body>
 </html>
