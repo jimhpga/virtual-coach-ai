@@ -5,3 +5,10 @@ public/data/
 dist/
 public/data/
 *.bak
+
+# local secrets & zips
+.env
+.env.local
+*.zip
+docs/access keys.txt
+
