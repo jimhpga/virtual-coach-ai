@@ -5,14 +5,20 @@
   const btn = $("#uploadBtn");
   const logEl = $("#log");
 
-  function log(msg){ logEl.textContent += (logEl.textContent ? "\\n" : "") + msg; logEl.scrollTop = logEl.scrollHeight; }
-  function busy(on){ btn.disabled = on; fileInput.disabled = on; }
+  function log(msg) {
+    logEl.textContent += (logEl.textContent ? "\n" : "") + msg;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  function busy(on) {
+    btn.disabled = on;
+    fileInput.disabled = on;
+  }
 
   log("[upload] client JS loaded");
 
   fileInput?.addEventListener("change", (e) => {
     const f = e.target.files?.[0];
-    fileLabel.textContent = f ? `${f.name} (${f.type||"video"}), ${f.size} bytes` : "(no file)";
+    fileLabel.textContent = f ? `${f.name} (${f.type || "video"}), ${f.size} bytes` : "(no file)";
     if (f) log("Selected: " + f.name);
   });
 
@@ -22,23 +28,26 @@
 
     busy(true);
     try {
+      // For now: skip upload, just call make-report to mint a sample report.
       const jobId = Date.now().toString();
-      log("Calling /api/make-report?");
-      const r = await fetch(`/api/make-report?jobId=${encodeURIComponent(jobId)}`, { method:"GET", headers:{accept:"application/json"} });
+      log("Calling /api/make-report…");
+      const r = await fetch(`/api/make-report?jobId=${encodeURIComponent(jobId)}`, {
+        method: "GET",
+        headers: { "accept": "application/json" },
+      });
       if (!r.ok) {
-        const t = await r.text().catch(()=> "");
-        throw new Error(`make-report HTTP ${r.status} ${r.statusText} ${t}`);
+        const txt = await r.text().catch(()=> "");
+        throw new Error(`make-report HTTP ${r.status} ${r.statusText} ${txt}`); 
       }
       const data = await r.json();
       log("Report created.");
-      const viewer = (data && data.viewerUrl) ? data.viewerUrl : "/report.html?report=/docs/report/report.json";
+      const viewer = (data && data.viewerUrl) ? data.viewerUrl : "/report.html?report=/docs/report.json";
       log("Opening viewer: " + viewer);
-      setTimeout(()=> location.href = viewer, 600);
+      setTimeout(() => location.href = viewer, 600);
     } catch (err) {
       log("Error: " + (err?.message || String(err)));
-      log("Falling back to local sample report.");
-      const fallback = "/report.html?report=/docs/report/report.json";
-      setTimeout(()=> location.href = fallback, 800);
+      log("If this says 404/NOT_FOUND: ensure /public/upload.client.js is deployed and routes in vercel.json match.");
+      busy(false);
     }
   });
 })();
