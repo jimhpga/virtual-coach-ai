@@ -1,103 +1,56 @@
-/* docs/upload.client.js
-   Upload → S3 (presigned POST) → /api/make-report → redirect to viewer
-   Works even if /api routes aren’t deployed (falls back to demo). */
-(function () {
-  var $ = function (s) { return document.querySelector(s); };
-
-  var fileInput = $('#fileInput');
-  var fileLabel = $('#fileLabel');
-  var uploadBtn = $('#uploadBtn');
-  var logEl     = $('#log');
+// docs/upload.client.js
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const fileInput = $("#fileInput");
+  const fileLabel = $("#fileLabel");
+  const btn = $("#uploadBtn");
+  const logEl = $("#log");
 
   function log(msg) {
-    if (!logEl) return;
-    logEl.textContent += '\n' + msg;
+    logEl.textContent += (logEl.textContent ? "\n" : "") + msg;
     logEl.scrollTop = logEl.scrollHeight;
   }
-  function busy(b) {
-    if (uploadBtn) uploadBtn.disabled = !!b;
-    if (fileInput) fileInput.disabled = !!b;
+  function busy(on) {
+    btn.disabled = on;
+    fileInput.disabled = on;
   }
 
-  if (!fileInput || !uploadBtn) {
-    console.error('upload.client.js: missing #fileInput or #uploadBtn');
-    return;
-  }
+  log("[upload] client JS loaded");
 
-  fileInput.addEventListener('change', function () {
-    var f = fileInput.files && fileInput.files[0];
-    if ($('#fileLabel')) {
-      fileLabel.textContent = f
-        ? (f.name + ' (' + (f.type || 'video') + ') ' + f.size + ' bytes')
-        : '(no file)';
-    }
-    if (f) log('Selected: ' + f.name + '  type=' + (f.type || 'n/a') + '  size=' + f.size);
+  fileInput?.addEventListener("change", (e) => {
+    const f = e.target.files?.[0];
+    fileLabel.textContent = f ? `${f.name} (${f.type || "video"}), ${f.size} bytes` : "(no file)";
+    if (f) log("Selected: " + f.name);
   });
 
-  uploadBtn.addEventListener('click', async function () {
-    var file = fileInput.files && fileInput.files[0];
-    if (!file) { log('No file selected'); return; }
+  btn?.addEventListener("click", async () => {
+    const f = fileInput?.files?.[0];
+    if (!f) { log("No file selected"); return; }
 
     busy(true);
     try {
-      // 1) Presign
-      log('1) Requesting presigned POST…');
-      var pr = await fetch('/api/presign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: file.name, type: file.type })
+      const jobId = Date.now().toString();
+      log("Calling /api/make-report…");
+      const r = await fetch(`/api/make-report?jobId=${encodeURIComponent(jobId)}`, {
+        method: "GET",
+        headers: { accept: "application/json" },
       });
-
-      if (!pr.ok) {
-        // If presign is missing in prod, fall back to demo so UI still moves
-        var txt = ''; try { txt = await pr.text(); } catch (_) {}
-        log('presign ' + pr.status + ' ' + pr.statusText + (txt ? (' ' + txt) : ''));
-        throw new Error('presign failed');
+      if (!r.ok) {
+        const txt = await r.text().catch(() => "");
+        throw new Error(`make-report HTTP ${r.status} ${r.statusText} ${txt}`);
       }
+      const data = await r.json();
+      log("Report created.");
 
-      var pres = await pr.json();
-      var url = pres.url;
-      var fields = pres.fields || {};
-      var key = pres.key || fields.key;
-      if (!url || !fields || !key) throw new Error('presign missing url/fields/key');
-      log('Presign OK, key: ' + key);
+      const viewer = (data && data.viewerUrl)
+        ? data.viewerUrl
+        : "/report.html?report=/docs/report.json";
 
-      // 2) Upload to S3 (browser → S3 using POST form)
-      log('2) Uploading to S3…');
-      var form = new FormData();
-      Object.keys(fields).forEach(function (k) { form.append(k, fields[k]); });
-      form.append('Content-Type', file.type || 'video/mp4');
-      form.append('file', file);
-
-      var up = await fetch(url, { method: 'POST', body: form });
-      if (!(up.status === 201 || up.status === 204 || up.ok)) {
-        var upTxt = ''; try { upTxt = await up.text(); } catch (_) {}
-        throw new Error('upload ' + up.status + ' ' + up.statusText + ' ' + upTxt);
-      }
-      log('Upload complete ✔');
-
-      // 3) Make report
-      log('3) Creating report…');
-      var mk = await fetch('/api/make-report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: key }) // server can derive jobId from key
-      });
-      if (!mk.ok) {
-        var mkTxt = ''; try { mkTxt = await mk.text(); } catch (_) {}
-        throw new Error('make-report ' + mk.status + ' ' + mk.statusText + ' ' + mkTxt);
-      }
-      var r = await mk.json();
-
-      // 4) Redirect to viewer
-      var viewer = (r && r.viewerUrl) ? r.viewerUrl : '/report?report=/docs/report.json';
-      log('Opening viewer: ' + viewer);
-      setTimeout(function () { location.href = viewer; }, 600);
-
+      log("Opening viewer: " + viewer);
+      setTimeout(() => { location.href = viewer; }, 600);
     } catch (err) {
-      var msg = (err && err.message) ? err.message : String(err);
-      log('Error: ' + msg);
-      log('If this mentions 404/NOT_FOUND for /api routes, deploy /api/presign and /api/make-report, or keep this page as a demo.');
+      log("Error: " + (err?.message || String(err)));
+      log("If this says 404/NOT_FOUND: ensure docs/upload.client.js is on main and /api routes are deployed.");
       busy(false);
     }
   });
