@@ -1,75 +1,65 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Coach AI — Upload</title>
+// docs/upload.client.js
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const fileInput = $("#fileInput");
+  const fileLabel = $("#fileLabel");
+  const btn = $("#uploadBtn");
+  const logEl = $("#log");
 
-  <link rel="preload" as="image" href="/homepage-background.png" />
-  <link rel="icon" href="/virtualcoach-logo.png" />
-  <style>
-    :root{ --nav:#0b2b12; --panel:rgba(10,18,24,.35); --line:rgba(255,255,255,.12); --text:#ecf3f7; --scrim:rgba(0,0,0,.16) }
-    *{box-sizing:border-box} html,body{height:100%}
-    body{
-      margin:0;color:var(--text);
-      background:#071c10 url('/homepage-background.png') center/cover no-repeat fixed;
-      font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
+  function log(msg) {
+    logEl.textContent += (logEl.textContent ? "\n" : "") + msg;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  function busy(on) {
+    btn.disabled = on;
+    fileInput.disabled = on;
+  }
+
+  log("[upload] client JS loaded");
+
+  fileInput?.addEventListener("change", (e) => {
+    const f = e.target.files?.[0];
+    fileLabel.textContent = f ? `${f.name} (${f.type || "video"}), ${f.size} bytes` : "(no file)";
+    if (f) log("Selected: " + f.name);
+  });
+
+  btn?.addEventListener("click", async () => {
+    const f = fileInput?.files?.[0];
+    if (!f) {
+      log("No file selected");
+      return;
     }
-    .scrim{min-height:100vh;background:var(--scrim)}
-    header.top{position:sticky;top:0;z-index:100;background:var(--nav);
-      border-bottom:1px solid rgba(255,255,255,.12);backdrop-filter:blur(2px)}
-    .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
-    .brand-logo{width:160px;height:36px;background:#fff;
-      -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat}
-    nav.nav{display:flex;gap:8px}
-    nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
-    nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-    .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(1.5px)}
-    .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
-    .card .content{padding:12px 16px}
-    .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
-    .pill{display:inline-block;font-size:12px;color:#cfe0e6;margin-left:10px}
-    .log{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-         background:#0c1116;color:#a7f3d0;border:1px solid var(--line);border-radius:12px;padding:12px;min-height:120px}
-    @media (max-width:680px){ .brand span{display:none} }
-  </style>
-  <style>.brand-logo{display:none}</style>
-</head>
-<body>
-<header class="top">
-  <div class="navwrap">
-    <a class="brand" href="/"><div class="brand-logo" aria-label="Virtual Coach AI"></div><span>Virtual Coach AI</span></a>
-    <nav class="nav" aria-label="Primary">
-      <a href="/index.html">Home</a>
-      <a href="/upload.html" aria-current="page">Upload</a>
-      <a href="/report-hybrid.html">Reports</a>
-      <a href="/pricing.html">Pricing</a>
-      <a href="/contact.html">Contact</a>
-    </nav>
-  </div>
-</header>
 
-<div class="scrim">
-  <main class="wrap">
-    <section class="card">
-      <h3>Upload → Report → Improve</h3>
-      <div class="content">
-        <p>Select a face-on or down-the-line video. We’ll analyze P1–P9 and generate a shareable report.</p>
-        <div style="display:flex;align-items:center;gap:10px;margin:10px 0 12px;">
-          <input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v" class="btn" />
-          <span id="fileLabel" class="pill">(no file)</span>
-          <button id="uploadBtn" class="btn">Upload &amp; Generate Report</button>
-        </div>
-        <div id="log" class="log">Ready.</div>
-      </div>
-    </section>
-  </main>
-</div>
+    busy(true);
+    try {
+      // 1) (future) presign + PUT to S3 would go here
+      // For now we simulate the upload and immediately ask the server to make a report.
+      const jobId = Date.now().toString();
 
-<!-- IMPORTANT: serve JS from /docs path because Vercel serves /docs as the site root -->
-<script src="/docs/upload.client.js?v=6" defer></script>
-</body>
-</html>
+      log("Calling /api/make-report…");
+      const r = await fetch(`/api/make-report?jobId=${encodeURIComponent(jobId)}`, {
+        method: "GET",
+        headers: { "accept": "application/json" },
+      });
+
+      if (!r.ok) {
+        const txt = await r.text().catch(() => "");
+        throw new Error(`make-report HTTP ${r.status} ${r.statusText} ${txt}`);
+      }
+
+      const data = await r.json();
+      log("Report created.");
+
+      const viewer = (data && data.viewerUrl)
+        ? data.viewerUrl
+        : "/report.html?report=/docs/report.json";
+
+      log("Opening viewer: " + viewer);
+      setTimeout(() => { location.href = viewer; }, 600);
+    } catch (err) {
+      log("Error: " + (err?.message || String(err)));
+      log("If this says 404/NOT_FOUND: merge /docs/upload.client.js to main and ensure vercel.json rewrites keep /api/*.");
+      busy(false);
+    }
+  });
+})();
