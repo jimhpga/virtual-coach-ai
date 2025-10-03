@@ -1,20 +1,14 @@
 {
   "version": 2,
   "builds": [
-    { "src": "public/**/*", "use": "@vercel/static" },
-    { "src": "api/**/*.js", "use": "@vercel/node" }
+    { "src": "api/*.js", "use": "@vercel/node", "config": { "regions": ["iad1"] } },
+    { "src": "docs/**", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "^/api/(.*)$", "dest": "/api/$1" },
-
-    { "src": "^/js/upload\\.client\\.js$", "dest": "/upload.client.js" },
-    { "src": "^/js/report\\.client\\.js$", "dest": "/report-shim.js" },
-    { "src": "^/css/site\\.css$",  "dest": "/style.css" },
-    { "src": "^/css/report\\.css$", "dest": "/report.css" },
-
-    { "src": "^/(faq|pricing|upload|report|contact|login|about|analyze|coming-soon|reports?)/?$", "dest": "/$1.html" },
-    { "src": "^/$", "dest": "/index.html" },
-
-    { "src": "^/(.*)$", "dest": "/$1" }
+    { "src": "^/(js|css)/(.+)$", "dest": "/docs/$1/$2" },
+    { "src": "^/(faq|upload|report|pricing)/?$", "dest": "/docs/$1.html" },
+    { "src": "^/$", "dest": "/docs/index.html" },
+    { "src": "^/(.*)$", "dest": "/docs/$1" }
   ]
 }
+
