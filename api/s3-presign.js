@@ -1,52 +1,50 @@
-﻿import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+// api/s3-presign.js
+import { randomUUID } from "crypto";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const {
-  S3_BUCKET, S3_REGION, S3_PREFIX, S3_MAX_MB,
-  AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,
-} = process.env;
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
 
-const bad = (res, code, error, extra = {}) => {
-  res.setHeader("Content-Type", "application/json");
-  res.status(code).send(JSON.stringify({ error, ...extra }));
-};
+function sanitize(name = "") {
+  return name.replace(/[^\w.\-]/g, "_").slice(0, 120);
+}
 
 export default async function handler(req, res) {
-  if (req.method !== "GET") return bad(res, 405, "method_not_allowed");
+  // Simple CORS
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "content-type");
+    return res.status(200).end();
+  }
 
-  const filename = (req.query.filename || "").toString();
-  const contentType = (req.query.contentType || "application/octet-stream").toString();
-  if (!filename) return bad(res, 400, "missing_filename");
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Use POST" });
+  }
 
-  const maxBytes = (parseInt(S3_MAX_MB || "500", 10) || 500) * 1024 * 1024;
-  const key = `${S3_PREFIX || ""}${filename}`.replace(/^\/+/, "");
+  const { filename, contentType } = req.body ?? {};
+  if (!filename || !contentType) {
+    return res.status(400).json({ error: "filename and contentType are required" });
+  }
 
-  const s3 = new S3Client({
-    region: S3_REGION,
-    credentials: {
-      accessKeyId: AWS_ACCESS_KEY_ID,
-      secretAccessKey: AWS_SECRET_ACCESS_KEY,
-    },
+  const key = `uploads/${Date.now()}-${randomUUID()}-${sanitize(filename)}`;
+
+  // Pre-signed PUT so the browser can upload the raw file body to S3
+  const command = new PutObjectCommand({
+    Bucket: process.env.S3_BUCKET,
+    Key: key,
+    ContentType: contentType,
+    // ACL: 'private' // default; keep uploads private
   });
 
-  // Disable flexible checksum middleware so URLs don't include x-amz-checksum-*
-  try { s3.middlewareStack.remove("flexibleChecksumsMiddleware"); } catch {}
+  const url = await getSignedUrl(s3, command, { expiresIn: 60 }); // 60s is plenty
 
-  try {
-    const cmd = new PutObjectCommand({
-      Bucket: S3_BUCKET,
-      Key: key,
-      ContentType: contentType,
-    });
-    try { cmd.middlewareStack.remove("flexibleChecksumsMiddleware"); } catch {}
-
-    const url = await getSignedUrl(s3, cmd, { expiresIn: 60 });
-    res.setHeader("Content-Type","application/json");
-    res.status(200).send(JSON.stringify({
-      ok:true, method:"PUT", url, key, bucket:S3_BUCKET, region:S3_REGION, maxBytes
-    }));
-  } catch (e) {
-    console.error("presign_error", { name: e?.name, message: e?.message, bucket: S3_BUCKET, region: S3_REGION, key });
-    return bad(res, 500, "presign_failed", { name: e?.name, message: e?.message });
-  }
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  return res.status(200).json({ url, key, bucket: process.env.S3_BUCKET });
 }
