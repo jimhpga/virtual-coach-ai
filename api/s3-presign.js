@@ -1,50 +1,48 @@
 // api/s3-presign.js
-import { randomUUID } from "crypto";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { S3Client } from "@aws-sdk/client-s3";
+import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
+
+export const config = { runtime: "edge" };
+
+const REGION = process.env.AWS_REGION || "us-west-1";
+const BUCKET = process.env.S3_BUCKET;
 
 const s3 = new S3Client({
-  region: process.env.AWS_REGION,
+  region: REGION,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   },
 });
 
-function sanitize(name = "") {
-  return name.replace(/[^\w.\-]/g, "_").slice(0, 120);
-}
-
-export default async function handler(req, res) {
-  // Simple CORS
-  if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "content-type");
-    return res.status(200).end();
-  }
-
+export default async function handler(req) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Use POST" });
+    return new Response(JSON.stringify({ error: "POST only" }), { status: 405 });
   }
 
-  const { filename, contentType } = req.body ?? {};
-  if (!filename || !contentType) {
-    return res.status(400).json({ error: "filename and contentType are required" });
-  }
+  const { name, type } = await req.json();
+  if (!name) return new Response(JSON.stringify({ error: "name required" }), { status: 400 });
 
-  const key = `uploads/${Date.now()}-${randomUUID()}-${sanitize(filename)}`;
+  const key = `uploads/${Date.now()}-${name}`;
 
-  // Pre-signed PUT so the browser can upload the raw file body to S3
-  const command = new PutObjectCommand({
-    Bucket: process.env.S3_BUCKET,
+  const { url, fields } = await createPresignedPost(s3, {
+    Bucket: BUCKET,
     Key: key,
-    ContentType: contentType,
-    // ACL: 'private' // default; keep uploads private
+    Conditions: [
+      ["content-length-range", 0, 1500000000],                    // up to ~1.5GB
+      ["starts-with", "$Content-Type", ""],                       // let browser send a type
+      { acl: "private" },
+      { "x-amz-server-side-encryption": "AES256" },               // << match IAM policy
+    ],
+    Fields: {
+      "Content-Type": type || "application/octet-stream",
+      acl: "private",
+      "x-amz-server-side-encryption": "AES256",                   // << match IAM policy
+    },
+    Expires: 60, // seconds
   });
 
-  const url = await getSignedUrl(s3, command, { expiresIn: 60 }); // 60s is plenty
-
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  return res.status(200).json({ url, key, bucket: process.env.S3_BUCKET });
+  return new Response(JSON.stringify({ url, fields, key, bucket: BUCKET }), {
+    headers: { "content-type": "application/json" },
+  });
 }
