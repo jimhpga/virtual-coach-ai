@@ -1,21 +1,33 @@
-﻿<!doctype html>
-<html><head>
+<!doctype html>
+<html lang="en">
+<head>
   <meta charset="utf-8"/>
   <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Virtual Coach AI — Report</title>
   <style>
-    body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:#081a10;color:#eef}
+    body{margin:0;background:#081a10;color:#eef;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
     .wrap{max-width:960px;margin:24px auto;padding:0 16px}
-    pre{background:#0c1116;color:#a7f3d0;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;overflow:auto}
     .muted{color:#cfe0e6}
+    .card{background:#0c1116;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;margin:12px 0}
+    ul,ol{margin:6px 0 0 20px}
+    h3{margin:10px 0 6px}
+    .actions{display:flex;gap:8px;margin:8px 0}
+    .btn{background:#12241a;border:1px solid rgba(255,255,255,.14);color:#fff;padding:6px 10px;border-radius:8px;cursor:pointer}
   </style>
 </head>
 <body>
-<div class="wrap">
-  <h2>Report</h2>
-  <p class="muted">Loading…</p>
-  <div id="view"></div>
-</div>
-<script src="/report-shim.js?v=1" defer></script>
-</body></html>
+  <div class="wrap">
+    <h2>Virtual Coach AI — Report</h2>
+    <p class="muted" id="status">Loading…</p>
+
+    <div class="actions">
+      <button class="btn" id="copyLink">Copy Link</button>
+      <button class="btn" id="refresh">Refresh</button>
+    </div>
+
+    <div id="view" class="card"></div>
+  </div>
+  <script src="/report-shim.js?v=2" defer></script>
+</body>
+</html>
