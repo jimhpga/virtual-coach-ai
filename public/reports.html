@@ -47,4 +47,382 @@
   .btn:hover{background:rgba(255,255,255,.16)}
   .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6;}
   .btn.warn{background:rgba(246,196,83,.18);border-color:#b8860b;}
-  .btn
+  .btn.ghost{background:rgba(255,255,255,.06);}
+
+  summary{list-style:none;display:flex;gap:10px;align-items:center;padding:14px 16px;cursor:pointer}
+  summary::-webkit-details-marker{display:none}
+  .pnum{width:34px;height:34px;border-radius:10px;background:#0c1820;border:1px solid var(--line);display:grid;place-items:center;font-weight:800}
+  .pname{font-weight:700}
+  .caret{margin-left:auto;transition:transform .2s}
+  details[open] .caret{transform:rotate(180deg)}
+
+  .gchip{font-size:12px;font-weight:800;padding:4px 8px;border-radius:999px;margin-left:8px}
+  .g-good{background:#19c37d;color:#fff}
+  .g-ok{background:#f6c453;color:#2a2300}
+  .g-bad{background:#ff6b6b;color:#fff}
+
+  .metric{display:flex;align-items:center;gap:10px;margin:9px 0}
+  .metric .name{flex:0 0 210px;color:#d8ebf2}
+  .bar{flex:1;height:10px;border-radius:999px;background:#10222c;border:1px solid #22404f;position:relative;overflow:hidden}
+  .bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:999px}
+  .ok{background:linear-gradient(90deg,#19c37d,#2bd897)}
+  .warn{background:linear-gradient(90deg,#f6c453,#ffd479)}
+  .bad{background:linear-gradient(90deg,#ff6b6b,#ff8f8f)}
+  .pct{width:52px;text-align:right;color:#cfe3ee}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:960px){.grid2{grid-template-columns:1fr}}
+
+  /* modal viewer */
+  .viewer{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50}
+  .viewer.open{display:flex}
+  .viewer .box{width:min(960px,92vw);height:min(70vh,70dvh);background:#0b1318;border:1px solid var(--line);border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.5);position:relative;overflow:hidden}
+  .viewer header{position:absolute;inset:0 0 auto 0;background:rgba(0,0,0,.35);border:none;display:flex;justify-content:flex-end;padding:6px}
+  .viewer button.close{background:rgba(255,255,255,.10);border:1px solid var(--line);color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer}
+  .viewer .slot{position:absolute;inset:36px 0 0 0;display:grid;place-items:center}
+  .viewer iframe,.viewer video{width:100%;height:100%;border:0;border-radius:0}
+</style>
+</head>
+<body>
+  <!-- Inline nav -->
+  <header>
+    <div class="navwrap">
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
+      <nav aria-label="Primary">
+        <a href="/">Home</a>
+        <a href="/report" aria-current="page">Reports</a>
+        <a href="/coming-soon">Coming&nbsp;Soon</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/faq">FAQ</a>
+        <a href="/contact">Contact</a>
+        <a href="/login">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="scrim">
+    <main class="wrap">
+      <header class="hdr" style="margin-bottom:10px">
+        <div>
+          <div class="title">Swing Report — P1–P9</div>
+          <div class="sub">Date: <span id="date"></span> • Mode: <span id="modeLabel">Full Swing</span></div>
+        </div>
+        <div><span class="badge">Swings: <span id="swingCount">1</span></span></div>
+      </header>
+
+      <div class="actions">
+        <button id="btnDownload" class="btn primary">Download</button>
+        <button id="btnSend" class="btn warn">Send to Coach</button>
+        <button id="btnCopy" class="btn ghost">Copy Share Link</button>
+      </div>
+
+      <section class="card" id="phasesCard" style="margin-top:6px">
+        <h3 class="hdr">
+          <span>P1–P9</span>
+          <details style="display:inline-block"><summary class="info btn">Info</summary>
+            <div class="content">If a phase has a YouTube URL, it opens in an in-page player. Local videos (blob:) also play inside. If the data only has a label (e.g., “ReviewWithCoach”), we’ll show a YouTube search in a new tab.</div>
+          </details>
+        </h3>
+        <div id="plist" class="content"></div>
+      </section>
+
+      <section class="card" style="margin-top:12px">
+        <h3>Coaching Card</h3>
+        <div class="content">
+          <details class="panel" open>
+            <summary><span class="pname">Top 3 Priority Fixes</span>
+              <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div id="coachPriority" class="content"></div>
+          </details>
+          <details class="panel" style="margin-top:10px">
+            <summary><span class="pname">Top 3 Power Fixes</span>
+              <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div id="coachPower" class="content"></div>
+          </details>
+        </div>
+      </section>
+
+      <section class="grid2" style="margin-top:12px">
+        <div class="card">
+          <h3 class="hdr"><span>Position Consistency</span></h3>
+          <div id="position" class="content"></div>
+        </div>
+        <div class="card">
+          <h3 class="hdr"><span>Swing Consistency</span></h3>
+          <div id="swing" class="content"></div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:12px">
+        <h3 class="hdr"><span>Power Score Summary</span></h3>
+        <div id="power" class="content"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Viewer -->
+  <div class="viewer" id="viewer" aria-hidden="true">
+    <div class="box">
+      <header><button class="close" id="closeViewer">Close</button></header>
+      <div class="slot" id="viewerSlot"></div>
+    </div>
+  </div>
+
+<script>
+/* ======================= CONFIG ======================= */
+const BUCKET = "virtualcoachai-prod";  // <-- set your bucket
+const REGION = "us-west-2";            // <-- set your region
+/* ====================================================== */
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const qp = new URLSearchParams(location.search);
+const id = qp.get('id');
+const reportParam = qp.get('report');   // legacy fallback
+const src = qp.get('src') || '';
+
+const esc = s => encodeURIComponent(s || '');
+const ytSearch = q => `https://www.youtube.com/results?search_query=${esc(q)}`;
+
+function toEmbed(url){
+  try{
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./,'');
+    if ((host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com') && u.pathname === '/watch') {
+      const vid = u.searchParams.get('v'); if (vid) return `https://www.youtube.com/embed/${vid}`;
+    }
+    if (host === 'youtu.be') { const vid = u.pathname.slice(1); if (vid) return `https://www.youtube.com/embed/${vid}`; }
+    if ((host === 'youtube.com' || host === 'm.youtube.com') && u.pathname.startsWith('/shorts/')) {
+      const vid = u.pathname.split('/')[2]; if (vid) return `https://www.youtube.com/embed/${vid}`;
+    }
+  }catch(e){}
+  return null;
+}
+const fmt  = v => `${v}%`;
+const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';
+const chip = g => (g==='good'?'g-good':g==='ok'?'g-ok':'g-bad');
+const metricRow = m => `<div class="metric"><div class="name">${m.label||m.p}</div><div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div><div class="pct">${fmt(m.value)}</div></div>`;
+
+/* ---------- rows ---------- */
+function buildPlayableUrl(ref, fallbackQuery){
+  if (!ref) return { mode:'search', url: ytSearch(fallbackQuery) };
+  if (String(ref).startsWith('blob:')) return { mode:'blob', url: ref };
+  if (/^https?:\/\//i.test(ref)) {
+    const emb = toEmbed(ref);
+    return emb ? { mode:'yt-embed', url: emb } : { mode:'link', url: ref };
+  }
+  return { mode:'search', url: ytSearch(ref || fallbackQuery) };
+}
+function phaseRow(ph,i){
+  const pid = ph.id || ('P'+(i+1));
+  const name = ph.name || '';
+  const gRaw = String(ph.grade||'').toLowerCase();
+  const grade = (gRaw==='bad') ? 'needs help' : (gRaw || 'ok');
+  const short = ph.short || '';
+  const long  = ph.long  || '';
+  const choice = buildPlayableUrl(ph.ref || ph.video || ph.video_url, `${pid} ${name} golf checkpoint`);
+  const control = (choice.mode === 'blob' || choice.mode === 'yt-embed')
+    ? `<button class="btn play" data-url="${choice.url}" data-mode="${choice.mode}" type="button">Play</button>`
+    : `<a class="btn" href="${choice.url}" target="_blank" rel="noopener">${choice.mode === 'search' ? 'YouTube Search' : 'Open Link'}</a>`;
+  return `
+  <details class="panel" ${i===0?'open':''}>
+    <summary>
+      <span class="pnum">${pid}</span>
+      <span class="pname">${name}</span>
+      <span class="gchip ${chip(grade)}">${grade.toUpperCase()}</span>
+      <span class="sub" style="margin-left:8px">${short}</span>
+      <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </summary>
+    <div class="content">
+      <div class="sub" style="margin-bottom:8px">${short}</div>
+      <div style="margin-bottom:10px">${long}</div>
+      ${control}
+    </div>
+  </details>`;
+}
+function coachItem(item){
+  const title = item.title || '';
+  const short = item.short || '';
+  const long  = item.long  || '';
+  const choice = buildPlayableUrl(item.ref, `${title} golf drill`);
+  const control = (choice.mode === 'blob' || choice.mode === 'yt-embed')
+    ? `<button class="btn play" data-url="${choice.url}" data-mode="${choice.mode}" type="button">Play</button>`
+    : `<a class="btn" href="${choice.url}" target="_blank" rel="noopener">${choice.mode === 'search' ? 'YouTube Search' : 'Open Link'}</a>`;
+  return `<details class="panel">
+    <summary><span class="pname">${title}</span><span class="sub" style="margin-left:8px">${short}</span>
+      <svg class="caret" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </summary>
+    <div class="content">
+      <div style="margin-bottom:10px">${long}</div>
+      ${control}
+    </div>
+  </details>`;
+}
+
+/* ---------- render ---------- */
+let last = null;
+function renderReport(data){
+  last = data || {};
+  document.getElementById('date').textContent = new Date().toLocaleDateString();
+  if(data.discipline){
+    document.getElementById('modeLabel').textContent =
+      /putt/i.test(data.discipline) ? 'Putting' :
+      /chip/i.test(data.discipline) ? 'Chipping' : 'Full Swing';
+  }
+  if(data.swings!=null){ document.getElementById('swingCount').textContent = String(data.swings); }
+
+  const phases = Array.isArray(data.phases)? data.phases : [];
+  document.getElementById('plist').innerHTML = phases.map(phaseRow).join('') || '<div class="content sub">No phases found in report.</div>';
+
+  const pri = (data.coaching && Array.isArray(data.coaching.priority_fixes)) ? data.coaching.priority_fixes : [];
+  const pow = (data.coaching && Array.isArray(data.coaching.power_fixes)) ? data.coaching.power_fixes : [];
+  document.getElementById('coachPriority').innerHTML = pri.map(coachItem).join('') || '<div class="sub">No priority fixes in report.</div>';
+  document.getElementById('coachPower').innerHTML    = pow.map(coachItem).join('')    || '<div class="sub">No power fixes in report.</div>';
+
+  document.getElementById('position').innerHTML = (data.position_metrics||[]).map(metricRow).join('') || '<div class="sub">No position metrics.</div>';
+  document.getElementById('swing').innerHTML    = (data.swing_metrics||[]).map(metricRow).join('')    || '<div class="sub">No swing metrics.</div>';
+
+  const p = data.power||{score:0, tempo:'—', release_timing:0};
+  document.getElementById('power').innerHTML = `
+    <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="${band(+p.score||0)}" style="width:${+p.score||0}%"></span></div><div class="pct">${+p.score||0}%</div></div>
+    <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo||'—'}</div></div>
+    <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing||0)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
+}
+
+/* ---------- S3 fetch + polling ---------- */
+function s3JsonUrlFromId(rid){
+  return (REGION === 'us-east-1')
+    ? `https://${BUCKET}.s3.amazonaws.com/reports/${encodeURIComponent(rid)}.json?cb=${Date.now()}`
+    : `https://${BUCKET}.s3.${REGION}.amazonaws.com/reports/${encodeURIComponent(rid)}.json?cb=${Date.now()}`;
+}
+async function fetchJsonOnce(url){
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(String(res.status));
+  const txt = await res.text();
+  return JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
+}
+async function loadFromS3OrPoll(rid){
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.margin = '10px 0';
+  card.innerHTML = `<div class="content">⏳ Processing… your report will appear automatically.</div>`;
+  document.querySelector('main').prepend(card);
+
+  // Try once immediately
+  try{
+    const data = await fetchJsonOnce(s3JsonUrlFromId(rid));
+    card.querySelector('.content').textContent = '✅ Report loaded.';
+    renderReport(data);
+    return;
+  }catch{}
+
+  // Poll every 30s
+  while (true) {
+    await new Promise(r => setTimeout(r, 30000));
+    try {
+      const data = await fetchJsonOnce(s3JsonUrlFromId(rid));
+      card.querySelector('.content').textContent = '✅ Report loaded.';
+      renderReport(data);
+      break;
+    } catch {}
+  }
+}
+
+/* ---------- share & actions ---------- */
+function shareUrl(){
+  try{
+    const u = new URL(location.href);
+    if (id) {
+      u.searchParams.set('id', id);
+      u.searchParams.delete('report');
+      u.searchParams.delete('src');
+    } else if (reportParam) {
+      u.searchParams.set('report', reportParam);
+      u.searchParams.delete('src');
+    }
+    return u.toString();
+  }catch{ return location.href; }
+}
+document.getElementById('date').textContent = new Date().toLocaleDateString();
+
+document.getElementById('btnCopy').addEventListener('click', async ()=>{
+  const link = shareUrl();
+  try{ await navigator.clipboard.writeText(link); alert('Share link copied'); }
+  catch{ prompt('Copy link:', link); }
+});
+let last = null;
+document.getElementById('btnSend').addEventListener('click', ()=>{
+  const email = prompt('Coach email (e.g. coach@example.com):');
+  if(!email) return;
+  const p = (last && last.power) ? `Power ${last.power.score||'-'}%  Tempo ${last.power.tempo||'-'}  Release ${last.power.release_timing||'-'}%` : '';
+  const subject = encodeURIComponent('Virtual Coach AI Swing Report');
+  const body = encodeURIComponent(`Here is my swing report:\n${shareUrl()}\n\n${p}\n\n— sent from virtualcoachai.net`);
+  location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+});
+document.getElementById('btnDownload').addEventListener('click', ()=>{
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'swing-report.html';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+});
+
+/* ---------- modal viewer logic ---------- */
+const viewer = document.getElementById('viewer');
+const slot   = document.getElementById('viewerSlot');
+const closeBtn = document.getElementById('closeViewer');
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.play');
+  if (!btn) return;
+  const mode = btn.getAttribute('data-mode');
+  const url  = btn.getAttribute('data-url');
+  slot.innerHTML = '';
+  if (mode === 'blob') {
+    const v = document.createElement('video');
+    v.src = url; v.controls = true; v.playsInline = true;
+    slot.appendChild(v);
+  } else if (mode === 'yt-embed') {
+    const f = document.createElement('iframe');
+    f.src = url; f.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+    f.allowFullscreen = true;
+    slot.appendChild(f);
+  }
+  viewer.classList.add('open');
+});
+closeBtn.addEventListener('click', ()=>{ viewer.classList.remove('open'); slot.innerHTML=''; });
+viewer.addEventListener('click', (e)=>{ if (e.target === viewer) { viewer.classList.remove('open'); slot.innerHTML=''; }});
+
+/* ---------- BOOT ---------- */
+if (src === 'session') {
+  try{
+    const raw = sessionStorage.getItem('vc_report');
+    if (!raw) throw new Error('No session report found. Go to Upload and create a report.');
+    const data = JSON.parse(raw);
+    renderReport(data);
+  }catch(err){
+    console.error(err);
+    alert(err.message || String(err));
+  }
+} else if (id) {
+  loadFromS3OrPoll(id);               // <- primary path
+} else if (reportParam) {
+  fetchJsonOnce(reportParam).then(renderReport).catch(err=>{
+    console.error(err); alert('Failed to load report: ' + (err.message||String(err)));
+  });
+} else {
+  try{
+    const raw = localStorage.getItem('vc_last_report') || '';
+    if (!raw) throw new Error('No saved report found. Go to Upload and try again.');
+    const data = JSON.parse(raw.trim().replace(/^\uFEFF/, ''));
+    renderReport(data);
+  }catch(err){
+    console.error(err); alert(err.message || String(err));
+  }
+}
+</script>
+</body>
+</html>
