@@ -1,77 +1,51 @@
-// /public/upload.client.js
+// public/upload.client.js
 (function () {
   const $ = (s) => document.querySelector(s);
-  const input = $('#fileInput');
-  const label = $('#fileLabel');
-  const btn = $('#uploadBtn');
-  const logBox = $('#log');
+  const log = (m) => { const el = $("#log"); el.textContent += (el.textContent ? "\n" : "") + m; };
 
-  function log(msg) {
-    logBox.textContent += (logBox.textContent ? '\n' : '') + msg;
-    logBox.scrollTop = logBox.scrollHeight;
-  }
-
-  input.addEventListener('change', () => {
-    const f = input.files && input.files[0];
-    label.textContent = f ? `${f.name} • ${f.size.toLocaleString()} bytes` : '(no file)';
+  $("#fileInput").addEventListener("change", (e) => {
+    const f = e.target.files?.[0];
+    $("#fileLabel").textContent = f ? `${f.name}` : "(no file)";
   });
 
-  btn.addEventListener('click', async () => {
+  $("#uploadBtn").addEventListener("click", async () => {
     try {
-      const file = input.files && input.files[0];
-      if (!file) { alert('Choose a video first'); return; }
+      const file = $("#fileInput").files?.[0];
+      if (!file) { log("Pick a video first."); return; }
 
-      log('[upload] client JS loaded');
-      log(`Selected: ${file.name} (${file.type || 'video/*'}), ${file.size.toLocaleString()} bytes`);
+      log("[upload] client JS loaded");
+      log("Requesting presign…");
 
       // 1) presign
-      log('Calling /api/presign…');
-      const meta = { filename: file.name, size: file.size, mime: file.type || 'video/mp4' };
-
-      const pres = await fetch('/api/presign', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(meta),
+      const pre = await fetch("/api/presign", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: file.name, type: file.type || "video/mp4", size: file.size }),
       });
+      if (!pre.ok) throw new Error("presign failed " + pre.status);
+      const { url, fields, key } = await pre.json();
+      if (!url || !fields || !key) throw new Error("presign response malformed");
 
-      if (!pres.ok) {
-        const t = await pres.text().catch(() => '');
-        throw new Error(`presign failed (${pres.status}): ${t || pres.statusText}`);
-      }
+      log("Uploading to S3…");
 
-      const { uploadUrl, videoKey, reportUrl } = await pres.json();
-      if (!uploadUrl) throw new Error('No uploadUrl from presign');
+      // 2) POST to S3 (presigned POST)
+      const fd = new FormData();
+      Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
+      fd.append("file", file, file.name);
 
-      // 2) upload to S3
-      log('Uploading to S3…');
-      const up = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'content-type': meta.mime },
-        body: file,
-      });
-      if (!up.ok) {
-        const t = await up.text().catch(() => '');
-        throw new Error(`S3 upload failed (${up.status}): ${t || up.statusText}`);
-      }
-      log('Upload complete.');
+      const up = await fetch(url, { method: "POST", body: fd });
+      if (!up.ok) throw new Error("S3 upload failed " + up.status);
 
-      // 3) show report
-      if (reportUrl) {
-        log(`Opening report: ${reportUrl}`);
-        location.href = reportUrl; // e.g. /report?id=vcai_...
-      } else {
-        log('No reportUrl returned. Copy your video key: ' + videoKey);
-        alert('Upload finished, but no reportUrl was returned.');
-      }
-    } catch (err) {
-      console.error(err);
-      log('Error: ' + (err && err.message ? err.message : String(err)));
-      if (/404|NOT_FOUND/i.test(String(err))) {
-        log('If this says 404/NOT_FOUND: ensure /api/presign exists and is deployed.');
-      }
+      log("Upload complete.");
+
+      // 3) Go to report viewer with the key we just wrote
+      const reportUrl = `/report.html?key=${encodeURIComponent(key)}`;
+      log("Opening report view…"); 
+      location.assign(reportUrl);
+    } catch (e) {
+      log("Error: " + (e?.message || e));
     }
   });
 
-  // initial
-  log('Ready.');
+  log("Ready.");
 })();
