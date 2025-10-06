@@ -1,0 +1,28 @@
+﻿name: smoke-api
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # every 10 minutes (UTC)
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check /api/presign health (GET)
+        run: |
+          set -e
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://virtualcoachai.net/api/presign)
+          echo "HTTP_STATUS=$STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ /api/presign returned $STATUS"
+            exit 1
+          fi
+      - name: Validate JSON shape
+        run: |
+          set -e
+          BODY=$(curl -s https://virtualcoachai.net/api/presign)
+          echo "$BODY" | jq .
+          OK=$(echo "$BODY" | jq -r '.ok // empty')
+          if [ "$OK" != "true" ] && [ "$OK" != "True" ]; then
+            echo "❌ Response missing ok=true"; exit 1
+          fi
