@@ -19,3 +19,8 @@ docs/access keys.txt
 docs/access keys.txt
 *.zip
 
+# Local backup artifacts
+*.bak
+*.bak*
+*backup*
+*.bak-*
