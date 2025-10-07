@@ -1,33 +1,51 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8"/>
-  <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="utf-8" />
   <title>Virtual Coach AI — Report</title>
-  <style>
-    body{margin:0;background:#081a10;color:#eef;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
-    .wrap{max-width:960px;margin:24px auto;padding:0 16px}
-    .muted{color:#cfe0e6}
-    .card{background:#0c1116;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;margin:12px 0}
-    ul,ol{margin:6px 0 0 20px}
-    h3{margin:10px 0 6px}
-    .actions{display:flex;gap:8px;margin:8px 0}
-    .btn{background:#12241a;border:1px solid rgba(255,255,255,.14);color:#fff;padding:6px 10px;border-radius:8px;cursor:pointer}
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>body{font-family:system-ui,Segoe UI,Arial;max-width:900px;margin:24px auto;padding:0 12px}
+  #video{width:100%;max-height:60vh}</style>
 </head>
 <body>
-  <div class="wrap">
-    <h2>Virtual Coach AI — Report</h2>
-    <p class="muted" id="status">Loading…</p>
+  <h1>Virtual Coach AI — Swing Report</h1>
+  <p id="meta"></p>
+  <video id="video" controls></video>
+  <pre id="log" style="background:#111;color:#0f0;padding:8px;border-radius:6px;white-space:pre-wrap"></pre>
 
-    <div class="actions">
-      <button class="btn" id="copyLink">Copy Link</button>
-      <button class="btn" id="refresh">Refresh</button>
-    </div>
+  <script>
+  (async () => {
+    const $ = (s) => document.querySelector(s);
+    const log = (m) => { const el = $("#log"); el.textContent += (el.textContent ? "\n" : "") + m; };
+    const params = new URLSearchParams(location.search);
+    const key = params.get("key");
 
-    <div id="view" class="card"></div>
-  </div>
-  <script src="/report-shim.js?v=2" defer></script>
+    async function setVideoFromKey(k) {
+      const r = await fetch(`/api/get-url?key=${encodeURIComponent(k)}`);
+      if (!r.ok) throw new Error("get-url failed " + r.status);
+      const { url } = await r.json();
+      $("#video").src = url;
+      $("#meta").textContent = `Object: ${k}`;
+      log("Loaded presigned GET for playback.");
+    }
+
+    if (key) {
+      try {
+        localStorage.setItem("vcai:lastKey", key);
+        await setVideoFromKey(key);
+      } catch (e) {
+        log("Error loading key: " + (e.message || e));
+      }
+    } else {
+      const last = localStorage.getItem("vcai:lastKey");
+      if (last) {
+        log("No key in URL; loading last uploaded video.");
+        try { await setVideoFromKey(last); } catch (e) { log("Fallback failed: " + e.message); }
+      } else {
+        log("No key provided and no previous upload found.");
+      }
+    }
+  })();
+  </script>
 </body>
 </html>
