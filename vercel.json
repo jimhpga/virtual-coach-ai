@@ -1,5 +1,4 @@
-@'
-{
+﻿{
   "version": 2,
   "routes": [
     { "src": "^/api/(.*)$", "dest": "/api/$1" },
@@ -8,4 +7,3 @@
     { "src": "^/(.*)$", "dest": "/public/$1" }
   ]
 }
-'@ | Set-Content -Path vercel.json -Encoding utf8
