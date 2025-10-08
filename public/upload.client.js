@@ -1,3 +1,4 @@
+Set-Content -Path public\upload.client.js -Encoding UTF8 -Value @'
 // public/upload.client.js
 (function () {
   const $ = (s) => document.querySelector(s);
@@ -6,7 +7,7 @@
   const btn = $("#uploadBtn");
   const logEl = $("#log");
 
-  const log = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
+  const log  = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
   const busy = (on) => { btn.disabled = on; fileInput.disabled = on; };
 
   log("[upload v4] client JS loaded");
@@ -24,7 +25,6 @@
     busy(true);
     try {
       log("Requesting presign…");
-      // 1) presign
       const pre = await fetch("/api/presign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -35,7 +35,6 @@
       if (!url || !fields || !key) throw new Error("presign response malformed");
 
       log("Uploading to S3…");
-      // 2) upload to S3
       const fd = new FormData();
       Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
       fd.append("file", file, file.name);
@@ -43,7 +42,6 @@
       if (!up.ok) throw new Error("S3 upload failed " + up.status);
 
       log("Upload complete.");
-      // 3) open viewer
       const reportUrl = `/report.html?key=${encodeURIComponent(key)}`;
       log("Opening report view…");
       location.assign(reportUrl);
@@ -53,3 +51,4 @@
     }
   });
 })();
+'@
