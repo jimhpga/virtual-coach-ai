@@ -27,3 +27,5 @@ export default async function handler(req, res) {
     res.status(200).json({ url, fields, key });
   } catch (e) { res.status(500).json({ error: "presign error", detail: String(e) }); }
 }
+
+export const config = { regions: ['iad1'] };
