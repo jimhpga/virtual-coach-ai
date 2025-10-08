@@ -1,21 +1,29 @@
 // public/upload.client.js
 (function () {
   const $ = (s) => document.querySelector(s);
-  const log = (m) => { const el = $("#log"); el.textContent += (el.textContent ? "\n" : "") + m; };
+  const fileInput = $("#fileInput");
+  const fileLabel = $("#fileLabel");
+  const btn = $("#uploadBtn");
+  const logEl = $("#log");
 
-  $("#fileInput").addEventListener("change", (e) => {
+  const log = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
+  const busy = (on) => { btn.disabled = on; fileInput.disabled = on; };
+
+  log("[upload v4] client JS loaded");
+
+  fileInput?.addEventListener("change", (e) => {
     const f = e.target.files?.[0];
-    $("#fileLabel").textContent = f ? `${f.name}` : "(no file)";
+    fileLabel.textContent = f ? `${f.name}` : "(no file)";
+    if (f) log("Selected: " + f.name);
   });
 
-  $("#uploadBtn").addEventListener("click", async () => {
+  btn?.addEventListener("click", async () => {
+    const file = fileInput?.files?.[0];
+    if (!file) { log("Pick a video first."); return; }
+
+    busy(true);
     try {
-      const file = $("#fileInput").files?.[0];
-      if (!file) { log("Pick a video first."); return; }
-
-      log("[upload] client JS loaded");
       log("Requesting presign…");
-
       // 1) presign
       const pre = await fetch("/api/presign", {
         method: "POST",
@@ -27,25 +35,21 @@
       if (!url || !fields || !key) throw new Error("presign response malformed");
 
       log("Uploading to S3…");
-
-      // 2) POST to S3 (presigned POST)
+      // 2) upload to S3
       const fd = new FormData();
       Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
       fd.append("file", file, file.name);
-
       const up = await fetch(url, { method: "POST", body: fd });
       if (!up.ok) throw new Error("S3 upload failed " + up.status);
 
       log("Upload complete.");
-
-      // 3) Go to report viewer with the key we just wrote
+      // 3) open viewer
       const reportUrl = `/report.html?key=${encodeURIComponent(key)}`;
-      log("Opening report view…"); 
+      log("Opening report view…");
       location.assign(reportUrl);
     } catch (e) {
       log("Error: " + (e?.message || e));
+      busy(false);
     }
   });
-
-  log("Ready.");
 })();
