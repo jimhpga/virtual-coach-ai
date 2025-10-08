@@ -1,7 +1,7 @@
-﻿import { S3Client } from "@aws-sdk/client-s3";
+import { S3Client } from "@aws-sdk/client-s3";
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 
-export const config = { runtime: "nodejs", maxDuration: 10, regions: ["pdx1","sfo1"] };
+export const config = { runtime: "nodejs", maxDuration: 10, regions: ['iad1'] };
 
 const {
   S3_BUCKET,
