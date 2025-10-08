@@ -1,5 +1,9 @@
+<<<<<<< Updated upstream
 Set-Content -Path public\upload.client.js -Encoding UTF8 -Value @'
 // public/upload.client.js
+=======
+﻿// public/upload.client.js
+>>>>>>> Stashed changes
 (function () {
   const $ = (s) => document.querySelector(s);
   const fileInput = $("#fileInput");
@@ -10,7 +14,11 @@ Set-Content -Path public\upload.client.js -Encoding UTF8 -Value @'
   const log  = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
   const busy = (on) => { btn.disabled = on; fileInput.disabled = on; };
 
+<<<<<<< Updated upstream
   log("[upload v4] client JS loaded");
+=======
+  log("[upload v5] client JS loaded");
+>>>>>>> Stashed changes
 
   fileInput?.addEventListener("change", (e) => {
     const f = e.target.files?.[0];
