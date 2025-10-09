@@ -9,7 +9,7 @@
   const log  = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
   const busy = (on) => { btn.disabled = on; fileInput.disabled = on; };
 
-  log("[upload v8] client JS loaded");
+  log("[upload v9] client JS loaded");
 
   fileInput?.addEventListener("change", (e) => {
     const f = e.target.files?.[0];
