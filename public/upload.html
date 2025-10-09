@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -10,9 +10,18 @@
     body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:#071c10;color:#ecf3f7}
     .wrap{width:min(1080px,92%);margin:40px auto}
     .card{background:rgba(10,18,24,.35);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px}
+    .row{display:flex;flex-wrap:wrap;gap:12px}
+    .field{display:flex;flex-direction:column;gap:6px;min-width:180px;flex:1}
+    .field input,.field select{background:#0c1116;border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:10px;padding:8px 10px}
+    .pill{display:inline-block;font-size:12px;color:#cfe0e6;margin-left:10px}
     .btn{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
     .log{white-space:pre-wrap;font-family:ui-monospace,Menlo,Consolas,monospace;background:#0c1116;color:#a7f3d0;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px;min-height:120px;margin-top:10px}
-    .pill{display:inline-block;font-size:12px;color:#cfe0e6;margin-left:10px}
+    .req{color:#93c5fd}
+    .hint{font-size:12px;color:#cfe0e6;opacity:.9}
+    .radios{display:flex;gap:14px;align-items:center}
+    .tight{display:flex;gap:8px;align-items:center}
+    .tight > * {flex:0 0 auto}
+    .tight input{width:90px}
   </style>
 </head>
 <body>
@@ -20,16 +29,63 @@
     <section class="card">
       <h3>Upload → Report → Improve</h3>
       <p>Select a face-on or down-the-line video. We’ll analyze P1–P9 and generate a shareable report.</p>
+
+      <!-- Golfer details -->
+      <div class="row" style="margin:10px 0 6px;">
+        <div class="field">
+          <label for="name">Name <span class="hint">(optional)</span></label>
+          <input id="name" type="text" placeholder="Jordan Example" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="email">Email <span class="hint">(optional)</span></label>
+          <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="handicap">Handicap <span class="hint">(optional)</span></label>
+          <input id="handicap" type="number" inputmode="numeric" min="0" max="54" step="0.1" placeholder="e.g. 12.3" />
+        </div>
+      </div>
+
+      <div class="row" style="margin:0 0 6px;">
+        <div class="field">
+          <label>Hand <span class="hint">(optional)</span></label>
+          <div class="radios">
+            <label><input type="radio" name="hand" value="R"> Right</label>
+            <label><input type="radio" name="hand" value="L"> Left</label>
+          </div>
+        </div>
+        <div class="field">
+          <label for="eye">Eye Dominance <span class="hint">(optional)</span></label>
+          <select id="eye">
+            <option value="">Don’t know</option>
+            <option value="R">Right eye</option>
+            <option value="L">Left eye</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Height <span class="req">(required)</span></label>
+          <div class="tight">
+            <input id="hft" type="number" inputmode="numeric" min="3" max="8" step="1" placeholder="ft">
+            <input id="hin" type="number" inputmode="numeric" min="0" max="11" step="1" placeholder="in">
+            <span class="hint">or</span>
+            <input id="hcm" type="number" inputmode="numeric" min="120" max="230" step="1" placeholder="cm">
+          </div>
+          <div class="hint">Enter feet & inches <em>or</em> centimeters.</div>
+        </div>
+      </div>
+
+      <!-- File + action -->
       <div style="display:flex;align-items:center;gap:10px;margin:10px 0 12px;">
-        <input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v" class="btn" />
+        <input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v,.mkv" class="btn" />
         <span id="fileLabel" class="pill">(no file)</span>
         <button id="uploadBtn" class="btn">Upload &amp; Generate Report</button>
       </div>
+
       <div id="log" class="log">Ready.</div>
     </section>
   </main>
 
   <!-- must match the file in /public -->
-  <script src="/upload.client.js?v=9" defer></script>
+  <script src="/upload.client.js?v=10" defer></script>
 </body>
 </html>
