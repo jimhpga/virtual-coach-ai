@@ -2,8 +2,11 @@
   "version": 2,
   "routes": [
     { "src": "^/api/(.*)$", "dest": "/api/$1" },
-    { "src": "^/(faq|pricing|upload|report|contact|login|about|analyze|reports?)/?$", "dest": "/public/$1.html" },
-    { "src": "^/$", "dest": "/public/index.html" },
-    { "src": "^/(.*)$", "dest": "/public/$1" }
+
+    { "src": "^/upload/?$", "dest": "/upload.html" },
+    { "src": "^/(report|pricing|contact|about|login|analyze|reports?)/?$", "dest": "/$1.html" },
+
+    { "src": "^/$", "dest": "/index.html" },
+    { "src": "^/(.*)$", "dest": "/$1" }
   ]
 }
