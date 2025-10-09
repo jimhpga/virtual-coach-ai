@@ -1,42 +1,27 @@
-name: ping-process-pending
+﻿name: ping-process-pending
 
 on:
   schedule:
-    - cron: "*/5 * * * *"      # every 5 minutes (UTC)
-  workflow_dispatch:           # allow manual runs from Actions tab
-
-permissions:
-  contents: read
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
-    steps:
-      - name: Validate secrets
-        env:
-          PING_URL: ${{ secrets.PING_URL }}
-          CRON_TOKEN: ${{ secrets.CRON_TOKEN }}
-        run: |
-          if [ -z "$PING_URL" ]; then
-            echo "::error::PING_URL secret not set"; exit 1
-          fi
-          if [ -z "$CRON_TOKEN" ]; then
-            echo "::error::CRON_TOKEN secret not set"; exit 1
-          fi
-          echo "Will ping: ${PING_URL%%\?*}"
+    env:
+      PING_URL: ${{ secrets.PING_URL }}
 
-      - name: Ping endpoint (fail on non-2xx)
-        env:
-          PING_URL: ${{ secrets.PING_URL }}
-          CRON_TOKEN: ${{ secrets.CRON_TOKEN }}
+    steps:
+      - name: Print target
+        run: echo "Pinging $PING_URL"
+
+      - name: Ping health endpoint (with retries)
         run: |
           set -e
-          # Send token in Authorization header (safer than query param)
-          CODE=$(curl -sS -o /dev/null -w "%{http_code}" \
-            -H "Authorization: Bearer $CRON_TOKEN" \
-            "$PING_URL")
-          echo "HTTP $CODE"
-          case "$CODE" in
-            2*) exit 0 ;;
-            *)  echo "::error::Non-2xx from $PING_URL (HTTP $CODE)"; exit 22 ;;
-          esac
+          for i in 1 2 3; do
+            curl -fsS --max-time 20 "$PING_URL" && exit 0
+            echo "Attempt $i failed; retrying in 10s…"
+            sleep 10
+          done
+          echo "Health check failed after 3 attempts."
+          exit 1
