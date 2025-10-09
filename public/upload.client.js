@@ -1,4 +1,4 @@
-﻿// public/upload.client.js
+// public/upload.client.js
 (function () {
   const $ = (s) => document.querySelector(s);
   const fileInput = $("#fileInput");
@@ -6,10 +6,19 @@
   const btn = $("#uploadBtn");
   const logEl = $("#log");
 
-  const log  = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
-  const busy = (on) => { btn.disabled = on; fileInput.disabled = on; };
+  // new inputs
+  const nameEl = $("#name");
+  const emailEl = $("#email");
+  const hcpEl = $("#handicap");
+  const eyeEl = $("#eye");
+  const hftEl = $("#hft");
+  const hinEl = $("#hin");
+  const hcmEl = $("#hcm");
 
-  log("[upload v9] client JS loaded");
+  function log(m){ logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; }
+  function busy(on){ btn.disabled = on; fileInput.disabled = on; }
+
+  log("[upload v10] client JS loaded");
 
   fileInput?.addEventListener("change", (e) => {
     const f = e.target.files?.[0];
@@ -17,9 +26,42 @@
     if (f) log("Selected: " + f.name);
   });
 
+  // helpers
+  function parseHeightCm() {
+    // if cm provided, trust it
+    const cm = Number(hcmEl?.value || "");
+    if (!Number.isNaN(cm) && cm >= 120 && cm <= 230) return Math.round(cm);
+
+    // else compute from ft/in
+    const ft = Number(hftEl?.value || "");
+    const inch = Number(hinEl?.value || "");
+    if (!Number.isNaN(ft) && !Number.isNaN(inch) && ft >= 3 && ft <= 8 && inch >= 0 && inch <= 11) {
+      const totalIn = (ft * 12) + inch;
+      return Math.round(totalIn * 2.54);
+    }
+    return null;
+  }
+
+  function getHand() {
+    const checked = document.querySelector('input[name="hand"]:checked');
+    return checked?.value || ""; // "R" | "L" | ""
+  }
+
   btn?.addEventListener("click", async () => {
     const file = fileInput?.files?.[0];
     if (!file) { log("Pick a video first."); return; }
+
+    const height_cm = parseHeightCm();
+    if (!height_cm) { log("Please enter your height (ft/in OR cm)."); return; }
+
+    const meta = {
+      name: nameEl?.value?.trim() || "",
+      email: emailEl?.value?.trim() || "",
+      handicap: hcpEl?.value?.trim() || "",
+      hand: getHand(),           // "R" | "L" | ""
+      eye: eyeEl?.value || "",   // "R" | "L" | ""
+      height_cm                  // number (required)
+    };
 
     busy(true);
     try {
@@ -27,7 +69,13 @@
       const pre = await fetch("/api/presign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name, type: file.type || "video/mp4", size: file.size }),
+        // backend ignores unknown fields; we keep filename/type/size, and include meta in case you want to log it server-side
+        body: JSON.stringify({
+          filename: file.name,
+          type: file.type || "video/mp4",
+          size: file.size,
+          meta
+        }),
       });
       if (!pre.ok) throw new Error("presign failed " + pre.status);
       const { url, fields, key } = await pre.json();
@@ -41,9 +89,18 @@
       if (!up.ok) throw new Error("S3 upload failed " + up.status);
 
       log("Upload complete.");
-      const reportUrl = `/report.html?key=${encodeURIComponent(key)}`;
+      const qp = new URLSearchParams({
+        key,
+        h: String(height_cm),
+        hand: meta.hand,
+        eye: meta.eye,
+        name: meta.name,
+        email: meta.email,
+        hcp: meta.handicap
+      });
+      const viewer = `/report.html?${qp.toString()}`;
       log("Opening report view…");
-      location.assign(reportUrl);
+      location.assign(viewer);
     } catch (e) {
       log("Error: " + (e?.message || e));
       busy(false);
