@@ -1,4 +1,4 @@
-﻿name: smoke-api
+name: smoke-api
 on:
   schedule:
     - cron: "*/10 * * * *"   # every 10 minutes (UTC)
@@ -7,20 +7,22 @@ on:
 jobs:
   ping:
     runs-on: ubuntu-latest
+    env:
+      SMOKE_URL: https://virtual-coach-ai-5slg.vercel.app/api/health
     steps:
-      - name: Check /api/presign health (GET)
+      - name: Check health (GET)
         run: |
           set -e
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://virtualcoachai.net/api/presign)
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SMOKE_URL")
           echo "HTTP_STATUS=$STATUS"
           if [ "$STATUS" != "200" ]; then
-            echo "❌ /api/presign returned $STATUS"
+            echo "❌ $SMOKE_URL returned $STATUS"
             exit 1
           fi
-      - name: Validate JSON shape
+      - name: Validate JSON shape (.ok == true)
         run: |
           set -e
-          BODY=$(curl -s https://virtualcoachai.net/api/presign)
+          BODY=$(curl -s "$SMOKE_URL")
           echo "$BODY" | jq .
           OK=$(echo "$BODY" | jq -r '.ok // empty')
           if [ "$OK" != "true" ] && [ "$OK" != "True" ]; then
