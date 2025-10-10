@@ -5,92 +5,183 @@
   <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Virtual Coach AI — Report</title>
-
-  <link rel="preload" as="image" href="/homepage-background.png" />
-  <link rel="icon" href="/virtualcoach-logo.png" />
   <style>
-    :root{ --nav:#0b2b12; --panel:rgba(10,18,24,.35); --line:rgba(255,255,255,.12); --text:#ecf3f7; --scrim:rgba(0,0,0,.16) }
-    *{box-sizing:border-box} html,body{height:100%}
-    body{
-      margin:0;color:var(--text);
-      background:#071c10 url('/homepage-background.png') center/cover no-repeat fixed;
-      font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
+    :root{
+      --bg: #071c10; --ink:#ecf3f7; --muted:#cfe0e6; --border:rgba(255,255,255,.12);
     }
-    .scrim{min-height:100vh;background:var(--scrim)}
-    header.top{position:sticky;top:0;z-index:100;background:var(--nav);
-      border-bottom:1px solid rgba(255,255,255,.12);backdrop-filter:blur(2px)}
-    .navwrap{width:min(1080px,92%);margin:0 auto;padding:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between}
-    .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
-    .brand-logo{width:160px;height:36px;background:#fff;
-      -webkit-mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat;mask:url('/virtualcoach-logo-transparent.png') center/contain no-repeat}
-    nav.nav{display:flex;gap:8px}
-    nav.nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent;white-space:nowrap}
-    nav.nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-    .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
-    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(1.5px)}
-    .card h3{margin:0;padding:14px 16px;border-bottom:1px solid var(--line)}
-    .card .content{padding:12px 16px}
-    .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
-    .pill{display:inline-block;font-size:12px;color:#cfe0e6;margin-left:10px}
-    .log{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-         background:#0c1116;color:#a7f3d0;border:1px solid var(--line);border-radius:12px;padding:12px;min-height:80px}
-    #video{width:100%;max-height:62vh;border-radius:12px;border:1px solid var(--line);background:#000}
-    @media (max-width:680px){ .brand span{display:none} }
+    *{box-sizing:border-box}
+    body{margin:0;background:#071c10;color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;}
+    .wrap{width:min(1100px,94%);margin:18px auto}
+    .card{background:rgba(10,18,24,.35);border:1px solid var(--border);border-radius:14px;padding:16px}
+    .vcai-toolbar{
+      position: sticky; top: 0; z-index: 10;
+      display:flex; gap:.5rem; align-items:center; padding:.6rem .75rem;
+      background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
+      border-bottom:1px solid var(--border);
+      color:#eaf3ee; font:14px/1.4 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+    }
+    .btn{
+      border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.08);
+      color:#fff; padding:.45rem .6rem; border-radius:10px; cursor:pointer;
+    }
+    .btn:hover{ filter:brightness(1.05); }
+    .vcai-muted{ color:#cbd5ce; }
+    .vcai-expect{
+      margin:12px 0; padding:.9rem; border-radius:12px;
+      border:1px solid var(--border); background:rgba(0,0,0,.35);
+      white-space:pre-wrap;
+    }
+    .kv{display:grid;grid-template-columns: 160px 1fr; gap:6px 14px; margin-top:8px;}
+    .kv .k{color:#cbd5ce}
+    .kv .v{color:#f2f7f4;overflow-wrap:anywhere}
+    .hint{font-size:12px;color:#cbd5ce;margin-top:6px}
   </style>
 </head>
 <body>
-<header class="top">
-  <div class="navwrap">
-    <a class="brand" href="/"><div class="brand-logo" aria-label="Virtual Coach AI"></div><span>Virtual Coach AI</span></a>
-    <nav class="nav" aria-label="Primary">
-      <a href="/index.html">Home</a>
-      <a href="/upload.html">Upload</a>
-      <a href="/report.html" aria-current="page">Reports</a>
-    </nav>
+  <div class="vcai-toolbar" id="vcai-baseline-toolbar">
+    <button class="btn" id="vcai-set-baseline">Set as Baseline</button>
+    <button class="btn" id="vcai-compare" disabled>Compare to Baseline</button>
+    <button class="btn" id="vcai-clear" disabled>Clear Baseline</button>
+    <span class="vcai-muted" id="vcai-base-info">(no baseline yet)</span>
   </div>
-</header>
 
-<div class="scrim">
   <main class="wrap">
     <section class="card">
       <h3>Report</h3>
-      <div class="content">
-        <p id="meta" class="pill">(loading…)</p>
-        <video id="video" controls playsinline></video>
-        <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
-          <button class="btn" onclick="history.back()">← Back</button>
-          <a class="btn" href="/upload.html">Upload Another</a>
-        </div>
-        <pre id="log" class="log"></pre>
+      <div class="kv">
+        <div class="k">Key</div><div class="v" id="kv-key">—</div>
+        <div class="k">Compare</div><div class="v" id="kv-compare">—</div>
+        <div class="k">Teacher voice</div><div class="v" id="kv-coach">—</div>
+        <div class="k">Height (in)</div><div class="v" id="kv-height">—</div>
+        <div class="k">Name</div><div class="v" id="kv-name">—</div>
+        <div class="k">Email</div><div class="v" id="kv-email">—</div>
+        <div class="k">Handed</div><div class="v" id="kv-hand">—</div>
+        <div class="k">Eye</div><div class="v" id="kv-eye">—</div>
+        <div class="k">Handicap</div><div class="v" id="kv-hcp">—</div>
       </div>
+
+      <div class="vcai-expect" id="vcai-expect" hidden></div>
+      <div class="hint">Tip: “Compare to Baseline” will reload this page with <code>?compare=&lt;baselineKey&gt;</code>. Use a side-by-side viewer if you have one; otherwise open your baseline in a new tab for A/B review.</div>
     </section>
   </main>
-</div>
 
-<script>
-(async () => {
-  const $ = s => document.querySelector(s);
-  const log = m => { const el = $("#log"); el.textContent += (el.textContent ? "\\n" : "") + m; };
+  <script>
+  (function(){
+    const qs = new URLSearchParams(location.search);
+    const current = {
+      key: qs.get("key") || "",
+      coach: qs.get("coach") || "supportive",
+      height: qs.get("h") || "",
+      name: qs.get("name") || "",
+      email: qs.get("email") || "",
+      hand: qs.get("hand") || "Right",
+      eye: qs.get("eye") || "Unknown",
+      hcp: qs.get("hcp") || "",
+      baselineFlag: qs.get("baseline") === "1",
+      compare: qs.get("compare") || ""
+    };
 
-  const params = new URLSearchParams(location.search);
-  const key = params.get("key") || localStorage.getItem("vcai:lastKey");
+    // Populate KV
+    function set(id, val){ const el = document.getElementById(id); if (el) el.textContent = val || "—"; }
+    set("kv-key", current.key);
+    set("kv-compare", current.compare || "—");
+    set("kv-coach", current.coach);
+    set("kv-height", current.height);
+    set("kv-name", current.name);
+    set("kv-email", current.email);
+    set("kv-hand", current.hand);
+    set("kv-eye", current.eye);
+    set("kv-hcp", current.hcp);
 
-  if (!key) { log("No key provided and no previous upload found."); $("#meta").textContent = "(no video)"; return; }
+    // Baseline storage in this browser
+    const LSKEY = "vcai.baseline";
+    function getBaseline(){
+      try { return JSON.parse(localStorage.getItem(LSKEY) || "null"); } catch(_){ return null; }
+    }
+    function setBaseline(obj){ localStorage.setItem(LSKEY, JSON.stringify(obj)); }
+    function clearBaseline(){ localStorage.removeItem(LSKEY); }
 
-  try {
-    localStorage.setItem("vcai:lastKey", key);
-    $("#meta").textContent = "Object: " + key;
+    const setBtn = document.getElementById("vcai-set-baseline");
+    const cmpBtn = document.getElementById("vcai-compare");
+    const clrBtn = document.getElementById("vcai-clear");
+    const infoEl = document.getElementById("vcai-base-info");
+    const expectEl = document.getElementById("vcai-expect");
 
-    const r = await fetch("/api/get-url?key=" + encodeURIComponent(key));
-    if (!r.ok) throw new Error("get-url failed " + r.status);
-    const { url } = await r.json();
+    function refreshUI(){
+      const base = getBaseline();
+      if (base && base.key){
+        cmpBtn.disabled = false;
+        clrBtn.disabled = false;
+        infoEl.textContent = `Baseline: ${base.label || base.key}`;
+      } else {
+        cmpBtn.disabled = true;
+        clrBtn.disabled = true;
+        infoEl.textContent = "(no baseline yet)";
+      }
+    }
 
-    $("#video").src = url;
-    log("Loaded video URL.");
-  } catch (e) {
-    log("Error: " + (e.message || e));
-  }
-})();
-</script>
+    // Auto-set when arriving with ?baseline=1
+    if (current.key && current.baselineFlag) {
+      const label = current.name ? `${current.name} • ${current.key}` : current.key;
+      setBaseline({ key: current.key, label, meta: current });
+    }
+
+    setBtn.addEventListener("click", () => {
+      if (!current.key) return alert("No report key in URL.");
+      const label = current.name ? `${current.name} • ${current.key}` : current.key;
+      setBaseline({ key: current.key, label, meta: current });
+      refreshUI();
+      alert("Baseline saved in this browser.");
+    });
+
+    clrBtn.addEventListener("click", () => {
+      clearBaseline();
+      refreshUI();
+    });
+
+    cmpBtn.addEventListener("click", () => {
+      const base = getBaseline();
+      if (!base || !base.key) return;
+      const next = new URLSearchParams(location.search);
+      next.set("compare", base.key);
+      location.href = `${location.pathname}?${next.toString()}`;
+    });
+
+    // “What to expect” card
+    function whatToExpect(coach, hand, eye){
+      const lines = [];
+      lines.push("After a swing change, expect a short adjustment period—this is normal.");
+      lines.push("• More arm rotation → tends to pull / start left (RH golfer).");
+      lines.push("• Faster body rotation → shallower AoA → more thin or ground balls early.");
+      lines.push("• New release pattern → face control can wobble for a few sessions.");
+
+      let plan = "";
+      switch (coach) {
+        case "direct":
+          plan = "Plan: 25 purposeful reps — 10 slow-motion, 10 pause at P5, 5 at game speed. Judge only start line & strike; ignore distance.";
+          break;
+        case "grumpy":
+          plan = "Plan: 3×10 with checkpoints. Film rep #1 & #10 each set. If strike degrades, slow down and reset feels.";
+          break;
+        case "tech":
+          plan = "Plan: Track start-line dispersion (±°) & low-point ahead of ball. If low-point trails, add 5 rehearsals with lead-side pressure at P6.";
+          break;
+        default:
+          plan = "Plan: Be kind to yourself. Rehearse the new feel, then 3×8 balls focusing on clean contact and consistent start line.";
+      }
+      lines.push("");
+      lines.push(plan);
+      return lines.join("\n");
+    }
+
+    const expectTxt = whatToExpect(current.coach, current.hand, current.eye);
+    if (expectTxt) {
+      expectEl.hidden = false;
+      expectEl.textContent = expectTxt;
+    }
+
+    refreshUI();
+  })();
+  </script>
 </body>
 </html>
