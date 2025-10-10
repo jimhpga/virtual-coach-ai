@@ -1,4 +1,3 @@
-﻿// public/upload.client.js (v10)
 (function () {
   const $ = (s) => document.querySelector(s);
   const fileInput = $("#fileInput");
@@ -6,55 +5,51 @@
   const btn = $("#uploadBtn");
   const logEl = $("#log");
 
-  const fields = {
-    name:   $("#name"),
-    email:  $("#email"),
-    hcap:   $("#handicap"),
-    handed: $("#handed"),
-    eye:    $("#eye"),
-    height: $("#height")
-  };
+  const coachEl = $("#coachStyle");
+  const hEl     = $("#heightInches");
+  const nameEl  = $("#name");
+  const emailEl = $("#email");
+  const handEl  = $("#handed");
+  const eyeEl   = $("#eye");
 
   const log  = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
-  const busy = (on) => { btn.disabled = on; fileInput.disabled = on; Object.values(fields).forEach(el => el && (el.disabled = on)); };
+  const busy = (on) => { btn.disabled = on; fileInput.disabled = on; };
 
-  log("[upload v10] client JS loaded");
+  log("[upload v11] client JS loaded");
 
   fileInput?.addEventListener("change", (e) => {
     const f = e.target.files?.[0];
-    fileLabel.textContent = f ? `${f.name}` : "(no file)";
+    fileLabel.textContent = f ? `${f.name} (${f.type || "video"}), ${f.size} bytes` : "(no file)";
     if (f) log("Selected: " + f.name);
   });
 
-  function readForm() {
+  function getForm() {
     return {
-      name:   (fields.name?.value || "").trim(),
-      email:  (fields.email?.value || "").trim(),
-      hcap:   (fields.hcap?.value || "").trim(),
-      handed: (fields.handed?.value || "").trim(),
-      eye:    (fields.eye?.value || "").trim(),
-      height: (fields.height?.value || "").trim()
+      coach: coachEl?.value || "supportive",
+      height: hEl?.value?.trim() || "",
+      name: nameEl?.value?.trim() || "",
+      email: emailEl?.value?.trim() || "",
+      hand: handEl?.value || "Right",
+      eye: eyeEl?.value || "Unknown",
     };
   }
 
-  function validateHeight(h) {
-    if (!h) return "Height is required.";
-    const n = Number(h);
-    if (!Number.isFinite(n)) return "Height must be a number.";
-    if (n < 48 || n > 84) return "Height should be between 48 and 84 inches.";
-    return "";
+  function validate() {
+    const f = getForm();
+    const heightNum = Number(f.height);
+    if (!f.height || Number.isNaN(heightNum) || heightNum < 48 || heightNum > 86) {
+      throw new Error("Please enter your height in inches (48–86).");
+    }
+    const file = fileInput?.files?.[0];
+    if (!file) throw new Error("Pick a video first.");
+    return { f, file };
   }
 
   btn?.addEventListener("click", async () => {
-    const file = fileInput?.files?.[0];
-    if (!file) { log("Pick a video first."); return; }
-
-    const data = readForm();
-    const heightError = validateHeight(data.height);
-    if (heightError) { log("Error: " + heightError); return; }
-
     busy(true);
     try {
+      const { f, file } = validate();
+
       log("Requesting presign…");
       const pre = await fetch("/api/presign", {
         method: "POST",
@@ -62,7 +57,7 @@
         body: JSON.stringify({ filename: file.name, type: file.type || "video/mp4", size: file.size }),
       });
       if (!pre.ok) throw new Error("presign failed " + pre.status);
-      const { url, fields, key } = await pre.json();
+      const { url, fields, key, viewerUrl } = await pre.json();
       if (!url || !fields || !key) throw new Error("presign response malformed");
 
       log("Uploading to S3…");
@@ -73,21 +68,20 @@
       if (!up.ok) throw new Error("S3 upload failed " + up.status);
 
       log("Upload complete.");
-
-      // Pass golfer details to the viewer
-      const q = new URLSearchParams({
+      const params = new URLSearchParams({
         key,
-        name: data.name,
-        email: data.email,
-        handicap: data.hcap,
-        hand: data.handed,
-        eye: data.eye,
-        height: data.height
+        coach: f.coach,
+        h: f.height,
+        name: f.name,
+        email: f.email,
+        hand: f.hand,
+        eye: f.eye
       });
-      const reportUrl = `/report.html?${q.toString()}`;
+      const report = viewerUrl || `/report.html?${params.toString()}`;
+      const finalUrl = viewerUrl ? `${viewerUrl}&${params.toString()}` : report;
 
       log("Opening report view…");
-      location.assign(reportUrl);
+      location.assign(finalUrl);
     } catch (e) {
       log("Error: " + (e?.message || e));
       busy(false);
