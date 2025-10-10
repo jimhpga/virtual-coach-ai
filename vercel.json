@@ -1,12 +1,6 @@
-{
-  "version": 2,
-  "routes": [
-    { "src": "^/api/(.*)$", "dest": "/api/$1" },
-
-    { "src": "^/upload/?$", "dest": "/upload.html" },
-    { "src": "^/(report|pricing|contact|about|login|analyze|reports?)/?$", "dest": "/$1.html" },
-
-    { "src": "^/$", "dest": "/index.html" },
-    { "src": "^/(.*)$", "dest": "/$1" }
+﻿{
+  "rewrites": [
+    { "source": "/upload", "destination": "/upload.html" },
+    { "source": "/report", "destination": "/report.html" }
   ]
 }
