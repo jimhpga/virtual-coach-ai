@@ -1,6 +1,0 @@
-﻿{
-  "rewrites": [
-    { "source": "/upload", "destination": "/upload.html" },
-    { "source": "/report", "destination": "/report.html" }
-  ]
-}
