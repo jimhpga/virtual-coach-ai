@@ -1,3 +1,4 @@
+// upload.client.js  (v12)
 (function () {
   const $ = (s) => document.querySelector(s);
   const fileInput = $("#fileInput");
@@ -9,13 +10,15 @@
   const hEl     = $("#heightInches");
   const nameEl  = $("#name");
   const emailEl = $("#email");
+  const hcapEl  = $("#handicap");
   const handEl  = $("#handed");
   const eyeEl   = $("#eye");
+  const baseEl  = $("#baseline");
 
   const log  = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
   const busy = (on) => { btn.disabled = on; fileInput.disabled = on; };
 
-  log("[upload v11] client JS loaded");
+  log("[upload v12] client JS loaded");
 
   fileInput?.addEventListener("change", (e) => {
     const f = e.target.files?.[0];
@@ -29,8 +32,10 @@
       height: hEl?.value?.trim() || "",
       name: nameEl?.value?.trim() || "",
       email: emailEl?.value?.trim() || "",
+      handicap: hcapEl?.value?.trim() || "",
       hand: handEl?.value || "Right",
       eye: eyeEl?.value || "Unknown",
+      baseline: !!baseEl?.checked
     };
   }
 
@@ -68,6 +73,7 @@
       if (!up.ok) throw new Error("S3 upload failed " + up.status);
 
       log("Upload complete.");
+
       const params = new URLSearchParams({
         key,
         coach: f.coach,
@@ -77,9 +83,11 @@
         hand: f.hand,
         eye: f.eye
       });
-      const report = viewerUrl || `/report.html?${params.toString()}`;
-      const finalUrl = viewerUrl ? `${viewerUrl}&${params.toString()}` : report;
+      if (f.handicap) params.set("hcp", f.handicap);
+      if (f.baseline) params.set("baseline", "1");
 
+      const baseUrl = viewerUrl || "/report.html";
+      const finalUrl = `${baseUrl}?${params.toString()}`;
       log("Opening report view…");
       location.assign(finalUrl);
     } catch (e) {
