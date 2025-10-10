@@ -1,0 +1,90 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Coach AI — Upload</title>
+  <link rel="icon" href="/virtualcoach-logo.png" />
+  <style>
+    :root{ --panel:rgba(10,18,24,.35); --line:rgba(255,255,255,.12); --text:#ecf3f7 }
+    body{margin:0;background:#071c10;color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
+    .wrap{width:min(1080px,92%);margin:28px auto}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+    .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .row{display:flex;flex-wrap:wrap;gap:12px}
+    .col{display:flex;flex-direction:column;gap:6px;min-width:220px;flex:1}
+    label{font-size:13px;opacity:.9}
+    input,select{padding:10px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff}
+    .log{white-space:pre-wrap;font-family:ui-monospace,Menlo,Consolas,monospace;background:#0c1116;color:#a7f3d0;border:1px solid var(--line);border-radius:12px;padding:12px;min-height:120px;margin-top:12px}
+    .pill{display:inline-block;font-size:12px;color:#cfe0e6;margin-left:10px}
+    .req{color:#ffb4b4;font-weight:600}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <h3>Upload → Report → Improve</h3>
+      <p>Select a face-on or down-the-line video. We’ll analyze P1–P9 and generate a shareable report.</p>
+
+      <!-- Golfer details -->
+      <div class="row" style="margin:12px 0 16px;">
+        <div class="col">
+          <label for="name">Name (optional)</label>
+          <input id="name" placeholder="e.g., Jordan Smith" />
+        </div>
+        <div class="col">
+          <label for="email">Email (optional)</label>
+          <input id="email" type="email" placeholder="you@example.com" />
+        </div>
+        <div class="col">
+          <label for="handicap">Handicap (optional)</label>
+          <input id="handicap" type="number" min="-10" max="54" step="0.1" placeholder="e.g., 8.2" />
+        </div>
+      </div>
+
+      <div class="row" style="margin:0 0 16px;">
+        <div class="col">
+          <label for="handed">Hand (optional)</label>
+          <select id="handed">
+            <option value="">— choose —</option>
+            <option value="R">Right</option>
+            <option value="L">Left</option>
+          </select>
+        </div>
+        <div class="col">
+          <label for="eye">Eye dominance (optional)</label>
+          <select id="eye">
+            <option value="">— choose —</option>
+            <option value="L">Left</option>
+            <option value="R">Right</option>
+            <option value="U">Don’t know</option>
+          </select>
+        </div>
+        <div class="col">
+          <label for="height">Height in inches <span class="req">*</span></label>
+          <input id="height" type="number" min="48" max="84" placeholder="e.g., 70 (5'10&quot;)" required />
+        </div>
+      </div>
+
+      <!-- File + action -->
+      <div style="display:flex;align-items:center;gap:10px;margin:10px 0 12px;">
+        <input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v" class="btn" />
+        <span id="fileLabel" class="pill">(no file)</span>
+        <button id="uploadBtn" class="btn">Upload &amp; Generate Report</button>
+      </div>
+
+      <div id="log" class="log">Ready.</div>
+    </section>
+  </main>
+
+  <!-- must match the file in /public -->
+  <script src="/upload.client.js?v=10" defer></script>
+</body>
+</html>
+
+
+
+
+
+
