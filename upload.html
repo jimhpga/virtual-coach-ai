@@ -8,148 +8,128 @@
   <link rel="icon" href="/virtualcoach-logo.png" />
   <style>
     :root{
-      --bg: #061a10;
-      --fg: #ecf3f7;
-      --muted:#cbd5ce;
+      --bg: #071c10;
       --card: rgba(0,0,0,.45);
-      --border: rgba(255,255,255,.10);
+      --border: rgba(255,255,255,.12);
+      --ink: #ecf3f7;
+      --muted:#cfe0e6;
       --accent:#1f6f3e;
-      --input-bg: rgba(255,255,255,.06);
-      --input-bd: rgba(255,255,255,.18);
     }
-    *{ box-sizing: border-box; }
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin:0; font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-      color:var(--fg);
-      min-height:100svh;
-      background: linear-gradient(180deg, rgba(5,14,9,1) 0%, rgba(7,28,16,1) 50%, rgba(6,20,12,1) 100%),
-                  url("/virtualcoach-bg.jpg") center/cover no-repeat fixed;
-      background-blend-mode: overlay;
+      margin:0; color:var(--ink); font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+      background:
+        linear-gradient(180deg, rgba(7,28,16,.8), rgba(7,28,16,.95)),
+        url("/golf-course.jpg") center/cover no-repeat fixed;
+      /* If you don’t have /golf-course.jpg yet, it’ll just show the gradient. */
     }
-    .wrap{ width:min(1100px,92%); margin:40px auto; }
-    .upload-card{
-      max-width: 980px; margin: 2rem auto; padding: 1.25rem 1.5rem;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      backdrop-filter: blur(4px);
+    .wrap{width:min(1080px,92%);margin:40px auto}
+    .card{
+      background:var(--card); border:1px solid var(--border);
+      border-radius:16px; padding:18px; backdrop-filter: blur(4px);
       box-shadow: 0 10px 30px rgba(0,0,0,.35);
     }
-    h1{ margin:0 0 .25rem 0; font-weight:700; letter-spacing:.2px; }
-    .sub{ color:var(--muted); margin:0 0 1rem 0; }
-
+    h1,h2,h3{margin:0 0 .5rem}
     .grid{
-      display:grid; gap:.8rem;
+      display:grid; gap:10px;
       grid-template-columns: repeat(12, 1fr);
     }
-    .col-12{ grid-column: span 12; }
-    .col-6{ grid-column: span 6; }
-    .row{
-      display:flex; flex-wrap:wrap; gap:.6rem .8rem; align-items:center;
-    }
-    label{ font-size:.92rem; color:#dfe7df; display:block; margin:.25rem 0 .25rem; }
+    .col-12{grid-column: span 12}
+    .col-6{grid-column: span 6}
+    .col-4{grid-column: span 4}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+
+    label{display:block; font-size:13px; color:var(--muted); margin-bottom:.25rem}
     input[type="text"], input[type="email"], input[type="number"], select, textarea{
-      width:100%; padding:.6rem .7rem; border-radius:10px;
-      background: var(--input-bg); border:1px solid var(--input-bd); color:#f3f6f4;
-      outline:none;
+      width:100%; padding:.6rem .7rem; border-radius:10px; outline:none;
+      background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.18); color:#f3f6f4;
     }
-    input::placeholder{ color:#cfd7d1; }
-
+    input::placeholder{color:#cbd5ce}
     .btn{
-      border:1px solid var(--input-bd);
-      background: rgba(255,255,255,.10);
-      color:#fff; padding:.65rem .9rem;
-      border-radius:10px; cursor:pointer;
+      border:1px solid var(--border); background:rgba(255,255,255,.10); color:#fff;
+      padding:.65rem .9rem; border-radius:10px; cursor:pointer;
     }
-    .btn[disabled]{ opacity:.6; cursor:not-allowed; }
-    .btn-primary{ background:var(--accent); border-color:var(--input-bd); }
-    .btn-primary:hover{ filter:brightness(1.05); }
-
+    .btn-primary{ background:var(--accent); border:1px solid rgba(255,255,255,.18); }
+    .btn:hover{ filter:brightness(1.05); }
+    .pill{display:inline-block;font-size:12px;color:#cfe0e6;margin-left:10px}
     .log{
-      white-space:pre-wrap; font-family:ui-monospace, Menlo, Consolas, monospace;
-      background:#0c1116; color:#a7f3d0; border:1px solid var(--border);
-      border-radius:12px; padding:12px; min-height:120px; margin-top:10px;
+      white-space:pre-wrap; font-family:ui-monospace,Menlo,Consolas,monospace;
+      background:#0c1116; color:#a7f3d0; border:1px solid var(--border); border-radius:12px;
+      padding:12px; min-height:120px; margin-top:10px; max-height:260px; overflow:auto;
     }
-
-    details{ border:1px dashed var(--border); border-radius:12px; padding:.5rem .8rem; }
-    summary{ cursor:pointer; color:#e1eee7; }
-
-    @media (max-width: 720px){
-      .col-6{ grid-column: span 12; }
-    }
+    .upload-card{max-width: 980px; margin: 2rem auto;}
   </style>
 </head>
 <body>
   <main class="wrap">
-    <section class="upload-card">
-      <h1>Upload → Report → Improve</h1>
-      <p class="sub">Select a face-on or down-the-line video. We’ll analyze P1–P9 and generate a shareable report.</p>
+    <section class="card upload-card">
+      <h3>Upload → Report → Improve</h3>
+      <p class="muted">Select a face-on or down-the-line video. We’ll analyze P1–P9 and generate a shareable report.</p>
 
-      <div class="grid" style="margin:.5rem 0 1rem;">
-        <div class="col-12">
-          <label>Video
-            <input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v,.mkv" />
-          </label>
-          <div id="fileLabel" class="sub">(no file)</div>
+      <div class="row" style="margin:10px 0 12px;">
+        <input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v,.mkv" class="btn" />
+        <span id="fileLabel" class="pill">(no file)</span>
+        <button id="uploadBtn" class="btn btn-primary">Upload &amp; Generate Report</button>
+      </div>
+
+      <div class="grid" style="margin-top:.75rem;">
+        <div class="col-6">
+          <label for="name">Golfer name (optional)</label>
+          <input id="name" type="text" placeholder="Jordan Sample" />
+        </div>
+        <div class="col-6">
+          <label for="email">Email (optional)</label>
+          <input id="email" type="email" placeholder="you@example.com" />
         </div>
 
-        <div class="col-6">
-          <label>Coach style</label>
+        <div class="col-4">
+          <label for="handicap">Handicap (optional)</label>
+          <input id="handicap" type="number" min="-10" max="54" step="1" placeholder="e.g. 14" />
+        </div>
+        <div class="col-4">
+          <label for="heightInches">Height in inches (required)</label>
+          <input id="heightInches" type="number" min="48" max="86" step="1" placeholder="e.g. 70" required />
+        </div>
+        <div class="col-4">
+          <label for="coachStyle">Teacher voice</label>
           <select id="coachStyle">
             <option value="supportive">Supportive</option>
             <option value="direct">Direct</option>
-            <option value="grumpy">Grumpy (tough love)</option>
-            <option value="tech">Tech-Nerd</option>
+            <option value="grumpy">Grumpy</option>
+            <option value="tech">Tech-y / Data-driven</option>
           </select>
         </div>
 
-        <div class="col-6">
-          <label>Height (inches) — required</label>
-          <input id="heightInches" type="number" min="48" max="86" placeholder="e.g., 70" required />
+        <div class="col-4">
+          <label for="handed">Handed</label>
+          <select id="handed">
+            <option>Right</option>
+            <option>Left</option>
+          </select>
+        </div>
+        <div class="col-4">
+          <label for="eye">Eye dominance</label>
+          <select id="eye">
+            <option>Unknown</option>
+            <option>Left</option>
+            <option>Right</option>
+          </select>
         </div>
 
-        <div class="col-12">
-          <details>
-            <summary>Optional player info</summary>
-            <div class="grid" style="margin-top:.6rem;">
-              <div class="col-6">
-                <label>Name <input id="name" type="text" placeholder="optional"></label>
-              </div>
-              <div class="col-6">
-                <label>Email <input id="email" type="email" placeholder="optional"></label>
-              </div>
-              <div class="col-6">
-                <label>Handedness
-                  <select id="handed">
-                    <option value="Right">Right</option>
-                    <option value="Left">Left</option>
-                  </select>
-                </label>
-              </div>
-              <div class="col-6">
-                <label>Eye dominance
-                  <select id="eye">
-                    <option value="Right">Right</option>
-                    <option value="Left">Left</option>
-                    <option value="Unknown">Don’t know</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-          </details>
-        </div>
-
-        <div class="col-12 row" style="margin-top:.6rem;">
-          <button id="uploadBtn" class="btn btn-primary">Upload & Generate Report</button>
-        </div>
-
-        <div class="col-12">
-          <div id="log" class="log">Ready.</div>
+        <div class="col-12" style="margin-top:.25rem;">
+          <label style="display:flex;gap:.5rem;align-items:center;">
+            <input id="baseline" type="checkbox" />
+            Set this upload as my baseline swing
+          </label>
         </div>
       </div>
+
+      <div id="log" class="log">Ready.</div>
     </section>
   </main>
 
-  <script src="/upload.client.js?v=11" defer></script>
+  <!-- must match the file in / (root) -->
+  <script src="/upload.client.js?v=12" defer></script>
 </body>
 </html>
