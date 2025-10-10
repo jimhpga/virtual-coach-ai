@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -20,6 +20,47 @@
     .pill{display:inline-block;font-size:12px;color:#cfe0e6;margin-left:10px}
     .req{color:#ffb4b4;font-weight:600}
   </style>
+<link rel="preload" as="image" href="/bg.jpg">
+<style>
+  :root { --course-bg: url('/bg.jpg'); } /* change path if your report uses a different image */
+
+  html, body { height: 100%; }
+  body{
+    margin: 0;
+    color: #e9efea;
+    background-image:
+      linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.55)),
+      var(--course-bg);
+    background-size: cover;
+    background-position: center 35%;
+    background-attachment: fixed;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+  }
+
+  /* optional card wrapper if you want a glass panel */
+  .upload-card{
+    max-width: 980px;
+    margin: 2rem auto;
+    padding: 1.25rem 1.5rem;
+    background: rgba(0, 0, 0, .45);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+
+  /* nicer inputs on dark background */
+  input[type="text"], input[type="email"], input[type="number"], select, textarea{
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.18);
+    color: #f3f6f4;
+  }
+  input::placeholder{ color: #cfd7d1; }
+  .btn-primary{ background:#1f6f3e; border:1px solid rgba(255,255,255,.18); color:#fff; }
+  .btn-primary:hover{ filter: brightness(1.05); }
+  .muted{ color:#cbd5ce; }
+  .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+</style>
 </head>
 <body>
   <main class="wrap">
