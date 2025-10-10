@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/*.js": { "runtime": "nodejs20.x", "regions": ["iad1"] }
+    "api/*.js": { "runtime": "nodejs20.x" }
   },
   "rewrites": [
     { "source": "/upload", "destination": "/upload.html" },
