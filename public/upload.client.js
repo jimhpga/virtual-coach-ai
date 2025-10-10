@@ -1,4 +1,4 @@
-// public/upload.client.js  (v10)
+﻿// public/upload.client.js (v10)
 (function () {
   const $ = (s) => document.querySelector(s);
   const fileInput = $("#fileInput");
@@ -6,12 +6,17 @@
   const btn = $("#uploadBtn");
   const logEl = $("#log");
 
-  // golfer fields
-  const gName = $("#gName"), gEmail = $("#gEmail"), gHandicap = $("#gHandicap");
-  const gHand = $("#gHand"), gEye = $("#gEye"), gHeight = $("#gHeight");
+  const fields = {
+    name:   $("#name"),
+    email:  $("#email"),
+    hcap:   $("#handicap"),
+    handed: $("#handed"),
+    eye:    $("#eye"),
+    height: $("#height")
+  };
 
   const log  = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
-  const busy = (on) => { btn.disabled = on; fileInput.disabled = on; };
+  const busy = (on) => { btn.disabled = on; fileInput.disabled = on; Object.values(fields).forEach(el => el && (el.disabled = on)); };
 
   log("[upload v10] client JS loaded");
 
@@ -21,23 +26,32 @@
     if (f) log("Selected: " + f.name);
   });
 
+  function readForm() {
+    return {
+      name:   (fields.name?.value || "").trim(),
+      email:  (fields.email?.value || "").trim(),
+      hcap:   (fields.hcap?.value || "").trim(),
+      handed: (fields.handed?.value || "").trim(),
+      eye:    (fields.eye?.value || "").trim(),
+      height: (fields.height?.value || "").trim()
+    };
+  }
+
+  function validateHeight(h) {
+    if (!h) return "Height is required.";
+    const n = Number(h);
+    if (!Number.isFinite(n)) return "Height must be a number.";
+    if (n < 48 || n > 84) return "Height should be between 48 and 84 inches.";
+    return "";
+  }
+
   btn?.addEventListener("click", async () => {
     const file = fileInput?.files?.[0];
     if (!file) { log("Pick a video first."); return; }
 
-    // height is required
-    const height = (gHeight?.value || "").trim();
-    if (!height) { log("Please enter your height (required)."); gHeight?.focus(); return; }
-
-    // collect meta (optional fields allowed to be blank)
-    const meta = {
-      name: (gName?.value || "").trim(),
-      email: (gEmail?.value || "").trim(),
-      handicap: (gHandicap?.value || "").trim(),
-      hand: (gHand?.value || "").trim(),      // "R" | "L" | ""
-      eye: (gEye?.value || "").trim(),        // "R" | "L" | "U" | ""
-      height: height                          // required
-    };
+    const data = readForm();
+    const heightError = validateHeight(data.height);
+    if (heightError) { log("Error: " + heightError); return; }
 
     busy(true);
     try {
@@ -45,7 +59,7 @@
       const pre = await fetch("/api/presign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name, type: file.type || "video/mp4", size: file.size })
+        body: JSON.stringify({ filename: file.name, type: file.type || "video/mp4", size: file.size }),
       });
       if (!pre.ok) throw new Error("presign failed " + pre.status);
       const { url, fields, key } = await pre.json();
@@ -59,9 +73,19 @@
       if (!up.ok) throw new Error("S3 upload failed " + up.status);
 
       log("Upload complete.");
-      // Pass details to the report via query string
-      const q = new URLSearchParams({ key, ...meta });
+
+      // Pass golfer details to the viewer
+      const q = new URLSearchParams({
+        key,
+        name: data.name,
+        email: data.email,
+        handicap: data.hcap,
+        hand: data.handed,
+        eye: data.eye,
+        height: data.height
+      });
       const reportUrl = `/report.html?${q.toString()}`;
+
       log("Opening report view…");
       location.assign(reportUrl);
     } catch (e) {
