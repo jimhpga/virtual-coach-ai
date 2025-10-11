@@ -185,3 +185,112 @@
   </script>
 </body>
 </html>
+<!-- pending badge -->
+<span id="pending-note" style="display:none;margin-left:8px;padding:2px 8px;border-radius:12px;background:#645; color:#fff; font-size:.85rem;">
+  Loading… analysis pending
+</span>
+
+<!-- value placeholders (put these where the cards live) -->
+<div id="sec-pos" style="display:none"></div>
+<div id="sec-swing" style="display:none"></div>
+<div id="sec-power" style="display:none"></div>
+<ul id="list-fundamentals"></ul>
+<ul id="list-power-errors"></ul>
+<ul id="list-quick-fixes"></ul>
+<ul id="list-faults"></ul>
+<ul id="list-drills"></ul>
+<ul id="list-expectations"></ul>
+<div id="baseline-cta" style="display:none;margin-top:6px;">
+  <em>Tip:</em> Set a baseline swing to compare future rounds.
+</div>
+<script>
+(function () {
+  const $ = s => document.querySelector(s);
+  const ui = {
+    badgeSwings: $('#badge-swings'),
+    pending: $('#pending-note')
+  };
+  const ids = {
+    pos: '#sec-pos', swing: '#sec-swing', power: '#sec-power',
+    fundamentals: '#list-fundamentals', powerErrors: '#list-power-errors',
+    quickFixes: '#list-quick-fixes', faults: '#list-faults',
+    drills: '#list-drills', expectations: '#list-expectations', baselineCta: '#baseline-cta'
+  };
+
+  function show(el, yes = true) {
+    const node = typeof el === 'string' ? $(el) : el;
+    if (!node) return;
+    node.style.display = yes ? '' : 'none';
+  }
+  function text(el, t) {
+    const node = typeof el === 'string' ? $(el) : el;
+    if (!node) return;
+    node.textContent = t;
+    show(node, true);
+  }
+  function fillList(sel, arr = []) {
+    const node = $(sel);
+    if (!node) return;
+    node.innerHTML = arr.map(i => `<li>${i}</li>`).join('');
+  }
+
+  const params = new URLSearchParams(location.search);
+  const key = params.get('key');
+  const demo = params.get('demo');
+
+  async function fetchReport() {
+    const url = demo === '1' ? '/api/report?demo=1'
+                             : `/api/report?key=${encodeURIComponent(key)}`;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`Report API ${res.status}`);
+    return await res.json();
+  }
+
+  function render(r) {
+    if (ui.pending) ui.pending.style.display = 'none';
+    if (ui.badgeSwings && r?.meta?.swings) ui.badgeSwings.textContent = `Swings: ${r.meta.swings}`;
+
+    text(ids.pos, `${r?.scores?.positionConsistency ?? '--'} / 100`);
+    text(ids.swing, `${r?.scores?.swingConsistency ?? '--'} / 100`);
+    text(ids.power, `${r?.scores?.powerScore ?? '--'} / 100`);
+
+    fillList(ids.fundamentals, r.fundamentals);
+    fillList(ids.powerErrors, r.powerErrors);
+    fillList(ids.quickFixes, r.quickFixes);
+    fillList(ids.faults, r.faults);
+    fillList(ids.drills, r.drills);
+    fillList(ids.expectations, r.expectations);
+
+    show(ids.baselineCta, !(r?.baseline?.hasBaseline));
+  }
+
+  async function init() {
+    if (!key && demo !== '1') {
+      alert('Missing ?key=… in the URL');
+      return;
+    }
+    if (ui.pending) ui.pending.style.display = 'inline-block';
+
+    const start = Date.now();
+    while (true) {
+      try {
+        const data = await fetchReport();
+        if (data) { render(data); return; }
+      } catch (e) {
+        console.warn(e);
+        if (ui.pending) ui.pending.style.display = 'none';
+        alert('Problem loading the report.');
+        return;
+      }
+      if (Date.now() - start > 60000) {
+        if (ui.pending) ui.pending.style.display = 'none';
+        alert('Analysis still processing. Check back soon.');
+        return;
+      }
+      await new Promise(r => setTimeout(r, 5000));
+    }
+  }
+  init();
+})();
+</script>
