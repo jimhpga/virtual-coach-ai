@@ -1,296 +1,155 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Coach AI — Report</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Swing Report | Virtual Coach AI</title>
+  <link rel="icon" href="/favicon.ico"/>
   <style>
     :root{
-      --bg: #071c10; --ink:#ecf3f7; --muted:#cfe0e6; --border:rgba(255,255,255,.12);
+      --bg:#05180f;
+      --card:rgba(0,0,0,.45);
+      --stroke:rgba(255,255,255,.12);
+      --text:#f3f6f4; --muted:#cbd5ce;
+      --accent:#1f6f3e; --accent-2:#2b8c53; --warn:#b08900;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:#071c10;color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;}
-    .wrap{width:min(1100px,94%);margin:18px auto}
-    .card{background:rgba(10,18,24,.35);border:1px solid var(--border);border-radius:14px;padding:16px}
-    .vcai-toolbar{
-      position: sticky; top: 0; z-index: 10;
-      display:flex; gap:.5rem; align-items:center; padding:.6rem .75rem;
-      background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
-      border-bottom:1px solid var(--border);
-      color:#eaf3ee; font:14px/1.4 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--text); background:var(--bg);
+      font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background-image: radial-gradient(1200px 600px at 10% -20%, rgba(255,255,255,.05), transparent 60%),
+                       radial-gradient(1200px 600px at 110% -20%, rgba(255,255,255,.05), transparent 60%);
     }
-    .btn{
-      border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.08);
-      color:#fff; padding:.45rem .6rem; border-radius:10px; cursor:pointer;
+    .wrap{max-width:1100px;margin:28px auto;padding:0 16px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .card{
+      background:var(--card); border:1px solid var(--stroke); border-radius:14px;
+      box-shadow:0 12px 32px rgba(0,0,0,.35); backdrop-filter:blur(4px);
+      padding:16px 18px; margin-bottom:12px;
     }
-    .btn:hover{ filter:brightness(1.05); }
-    .vcai-muted{ color:#cbd5ce; }
-    .vcai-expect{
-      margin:12px 0; padding:.9rem; border-radius:12px;
-      border:1px solid var(--border); background:rgba(0,0,0,.35);
-      white-space:pre-wrap;
+    .title{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin:0 0 8px}
+    h1{font-size:20px;margin:0}
+    .muted{color:var(--muted)}
+    select,input[type="text"],button{
+      border:1px solid rgba(255,255,255,.18); border-radius:10px; padding:8px 10px;
+      color:var(--text); background:rgba(255,255,255,.06); outline:none;
     }
-    .kv{display:grid;grid-template-columns: 160px 1fr; gap:6px 14px; margin-top:8px;}
-    .kv .k{color:#cbd5ce}
-    .kv .v{color:#f2f7f4;overflow-wrap:anywhere}
-    .hint{font-size:12px;color:#cbd5ce;margin-top:6px}
+    button.btn{background:var(--accent);color:#fff;cursor:pointer}
+    button.btn:hover{filter:brightness(1.05)}
+    button.ghost{background:transparent}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media (max-width:920px){ .grid{grid-template-columns:1fr} }
+    .section h3{margin:0 0 6px;font-size:16px}
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;border:1px solid var(--stroke);
+      border-radius:999px;padding:6px 10px;margin:4px 6px 0 0;background:rgba(255,255,255,.06)
+    }
+    .progress{height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+    .bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .pending{padding:12px;border:1px dashed var(--stroke);border-radius:12px}
+    .pill{border:1px solid var(--stroke);border-radius:999px;padding:6px 10px}
   </style>
 </head>
 <body>
-  <div class="vcai-toolbar" id="vcai-baseline-toolbar">
-    <button class="btn" id="vcai-set-baseline">Set as Baseline</button>
-    <button class="btn" id="vcai-compare" disabled>Compare to Baseline</button>
-    <button class="btn" id="vcai-clear" disabled>Clear Baseline</button>
-    <span class="vcai-muted" id="vcai-base-info">(no baseline yet)</span>
+  <div class="wrap">
+    <div class="title">
+      <h1>Virtual Coach AI — Swing Report</h1>
+      <div class="row">
+        <a class="pill" href="/upload.html">Upload another</a>
+        <a class="pill" id="share" href="#">Copy share link</a>
+      </div>
+    </div>
+
+    <div id="meta" class="muted" style="margin-bottom:10px;"></div>
+
+    <div class="card">
+      <div class="row" style="gap:12px;align-items:center;">
+        <div>
+          <label class="muted" for="teacher">Teacher voice</label><br/>
+          <select id="teacher">
+            <option value="nice">Nice & encouraging</option>
+            <option value="oldschool">Old-school coach</option>
+            <option value="supportive">Calm & supportive</option>
+          </select>
+        </div>
+        <div>
+          <label class="muted" for="baseline">Baseline compare</label><br/>
+          <select id="baseline"></select>
+        </div>
+        <div class="row">
+          <button id="setBaseline" class="btn">Set current as baseline</button>
+          <button id="clearBaseline" class="ghost">Clear baseline</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="pending" class="card pending" style="display:none"></div>
+
+    <div id="report" style="display:none">
+      <div class="grid">
+        <div class="card section" id="summary">
+          <h3>Power Score & Consistency</h3>
+          <div class="row" style="gap:20px">
+            <div style="min-width:220px">
+              <div class="muted small">Power Score</div>
+              <div class="progress" title="Power Score">
+                <div class="bar" id="pwrBar" style="width:0%"></div>
+              </div>
+              <div class="mono" id="pwrLbl">—</div>
+            </div>
+            <div style="min-width:220px">
+              <div class="muted small">Consistency</div>
+              <div class="progress" title="Consistency">
+                <div class="bar" id="consBar" style="width:0%"></div>
+              </div>
+              <div class="mono" id="consLbl">—</div>
+            </div>
+          </div>
+
+          <div id="deltas" style="margin-top:10px"></div>
+        </div>
+
+        <div class="card section" id="top3">
+          <h3>Top 3 Fundamentals</h3>
+          <ol id="funds"></ol>
+        </div>
+
+        <div class="card section" id="errors">
+          <h3>Top 3 Power Errors</h3>
+          <ol id="errs"></ol>
+        </div>
+
+        <div class="card section" id="quickfix">
+          <h3>Top 3 Quick Fixes</h3>
+          <ol id="fixes"></ol>
+        </div>
+
+        <div class="card section" id="expect">
+          <h3>What to Expect After a Change</h3>
+          <ul id="exp"></ul>
+          <div class="muted small">These short-term outcomes are normal as your body adopts new patterns.</div>
+        </div>
+
+        <div class="card section" id="drills">
+          <h3>Drills</h3>
+          <ul id="drillList"></ul>
+        </div>
+
+        <div class="card section" id="badges">
+          <h3>Badges</h3>
+          <div id="badgeRow"></div>
+        </div>
+
+        <div class="card section" id="coach">
+          <h3>Your Coach Says</h3>
+          <div id="coachCopy"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <main class="wrap">
-    <section class="card">
-      <h3>Report</h3>
-      <div class="kv">
-        <div class="k">Key</div><div class="v" id="kv-key">—</div>
-        <div class="k">Compare</div><div class="v" id="kv-compare">—</div>
-        <div class="k">Teacher voice</div><div class="v" id="kv-coach">—</div>
-        <div class="k">Height (in)</div><div class="v" id="kv-height">—</div>
-        <div class="k">Name</div><div class="v" id="kv-name">—</div>
-        <div class="k">Email</div><div class="v" id="kv-email">—</div>
-        <div class="k">Handed</div><div class="v" id="kv-hand">—</div>
-        <div class="k">Eye</div><div class="v" id="kv-eye">—</div>
-        <div class="k">Handicap</div><div class="v" id="kv-hcp">—</div>
-      </div>
-
-      <div class="vcai-expect" id="vcai-expect" hidden></div>
-      <div class="hint">Tip: “Compare to Baseline” will reload this page with <code>?compare=&lt;baselineKey&gt;</code>. Use a side-by-side viewer if you have one; otherwise open your baseline in a new tab for A/B review.</div>
-    </section>
-  </main>
-
-  <script>
-  (function(){
-    const qs = new URLSearchParams(location.search);
-    const current = {
-      key: qs.get("key") || "",
-      coach: qs.get("coach") || "supportive",
-      height: qs.get("h") || "",
-      name: qs.get("name") || "",
-      email: qs.get("email") || "",
-      hand: qs.get("hand") || "Right",
-      eye: qs.get("eye") || "Unknown",
-      hcp: qs.get("hcp") || "",
-      baselineFlag: qs.get("baseline") === "1",
-      compare: qs.get("compare") || ""
-    };
-
-    // Populate KV
-    function set(id, val){ const el = document.getElementById(id); if (el) el.textContent = val || "—"; }
-    set("kv-key", current.key);
-    set("kv-compare", current.compare || "—");
-    set("kv-coach", current.coach);
-    set("kv-height", current.height);
-    set("kv-name", current.name);
-    set("kv-email", current.email);
-    set("kv-hand", current.hand);
-    set("kv-eye", current.eye);
-    set("kv-hcp", current.hcp);
-
-    // Baseline storage in this browser
-    const LSKEY = "vcai.baseline";
-    function getBaseline(){
-      try { return JSON.parse(localStorage.getItem(LSKEY) || "null"); } catch(_){ return null; }
-    }
-    function setBaseline(obj){ localStorage.setItem(LSKEY, JSON.stringify(obj)); }
-    function clearBaseline(){ localStorage.removeItem(LSKEY); }
-
-    const setBtn = document.getElementById("vcai-set-baseline");
-    const cmpBtn = document.getElementById("vcai-compare");
-    const clrBtn = document.getElementById("vcai-clear");
-    const infoEl = document.getElementById("vcai-base-info");
-    const expectEl = document.getElementById("vcai-expect");
-
-    function refreshUI(){
-      const base = getBaseline();
-      if (base && base.key){
-        cmpBtn.disabled = false;
-        clrBtn.disabled = false;
-        infoEl.textContent = `Baseline: ${base.label || base.key}`;
-      } else {
-        cmpBtn.disabled = true;
-        clrBtn.disabled = true;
-        infoEl.textContent = "(no baseline yet)";
-      }
-    }
-
-    // Auto-set when arriving with ?baseline=1
-    if (current.key && current.baselineFlag) {
-      const label = current.name ? `${current.name} • ${current.key}` : current.key;
-      setBaseline({ key: current.key, label, meta: current });
-    }
-
-    setBtn.addEventListener("click", () => {
-      if (!current.key) return alert("No report key in URL.");
-      const label = current.name ? `${current.name} • ${current.key}` : current.key;
-      setBaseline({ key: current.key, label, meta: current });
-      refreshUI();
-      alert("Baseline saved in this browser.");
-    });
-
-    clrBtn.addEventListener("click", () => {
-      clearBaseline();
-      refreshUI();
-    });
-
-    cmpBtn.addEventListener("click", () => {
-      const base = getBaseline();
-      if (!base || !base.key) return;
-      const next = new URLSearchParams(location.search);
-      next.set("compare", base.key);
-      location.href = `${location.pathname}?${next.toString()}`;
-    });
-
-    // “What to expect” card
-    function whatToExpect(coach, hand, eye){
-      const lines = [];
-      lines.push("After a swing change, expect a short adjustment period—this is normal.");
-      lines.push("• More arm rotation → tends to pull / start left (RH golfer).");
-      lines.push("• Faster body rotation → shallower AoA → more thin or ground balls early.");
-      lines.push("• New release pattern → face control can wobble for a few sessions.");
-
-      let plan = "";
-      switch (coach) {
-        case "direct":
-          plan = "Plan: 25 purposeful reps — 10 slow-motion, 10 pause at P5, 5 at game speed. Judge only start line & strike; ignore distance.";
-          break;
-        case "grumpy":
-          plan = "Plan: 3×10 with checkpoints. Film rep #1 & #10 each set. If strike degrades, slow down and reset feels.";
-          break;
-        case "tech":
-          plan = "Plan: Track start-line dispersion (±°) & low-point ahead of ball. If low-point trails, add 5 rehearsals with lead-side pressure at P6.";
-          break;
-        default:
-          plan = "Plan: Be kind to yourself. Rehearse the new feel, then 3×8 balls focusing on clean contact and consistent start line.";
-      }
-      lines.push("");
-      lines.push(plan);
-      return lines.join("\n");
-    }
-
-    const expectTxt = whatToExpect(current.coach, current.hand, current.eye);
-    if (expectTxt) {
-      expectEl.hidden = false;
-      expectEl.textContent = expectTxt;
-    }
-
-    refreshUI();
-  })();
-  </script>
+  <script src="/report.client.js?v=3" defer></script>
 </body>
 </html>
-<!-- pending badge -->
-<span id="pending-note" style="display:none;margin-left:8px;padding:2px 8px;border-radius:12px;background:#645; color:#fff; font-size:.85rem;">
-  Loading� analysis pending
-</span>
-
-<!-- value placeholders (put these where the cards live) -->
-<div id="sec-pos" style="display:none"></div>
-<div id="sec-swing" style="display:none"></div>
-<div id="sec-power" style="display:none"></div>
-<ul id="list-fundamentals"></ul>
-<ul id="list-power-errors"></ul>
-<ul id="list-quick-fixes"></ul>
-<ul id="list-faults"></ul>
-<ul id="list-drills"></ul>
-<ul id="list-expectations"></ul>
-<div id="baseline-cta" style="display:none;margin-top:6px;">
-  <em>Tip:</em> Set a baseline swing to compare future rounds.
-</div>
-<script>
-(function () {
-  const $ = s => document.querySelector(s);
-  const ui = {
-    badgeSwings: $('#badge-swings'),
-    pending: $('#pending-note')
-  };
-  const ids = {
-    pos: '#sec-pos', swing: '#sec-swing', power: '#sec-power',
-    fundamentals: '#list-fundamentals', powerErrors: '#list-power-errors',
-    quickFixes: '#list-quick-fixes', faults: '#list-faults',
-    drills: '#list-drills', expectations: '#list-expectations', baselineCta: '#baseline-cta'
-  };
-
-  function show(el, yes = true) {
-    const node = typeof el === 'string' ? $(el) : el;
-    if (!node) return;
-    node.style.display = yes ? '' : 'none';
-  }
-  function text(el, t) {
-    const node = typeof el === 'string' ? $(el) : el;
-    if (!node) return;
-    node.textContent = t;
-    show(node, true);
-  }
-  function fillList(sel, arr = []) {
-    const node = $(sel);
-    if (!node) return;
-    node.innerHTML = arr.map(i => `<li>${i}</li>`).join('');
-  }
-
-  const params = new URLSearchParams(location.search);
-  const key = params.get('key');
-  const demo = params.get('demo');
-
-  async function fetchReport() {
-    const url = demo === '1' ? '/api/report?demo=1'
-                             : `/api/report?key=${encodeURIComponent(key)}`;
-    const res = await fetch(url, { cache: 'no-store' });
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`Report API ${res.status}`);
-    return await res.json();
-  }
-
-  function render(r) {
-    if (ui.pending) ui.pending.style.display = 'none';
-    if (ui.badgeSwings && r?.meta?.swings) ui.badgeSwings.textContent = `Swings: ${r.meta.swings}`;
-
-    text(ids.pos, `${r?.scores?.positionConsistency ?? '--'} / 100`);
-    text(ids.swing, `${r?.scores?.swingConsistency ?? '--'} / 100`);
-    text(ids.power, `${r?.scores?.powerScore ?? '--'} / 100`);
-
-    fillList(ids.fundamentals, r.fundamentals);
-    fillList(ids.powerErrors, r.powerErrors);
-    fillList(ids.quickFixes, r.quickFixes);
-    fillList(ids.faults, r.faults);
-    fillList(ids.drills, r.drills);
-    fillList(ids.expectations, r.expectations);
-
-    show(ids.baselineCta, !(r?.baseline?.hasBaseline));
-  }
-
-  async function init() {
-    if (!key && demo !== '1') {
-      alert('Missing ?key=� in the URL');
-      return;
-    }
-    if (ui.pending) ui.pending.style.display = 'inline-block';
-
-    const start = Date.now();
-    while (true) {
-      try {
-        const data = await fetchReport();
-        if (data) { render(data); return; }
-      } catch (e) {
-        console.warn(e);
-        if (ui.pending) ui.pending.style.display = 'none';
-        alert('Problem loading the report.');
-        return;
-      }
-      if (Date.now() - start > 60000) {
-        if (ui.pending) ui.pending.style.display = 'none';
-        alert('Analysis still processing. Check back soon.');
-        return;
-      }
-      await new Promise(r => setTimeout(r, 5000));
-    }
-  }
-  init();
-})();
-</script>
