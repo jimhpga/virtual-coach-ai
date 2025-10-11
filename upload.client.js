@@ -1,98 +1,147 @@
-// upload.client.js  (v12)
-(function () {
-  const $ = (s) => document.querySelector(s);
-  const fileInput = $("#fileInput");
-  const fileLabel = $("#fileLabel");
-  const btn = $("#uploadBtn");
-  const logEl = $("#log");
+/* Upload client v11 — flexible height parsing + presign → S3 upload */
+(() => {
+  const ui = {
+    name: document.getElementById('name'),
+    email: document.getElementById('email'),
+    hcp: document.getElementById('hcp'),
+    hand: document.getElementById('hand'),
+    eye: document.getElementById('eye'),
+    heightIn: document.getElementById('heightIn'),
+    file: document.getElementById('file'),
+    fileName: document.getElementById('fileName'),
+    go: document.getElementById('go'),
+    log: document.getElementById('log'),
+  };
 
-  const coachEl = $("#coachStyle");
-  const hEl     = $("#heightInches");
-  const nameEl  = $("#name");
-  const emailEl = $("#email");
-  const hcapEl  = $("#handicap");
-  const handEl  = $("#handed");
-  const eyeEl   = $("#eye");
-  const baseEl  = $("#baseline");
+  function log(line = '') {
+    if (!ui.log) return;
+    ui.log.textContent += (ui.log.textContent ? '\n' : '') + line;
+    ui.log.scrollTop = ui.log.scrollHeight;
+  }
 
-  const log  = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
-  const busy = (on) => { btn.disabled = on; fileInput.disabled = on; };
+  console.log('[upload v11] client JS loaded');
+  log('Ready.\n[upload v11] client JS loaded');
 
-  log("[upload v12] client JS loaded");
+  // -------- Height parser (inches, feet+inches, or cm) --------
+  function parseHeightToInches(inputRaw) {
+    if (!inputRaw) return null;
+    const s = String(inputRaw).trim().toLowerCase();
 
-  fileInput?.addEventListener("change", (e) => {
-    const f = e.target.files?.[0];
-    fileLabel.textContent = f ? `${f.name} (${f.type || "video"}), ${f.size} bytes` : "(no file)";
-    if (f) log("Selected: " + f.name);
+    // e.g. "170 cm"
+    const cmMatch = s.match(/^(\d+(?:\.\d+)?)\s*cm$/i);
+    if (cmMatch) return Math.round(parseFloat(cmMatch[1]) / 2.54);
+
+    // e.g. 5'6", 5' 6, 5-6
+    let m = s.match(/^(\d+)\s*['\-]\s*(\d+)\s*("?|in|inches)?$/);
+    if (m) return (+m[1]) * 12 + (+m[2]);
+
+    // e.g. 5', 6ft, 6 ft
+    m = s.match(/^(\d+)\s*(?:'|ft|feet)$/);
+    if (m) return (+m[1]) * 12;
+
+    // e.g. 5.6  (~5'7")
+    m = s.match(/^(\d+)\.(\d+)$/);
+    if (m) {
+      const feet = +m[1];
+      const dec = parseFloat(`0.${m[2]}`);
+      return Math.round(feet * 12 + dec * 12);
+    }
+
+    // bare number: <=84 → inches; >100 → assume cm
+    if (/^\d+(\.\d+)?$/.test(s)) {
+      const n = parseFloat(s);
+      if (n > 100) return Math.round(n / 2.54);
+      return Math.round(n);
+    }
+
+    return null;
+  }
+
+  // ---- UI helpers ----
+  ui.file.addEventListener('change', () => {
+    const f = ui.file.files?.[0];
+    ui.fileName.textContent = f ? f.name : '(no file)';
+    if (f) log(`Selected: ${f.name}`);
   });
 
-  function getForm() {
-    return {
-      coach: coachEl?.value || "supportive",
-      height: hEl?.value?.trim() || "",
-      name: nameEl?.value?.trim() || "",
-      email: emailEl?.value?.trim() || "",
-      handicap: hcapEl?.value?.trim() || "",
-      hand: handEl?.value || "Right",
-      eye: eyeEl?.value || "Unknown",
-      baseline: !!baseEl?.checked
-    };
-  }
-
-  function validate() {
-    const f = getForm();
-    const heightNum = Number(f.height);
-    if (!f.height || Number.isNaN(heightNum) || heightNum < 48 || heightNum > 86) {
-      throw new Error("Please enter your height in inches (48–86).");
-    }
-    const file = fileInput?.files?.[0];
-    if (!file) throw new Error("Pick a video first.");
-    return { f, file };
-  }
-
-  btn?.addEventListener("click", async () => {
-    busy(true);
+  ui.go.addEventListener('click', async () => {
     try {
-      const { f, file } = validate();
+      ui.go.disabled = true;
+      ui.go.textContent = 'Uploading…';
 
-      log("Requesting presign…");
-      const pre = await fetch("/api/presign", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name, type: file.type || "video/mp4", size: file.size }),
+      const f = ui.file.files?.[0];
+      if (!f) {
+        log('Error: please choose a video file.');
+        return;
+      }
+
+      // Height parse + bounds
+      const rawHeight = ui.heightIn.value;
+      const height = parseHeightToInches(rawHeight);
+      if (!height || height < 48 || height > 84) {
+        log('Error: Height should be between 48 and 84 inches.');
+        return;
+      }
+
+      // 1) Presign
+      log('Requesting presign…');
+      const payload = {
+        filename: f.name,
+        type: f.type || 'video/mp4',
+        size: f.size,
+        meta: {
+          name: ui.name.value || '',
+          email: ui.email.value || '',
+          handicap: ui.hcp.value || '',
+          hand: ui.hand.value || '',
+          eye: ui.eye.value || '',
+          heightInches: height,
+        }
+      };
+
+      const presignRes = await fetch('/api/presign', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload),
       });
-      if (!pre.ok) throw new Error("presign failed " + pre.status);
-      const { url, fields, key, viewerUrl } = await pre.json();
-      if (!url || !fields || !key) throw new Error("presign response malformed");
 
-      log("Uploading to S3…");
+      if (!presignRes.ok) {
+        const txt = await presignRes.text().catch(()=>'');
+        throw new Error(`/api/presign failed (${presignRes.status}) ${txt}`);
+      }
+      const presign = await presignRes.json();
+      if (!presign?.ok || !presign.url || !presign.fields) {
+        throw new Error('Invalid /api/presign response.');
+      }
+
+      // 2) Upload to S3
+      log('Uploading to S3…');
       const fd = new FormData();
-      Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
-      fd.append("file", file, file.name);
-      const up = await fetch(url, { method: "POST", body: fd });
-      if (!up.ok) throw new Error("S3 upload failed " + up.status);
+      // copy all fields returned by presign
+      Object.entries(presign.fields).forEach(([k,v]) => fd.append(k, v));
+      // important: the file part MUST be named exactly "file"
+      fd.append('file', f);
 
-      log("Upload complete.");
+      const s3 = await fetch(presign.url, { method: 'POST', body: fd });
+      if (!(s3.status === 201 || s3.status === 204)) {
+        const errTxt = await s3.text().catch(()=> '');
+        throw new Error(`S3 upload failed (${s3.status}). ${errTxt}`);
+      }
 
-      const params = new URLSearchParams({
-        key,
-        coach: f.coach,
-        h: f.height,
-        name: f.name,
-        email: f.email,
-        hand: f.hand,
-        eye: f.eye
-      });
-      if (f.handicap) params.set("hcp", f.handicap);
-      if (f.baseline) params.set("baseline", "1");
-
-      const baseUrl = viewerUrl || "/report.html";
-      const finalUrl = `${baseUrl}?${params.toString()}`;
-      log("Opening report view…");
-      location.assign(finalUrl);
-    } catch (e) {
-      log("Error: " + (e?.message || e));
-      busy(false);
+      log('Upload OK.');
+      const viewer = presign.viewerUrl || `/report.html?key=${encodeURIComponent(presign.key)}`;
+      log(`Opening report…`);
+      window.location.href = viewer;
+    } catch (err) {
+      console.error(err);
+      if (/CORS/i.test(String(err))) {
+        log('Error: CORS issue. Ensure your S3 bucket CORS allows this site origin.');
+      } else {
+        log(`Error: ${err.message || err}`);
+      }
+    } finally {
+      ui.go.disabled = false;
+      ui.go.textContent = 'Upload & Generate Report';
     }
   });
 })();
