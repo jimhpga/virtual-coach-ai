@@ -2,134 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Virtual Coach AI — Upload</title>
-  <link rel="icon" href="/virtualcoach-logo.png" />
+  <title>Upload → Report → Improve | Virtual Coach AI</title>
+  <link rel="icon" href="/favicon.ico" />
   <style>
     :root{
-      --bg: #071c10;
-      --card: rgba(0,0,0,.45);
-      --border: rgba(255,255,255,.12);
-      --ink: #ecf3f7;
-      --muted:#cfe0e6;
+      --bg:#061a12;
+      --card:rgba(0,0,0,.45);
+      --stroke:rgba(255,255,255,.12);
+      --muted:#cbd5ce;
+      --text:#f3f6f4;
       --accent:#1f6f3e;
+      --accent-2:#2b8c53;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; color:var(--ink); font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-      background:
-        linear-gradient(180deg, rgba(7,28,16,.8), rgba(7,28,16,.95)),
-        url("/golf-course.jpg") center/cover no-repeat fixed;
-      /* If you don’t have /golf-course.jpg yet, it’ll just show the gradient. */
+      margin:0; color:var(--text); background:var(--bg); font:14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background-image: radial-gradient(1200px 600px at 10% -20%, rgba(255,255,255,.05), transparent 60%),
+                       radial-gradient(1200px 600px at 110% -20%, rgba(255,255,255,.05), transparent 60%);
     }
-    .wrap{width:min(1080px,92%);margin:40px auto}
-    .card{
-      background:var(--card); border:1px solid var(--border);
-      border-radius:16px; padding:18px; backdrop-filter: blur(4px);
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    .wrap{max-width:1100px; margin:32px auto; padding:0 16px}
+    h1{font-size:20px; margin:0 0 18px}
+    .upload-card{
+      border:1px solid var(--stroke); border-radius:14px; background:var(--card);
+      box-shadow:0 12px 32px rgba(0,0,0,.35); backdrop-filter: blur(4px);
+      padding:18px 20px;
     }
-    h1,h2,h3{margin:0 0 .5rem}
-    .grid{
-      display:grid; gap:10px;
-      grid-template-columns: repeat(12, 1fr);
+    .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px}
+    @media (max-width:920px){ .grid{grid-template-columns:1fr} }
+    label{display:block; font-size:12px; color:var(--muted); margin:6px 0 6px}
+    input[type="text"],input[type="email"],input[type="number"],select,textarea{
+      width:100%; color:var(--text); background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.18); border-radius:8px; padding:10px 12px;
+      outline:none;
     }
-    .col-12{grid-column: span 12}
-    .col-6{grid-column: span 6}
-    .col-4{grid-column: span 4}
+    input::placeholder{color:#cfd7d1}
     .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-
-    label{display:block; font-size:13px; color:var(--muted); margin-bottom:.25rem}
-    input[type="text"], input[type="email"], input[type="number"], select, textarea{
-      width:100%; padding:.6rem .7rem; border-radius:10px; outline:none;
-      background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.18); color:#f3f6f4;
-    }
-    input::placeholder{color:#cbd5ce}
     .btn{
-      border:1px solid var(--border); background:rgba(255,255,255,.10); color:#fff;
-      padding:.65rem .9rem; border-radius:10px; cursor:pointer;
+      border-radius:10px; padding:10px 14px; border:1px solid rgba(255,255,255,.18);
+      background:var(--accent); color:#fff; cursor:pointer;
     }
-    .btn-primary{ background:var(--accent); border:1px solid rgba(255,255,255,.18); }
-    .btn:hover{ filter:brightness(1.05); }
-    .pill{display:inline-block;font-size:12px;color:#cfe0e6;margin-left:10px}
+    .btn:hover{filter:brightness(1.05)}
+    .btn:disabled{opacity:.6; cursor:not-allowed}
+    .muted{color:var(--muted)}
     .log{
-      white-space:pre-wrap; font-family:ui-monospace,Menlo,Consolas,monospace;
-      background:#0c1116; color:#a7f3d0; border:1px solid var(--border); border-radius:12px;
-      padding:12px; min-height:120px; margin-top:10px; max-height:260px; overflow:auto;
+      margin-top:14px; border:1px dashed var(--stroke); border-radius:10px;
+      padding:12px; min-height:120px; background:rgba(0,0,0,.35);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      white-space:pre-wrap;
     }
-    .upload-card{max-width: 980px; margin: 2rem auto;}
+    .file-pill{display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--stroke); border-radius:999px}
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--stroke); border-radius:999px}
+    .small{font-size:12px}
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <section class="card upload-card">
-      <h3>Upload → Report → Improve</h3>
-      <p class="muted">Select a face-on or down-the-line video. We’ll analyze P1–P9 and generate a shareable report.</p>
+  <div class="wrap">
+    <div class="upload-card">
+      <h1>Upload → Report → Improve</h1>
+      <p class="muted small">Select a face-on or down-the-line video. We’ll analyze P1–P9 and generate a shareable report.</p>
 
-      <div class="row" style="margin:10px 0 12px;">
-        <input id="fileInput" type="file" accept="video/*,.mov,.mp4,.m4v,.mkv" class="btn" />
-        <span id="fileLabel" class="pill">(no file)</span>
-        <button id="uploadBtn" class="btn btn-primary">Upload &amp; Generate Report</button>
-      </div>
-
-      <div class="grid" style="margin-top:.75rem;">
-        <div class="col-6">
-          <label for="name">Golfer name (optional)</label>
-          <input id="name" type="text" placeholder="Jordan Sample" />
+      <div class="grid">
+        <div>
+          <label>Name (optional)</label>
+          <input id="name" type="text" placeholder="e.g., Jordan Smith" />
         </div>
-        <div class="col-6">
-          <label for="email">Email (optional)</label>
+        <div>
+          <label>Email (optional)</label>
           <input id="email" type="email" placeholder="you@example.com" />
         </div>
-
-        <div class="col-4">
-          <label for="handicap">Handicap (optional)</label>
-          <input id="handicap" type="number" min="-10" max="54" step="1" placeholder="e.g. 14" />
-        </div>
-        <div class="col-4">
-          <label for="heightInches">Height in inches (required)</label>
-          <input id="heightInches" type="number" min="48" max="86" step="1" placeholder="e.g. 70" required />
-        </div>
-        <div class="col-4">
-          <label for="coachStyle">Teacher voice</label>
-          <select id="coachStyle">
-            <option value="supportive">Supportive</option>
-            <option value="direct">Direct</option>
-            <option value="grumpy">Grumpy</option>
-            <option value="tech">Tech-y / Data-driven</option>
-          </select>
+        <div>
+          <label>Handicap (optional)</label>
+          <input id="hcp" type="text" inputmode="decimal" placeholder="e.g., 8.2" />
         </div>
 
-        <div class="col-4">
-          <label for="handed">Handed</label>
-          <select id="handed">
+        <div>
+          <label>Hand (optional)</label>
+          <select id="hand">
+            <option value="">— choose —</option>
             <option>Right</option>
             <option>Left</option>
           </select>
         </div>
-        <div class="col-4">
-          <label for="eye">Eye dominance</label>
+        <div>
+          <label>Eye dominance (optional)</label>
           <select id="eye">
-            <option>Unknown</option>
-            <option>Left</option>
+            <option value="">— choose —</option>
             <option>Right</option>
+            <option>Left</option>
+            <option>Don’t know</option>
           </select>
         </div>
-
-        <div class="col-12" style="margin-top:.25rem;">
-          <label style="display:flex;gap:.5rem;align-items:center;">
-            <input id="baseline" type="checkbox" />
-            Set this upload as my baseline swing
-          </label>
+        <div>
+          <label>Height <span class="muted">(inches, feet/inches, or cm)</span> *</label>
+          <input id="heightIn" type="text" inputmode="decimal" placeholder="e.g., 66  or  5'6&quot;  or  170 cm" />
         </div>
       </div>
 
-      <div id="log" class="log">Ready.</div>
-    </section>
-  </main>
+      <div class="row" style="margin-top:12px">
+        <label class="file-pill">
+          <input id="file" type="file" accept="video/*" style="display:none" />
+          <span>Browse…</span>
+        </label>
+        <span id="fileName" class="muted small">(no file)</span>
 
-  <!-- must match the file in / (root) -->
-  <script src="/upload.client.js?v=12" defer></script>
+        <button id="go" class="btn">Upload &amp; Generate Report</button>
+      </div>
+
+      <div id="log" class="log"></div>
+    </div>
+  </div>
+
+  <!-- client -->
+  <script src="/upload.client.js?v=11" defer></script>
 </body>
 </html>
