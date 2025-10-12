@@ -1,169 +1,104 @@
 // api/report.js
-// Always return a usable report. If real analysis isn't available yet,
-// fall back to a demo report so the UI never looks empty.
+import { S3Client, GetObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
+import { Readable } from "stream";
+
+/** read stream -> string */
+const streamToString = async (stream) =>
+  await new Promise((resolve, reject) => {
+    const chunks = [];
+    stream.on("data", (c) => chunks.push(Buffer.from(c)));
+    stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    stream.on("error", reject);
+  });
 
 export default async function handler(req, res) {
-  try {
-    const {
-      key = "",
-      name = "",
-      email = "",
-      handicap = "",
-      hand = "",
-      eye = "",
-      height = ""
-    } = req.query || {};
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" });
+  }
 
-    // If demo=1 was requested, force demo
-    if (req.query.demo === "1") {
-      return res.status(200).json({
-        ok: true,
-        source: "demo",
-        report: demoReport({ key, name, email, handicap, hand, eye, height })
-      });
+  try {
+    const { key, demo } = req.query || {};
+    if (!key) return res.status(400).json({ ok: false, error: "MISSING_KEY" });
+
+    const {
+      AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY,
+      AWS_REGION = "us-west-1",
+      S3_BUCKET = "virtualcoachai-swings",
+      REPORTS_PREFIX = "reports",
+    } = process.env;
+
+    // For safety: only allow keys in uploads/
+    if (!key.startsWith("uploads/")) {
+      return res.status(400).json({ ok: false, error: "BAD_KEY" });
     }
 
-    // TODO: real analysis lookup goes here (DB/object store/etc.)
-    // Example shape:
-    // const real = await getAnalysisByKey(key)
-    // if (real) return res.status(200).json({ ok: true, source: "real", report: real });
-
-    // If we reach here, we don't have real analysis yet — fall back to demo
-    return res.status(200).json({
-      ok: true,
-      source: "demo-fallback",
-      report: demoReport({ key, name, email, handicap, hand, eye, height })
+    const s3 = new S3Client({
+      region: AWS_REGION,
+      credentials:
+        AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY
+          ? { accessKeyId: AWS_ACCESS_KEY_ID, secretAccessKey: AWS_SECRET_ACCESS_KEY }
+          : undefined, // allow IAM on Vercel Integration if present
     });
+
+    const reportKey = `${REPORTS_PREFIX}/${key}.json`;
+
+    // If ?demo=1 passed, synthesize a demo JSON (useful while testing)
+    if (demo === "1" || demo === "true") {
+      const demoJson = {
+        ok: true,
+        meta: {
+          key,
+          createdAt: new Date().toISOString(),
+          mode: "Full Swing",
+          swings: 8,
+          heightInches: 70,
+        },
+        scores: { power: 72, consistency: 64 },
+        fundamentals: ["Posture at P1", "Width at P3", "Chest open at P7"],
+        errors: ["Steep at P6", "Face open vs path at P7", "Late rotation"],
+        quickFixes: ["Toe-up checkpoint drill", "Alignment stick shallow drill", "Lead-arm rotation feel"],
+        expectations: [
+          "If you rotate body faster, AoA shallows — expect occasional ground balls at first.",
+          "More forearm rotation can start ball left until timing settles.",
+        ],
+        drills: [
+          "Pump drill to shallow from P5→P6",
+          "Preset wrist/forearm rotation, hit 9-to-3",
+          "Feet-together tempo swings",
+        ],
+        badges: [{ id: "first-upload", label: "First Upload" }, { id: "consistency-60", label: "Consistency 60+" }],
+        coachVoice: "Great start — keep the feels small and hit 9-to-3 to lock in the new pattern.",
+      };
+      return res.status(200).json(demoJson);
+    }
+
+    // Check if report exists
+    try {
+      await s3.send(
+        new HeadObjectCommand({
+          Bucket: S3_BUCKET,
+          Key: reportKey,
+        })
+      );
+    } catch (e) {
+      // Not found yet → still processing
+      return res.status(202).json({ ok: false, error: "NOT_READY" });
+    }
+
+    // Return report JSON
+    const out = await s3.send(
+      new GetObjectCommand({
+        Bucket: S3_BUCKET,
+        Key: reportKey,
+      })
+    );
+
+    const body = await streamToString(out.Body instanceof Readable ? out.Body : Readable.from(out.Body));
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    return res.status(200).send(body);
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ ok: false, error: "SERVER_ERROR" });
+    return res.status(500).json({ ok: false, error: "UNEXPECTED", details: String(err?.message || err) });
   }
-}
-
-// --- Demo generator (kept small but complete) ---
-function demoReport({ key, name, email, handicap, hand, eye, height }) {
-  const inches = normalizeHeight(height); // number or null
-  const golfer = {
-    name: name || "Player",
-    email,
-    handicap: handicap || "",
-    hand: hand || "right",
-    eye: eye || "unknown",
-    heightIn: inches || 70
-  };
-
-  // Simple, consistent sample content
-  const today = new Date().toISOString().slice(0, 10);
-
-  return {
-    meta: {
-      title: "Swing Report — P1–P9",
-      date: today,
-      mode: "Full Swing",
-      key,
-      golfer,
-      swings: 8
-    },
-    checkpoints: [
-      { label: "P6", note: "Shaft steep; handle high" },
-      { label: "P7", note: "Face a bit open vs path" }
-    ],
-    sections: {
-      positionConsistency: [
-        "Setup aligned well; slight posture rise at P2.",
-        "Trail hip early extension by ~3° vs baseline."
-      ],
-      swingConsistency: [
-        "Tempo consistent at 3:1.",
-        "Low-point scatter tightened vs last session."
-      ],
-      powerScoreSummary: [
-        "Clubhead speed +1.8 mph vs baseline.",
-        "Attack angle trend shallower by 0.6°."
-      ],
-      fundamentalsTop3: [
-        "Neutral grip pressure through transition.",
-        "Ball position one ball forward.",
-        "Maintain spine tilt in downswing."
-      ],
-      powerErrorsTop3: [
-        "Over-rotated forearms late (left start line).",
-        "Early trail shoulder open (glancing contact).",
-        "Excess handle height (thin/ground balls)."
-      ],
-      quickFixesTop3: [
-        "Preset trail wrist extension at address.",
-        "Half-swing drill: pause at P3, then rotate.",
-        "Lead-hand only chips to feel loft."
-      ],
-      faults: [
-        "Face-to-path mismatch at impact.",
-        "Slight casting from P5→P6.",
-        "Trail knee rushes ball-side."
-      ],
-      drills: [
-        "Gate drill at 6–12 inches ahead of the ball.",
-        "Step-through drill for rotation → shallowing.",
-        "Alignment stick down trail side (no early extend)."
-      ]
-    },
-    // Expectations after swing change (what the coach asked for)
-    expectations: [
-      "If you rotate forearms more: starts left are normal for a bit.",
-      "If you rotate body faster: AoA shallows → expect some grounders.",
-      "Small misses while it ‘beds in’ are expected. Give it ~2–3 sessions."
-    ],
-    // Teacher voice — UI can render this style string
-    teacherVoice: {
-      mode: "supportive", // "supportive" | "nice" | "grumpy"
-      sample:
-        "Good move. Small mess-ups mean it’s changing — stay patient; keep the drills tight."
-    },
-    // Baseline compare scaffold
-    baseline: {
-      canSet: true,
-      notes: "Set this as your good swing and compare future swings any time."
-    },
-    // Gamification – simple badges
-    badges: [
-      { id: "tempo-tamer", title: "Tempo Tamer", earned: true },
-      { id: "lowpoint-lock", title: "Low-Point Lock", earned: false },
-      { id: "face-path-sync", title: "Face–Path Sync", earned: false }
-    ]
-  };
-}
-
-function normalizeHeight(h) {
-  if (!h) return null;
-  const s = String(h).trim();
-
-  // plain inches
-  if (/^\d{2,3}$/.test(s)) return clamp(+s, 48, 84);
-
-  // feet'inches e.g. 5'10 or 5' 10"
-  const feetIn = s.match(/^(\d)\s*'\s*(\d{1,2})/);
-  if (feetIn) {
-    const inches = (+feetIn[1]) * 12 + (+feetIn[2]);
-    return clamp(inches, 48, 84);
-  }
-
-  // feet.inches e.g. 5.10 or 5.8 (assume .xx are inches)
-  const feetDot = s.match(/^(\d)\.(\d{1,2})$/);
-  if (feetDot) {
-    const inches = (+feetDot[1]) * 12 + (+feetDot[2]);
-    return clamp(inches, 48, 84);
-  }
-
-  // cm
-  const cm = s.match(/^(\d{2,3})\s*cm$/i);
-  if (cm) {
-    const inches = Math.round((+cm[1]) / 2.54);
-    return clamp(inches, 48, 84);
-  }
-
-  return null;
-}
-
-function clamp(n, lo, hi) {
-  return Math.min(hi, Math.max(lo, n));
 }
