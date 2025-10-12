@@ -1,147 +1,128 @@
-/* Upload client v11 — flexible height parsing + presign → S3 upload */
+<!-- served as /upload.client.js -->
+<script>
 (() => {
+  const logEl   = document.getElementById('log') || (() => {
+    const pre = document.createElement('pre');
+    pre.id = 'log';
+    pre.style.cssText = 'background:#0b1210;border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px;overflow:auto;min-height:120px;';
+    document.querySelector('.upload-card')?.appendChild(pre);
+    return pre;
+  })();
+
   const ui = {
-    name: document.getElementById('name'),
-    email: document.getElementById('email'),
-    hcp: document.getElementById('hcp'),
-    hand: document.getElementById('hand'),
-    eye: document.getElementById('eye'),
-    heightIn: document.getElementById('heightIn'),
-    file: document.getElementById('file'),
-    fileName: document.getElementById('fileName'),
-    go: document.getElementById('go'),
-    log: document.getElementById('log'),
+    file:   document.getElementById('file'),
+    btn:    document.getElementById('go') || document.querySelector('[data-action="upload"]'),
+    name:   document.getElementById('name'),
+    email:  document.getElementById('email'),
+    hcap:   document.getElementById('handicap'),
+    hand:   document.getElementById('hand'),
+    eye:    document.getElementById('eye'),
+    height: document.getElementById('height'),
   };
 
-  function log(line = '') {
-    if (!ui.log) return;
-    ui.log.textContent += (ui.log.textContent ? '\n' : '') + line;
-    ui.log.scrollTop = ui.log.scrollHeight;
-  }
+  const log = (s='') => { logEl.textContent += (s + '\n'); logEl.scrollTop = logEl.scrollHeight; };
 
-  console.log('[upload v11] client JS loaded');
-  log('Ready.\n[upload v11] client JS loaded');
+  // ---- height parsing (accepts 70, "5'10", 5-10, 178cm) -> inches
+  function parseHeightToInches(v) {
+    if (!v) return null;
+    v = String(v).trim().toLowerCase();
 
-  // -------- Height parser (inches, feet+inches, or cm) --------
-  function parseHeightToInches(inputRaw) {
-    if (!inputRaw) return null;
-    const s = String(inputRaw).trim().toLowerCase();
+    // 178 cm
+    const cm = v.match(/^(\d+(?:\.\d+)?)\s*cm$/);
+    if (cm) return Math.round(parseFloat(cm[1]) / 2.54);
 
-    // e.g. "170 cm"
-    const cmMatch = s.match(/^(\d+(?:\.\d+)?)\s*cm$/i);
-    if (cmMatch) return Math.round(parseFloat(cmMatch[1]) / 2.54);
+    // 5' 10" or 5-10 or 5 10
+    const ftin = v.match(/^(\d+)\s*(?:'|ft|\-|\s)\s*(\d{1,2})”??"?$/);
+    if (ftin) return (+ftin[1]) * 12 + (+ftin[2]);
 
-    // e.g. 5'6", 5' 6, 5-6
-    let m = s.match(/^(\d+)\s*['\-]\s*(\d+)\s*("?|in|inches)?$/);
-    if (m) return (+m[1]) * 12 + (+m[2]);
-
-    // e.g. 5', 6ft, 6 ft
-    m = s.match(/^(\d+)\s*(?:'|ft|feet)$/);
-    if (m) return (+m[1]) * 12;
-
-    // e.g. 5.6  (~5'7")
-    m = s.match(/^(\d+)\.(\d+)$/);
-    if (m) {
-      const feet = +m[1];
-      const dec = parseFloat(`0.${m[2]}`);
-      return Math.round(feet * 12 + dec * 12);
-    }
-
-    // bare number: <=84 → inches; >100 → assume cm
-    if (/^\d+(\.\d+)?$/.test(s)) {
-      const n = parseFloat(s);
-      if (n > 100) return Math.round(n / 2.54);
-      return Math.round(n);
-    }
+    // simple inches number
+    const num = v.match(/^\d+(?:\.\d+)?$/);
+    if (num) return Math.round(parseFloat(v));
 
     return null;
   }
 
-  // ---- UI helpers ----
-  ui.file.addEventListener('change', () => {
-    const f = ui.file.files?.[0];
-    ui.fileName.textContent = f ? f.name : '(no file)';
-    if (f) log(`Selected: ${f.name}`);
-  });
+  async function postJSON(url, body) {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  }
 
-  ui.go.addEventListener('click', async () => {
+  async function s3Upload(presign, file) {
+    const fd = new FormData();
+    Object.entries(presign.fields).forEach(([k, val]) => fd.append(k, val));
+    fd.append('file', file);
+    const r = await fetch(presign.url, { method: 'POST', body: fd });
+    if (!(r.status === 204 || r.status === 201)) {
+      const t = await r.text().catch(()=>'');
+      throw new Error(`S3 upload failed (${r.status}): ${t}`);
+    }
+  }
+
+  async function onUpload() {
     try {
-      ui.go.disabled = true;
-      ui.go.textContent = 'Uploading…';
+      log('[upload v12] client JS loaded');
 
-      const f = ui.file.files?.[0];
-      if (!f) {
-        log('Error: please choose a video file.');
-        return;
+      const file = ui.file?.files?.[0];
+      if (!file) { log('Error: please choose a video.'); return; }
+
+      const inches = parseHeightToInches(ui.height?.value);
+      if (!inches || inches < 48 || inches > 84) {
+        log('Error: Height should be between 48 and 84 inches.'); return;
       }
 
-      // Height parse + bounds
-      const rawHeight = ui.heightIn.value;
-      const height = parseHeightToInches(rawHeight);
-      if (!height || height < 48 || height > 84) {
-        log('Error: Height should be between 48 and 84 inches.');
-        return;
-      }
-
-      // 1) Presign
+      log(`Selected: ${file.name}`);
       log('Requesting presign…');
-      const payload = {
-        filename: f.name,
-        type: f.type || 'video/mp4',
-        size: f.size,
-        meta: {
-          name: ui.name.value || '',
-          email: ui.email.value || '',
-          handicap: ui.hcp.value || '',
-          hand: ui.hand.value || '',
-          eye: ui.eye.value || '',
-          heightInches: height,
-        }
-      };
 
-      const presignRes = await fetch('/api/presign', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload),
+      // ask our API for presigned POST
+      const presign = await postJSON('/api/presign', {
+        filename: file.name,
+        type: file.type || 'video/mp4',
+        size: file.size,
+        // pass through the optional form fields (useful for the report):
+        name: (ui.name?.value || '').trim(),
+        email: (ui.email?.value || '').trim(),
+        handicap: (ui.hcap?.value || '').trim(),
+        hand: (ui.hand?.value || '').trim(),
+        eye: (ui.eye?.value || '').trim(),
+        height: String(inches)
       });
 
-      if (!presignRes.ok) {
-        const txt = await presignRes.text().catch(()=>'');
-        throw new Error(`/api/presign failed (${presignRes.status}) ${txt}`);
-      }
-      const presign = await presignRes.json();
-      if (!presign?.ok || !presign.url || !presign.fields) {
-        throw new Error('Invalid /api/presign response.');
-      }
+      if (!presign?.ok) throw new Error(presign?.error || 'presign failed');
 
-      // 2) Upload to S3
       log('Uploading to S3…');
-      const fd = new FormData();
-      // copy all fields returned by presign
-      Object.entries(presign.fields).forEach(([k,v]) => fd.append(k, v));
-      // important: the file part MUST be named exactly "file"
-      fd.append('file', f);
+      await s3Upload(presign, file);
 
-      const s3 = await fetch(presign.url, { method: 'POST', body: fd });
-      if (!(s3.status === 201 || s3.status === 204)) {
-        const errTxt = await s3.text().catch(()=> '');
-        throw new Error(`S3 upload failed (${s3.status}). ${errTxt}`);
-      }
+      // IMPORTANT: always open the report on *this* deployment’s origin
+      const viewer = new URL('/report.html', window.location.origin);
+      viewer.search = new URLSearchParams({
+        key: presign.key,
+        name: (ui.name?.value || '').trim(),
+        email: (ui.email?.value || '').trim(),
+        handicap: (ui.hcap?.value || '').trim(),
+        hand: (ui.hand?.value || '').trim(),
+        eye: (ui.eye?.value || '').trim(),
+        height: String(inches)
+      }).toString();
 
-      log('Upload OK.');
-      const viewer = presign.viewerUrl || `/report.html?key=${encodeURIComponent(presign.key)}`;
-      log(`Opening report…`);
-      window.location.href = viewer;
+      log('Opening report…');
+      window.location.href = viewer.toString();
     } catch (err) {
       console.error(err);
-      if (/CORS/i.test(String(err))) {
-        log('Error: CORS issue. Ensure your S3 bucket CORS allows this site origin.');
-      } else {
-        log(`Error: ${err.message || err}`);
-      }
-    } finally {
-      ui.go.disabled = false;
-      ui.go.textContent = 'Upload & Generate Report';
+      log(`Error: ${err?.message || err}`);
+      alert('Upload failed. Please try again.');
     }
+  }
+
+  // wire up
+  if (ui.btn) ui.btn.addEventListener('click', onUpload);
+  if (ui.file) ui.file.addEventListener('change', e => {
+    const f = e.currentTarget.files?.[0];
+    if (f) log(`Selected: ${f.name}`);
   });
 })();
+</script>
