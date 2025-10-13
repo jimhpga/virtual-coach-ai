@@ -2,35 +2,44 @@
 (function () {
   const $ = (s) => document.querySelector(s);
   const byId = (id) => document.getElementById(id);
-
   const qs = () => Object.fromEntries(new URLSearchParams(location.search).entries());
 
   async function getJSON(url) {
-    const r = await fetch(url, { headers: { accept: "application/json" } });
+    const r = await fetch(url, { headers: { accept: "application/json" }, cache: "no-store" });
     const t = await r.text();
     try { return JSON.parse(t); } catch { throw new Error(`Bad JSON: ${t}`); }
   }
 
   function setProgress(barId, lblId, val) {
     const n = Math.max(0, Math.min(100, Number(val) || 0));
-    byId(barId).style.width = n + "%";
-    byId(lblId).textContent = String(n);
+    const bar = byId(barId), lbl = byId(lblId);
+    if (bar) bar.style.width = n + "%";
+    if (lbl) lbl.textContent = `${n} / 100`;
   }
+
   function setList(id, arr) {
-    const el = byId(id); el.innerHTML = "";
-    (arr || []).forEach((x) => { const li = document.createElement("li"); li.textContent = x; el.appendChild(li);});
+    const el = byId(id); if (!el) return;
+    el.innerHTML = "";
+    (arr || []).forEach((x) => {
+      const li = document.createElement("li");
+      li.textContent = String(x);
+      el.appendChild(li);
+    });
   }
-  function setUl(id, arr) { setList(id, arr); }
+  const setUl = setList;
+
   function setBadges(id, badges) {
-    const row = byId(id); row.innerHTML = "";
+    const row = byId(id); if (!row) return;
+    row.innerHTML = "";
     (badges || []).forEach((b) => {
       const span = document.createElement("span");
       span.className = "badge";
-      span.textContent = b.title || b.label || b.id;
+      span.textContent = (b.title || b.label || b.id || b.code || "").toString().replace(/[-_]/g, " ");
       row.appendChild(span);
     });
   }
 
+  // --------- Shape A (legacy) ----------
   function renderShapeA(d) {
     const s = d.summary || {};
     setProgress("pwrBar", "pwrLbl", s.powerScore);
@@ -49,11 +58,12 @@
         : "";
   }
 
+  // --------- Shape B (wrapped report) ----------
   function renderShapeB(r) {
     const meta = r.meta || {};
     const sections = r.sections || {};
-    const pwr = r.summary?.powerScore ?? r.metrics?.powerScore;
-    const cons = r.summary?.consistency ?? r.metrics?.consistency;
+    const pwr = r.summary?.powerScore ?? r.metrics?.powerScore ?? 0;
+    const cons = r.summary?.consistency ?? r.metrics?.consistency ?? 0;
 
     setProgress("pwrBar", "pwrLbl", pwr);
     setProgress("consBar", "consLbl", cons);
@@ -72,22 +82,76 @@
     byId("meta").innerHTML = bits.join(" • ");
   }
 
+  // --------- Shape VC (your current API) ----------
+  function renderShapeVC(r) {
+    // meta/header
+    const when = r.ts ? new Date(r.ts) : new Date();
+    const parts = [
+      when.toLocaleDateString(),
+      r.mode ? `Mode: ${title(r.mode)}` : "",
+      r.sourceKey ? `<span class="mono">${r.sourceKey}</span>` : ""
+    ].filter(Boolean);
+    byId("meta").innerHTML = parts.join(" • ");
+
+    // scores
+    const pwr = r.swingScore ?? 0;
+    const cons = Math.round((r.swingScore ?? 0) * 0.9); // simple proxy until you add a real field
+    setProgress("pwrBar", "pwrLbl", pwr);
+    setProgress("consBar", "consLbl", cons);
+
+    // p-checkpoints → fundamentals list
+    const funds = (r.p_checkpoints || [])
+      .slice(0, 3)
+      .map(x => `P${x.p} — ${x.notes || x.label || ""}`);
+    setList("funds", funds);
+
+    // faults → errors list & badges
+    const errs = (r.faults || []).map(f => `${nice(f.code)}${f.severity ? ` (${f.severity})` : ""}`);
+    setList("errs", errs.slice(0, 3));
+    setBadges("badgeRow", r.faults);
+
+    // friendly placeholders until you return these arrays
+    setList("fixes", [
+      "Add vertical force earlier",
+      "Keep trail wrist bent through P6",
+      "Match face closer to path at P7"
+    ]);
+    setUl("exp", [
+      "Ball flight may start lower for a few sessions",
+      "Tempo can feel slower as mechanics improve",
+      "Contact consistency improves after 50–100 reps"
+    ]);
+    setUl("drillList", [
+      "Step-Through Drill",
+      "Pump to P6 Drill",
+      "Alignment Stick Side-Bend"
+    ]);
+
+    byId("coachCopy").textContent =
+      "Great foundation. Build verticals sooner and keep side-bend into P6. Expect straighter starts as face matches path.";
+  }
+
   function showPending(msg) {
     const p = byId("pending");
+    if (!p) return;
     p.style.display = "";
     p.innerHTML = `<div class="mono">${msg}</div>`;
   }
 
   function render(data) {
-    if (data.report) renderShapeB(data.report);
+    if (data?.report) renderShapeB(data.report);
+    else if ("swingScore" in data || "p_checkpoints" in data) renderShapeVC(data);
     else renderShapeA(data);
-    byId("pending").style.display = "none";
-    byId("report").style.display = "";
+
+    const pending = byId("pending"), report = byId("report");
+    if (pending) pending.style.display = "none";
+    if (report) report.style.display = "";
   }
 
   async function init() {
     const params = qs();
-    const key = params.key || "demo.mov";
+    // Your flow uses uploads/<date>/demo.mov; keep that default to match S3 keys you write
+    const key = params.key || "uploads/demo.mov";
     const demo = params.demo;
 
     const share = $("#share");
@@ -123,4 +187,7 @@
   }
 
   document.addEventListener("DOMContentLoaded", init);
+
+  function title(s){ return (s||"").replace(/-/g," ").replace(/\b\w/g,m=>m.toUpperCase()); }
+  function nice(s){ return (s||"").replace(/[-_]/g," ").replace(/\b\w/g,m=>m.toUpperCase()); }
 })();
