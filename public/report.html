@@ -1,7 +1,8 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Swing Report | Virtual Coach AI</title>
   <link rel="icon" href="/favicon.ico"/>
@@ -18,8 +19,9 @@
     body{
       margin:0; color:var(--text); background:var(--bg);
       font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-      background-image: radial-gradient(1200px 600px at 10% -20%, rgba(255,255,255,.05), transparent 60%),
-                       radial-gradient(1200px 600px at 110% -20%, rgba(255,255,255,.05), transparent 60%);
+      background-image:
+        radial-gradient(1200px 600px at 10% -20%, rgba(255,255,255,.05), transparent 60%),
+        radial-gradient(1200px 600px at 110% -20%, rgba(255,255,255,.05), transparent 60%);
     }
     .wrap{max-width:1100px;margin:28px auto;padding:0 16px}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -54,8 +56,8 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="title">
-      <h1>Virtual Coach AI â€” Swing Report</h1>
+    <div class="title" role="banner">
+      <h1>Virtual Coach AI &mdash; Swing Report</h1>
       <div class="row">
         <a class="pill" href="/upload.html">Upload another</a>
         <a class="pill" id="share" href="#">Copy share link</a>
@@ -64,7 +66,7 @@
 
     <div id="meta" class="muted" style="margin-bottom:10px;"></div>
 
-    <div class="card">
+    <div class="card" aria-label="Controls">
       <div class="row" style="gap:12px;align-items:center;">
         <div>
           <label class="muted" for="teacher">Teacher voice</label><br/>
@@ -79,8 +81,8 @@
           <select id="baseline"></select>
         </div>
         <div class="row">
-          <button id="setBaseline" class="btn">Set current as baseline</button>
-          <button id="clearBaseline" class="ghost">Clear baseline</button>
+          <button id="setBaseline" class="btn" type="button">Set current as baseline</button>
+          <button id="clearBaseline" class="ghost" type="button">Clear baseline</button>
         </div>
       </div>
     </div>
@@ -97,17 +99,16 @@
               <div class="progress" title="Power Score">
                 <div class="bar" id="pwrBar" style="width:0%"></div>
               </div>
-              <div class="mono" id="pwrLbl">â€”</div>
+              <div class="mono" id="pwrLbl">&mdash;</div>
             </div>
             <div style="min-width:220px">
               <div class="muted small">Consistency</div>
               <div class="progress" title="Consistency">
                 <div class="bar" id="consBar" style="width:0%"></div>
               </div>
-              <div class="mono" id="consLbl">â€”</div>
+              <div class="mono" id="consLbl">&mdash;</div>
             </div>
           </div>
-
           <div id="deltas" style="margin-top:10px"></div>
         </div>
 
@@ -150,7 +151,8 @@
     </div>
   </div>
 
-  <!-- All logic in external script to avoid inline multi-line strings -->
+  <!-- All logic in external script to avoid encoding issues in inline strings -->
   <script src="/report.client.js?v=6" defer></script>
 </body>
 </html>
+
