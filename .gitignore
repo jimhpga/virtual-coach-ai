@@ -28,3 +28,7 @@ api/*.js
 api/*.mjs
 api/*.cjs
 api/*.map
+api/*.js
+api/*.mjs
+api/*.cjs
+api/*.map
