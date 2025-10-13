@@ -1,7 +1,6 @@
 {
-  "routes": [
-    { "src": "^/api/(.*)$", "dest": "/api/$1" },
-    { "src": "^/(faq|pricing|upload|report|contact|login|about|analyze|reports?)/?$", "dest": "/public/$1.html" },
-    { "src": "^/$", "dest": "/public/index.html" }
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/:path*" }
   ]
 }
