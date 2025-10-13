@@ -1,4 +1,4 @@
-{
+﻿{
   "redirects": [
     { "source": "/upload", "destination": "/upload.html", "permanent": false },
     { "source": "/report", "destination": "/report.html", "permanent": false }
