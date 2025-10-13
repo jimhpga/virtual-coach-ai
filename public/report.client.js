@@ -1,51 +1,28 @@
-// report.client.js  (serve from site root: /report.client.js)
-// Renders the Swing Report from /api/report?key=... (supports demo=1)
-
+// public/report.client.js
 (function () {
-  const $ = (sel) => document.querySelector(sel);
+  const $ = (s) => document.querySelector(s);
   const byId = (id) => document.getElementById(id);
 
-  function qs() {
-    const out = {};
-    for (const [k, v] of new URLSearchParams(location.search).entries()) out[k] = v;
-    return out;
-  }
+  const qs = () => Object.fromEntries(new URLSearchParams(location.search).entries());
 
   async function getJSON(url) {
-    const r = await fetch(url, { headers: { "accept": "application/json" } });
-    const txt = await r.text();
-    try { return JSON.parse(txt); } catch { throw new Error(`Bad JSON: ${txt}`); }
+    const r = await fetch(url, { headers: { accept: "application/json" } });
+    const t = await r.text();
+    try { return JSON.parse(t); } catch { throw new Error(`Bad JSON: ${t}`); }
   }
 
-  function setProgress(idBar, idLbl, val) {
-    const pct = Math.max(0, Math.min(100, Number(val) || 0));
-    byId(idBar).style.width = pct + "%";
-    byId(idLbl).textContent = `${pct}`;
+  function setProgress(barId, lblId, val) {
+    const n = Math.max(0, Math.min(100, Number(val) || 0));
+    byId(barId).style.width = n + "%";
+    byId(lblId).textContent = String(n);
   }
-
-  function setList(olId, items) {
-    const el = byId(olId);
-    el.innerHTML = "";
-    (items || []).forEach((t) => {
-      const li = document.createElement("li");
-      li.textContent = t;
-      el.appendChild(li);
-    });
+  function setList(id, arr) {
+    const el = byId(id); el.innerHTML = "";
+    (arr || []).forEach((x) => { const li = document.createElement("li"); li.textContent = x; el.appendChild(li);});
   }
-
-  function setUl(ulId, items) {
-    const el = byId(ulId);
-    el.innerHTML = "";
-    (items || []).forEach((t) => {
-      const li = document.createElement("li");
-      li.textContent = t;
-      el.appendChild(li);
-    });
-  }
-
-  function setBadges(rowId, badges) {
-    const row = byId(rowId);
-    row.innerHTML = "";
+  function setUl(id, arr) { setList(id, arr); }
+  function setBadges(id, badges) {
+    const row = byId(id); row.innerHTML = "";
     (badges || []).forEach((b) => {
       const span = document.createElement("span");
       span.className = "badge";
@@ -54,62 +31,45 @@
     });
   }
 
-  function text(id, v) { const el = byId(id); if (el) el.textContent = v ?? ""; }
-
-  function fillFromShapeA(data) {
-    // Shape A -> fields at top-level (demo from /api/report earlier)
-    const s = data.summary || {};
+  function renderShapeA(d) {
+    const s = d.summary || {};
     setProgress("pwrBar", "pwrLbl", s.powerScore);
     setProgress("consBar", "consLbl", s.consistency);
-    setList("funds", data.fundamentals);
-    setList("errs", data.errors);
-    setList("fixes", data.quickFixes);
-    setUl("exp", data.expectations);
-    setUl("drillList", data.drills);
-    setBadges("badgeRow", data.badges);
-    text("coachCopy", data.coachCopy || "");
-    const deltas = data.deltas || {};
+    setList("funds", d.fundamentals);
+    setList("errs", d.errors);
+    setList("fixes", d.quickFixes);
+    setUl("exp", d.expectations);
+    setUl("drillList", d.drills);
+    setBadges("badgeRow", d.badges);
+    byId("coachCopy").textContent = d.coachCopy || "";
+    const deltas = d.deltas || {};
     byId("deltas").innerHTML =
       (deltas.powerScore || deltas.consistency)
         ? `<span class="mono">Δ Power: ${deltas.powerScore ?? 0} • Δ Consistency: ${deltas.consistency ?? 0}</span>`
         : "";
   }
 
-  function fillFromShapeB(report) {
-    // Shape B -> nested under report.meta / report.sections (newer demo)
-    const meta = report.meta || {};
-    const sections = report.sections || {};
-    const pwr = (report.summary && report.summary.powerScore)
-      || (report.metrics && report.metrics.powerScore);
-    const cons = (report.summary && report.summary.consistency)
-      || (report.metrics && report.metrics.consistency);
+  function renderShapeB(r) {
+    const meta = r.meta || {};
+    const sections = r.sections || {};
+    const pwr = r.summary?.powerScore ?? r.metrics?.powerScore;
+    const cons = r.summary?.consistency ?? r.metrics?.consistency;
 
     setProgress("pwrBar", "pwrLbl", pwr);
     setProgress("consBar", "consLbl", cons);
-
     setList("funds", sections.fundamentalsTop3 || []);
     setList("errs", sections.powerErrorsTop3 || []);
     setList("fixes", sections.quickFixesTop3 || []);
-    setUl("exp", report.expectations || []);
-    setUl("drillList", sections.drills || report.drills || []);
-    setBadges("badgeRow", report.badges || []);
-    text("coachCopy", (report.teacherVoice && report.teacherVoice.sample) || report.coachCopy || "");
+    setUl("exp", r.expectations || []);
+    setUl("drillList", sections.drills || r.drills || []);
+    setBadges("badgeRow", r.badges || []);
+    byId("coachCopy").textContent = r.teacherVoice?.sample || r.coachCopy || "";
 
-    // header meta
-    const k = meta.key ? ` — <span class="mono">${meta.key}</span>` : "";
-    const dateStr = meta.date ? `Date: ${meta.date}` : "";
-    byId("meta").innerHTML = [dateStr, meta.mode].filter(Boolean).join(" • ") + k;
-  }
-
-  function render(data) {
-    // Try both shapes
-    if (data && data.report) {
-      fillFromShapeB(data.report);
-    } else {
-      fillFromShapeA(data);
-    }
-    byId("pending").style.display = "none";
-    byId("report").style.display = "";
+    const bits = [];
+    if (meta.date) bits.push(`Date: ${meta.date}`);
+    if (meta.mode) bits.push(meta.mode);
+    if (meta.key) bits.push(`<span class="mono">${meta.key}</span>`);
+    byId("meta").innerHTML = bits.join(" • ");
   }
 
   function showPending(msg) {
@@ -118,47 +78,46 @@
     p.innerHTML = `<div class="mono">${msg}</div>`;
   }
 
+  function render(data) {
+    if (data.report) renderShapeB(data.report);
+    else renderShapeA(data);
+    byId("pending").style.display = "none";
+    byId("report").style.display = "";
+  }
+
   async function init() {
     const params = qs();
     const key = params.key || "demo.mov";
     const demo = params.demo;
 
-    // update share link
     const share = $("#share");
     if (share) {
       share.addEventListener("click", (e) => {
         e.preventDefault();
-        const url = location.href;
-        navigator.clipboard?.writeText(url);
+        navigator.clipboard?.writeText(location.href);
         share.textContent = "Copied!";
-        setTimeout(() => (share.textContent = "Copy share link"), 1500);
+        setTimeout(() => (share.textContent = "Copy share link"), 1200);
       });
     }
 
     showPending("Loading report…");
 
-    const u = new URL("/api/report", location.origin);
-    u.searchParams.set("key", key);
-    if (demo) u.searchParams.set("demo", demo);
+    const url = new URL("/api/report", location.origin);
+    url.searchParams.set("key", key);
+    if (demo) url.searchParams.set("demo", demo);
 
     const start = Date.now();
     while (true) {
       try {
-        const data = await getJSON(u.toString());
-        if (data && data.ok) { render(data); return; }
-        if (data && data.error === "NOT_READY") {
-          showPending("Analyzing your swing… (refreshes every 5s)");
-        } else {
-          showPending(`Waiting… ${data && data.error ? data.error : ""}`);
-        }
+        const data = await getJSON(url.toString());
+        if (data?.ok) { render(data); return; }
+        if (data?.error === "NOT_READY") showPending("Analyzing your swing… (auto-refreshing)");
+        else showPending("Waiting on analysis…");
       } catch (e) {
-        showPending("Problem loading the report.");
         console.warn(e);
+        showPending("Problem loading the report.");
       }
-      if (Date.now() - start > 60000) { // give up after 60s
-        showPending("Analysis still processing. Check back soon.");
-        return;
-      }
+      if (Date.now() - start > 60000) { showPending("Still processing — check back soon."); return; }
       await new Promise((r) => setTimeout(r, 5000));
     }
   }
