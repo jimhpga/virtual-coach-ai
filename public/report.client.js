@@ -1,186 +1,167 @@
-// public/report.client.js  (v5)
-(() => {
-  const qs = new URLSearchParams(location.search);
-  const key = qs.get("key") || "demo.mov";
-  const demo = qs.get("demo"); // "1" if present
+// report.client.js  (serve from site root: /report.client.js)
+// Renders the Swing Report from /api/report?key=... (supports demo=1)
 
-  // ---------- helpers ----------
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+(function () {
+  const $ = (sel) => document.querySelector(sel);
   const byId = (id) => document.getElementById(id);
 
-  function ensureListAfterHeading(headingText, preferId) {
-    // Prefer a specific container ID if your newer report.html has it.
-    if (preferId && byId(preferId)) return byId(preferId);
-
-    // Otherwise find any element that looks like a section heading and insert a list after it.
-    const h = $$(".wrap *")
-      .find((el) => {
-        const t = (el.textContent || "").trim().toLowerCase();
-        return (
-          ["h2", "h3", "div", "span", "p"].includes(el.tagName.toLowerCase()) &&
-          t.includes(headingText.toLowerCase())
-        );
-      });
-
-    if (!h) {
-      // Fallback to a container near bottom if nothing found
-      const fallback = document.createElement("ul");
-      document.body.appendChild(fallback);
-      return fallback;
-    }
-
-    // If next sibling is already a list, reuse it.
-    const next = h.nextElementSibling;
-    if (next && /^(ul|ol)$/i.test(next.tagName)) return next;
-
-    const list = document.createElement("ul");
-    list.style.margin = "8px 0 0 0";
-    list.style.paddingLeft = "18px";
-    h.insertAdjacentElement("afterend", list);
-    return list;
+  function qs() {
+    const out = {};
+    for (const [k, v] of new URLSearchParams(location.search).entries()) out[k] = v;
+    return out;
   }
 
-  function setList(listEl, items) {
-    if (!listEl) return;
-    listEl.innerHTML = "";
-    (items || []).forEach((txt) => {
+  async function getJSON(url) {
+    const r = await fetch(url, { headers: { "accept": "application/json" } });
+    const txt = await r.text();
+    try { return JSON.parse(txt); } catch { throw new Error(`Bad JSON: ${txt}`); }
+  }
+
+  function setProgress(idBar, idLbl, val) {
+    const pct = Math.max(0, Math.min(100, Number(val) || 0));
+    byId(idBar).style.width = pct + "%";
+    byId(idLbl).textContent = `${pct}`;
+  }
+
+  function setList(olId, items) {
+    const el = byId(olId);
+    el.innerHTML = "";
+    (items || []).forEach((t) => {
       const li = document.createElement("li");
-      li.textContent = txt;
-      listEl.appendChild(li);
+      li.textContent = t;
+      el.appendChild(li);
     });
   }
 
-  function fillBars(summary) {
-    // Works only if your newer report.html has these IDs; otherwise skip.
-    const pwrBar = byId("pwrBar");
-    const consBar = byId("consBar");
-    const pwrLbl = byId("pwrLbl");
-    const consLbl = byId("consLbl");
-    if (summary?.powerScore != null && pwrBar) {
-      const v = Math.max(0, Math.min(100, Number(summary.powerScore)));
-      pwrBar.style.width = `${v}%`;
-      if (pwrLbl) pwrLbl.textContent = `${v}`;
-    }
-    if (summary?.consistency != null && consBar) {
-      const v = Math.max(0, Math.min(100, Number(summary.consistency)));
-      consBar.style.width = `${v}%`;
-      if (consLbl) consLbl.textContent = `${v}`;
-    }
-  }
-
-  function setTextAfterHeading(headingText, copy, preferId) {
-    if (preferId && byId(preferId)) {
-      byId(preferId).textContent = copy ?? "";
-      return;
-    }
-    const h = $$(".wrap *").find((el) => {
-      const t = (el.textContent || "").trim().toLowerCase();
-      return (
-        ["h2", "h3", "div", "span", "p"].includes(el.tagName.toLowerCase()) &&
-        t.includes(headingText.toLowerCase())
-      );
+  function setUl(ulId, items) {
+    const el = byId(ulId);
+    el.innerHTML = "";
+    (items || []).forEach((t) => {
+      const li = document.createElement("li");
+      li.textContent = t;
+      el.appendChild(li);
     });
-    if (!h) return;
-    const p = document.createElement("p");
-    p.textContent = copy ?? "";
-    p.style.margin = "8px 0 0 0";
-    h.insertAdjacentElement("afterend", p);
   }
 
-  // ---------- fetch + render ----------
-  async function fetchReport() {
-    const url = new URL("/api/report", location.origin);
-    url.searchParams.set("key", key);
-    if (demo) url.searchParams.set("demo", demo);
-    const r = await fetch(url, { cache: "no-store" });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.json();
+  function setBadges(rowId, badges) {
+    const row = byId(rowId);
+    row.innerHTML = "";
+    (badges || []).forEach((b) => {
+      const span = document.createElement("span");
+      span.className = "badge";
+      span.textContent = b.title || b.label || b.id;
+      row.appendChild(span);
+    });
   }
 
-  function render(payload) {
-    // Shape for demo
-    // { ok:true, source:"demo", report: { meta, checkpoints, sections:{...}, expectations, teacherVoice, badges, ... } }
-    const data = payload?.report || payload;
+  function text(id, v) { const el = byId(id); if (el) el.textContent = v ?? ""; }
 
-    // Meta / header
-    const metaEl = byId("meta");
-    if (metaEl && data?.meta) {
-      const m = data.meta;
-      const bits = [];
-      if (m.title) bits.push(m.title);
-      if (m.date) bits.push(m.date);
-      if (m.mode) bits.push(`Mode: ${m.mode}`);
-      if (m.key)  bits.push(`Key: ${m.key}`);
-      metaEl.textContent = bits.join(" • ");
+  function fillFromShapeA(data) {
+    // Shape A -> fields at top-level (demo from /api/report earlier)
+    const s = data.summary || {};
+    setProgress("pwrBar", "pwrLbl", s.powerScore);
+    setProgress("consBar", "consLbl", s.consistency);
+    setList("funds", data.fundamentals);
+    setList("errs", data.errors);
+    setList("fixes", data.quickFixes);
+    setUl("exp", data.expectations);
+    setUl("drillList", data.drills);
+    setBadges("badgeRow", data.badges);
+    text("coachCopy", data.coachCopy || "");
+    const deltas = data.deltas || {};
+    byId("deltas").innerHTML =
+      (deltas.powerScore || deltas.consistency)
+        ? `<span class="mono">Δ Power: ${deltas.powerScore ?? 0} • Δ Consistency: ${deltas.consistency ?? 0}</span>`
+        : "";
+  }
+
+  function fillFromShapeB(report) {
+    // Shape B -> nested under report.meta / report.sections (newer demo)
+    const meta = report.meta || {};
+    const sections = report.sections || {};
+    const pwr = (report.summary && report.summary.powerScore)
+      || (report.metrics && report.metrics.powerScore);
+    const cons = (report.summary && report.summary.consistency)
+      || (report.metrics && report.metrics.consistency);
+
+    setProgress("pwrBar", "pwrLbl", pwr);
+    setProgress("consBar", "consLbl", cons);
+
+    setList("funds", sections.fundamentalsTop3 || []);
+    setList("errs", sections.powerErrorsTop3 || []);
+    setList("fixes", sections.quickFixesTop3 || []);
+    setUl("exp", report.expectations || []);
+    setUl("drillList", sections.drills || report.drills || []);
+    setBadges("badgeRow", report.badges || []);
+    text("coachCopy", (report.teacherVoice && report.teacherVoice.sample) || report.coachCopy || "");
+
+    // header meta
+    const k = meta.key ? ` — <span class="mono">${meta.key}</span>` : "";
+    const dateStr = meta.date ? `Date: ${meta.date}` : "";
+    byId("meta").innerHTML = [dateStr, meta.mode].filter(Boolean).join(" • ") + k;
+  }
+
+  function render(data) {
+    // Try both shapes
+    if (data && data.report) {
+      fillFromShapeB(data.report);
+    } else {
+      fillFromShapeA(data);
     }
+    byId("pending").style.display = "none";
+    byId("report").style.display = "";
+  }
 
-    // Bars (if present in your DOM)
-    fillBars(data?.summary);
-
-    // Sections mapping
-    const S = data?.sections || {};
-    setList(ensureListAfterHeading("Position Consistency", "positionConsistencyList"), S.positionConsistency);
-    setList(ensureListAfterHeading("Swing Consistency", "swingConsistencyList"), S.swingConsistency);
-    setList(ensureListAfterHeading("Power Score Summary", "powerScoreSummaryList"), S.powerScoreSummary);
-    setList(ensureListAfterHeading("Top 3 Fundamentals", "funds"), S.fundamentalsTop3);
-    setList(ensureListAfterHeading("Top 3 Power Errors", "errs"), S.powerErrorsTop3);
-    setList(ensureListAfterHeading("Top 3 Quick Fixes", "fixes"), S.quickFixesTop3);
-    setList(ensureListAfterHeading("Faults", "faultsList"), S.faults);
-    setList(ensureListAfterHeading("Drills", "drillList"), S.drills);
-
-    // Expectations (if you have a dedicated section)
-    if (Array.isArray(data?.expectations) && data.expectations.length) {
-      setList(ensureListAfterHeading("What to Expect", "exp"), data.expectations);
-    }
-
-    // Teacher voice / coach copy
-    if (data?.teacherVoice?.sample) {
-      setTextAfterHeading("Your Coach Says", data.teacherVoice.sample, "coachCopy");
-    }
-
-    // Badges (simple chips if a “badgeRow” exists)
-    const badgeRow = byId("badgeRow");
-    if (badgeRow && Array.isArray(data?.badges)) {
-      badgeRow.innerHTML = "";
-      data.badges.forEach((b) => {
-        const span = document.createElement("span");
-        span.textContent = b.title || b.id;
-        span.className = "badge";
-        if (!b.earned) span.style.opacity = "0.55";
-        badgeRow.appendChild(span);
-      });
-    }
-
-    // Done
+  function showPending(msg) {
+    const p = byId("pending");
+    p.style.display = "";
+    p.innerHTML = `<div class="mono">${msg}</div>`;
   }
 
   async function init() {
-    try {
-      const json = await fetchReport();
+    const params = qs();
+    const key = params.key || "demo.mov";
+    const demo = params.demo;
 
-      if (json?.ok) {
-        render(json);
+    // update share link
+    const share = $("#share");
+    if (share) {
+      share.addEventListener("click", (e) => {
+        e.preventDefault();
+        const url = location.href;
+        navigator.clipboard?.writeText(url);
+        share.textContent = "Copied!";
+        setTimeout(() => (share.textContent = "Copy share link"), 1500);
+      });
+    }
+
+    showPending("Loading report…");
+
+    const u = new URL("/api/report", location.origin);
+    u.searchParams.set("key", key);
+    if (demo) u.searchParams.set("demo", demo);
+
+    const start = Date.now();
+    while (true) {
+      try {
+        const data = await getJSON(u.toString());
+        if (data && data.ok) { render(data); return; }
+        if (data && data.error === "NOT_READY") {
+          showPending("Analyzing your swing… (refreshes every 5s)");
+        } else {
+          showPending(`Waiting… ${data && data.error ? data.error : ""}`);
+        }
+      } catch (e) {
+        showPending("Problem loading the report.");
+        console.warn(e);
+      }
+      if (Date.now() - start > 60000) { // give up after 60s
+        showPending("Analysis still processing. Check back soon.");
         return;
       }
-
-      // For real analyzer path: poll while NOT_READY (demo should never hit this)
-      const t0 = Date.now();
-      while (json?.error === "NOT_READY") {
-        if (Date.now() - t0 > 60000) {
-          alert("Analysis still processing. Check back soon.");
-          return;
-        }
-        await new Promise((r) => setTimeout(r, 3000));
-        const again = await fetchReport();
-        if (again?.ok) { render(again); return; }
-      }
-
-      alert(`Problem loading report: ${json?.error || "Unknown"}`);
-    } catch (err) {
-      console.error(err);
-      alert("Problem loading the report.");
+      await new Promise((r) => setTimeout(r, 5000));
     }
   }
 
-  init();
+  document.addEventListener("DOMContentLoaded", init);
 })();
