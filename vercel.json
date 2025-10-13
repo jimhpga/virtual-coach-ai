@@ -1,5 +1,8 @@
 {
-  "cleanUrls": true,
+  "redirects": [
+    { "source": "/upload", "destination": "/upload.html", "permanent": false },
+    { "source": "/report", "destination": "/report.html", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/:path*" }
   ]
