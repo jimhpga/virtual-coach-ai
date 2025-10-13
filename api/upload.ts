@@ -1,54 +1,38 @@
 // api/upload.ts
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-export const config = { runtime: "nodejs18.x" }; // force Node, not Edge
+export const config = { runtime: 'nodejs' };
 
 const REGION = process.env.AWS_REGION!;
 const BUCKET = process.env.S3_BUCKET!;
 const s3 = new S3Client({ region: REGION });
 
-function cors(res: ResponseInit = {}): ResponseInit {
-  return {
-    ...res,
-    headers: {
-      "Access-Control-Allow-Origin": "https://virtualcoachai.net",
-      "Access-Control-Allow-Methods": "POST,OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type,Authorization",
-      ...(res.headers as any),
-    },
-  };
+function allowCORS(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Origin', 'https://virtualcoachai.net');
+  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  if (req.method === 'OPTIONS') { res.status(204).end(); return true; }
+  return false;
 }
 
-export default async function handler(req: Request) {
-  if (req.method === "OPTIONS") return new Response(null, cors({ status: 204 }));
-  if (req.method !== "POST") return new Response("Method Not Allowed", cors({ status: 405 }));
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (allowCORS(req, res)) return;
+  if (req.method !== 'POST') return res.status(405).send('Method Not Allowed');
 
   try {
-    // Optional: client can suggest a filename; we’ll place it under uploads/
-    const body = await safeJson(req);
-    const filename = (body?.filename || `vid-${Date.now()}.mp4`).replace(/[^-\w.]/g, "");
-    const key = `uploads/${new Date().toISOString().slice(0,10)}/${filename}`;
+    const filenameIn = (req.body?.filename ?? `vid-${Date.now()}.mp4`) as string;
+    const filename = filenameIn.replace(/[^-\w.]/g, '');
+    const day = new Date().toISOString().slice(0,10);
+    const key = `uploads/${day}/${filename}`;
 
-    const cmd = new PutObjectCommand({
-      Bucket: BUCKET,
-      Key: key,
-      ContentType: "video/mp4", // adjust if needed
-    });
-    const url = await getSignedUrl(s3, cmd, { expiresIn: 60 * 5 }); // 5 min
+    const cmd = new PutObjectCommand({ Bucket: BUCKET, Key: key, ContentType: 'video/mp4' });
+    const url = await getSignedUrl(s3, cmd, { expiresIn: 300 });
 
-    return json({ ok: true, url, key }, 200);
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json({ ok: true, url, key });
   } catch (e:any) {
-    return json({ ok: false, error: e.message ?? "UPLOAD_PRESIGN_ERROR" }, 500);
+    return res.status(500).json({ ok: false, error: e.message ?? 'UPLOAD_PRESIGN_ERROR' });
   }
-}
-
-async function safeJson(req: Request) {
-  try { return await req.json(); } catch { return null; }
-}
-function json(data: any, status=200) {
-  return new Response(JSON.stringify(data), cors({
-    status,
-    headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
-  }));
 }
