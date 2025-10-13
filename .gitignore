@@ -24,3 +24,7 @@ docs/access keys.txt
 *.bak*
 *backup*
 *.bak-*
+api/*.js
+api/*.mjs
+api/*.cjs
+api/*.map
