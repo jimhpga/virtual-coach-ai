@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 // public/report.client.js
 (function () {
   const $ = (s) => document.querySelector(s);
@@ -191,3 +192,6 @@
   function title(s){ return (s||"").replace(/-/g," ").replace(/\b\w/g,m=>m.toUpperCase()); }
   function nice(s){ return (s||"").replace(/[-_]/g," ").replace(/\b\w/g,m=>m.toUpperCase()); }
 })();
+=======
+﻿<PASTE THE NEW JS FROM MY LAST MESSAGE HERE>
+>>>>>>> Stashed changes
