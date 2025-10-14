@@ -1,19 +1,64 @@
-// /public/upload.client.js
+// /public/upload.client.js  (Mux + Blob)
+// No tokens in here. They live server-side.
 (function () {
-  console.log("[upload v12] client JS loaded");
-  const form = document.querySelector("#upload-form");
-  const input = document.querySelector("#file");
-  const log = (m) => (document.querySelector("#log").textContent = m ?? "");
+  console.log("[upload mux v2] client JS loaded");
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const file = input.files?.[0];
-    if (!file) return (log("Choose a video first."));
+  const $ = (s) => document.querySelector(s);
+  const fileInput = $("#fileInput");
+  const fileLabel = $("#fileLabel");
+  const btn = $("#uploadBtn");
+  const logEl = $("#log");
 
+  const fields = {
+    name:   $("#name"),
+    email:  $("#email"),
+    hcap:   $("#handicap"),
+    handed: $("#handed"),
+    eye:    $("#eye"),
+    height: $("#height")
+  };
+
+  const log  = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
+  const busy = (on) => { if(btn) btn.disabled = on; if(fileInput) fileInput.disabled = on; Object.values(fields).forEach(el => el && (el.disabled = on)); };
+
+  fileInput?.addEventListener("change", (e) => {
+    const f = e.target.files?.[0];
+    if (fileLabel) fileLabel.textContent = f ? `${f.name}` : "(no file)";
+    if (f) log("Selected: " + f.name);
+  });
+
+  function readForm() {
+    return {
+      name:   (fields.name?.value || "").trim(),
+      email:  (fields.email?.value || "").trim(),
+      hcap:   (fields.hcap?.value || "").trim(),
+      handed: (fields.handed?.value || "").trim(),
+      eye:    (fields.eye?.value || "").trim(),
+      height: (fields.height?.value || "").trim()
+    };
+  }
+
+  function validateHeight(h) {
+    if (!h) return "Height is required.";
+    const n = Number(h);
+    if (!Number.isFinite(n)) return "Height must be a number.";
+    if (n < 48 || n > 84) return "Height should be between 48 and 84 inches.";
+    return "";
+  }
+
+  btn?.addEventListener("click", async () => {
+    const file = fileInput?.files?.[0];
+    if (!file) { log("Pick a video first."); return; }
+
+    const data = readForm();
+    const heightError = validateHeight(data.height);
+    if (heightError) { log("Error: " + heightError); return; }
+
+    busy(true);
     try {
       log("Requesting Mux upload URL…");
       const { upload } = await fetch("/api/mux-direct-upload", { method: "POST" }).then(r => r.json());
-      if (!upload?.url) throw new Error("No Mux upload URL");
+      if (!upload?.url) throw new Error("Mux upload URL missing");
 
       log("Uploading to Mux (this can take a minute)...");
       const put = await fetch(upload.url, { method: "PUT", body: file });
@@ -26,18 +71,23 @@
         body: JSON.stringify({
           status: "ready",
           swingScore: 80,
-          muxPlaybackId: null,     // not known yet
-          muxUploadId: upload.id,  // tiny poller will resolve to playback_id
+          muxPlaybackId: null,     // resolved later by tiny poller
+          muxUploadId: upload.id,  // used by /api/resolve-mux
           p1p9: [],
           faults: [],
-          note: `uploaded ${file.name}`
+          note: `uploaded ${file.name}`,
+          // Optional: persist the golfer fields in your report
+          meta: { ...data }
         })
       }).then(r => r.json());
 
       if (!rep?.id) throw new Error("Report save failed");
-      location.href = `/report?id=${encodeURIComponent(rep.id)}`;
-    } catch (err) {
-      log(String(err?.message || err));
+      log("Opening report view…");
+      location.assign(`/report?id=${encodeURIComponent(rep.id)}`);
+    } catch (e) {
+      log("Error: " + (e?.message || e));
+      busy(false);
     }
   });
 })();
+
