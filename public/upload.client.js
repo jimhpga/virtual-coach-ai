@@ -1,4 +1,6 @@
+// [upload mux v1] — forces new code path
 (function () {
+  console.log("[upload mux v1] client JS loaded");
   const form = document.querySelector("#upload-form");
   const input = document.querySelector("#file");
   const log = (m) => (document.querySelector("#log").textContent = m ?? "");
@@ -24,8 +26,8 @@
         body: JSON.stringify({
           status: "ready",
           swingScore: 80,
-          muxPlaybackId: null,     // not known yet
-          muxUploadId: upload.id,  // used by tiny poller
+          muxPlaybackId: null,
+          muxUploadId: upload.id,   // poller will resolve to playback_id
           p1p9: [],
           faults: [],
           note: `uploaded ${file.name}`
