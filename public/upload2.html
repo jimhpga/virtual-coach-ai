@@ -1,0 +1,53 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Upload2 • Virtual Coach AI</title>
+<body style="font-family:system-ui;margin:2rem;max-width:820px">
+  <h1>Upload2 Test</h1>
+  <form>
+    <input id="file" type="file" accept="video/*" />
+    <button id="uploadBtn" type="button">Upload & Analyze</button>
+  </form>
+  <pre id="log" style="margin-top:1rem;color:#555;white-space:pre-wrap"></pre>
+
+  <script>
+  // [upload mux TEST] inline, no S3, blocks other handlers
+  (function () {
+    console.log("[upload mux TEST] client JS loaded");
+    const $ = s => document.querySelector(s);
+    const file = $("#file");
+    const btn = $("#uploadBtn");
+    const logEl = $("#log");
+    const log = m => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; };
+
+    btn.addEventListener("click", async (e) => {
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+      const f = file.files?.[0];
+      if (!f) return log("Pick a video first.");
+
+      try {
+        log("Requesting Mux upload URL…");
+        const r1 = await fetch("/api/mux-direct-upload", { method:"POST" });
+        const j1 = await r1.json(); const up = j1?.upload;
+        if (!r1.ok || !up?.url) throw new Error("Mux upload URL missing");
+
+        log("Uploading to Mux…");
+        const r2 = await fetch(up.url, { method:"PUT", body:f });
+        if (!r2.ok) throw new Error(`Mux upload failed (${r2.status})`);
+
+        log("Saving report JSON…");
+        const r3 = await fetch("/api/save-report", {
+          method:"POST", headers:{ "content-type":"application/json" },
+          body: JSON.stringify({
+            status:"ready", swingScore:80,
+            muxPlaybackId:null, muxUploadId:up.id,
+            p1p9:[], faults:[], note:`uploaded ${f.name}`
+          })
+        });
+        const j3 = await r3.json();
+        if (!r3.ok || !j3?.id) throw new Error("Report save failed");
+        location.assign(`/report?id=${encodeURIComponent(j3.id)}`);
+      } catch (err) { log("Error: " + (err?.message || err)); }
+    });
+  })();
+  </script>
+</body>
