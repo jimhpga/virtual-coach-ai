@@ -1,9 +1,9 @@
 {
-  "redirects": [
-    { "source": "/upload", "destination": "/upload.html", "permanent": false },
-    { "source": "/report", "destination": "/report.html", "permanent": false }
-  ],
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/:path*" }
+  "version": 2,
+  "routes": [
+    { "src": "^/api/(.*)$", "dest": "/api/$1" },
+    { "src": "^/(faq|pricing|upload|report|contact|login|about|analyze|reports?)/?$", "dest": "/public/$1.html" },
+    { "src": "^/$", "dest": "/public/index.html" },
+    { "src": "^/(.*)$", "dest": "/public/$1" }
   ]
 }
