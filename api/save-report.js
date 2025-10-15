@@ -25,21 +25,22 @@ export default async function handler(req, res) {
       muxUploadId: body.muxUploadId ?? null,
       p1p9: Array.isArray(body.p1p9) ? body.p1p9 : [],
       faults: Array.isArray(body.faults) ? body.faults : [],
-      note: body.note || ""
+      note: body.note || "",
+      meta: body.meta || {}
     };
 
-    // write JSON to Blob (public)
+    // Write to Vercel Blob (public)
     const { url } = await put(key, JSON.stringify(report), {
       access: "public",
-      contentType: "application/json",
+      contentType: "application/json"
     });
 
     return res.status(200).json({ id, url });
   } catch (e) {
-    // return the real error so the page shows it
+    // Surface real error to the client for fast debugging
     return res.status(500).json({
       error: String(e?.message || e),
-      hint: "Check @vercel/blob is installed and BLOB_READ_WRITE_TOKEN env is set",
+      hint: "Check @vercel/blob is installed and BLOB_READ_WRITE_TOKEN env var is set."
     });
   }
 }
