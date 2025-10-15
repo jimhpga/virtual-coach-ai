@@ -1,94 +1,52 @@
-// /public/report.client.js (v4 - verbose + robust)
+﻿/* /public/report.client.js v5 — resolves ?url= or ?id= via /api/get-url */
 (function () {
-  const $ = (s) => document.querySelector(s);
-  const set = (id, v) => { const el = $(`#${id}`); if (el) el.textContent = v ?? "—"; };
-  const showErr = (m) => { const e = $("#error"); if (e) e.textContent = m; console.error("[report]", m); };
-  const say = (m) => { console.log("[report]", m); };
+  const $ = s => document.querySelector(s);
 
-  // Params
-  const q = new URLSearchParams(location.search);
-  const id = q.get("id");
-  const directUrl = q.get("url"); // fallback: direct JSON URL
-  const base = (window.BLOB_PUBLIC_BASE || "").replace(/\/+$/, "");
-
-  // Build URL
-  let reportUrl = null;
-  if (directUrl) {
-    reportUrl = directUrl;
-    say("Using direct url= param");
-  } else if (id && base) {
-    reportUrl = `${base}/reports/${encodeURIComponent(id)}.json`;
-    say(`Using id param -> ${reportUrl}`);
-  } else {
-    return showErr("Missing report id. Open this page as /report.html?id=<reportId> or pass &url=<full-json-url>.");
+  function showError(msg){
+    console.error("[report]", msg);
+    let el = document.getElementById("error");
+    if (!el) { el = document.createElement("div"); el.id="error"; el.style="color:red;margin:10px 0"; (document.querySelector("main")||document.body).prepend(el); }
+    el.textContent = msg;
   }
 
-  // Fetch JSON
-  async function fetchReport() {
-    say("Fetching:", reportUrl);
-    const r = await fetch(reportUrl, { cache: "no-store" });
-    if (!r.ok) throw new Error(`Fetch ${r.status} for ${reportUrl}`);
-    return r.json();
+  async function fetchJson(u){
+    const r = await fetch(u, { cache: "no-store" });
+    if (!r.ok) throw new Error(`Fetch ${r.status} for ${u}`);
+    const t = await r.text();
+    return JSON.parse(t.trim().replace(/^\uFEFF/, ""));
   }
 
-  function render(r) {
-    set("score", r.swingScore);
-    set("status", r.status);
-    set("created", r.created);
-
-    const playerWrap = $("#player");
-    const processing = $("#processing");
-    playerWrap.textContent = "";
-    processing.textContent = "";
-
-    if (r.muxPlaybackId) {
-      const player = document.createElement("mux-player");
-      player.setAttribute("stream-type", "on-demand");
-      player.setAttribute("playsinline", "");
-      player.style.width = "100%";
-      player.style.maxWidth = "820px";
-      player.style.aspectRatio = "16/9";
-      player.setAttribute("playback-id", r.muxPlaybackId);
-      playerWrap.replaceChildren(player);
-    } else if (r.muxUploadId) {
-      processing.textContent = "Processing video… it will load automatically.";
-    } else {
-      processing.textContent = "No video available.";
+  async function resolveReportUrl(){
+    const q = new URLSearchParams(location.search);
+    const urlParam = q.get("url");
+    const idParam  = q.get("id");
+    if (urlParam) return urlParam;
+    if (idParam) {
+      const r = await fetch(`/api/get-url?id=${encodeURIComponent(idParam)}`);
+      const j = await r.json().catch(()=> ({}));
+      if (!r.ok || !j?.url) throw new Error(`Could not resolve URL for id=${idParam}`);
+      return j.url;
     }
+    throw new Error("Missing report id or url. Use /report.html?url=<full-json> or /report.html?id=<id>.");
   }
 
-  async function resolveIfNeeded(r) {
-    if (r.muxPlaybackId || !r.muxUploadId) return false;
-    try {
-      const resp = await fetch("/api/resolve-mux", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ id, uploadId: r.muxUploadId })
-      }).then(x => x.json());
-      say("resolve-mux:", resp);
-      return resp?.status === "ready" ? resp.playbackId : false;
-    } catch (e) { say("resolve-mux error", e); return false; }
+  function setText(id, v){ const el = document.getElementById(id); if (el) el.textContent = v ?? "—"; }
+  function renderReport(data){
+    setText("score",   data.swingScore ?? data.power?.score ?? "—");
+    setText("status",  data.status ?? "—");
+    setText("created", data.created ?? data.createdAt ?? "—");
+    // mount mux player later if data.muxPlaybackId exists
   }
 
   (async () => {
     try {
-      let rep = await fetchReport();
-      say("Loaded JSON:", rep);
-      render(rep);
-
-      // Tiny poller to patch in playback id
-      if (!rep.muxPlaybackId && rep.muxUploadId) {
-        const t = setInterval(async () => {
-          const playback = await resolveIfNeeded(rep);
-          if (playback) {
-            rep = await fetchReport();
-            render(rep);
-            clearInterval(t);
-          }
-        }, 4000);
-      }
+      const u = await resolveReportUrl();
+      console.log("[report] loading:", u);
+      const json = await fetchJson(u);
+      console.log("[report] loaded:", json);
+      renderReport(json);
     } catch (e) {
-      showErr("Failed to load report: " + (e?.message || e));
+      showError("Failed to load report: " + (e?.message || e));
     }
   })();
 })();
