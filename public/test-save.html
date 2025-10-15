@@ -1,26 +1,81 @@
-<!doctype html><meta charset="utf-8"><title>Test Save</title>
-<body style="font-family:system-ui;padding:2rem">
-  <button id="go">Test save-report</button>
-  <pre id="out" style="white-space:pre-wrap;color:#333"></pre>
+<!doctype html>
+<meta charset="utf-8">
+<title>Test save-report</title>
+<body style="font-family:system-ui; margin:2rem; max-width:900px">
+  <h1>save-report smoke test</h1>
+  <p>This page calls <code>/api/save-report</code>, shows the URL that was
+  created in Vercel Blob, and provides a one-click link to view it in the
+  report page.</p>
+
+  <button id="btn">Create sample report</button>
+  <button id="open" disabled>Open report</button>
+  <button id="copy" disabled>Copy share URL</button>
+
+  <pre id="out" style="margin-top:1rem; background:#f6f8fa; padding:12px; border-radius:8px; overflow:auto"></pre>
+
   <script>
-  document.querySelector("#go").onclick = async () => {
-    const out = document.querySelector("#out");
-    out.textContent = "Calling /api/save-report…";
+  const $ = s => document.querySelector(s);
+  const out = $('#out'), btn = $('#btn'), openBtn = $('#open'), copyBtn = $('#copy');
+
+  function log(o) {
+    out.textContent = (typeof o === 'string') ? o : JSON.stringify(o, null, 2);
+  }
+
+  function ui(disabled) {
+    btn.disabled = disabled;
+  }
+
+  btn.addEventListener('click', async () => {
+    ui(true);
+    log('Saving…');
+
+    // Minimal sample report payload
+    const sample = {
+      status: 'ready',
+      discipline: 'full_swing',
+      swings: 1,
+      power: { score: 72, tempo: '3:1', release_timing: 61 },
+      phases: [
+        { id:'P1', name:'Setup',     grade:'ok',   short:'Neutral grip', long:'Stand tall, soft arms.' },
+        { id:'P2', name:'Takeaway',  grade:'good', short:'One-piece',    long:'Chest + arms together.' }
+      ],
+      createdBy: 'test-save.html',
+      createdLocalTime: new Date().toLocaleString()
+    };
+
     try {
-      const r = await fetch("/api/save-report", {
-        method: "POST",
-        headers: {"content-type":"application/json"},
-        body: JSON.stringify({ status:"ready", swingScore:80, muxPlaybackId:null, muxUploadId:null })
+      const r = await fetch('/api/save-report', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(sample)
       });
-      const ct = (r.headers.get("content-type")||"").toLowerCase();
-      if (ct.includes("application/json")) {
-        const j = await r.json();
-        out.textContent = "OK\n" + JSON.stringify(j, null, 2);
-      } else {
-        const t = await r.text();
-        out.textContent = `Non-JSON (${r.status})\n` + t.slice(0,400) + "…";
-      }
-    } catch (e) { out.textContent = "Error: " + (e.message||e); }
-  };
+      const j = await r.json();
+      if (!r.ok) throw new Error(j?.error || 'save-report failed');
+
+      // j.url is the public Blob URL; use it to view the report
+      log({ OK: true, id: j.id, url: j.url });
+
+      // Enable buttons
+      openBtn.disabled = false;
+      copyBtn.disabled = false;
+
+      // Attach handlers now that we have the URL
+      openBtn.onclick = () => {
+        const u = '/report.html?url=' + encodeURIComponent(j.url);
+        location.assign(u);
+      };
+      copyBtn.onclick = async () => {
+        const share = location.origin + '/report.html?url=' + encodeURIComponent(j.url);
+        try { await navigator.clipboard.writeText(share); alert('Share URL copied'); }
+        catch { prompt('Copy this URL', share); }
+      };
+    } catch (e) {
+      log('Error: ' + (e?.message || e));
+      openBtn.disabled = true;
+      copyBtn.disabled = true;
+    } finally {
+      ui(false);
+    }
+  });
   </script>
 </body>
