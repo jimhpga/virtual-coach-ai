@@ -1,0 +1,26 @@
+<!doctype html><meta charset="utf-8"><title>Test Save</title>
+<body style="font-family:system-ui;padding:2rem">
+  <button id="go">Test save-report</button>
+  <pre id="out" style="white-space:pre-wrap;color:#333"></pre>
+  <script>
+  document.querySelector("#go").onclick = async () => {
+    const out = document.querySelector("#out");
+    out.textContent = "Calling /api/save-report…";
+    try {
+      const r = await fetch("/api/save-report", {
+        method: "POST",
+        headers: {"content-type":"application/json"},
+        body: JSON.stringify({ status:"ready", swingScore:80, muxPlaybackId:null, muxUploadId:null })
+      });
+      const ct = (r.headers.get("content-type")||"").toLowerCase();
+      if (ct.includes("application/json")) {
+        const j = await r.json();
+        out.textContent = "OK\n" + JSON.stringify(j, null, 2);
+      } else {
+        const t = await r.text();
+        out.textContent = `Non-JSON (${r.status})\n` + t.slice(0,400) + "…";
+      }
+    } catch (e) { out.textContent = "Error: " + (e.message||e); }
+  };
+  </script>
+</body>
