@@ -1,26 +1,52 @@
-<!doctype html><meta charset="utf-8"/>
-<title>Report • Virtual Coach AI</title>
-<body style="font-family:system-ui;margin:2rem;max-width:900px">
-  <h1>Virtual Coach AI — Swing Report</h1>
-  <nav style="margin:.5rem 0 1rem">
-    <a href="/">Home</a> · <a href="/upload">Upload</a>
-  </nav>
-
-  <div>Score: <b id="score">—</b></div>
-  <div>Status: <b id="status">—</b></div>
-  <div>Created: <b id="created">—</b></div>
-
-  <div id="player" style="margin:1rem 0;"></div>
-  <div id="processing" style="color:#555"></div>
-  <div id="error" style="color:red"></div>
-
-  <h2>P1–P9</h2>
-  <p>Shell only for MVP. (We’ll render details from JSON here.)</p>
-
 <script>
-  window.BLOB_PUBLIC_BASE = "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com";
-</script>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@mux/mux-player"></script>
-<script src="./report.client.js?v=3"></script>
+  const $ = s => document.querySelector(s);
+  const qp = new URLSearchParams(location.search);
+  const urlParam = qp.get('url');     // preferred
+  const idParam  = qp.get('id');      // fallback
 
-</body>
+  const fmt = v => `${v}%`;
+  const band = v => v>=75 ? 'ok' : v>=55 ? 'warn' : 'bad';
+  const metricRow = m =>
+    `<div class="metric"><div class="name">${m.label||m.p}</div>
+      <div class="bar"><span class="${band(m.value)}" style="width:${m.value}%"></span></div>
+      <div class="pct">${fmt(m.value)}</div></div>`;
+
+  async function fetchJson(u){
+    const r = await fetch(u, { cache: 'no-store' });
+    if (!r.ok) throw new Error(`Fetch ${r.status} for ${u}`);
+    const t = await r.text();
+    return JSON.parse(t.trim().replace(/^\uFEFF/, ''));
+  }
+
+  async function resolveUrl() {
+    if (urlParam) return urlParam;
+    if (idParam) {
+      const r = await fetch(`/api/get-url?id=${encodeURIComponent(idParam)}`);
+      const j = await r.json();
+      if (!r.ok || !j?.url) throw new Error('Could not resolve report URL from id');
+      return j.url;
+    }
+    throw new Error('Missing report id or url.\nOpen as /report.html?id=<reportId> or /report.html?url=<full-blob-url>');
+  }
+
+  function renderReport(data){
+    // very small version (keep your pretty UI if you want)
+    $('#created')?.textContent = new Date().toLocaleDateString();
+    const p = data.power || { score:0, tempo:'—', release_timing:0 };
+    // fill any other elements you already have…
+  }
+
+  (async () => {
+    try {
+      const u = await resolveUrl();
+      const data = await fetchJson(u);
+      renderReport(data);
+    } catch (e) {
+      console.error(e);
+      const err = document.createElement('div');
+      err.style.color = 'red';
+      err.textContent = `Failed to load report: ${e.message}`;
+      document.body.querySelector('main,body').prepend(err);
+    }
+  })();
+</script>
