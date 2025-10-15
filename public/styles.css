@@ -1,0 +1,10 @@
+html,body{margin:0;padding:0;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#0b1520;color:#e8f0f7}
+.wrap{max-width:960px;margin:2rem auto;padding:2rem}
+.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1rem}
+body.has-hero{min-height:100vh;background:
+  radial-gradient(1000px 600px at 80% 0, rgba(86,174,255,.15), transparent 60%),
+  radial-gradient(900px 500px at 10% 20%, rgba(198,120,255,.12), transparent 60%),
+  url("/img/bg.jpg") center/cover no-repeat fixed,
+  #0b1520;}
+a{color:#7ed0ff;text-decoration:none}
+button{padding:.7rem 1.1rem;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#121c27;color:#e8f0f7;cursor:pointer}
