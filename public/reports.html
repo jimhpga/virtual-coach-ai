@@ -24,7 +24,6 @@
   .scrim{min-height:100vh;background:var(--scrim)}
   .wrap{width:min(1080px,92%);margin:0 auto;padding:18px 0 42px}
 
-  /* inline nav (fallback if /nav.js fails) */
   header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(1080px,94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
@@ -73,7 +72,6 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   @media(max-width:960px){.grid2{grid-template-columns:1fr}}
 
-  /* modal viewer */
   .viewer{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50}
   .viewer.open{display:flex}
   .viewer .box{width:min(960px,92vw);height:min(70vh,70dvh);background:#0b1318;border:1px solid var(--line);border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,.5);position:relative;overflow:hidden}
@@ -84,13 +82,12 @@
 </style>
 </head>
 <body>
-  <!-- Inline nav -->
   <header>
     <div class="navwrap">
       <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
       <nav aria-label="Primary">
         <a href="/">Home</a>
-        <a href="/report" aria-current="page">Reports</a>
+        <a href="/report.html" aria-current="page">Reports</a>
         <a href="/coming-soon">Coming&nbsp;Soon</a>
         <a href="/pricing">Pricing</a>
         <a href="/faq">FAQ</a>
@@ -171,17 +168,16 @@
   </div>
 
 <script>
-/* ======================= CONFIG ======================= */
-const BUCKET = "virtualcoachai-prod";  // <-- set your bucket
-const REGION = "us-west-2";            // <-- set your region
-/* ====================================================== */
+/* -------- BLOB base --------
+   Make sure this matches your store’s Public Base URL */
+window.BLOB_PUBLIC_BASE = window.BLOB_PUBLIC_BASE
+  || "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com";
 
 /* ---------- helpers ---------- */
 const $ = s => document.querySelector(s);
 const qp = new URLSearchParams(location.search);
-const id = qp.get('id');
-const reportParam = qp.get('report');   // legacy fallback
-const src = qp.get('src') || '';
+const id  = qp.get('id');
+const directUrl = qp.get('url');            // optional ?url=<full json>
 
 const esc = s => encodeURIComponent(s || '');
 const ytSearch = q => `https://www.youtube.com/results?search_query=${esc(q)}`;
@@ -262,106 +258,73 @@ function coachItem(item){
 }
 
 /* ---------- render ---------- */
-let last = null;
+let lastReport = null;
 function renderReport(data){
-  last = data || {};
-  document.getElementById('date').textContent = new Date().toLocaleDateString();
+  lastReport = data || {};
+  $("#date").textContent = new Date().toLocaleDateString();
   if(data.discipline){
-    document.getElementById('modeLabel').textContent =
+    $("#modeLabel").textContent =
       /putt/i.test(data.discipline) ? 'Putting' :
       /chip/i.test(data.discipline) ? 'Chipping' : 'Full Swing';
   }
-  if(data.swings!=null){ document.getElementById('swingCount').textContent = String(data.swings); }
+  if(data.swings!=null){ $("#swingCount").textContent = String(data.swings); }
 
   const phases = Array.isArray(data.phases)? data.phases : [];
-  document.getElementById('plist').innerHTML = phases.map(phaseRow).join('') || '<div class="content sub">No phases found in report.</div>';
+  $("#plist").innerHTML = phases.map(phaseRow).join('') || '<div class="content sub">No phases found in report.</div>';
 
   const pri = (data.coaching && Array.isArray(data.coaching.priority_fixes)) ? data.coaching.priority_fixes : [];
   const pow = (data.coaching && Array.isArray(data.coaching.power_fixes)) ? data.coaching.power_fixes : [];
-  document.getElementById('coachPriority').innerHTML = pri.map(coachItem).join('') || '<div class="sub">No priority fixes in report.</div>';
-  document.getElementById('coachPower').innerHTML    = pow.map(coachItem).join('')    || '<div class="sub">No power fixes in report.</div>';
+  $("#coachPriority").innerHTML = pri.map(coachItem).join('') || '<div class="sub">No priority fixes in report.</div>';
+  $("#coachPower").innerHTML    = pow.map(coachItem).join('')    || '<div class="sub">No power fixes in report.</div>';
 
-  document.getElementById('position').innerHTML = (data.position_metrics||[]).map(metricRow).join('') || '<div class="sub">No position metrics.</div>';
-  document.getElementById('swing').innerHTML    = (data.swing_metrics||[]).map(metricRow).join('')    || '<div class="sub">No swing metrics.</div>';
+  $("#position").innerHTML = (data.position_metrics||[]).map(metricRow).join('') || '<div class="sub">No position metrics.</div>';
+  $("#swing").innerHTML    = (data.swing_metrics||[]).map(metricRow).join('')    || '<div class="sub">No swing metrics.</div>';
 
   const p = data.power||{score:0, tempo:'—', release_timing:0};
-  document.getElementById('power').innerHTML = `
+  $("#power").innerHTML = `
     <div class="metric"><div class="name">Power Score</div><div class="bar"><span class="${band(+p.score||0)}" style="width:${+p.score||0}%"></span></div><div class="pct">${+p.score||0}%</div></div>
     <div class="metric"><div class="name">Tempo</div><div class="bar"><span class="ok" style="width:76%"></span></div><div class="pct">${p.tempo||'—'}</div></div>
     <div class="metric"><div class="name">Release Timing</div><div class="bar"><span class="${band(+p.release_timing||0)}" style="width:${+p.release_timing||0}%"></span></div><div class="pct">${+p.release_timing||0}%</div></div>`;
 }
 
-/* ---------- S3 fetch + polling ---------- */
-function s3JsonUrlFromId(rid){
-  return (REGION === 'us-east-1')
-    ? `https://${BUCKET}.s3.amazonaws.com/reports/${encodeURIComponent(rid)}.json?cb=${Date.now()}`
-    : `https://${BUCKET}.s3.${REGION}.amazonaws.com/reports/${encodeURIComponent(rid)}.json?cb=${Date.now()}`;
-}
-async function fetchJsonOnce(url){
+/* ---------- Blob fetch ---------- */
+const buildBlobUrlFromId = (rid) =>
+  `${window.BLOB_PUBLIC_BASE.replace(/\/+$/,'')}/reports/${encodeURIComponent(rid)}.json?cb=${Date.now()}`;
+
+async function fetchJson(url){
   const res = await fetch(url, { cache: 'no-store' });
-  if (!res.ok) throw new Error(String(res.status));
+  if (!res.ok) throw new Error(`Fetch ${res.status}`);
   const txt = await res.text();
   return JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
-}
-async function loadFromS3OrPoll(rid){
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.style.margin = '10px 0';
-  card.innerHTML = `<div class="content">⏳ Processing… your report will appear automatically.</div>`;
-  document.querySelector('main').prepend(card);
-
-  // Try once immediately
-  try{
-    const data = await fetchJsonOnce(s3JsonUrlFromId(rid));
-    card.querySelector('.content').textContent = '✅ Report loaded.';
-    renderReport(data);
-    return;
-  }catch{}
-
-  // Poll every 30s
-  while (true) {
-    await new Promise(r => setTimeout(r, 30000));
-    try {
-      const data = await fetchJsonOnce(s3JsonUrlFromId(rid));
-      card.querySelector('.content').textContent = '✅ Report loaded.';
-      renderReport(data);
-      break;
-    } catch {}
-  }
 }
 
 /* ---------- share & actions ---------- */
 function shareUrl(){
-  try{
-    const u = new URL(location.href);
-    if (id) {
-      u.searchParams.set('id', id);
-      u.searchParams.delete('report');
-      u.searchParams.delete('src');
-    } else if (reportParam) {
-      u.searchParams.set('report', reportParam);
-      u.searchParams.delete('src');
-    }
-    return u.toString();
-  }catch{ return location.href; }
+  const u = new URL(location.href);
+  if (id) {
+    u.searchParams.set('id', id);
+    u.searchParams.delete('url');
+  } else if (directUrl) {
+    u.searchParams.set('url', directUrl);
+  }
+  return u.toString();
 }
-document.getElementById('date').textContent = new Date().toLocaleDateString();
+$("#date").textContent = new Date().toLocaleDateString();
 
-document.getElementById('btnCopy').addEventListener('click', async ()=>{
+$("#btnCopy").addEventListener('click', async ()=>{
   const link = shareUrl();
   try{ await navigator.clipboard.writeText(link); alert('Share link copied'); }
   catch{ prompt('Copy link:', link); }
 });
-let last = null;
-document.getElementById('btnSend').addEventListener('click', ()=>{
+$("#btnSend").addEventListener('click', ()=>{
   const email = prompt('Coach email (e.g. coach@example.com):');
   if(!email) return;
-  const p = (last && last.power) ? `Power ${last.power.score||'-'}%  Tempo ${last.power.tempo||'-'}  Release ${last.power.release_timing||'-'}%` : '';
+  const p = (lastReport && lastReport.power) ? `Power ${lastReport.power.score||'-'}%  Tempo ${lastReport.power.tempo||'-'}  Release ${lastReport.power.release_timing||'-'}%` : '';
   const subject = encodeURIComponent('Virtual Coach AI Swing Report');
   const body = encodeURIComponent(`Here is my swing report:\n${shareUrl()}\n\n${p}\n\n— sent from virtualcoachai.net`);
   location.href = `mailto:${email}?subject=${subject}&body=${body}`;
 });
-document.getElementById('btnDownload').addEventListener('click', ()=>{
+$("#btnDownload").addEventListener('click', ()=>{
   const html = document.documentElement.outerHTML;
   const blob = new Blob([html], {type:'text/html'});
   const a = document.createElement('a');
@@ -371,10 +334,11 @@ document.getElementById('btnDownload').addEventListener('click', ()=>{
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 });
 
-/* ---------- modal viewer logic ---------- */
-const viewer = document.getElementById('viewer');
-const slot   = document.getElementById('viewerSlot');
-const closeBtn = document.getElementById('closeViewer');
+/* ---------- modal viewer ---------- */
+const viewer = $("#viewer");
+const slot   = $("#viewerSlot");
+$("#closeViewer").addEventListener('click', ()=>{ viewer.classList.remove('open'); slot.innerHTML=''; });
+viewer.addEventListener('click', (e)=>{ if (e.target === viewer) { viewer.classList.remove('open'); slot.innerHTML=''; }});
 document.addEventListener('click', (e)=>{
   const btn = e.target.closest('.play');
   if (!btn) return;
@@ -393,36 +357,32 @@ document.addEventListener('click', (e)=>{
   }
   viewer.classList.add('open');
 });
-closeBtn.addEventListener('click', ()=>{ viewer.classList.remove('open'); slot.innerHTML=''; });
-viewer.addEventListener('click', (e)=>{ if (e.target === viewer) { viewer.classList.remove('open'); slot.innerHTML=''; }});
 
 /* ---------- BOOT ---------- */
-if (src === 'session') {
-  try{
-    const raw = sessionStorage.getItem('vc_report');
-    if (!raw) throw new Error('No session report found. Go to Upload and create a report.');
-    const data = JSON.parse(raw);
+(async () => {
+  try {
+    let url = null;
+    if (directUrl) {
+      url = directUrl;
+      console.log("[report] using direct url=", url);
+    } else if (id) {
+      url = buildBlobUrlFromId(id);
+      console.log("[report] using id ->", url);
+    } else {
+      // session fallback (when navigated from Upload page that stuffed sessionStorage)
+      const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
+      if (!raw) throw new Error('No report specified. Add ?id=... or ?url=... or open from Upload.');
+      renderReport(JSON.parse(raw.trim().replace(/^\uFEFF/, '')));
+      return;
+    }
+    const data = await fetchJson(url);
+    console.log("[report] loaded", data);
     renderReport(data);
-  }catch(err){
-    console.error(err);
-    alert(err.message || String(err));
+  } catch (e) {
+    console.error(e);
+    alert('Failed to load report: ' + (e?.message || e));
   }
-} else if (id) {
-  loadFromS3OrPoll(id);               // <- primary path
-} else if (reportParam) {
-  fetchJsonOnce(reportParam).then(renderReport).catch(err=>{
-    console.error(err); alert('Failed to load report: ' + (err.message||String(err)));
-  });
-} else {
-  try{
-    const raw = localStorage.getItem('vc_last_report') || '';
-    if (!raw) throw new Error('No saved report found. Go to Upload and try again.');
-    const data = JSON.parse(raw.trim().replace(/^\uFEFF/, ''));
-    renderReport(data);
-  }catch(err){
-    console.error(err); alert(err.message || String(err));
-  }
-}
+})();
 </script>
 </body>
 </html>
