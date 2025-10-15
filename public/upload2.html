@@ -10,12 +10,12 @@
   <pre id="log" style="margin-top:1rem;color:#555;white-space:pre-wrap"></pre>
 
   <script>
-  // [upload mux TEST] inline, no S3, blocks other handlers
+  // [upload mux TEST fixed] — Mux only, robust error reporting
   (function () {
-    console.log("[upload mux TEST] client JS loaded");
+    console.log("[upload mux TEST fixed] client JS loaded");
     const $ = s => document.querySelector(s);
     const file = $("#file");
-    const btn = $("#uploadBtn");
+    const btn  = $("#uploadBtn");
     const logEl = $("#log");
     const log = m => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; };
 
@@ -26,27 +26,46 @@
 
       try {
         log("Requesting Mux upload URL…");
-        const r1 = await fetch("/api/mux-direct-upload", { method:"POST" });
-        const j1 = await r1.json(); const up = j1?.upload;
-        if (!r1.ok || !up?.url) throw new Error("Mux upload URL missing");
+        const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
+        const j1 = await r1.json().catch(() => ({}));
+        const up = j1?.upload;
+        if (!r1.ok || !up?.url) throw new Error(`Mux upload URL missing (${r1.status})`);
 
         log("Uploading to Mux…");
-        const r2 = await fetch(up.url, { method:"PUT", body:f });
+        const r2 = await fetch(up.url, { method: "PUT", body: f });
         if (!r2.ok) throw new Error(`Mux upload failed (${r2.status})`);
 
         log("Saving report JSON…");
         const r3 = await fetch("/api/save-report", {
-          method:"POST", headers:{ "content-type":"application/json" },
+          method: "POST",
+          headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            status:"ready", swingScore:80,
-            muxPlaybackId:null, muxUploadId:up.id,
-            p1p9:[], faults:[], note:`uploaded ${f.name}`
+            status: "ready",
+            swingScore: 80,
+            muxPlaybackId: null,
+            muxUploadId: up.id,
+            p1p9: [],
+            faults: [],
+            note: `uploaded ${f.name}`
           })
         });
-        const j3 = await r3.json();
-        if (!r3.ok || !j3?.id) throw new Error("Report save failed");
-        location.assign(`/report?id=${encodeURIComponent(j3.id)}`);
-      } catch (err) { log("Error: " + (err?.message || err)); }
+
+        // Parse JSON only if it's actually JSON; otherwise show the first 200 chars.
+        let rep;
+        const ct = (r3.headers.get("content-type") || "").toLowerCase();
+        if (ct.includes("application/json")) {
+          rep = await r3.json();
+        } else {
+          const txt = await r3.text();
+          throw new Error(`save-report returned non-JSON (${r3.status})\n${txt.slice(0,200)}…`);
+        }
+
+        if (!r3.ok || !rep?.id) throw new Error(`Report save failed (${r3.status})`);
+        // Use explicit file path so it works without pretty routes
+        location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
+      } catch (err) {
+        log("Error: " + (err?.message || err));
+      }
     });
   })();
   </script>
