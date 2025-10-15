@@ -1,7 +1,8 @@
-// /public/upload.client.js — Mux flow (no S3)
-// v4
+<!-- /public/upload.client.js — Mux flow (no S3) -->
+<!-- v5 -->
+<script>
 (function () {
-  console.log("[upload mux v4] client JS loaded");
+  console.log("[upload mux v5] client JS loaded");
 
   const $ = (s) => document.querySelector(s);
 
@@ -25,11 +26,11 @@
     })();
 
   const fields = {
-    name: $("#name"),
-    email: $("#email"),
-    hcap: $("#handicap"),
+    name:   $("#name"),
+    email:  $("#email"),
+    hcap:   $("#handicap"),
     handed: $("#handed"),
-    eye: $("#eye"),
+    eye:    $("#eye"),
     height: $("#height"),
   };
 
@@ -54,11 +55,11 @@
   // Helpers
   function readForm() {
     return {
-      name: (fields.name?.value || "").trim(),
-      email: (fields.email?.value || "").trim(),
-      hcap: (fields.hcap?.value || "").trim(),
+      name:   (fields.name?.value || "").trim(),
+      email:  (fields.email?.value || "").trim(),
+      hcap:   (fields.hcap?.value || "").trim(),
       handed: (fields.handed?.value || "").trim(),
-      eye: (fields.eye?.value || "").trim(),
+      eye:    (fields.eye?.value || "").trim(),
       height: (fields.height?.value || "").trim(),
     };
   }
@@ -71,7 +72,7 @@
     return "";
   }
 
-  // Main handler (blocks any old S3 listeners)
+  // Main handler (blocks any old listeners)
   btn?.addEventListener("click", async (e) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
@@ -100,8 +101,9 @@
       log("Requesting Mux upload URL…");
       const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
       const j1 = await r1.json().catch(() => ({}));
+      if (!r1.ok) throw new Error(j1?.error || "Mux upload URL request failed");
       const upload = j1?.upload;
-      if (!r1.ok || !upload?.url) throw new Error("Mux upload URL missing");
+      if (!upload?.url) throw new Error("Mux upload URL missing");
 
       log("Uploading to Mux (this can take a minute)...");
       const put = await fetch(upload.url, { method: "PUT", body: file });
@@ -123,10 +125,17 @@
         }),
       });
       const rep = await r2.json().catch(() => ({}));
-      if (!r2.ok || !rep?.id) throw new Error("Report save failed");
+      if (!r2.ok || (!rep?.url && !rep?.id)) {
+        throw new Error(rep?.error || "Report save failed");
+      }
 
+      // ✅ Prefer the Blob URL; fall back to id
       log("Opening report view…");
-      location.assign(`/report?id=${encodeURIComponent(rep.id)}`);
+      if (rep.url) {
+        location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
+      } else {
+        location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
+      }
     } catch (err) {
       log("Error: " + (err?.message || err));
       busy(false);
@@ -134,3 +143,4 @@
     }
   });
 })();
+</script>
