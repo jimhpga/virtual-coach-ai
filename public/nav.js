@@ -1,46 +1,31 @@
-<script>
-(function(){
-  const mount = document.getElementById('navMount');
-  if(!mount) return;
+// public/nav.js
+(function () {
+  const links = [
+    { href: "/",            label: "Home",        id: "home" },
+    { href: "/upload",      label: "Upload",      id: "upload" },
+    { href: "/reports",     label: "Reports",     id: "reports" },
+    { href: "/coming-soon", label: "Coming Soon", id: "coming" },
+    { href: "/pricing",     label: "Pricing",     id: "pricing" },
+    { href: "/faq",         label: "FAQ",         id: "faq" },
+    { href: "/contact",     label: "Contact",     id: "contact" },
+    { href: "/about",       label: "About",       id: "about" }
+  ];
 
-  function markCurrent(){
-    const here = location.pathname.replace(/\/+$/,'') || '/index.html';
-    mount.querySelectorAll('a[data-nav]').forEach(a=>{
-      const u = new URL(a.getAttribute('href'), location.origin);
-      if(u.pathname.replace(/\/+$/,'') === here){ a.setAttribute('aria-current','page'); }
-    });
-  }
+  const curr = location.pathname.replace(/\/+$/,'') || "/";
+  const html = `
+    <div class="navwrap">
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
+      <nav aria-label="Primary">
+        ${links.map(l => {
+          const isCurrent =
+            curr === l.href ||
+            (l.href !== "/" && curr.startsWith(l.href));
+          return `<a href="${l.href}" ${isCurrent ? 'aria-current="page"' : ''}>${l.label}</a>`;
+        }).join("")}
+      </nav>
+    </div>
+  `;
 
-  function fallback(){
-    mount.innerHTML = `
-<nav class="topbar">
-  <div class="brand"><a href="/index.html">Virtual Coach AI</a></div>
-  <div class="nav" role="navigation" aria-label="Primary">
-    <a href="/index.html" data-nav>Home</a>
-    <a href="/report.html?report=/report.json" data-nav>Reports</a>
-    <a href="/coming-soon.html" data-nav>Coming Soon</a>
-    <a href="/pricing.html" data-nav>Pricing</a>
-    <a href="/faq.html" data-nav>FAQ</a>
-    <a href="/contact.html" data-nav>Contact</a>
-    <a href="/upload.html" data-nav>Upload</a>
-    <a href="/login.html" data-nav>Login</a>
-  </div>
-</nav>
-<style>
-  .topbar{position:sticky;top:0;z-index:1000;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;background:#0b2b12;border-bottom:1px solid rgba(255,255,255,.08)}
-  .topbar .brand a{color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px;white-space:nowrap}
-  .topbar .nav{display:flex;gap:6px;align-items:center;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-ms-overflow-style:none;max-width:100%}
-  .topbar .nav::-webkit-scrollbar{display:none}
-  .topbar .nav a{color:#fff;text-decoration:none;margin:0 2px;padding:8px 10px;border-radius:10px;flex:0 0 auto}
-  .topbar .nav a:hover{background:rgba(255,255,255,.10)}
-  .topbar .nav a[aria-current="page"]{text-decoration:underline;text-underline-offset:4px}
-</style>`;
-    markCurrent();
-  }
-
-  fetch('/nav.html?v='+Date.now(), {cache:'no-store'})
-    .then(r=>r.ok?r.text():Promise.reject(r))
-    .then(h=>{ mount.innerHTML=h; markCurrent(); })
-    .catch(fallback);
+  const hdr = document.getElementById("site-header");
+  if (hdr) hdr.innerHTML = html;
 })();
-</script>
