@@ -2,92 +2,92 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate"/>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Upload • Virtual Coach AI</title>
-<link rel="preload" as="image" href="/homepage-background.png" />
-<link rel="stylesheet" href="/_shared.css" />
+<link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <!-- header (shared) -->
-  <header>
+  <!-- Header -->
+  <header class="site">
     <div class="navwrap">
-      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt=""><span>Virtual Coach AI</span></a>
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
       <nav aria-label="Primary">
-        <a href="/" data-active="home">Home</a>
-        <a href="/upload" aria-current="page" data-active="upload">Upload</a>
-        <a href="/report.html" data-active="reports">Reports</a>
-        <a href="/coming-soon" data-active="coming">Coming&nbsp;Soon</a>
-        <a href="/pricing" data-active="pricing">Pricing</a>
-        <a href="/faq" data-active="faq">FAQ</a>
-        <a href="/contact" data-active="contact">Contact</a>
-        <a href="/about" data-active="about">About</a>
+        <a href="/">Home</a>
+        <a href="/upload" aria-current="page">Upload</a>
+        <a href="/reports">Reports</a>
+        <a href="/coming-soon">Coming&nbsp;Soon</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/faq">FAQ</a>
+        <a href="/contact">Contact</a>
+        <a href="/about">About</a>
       </nav>
     </div>
   </header>
 
   <div class="scrim">
     <main class="wrap">
-      <h1 style="margin:8px 0 12px;font-weight:900">Upload a swing</h1>
-      <div class="card">
-        <label class="muted" for="file">Video file</label><br/>
+      <h1>Upload a swing</h1>
+      <section class="card">
+        <label class="sub" for="file">Video file</label><br/>
         <input id="file" type="file" accept="video/*" />
-        <div style="margin-top:12px">
-          <button id="uploadBtn" class="btn" type="button">Upload & Analyze</button>
+        <div style="margin-top:10px">
+          <button id="uploadBtn" class="btn primary" type="button">Upload & Analyze</button>
         </div>
-        <pre id="log" class="muted" style="margin-top:12px"></pre>
-      </div>
+        <pre id="log" class="sub" style="margin-top:10px;white-space:pre-wrap"></pre>
+      </section>
     </main>
   </div>
 
-<script>
-(function () {
-  const $ = s => document.querySelector(s);
-  const file = $("#file");
-  const btn  = $("#uploadBtn");
-  const logEl = $("#log");
-  const log = m => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; };
+  <!-- Inline client (Mux flow) -->
+  <script>
+  (function () {
+    const $ = s => document.querySelector(s);
+    const file = $("#file");
+    const btn  = $("#uploadBtn");
+    const logEl = $("#log");
+    const log = m => { logEl.textContent += (logEl.textContent ? "\\n" : "") + m; };
 
-  btn?.addEventListener("click", async (e) => {
-    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    const f = file.files?.[0];
-    if (!f) return log("Pick a video first.");
-    try {
-      log("Requesting Mux upload URL…");
-      const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
-      const j1 = await r1.json().catch(() => ({}));
-      if (!r1.ok || !j1?.upload?.url) throw new Error(j1?.error || `Mux URL request failed (${r1.status})`);
-      const up = j1.upload;
+    btn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      const f = file.files?.[0];
+      if (!f) return log("Pick a video first.");
 
-      log("Uploading to Mux…");
-      const put = await fetch(up.url, { method: "PUT", body: f });
-      if (!put.ok) throw new Error(`Mux upload failed (${put.status})`);
+      try {
+        log("Requesting Mux upload URL…");
+        const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
+        const j1 = await r1.json().catch(() => ({}));
+        const up = j1?.upload;
+        if (!r1.ok || !up?.url) throw new Error(`Mux upload URL missing (${r1.status})`);
 
-      log("Saving report JSON…");
-      const r3 = await fetch("/api/save-report", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          status: "ready",
-          swingScore: 80,
-          muxPlaybackId: null,
-          muxUploadId: up.id,
-          p1p9: [],
-          faults: [],
-          note: `uploaded ${f.name}`
-        })
-      });
-      const rep = await r3.json().catch(()=> ({}));
-      if (!r3.ok || (!rep?.url && !rep?.id)) throw new Error(rep?.error || `save-report failed (${r3.status})`);
+        log("Uploading to Mux…");
+        const r2 = await fetch(up.url, { method: "PUT", body: f });
+        if (!r2.ok) throw new Error(`Mux upload failed (${r2.status})`);
 
-      log("Opening report…");
-      if (rep.url) location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
-      else         location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
-    } catch (err) {
-      log("Error: " + (err?.message || err));
-    }
-  });
-})();
-</script>
+        log("Saving report JSON…");
+        const r3 = await fetch("/api/save-report", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            status: "ready", swingScore: 80,
+            muxPlaybackId: null, muxUploadId: up.id,
+            p1p9: [], faults: [], note: `uploaded ${f.name}`
+          })
+        });
+
+        let rep;
+        const ct = (r3.headers.get("content-type") || "").toLowerCase();
+        if (ct.includes("application/json")) rep = await r3.json();
+        else throw new Error(`save-report returned non-JSON (${r3.status})`);
+
+        if (!r3.ok || (!rep?.id && !rep?.url)) throw new Error(`Report save failed (${r3.status})`);
+
+        if (rep.url) location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
+        else         location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
+      } catch (err) {
+        log("Error: " + (err?.message || err));
+      }
+    });
+  })();
+  </script>
 </body>
 </html>
