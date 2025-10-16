@@ -1,12 +1,13 @@
 {
-  "version": 2,
   "rewrites": [
-    { "source": "/upload",       "destination": "/upload.html" },
-    { "source": "/report",       "destination": "/report.html" },
-    { "source": "/pricing",      "destination": "/pricing.html" },
-    { "source": "/faq",          "destination": "/faq.html" },
-    { "source": "/contact",      "destination": "/contact.html" },
-    { "source": "/login",        "destination": "/login.html" },
-    { "source": "/coming-soon",  "destination": "/coming-soon.html" }
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/upload", "destination": "/upload.html" },
+    { "source": "/reports", "destination": "/reports.html" },
+    { "source": "/coming-soon", "destination": "/coming-soon.html" },
+    { "source": "/pricing", "destination": "/pricing.html" },
+    { "source": "/faq", "destination": "/faq.html" },
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/about", "destination": "/about.html" },
+    { "source": "/report", "destination": "/report.html" }
   ]
 }
