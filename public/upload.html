@@ -2,42 +2,28 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate"/>
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Upload • Virtual Coach AI</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
-  :root{
-    --panel: rgba(10,18,24,.24);
-    --line:  rgba(255,255,255,.10);
-    --text:  #ecf3f7; --muted:#cfe0e6; --nav:#0b2b12;
-    --radius:16px;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;color:var(--text);
-    background:
-      radial-gradient(1200px 800px at 80% -10%, rgba(37,201,129,.15), transparent 60%),
-      radial-gradient(1000px 600px at -20% -20%, rgba(28,125,255,.14), transparent 60%),
-      #071017 url('/homepage-background.png') center/cover fixed no-repeat;
-    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-  }
-  header{position:sticky;top:0;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.12)}
+  :root{--scrim:rgba(0,0,0,.06);--panel:rgba(10,18,24,.24);--line:rgba(255,255,255,.10);--text:#ecf3f7;--muted:#cfe0e6;--radius:16px;--shadow:0 8px 24px rgba(0,0,0,.2);--nav:#0b2b12}
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;color:var(--text);background:url('/homepage-background.png') center/cover fixed no-repeat;font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
+  .scrim{min-height:100vh;background:var(--scrim)}
+  .wrap{width:min(1080px,92%);margin:0 auto;padding:22px 0 52px}
+  header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
   .navwrap{width:min(1080px,94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
   .brand img{height:30px}
   nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
-  nav a:hover{background:rgba(255,255,255,.10)}
+  nav a:hover{background:rgba(255,255,255,.08)}
   nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-
-  .wrap{width:min(900px,92%);margin:30px auto}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
-  label{display:block;margin:.6rem 0 .2rem}
-  input,select,button{font:inherit}
-  input[type="file"]{display:block;margin:.4rem 0 1rem}
-  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:12px;cursor:pointer}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px);padding:18px}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;display:inline-block}
   .btn:hover{background:rgba(255,255,255,.16)}
-  pre{white-space:pre-wrap;color:#cfe0e6}
+  .muted{color:var(--muted)}
+  pre{white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -52,40 +38,42 @@
   </div>
 </header>
 
-<main class="wrap">
-  <h1>Upload a swing</h1>
-  <div class="card">
-    <label for="file">Video file</label>
-    <input id="file" type="file" accept="video/*" />
-    <button id="uploadBtn" class="btn" type="button">Upload & Analyze</button>
-    <pre id="log" style="margin-top:1rem"></pre>
-  </div>
-</main>
+<div class="scrim">
+  <main class="wrap">
+    <h1 style="margin:8px 0 12px;font-weight:900">Upload a swing</h1>
+    <div class="card">
+      <label class="muted" for="file">Video file</label><br/>
+      <input id="file" type="file" accept="video/*" />
+      <div style="margin-top:12px">
+        <button id="uploadBtn" class="btn" type="button">Upload & Analyze</button>
+      </div>
+      <pre id="log" class="muted" style="margin-top:12px"></pre>
+    </div>
+  </main>
+</div>
 
+<!-- Upload client (Mux flow; opens report.html?url=… or ?id=…) -->
 <script>
-// Inline Mux uploader + report launcher
 (function () {
   const $ = s => document.querySelector(s);
   const file = $("#file");
   const btn  = $("#uploadBtn");
   const logEl = $("#log");
-  const log = m => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
-
-  btn.addEventListener("click", async (e) => {
+  const log = m => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; };
+  btn?.addEventListener("click", async (e) => {
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
     const f = file.files?.[0];
-    if (!f) { log("Pick a video first."); return; }
-
+    if (!f) return log("Pick a video first.");
     try {
       log("Requesting Mux upload URL…");
       const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
       const j1 = await r1.json().catch(() => ({}));
-      const up = j1?.upload;
-      if (!r1.ok || !up?.url) throw new Error(`Mux upload URL missing (${r1.status})`);
+      if (!r1.ok || !j1?.upload?.url) throw new Error(j1?.error || `Mux URL request failed (${r1.status})`);
+      const up = j1.upload;
 
       log("Uploading to Mux…");
-      const r2 = await fetch(up.url, { method: "PUT", body: f });
-      if (!r2.ok) throw new Error(`Mux upload failed (${r2.status})`);
+      const put = await fetch(up.url, { method: "PUT", body: f });
+      if (!put.ok) throw new Error(`Mux upload failed (${put.status})`);
 
       log("Saving report JSON…");
       const r3 = await fetch("/api/save-report", {
@@ -101,22 +89,12 @@
           note: `uploaded ${f.name}`
         })
       });
+      const rep = await r3.json().catch(()=> ({}));
+      if (!r3.ok || (!rep?.url && !rep?.id)) throw new Error(rep?.error || `save-report failed (${r3.status})`);
 
-      let rep;
-      const ct = (r3.headers.get("content-type") || "").toLowerCase();
-      if (ct.includes("application/json")) {
-        rep = await r3.json();
-      } else {
-        const txt = await r3.text();
-        throw new Error(`save-report returned non-JSON (${r3.status})\n${txt.slice(0,200)}…`);
-      }
-
-      if (!r3.ok || (!rep?.url && !rep?.id)) throw new Error(`Report save failed (${r3.status})`);
-      const dest = rep.url
-        ? `/report.html?url=${encodeURIComponent(rep.url)}`
-        : `/report.html?id=${encodeURIComponent(rep.id)}`;
       log("Opening report…");
-      location.assign(dest);
+      if (rep.url) location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
+      else         location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
     } catch (err) {
       log("Error: " + (err?.message || err));
     }
