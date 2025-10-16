@@ -2,8 +2,14 @@
   "version": 2,
   "routes": [
     { "src": "^/api/(.*)$", "dest": "/api/$1" },
-    { "src": "^/(upload|report|pricing|faq|contact|login|coming-soon)/?$", "dest": "/public/$1.html" },
-    { "src": "^/$", "dest": "/public/index.html" },
-    { "src": "^/(.*)$", "dest": "/public/$1" }
+
+    // pretty URLs for your static HTML files that live in the output directory
+    { "src": "^/(upload|report|pricing|faq|contact|login|coming-soon)/?$", "dest": "/$1.html" },
+
+    // home
+    { "src": "^/$", "dest": "/index.html" },
+
+    // fallback to any other static asset (css/js/images/etc.)
+    { "src": "^/(.*)$", "dest": "/$1" }
   ]
 }
