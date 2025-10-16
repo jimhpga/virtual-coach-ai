@@ -1,15 +1,12 @@
 {
   "version": 2,
-  "routes": [
-    { "src": "^/api/(.*)$", "dest": "/api/$1" },
-
-    // pretty URLs for your static HTML files that live in the output directory
-    { "src": "^/(upload|report|pricing|faq|contact|login|coming-soon)/?$", "dest": "/$1.html" },
-
-    // home
-    { "src": "^/$", "dest": "/index.html" },
-
-    // fallback to any other static asset (css/js/images/etc.)
-    { "src": "^/(.*)$", "dest": "/$1" }
+  "rewrites": [
+    { "source": "/upload",       "destination": "/upload.html" },
+    { "source": "/report",       "destination": "/report.html" },
+    { "source": "/pricing",      "destination": "/pricing.html" },
+    { "source": "/faq",          "destination": "/faq.html" },
+    { "source": "/contact",      "destination": "/contact.html" },
+    { "source": "/login",        "destination": "/login.html" },
+    { "source": "/coming-soon",  "destination": "/coming-soon.html" }
   ]
 }
