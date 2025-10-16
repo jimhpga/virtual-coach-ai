@@ -1,189 +1,182 @@
 <!doctype html>
 <html lang="en">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Virtual Coach AI — Swing Report</title>
-<style>
-  :root{--bg:#0c141a;--panel:#12202a;--line:#1f3a4a;--text:#e8f3f7;--muted:#b8d0db}
-  html,body{height:100%} body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
-  .wrap{max-width:920px;margin:0 auto;padding:20px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0}
-  .muted{color:var(--muted)}
-  .row{display:flex;gap:10px;flex-wrap:wrap}
-  .pill{background:#0f1b22;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:700}
-  .btn{display:inline-block;border:1px solid var(--line);background:#0f1b22;color:#fff;text-decoration:none;border-radius:10px;padding:8px 12px;margin-right:6px}
-  .btn:hover{background:#122734}
-  summary{list-style:none;cursor:pointer}
-  details.panel{background:#0f1b22;border:1px solid var(--line);border-radius:12px;margin:8px 0}
-  pre{white-space:pre-wrap;word-break:break-word}
-</style>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload • Virtual Coach AI</title>
+  <style>
+    :root{--bg:#0c141a;--panel:#12202a;--line:#1f3a4a;--text:#e8f3f7;--muted:#b8d0db}
+    html,body{height:100%} body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial}
+    .wrap{max-width:820px;margin:0 auto;padding:24px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+    h1{margin:0 0 12px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .btn{border:1px solid var(--line);background:#0f1b22;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer}
+    .btn[disabled]{opacity:.5;cursor:not-allowed}
+    .muted{color:var(--muted)}
+    pre{white-space:pre-wrap;word-break:break-word;margin:12px 0 0}
+    input[type="file"]{accent-color:#19c37d}
+    label{display:block;font-weight:700;margin-top:12px}
+    input[type="text"],input[type="email"],select{background:#0f1b22;color:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+    .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    @media (max-width:760px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
 <body>
-<div class="wrap">
-  <h1>Virtual Coach AI — Swing Report</h1>
-  <div class="muted" id="meta">Loading…</div>
+  <main class="wrap">
+    <h1>Upload</h1>
 
-  <div class="card" id="summary" hidden>
-    <div class="row">
-      <span class="pill">Score: <b id="score">—</b></span>
-      <span class="pill">Status: <b id="status">—</b></span>
-      <span class="pill">Created: <b id="created">—</b></span>
-      <span class="pill" id="loadedVia" title="How the report was loaded"></span>
-    </div>
-    <div style="margin-top:10px">
-      <a class="btn" id="btnCopy" href="#">Copy share link</a>
-      <a class="btn" id="btnDownload" href="#">Download HTML</a>
-    </div>
-  </div>
+    <section class="card" style="margin-bottom:12px">
+      <div class="row" style="gap:12px">
+        <input id="file" type="file" accept="video/*" />
+        <button id="uploadBtn" class="btn" type="button">Upload & Analyze</button>
+        <span class="muted">MP4/MOV recommended</span>
+      </div>
 
-  <div class="card" id="phases" hidden>
-    <h3 style="margin:0 0 8px">P1–P9</h3>
-    <div id="plist" class="muted">—</div>
-  </div>
+      <!-- optional metadata (all optional; kept for future) -->
+      <div class="grid" style="margin-top:12px">
+        <input id="name"      type="text"  placeholder="Name (optional)" />
+        <input id="email"     type="email" placeholder="Email (optional)" />
+        <input id="handicap"  type="text"  placeholder="Handicap (optional)" />
+        <select id="handed">
+          <option value="">Handedness (optional)</option>
+          <option>Right</option><option>Left</option>
+        </select>
+        <select id="eye">
+          <option value="">Dominant Eye (optional)</option>
+          <option>Right</option><option>Left</option>
+        </select>
+        <input id="height" type="text" placeholder="Height in inches (48–84)" />
+      </div>
 
-  <div class="card" id="coach" hidden>
-    <h3 style="margin:0 0 8px">Coaching</h3>
-    <details class="panel" id="coachPriorityWrap" hidden>
-      <summary><b>Top 3 Priority Fixes</b></summary>
-      <div id="coachPriority" style="padding:10px"></div>
-    </details>
-    <details class="panel" id="coachPowerWrap" hidden>
-      <summary><b>Top 3 Power Fixes</b></summary>
-      <div id="coachPower" style="padding:10px"></div>
-    </details>
-  </div>
+      <pre id="log" class="muted">Ready.</pre>
+    </section>
 
-  <div class="card" id="raw" hidden>
-    <h3 style="margin:0 0 8px">Raw JSON</h3>
-    <pre id="dump"></pre>
-  </div>
+    <section class="card">
+      <h3 style="margin:0 0 8px">How this works</h3>
+      <ol class="muted" style="margin:0; padding-left:18px">
+        <li>We request a Mux “direct upload” URL.</li>
+        <li>Your video is PUT straight to Mux (can take a minute).</li>
+        <li>We save a report JSON via <code>/api/save-report</code>.</li>
+        <li>We open the viewer at <code>/report.html?url=…</code> (or <code>?id=…</code> fallback).</li>
+      </ol>
+    </section>
+  </main>
 
-  <pre id="err" class="card" style="display:none;color:#fff;background:#58151a;border-color:#8a252f"></pre>
-</div>
+  <!-- Inline client (full replacement) -->
+  <script>
+  (() => {
+    const $ = s => document.querySelector(s);
+    const fileEl = $("#file");
+    const btn = $("#uploadBtn");
+    const logEl = $("#log");
 
-<script>
-/* ----------- CONFIG ----------- */
-window.BLOB_PUBLIC_BASE =
-  window.BLOB_PUBLIC_BASE || "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com";
+    const fields = {
+      name:   $("#name"),
+      email:  $("#email"),
+      hcap:   $("#handicap"),
+      handed: $("#handed"),
+      eye:    $("#eye"),
+      height: $("#height"),
+    };
 
-/* ----------- helpers ----------- */
-const $ = s => document.querySelector(s);
-const qp = new URLSearchParams(location.search);
-const rid = qp.get('id');
-const directUrl = qp.get('url');
+    const log = m => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
+    const busy = on => { btn.disabled = !!on; fileEl.disabled = !!on; Object.values(fields).forEach(el => el && (el.disabled = !!on)); };
 
-const blobFromId = id =>
-  `${window.BLOB_PUBLIC_BASE.replace(/\/+$/,'')}/reports/${encodeURIComponent(id)}.json?cb=${Date.now()}`;
+    const readForm = () => ({
+      name:   (fields.name?.value || "").trim(),
+      email:  (fields.email?.value || "").trim(),
+      hcap:   (fields.hcap?.value || "").trim(),
+      handed: (fields.handed?.value || "").trim(),
+      eye:    (fields.eye?.value || "").trim(),
+      height: (fields.height?.value || "").trim(),
+    });
 
-function showErr(msg){
-  const e = $('#err'); e.style.display='block'; e.textContent = msg;
-  $('#meta').textContent = 'Error';
-}
-
-async function fetchJson(url){
-  const res = await fetch(url, {cache:'no-store'});
-  if(!res.ok) throw new Error(`Fetch ${res.status} for ${url}`);
-  const txt = await res.text();
-  return JSON.parse(txt.trim().replace(/^\uFEFF/,''));
-}
-
-function shareUrl(){
-  const u = new URL(location.href);
-  if (directUrl) { u.searchParams.set('url', directUrl); u.searchParams.delete('id'); }
-  else if (rid) { u.searchParams.set('id', rid); u.searchParams.delete('url'); }
-  return u.toString();
-}
-
-const chip = g => (g==='good'?'color:#19c37d':g==='ok'?'color:#f6c453':'color:#ff6b6b');
-
-function render(data){
-  $('#summary').hidden = false;
-  $('#raw').hidden = false;
-  $('#dump').textContent = JSON.stringify(data, null, 2);
-
-  $('#status').textContent  = data.status ?? '—';
-  $('#score').textContent   = (data.swingScore ?? data.score ?? '—');
-  $('#created').textContent = new Date().toLocaleString();
-  $('#meta').textContent    = (directUrl ? 'Loaded via ?url' : 'Loaded via ?id');
-  $('#loadedVia').textContent = directUrl ? 'via url' : (rid ? 'via id' : 'via storage');
-
-  // P1–P9
-  const phases = Array.isArray(data.phases || data.p1p9) ? (data.phases || data.p1p9) : [];
-  if (phases.length){
-    $('#phases').hidden = false;
-    $('#plist').innerHTML = phases.map((p,i)=> {
-      const name  = p.name || p.title || `P${i+1}`;
-      const grade = (p.grade || '').toString().toLowerCase();
-      const short = p.short || p.note || '';
-      return `<div style="margin:6px 0">
-        <b>${name}</b>${grade?` — <span style="${chip(grade)}">${grade}</span>`:''}
-        ${short?` <span class="muted">• ${short}</span>`:''}
-      </div>`;
-    }).join('');
-  }
-
-  // Coaching
-  const pri = data.coaching?.priority_fixes ?? [];
-  const pow = data.coaching?.power_fixes ?? [];
-  if (pri.length || pow.length){
-    $('#coach').hidden = false;
-    if (pri.length){
-      $('#coachPriorityWrap').hidden = false;
-      $('#coachPriority').innerHTML = pri.map(f => {
-        const t=f.title||''; const s=f.short||''; const l=f.long||'';
-        return `<div style="margin:8px 0">
-          <div><b>${t}</b>${s?` <span class="muted">• ${s}</span>`:''}</div>
-          ${l?`<div class="muted" style="margin-top:4px">${l}</div>`:''}
-        </div>`;
-      }).join('');
+    function validateHeight(h){
+      if (!h) return ""; // optional now; if you want required, uncomment next line
+      // if (!h) return "Height is required.";
+      const n = Number(h);
+      if (!Number.isFinite(n)) return "Height must be a number.";
+      if (n < 48 || n > 84)  return "Height should be between 48 and 84 inches.";
+      return "";
     }
-    if (pow.length){
-      $('#coachPowerWrap').hidden = false;
-      $('#coachPower').innerHTML = pow.map(f => {
-        const t=f.title||''; const s=f.short||''; const l=f.long||'';
-        return `<div style="margin:8px 0">
-          <div><b>${t}</b>${s?` <span class="muted">• ${s}</span>`:''}</div>
-          ${l?`<div class="muted" style="margin-top:4px">${l}</div>`:''}
-        </div>`;
-      }).join('');
+
+    async function jsonOrThrow(res, fallback = "Request failed"){
+      let data = null;
+      try { data = await res.json(); } catch(_) {}
+      if (!res.ok) throw new Error((data && data.error) || `${fallback} (${res.status})`);
+      return data || {};
     }
-  }
 
-  // actions
-  $('#btnCopy').onclick = async (e)=>{
-    e.preventDefault();
-    const link = shareUrl();
-    try{ await navigator.clipboard.writeText(link); alert('Share link copied'); }
-    catch{ prompt('Copy link:', link); }
-  };
+    btn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      if (window.__uploadRunning) return;
 
-  $('#btnDownload').onclick = (e)=>{
-    e.preventDefault();
-    const html = document.documentElement.outerHTML;
-    const b = new Blob([html], {type:'text/html'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(b);
-    a.download = 'swing-report.html';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-  };
-}
+      const file = fileEl.files?.[0];
+      if (!file) { log("Pick a video first."); return; }
 
-/* ----------- boot ----------- */
-(async ()=>{
-  try{
-    let url = null;
-    if (directUrl) url = directUrl;
-    else if (rid)   url = blobFromId(rid);
-    else {
-      const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
-      if (!raw) throw new Error('Missing ?url or ?id. Use /test-save.html to open.');
-      render(JSON.parse(raw.trim().replace(/^\uFEFF/, '')));
-      return;
-    }
-    const data = await fetchJson(url);
-    render(data);
-  }catch(err){ showErr(err?.message || String(err)); }
-})();
-</script>
+      const form = readForm();
+      const heightErr = validateHeight(form.height);
+      if (heightErr) { log("Error: " + heightErr); return; }
+
+      window.__uploadRunning = true;
+      busy(true);
+      logEl.textContent = "Starting upload…";
+
+      try {
+        log("Requesting Mux upload URL…");
+        const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
+        const j1 = await jsonOrThrow(r1, "Mux upload URL request failed");
+        const up = j1.upload;
+        if (!up?.url) throw new Error("Mux upload URL missing");
+
+        log("Uploading to Mux… (this can take a minute)");
+        const r2 = await fetch(up.url, { method: "PUT", body: file });
+        if (!r2.ok) throw new Error(`Mux upload failed (${r2.status})`);
+
+        log("Saving report JSON…");
+        const r3 = await fetch("/api/save-report", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            status: "ready",
+            swingScore: 80,
+            muxPlaybackId: null,  // your backend can resolve later
+            muxUploadId: up.id,   // keep this
+            p1p9: [],
+            faults: [],
+            note: `uploaded ${file.name}`,
+            meta: form
+          })
+        });
+
+        // be tolerant of non-JSON to surface server errors
+        let rep;
+        const ct = (r3.headers.get("content-type") || "").toLowerCase();
+        if (ct.includes("application/json")) {
+          rep = await r3.json();
+        } else {
+          const txt = await r3.text();
+          throw new Error(`save-report returned non-JSON (${r3.status})\n${txt.slice(0,200)}…`);
+        }
+        if (!r3.ok) throw new Error(rep?.error || `Report save failed (${r3.status})`);
+
+        log("Opening report view…");
+        if (rep.url) {
+          location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
+        } else if (rep.id) {
+          location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
+        } else {
+          throw new Error("Report response missing url/id");
+        }
+      } catch (err) {
+        log("Error: " + (err?.message || err));
+        busy(false);
+        window.__uploadRunning = false;
+      }
+    });
+  })();
+  </script>
 </body>
 </html>
