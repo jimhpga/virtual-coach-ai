@@ -1,36 +1,39 @@
-<!-- /public/upload.client.js — Mux flow (no S3) -->
-<!-- v5 -->
-<script>
-(function () {
+// /public/upload.client.js — Mux flow (no S3)
+// v5-final
+
+(() => {
   console.log("[upload mux v5] client JS loaded");
 
   const $ = (s) => document.querySelector(s);
 
   // Fallback-friendly selectors
-  const fileInput = $("#fileInput") || $("#file");
+  const fileInput =
+    $("#fileInput") || $("#file") || document.querySelector('input[type="file"]');
   const fileLabel = $("#fileLabel");
   const btn =
     $("#uploadBtn") ||
     $("#submit") ||
     document.querySelector('button[type="submit"]') ||
-    document.querySelector('button');
+    document.querySelector("button");
 
+  // Minimal log area if none exists
   const logEl =
     $("#log") ||
     (() => {
       const d = document.createElement("pre");
       d.id = "log";
-      d.style = "margin-top:1rem;color:#666;white-space:pre-wrap;";
+      d.style.cssText =
+        "margin-top:1rem;color:#666;white-space:pre-wrap;background:#f7f7f8;border:1px solid #ddd;padding:.5rem;border-radius:8px;max-width:680px";
       document.body.appendChild(d);
       return d;
     })();
 
   const fields = {
-    name:   $("#name"),
-    email:  $("#email"),
-    hcap:   $("#handicap"),
+    name: $("#name"),
+    email: $("#email"),
+    hcap: $("#handicap"),
     handed: $("#handed"),
-    eye:    $("#eye"),
+    eye: $("#eye"),
     height: $("#height"),
   };
 
@@ -40,8 +43,8 @@
   };
 
   const busy = (on) => {
-    if (btn) btn.disabled = on;
-    if (fileInput) fileInput.disabled = on;
+    btn && (btn.disabled = on);
+    fileInput && (fileInput.disabled = on);
     Object.values(fields).forEach((el) => el && (el.disabled = on));
   };
 
@@ -55,11 +58,11 @@
   // Helpers
   function readForm() {
     return {
-      name:   (fields.name?.value || "").trim(),
-      email:  (fields.email?.value || "").trim(),
-      hcap:   (fields.hcap?.value || "").trim(),
+      name: (fields.name?.value || "").trim(),
+      email: (fields.email?.value || "").trim(),
+      hcap: (fields.hcap?.value || "").trim(),
       handed: (fields.handed?.value || "").trim(),
-      eye:    (fields.eye?.value || "").trim(),
+      eye: (fields.eye?.value || "").trim(),
       height: (fields.height?.value || "").trim(),
     };
   }
@@ -70,6 +73,15 @@
     if (!Number.isFinite(n)) return "Height must be a number.";
     if (n < 48 || n > 84) return "Height should be between 48 and 84 inches.";
     return "";
+  }
+
+  async function jsonOrThrow(res, fallback = "Request failed") {
+    let data = null;
+    try {
+      data = await res.json();
+    } catch (_) {}
+    if (!res.ok) throw new Error(data?.error || `${fallback} (${res.status})`);
+    return data || {};
   }
 
   // Main handler (blocks any old listeners)
@@ -98,17 +110,19 @@
 
     busy(true);
     try {
+      // 1) Get a Mux direct-upload URL
       log("Requesting Mux upload URL…");
       const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
-      const j1 = await r1.json().catch(() => ({}));
-      if (!r1.ok) throw new Error(j1?.error || "Mux upload URL request failed");
+      const j1 = await jsonOrThrow(r1, "Mux upload URL request failed");
       const upload = j1?.upload;
       if (!upload?.url) throw new Error("Mux upload URL missing");
 
+      // 2) PUT the file to Mux
       log("Uploading to Mux (this can take a minute)...");
       const put = await fetch(upload.url, { method: "PUT", body: file });
       if (!put.ok) throw new Error(`Mux upload failed (${put.status})`);
 
+      // 3) Save your report JSON (store the Mux upload id so your backend can resolve playback later)
       log("Saving report JSON…");
       const r2 = await fetch("/api/save-report", {
         method: "POST",
@@ -116,7 +130,7 @@
         body: JSON.stringify({
           status: "ready",
           swingScore: 80,
-          muxPlaybackId: null,   // resolved later by /api/resolve-mux
+          muxPlaybackId: null, // resolved later by /api/resolve-mux
           muxUploadId: upload.id,
           p1p9: [],
           faults: [],
@@ -124,17 +138,16 @@
           meta: data,
         }),
       });
-      const rep = await r2.json().catch(() => ({}));
-      if (!r2.ok || (!rep?.url && !rep?.id)) {
-        throw new Error(rep?.error || "Report save failed");
-      }
+      const rep = await jsonOrThrow(r2, "Report save failed");
 
-      // ✅ Prefer the Blob URL; fall back to id
+      // 4) Open the report — prefer the direct Blob URL, fall back to id
       log("Opening report view…");
       if (rep.url) {
         location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
-      } else {
+      } else if (rep.id) {
         location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
+      } else {
+        throw new Error("Report response missing url/id");
       }
     } catch (err) {
       log("Error: " + (err?.message || err));
@@ -143,4 +156,3 @@
     }
   });
 })();
-</script>
