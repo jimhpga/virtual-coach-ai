@@ -9,64 +9,83 @@
   </form>
   <pre id="log" style="margin-top:1rem;color:#555;white-space:pre-wrap"></pre>
 
-  <script>
-  // [upload mux INLINE fixed] — Mux only, with robust error reporting
-  (function () {
-    console.log("[upload mux INLINE fixed] client JS loaded");
-    const $ = s => document.querySelector(s);
-    const file = $("#file");
-    const btn  = $("#uploadBtn");
-    const logEl = $("#log");
-    const log = m => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; };
+ <script>
+/* Upload → Mux → save-report (inline, robust) */
+(() => {
+  console.log("[upload mux INLINE v5] loaded");
+  const $ = (s) => document.querySelector(s);
+  const file = $("#file");
+  const btn  = $("#uploadBtn");
+  const logEl = $("#log");
+  const log = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; };
 
-    btn.addEventListener("click", async (e) => {
-      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+  let running = false;
+
+  async function jsonOrThrow(res, fallback = "Request failed") {
+    let data = null;
+    try { data = await res.json(); } catch (_){}
+    if (!res.ok) throw new Error(data?.error || `${fallback} (${res.status})`);
+    return data || {};
+  }
+
+  btn.addEventListener("click", async (e) => {
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+    if (running) return; running = true;
+    try {
       const f = file.files?.[0];
-      if (!f) return log("Pick a video first.");
+      if (!f) { log("Pick a video first."); running = false; return; }
 
-      try {
-        log("Requesting Mux upload URL…");
-        const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
-        const j1 = await r1.json().catch(() => ({}));
-        const up = j1?.upload;
-        if (!r1.ok || !up?.url) throw new Error(`Mux upload URL missing (${r1.status})`);
+      log("Requesting Mux upload URL…");
+      const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
+      const j1 = await jsonOrThrow(r1, "Mux upload URL request failed");
+      const up = j1?.upload;
+      if (!up?.url) throw new Error("Mux upload URL missing");
 
-        log("Uploading to Mux…");
-        const r2 = await fetch(up.url, { method: "PUT", body: f });
-        if (!r2.ok) throw new Error(`Mux upload failed (${r2.status})`);
+      log("Uploading to Mux…");
+      const put = await fetch(up.url, { method: "PUT", body: f });
+      if (!put.ok) throw new Error(`Mux upload failed (${put.status})`);
 
-        log("Saving report JSON…");
-        const r3 = await fetch("/api/save-report", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            status: "ready",
-            swingScore: 80,
-            muxPlaybackId: null,
-            muxUploadId: up.id,
-            p1p9: [],
-            faults: [],
-            note: `uploaded ${f.name}`
-          })
-        });
+      log("Saving report JSON…");
+      const r2 = await fetch("/api/save-report", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          status: "ready",
+          swingScore: 80,
+          muxPlaybackId: null,     // resolved later by your backend
+          muxUploadId: up.id,
+          p1p9: [],
+          faults: [],
+          note: `uploaded ${f.name}`
+        })
+      });
 
-        // Be tolerant: if not JSON, show the first 200 chars so we can see the real error.
-        let rep;
-        const ct = (r3.headers.get("content-type") || "").toLowerCase();
-        if (ct.includes("application/json")) {
-          rep = await r3.json();
-        } else {
-          const txt = await r3.text();
-          throw new Error(`save-report returned non-JSON (${r3.status})\n${txt.slice(0,200)}…`);
-        }
-
-        if (!r3.ok || !rep?.id) throw new Error(`Report save failed (${r3.status})`);
-        // Use the explicit file path so it works without pretty routes.
-        location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
-      } catch (err) {
-        log("Error: " + (err?.message || err));
+      // Prefer JSON; if not JSON, show first 200 chars of body to diagnose.
+      let rep;
+      const ct = (r2.headers.get("content-type") || "").toLowerCase();
+      if (ct.includes("application/json")) {
+        rep = await r2.json();
+      } else {
+        const txt = await r2.text();
+        throw new Error(`save-report returned non-JSON (${r2.status})\n${txt.slice(0,200)}…`);
       }
-    });
-  })();
-  </script>
+
+      if (!r2.ok) throw new Error(rep?.error || `Report save failed (${r2.status})`);
+      if (!rep?.url && !rep?.id) throw new Error("Report response missing url/id");
+
+      log("Opening report view…");
+      if (rep.url) {
+        // ✅ Most reliable (doesn’t depend on viewer constructing the blob path)
+        location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
+      } else {
+        // fallback if your API didn’t return the full URL
+        location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
+      }
+    } catch (err) {
+      log("Error: " + (err?.message || err));
+      running = false;
+    }
+  });
+})();
+</script>
 </body>
