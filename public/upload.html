@@ -1,58 +1,100 @@
 <!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Upload • Virtual Coach AI</title>
-<body style="font-family:system-ui;margin:2rem;max-width:820px">
-  <h1>Upload</h1>
-  <form>
-    <input id="file" type="file" accept="video/*" />
-    <button id="uploadBtn" type="button">Upload & Analyze</button>
-  </form>
-  <pre id="log" style="margin-top:1rem;color:#555;white-space:pre-wrap"></pre>
+<link rel="preload" as="image" href="/homepage-background.png" />
+<style>
+  :root{
+    --panel: rgba(10,18,24,.24);
+    --line:  rgba(255,255,255,.10);
+    --text:  #ecf3f7; --muted:#cfe0e6; --nav:#0b2b12;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;color:var(--text);
+    background:
+      radial-gradient(1200px 800px at 80% -10%, rgba(37,201,129,.15), transparent 60%),
+      radial-gradient(1000px 600px at -20% -20%, rgba(28,125,255,.14), transparent 60%),
+      #071017 url('/homepage-background.png') center/cover fixed no-repeat;
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+  }
+  header{position:sticky;top:0;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.12)}
+  .navwrap{width:min(1080px,94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800}
+  .brand img{height:30px}
+  nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+  nav a:hover{background:rgba(255,255,255,.10)}
+  nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
 
- <script>
-/* Upload → Mux → save-report (inline, robust) */
-(() => {
-  console.log("[upload mux INLINE v5] loaded");
-  const $ = (s) => document.querySelector(s);
+  .wrap{width:min(900px,92%);margin:30px auto}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  label{display:block;margin:.6rem 0 .2rem}
+  input,select,button{font:inherit}
+  input[type="file"]{display:block;margin:.4rem 0 1rem}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:12px;cursor:pointer}
+  .btn:hover{background:rgba(255,255,255,.16)}
+  pre{white-space:pre-wrap;color:#cfe0e6}
+</style>
+</head>
+<body>
+<header>
+  <div class="navwrap">
+    <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt=""><span>Virtual Coach AI</span></a>
+    <nav aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/upload" aria-current="page">Upload</a>
+      <a href="/report.html">Reports</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Upload a swing</h1>
+  <div class="card">
+    <label for="file">Video file</label>
+    <input id="file" type="file" accept="video/*" />
+    <button id="uploadBtn" class="btn" type="button">Upload & Analyze</button>
+    <pre id="log" style="margin-top:1rem"></pre>
+  </div>
+</main>
+
+<script>
+// Inline Mux uploader + report launcher
+(function () {
+  const $ = s => document.querySelector(s);
   const file = $("#file");
   const btn  = $("#uploadBtn");
   const logEl = $("#log");
-  const log = (m) => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; };
-
-  let running = false;
-
-  async function jsonOrThrow(res, fallback = "Request failed") {
-    let data = null;
-    try { data = await res.json(); } catch (_){}
-    if (!res.ok) throw new Error(data?.error || `${fallback} (${res.status})`);
-    return data || {};
-  }
+  const log = m => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; logEl.scrollTop = logEl.scrollHeight; };
 
   btn.addEventListener("click", async (e) => {
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    if (running) return; running = true;
-    try {
-      const f = file.files?.[0];
-      if (!f) { log("Pick a video first."); running = false; return; }
+    const f = file.files?.[0];
+    if (!f) { log("Pick a video first."); return; }
 
+    try {
       log("Requesting Mux upload URL…");
       const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
-      const j1 = await jsonOrThrow(r1, "Mux upload URL request failed");
+      const j1 = await r1.json().catch(() => ({}));
       const up = j1?.upload;
-      if (!up?.url) throw new Error("Mux upload URL missing");
+      if (!r1.ok || !up?.url) throw new Error(`Mux upload URL missing (${r1.status})`);
 
       log("Uploading to Mux…");
-      const put = await fetch(up.url, { method: "PUT", body: f });
-      if (!put.ok) throw new Error(`Mux upload failed (${put.status})`);
+      const r2 = await fetch(up.url, { method: "PUT", body: f });
+      if (!r2.ok) throw new Error(`Mux upload failed (${r2.status})`);
 
       log("Saving report JSON…");
-      const r2 = await fetch("/api/save-report", {
+      const r3 = await fetch("/api/save-report", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           status: "ready",
           swingScore: 80,
-          muxPlaybackId: null,     // resolved later by your backend
+          muxPlaybackId: null,
           muxUploadId: up.id,
           p1p9: [],
           faults: [],
@@ -60,32 +102,26 @@
         })
       });
 
-      // Prefer JSON; if not JSON, show first 200 chars of body to diagnose.
       let rep;
-      const ct = (r2.headers.get("content-type") || "").toLowerCase();
+      const ct = (r3.headers.get("content-type") || "").toLowerCase();
       if (ct.includes("application/json")) {
-        rep = await r2.json();
+        rep = await r3.json();
       } else {
-        const txt = await r2.text();
-        throw new Error(`save-report returned non-JSON (${r2.status})\n${txt.slice(0,200)}…`);
+        const txt = await r3.text();
+        throw new Error(`save-report returned non-JSON (${r3.status})\n${txt.slice(0,200)}…`);
       }
 
-      if (!r2.ok) throw new Error(rep?.error || `Report save failed (${r2.status})`);
-      if (!rep?.url && !rep?.id) throw new Error("Report response missing url/id");
-
-      log("Opening report view…");
-      if (rep.url) {
-        // ✅ Most reliable (doesn’t depend on viewer constructing the blob path)
-        location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
-      } else {
-        // fallback if your API didn’t return the full URL
-        location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
-      }
+      if (!r3.ok || (!rep?.url && !rep?.id)) throw new Error(`Report save failed (${r3.status})`);
+      const dest = rep.url
+        ? `/report.html?url=${encodeURIComponent(rep.url)}`
+        : `/report.html?id=${encodeURIComponent(rep.id)}`;
+      log("Opening report…");
+      location.assign(dest);
     } catch (err) {
       log("Error: " + (err?.message || err));
-      running = false;
     }
   });
 })();
 </script>
 </body>
+</html>
