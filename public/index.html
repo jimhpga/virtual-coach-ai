@@ -1,8 +1,104 @@
-<!doctype html><meta charset="utf-8"/><title>Virtual Coach AI</title>
-<body style="font-family:system-ui;margin:2rem;max-width:900px">
-  <h1>Virtual Coach AI</h1>
-  <nav style="margin:.5rem 0 1rem">
-    <a href="/">Home</a> · <a href="/upload">Upload</a> · <a href="/report">Report</a> · <a href="/pricing">Pricing</a> · <a href="/contact">Contact</a>
-  </nav>
-  <p>Upload your swing and get an instant report with P1–P9 plus video playback.</p>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI</title>
+<link rel="preload" as="image" href="/homepage-background.png" />
+<style>
+  :root{
+    --scrim: rgba(0,0,0,.06);
+    --panel: rgba(10,18,24,.24);
+    --line:  rgba(255,255,255,.08);
+    --text:  #ecf3f7; --muted:#cfe0e6;
+    --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
+    --nav:#0b2b12;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;color:var(--text);
+    background:
+      radial-gradient(1200px 800px at 80% -10%, rgba(37,201,129,.15), transparent 60%),
+      radial-gradient(1000px 600px at -20% -20%, rgba(28,125,255,.14), transparent 60%),
+      #071017 url('/homepage-background.png') center/cover fixed no-repeat;
+    font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+  }
+  .scrim{min-height:100vh;background:linear-gradient(to bottom,rgba(0,0,0,.15),rgba(0,0,0,.35))}
+  .wrap{width:min(1080px,92%);margin:0 auto;padding:26px 0 64px}
+
+  /* sticky nav */
+  header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+  .navwrap{width:min(1080px,94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
+  .brand img{height:30px;width:auto;display:block}
+  nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+  nav a:hover{background:rgba(255,255,255,.10)}
+  nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+
+  .hero{margin:40px 0 24px}
+  .h1{font-size:42px;line-height:1.1;font-weight:900;letter-spacing:.2px;margin:0 0 10px}
+  .sub{color:var(--muted);font-size:15px}
+  .cta{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
+  .btn:hover{background:rgba(255,255,255,.16)}
+  .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px);padding:16px}
+  .card h3{margin:0 0 8px}
+  .muted{color:var(--muted)}
+</style>
+</head>
+<body>
+  <!-- inline nav -->
+  <header>
+    <div class="navwrap">
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
+      <nav aria-label="Primary">
+        <a href="/" aria-current="page">Home</a>
+        <a href="/upload">Upload</a>
+        <a href="/report.html">Reports</a>
+        <a href="/coming-soon">Coming&nbsp;Soon</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/faq">FAQ</a>
+        <a href="/contact">Contact</a>
+        <a href="/login">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="scrim">
+    <main class="wrap">
+      <section class="hero">
+        <div class="h1">Your swing, analyzed by AI.</div>
+        <div class="sub">Upload a clip, get a P1–P9 breakdown, coaching priorities, and power insights—instantly.</div>
+        <div class="cta">
+          <a class="btn primary" href="/upload">Upload a swing</a>
+          <a class="btn" href="/report.html">View a report</a>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="card">
+          <h3>P1–P9 Positions</h3>
+          <div class="muted">We annotate each checkpoint with a grade and video reference so you can review quickly.</div>
+        </div>
+        <div class="card">
+          <h3>Coach-Ready</h3>
+          <div class="muted">Share a clean link with your coach and collaborate using common swing language.</div>
+        </div>
+        <div class="card">
+          <h3>Power Summary</h3>
+          <div class="muted">See power score, tempo, and release timing at a glance—no hardware required.</div>
+        </div>
+        <div class="card">
+          <h3>Private by Default</h3>
+          <div class="muted">Videos upload directly to Mux; reports are stored securely using Vercel Blob.</div>
+        </div>
+      </section>
+    </main>
+  </div>
 </body>
+</html>
