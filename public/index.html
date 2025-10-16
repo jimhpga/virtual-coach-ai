@@ -7,9 +7,9 @@
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
   :root{
-    --scrim: rgba(0,0,0,.06);
+    --scrim: rgba(0,0,0,.10);
     --panel: rgba(10,18,24,.24);
-    --line:  rgba(255,255,255,.08);
+    --line:  rgba(255,255,255,.10);
     --text:  #ecf3f7; --muted:#cfe0e6;
     --radius:16px; --shadow:0 8px 24px rgba(0,0,0,.20);
     --nav:#0b2b12;
@@ -24,18 +24,15 @@
       #071017 url('/homepage-background.png') center/cover fixed no-repeat;
     font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
   }
-  .scrim{min-height:100vh;background:linear-gradient(to bottom,rgba(0,0,0,.15),rgba(0,0,0,.35))}
+  .scrim{min-height:100vh;background:linear-gradient(to bottom,rgba(0,0,0,.10),rgba(0,0,0,.35))}
   .wrap{width:min(1080px,92%);margin:0 auto;padding:26px 0 64px}
-
-  /* sticky nav */
-  header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.1)}
+  header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.12)}
   .navwrap{width:min(1080px,94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
   .brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;letter-spacing:.2px}
   .brand img{height:30px;width:auto;display:block}
   nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
   nav a:hover{background:rgba(255,255,255,.10)}
   nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-
   .hero{margin:40px 0 24px}
   .h1{font-size:42px;line-height:1.1;font-weight:900;letter-spacing:.2px;margin:0 0 10px}
   .sub{color:var(--muted);font-size:15px}
@@ -45,14 +42,12 @@
   .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6;}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
   @media(max-width:900px){.grid{grid-template-columns:1fr}}
-
   .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px);padding:16px}
   .card h3{margin:0 0 8px}
   .muted{color:var(--muted)}
 </style>
 </head>
 <body>
-  <!-- inline nav -->
   <header>
     <div class="navwrap">
       <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
@@ -76,26 +71,26 @@
         <div class="sub">Upload a clip, get a P1–P9 breakdown, coaching priorities, and power insights—instantly.</div>
         <div class="cta">
           <a class="btn primary" href="/upload">Upload a swing</a>
-          <a class="btn" href="/report.html">View a report</a>
+          <a class="btn" href="/report.html">Open a report</a>
         </div>
       </section>
 
       <section class="grid">
         <div class="card">
           <h3>P1–P9 Positions</h3>
-          <div class="muted">We annotate each checkpoint with a grade and video reference so you can review quickly.</div>
+          <div class="muted">Each checkpoint with grade and reference video for fast review.</div>
         </div>
         <div class="card">
           <h3>Coach-Ready</h3>
-          <div class="muted">Share a clean link with your coach and collaborate using common swing language.</div>
+          <div class="muted">Share a clean link with your coach and collaborate.</div>
         </div>
         <div class="card">
           <h3>Power Summary</h3>
-          <div class="muted">See power score, tempo, and release timing at a glance—no hardware required.</div>
+          <div class="muted">Power score, tempo, and release timing at a glance.</div>
         </div>
         <div class="card">
           <h3>Private by Default</h3>
-          <div class="muted">Videos upload directly to Mux; reports are stored securely using Vercel Blob.</div>
+          <div class="muted">Videos upload to Mux; reports live in Vercel Blob.</div>
         </div>
       </section>
     </main>
