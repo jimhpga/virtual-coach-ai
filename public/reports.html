@@ -3,119 +3,80 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Virtual Coach AI — Swing Report</title>
+<title>Reports • Virtual Coach AI</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
-<link rel="stylesheet" href="/_shared.css" />
+<style>
+  :root{--nav:#0c2a18;--panel:rgba(13,23,28,.28);--line:rgba(255,255,255,.1);--text:#ecf3f7;--muted:#cfe0e6;--shadow:0 8px 28px rgba(0,0,0,.22);--radius:16px}
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:url('/homepage-background.png') center/cover fixed no-repeat}
+  header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.08)}
+  .nav{width:min(1080px,94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
+  nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+  nav a:hover{background:rgba(255,255,255,.08)}
+  nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+  .wrap{width:min(1080px,92%);margin:0 auto;padding:24px 0 64px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px);padding:16px}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;display:inline-block}
+  .btn:hover{background:rgba(255,255,255,.16)}
+  input[type=text]{width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:#fff}
+</style>
 </head>
 <body>
-  <!-- header -->
-  <header>
-    <div class="navwrap">
-      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt=""><span>Virtual Coach AI</span></a>
-      <nav aria-label="Primary">
-        <a href="/" data-active="home">Home</a>
-        <a href="/upload" data-active="upload">Upload</a>
-        <a href="/report.html" aria-current="page" data-active="reports">Reports</a>
-        <a href="/coming-soon" data-active="coming">Coming&nbsp;Soon</a>
-        <a href="/pricing" data-active="pricing">Pricing</a>
-        <a href="/faq" data-active="faq">FAQ</a>
-        <a href="/contact" data-active="contact">Contact</a>
-        <a href="/about" data-active="about">About</a>
-      </nav>
-    </div>
-  </header>
-
-  <div class="scrim">
-    <main class="wrap">
-      <h1 style="margin:8px 0 0;font-weight:900">Virtual Coach AI — Swing Report</h1>
-      <div class="muted" id="meta">Loading…</div>
-
-      <div class="card" id="summary" hidden>
-        <div class="badge">Score: <b id="score">—</b></div>
-        <div class="badge">Status: <b id="status">—</b></div>
-        <div class="badge">Created: <b id="created">—</b></div>
-        <div style="margin-top:10px">
-          <a class="badge" id="btnCopy" href="#">Copy share link</a>
-          <a class="badge" id="btnDownload" href="#">Download HTML</a>
-        </div>
-      </div>
-
-      <div class="card" id="phases" hidden>
-        <h3 style="margin:0 0 8px">P1–P9</h3>
-        <div id="plist" class="muted">—</div>
-      </div>
-
-      <div class="card" id="raw" hidden>
-        <h3 style="margin:0 0 8px">Raw JSON</h3>
-        <pre id="dump"></pre>
-      </div>
-
-      <pre id="err" class="card" style="display:none;color:#fff;background:#58151a;border-color:#8a252f"></pre>
-    </main>
+<header>
+  <div class="nav">
+    <a class="brand" href="/">Virtual Coach AI</a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/upload.html">Upload</a>
+      <a href="/reports.html" aria-current="page">Reports</a>
+      <a href="/coming-soon.html">Coming Soon</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/contact.html">Contact</a>
+      <a href="/about.html">About</a>
+    </nav>
   </div>
+</header>
+
+<main class="wrap">
+  <h1 style="margin:10px 0 14px">Open a report</h1>
+  <section class="card" style="max-width:980px">
+    <p style="color:#cfe0e6;margin:0 0 8px">
+      Paste either a <b>full JSON URL</b> (from Vercel Blob) or a <b>report id</b> like <code>1760656286842-z1b9ky</code>.
+    </p>
+    <div style="display:flex;gap:10px;align-items:center">
+      <input id="input" type="text" placeholder="https://… or 1760…-abc123" />
+      <button id="open" class="btn">Open</button>
+      <button id="sample" class="btn">Create sample report</button>
+    </div>
+  </section>
+</main>
 
 <script>
-  window.BLOB_PUBLIC_BASE = window.BLOB_PUBLIC_BASE
-    || "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com";
-
   const $ = s => document.querySelector(s);
-  const qp = new URLSearchParams(location.search);
-  const rid = qp.get('id');
-  const directUrl = qp.get('url');
-
-  const blobFromId = id =>
-    `${window.BLOB_PUBLIC_BASE.replace(/\/+$/,'')}/reports/${encodeURIComponent(id)}.json?cb=${Date.now()}`;
-
-  function showErr(msg){ const e=$('#err'); e.style.display='block'; e.textContent=msg; $('#meta').textContent='Error'; }
-  async function fetchJson(url){
-    const res = await fetch(url, {cache:'no-store'});
-    if(!res.ok) throw new Error(`Fetch ${res.status} for ${url}`);
-    const txt = await res.text();
-    return JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
-  }
-  function shareUrl(){
-    const u = new URL(location.href);
-    if (directUrl) { u.searchParams.set('url', directUrl); u.searchParams.delete('id'); }
-    else if (rid)   { u.searchParams.set('id', rid);       u.searchParams.delete('url'); }
-    return u.toString();
-  }
-  function render(data){
-    $('#summary').hidden = false; $('#raw').hidden = false;
-    $('#dump').textContent = JSON.stringify(data, null, 2);
-    $('#status').textContent  = data.status ?? '—';
-    $('#score').textContent   = (data.swingScore ?? data.score ?? '—');
-    $('#created').textContent = new Date().toLocaleString();
-    $('#meta').textContent    = (directUrl ? 'Loaded via ?url' : 'Loaded via ?id');
-
-    const phases = Array.isArray(data.phases || data.p1p9) ? (data.phases || data.p1p9) : [];
-    if (phases.length){
-      $('#phases').hidden = false;
-      $('#plist').innerHTML = phases.map((p,i)=> {
-        const name = p.name || p.title || `P${i+1}`;
-        const grade = (p.grade || '').toString();
-        const short = p.short || p.note || '';
-        return `<div style="margin:6px 0"><b>${name}</b>${grade?` — ${grade}`:''}${short?` <span class="muted">• ${short}</span>`:''}</div>`;
-      }).join('');
+  $('#open').onclick = () => {
+    const v = $('#input').value.trim();
+    if (!v) return;
+    if (/^https?:\/\//i.test(v)) {
+      location.assign('/report.html?url=' + encodeURIComponent(v));
+    } else {
+      location.assign('/report.html?id=' + encodeURIComponent(v));
     }
-    $('#btnCopy').onclick = async (e)=>{ e.preventDefault(); try{ await navigator.clipboard.writeText(shareUrl()); alert('Share link copied'); }catch{ prompt('Copy link:', shareUrl()); } };
-    $('#btnDownload').onclick = (e)=>{ e.preventDefault(); const html = document.documentElement.outerHTML; const b=new Blob([html],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='swing-report.html'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); };
-  }
-
-  (async ()=>{
-    try{
-      let url = null;
-      if (directUrl) url = directUrl;
-      else if (rid)  url = blobFromId(rid);
-      else {
-        const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
-        if (!raw) throw new Error('Missing ?url or ?id. Use the Upload page to create a report.');
-        render(JSON.parse(raw.trim().replace(/^\uFEFF/, '')));
-        return;
-      }
-      const data = await fetchJson(url);
-      render(data);
-    }catch(err){ showErr(err?.message || String(err)); }
-  })();
+  };
+  $('#sample').onclick = async () => {
+    const r = await fetch('/api/save-report', {
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({
+        status:'ready', swingScore:80, muxPlaybackId:null, muxUploadId:'sample',
+        p1p9:[], faults:[], note:'sample via Reports page', meta:{}
+      })
+    });
+    const j = await r.json().catch(()=>({}));
+    if (j?.url) location.assign('/report.html?url=' + encodeURIComponent(j.url));
+    else if (j?.id) location.assign('/report.html?id=' + encodeURIComponent(j.id));
+    else alert('Could not create sample report.');
+  };
 </script>
 </body>
 </html>
