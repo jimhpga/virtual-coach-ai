@@ -2,92 +2,61 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Upload • Virtual Coach AI</title>
-<link rel="stylesheet" href="/styles.css" />
+<link rel="preload" as="image" href="/homepage-background.png" />
+<style>
+  :root{--nav:#0c2a18;--panel:rgba(13,23,28,.28);--line:rgba(255,255,255,.1);--text:#ecf3f7;--muted:#cfe0e6;--shadow:0 8px 28px rgba(0,0,0,.22);--radius:16px}
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;background:url('/homepage-background.png') center/cover fixed no-repeat}
+  header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.08)}
+  .nav{width:min(1080px,94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
+  nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
+  nav a:hover{background:rgba(255,255,255,.08)}
+  nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
+  .wrap{width:min(1080px,92%);margin:0 auto;padding:24px 0 64px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px);padding:16px}
+  .btn{border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none;display:inline-block}
+  .btn:hover{background:rgba(255,255,255,.16)}
+  pre#log{margin-top:10px;color:#cfdde6;white-space:pre-wrap}
+  label{display:block;margin:4px 0 6px;color:var(--muted)}
+  input[type=file]{display:block;padding:8px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.07);color:#fff}
+</style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="site">
-    <div class="navwrap">
-      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
-      <nav aria-label="Primary">
-        <a href="/">Home</a>
-        <a href="/upload" aria-current="page">Upload</a>
-        <a href="/reports">Reports</a>
-        <a href="/coming-soon">Coming&nbsp;Soon</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/faq">FAQ</a>
-        <a href="/contact">Contact</a>
-        <a href="/about">About</a>
-      </nav>
-    </div>
-  </header>
-
-  <div class="scrim">
-    <main class="wrap">
-      <h1>Upload a swing</h1>
-      <section class="card">
-        <label class="sub" for="file">Video file</label><br/>
-        <input id="file" type="file" accept="video/*" />
-        <div style="margin-top:10px">
-          <button id="uploadBtn" class="btn primary" type="button">Upload & Analyze</button>
-        </div>
-        <pre id="log" class="sub" style="margin-top:10px;white-space:pre-wrap"></pre>
-      </section>
-    </main>
+<header>
+  <div class="nav">
+    <a class="brand" href="/">Virtual Coach AI</a>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/upload.html" aria-current="page">Upload</a>
+      <a href="/reports.html">Reports</a>
+      <a href="/coming-soon.html">Coming Soon</a>
+      <a href="/pricing.html">Pricing</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/contact.html">Contact</a>
+      <a href="/about.html">About</a>
+    </nav>
   </div>
+</header>
 
-  <!-- Inline client (Mux flow) -->
-  <script>
-  (function () {
-    const $ = s => document.querySelector(s);
-    const file = $("#file");
-    const btn  = $("#uploadBtn");
-    const logEl = $("#log");
-    const log = m => { logEl.textContent += (logEl.textContent ? "\\n" : "") + m; };
+<main class="wrap">
+  <h1 style="margin:10px 0 14px">Upload a swing</h1>
+  <section class="card" style="max-width:980px">
+    <label for="file">Video file</label>
+    <input id="fileInput" type="file" accept="video/*" />
+    <div style="margin-top:10px;display:flex;gap:10px;align-items:center">
+      <button id="uploadBtn" class="btn" type="button">Upload & Analyze</button>
+      <span id="fileLabel" style="color:#cfe0e6">(no file)</span>
+    </div>
+    <pre id="log"></pre>
+    <div style="margin-top:8px;color:#cfe0e6">
+      Tips: one down-the-line swing, 240–480p is plenty. Keep the club in frame.
+    </div>
+  </section>
+</main>
 
-    btn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      const f = file.files?.[0];
-      if (!f) return log("Pick a video first.");
-
-      try {
-        log("Requesting Mux upload URL…");
-        const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
-        const j1 = await r1.json().catch(() => ({}));
-        const up = j1?.upload;
-        if (!r1.ok || !up?.url) throw new Error(`Mux upload URL missing (${r1.status})`);
-
-        log("Uploading to Mux…");
-        const r2 = await fetch(up.url, { method: "PUT", body: f });
-        if (!r2.ok) throw new Error(`Mux upload failed (${r2.status})`);
-
-        log("Saving report JSON…");
-        const r3 = await fetch("/api/save-report", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            status: "ready", swingScore: 80,
-            muxPlaybackId: null, muxUploadId: up.id,
-            p1p9: [], faults: [], note: `uploaded ${f.name}`
-          })
-        });
-
-        let rep;
-        const ct = (r3.headers.get("content-type") || "").toLowerCase();
-        if (ct.includes("application/json")) rep = await r3.json();
-        else throw new Error(`save-report returned non-JSON (${r3.status})`);
-
-        if (!r3.ok || (!rep?.id && !rep?.url)) throw new Error(`Report save failed (${r3.status})`);
-
-        if (rep.url) location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
-        else         location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
-      } catch (err) {
-        log("Error: " + (err?.message || err));
-      }
-    });
-  })();
-  </script>
+<!-- Uses your existing v5 script -->
+<script src="/upload.client.js"></script>
 </body>
 </html>
