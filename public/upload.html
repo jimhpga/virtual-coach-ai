@@ -1,43 +1,173 @@
-<!-- --- Player info fields (drop-in) --- -->
-<div class="grid gap">
-  <label class="f">
-    <span>Name</span>
-    <input id="name" type="text" placeholder="Your name">
-  </label>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Upload • Virtual Coach AI</title>
 
-  <label class="f">
-    <span>Email</span>
-    <input id="email" type="email" placeholder="you@example.com" autocomplete="email">
-  </label>
+  <!-- Shared styles (keep if you already have /_shared.css) -->
+  <link rel="preload" as="image" href="/homepage-background.png" />
+  <link rel="stylesheet" href="/_shared.css" />
 
-  <label class="f">
-    <span>Handicap (optional)</span>
-    <input id="handicap" type="number" inputmode="numeric" min="-10" max="54" step="1" placeholder="e.g. 8">
-  </label>
+  <style>
+    :root{
+      --bg:#0c141a; --panel:rgba(18,32,42,.86); --line:rgba(255,255,255,.14);
+      --text:#e8f3f7; --muted:#b8d0db; --nav:#0b2b12;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--text);
+      background:url('/homepage-background.png') center/cover fixed no-repeat;
+      font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
+    }
+    header{
+      position:sticky; top:0; z-index:20;
+      background:var(--nav);
+      border-bottom:1px solid rgba(255,255,255,.12);
+    }
+    .navwrap{
+      width:min(1100px,94%); margin:0 auto; padding:10px 0;
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+    }
+    .brand{color:#fff; text-decoration:none; font-weight:800; letter-spacing:.2px}
+    nav a{
+      color:#fff; text-decoration:none; padding:8px 10px; border-radius:10px;
+      border:1px solid transparent;
+    }
+    nav a:hover{background:rgba(255,255,255,.08)}
+    nav a[aria-current="page"]{
+      border-color:rgba(255,255,255,.18); background:rgba(255,255,255,.10);
+    }
 
-  <label class="f">
-    <span>Handed</span>
-    <select id="handed">
-      <option value="">Select…</option>
-      <option>Right</option>
-      <option>Left</option>
-      <option>Both</option>
-    </select>
-  </label>
+    .scrim{min-height:100vh; background:rgba(0,0,0,.05)}
+    .wrap{width:min(1100px,94%); margin:0 auto; padding:24px 0 60px}
 
-  <label class="f">
-    <span>Dominant Eye</span>
-    <select id="eye">
-      <option value="">Select…</option>
-      <option>Right</option>
-      <option>Left</option>
-      <option>Unknown</option>
-    </select>
-  </label>
+    .card{
+      background:var(--panel); border:1px solid var(--line);
+      border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.20);
+      padding:16px; backdrop-filter:blur(2px)
+    }
+    .title{font-size:28px; font-weight:800; margin:6px 0 14px}
+    .muted{color:var(--muted)}
 
-  <label class="f">
-    <span>Height (inches)</span>
-    <input id="height" type="number" inputmode="numeric" min="48" max="84" step="1" placeholder="e.g. 70" required>
-  </label>
-</div>
-<!-- --- end Player info fields --- -->
+    .f { display:flex; flex-direction:column; gap:6px }
+    .f span { font-size:12px; color:#d8e6ee; letter-spacing:.2px }
+    .f input, .f select {
+      appearance:none; width:100%;
+      padding:10px 12px; border-radius:10px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.10); color:#fff;
+    }
+    .f input::placeholder{ color:#a9c1cb }
+
+    .grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px }
+    @media (max-width:900px){ .grid { grid-template-columns: 1fr 1fr } }
+    @media (max-width:640px){ .grid { grid-template-columns: 1fr } }
+
+    .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+    .btn{
+      border:1px solid var(--line);
+      background:rgba(25,195,125,.18);
+      color:#fff; padding:10px 14px; border-radius:10px;
+      text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+      cursor:pointer
+    }
+    .btn:hover{background:rgba(25,195,125,.26)}
+    .btn.ghost{ background:rgba(255,255,255,.08) }
+
+    #log{
+      margin-top:10px; color:#cfe0e6; white-space:pre-wrap;
+      font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .help{font-size:13px; color:#cfe0e6}
+  </style>
+</head>
+<body>
+  <!-- Top nav (same everywhere) -->
+  <header>
+    <div class="navwrap">
+      <a class="brand" href="/">Virtual Coach AI</a>
+      <nav aria-label="Primary">
+        <a href="/">Home</a>
+        <a href="/upload.html" aria-current="page">Upload</a>
+        <a href="/reports.html">Reports</a>
+        <a href="/coming-soon.html">Coming&nbsp;Soon</a>
+        <a href="/pricing.html">Pricing</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/contact.html">Contact</a>
+        <a href="/about.html">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="scrim">
+    <main class="wrap">
+      <div class="title">Upload a swing</div>
+      <section class="card" style="max-width:980px">
+        <div class="f" style="margin-bottom:12px">
+          <span>Video file</span>
+          <input id="file" type="file" accept="video/*" />
+        </div>
+
+        <!-- Player details -->
+        <div class="grid" style="margin-top:8px">
+          <label class="f">
+            <span>Name</span>
+            <input id="name" type="text" placeholder="Your name" />
+          </label>
+
+          <label class="f">
+            <span>Email</span>
+            <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
+          </label>
+
+          <label class="f">
+            <span>Handicap (optional)</span>
+            <input id="handicap" type="number" inputmode="numeric" min="-10" max="54" step="1" placeholder="e.g. 8" />
+          </label>
+
+          <label class="f">
+            <span>Handed</span>
+            <select id="handed">
+              <option value="">Select…</option>
+              <option>Right</option>
+              <option>Left</option>
+              <option>Both</option>
+            </select>
+          </label>
+
+          <label class="f">
+            <span>Dominant Eye</span>
+            <select id="eye">
+              <option value="">Select…</option>
+              <option>Right</option>
+              <option>Left</option>
+              <option>Unknown</option>
+            </select>
+          </label>
+
+          <label class="f">
+            <span>Height (inches)</span>
+            <input id="height" type="number" inputmode="numeric" min="48" max="84" step="1" placeholder="e.g. 70" required />
+          </label>
+        </div>
+
+        <div class="row" style="margin-top:14px">
+          <button id="uploadBtn" class="btn" type="button">Upload & Analyze</button>
+          <a class="btn ghost" href="/reports.html">Open a report</a>
+        </div>
+
+        <div class="help" style="margin-top:10px">
+          Tips: one down-the-line swing, 240–480p is plenty. Keep the club in frame. Height must be 48–84&nbsp;inches.
+        </div>
+
+        <pre id="log"></pre>
+      </section>
+    </main>
+  </div>
+
+  <!-- Your Mux flow script (v5) -->
+  <script src="/upload.client.js"></script>
+</body>
+</html>
