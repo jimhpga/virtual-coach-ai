@@ -1,105 +1,86 @@
-// api/save-report.js
-export const config = { runtime: "nodejs" }; // keep Node runtime
+# ---- Create a rich report body ----
+$body = @{
+  status       = "ready"
+  swingScore   = 82
+  muxPlaybackId = $null
+  muxUploadId  = "smoke"
 
-import { put } from "@vercel/blob";
+  # P1–P9 (you can add up to 9)
+  phases = @(
+    @{ id="P1"; name="Address";  grade="ok";  short="Athletic, neutral"; long="Balanced stance, soft knees, chin up."; ref="https://www.youtube.com/watch?v=6w2eFiHmpiA" }
+    @{ id="P2"; name="Takeaway"; grade="good";short="One-piece start";  long="Clubhead outside hands, shaft parallel to target line."; ref="https://youtu.be/GW4Jm66p3y8" }
+    @{ id="P3"; name="Lead arm parallel"; grade="ok"; short="Width kept"; long="Lead arm extended, trail wrist hinged, club in plane window."; ref="lead arm parallel golf drill" }
+    @{ id="P4"; name="Top"; grade="needs help"; short="Across line"; long="Slight across; feel more laid off with lead wrist flat."; ref="top of backswing laid off drill" }
+  )
 
-/* Helpers */
-const isArr = (v) => Array.isArray(v);
-const obj  = (v, d = {}) => (v && typeof v === "object" ? v : d);
-
-/**
- * Minimal defaults so the viewer always has something to render.
- * You can tweak these to your liking, or keep them empty shells.
- */
-function withDefaults(input) {
-  const body = obj(input);
-
-  // Allow older field name p1p9 OR newer "phases"
-  const phases = isArr(body.phases)
-    ? body.phases
-    : isArr(body.p1p9)
-    ? body.p1p9
-    : [];
-
-  const coaching = obj(body.coaching, {});
-  const priority_fixes = isArr(coaching.priority_fixes) ? coaching.priority_fixes : [];
-  const power_fixes    = isArr(coaching.power_fixes)    ? coaching.power_fixes    : [];
-
-  const position_metrics = isArr(body.position_metrics) ? body.position_metrics : [];
-  const swing_metrics    = isArr(body.swing_metrics)    ? body.swing_metrics    : [];
-
-  const power = obj(body.power, {
-    score: 0,
-    tempo: "—",
-    release_timing: 0
-  });
-
-  const practice_plan = isArr(body.practice_plan) ? body.practice_plan : [];
-
-  return {
-    schema: "1.0",
-    created: new Date().toISOString(),
-    status: body.status ?? "ready",
-
-    // summary
-    swingScore: body.swingScore ?? body.score ?? 75,
-
-    // media / ingestion
-    muxPlaybackId: body.muxPlaybackId ?? null,
-    muxUploadId: body.muxUploadId ?? null,
-
-    // sections
-    phases,
-    coaching: { priority_fixes, power_fixes },
-    position_metrics,
-    swing_metrics,
-    power,
-    practice_plan,
-
-    // misc
-    note: body.note || "",
-    meta: obj(body.meta)
-  };
-}
-
-export default async function handler(req, res) {
-  // Basic CORS (optional but handy if you ever POST from another origin)
-  if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    return res.status(204).end();
+  coaching = @{
+    priority_fixes = @(
+      @{ title="Flatten lead wrist at top"; short="Bow the lead wrist"; long="Train flexion at P4 to square face earlier."; ref="lead wrist flexion golf drill" }
+      @{ title="Later trail-heel release"; short="Keep pressure longer"; long="Hold ground pressure to P5 for better sequence."; ref="ground reaction forces drill golf" }
+      @{ title="Face-to-path control"; short="Start shots left of target"; long="Feel face slightly closed to path through P7."; ref="close face to path golf" }
+    )
+    power_fixes = @(
+      @{ title="Pump step for GRF"; short="Mini step into lead side"; long="Add vertical force right before impact."; ref="step drill golf speed" }
+      @{ title="3:1 tempo metronome"; short="Count 1-2-3 back, 1 through"; long="Consistency breeds speed."; ref="golf tempo 3 to 1 metronome" }
+      @{ title="Early wrist set"; short="Set by P2.5"; long="Stores lever length without overrun."; ref="early wrist set drill golf" }
+    )
   }
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
-  }
+  position_metrics = @(
+    @{ label="Spine tilt";         value=72 }
+    @{ label="Hip hinge";          value=64 }
+    @{ label="Ball position";      value=58 }
+    @{ label="Grip fundamentals";  value=83 }
+  )
 
-  try {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+  swing_metrics = @(
+    @{ label="Club path control";  value=61 }
+    @{ label="Face control";       value=69 }
+    @{ label="Low-point control";  value=66 }
+    @{ label="Start line";         value=62 }
+  )
 
-    // Parse body safely whether it arrived as text or JSON
-    const raw = typeof req.body === "string" ? req.body : (req.body ?? {});
-    const data = typeof raw === "string" ? JSON.parse(raw || "{}") : raw;
+  power = @{ score=76; tempo="3:1"; release_timing=62 }
 
-    const id  = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const key = `reports/${encodeURIComponent(id)}.json`;
+  practice_plan = @(
+    @{ day=1;  title="Mirror P1–P2 (10m)";  items=@("Athletic posture checkpoints","One-piece takeaway with stick") }
+    @{ day=2;  title="Tempo & Pump step";    items=@("Metronome 3:1 — 5m","Pump step drill — 10 reps") }
+    @{ day=3;  title="Lead wrist at P4";     items=@("Bow lead wrist at top — 15 reps","Record 3 swings") }
+    @{ day=4;  title="Low-point gates";      items=@("Impact line — 20 brush strikes","3 slow-motion swings") }
+    @{ day=5;  title="Path & start line";    items=@("Alignment stick start line — 15 balls") }
+    @{ day=6;  title="Speed windows";        items=@("Light–medium–full windows — 15 balls") }
+    @{ day=7;  title="Review + light day";   items=@("Re-record P1–P4 checkpoints") }
+    @{ day=8;  title="Re-load wrist set";    items=@("Set by P2.5 — 15 reps") }
+    @{ day=9;  title="Face-to-path";         items=@("Start left, curve back — 10 balls") }
+    @{ day=10; title="Ground forces";        items=@("Hold trail heel, post into lead — 10 reps") }
+    @{ day=11; title="Tempo 3:1";            items=@("Metronome — 5 min") }
+    @{ day=12; title="Pressure shift";       items=@("Step-change — 10 reps") }
+    @{ day=13; title="Combine";              items=@("Alternate drills — 20 balls") }
+    @{ day=14; title="Retest";               items=@("Film 3 swings — upload new report") }
+  )
 
-    // Build report with defaults
-    const report = withDefaults(data);
-
-    // Write to Vercel Blob (public). Pretty-print so it's easy to inspect.
-    const { url } = await put(key, JSON.stringify(report, null, 2), {
-      access: "public",
-      contentType: "application/json; charset=utf-8"
-    });
-
-    return res.status(200).json({ id, url });
-  } catch (e) {
-    return res.status(500).json({
-      error: String(e?.message || e),
-      hint:
-        "Ensure @vercel/blob is installed and BLOB_READ_WRITE_TOKEN is set in your env."
-    });
+  meta = @{
+    name   = "Jim Hartnett"
+    email  = "jim@example.com"
+    hcap   = "8"
+    handed = "right"
+    eye    = "right"
+    height = 70
   }
 }
+
+# ---- Post it to your API ----
+$json = $body | ConvertTo-Json -Depth 10
+$resp = Invoke-RestMethod -Method POST `
+  -Uri "https://virtualcoachai.net/api/save-report" `
+  -Body $json -ContentType "application/json"
+
+# ---- Open the viewer with the direct Blob URL (best), fallback to id ----
+if ($resp.url) {
+  $enc = [uri]::EscapeDataString($resp.url)
+  Start-Process "https://virtualcoachai.net/report.html?url=$enc"
+} else {
+  Start-Process "https://virtualcoachai.net/report.html?id=$($resp.id)"
+}
+
+$resp
