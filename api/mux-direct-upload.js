@@ -1,9 +1,7 @@
 // api/mux-direct-upload.js
-export const config = { runtime: "nodejs" };
+export const config = { runtime: "nodejs" }; // Node runtime so we have server env
 
-import Mux from "@mux/mux-node";
-
-// These MUST be set in Vercel > Project Settings > Environment Variables
+// Uses the native fetch in Node 18+ (Vercel default)
 const { MUX_TOKEN_ID, MUX_TOKEN_SECRET } = process.env;
 
 export default async function handler(req, res) {
@@ -17,24 +15,37 @@ export default async function handler(req, res) {
       });
     }
 
-    const mux = new Mux({ tokenId: MUX_TOKEN_ID, tokenSecret: MUX_TOKEN_SECRET });
-    const uploads = mux.video.uploads;
+    // Basic auth header: base64("tokenId:tokenSecret")
+    const basic = Buffer.from(`${MUX_TOKEN_ID}:${MUX_TOKEN_SECRET}`).toString("base64");
 
-    // Create a direct-upload URL that we can PUT the file to
-    const upload = await uploads.create({
-      new_asset_settings: {
-        playback_policy: "public", // we want public playback IDs
+    // Create a Mux Direct Upload via REST
+    const r = await fetch("https://api.mux.com/video/v1/uploads", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "authorization": `Basic ${basic}`,
       },
-      cors_origin: "*",
-      // test: true, // flip on if you want "test" assets (cheaper) while debugging
+      body: JSON.stringify({
+        cors_origin: "*",
+        new_asset_settings: { playback_policy: ["public"] },
+        // test: true, // uncomment if you want test assets while debugging
+      }),
     });
 
-    return res.status(200).json({
-      upload: {
-        id: upload.id,
-        url: upload.url, // front-end will PUT the file here
-      },
-    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      return res.status(r.status).json({
+        error: data?.error?.message || JSON.stringify(data) || "Mux create upload failed",
+      });
+    }
+
+    // Mux REST returns: { data: { id, url, ... } }
+    const upload = data?.data;
+    if (!upload?.url) {
+      return res.status(500).json({ error: "Mux response missing upload.url", raw: data });
+    }
+
+    return res.status(200).json({ upload: { id: upload.id, url: upload.url } });
   } catch (err) {
     return res.status(500).json({ error: String(err?.message || err) });
   }
