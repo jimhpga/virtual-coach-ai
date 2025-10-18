@@ -1,8 +1,17 @@
 <!doctype html>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Upload • Virtual Coach AI</title>
-<link rel="stylesheet" href="/styles.css" />
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload • Virtual Coach AI</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .field{display:block;margin:6px 0}
+    .field>span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+    input,select{width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff}
+    #log{margin-top:12px;white-space:pre-wrap;background:rgba(0,0,0,.25);border-radius:10px;padding:10px}
+  </style>
+</head>
 <body>
   <header class="site">
     <div class="navwrap">
@@ -45,19 +54,14 @@
               <input id="file" type="file" accept="video/*" />
             </label>
             <button id="uploadBtn" class="btn primary" type="button" style="margin-top:10px">Upload & Analyze</button>
+            <a class="btn" href="/reports" style="margin-left:6px">Open a report</a>
           </div>
         </div>
 
-        <pre id="log" class="muted" style="margin-top:12px;white-space:pre-wrap"></pre>
+        <pre id="log" class="muted"></pre>
       </section>
     </main>
   </div>
-
-  <style>
-    .field{display:block;margin:6px 0}
-    .field>span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
-    input,select{width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff}
-  </style>
 
   <script>
   // Minimal, Mux + Blob only. No S3. Redirects using ?url=... to report.html.
@@ -122,7 +126,7 @@
             status: "ready",
             swingScore: 80,
             muxPlaybackId: null,
-            muxUploadId: j1.upload.id,   // tiny poller can resolve later
+            muxUploadId: j1.upload.id,
             p1p9: [],
             faults: [],
             note: `uploaded ${file.name}`,
@@ -130,19 +134,19 @@
           })
         });
 
-        let rep, ct = (r3.headers.get("content-type") || "").toLowerCase();
-        if (ct.includes("application/json")) rep = await r3.json(); else {
-          const txt = await r3.text(); throw new Error("save-report returned non-JSON ("+r3.status+"): " + txt.slice(0,200));
+        let rep; const ct = (r3.headers.get("content-type") || "").toLowerCase();
+        if (ct.includes("application/json")) {
+          rep = await r3.json();
+        } else {
+          const txt = await r3.text();
+          throw new Error("save-report returned non-JSON ("+r3.status+"): " + txt.slice(0,200));
         }
         if (!r3.ok || (!rep?.url && !rep?.id)) throw new Error("Report save failed (" + r3.status + ")");
 
-        // 4) Open report viewer (prefer direct URL so it always loads)
+        // 4) Open report viewer
         log("Opening report…");
-        if (rep.url) {
-          location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
-        } else {
-          location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
-        }
+        if (rep.url) location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
+        else         location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
       } catch (e) {
         log("Error: " + (e?.message || e));
         busy(false);
@@ -151,3 +155,4 @@
   })();
   </script>
 </body>
+</html>
