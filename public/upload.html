@@ -1,173 +1,153 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Upload • Virtual Coach AI</title>
-
-  <!-- Shared styles (keep if you already have /_shared.css) -->
-  <link rel="preload" as="image" href="/homepage-background.png" />
-  <link rel="stylesheet" href="/_shared.css" />
-
-  <style>
-    :root{
-      --bg:#0c141a; --panel:rgba(18,32,42,.86); --line:rgba(255,255,255,.14);
-      --text:#e8f3f7; --muted:#b8d0db; --nav:#0b2b12;
-    }
-    html,body{height:100%}
-    body{
-      margin:0; color:var(--text);
-      background:url('/homepage-background.png') center/cover fixed no-repeat;
-      font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-    }
-    header{
-      position:sticky; top:0; z-index:20;
-      background:var(--nav);
-      border-bottom:1px solid rgba(255,255,255,.12);
-    }
-    .navwrap{
-      width:min(1100px,94%); margin:0 auto; padding:10px 0;
-      display:flex; align-items:center; justify-content:space-between; gap:16px;
-    }
-    .brand{color:#fff; text-decoration:none; font-weight:800; letter-spacing:.2px}
-    nav a{
-      color:#fff; text-decoration:none; padding:8px 10px; border-radius:10px;
-      border:1px solid transparent;
-    }
-    nav a:hover{background:rgba(255,255,255,.08)}
-    nav a[aria-current="page"]{
-      border-color:rgba(255,255,255,.18); background:rgba(255,255,255,.10);
-    }
-
-    .scrim{min-height:100vh; background:rgba(0,0,0,.05)}
-    .wrap{width:min(1100px,94%); margin:0 auto; padding:24px 0 60px}
-
-    .card{
-      background:var(--panel); border:1px solid var(--line);
-      border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.20);
-      padding:16px; backdrop-filter:blur(2px)
-    }
-    .title{font-size:28px; font-weight:800; margin:6px 0 14px}
-    .muted{color:var(--muted)}
-
-    .f { display:flex; flex-direction:column; gap:6px }
-    .f span { font-size:12px; color:#d8e6ee; letter-spacing:.2px }
-    .f input, .f select {
-      appearance:none; width:100%;
-      padding:10px 12px; border-radius:10px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.10); color:#fff;
-    }
-    .f input::placeholder{ color:#a9c1cb }
-
-    .grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px }
-    @media (max-width:900px){ .grid { grid-template-columns: 1fr 1fr } }
-    @media (max-width:640px){ .grid { grid-template-columns: 1fr } }
-
-    .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
-    .btn{
-      border:1px solid var(--line);
-      background:rgba(25,195,125,.18);
-      color:#fff; padding:10px 14px; border-radius:10px;
-      text-decoration:none; display:inline-flex; align-items:center; gap:8px;
-      cursor:pointer
-    }
-    .btn:hover{background:rgba(25,195,125,.26)}
-    .btn.ghost{ background:rgba(255,255,255,.08) }
-
-    #log{
-      margin-top:10px; color:#cfe0e6; white-space:pre-wrap;
-      font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    }
-
-    .help{font-size:13px; color:#cfe0e6}
-  </style>
-</head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Upload • Virtual Coach AI</title>
+<link rel="stylesheet" href="/styles.css" />
 <body>
-  <!-- Top nav (same everywhere) -->
-  <header>
+  <header class="site">
     <div class="navwrap">
-      <a class="brand" href="/">Virtual Coach AI</a>
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
       <nav aria-label="Primary">
         <a href="/">Home</a>
-        <a href="/upload.html" aria-current="page">Upload</a>
-        <a href="/reports.html">Reports</a>
-        <a href="/coming-soon.html">Coming&nbsp;Soon</a>
-        <a href="/pricing.html">Pricing</a>
-        <a href="/faq.html">FAQ</a>
-        <a href="/contact.html">Contact</a>
-        <a href="/about.html">About</a>
+        <a href="/upload" aria-current="page">Upload</a>
+        <a href="/reports">Reports</a>
+        <a href="/coming-soon">Coming&nbsp;Soon</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/faq">FAQ</a>
+        <a href="/contact">Contact</a>
+        <a href="/about">About</a>
       </nav>
     </div>
   </header>
 
   <div class="scrim">
     <main class="wrap">
-      <div class="title">Upload a swing</div>
-      <section class="card" style="max-width:980px">
-        <div class="f" style="margin-bottom:12px">
-          <span>Video file</span>
-          <input id="file" type="file" accept="video/*" />
+      <h1>Upload Your Swing</h1>
+
+      <section class="card">
+        <div class="grid2" style="align-items:flex-end">
+          <div>
+            <label class="field"><span>Name (optional)</span><input id="name" placeholder="Your name" /></label>
+            <label class="field"><span>Email (optional)</span><input id="email" type="email" placeholder="you@example.com" /></label>
+            <label class="field"><span>Handicap (optional)</span><input id="handicap" placeholder="e.g. 10" /></label>
+            <label class="field"><span>Hand (optional)</span>
+              <select id="handed"><option value="">—</option><option>right</option><option>left</option></select>
+            </label>
+            <label class="field"><span>Eye dominance (optional)</span>
+              <select id="eye"><option value="">—</option><option>right</option><option>left</option></select>
+            </label>
+            <label class="field"><span>Height in inches *</span><input id="height" inputmode="numeric" placeholder="e.g. 70" /></label>
+          </div>
+
+          <div>
+            <label class="field">
+              <span>Video *</span>
+              <input id="file" type="file" accept="video/*" />
+            </label>
+            <button id="uploadBtn" class="btn primary" type="button" style="margin-top:10px">Upload & Analyze</button>
+          </div>
         </div>
 
-        <!-- Player details -->
-        <div class="grid" style="margin-top:8px">
-          <label class="f">
-            <span>Name</span>
-            <input id="name" type="text" placeholder="Your name" />
-          </label>
-
-          <label class="f">
-            <span>Email</span>
-            <input id="email" type="email" placeholder="you@example.com" autocomplete="email" />
-          </label>
-
-          <label class="f">
-            <span>Handicap (optional)</span>
-            <input id="handicap" type="number" inputmode="numeric" min="-10" max="54" step="1" placeholder="e.g. 8" />
-          </label>
-
-          <label class="f">
-            <span>Handed</span>
-            <select id="handed">
-              <option value="">Select…</option>
-              <option>Right</option>
-              <option>Left</option>
-              <option>Both</option>
-            </select>
-          </label>
-
-          <label class="f">
-            <span>Dominant Eye</span>
-            <select id="eye">
-              <option value="">Select…</option>
-              <option>Right</option>
-              <option>Left</option>
-              <option>Unknown</option>
-            </select>
-          </label>
-
-          <label class="f">
-            <span>Height (inches)</span>
-            <input id="height" type="number" inputmode="numeric" min="48" max="84" step="1" placeholder="e.g. 70" required />
-          </label>
-        </div>
-
-        <div class="row" style="margin-top:14px">
-          <button id="uploadBtn" class="btn" type="button">Upload & Analyze</button>
-          <a class="btn ghost" href="/reports.html">Open a report</a>
-        </div>
-
-        <div class="help" style="margin-top:10px">
-          Tips: one down-the-line swing, 240–480p is plenty. Keep the club in frame. Height must be 48–84&nbsp;inches.
-        </div>
-
-        <pre id="log"></pre>
+        <pre id="log" class="muted" style="margin-top:12px;white-space:pre-wrap"></pre>
       </section>
     </main>
   </div>
 
-  <!-- Your Mux flow script (v5) -->
-  <script src="/upload.client.js"></script>
+  <style>
+    .field{display:block;margin:6px 0}
+    .field>span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+    input,select{width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff}
+  </style>
+
+  <script>
+  // Minimal, Mux + Blob only. No S3. Redirects using ?url=... to report.html.
+  (function(){
+    const $ = s => document.querySelector(s);
+    const el = {
+      name: $("#name"), email: $("#email"), hcap: $("#handicap"),
+      handed: $("#handed"), eye: $("#eye"), height: $("#height"),
+      file: $("#file"), btn: $("#uploadBtn"), log: $("#log")
+    };
+    const log = m => { el.log.textContent += (el.log.textContent ? "\n" : "") + m; el.log.scrollTop = el.log.scrollHeight; };
+    const busy = on => {
+      el.btn.disabled = on; el.file.disabled = on;
+      [el.name, el.email, el.hcap, el.handed, el.eye, el.height].forEach(x=>x.disabled = on);
+    };
+    const readForm = () => ({
+      name: (el.name.value||"").trim(),
+      email: (el.email.value||"").trim(),
+      hcap: (el.hcap.value||"").trim(),
+      handed: (el.handed.value||"").trim(),
+      eye: (el.eye.value||"").trim(),
+      height: (el.height.value||"").trim(),
+    });
+    const validateHeight = h => {
+      if (!h) return "Height is required.";
+      const n = Number(h); if (!Number.isFinite(n)) return "Height must be a number.";
+      if (n < 48 || n > 84) return "Height should be between 48 and 84 inches.";
+      return "";
+    };
+
+    el.btn.addEventListener("click", async (e) => {
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+
+      const file = el.file.files?.[0];
+      if (!file) return log("Pick a video first.");
+
+      const meta = readForm();
+      const err = validateHeight(meta.height);
+      if (err) return log("Error: " + err);
+
+      busy(true);
+      try {
+        // 1) Mint Mux direct-upload URL
+        log("Requesting Mux upload URL…");
+        const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
+        const j1 = await r1.json().catch(() => ({}));
+        if (!r1.ok || !j1?.upload?.url) {
+          throw new Error("mux-direct-upload failed (" + r1.status + "): " + (j1?.error || JSON.stringify(j1)));
+        }
+
+        // 2) Upload the file to Mux
+        log("Uploading to Mux (this can take a minute)...");
+        const r2 = await fetch(j1.upload.url, { method: "PUT", body: file });
+        if (!r2.ok) throw new Error("Mux upload failed (" + r2.status + ")");
+
+        // 3) Save report JSON to Blob
+        log("Saving report JSON…");
+        const r3 = await fetch("/api/save-report", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            status: "ready",
+            swingScore: 80,
+            muxPlaybackId: null,
+            muxUploadId: j1.upload.id,   // tiny poller can resolve later
+            p1p9: [],
+            faults: [],
+            note: `uploaded ${file.name}`,
+            meta
+          })
+        });
+
+        let rep, ct = (r3.headers.get("content-type") || "").toLowerCase();
+        if (ct.includes("application/json")) rep = await r3.json(); else {
+          const txt = await r3.text(); throw new Error("save-report returned non-JSON ("+r3.status+"): " + txt.slice(0,200));
+        }
+        if (!r3.ok || (!rep?.url && !rep?.id)) throw new Error("Report save failed (" + r3.status + ")");
+
+        // 4) Open report viewer (prefer direct URL so it always loads)
+        log("Opening report…");
+        if (rep.url) {
+          location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
+        } else {
+          location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
+        }
+      } catch (e) {
+        log("Error: " + (e?.message || e));
+        busy(false);
+      }
+    });
+  })();
+  </script>
 </body>
-</html>
