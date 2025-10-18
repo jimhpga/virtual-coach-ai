@@ -2,35 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate"/>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Reports • Virtual Coach AI</title>
-  <link rel="preload" as="image" href="/homepage-background.png" />
   <link rel="stylesheet" href="/styles.css" />
-  <style>
-    /* Page-local polish (kept tiny; main layout/colors from styles.css) */
-    .open-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:12px}
-    #val{
-      min-width:340px;
-      padding:10px 12px;
-      border-radius:10px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.06);
-      color:#fff; outline:none;
-    }
-    #val:focus{box-shadow:0 0 0 3px rgba(255,255,255,.12)}
-    .hint{color:var(--muted);margin-top:6px;font-size:.92rem}
-    .err{display:none;margin-top:10px;padding:10px 12px;border-radius:10px;
-         background:#5a1b20;border:1px solid #8a2a33;color:#fff}
-  </style>
 </head>
 <body>
-  <!-- Header / Nav -->
+  <!-- Header -->
   <header class="site">
     <div class="navwrap">
-      <a class="brand" href="/">
-        <img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI">
-        <span>Virtual Coach AI</span>
-      </a>
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
       <nav aria-label="Primary">
         <a href="/">Home</a>
         <a href="/upload">Upload</a>
@@ -48,31 +29,25 @@
     <main class="wrap">
       <h1>Open a report</h1>
 
-      <section class="card">
+      <section class="card" style="margin-top:10px">
         <div class="sub">
           Paste either a <b>full JSON URL</b> (from Vercel Blob) or a <b>report id</b> like
           <code>1760565286842-zib9ky</code>.
         </div>
 
-        <div class="open-row">
-          <label class="sr-only" for="val">Report URL or id</label>
-          <input id="val" name="val" placeholder="https://... or 1760...-abc123" autocomplete="off" />
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+          <label for="val" class="visually-hidden">Report URL or id</label>
+          <input id="val" placeholder="https://…/reports/… .json  — or —  1760…-abc123"
+                 style="min-width:360px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff" />
           <button id="open" class="btn primary" type="button">Open</button>
           <a class="btn" href="/test-save.html" target="_blank" rel="noopener">Create sample report</a>
         </div>
-
-        <div class="hint">
-          Tip: If you used <b>Upload</b>, your report page will open automatically. You can also copy the Blob
-          JSON URL from <code>/api/save-report</code> responses and paste it here.
-        </div>
-
-        <div id="err" class="err" role="alert" aria-live="polite"></div>
       </section>
 
-      <section class="card" style="margin-top:12px">
+      <section class="card" style="margin-top:14px">
         <h3 style="margin:0 0 8px">Examples</h3>
         <div class="sub">
-          • Full JSON URL (Blob): <code>https://…/reports/1760565286842-zib9ky-*.json</code><br />
+          • Full JSON URL (Blob): <code>https://…/reports/1760565286842-zib9ky-*.json</code><br/>
           • Report id only: <code>1760565286842-zib9ky</code>
         </div>
       </section>
@@ -80,49 +55,34 @@
   </div>
 
   <script>
-    (function(){
-      const $ = (s)=>document.querySelector(s);
-      const input = $('#val');
-      const openBtn = $('#open');
-      const err = $('#err');
+  (function () {
+    function $(id){ return document.getElementById(id); }
 
-      input.setAttribute('autofocus', 'autofocus');
+    function openReport() {
+      const raw = ($('val').value || '').trim();
+      if (!raw) { alert('Paste a full JSON URL or a report id.'); return; }
 
-      function showErr(msg){
-        err.textContent = msg;
-        err.style.display = 'block';
-        setTimeout(()=>{ err.style.display = 'none'; }, 4500);
+      // URL vs ID
+      if (/^https?:\/\//i.test(raw)) {
+        location.assign('/report.html?url=' + encodeURIComponent(raw));
+      } else {
+        location.assign('/report.html?id=' + encodeURIComponent(raw));
       }
+    }
 
-      function parseValue(v){
-        // 1) Full URL? Route as ?url=
-        if (/^https?:\/\//i.test(v)) {
-          return { kind:'url', value: v };
-        }
-        // 2) Looks like an id (e.g., 1760565286842-zib9ky)
-        const m = v.match(/(\d{10,}-[a-z0-9]+)$/i);
-        if (m) return { kind:'id', value: m[1] };
-        return null;
-      }
+    window.addEventListener('DOMContentLoaded', () => {
+      const input = $('val');
+      const btn   = $('open');
 
-      function go(){
-        const raw = (input.value || '').trim().replace(/^["']|["']$/g,'');
-        if (!raw) return;
-        const parsed = parseValue(raw);
-        if (!parsed) {
-          showErr('Please paste a full JSON URL or a report id like 1760565286842-zib9ky.');
-          return;
+      if (btn) btn.addEventListener('click', openReport);
+      if (input) input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          openReport();
         }
-        if (parsed.kind === 'url') {
-          location.assign(`/report.html?url=${encodeURIComponent(parsed.value)}`);
-        } else {
-          location.assign(`/report.html?id=${encodeURIComponent(parsed.value)}`);
-        }
-      }
-
-      openBtn.addEventListener('click', go);
-      input.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') go(); });
-    })();
+      });
+    });
+  })();
   </script>
 </body>
 </html>
