@@ -60,6 +60,28 @@
   </style>
 
   <script>
+  // ------- tiny mock analysis so the report looks complete instantly -------
+  function mockFrom(meta){
+    return {
+      power: { score: 74, tempo: "3:1", release_timing: 61 },
+      p1p9: [
+        { id:"P1", name:"Address", grade:"ok",   short:"Athletic, neutral." },
+        { id:"P2", name:"Takeaway", grade:"good",short:"One-piece, on plane." },
+        { id:"P3", name:"Lead arm parallel", grade:"ok", short:"Width maintained." },
+        { id:"P4", name:"Top", grade:"needs help", short:"Across line; softer trail wrist." },
+        { id:"P5", name:"Lead arm parallel dwn", grade:"ok", short:"Elbow in front of seam." },
+        { id:"P6", name:"Club parallel dwn", grade:"good", short:"Square to path." },
+        { id:"P7", name:"Impact", grade:"good", short:"Handle forward, ball first." },
+        { id:"P8", name:"Post-impact", grade:"ok", short:"Extending to target." },
+        { id:"P9", name:"Finish", grade:"good", short:"Balanced." }
+      ],
+      faults: [
+        { title:"Across-line at P4", fix:"Laid-off rehearsal to neutral." },
+        { title:"Tempo quick",       fix:"Metronome 3:1." }
+      ]
+    };
+  }
+
   (function(){
     const $ = s => document.querySelector(s);
     const el = {
@@ -68,10 +90,6 @@
       file: $("#file"), btn: $("#uploadBtn"), log: $("#log")
     };
     const log = m => { el.log.textContent += (el.log.textContent ? "\n" : "") + m; el.log.scrollTop = el.log.scrollHeight; };
-    const showErr = (e) => {
-      const msg = (typeof e === "string") ? e : (e?.message || JSON.stringify(e));
-      log("Error: " + msg);
-    };
     const busy = on => {
       el.btn.disabled = on; el.file.disabled = on;
       [el.name, el.email, el.hcap, el.handed, el.eye, el.height].forEach(x=>x.disabled = on);
@@ -99,23 +117,22 @@
 
       const meta = readForm();
       const err = validateHeight(meta.height);
-      if (err) return showErr(err);
+      if (err) return log("Error: " + err);
 
       busy(true);
       try {
         log("Requesting Mux upload URL…");
         const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
-        let j1; try { j1 = await r1.json(); } catch{}
+        const j1 = await r1.json().catch(() => ({}));
         if (!r1.ok || !j1?.upload?.url) {
-          throw new Error(`mux-direct-upload failed (${r1.status}): ${JSON.stringify(j1)}`);
+          throw new Error("mux-direct-upload failed (" + r1.status + "): " + (j1?.error || JSON.stringify(j1)));
         }
 
         log("Uploading to Mux (this can take a minute)...");
         const r2 = await fetch(j1.upload.url, { method: "PUT", body: file });
-        if (!r2.ok) {
-          const t = await r2.text();
-          throw new Error(`Mux upload failed (${r2.status}): ${t.slice(0,180)}`);
-        }
+        if (!r2.ok) throw new Error("Mux upload failed (" + r2.status + ")");
+
+        const analysis = mockFrom(meta);
 
         log("Saving report JSON…");
         const r3 = await fetch("/api/save-report", {
@@ -125,25 +142,24 @@
             status: "ready",
             swingScore: 80,
             muxPlaybackId: null,
-            muxUploadId: j1.upload.id,
-            p1p9: [],
-            faults: [],
+            muxUploadId: j1.upload.id,        // your resolver can fill playback later
+            ...analysis,                       // send mock sections now
             note: `uploaded ${file.name}`,
             meta
           })
         });
 
         const ct = (r3.headers.get("content-type") || "").toLowerCase();
-        const rep = ct.includes("json") ? await r3.json() : { errorText: await r3.text() };
+        const rep = ct.includes("application/json") ? await r3.json() : { error: await r3.text() };
         if (!r3.ok || (!rep?.url && !rep?.id)) {
-          throw new Error(`save-report failed (${r3.status}): ${JSON.stringify(rep).slice(0,200)}`);
+          throw new Error("Report save failed (" + r3.status + "): " + (rep?.error || JSON.stringify(rep)));
         }
 
         log("Opening report…");
         if (rep.url) location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
         else         location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
       } catch (e) {
-        showErr(e);
+        log("Error: " + (e?.message || e));
         busy(false);
       }
     });
