@@ -1,335 +1,234 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Virtual Coach AI — Swing Report</title>
-<link rel="stylesheet" href="/styles.css" />
+<link rel="stylesheet" href="/styles.css"/>
 <style>
-  /* --- Viewer-specific refinements -------------------------------------- */
-
-  /* Give the page a little breathing room under a sticky/dense nav */
-  :root { --top-offset: 10px; }
-  body { scroll-padding-top: 64px; }
-  .scrim .wrap { margin-top: var(--top-offset); }
-
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .grid2-3{display:grid;grid-template-columns:2fr 1fr;gap:12px}
-  @media (max-width: 900px){
-    .grid2, .grid2-3{grid-template-columns:1fr}
-  }
-
-  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .kpi{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
   .pill{background:#0f1b22;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:700}
-  .btn.small{padding:6px 10px;border-radius:10px;font-size:14px}
-  .btn.ghost{background:transparent;border:1px solid var(--line)}
-  .h1-tight{margin:0 0 4px 0}
-  .muted-tight{margin:0;color:var(--muted);font-size:12px}
-  .hint{color:var(--muted);font-size:12px}
-  .mono{font-family:ui-monospace, Menlo, Consolas, monospace}
-  .tiny{font-size:12px}
-  .dim{color:var(--muted)}
-
-  /* At-a-glance bullets */
-  .glance ul{margin:6px 0 0 18px}
-  .glance li{margin:4px 0}
-
-  /* P1–P9 row look */
-  .p1p9-row{display:flex;gap:12px;align-items:flex-start;border-top:1px dashed var(--line);padding:10px 6px}
-  .p1p9-row:first-child{border-top:0}
-  .p1p9-title{font-weight:700;margin-right:6px}
-  .p1p9-short{color:var(--muted)}
-  .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-weight:700;white-space:nowrap}
-  .badge.ok   {color:#9BE9A8;border-color:#2d5a3a;background:rgba(20,70,40,.35)}
-  .badge.good {color:#BEE9FF;border-color:#2b4a62;background:rgba(22,44,66,.35)}
-  .badge.help {color:#FFC6A9;border-color:#62463a;background:rgba(66,36,18,.35)}
-
-  details>summary{cursor:pointer;list-style:none}
-  details>summary::-webkit-details-marker{display:none}
-  details summary .caret{display:inline-block;transform:rotate(0deg);transition:.15s transform;margin-right:4px}
-  details[open] summary .caret{transform:rotate(90deg)}
-  .muted-box{background:#0f1b22;border:1px dashed var(--line);border-radius:10px;padding:8px 10px;margin-top:8px}
-
-  /* Meter bars */
-  .bar-row{display:grid;grid-template-columns:140px 1fr 40px;gap:12px;align-items:center}
-  .meter{height:8px;border-radius:999px;background:#0f1b22;border:1px solid var(--line);overflow:hidden}
-  .meter>i{display:block;height:100%;background:#45D1C0}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .metric{display:flex;justify-content:space-between;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:4px 0;background:#0f1b22}
+  .bar{height:6px;background:#0b1a22;border-radius:6px;margin:6px 0;overflow:hidden}
+  .bar>i{display:block;height:6px;background:#38bdf8}
+  .pitem{padding:10px;border:1px solid var(--line);border-radius:8px;margin:6px 0;background:#0f1b22}
+  details.pitem>summary{cursor:pointer;list-style:none}
+  details.pitem>summary::-webkit-details-marker{display:none}
+  .list-dot{margin-left:16px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr; gap:12px}
+  @media (max-width:900px){.grid2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-  <header class="site">
-    <div class="navwrap">
-      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
-      <nav aria-label="Primary">
-        <a href="/">Home</a>
-        <a href="/upload">Upload</a>
-        <a href="/reports">Reports</a>
-        <a href="/coming-soon">Coming&nbsp;Soon</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/faq">FAQ</a>
-        <a href="/contact">Contact</a>
-        <a href="/about">About</a>
-      </nav>
-    </div>
-  </header>
-
-  <div class="scrim">
-    <main class="wrap" id="root">
-      <!-- filled by JS -->
-    </main>
+<header class="site">
+  <div class="navwrap">
+    <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
+    <nav aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/upload">Upload</a>
+      <a href="/reports" aria-current="page">Reports</a>
+      <a href="/coming-soon">Coming&nbsp;Soon</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/faq">FAQ</a>
+      <a href="/contact">Contact</a>
+      <a href="/about">About</a>
+    </nav>
   </div>
+</header>
+
+<div class="scrim">
+  <main class="wrap">
+    <h1>Swing Report — P1–P9</h1>
+
+    <!-- Summary / KPIs -->
+    <section class="card">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div class="kpi">
+          <span class="pill">Score: <b id="score">—</b></span>
+          <span class="pill">Status: <b id="status">—</b></span>
+          <span class="pill">Tempo: <b id="tempo">—</b></span>
+          <span class="pill">Release: <b id="rel">—</b>%</span>
+        </div>
+        <div class="row">
+          <a id="btnDL" class="btn" href="#" download="swing-report.html">Download</a>
+          <a id="btnCopy" class="btn" href="#">Copy share link</a>
+        </div>
+      </div>
+      <ul id="ataglance" class="list-dot" style="margin-top:10px"></ul>
+    </section>
+
+    <!-- P1–P9 -->
+    <section class="card">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <h3 style="margin:0">P1–P9</h3>
+        <span class="pill" id="pcount">Info</span>
+      </div>
+      <div id="pgrid"></div>
+    </section>
+
+    <!-- Coaching card -->
+    <section class="card">
+      <h3 style="margin:0 0 8px">Coaching Card</h3>
+      <div class="grid2">
+        <div>
+          <b>Top 3 Priority Fixes</b>
+          <ul id="prio" class="list-dot"></ul>
+        </div>
+        <div>
+          <b>Top 3 Power Fixes</b>
+          <ul id="powerfix" class="list-dot"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Consistency -->
+    <section class="card">
+      <div class="grid2">
+        <div>
+          <h3 style="margin:0 0 8px">Position Consistency</h3>
+          <div id="pos"></div>
+        </div>
+        <div>
+          <h3 style="margin:0 0 8px">Swing Consistency</h3>
+          <div id="swg"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Power summary -->
+    <section class="card">
+      <h3 style="margin:0 0 8px">Power Score Summary</h3>
+      <div>Power Score</div>
+      <div class="bar"><i id="pscore" style="width:0%"></i></div>
+      <div class="row" style="gap:20px">
+        <div>Tempo <b id="ptempo">—</b></div>
+        <div>Release Timing <b id="prel">—</b>%</div>
+      </div>
+    </section>
+
+    <!-- Practice plan -->
+    <section class="card">
+      <h3 style="margin:0 0 8px">Practice Plan</h3>
+      <ol id="plan" style="margin-left:18px"></ol>
+    </section>
+
+    <!-- Raw JSON -->
+    <section class="card">
+      <h3 style="margin:0 0 8px">Raw JSON</h3>
+      <pre id="dump" style="white-space:pre-wrap"></pre>
+    </section>
+  </main>
+</div>
 
 <script>
-/* ---------------- helpers ---------------- */
-const $  = s => document.querySelector(s);
+const $ = s => document.querySelector(s);
 const qp = new URLSearchParams(location.search);
 const rid = qp.get('id');
 const directUrl = qp.get('url');
-const BLOB_BASE = (window.BLOB_PUBLIC_BASE
-  || "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com").replace(/\/+$/,'');
+const blobBase = (window.BLOB_PUBLIC_BASE || "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com").replace(/\/+$/,'');
 
-const blobFromId = id => `${BLOB_BASE}/reports/${encodeURIComponent(id)}.json?cb=${Date.now()}`;
-
-function h(tag, attrs={}, ...kids){
-  const el = document.createElement(tag);
-  for (const [k,v] of Object.entries(attrs||{})) {
-    if (k === 'class') el.className = v;
-    else if (k === 'html') el.innerHTML = v;
-    else if (k.startsWith('on') && typeof v === 'function') el[k] = v;
-    else el.setAttribute(k, v);
-  }
-  for (const kid of kids.flat().filter(Boolean)) {
-    el.append(kid.nodeType ? kid : document.createTextNode(kid));
-  }
-  return el;
-}
-function fmtDate(iso){ try { return new Date(iso).toLocaleString(); } catch { return '' } }
-function safeNum(n, fallback=0){ const x = Number(n); return Number.isFinite(x) ? x : fallback; }
-function badgeClass(grade=''){
-  const g = String(grade).toLowerCase();
-  return g.includes('need')||g==='bad' ? 'help' : g.includes('good') ? 'good' : 'ok';
-}
-
-/* ---------------- UI builders ---------------- */
-function SummaryCard(data, linkUrl){
-  return h('section',{class:'card'},
-    h('div',{class:'row',style:'justify-content:space-between'},
-      h('h1',{class:'h1-tight'},'Swing Report — P1–P9'),
-      h('div',{},
-        h('button',{class:'btn small ghost',onclick:downloadHTML},'Download'),
-        ' ',
-        h('button',{class:'btn small ghost',onclick:()=>sendToCoach(linkUrl)},'Send to Coach'),
-        ' ',
-        h('button',{class:'btn small',onclick:()=>copyShare(linkUrl)},'Copy Share Link')
-      )
-    ),
-    h('p',{class:'muted-tight'},
-      'Score view • Status • Created: ', fmtDate(data.created)
-    ),
-    h('div',{class:'row',style:'margin-top:8px'},
-      h('span',{class:'pill'},"Score: ", h('b',{}, data.swingScore ?? '—')),
-      h('span',{class:'pill'},"Status: ", h('b',{}, data.status ?? '—')),
-      h('span',{class:'pill'},"Created: ", h('b',{}, fmtDate(data.created)))
-    )
-  );
-}
-
-function AtAGlanceCard(data){
-  return h('section',{class:'card glance'},
-    h('h3',{},'At a glance'),
-    h('ul',{},
-      h('li',{},'Single-swing analysis across P1–P9 checkpoints.'),
-      h('li',{},'Tap ', h('b',{},'Details'), ' at each phase to expand notes.'),
-      h('li',{},'Use the practice plan to structure the next two weeks.')
-    )
-  );
-}
-
-function P1P9Card(data){
-  const phases = Array.isArray(data.p1p9) ? data.p1p9 : (Array.isArray(data.phases) ? data.phases : []);
-  const box = h('section',{class:'card'},
-    h('div',{class:'row',style:'justify-content:space-between;align-items:center'},
-      h('h3',{style:'margin:0'},'P1–P9'), h('span',{class:'hint'},'Tap Details to expand')
-    )
-  );
-  if (!phases.length){
-    box.append(h('div',{class:'dim',style:'padding:8px 0'},"No phases found in report."));
-    return box;
-  }
-  for (const p of phases){
-    const badge = h('span',{class:`badge ${badgeClass(p.grade)}`}, p.grade || 'OK');
-    const title = p.name || p.title || p.id || 'Phase';
-    const short = p.short || p.note || '(no short note)';
-    const long  = p.long  || p.details || '';
-
-    box.append(
-      h('div',{class:'p1p9-row'},
-        badge,
-        h('div',{style:'flex:1 1 auto'},
-          h('div',{class:'row',style:'justify-content:space-between;align-items:baseline'},
-            h('div',{}, h('span',{class:'p1p9-title'}, title),
-                      p.focus ? h('span',{class:'tiny dim'},'• ', p.focus) : null),
-            long ? h('details',{},
-                    h('summary',{}, h('span',{class:'caret'},'▸'),'Details'),
-                    h('div',{class:'muted-box'}, long)
-                  )
-                 : null
-          ),
-          h('div',{class:'p1p9-short'}, short)
-        )
-      )
-    );
-  }
-  return box;
-}
-
-function CoachingCard(data){
-  const priority = data.priorityFixes || data.faults || [];
-  const power    = data.powerFixes || [];
-  return h('section',{class:'card'},
-    h('h3',{},'Coaching Card'),
-    h('details',{open:true},
-      h('summary',{},'Top 3 Priority Fixes'),
-      !priority.length
-        ? h('div',{class:'dim',style:'margin-top:6px'},'No priority fixes in report.')
-        : h('ul',{}, ...priority.slice(0,3).map(x=>h('li',{}, typeof x==='string'?x:(x.text||x.name||JSON.stringify(x)))))
-    ),
-    h('details',{},
-      h('summary',{},'Top 3 Power Fixes'),
-      !power.length
-        ? h('div',{class:'dim',style:'margin-top:6px'},'No power fixes in report.')
-        : h('ul',{}, ...power.slice(0,3).map(x=>h('li',{}, typeof x==='string'?x:(x.text||x.name||JSON.stringify(x)))))
-    )
-  );
-}
-
-function ConsistencyGrid(){
-  const card = (label)=>h('section',{class:'card'},
-    h('h3',{},label), h('div',{class:'dim'},'No metrics.')
-  );
-  return h('div',{class:'grid2'},
-    card('Position Consistency'), card('Swing Consistency')
-  );
-}
-
-function PowerCard(data){
-  const p = data.power || {};
-  const score   = safeNum(p.score ?? p.power ?? data.swingScore, 0);
-  const tempo   = p.tempo || '—';
-  const release = safeNum(p.release_timing ?? p.release ?? 0, 0);
-  const meter = (val)=>h('div',{class:'meter'}, h('i',{style:`width:${Math.max(0,Math.min(100,val))}%`}));
-
-  return h('section',{class:'card'},
-    h('h3',{},'Power Score Summary'),
-    h('div',{class:'bar-row'},
-      h('div',{}, 'Power Score'), meter(score), h('div',{class:'tiny dim'}, score + '%')
-    ),
-    h('div',{class:'bar-row',style:'margin-top:8px'},
-      h('div',{}, 'Tempo'), meter( tempoRatio(tempo) ), h('div',{class:'tiny dim'}, tempo)
-    ),
-    h('div',{class:'bar-row',style:'margin-top:8px'},
-      h('div',{}, 'Release Timing'), meter(release), h('div',{class:'tiny dim'}, release + '%')
-    )
-  );
-}
-function tempoRatio(t){
-  if (!t || typeof t !== 'string' || !t.includes(':')) return 0;
-  const [d,b] = t.split(':').map(Number);
-  if (!Number.isFinite(d)||!Number.isFinite(b)||b<=0) return 0;
-  const r = d/b; // goal 3:1
-  return Math.max(0, Math.min(100, 100 - Math.abs(3 - r)*20));
-}
-
-function PracticePlanCard(data){
-  const plan = Array.isArray(data.practice_plan) ? data.practice_plan : [];
-  return h('section',{class:'card'},
-    h('h3',{},'Practice Plan'),
-    !plan.length
-      ? h('div',{class:'dim'},'No plan in report.')
-      : h('ol',{style:'margin:0;padding-left:18px'},
-          ...plan.map(d =>
-            h('li',{style:'margin:6px 0'},
-              h('b',{}, `Day ${d.day || '?'} — ${d.title || ''}`),
-              Array.isArray(d.items) && d.items.length
-                ? h('ul',{}, ...d.items.map(it=>h('li',{}, it)))
-                : null
-            )
-          )
-        )
-  );
-}
-
-function RawJSONCard(data){
-  return h('section',{class:'card'},
-    h('h3',{},'Raw JSON'),
-    h('pre',{class:'mono tiny',style:'white-space:pre-wrap'}, JSON.stringify(data, null, 2))
-  );
-}
-
-/* ---------------- actions ---------------- */
-function downloadHTML(){
-  const html = document.documentElement.outerHTML;
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([html], {type:'text/html'}));
-  a.download = 'swing-report.html';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-}
-async function copyShare(url){
-  try{ await navigator.clipboard.writeText(url); alert('Share link copied'); }
-  catch{ prompt('Copy link:', url); }
-}
-function sendToCoach(url){
-  const mailto = `mailto:?subject=Virtual%20Coach%20AI%20—%20Swing%20Report&body=${encodeURIComponent(url)}`;
-  location.href = mailto;
-}
-
-/* ---------------- load & render ---------------- */
-async function fetchJson(url){
-  const res = await fetch(url, {cache:'no-store'});
-  if(!res.ok) throw new Error(`Fetch ${res.status} for ${url}`);
-  const txt = await res.text();
-  return JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
-}
-function shareUrl(source){
+function shareUrl(){
   const u = new URL(location.href);
-  if (source === 'url') { u.searchParams.set('url', directUrl); u.searchParams.delete('id'); }
-  else                  { u.searchParams.set('id', rid);       u.searchParams.delete('url'); }
+  if (directUrl) { u.searchParams.set('url', directUrl); u.searchParams.delete('id'); }
+  else if (rid)  { u.searchParams.set('id', rid); u.searchParams.delete('url'); }
   return u.toString();
 }
-
-(function boot(){
-  const root = $('#root');
-  (async ()=>{
-    try{
-      let url = null, source = null;
-      if (directUrl) { url = directUrl; source='url'; }
-      else if (rid)   { url = blobFromId(rid); source='id'; }
-      else {
-        const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
-        if (!raw) throw new Error('Missing ?url or ?id. Use Reports page to open a report.');
-        render(root, JSON.parse(raw.trim().replace(/^\uFEFF/, '')), location.href);
-        return;
-      }
-      const data = await fetchJson(url);
-      render(root, data, shareUrl(source));
-    }catch(e){
-      root.append(h('section',{class:'card'}, h('h3',{},'Error'), h('div',{class:'muted-box'}, String(e?.message||e))));
-    }
-  })();
-})();
-
-function render(root, data, canonicalShare){
-  root.innerHTML = '';
-  root.append(SummaryCard(data, canonicalShare));
-  root.append(AtAGlanceCard(data));
-  root.append(P1P9Card(data));
-  root.append(CoachingCard(data));
-  root.append(ConsistencyGrid());
-  root.append(PowerCard(data));
-  root.append(PracticePlanCard(data));
-  root.append(RawJSONCard(data));
+function blobFromId(id){
+  return `${blobBase}/reports/${encodeURIComponent(id)}.json?cb=${Date.now()}`;
 }
+async function fetchJson(url){
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error(`Fetch ${r.status} for ${url}`);
+  const t = await r.text();
+  return JSON.parse(t.trim().replace(/^\uFEFF/, ''));
+}
+function el(tag, attrs={}, html){
+  const n = document.createElement(tag);
+  Object.entries(attrs).forEach(([k,v]) => n.setAttribute(k,v));
+  if (html) n.innerHTML = html;
+  return n;
+}
+
+function render(data){
+  // KPIs
+  $('#status').textContent = data.status || '—';
+  $('#score').textContent  = data.power?.score ?? data.swingScore ?? '—';
+  $('#tempo').textContent  = data.power?.tempo ?? '—';
+  $('#rel').textContent    = data.power?.release_timing ?? '—';
+  $('#ptempo').textContent = data.power?.tempo ?? '—';
+  $('#prel').textContent   = data.power?.release_timing ?? '—';
+  $('#pscore').style.width = ((data.power?.score ?? data.swingScore ?? 0)|0) + '%';
+
+  // at a glance
+  const ag = data.atAGlance || [];
+  const ul = $('#ataglance'); ul.innerHTML='';
+  ag.forEach(s => ul.appendChild(el('li',{},s)));
+
+  // P1–P9
+  const pgrid = $('#pgrid'); pgrid.innerHTML='';
+  const phases = Array.isArray(data.p1p9) ? data.p1p9 : [];
+  $('#pcount').textContent = `${phases.length} items`;
+  phases.forEach(p => {
+    const d = el('details', {class:'pitem', open:''});
+    const s = el('summary', {}, `<b>${p.id} — ${p.name}</b> <span class="muted">• ${p.grade}</span><div class="muted">${p.short}</div>`);
+    d.appendChild(s);
+    d.appendChild(el('div', {style:'margin-top:6px'}, p.long || p.short || ''));
+    pgrid.appendChild(d);
+  });
+
+  // top 3s
+  const prio = $('#prio'); prio.innerHTML='';
+  (data.priorityFixes || []).slice(0,3).forEach(t => prio.appendChild(el('li',{},t)));
+  const pfix = $('#powerfix'); pfix.innerHTML='';
+  (data.powerFixes || []).slice(0,3).forEach(t => pfix.appendChild(el('li',{},t)));
+
+  // consistency
+  const pos = $('#pos'); pos.innerHTML='';
+  (data.positionConsistency || []).forEach(m => {
+    const div = el('div',{class:'metric'}, `<div>${m.name}</div><div><b>${m.score}%</b></div>`);
+    pos.appendChild(div);
+  });
+  const swg = $('#swg'); swg.innerHTML='';
+  (data.swingConsistency || []).forEach(m => {
+    const div = el('div',{class:'metric'}, `<div>${m.name}</div><div><b>${m.score}%</b></div>`);
+    swg.appendChild(div);
+  });
+
+  // plan
+  const plan = $('#plan'); plan.innerHTML='';
+  (data.practice_plan || []).forEach(day => {
+    const li = el('li',{}, `<b>Day ${day.day} — ${day.title}</b>`);
+    const sub = el('ul',{class:'list-dot'});
+    (day.items || []).forEach(i => sub.appendChild(el('li',{},i)));
+    li.appendChild(sub); plan.appendChild(li);
+  });
+
+  // raw
+  $('#dump').textContent = JSON.stringify(data, null, 2);
+
+  // actions
+  $('#btnCopy').onclick = async (e)=>{ e.preventDefault(); try{ await navigator.clipboard.writeText(shareUrl()); alert('Share link copied'); }catch{ prompt('Copy link:', shareUrl()); } };
+  $('#btnDL').onclick   = (e)=>{ e.preventDefault(); const html = document.documentElement.outerHTML; const b = new Blob([html], {type:'text/html'}); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download='swing-report.html'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 1000); };
+}
+
+(async()=>{
+  try{
+    let url=null;
+    if (directUrl) url = directUrl;
+    else if (rid)  url = blobFromId(rid);
+    else {
+      const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
+      if (!raw) throw new Error('Missing ?url or ?id');
+      render(JSON.parse(raw.trim().replace(/^\uFEFF/,'') ));
+      return;
+    }
+    const data = await fetchJson(url);
+    render(data);
+  }catch(err){
+    alert(err?.message || String(err));
+  }
+})();
 </script>
 </body>
 </html>
