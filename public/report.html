@@ -6,32 +6,54 @@
 <title>Virtual Coach AI — Swing Report</title>
 <link rel="stylesheet" href="/styles.css" />
 <style>
-  /* Small additions specific to the report viewer */
+  /* --- Viewer-specific refinements -------------------------------------- */
+
+  /* Give the page a little breathing room under a sticky/dense nav */
+  :root { --top-offset: 10px; }
+  body { scroll-padding-top: 64px; }
+  .scrim .wrap { margin-top: var(--top-offset); }
+
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .grid2-3{display:grid;grid-template-columns:2fr 1fr;gap:12px}
-  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  @media (max-width: 900px){
+    .grid2, .grid2-3{grid-template-columns:1fr}
+  }
+
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   .pill{background:#0f1b22;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:700}
-  .meter{height:8px;border-radius:999px;background:#0f1b22;border:1px solid var(--line);overflow:hidden}
-  .meter>i{display:block;height:100%;background:#45D1C0}
   .btn.small{padding:6px 10px;border-radius:10px;font-size:14px}
   .btn.ghost{background:transparent;border:1px solid var(--line)}
-  .p1{margin:0}
-  .chk{display:flex;gap:10px;align-items:flex-start;border-bottom:1px dashed var(--line);padding:10px 8px}
-  .chk:last-child{border-bottom:0}
-  .chk .grade{min-width:60px;text-align:center}
-  .badge{display:inline-block;min-width:20px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-weight:700}
-  .badge.ok{color:#9BE9A8;border-color:#2d5a3a;background:rgba(20,70,40,.35)}
-  .badge.good{color:#BEE9FF;border-color:#2b4a62;background:rgba(22,44,66,.35)}
-  .badge.help{color:#FFC6A9;border-color:#62463a;background:rgba(66,36,18,.35)}
+  .h1-tight{margin:0 0 4px 0}
+  .muted-tight{margin:0;color:var(--muted);font-size:12px}
+  .hint{color:var(--muted);font-size:12px}
+  .mono{font-family:ui-monospace, Menlo, Consolas, monospace}
+  .tiny{font-size:12px}
   .dim{color:var(--muted)}
+
+  /* At-a-glance bullets */
+  .glance ul{margin:6px 0 0 18px}
+  .glance li{margin:4px 0}
+
+  /* P1–P9 row look */
+  .p1p9-row{display:flex;gap:12px;align-items:flex-start;border-top:1px dashed var(--line);padding:10px 6px}
+  .p1p9-row:first-child{border-top:0}
+  .p1p9-title{font-weight:700;margin-right:6px}
+  .p1p9-short{color:var(--muted)}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--line);font-weight:700;white-space:nowrap}
+  .badge.ok   {color:#9BE9A8;border-color:#2d5a3a;background:rgba(20,70,40,.35)}
+  .badge.good {color:#BEE9FF;border-color:#2b4a62;background:rgba(22,44,66,.35)}
+  .badge.help {color:#FFC6A9;border-color:#62463a;background:rgba(66,36,18,.35)}
+
   details>summary{cursor:pointer;list-style:none}
   details>summary::-webkit-details-marker{display:none}
-  details summary .caret{display:inline-block;transform:rotate(0deg);transition:.15s transform}
+  details summary .caret{display:inline-block;transform:rotate(0deg);transition:.15s transform;margin-right:4px}
   details[open] summary .caret{transform:rotate(90deg)}
-  .muted-box{background:#0f1b22;border:1px dashed var(--line);border-radius:10px;padding:8px 10px}
-  .tiny{font-size:12px}
-  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace}
-  .w100{width:100%}
+  .muted-box{background:#0f1b22;border:1px dashed var(--line);border-radius:10px;padding:8px 10px;margin-top:8px}
+
+  /* Meter bars */
+  .bar-row{display:grid;grid-template-columns:140px 1fr 40px;gap:12px;align-items:center}
+  .meter{height:8px;border-radius:999px;background:#0f1b22;border:1px solid var(--line);overflow:hidden}
+  .meter>i{display:block;height:100%;background:#45D1C0}
 </style>
 </head>
 <body>
@@ -53,12 +75,12 @@
 
   <div class="scrim">
     <main class="wrap" id="root">
-      <!-- populated by JS -->
+      <!-- filled by JS -->
     </main>
   </div>
 
 <script>
-/* ---------------- boot & helpers ---------------- */
+/* ---------------- helpers ---------------- */
 const $  = s => document.querySelector(s);
 const qp = new URLSearchParams(location.search);
 const rid = qp.get('id');
@@ -81,25 +103,28 @@ function h(tag, attrs={}, ...kids){
   }
   return el;
 }
-function fmtDate(iso){
-  try { return new Date(iso).toLocaleString(); } catch { return '' }
-}
-function safeNum(n, fallback=0){
-  const x = Number(n); return Number.isFinite(x) ? x : fallback;
+function fmtDate(iso){ try { return new Date(iso).toLocaleString(); } catch { return '' } }
+function safeNum(n, fallback=0){ const x = Number(n); return Number.isFinite(x) ? x : fallback; }
+function badgeClass(grade=''){
+  const g = String(grade).toLowerCase();
+  return g.includes('need')||g==='bad' ? 'help' : g.includes('good') ? 'good' : 'ok';
 }
 
-/* ------- rendering ------- */
+/* ---------------- UI builders ---------------- */
 function SummaryCard(data, linkUrl){
-  const top = h('section',{class:'card'},
-    h('div',{class:'row'},
-      h('h1',{style:'margin:0;flex:1'},"Swing Report — P1–P9"),
+  return h('section',{class:'card'},
+    h('div',{class:'row',style:'justify-content:space-between'},
+      h('h1',{class:'h1-tight'},'Swing Report — P1–P9'),
       h('div',{},
-        h('button',{class:'btn small ghost', onclick:()=>downloadHTML()},'Download'),
+        h('button',{class:'btn small ghost',onclick:downloadHTML},'Download'),
         ' ',
-        h('button',{class:'btn small ghost', onclick:()=>sendToCoach(linkUrl)},'Send to Coach'),
+        h('button',{class:'btn small ghost',onclick:()=>sendToCoach(linkUrl)},'Send to Coach'),
         ' ',
-        h('button',{class:'btn small', onclick:()=>copyShare(linkUrl)},'Copy Share Link'),
-      ),
+        h('button',{class:'btn small',onclick:()=>copyShare(linkUrl)},'Copy Share Link')
+      )
+    ),
+    h('p',{class:'muted-tight'},
+      'Score view • Status • Created: ', fmtDate(data.created)
     ),
     h('div',{class:'row',style:'margin-top:8px'},
       h('span',{class:'pill'},"Score: ", h('b',{}, data.swingScore ?? '—')),
@@ -107,48 +132,53 @@ function SummaryCard(data, linkUrl){
       h('span',{class:'pill'},"Created: ", h('b',{}, fmtDate(data.created)))
     )
   );
-  return top;
+}
+
+function AtAGlanceCard(data){
+  return h('section',{class:'card glance'},
+    h('h3',{},'At a glance'),
+    h('ul',{},
+      h('li',{},'Single-swing analysis across P1–P9 checkpoints.'),
+      h('li',{},'Tap ', h('b',{},'Details'), ' at each phase to expand notes.'),
+      h('li',{},'Use the practice plan to structure the next two weeks.')
+    )
+  );
 }
 
 function P1P9Card(data){
   const phases = Array.isArray(data.p1p9) ? data.p1p9 : (Array.isArray(data.phases) ? data.phases : []);
   const box = h('section',{class:'card'},
     h('div',{class:'row',style:'justify-content:space-between;align-items:center'},
-      h('h3',{class:'p1'},'P1–P9'),
-      h('button',{class:'btn small ghost', onclick:()=>alert('How we grade: A concise qualitative check at each checkpoint. Use Details to see the longer coaching note.')}, 'Info')
+      h('h3',{style:'margin:0'},'P1–P9'), h('span',{class:'hint'},'Tap Details to expand')
     )
   );
   if (!phases.length){
-    box.append(h('div',{class:'muted dim',style:'padding:8px 0'},"No phases found in report."));
+    box.append(h('div',{class:'dim',style:'padding:8px 0'},"No phases found in report."));
     return box;
   }
   for (const p of phases){
-    const grade = (p.grade||'').toLowerCase();
-    const badgeClass = grade.includes('need')||grade==='bad' ? 'help'
-                       : grade.includes('good') ? 'good'
-                       : 'ok';
+    const badge = h('span',{class:`badge ${badgeClass(p.grade)}`}, p.grade || 'OK');
+    const title = p.name || p.title || p.id || 'Phase';
     const short = p.short || p.note || '(no short note)';
     const long  = p.long  || p.details || '';
-    const item = h('div',{class:'chk'},
-      h('div',{class:'grade'},
-        h('div',{class:`badge ${badgeClass}`}, (p.grade||'OK'))
-      ),
-      h('div',{class:'w100'},
-        h('div',{class:'row',style:'justify-content:space-between;gap:10px'},
-          h('div',{},
-            h('b',{}, (p.name || p.title || p.id || 'Phase')),
-            p.focus ? h('span',{class:'tiny dim',style:'margin-left:6px'}, '• ', p.focus) : null
+
+    box.append(
+      h('div',{class:'p1p9-row'},
+        badge,
+        h('div',{style:'flex:1 1 auto'},
+          h('div',{class:'row',style:'justify-content:space-between;align-items:baseline'},
+            h('div',{}, h('span',{class:'p1p9-title'}, title),
+                      p.focus ? h('span',{class:'tiny dim'},'• ', p.focus) : null),
+            long ? h('details',{},
+                    h('summary',{}, h('span',{class:'caret'},'▸'),'Details'),
+                    h('div',{class:'muted-box'}, long)
+                  )
+                 : null
           ),
-          long ? h('details',{},
-                  h('summary',{}, h('span',{class:'caret'},'▸ '),'Details'),
-                  h('div',{class:'muted-box',style:'margin-top:6px'}, long)
-                )
-               : null
-        ),
-        h('div',{class:'dim',style:'margin-top:4px'}, short)
+          h('div',{class:'p1p9-short'}, short)
+        )
       )
     );
-    box.append(item);
   }
   return box;
 }
@@ -156,73 +186,66 @@ function P1P9Card(data){
 function CoachingCard(data){
   const priority = data.priorityFixes || data.faults || [];
   const power    = data.powerFixes || [];
-  const card = h('section',{class:'card'},
+  return h('section',{class:'card'},
     h('h3',{},'Coaching Card'),
     h('details',{open:true},
       h('summary',{},'Top 3 Priority Fixes'),
-      h('div',{class:'muted dim',style:'margin-top:6px'},
-        !priority.length
-          ? 'No priority fixes in report.'
-          : h('ul',{}, ...priority.slice(0,3).map(x=>h('li',{}, typeof x==='string'?x:(x.text||x.name||JSON.stringify(x)))))
-      )
+      !priority.length
+        ? h('div',{class:'dim',style:'margin-top:6px'},'No priority fixes in report.')
+        : h('ul',{}, ...priority.slice(0,3).map(x=>h('li',{}, typeof x==='string'?x:(x.text||x.name||JSON.stringify(x)))))
     ),
     h('details',{},
       h('summary',{},'Top 3 Power Fixes'),
-      h('div',{class:'muted dim',style:'margin-top:6px'},
-        !power.length
-          ? 'No power fixes in report.'
-          : h('ul',{}, ...power.slice(0,3).map(x=>h('li',{}, typeof x==='string'?x:(x.text||x.name||JSON.stringify(x)))))
-      )
+      !power.length
+        ? h('div',{class:'dim',style:'margin-top:6px'},'No power fixes in report.')
+        : h('ul',{}, ...power.slice(0,3).map(x=>h('li',{}, typeof x==='string'?x:(x.text||x.name||JSON.stringify(x)))))
     )
   );
-  return card;
 }
 
-function ConsistencyRow(title){
-  return h('div',{class:'card'},
-    h('h3',{}, title),
-    h('div',{class:'muted dim'},'No metrics.')
+function ConsistencyGrid(){
+  const card = (label)=>h('section',{class:'card'},
+    h('h3',{},label), h('div',{class:'dim'},'No metrics.')
+  );
+  return h('div',{class:'grid2'},
+    card('Position Consistency'), card('Swing Consistency')
   );
 }
 
 function PowerCard(data){
   const p = data.power || {};
-  const score = safeNum(p.score ?? p.power ?? data.swingScore, 0);
-  const tempo = p.tempo || '—';
+  const score   = safeNum(p.score ?? p.power ?? data.swingScore, 0);
+  const tempo   = p.tempo || '—';
   const release = safeNum(p.release_timing ?? p.release ?? 0, 0);
+  const meter = (val)=>h('div',{class:'meter'}, h('i',{style:`width:${Math.max(0,Math.min(100,val))}%`}));
 
-  const meter = val => h('div',{class:'meter'}, h('i',{style:`width:${Math.max(0,Math.min(100,val))}%;`}));
   return h('section',{class:'card'},
     h('h3',{},'Power Score Summary'),
-    h('div',{class:'row',style:'gap:16px;align-items:center'},
-      h('div',{style:'min-width:120px'}, 'Power Score'),
-      h('div',{class:'w100'}, meter(score)), h('div',{class:'dim tiny'}, score+'%')
+    h('div',{class:'bar-row'},
+      h('div',{}, 'Power Score'), meter(score), h('div',{class:'tiny dim'}, score + '%')
     ),
-    h('div',{class:'row',style:'gap:16px;align-items:center;margin-top:8px'},
-      h('div',{style:'min-width:120px'}, 'Tempo'),
-      h('div',{class:'w100'}, meter( tempoRatio(tempo) )), h('div',{class:'dim tiny'}, tempo)
+    h('div',{class:'bar-row',style:'margin-top:8px'},
+      h('div',{}, 'Tempo'), meter( tempoRatio(tempo) ), h('div',{class:'tiny dim'}, tempo)
     ),
-    h('div',{class:'row',style:'gap:16px;align-items:center;margin-top:8px'},
-      h('div',{style:'min-width:120px'}, 'Release Timing'),
-      h('div',{class:'w100'}, meter(release)), h('div',{class:'dim tiny'}, release+'%')
+    h('div',{class:'bar-row',style:'margin-top:8px'},
+      h('div',{}, 'Release Timing'), meter(release), h('div',{class:'tiny dim'}, release + '%')
     )
   );
 }
 function tempoRatio(t){
-  // Convert "3:1" -> ~75% feel; fall back 0
   if (!t || typeof t !== 'string' || !t.includes(':')) return 0;
-  const [d,b] = t.split(':').map(x=>Number(x));
+  const [d,b] = t.split(':').map(Number);
   if (!Number.isFinite(d)||!Number.isFinite(b)||b<=0) return 0;
-  const r = d/b; // 3 is our "target"
-  return Math.max(0, Math.min(100, 100 - Math.abs(3-r)*20));
+  const r = d/b; // goal 3:1
+  return Math.max(0, Math.min(100, 100 - Math.abs(3 - r)*20));
 }
 
 function PracticePlanCard(data){
   const plan = Array.isArray(data.practice_plan) ? data.practice_plan : [];
-  const card = h('section',{class:'card'},
+  return h('section',{class:'card'},
     h('h3',{},'Practice Plan'),
     !plan.length
-      ? h('div',{class:'muted dim'},'No plan in report.')
+      ? h('div',{class:'dim'},'No plan in report.')
       : h('ol',{style:'margin:0;padding-left:18px'},
           ...plan.map(d =>
             h('li',{style:'margin:6px 0'},
@@ -234,7 +257,6 @@ function PracticePlanCard(data){
           )
         )
   );
-  return card;
 }
 
 function RawJSONCard(data){
@@ -244,7 +266,7 @@ function RawJSONCard(data){
   );
 }
 
-/* ---- actions ---- */
+/* ---------------- actions ---------------- */
 function downloadHTML(){
   const html = document.documentElement.outerHTML;
   const a = document.createElement('a');
@@ -254,109 +276,58 @@ function downloadHTML(){
   setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
 }
 async function copyShare(url){
-  try{
-    await navigator.clipboard.writeText(url);
-    alert('Share link copied');
-  }catch{
-    prompt('Copy link:', url);
-  }
+  try{ await navigator.clipboard.writeText(url); alert('Share link copied'); }
+  catch{ prompt('Copy link:', url); }
 }
 function sendToCoach(url){
   const mailto = `mailto:?subject=Virtual%20Coach%20AI%20—%20Swing%20Report&body=${encodeURIComponent(url)}`;
   location.href = mailto;
 }
 
-/* ---- load & render ---- */
+/* ---------------- load & render ---------------- */
 async function fetchJson(url){
   const res = await fetch(url, {cache:'no-store'});
   if(!res.ok) throw new Error(`Fetch ${res.status} for ${url}`);
   const txt = await res.text();
   return JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
 }
-function shareUrl(currentSource){
+function shareUrl(source){
   const u = new URL(location.href);
-  if (currentSource === 'url') {
-    u.searchParams.set('url', directUrl);
-    u.searchParams.delete('id');
-  } else {
-    u.searchParams.set('id', rid);
-    u.searchParams.delete('url');
-  }
+  if (source === 'url') { u.searchParams.set('url', directUrl); u.searchParams.delete('id'); }
+  else                  { u.searchParams.set('id', rid);       u.searchParams.delete('url'); }
   return u.toString();
 }
 
-(async function boot(){
+(function boot(){
   const root = $('#root');
-  try{
-    let url = null, source = null;
-    if (directUrl) { url = directUrl; source='url'; }
-    else if (rid)   { url = blobFromId(rid); source='id'; }
-    else {
-      const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
-      if (!raw) throw new Error('Missing ?url or ?id. Use the Reports page to open a report.');
-      const data = JSON.parse(raw.trim().replace(/^\uFEFF/, ''));
-      render(root, data, location.href);
-      return;
+  (async ()=>{
+    try{
+      let url = null, source = null;
+      if (directUrl) { url = directUrl; source='url'; }
+      else if (rid)   { url = blobFromId(rid); source='id'; }
+      else {
+        const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
+        if (!raw) throw new Error('Missing ?url or ?id. Use Reports page to open a report.');
+        render(root, JSON.parse(raw.trim().replace(/^\uFEFF/, '')), location.href);
+        return;
+      }
+      const data = await fetchJson(url);
+      render(root, data, shareUrl(source));
+    }catch(e){
+      root.append(h('section',{class:'card'}, h('h3',{},'Error'), h('div',{class:'muted-box'}, String(e?.message||e))));
     }
-    const data = await fetchJson(url);
-    render(root, data, shareUrl(source));
-  }catch(e){
-    root.append(
-      h('section',{class:'card'},
-        h('h3',{},'Error'),
-        h('div',{class:'muted-box'}, String(e?.message||e))
-      )
-    );
-  }
+  })();
 })();
 
 function render(root, data, canonicalShare){
   root.innerHTML = '';
-
-  // Summary first
   root.append(SummaryCard(data, canonicalShare));
-
-  // Upper coaching / scores quick snapshot
-  root.append(
-    h('section',{class:'card'},
-      h('div',{class:'grid2-3'},
-        h('div',{},
-          h('h3',{},'At a glance'),
-          h('ul',{class:'dim',style:'margin:0;padding-left:18px'},
-            h('li',{},'Top checkpoints and notes appear below.'),
-            h('li',{},'Tap ', h('b',{},'Details'), ' to see the long coaching note.'),
-            h('li',{},'Use the practice plan to structure the next two weeks.')
-          )
-        ),
-        h('div',{},
-          h('div',{class:'pill',style:'display:inline-block'},'Score: ', h('b',{}, data.swingScore ?? '—')),
-          ' ',
-          h('div',{class:'pill',style:'display:inline-block'},'Tempo: ', h('b',{}, (data?.power?.tempo || '—')))
-        )
-      )
-    )
-  );
-
-  // P1–P9
+  root.append(AtAGlanceCard(data));
   root.append(P1P9Card(data));
-
-  // Coaching
   root.append(CoachingCard(data));
-
-  // Consistency (placeholders, can wire real metrics later)
-  const consistencyRow = h('div',{class:'grid2'},
-    ConsistencyRow('Position Consistency'),
-    ConsistencyRow('Swing Consistency')
-  );
-  root.append(consistencyRow);
-
-  // Power
+  root.append(ConsistencyGrid());
   root.append(PowerCard(data));
-
-  // Practice Plan
   root.append(PracticePlanCard(data));
-
-  // Raw JSON
   root.append(RawJSONCard(data));
 }
 </script>
