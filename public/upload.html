@@ -1,17 +1,8 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Upload • Virtual Coach AI</title>
-  <link rel="stylesheet" href="/styles.css" />
-  <style>
-    .field{display:block;margin:6px 0}
-    .field>span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
-    input,select{width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff}
-    #log{margin-top:12px;white-space:pre-wrap;background:rgba(0,0,0,.25);border-radius:10px;padding:10px}
-  </style>
-</head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Upload • Virtual Coach AI</title>
+<link rel="stylesheet" href="/styles.css" />
 <body>
   <header class="site">
     <div class="navwrap">
@@ -54,17 +45,21 @@
               <input id="file" type="file" accept="video/*" />
             </label>
             <button id="uploadBtn" class="btn primary" type="button" style="margin-top:10px">Upload & Analyze</button>
-            <a class="btn" href="/reports" style="margin-left:6px">Open a report</a>
           </div>
         </div>
 
-        <pre id="log" class="muted"></pre>
+        <pre id="log" class="muted" style="margin-top:12px;white-space:pre-wrap"></pre>
       </section>
     </main>
   </div>
 
+  <style>
+    .field{display:block;margin:6px 0}
+    .field>span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+    input,select{width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff}
+  </style>
+
   <script>
-  // Minimal, Mux + Blob only. No S3. Redirects using ?url=... to report.html.
   (function(){
     const $ = s => document.querySelector(s);
     const el = {
@@ -73,6 +68,10 @@
       file: $("#file"), btn: $("#uploadBtn"), log: $("#log")
     };
     const log = m => { el.log.textContent += (el.log.textContent ? "\n" : "") + m; el.log.scrollTop = el.log.scrollHeight; };
+    const showErr = (e) => {
+      const msg = (typeof e === "string") ? e : (e?.message || JSON.stringify(e));
+      log("Error: " + msg);
+    };
     const busy = on => {
       el.btn.disabled = on; el.file.disabled = on;
       [el.name, el.email, el.hcap, el.handed, el.eye, el.height].forEach(x=>x.disabled = on);
@@ -100,24 +99,24 @@
 
       const meta = readForm();
       const err = validateHeight(meta.height);
-      if (err) return log("Error: " + err);
+      if (err) return showErr(err);
 
       busy(true);
       try {
-        // 1) Mint Mux direct-upload URL
         log("Requesting Mux upload URL…");
         const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
-        const j1 = await r1.json().catch(() => ({}));
+        let j1; try { j1 = await r1.json(); } catch{}
         if (!r1.ok || !j1?.upload?.url) {
-          throw new Error("mux-direct-upload failed (" + r1.status + "): " + (j1?.error || JSON.stringify(j1)));
+          throw new Error(`mux-direct-upload failed (${r1.status}): ${JSON.stringify(j1)}`);
         }
 
-        // 2) Upload the file to Mux
         log("Uploading to Mux (this can take a minute)...");
         const r2 = await fetch(j1.upload.url, { method: "PUT", body: file });
-        if (!r2.ok) throw new Error("Mux upload failed (" + r2.status + ")");
+        if (!r2.ok) {
+          const t = await r2.text();
+          throw new Error(`Mux upload failed (${r2.status}): ${t.slice(0,180)}`);
+        }
 
-        // 3) Save report JSON to Blob
         log("Saving report JSON…");
         const r3 = await fetch("/api/save-report", {
           method: "POST",
@@ -134,25 +133,20 @@
           })
         });
 
-        let rep; const ct = (r3.headers.get("content-type") || "").toLowerCase();
-        if (ct.includes("application/json")) {
-          rep = await r3.json();
-        } else {
-          const txt = await r3.text();
-          throw new Error("save-report returned non-JSON ("+r3.status+"): " + txt.slice(0,200));
+        const ct = (r3.headers.get("content-type") || "").toLowerCase();
+        const rep = ct.includes("json") ? await r3.json() : { errorText: await r3.text() };
+        if (!r3.ok || (!rep?.url && !rep?.id)) {
+          throw new Error(`save-report failed (${r3.status}): ${JSON.stringify(rep).slice(0,200)}`);
         }
-        if (!r3.ok || (!rep?.url && !rep?.id)) throw new Error("Report save failed (" + r3.status + ")");
 
-        // 4) Open report viewer
         log("Opening report…");
         if (rep.url) location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
         else         location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
       } catch (e) {
-        log("Error: " + (e?.message || e));
+        showErr(e);
         busy(false);
       }
     });
   })();
   </script>
 </body>
-</html>
