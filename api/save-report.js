@@ -3,32 +3,29 @@ export const config = { runtime: "nodejs" };
 
 import { put } from "@vercel/blob";
 
+/** Default sections to ensure the viewer has data to render */
 function defaultAnalysis(meta = {}) {
   return {
-    // P1–P9 checkpoints
     p1p9: [
-      { id: "P1", name: "Address",          grade: "ok",         short: "Athletic, neutral." },
-      { id: "P2", name: "Takeaway",         grade: "good",       short: "One-piece, on plane." },
-      { id: "P3", name: "Lead arm parallel",grade: "ok",         short: "Width is good." },
-      { id: "P4", name: "Top",              grade: "needs help", short: "Slightly across line; soften trail wrist." },
-      { id: "P5", name: "Lead arm parallel dwn", grade: "ok",     short: "Trail elbow in front of seam." },
-      { id: "P6", name: "Club parallel dwn",     grade: "good",   short: "Face square to path." },
-      { id: "P7", name: "Impact",                grade: "good",   short: "Handle forward, ball-first strike." },
-      { id: "P8", name: "Post-impact",           grade: "ok",     short: "Extending to target." },
-      { id: "P9", name: "Finish",                grade: "good",   short: "Balanced and tall." }
+      { id: "P1", name: "Address",                grade: "ok",         short: "Athletic, neutral." },
+      { id: "P2", name: "Takeaway",               grade: "good",       short: "One-piece, on plane." },
+      { id: "P3", name: "Lead arm parallel",      grade: "ok",         short: "Width maintained." },
+      { id: "P4", name: "Top",                    grade: "needs help", short: "Slightly across line; soften trail wrist." },
+      { id: "P5", name: "Lead arm parallel dwn",  grade: "ok",         short: "Trail elbow in front of seam." },
+      { id: "P6", name: "Club parallel dwn",      grade: "good",       short: "Face square to path." },
+      { id: "P7", name: "Impact",                 grade: "good",       short: "Handle forward, ball-first strike." },
+      { id: "P8", name: "Post-impact",            grade: "ok",         short: "Extending to target." },
+      { id: "P9", name: "Finish",                 grade: "good",       short: "Balanced and tall." }
     ],
-    // “Power Score Summary”
     power: {
       score: 76,
       tempo: "3:1",
       release_timing: 62
     },
-    // “Swing Consistency / Position Consistency”
     consistency: {
       position: { dispersion: 0.18, contact: 0.72 },
       swing:    { pathVar: 0.22, faceVar: 0.17 }
     },
-    // 14-day practice plan
     practice_plan: [
       { day:  1, title: "Mirror P1–P2 (10m)",      items: ["Athletic posture checkpoints","One-piece takeaway with stick"] },
       { day:  2, title: "Tempo & Pump step",       items: ["Metronome 3:1 — 5m","Pump step drill — 10 reps"] },
@@ -45,11 +42,9 @@ function defaultAnalysis(meta = {}) {
       { day: 13, title: "Combine",                 items: ["Alternate drills — 20 balls"] },
       { day: 14, title: "Retest",                  items: ["Film 3 swings — upload new report"] }
     ],
-    // handy mirrors to what your viewer already reads
     faults: [
-      { title: "Across-line at P4",  fix: "Soften trail wrist; feel 'laid-off' rehearsal to neutral." },
-      { title: "Tempo drifts fast",  fix: "Metronome 3:1; count 1-2-3 back, 1 down." },
-      { title: "Late release",       fix: "Pump drill; release by lead thigh." }
+      { title: "Across-line at P4",  fix: "Laid-off rehearsal to neutral." },
+      { title: "Tempo quick",        fix: "Metronome 3:1; 1-2-3 back, 1 down." }
     ],
     note: meta?.note || ""
   };
@@ -65,25 +60,25 @@ export default async function handler(req, res) {
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const key = `reports/${id}.json`;
 
-    // Merge defaults with request
     const defaults = defaultAnalysis(body.meta);
+
     const report = {
       schema: "1.0",
       created: new Date().toISOString(),
       status: body.status ?? "ready",
       swingScore: body.swingScore ?? 80,
       muxPlaybackId: body.muxPlaybackId ?? null,
-      muxUploadId: body.muxUploadId ?? null,
+      muxUploadId:  body.muxUploadId  ?? null,
 
-      // sections (use client-provided or add defaults)
-      p1p9: Array.isArray(body.p1p9) && body.p1p9.length ? body.p1p9 : defaults.p1p9,
-      power: body.power || defaults.power,
-      consistency: body.consistency || defaults.consistency,
+      // If the client didn’t send these sections, fill with defaults:
+      p1p9:          Array.isArray(body.p1p9) && body.p1p9.length ? body.p1p9 : defaults.p1p9,
+      power:         body.power || defaults.power,
+      consistency:   body.consistency || defaults.consistency,
       practice_plan: Array.isArray(body.practice_plan) && body.practice_plan.length
-        ? body.practice_plan
-        : defaults.practice_plan,
+                       ? body.practice_plan
+                       : defaults.practice_plan,
+      faults:        Array.isArray(body.faults) && body.faults.length ? body.faults : defaults.faults,
 
-      faults: Array.isArray(body.faults) && body.faults.length ? body.faults : defaults.faults,
       note: body.note || defaults.note,
       meta: body.meta || {}
     };
@@ -97,7 +92,7 @@ export default async function handler(req, res) {
   } catch (e) {
     return res.status(500).json({
       error: String(e?.message || e),
-      hint: "Check @vercel/blob and your BLOB_READ_WRITE_TOKEN."
+      hint: "Check @vercel/blob is installed and BLOB_READ_WRITE_TOKEN is set."
     });
   }
 }
