@@ -1,148 +1,121 @@
-// /api/generate-report-llm.js
+// api/generate-report-llm.js
 export const config = { runtime: "nodejs" };
 
-import { getSimilarPros } from "@/lib/pro-library";
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
-// lightweight “baseline” so we always have tempo/release/mode
-function seededBaseline(meta = {}, filename = "") {
-  const s = (filename || "").toLowerCase();
-  const tempo = /120fps|slow/.test(s) ? "3:1" : "2.8:1";
-  const release_timing = /slow/.test(s) ? 68 : 72;
-  const arche =
-    (meta.height && Number(meta.height) >= 72) ? "Long Levers" :
-    (meta.height && Number(meta.height) <= 66) ? "Compact" : "Neutral";
-  return {
-    parsed: { filename },
-    tempo,
-    release_timing,
-    arche,
-    swingScore: 75
-  };
-}
-
-// force JSON output
-const SYSTEM = `
-You are Virtual Coach AI, a single expert coach whose knowledge blends modern
-biomechanics (Dr. Kwon), swing geometry (Jim McLean), measurement (Dave Tutelman),
-and practical tour coaching (Butch Harmon). Your job is to synthesize—not imitate—
-and produce a personalized, actionable report.
-
-RULES:
-- Output **only valid JSON** that matches the schema provided.
-- Incorporate "Pro exemplars" as patterns (width, pressure timing, shallowing, tempo),
-  not as identities (never name players or refer to "this pro").
-- Mirror instructions for left-handers.
-- Keep short blurbs concise; long explanations 1–3 sentences.
-- The practice_plan must be 14 days, progressive, and drill-ready.
-
-SCHEMA (return exactly this shape):
-{
-  "p1p9": [{ "id":"P1..P9", "grade":"good|ok|needs help", "short":"...", "long":"..." }],
-  "top_priority_fixes": [ { "title":"...", "why":"...", "how":"(3 bullet steps)" } ],
-  "top_power_fixes": [ { "title":"...", "why":"...", "how":"(3 bullet steps)" } ],
-  "power": { "score": 0-100, "tempo":"x:x", "release_timing": 0-100 },
-  "position_consistency": { "notes": "one line" },
-  "swing_consistency": { "notes": "one line" },
-  "practice_plan": [
-    { "day": 1, "title":"...", "items":["...","..."] },
-    ... (days 2–14)
-  ]
-}
-Ensure JSON is minified or pretty; do not wrap in code fences.
-`;
-
-async function callOpenAI({ meta, filename, observations }) {
-  if (!OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY is not set");
+function safeJson(input) {
+  try {
+    if (!input) return {};
+    if (typeof input === "string") return JSON.parse(input);
+    return input;
+  } catch {
+    return {};
   }
+}
 
-  const baseline = seededBaseline(meta, filename);
-  const proRefs = getSimilarPros({ meta, filename, baseline, k: 4 });
+function stripFences(s) {
+  if (typeof s !== "string") return s;
+  return s.replace(/^\s*```json\s*/i, "").replace(/^\s*```\s*$/i, "");
+}
 
-  const userText = `
-Student meta: ${JSON.stringify(meta || {}, null, 2)}
-Filename clues: ${JSON.stringify(baseline.parsed, null, 2)}
+async function openaiJsonCompletion({ model, system, user }) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error("Missing OPENAI_API_KEY");
 
-Baseline hints:
-${JSON.stringify({
-    archetype: baseline.arche,
-    swingScore: baseline.swingScore,
-    tempo: baseline.tempo,
-    release_timing: baseline.release_timing
-  }, null, 2)}
-
-Pro exemplars (anonymized; use for patterns only):
-${JSON.stringify(proRefs, null, 2)}
-
-Optional observations (from uploader or future vision system):
-${JSON.stringify(observations || {}, null, 2)}
-
-Return JSON only (schema above).`;
-
-  // OpenAI Chat Completions (text-only)
-  const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+  const r = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
-      authorization: `Bearer ${OPENAI_API_KEY}`,
-      "content-type": "application/json"
+      "content-type": "application/json",
+      authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
-      temperature: 0.2,
+      model: model || "gpt-4o-mini",
+      response_format: { type: "json_object" },
+      temperature: 0.4,
       messages: [
-        { role: "system", content: SYSTEM.trim() },
-        { role: "user", content: userText.trim() }
-      ]
-    })
+        { role: "system", content: system },
+        { role: "user", content: user },
+      ],
+    }),
   });
 
-  if (!resp.ok) {
-    const txt = await resp.text().catch(() => "");
-    throw new Error(`OpenAI ${resp.status}: ${txt.slice(0, 400)}`);
+  if (!r.ok) {
+    const txt = await r.text().catch(() => "");
+    throw new Error(`OpenAI ${r.status}: ${txt.slice(0, 200)}`);
   }
 
-  const data = await resp.json();
-  const content = data?.choices?.[0]?.message?.content || "";
-  const json = safeJson(content);
-  if (!json || !json.p1p9) throw new Error("LLM did not return valid schema");
-  return json;
+  const j = await r.json();
+  const raw = j?.choices?.[0]?.message?.content || "{}";
+  const clean = stripFences(raw);
+  return safeJson(clean);
 }
 
-// tolerant JSON extractor
-function safeJson(s) {
-  if (!s) return null;
-  // strip code fences if any slipped through
-  const cleaned = s.replace(/^```json|^```|```$/gim, "").trim();
-  try { return JSON.parse(cleaned); } catch {}
-  // try to find first/last braces
-  const first = cleaned.indexOf("{");
-  const last = cleaned.lastIndexOf("}");
-  if (first >= 0 && last > first) {
-    try { return JSON.parse(cleaned.slice(first, last + 1)); } catch {}
-  }
-  return null;
+const SYSTEM = `
+You are a senior golf coach who writes *strict JSON*. 
+You enhance a base swing report for a student using expert voices (Butch Harmon, Jim McLean, Dr. Kwon, Dave Tutelman).
+Output JSON only—no prose, no markdown.
+
+Return ONLY these keys when present:
+{
+  "topPriorityFixes": string[],           // 1–3 items
+  "topPowerFixes": string[],              // 1–3 items
+  "positionConsistency": { "notes": string },
+  "swingConsistency": { "notes": string },
+  "power": { "score": number, "tempo": string, "release_timing": number }, // 0–100; tempo like "3:1"
+  "p1p9": [
+     { "id": "P1", "name": "Address", "grade": "good|ok|needs help",
+       "short": "concise coaching point",
+       "long": "longer actionable coaching notes",
+       "video": "https://... (optional)" },
+     …
+  ],
+  "practicePlan": [
+    { "day": number, "title": string, "items": string[] } // 10–14 days, small focused blocks
+  ]
+}
+
+Personalize to the student (handedness, eye, height, handicap) if provided. 
+Be specific but concise; no medical claims; avoid brand names. 
+Always produce valid JSON that matches the shape above (omit keys you cannot infer).
+`;
+
+function userPromptFromReport(report) {
+  const summary = {
+    meta: report?.meta || {},
+    power: report?.power || { score: report?.swingScore ?? 80 },
+    p1p9: report?.p1p9 || [],
+    faults: report?.faults || [],
+    note: report?.note || "",
+  };
+
+  return `
+Base swing report (JSON):
+${JSON.stringify(summary, null, 2)}
+`;
 }
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
+
   try {
-    const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
-    const { meta = {}, filename = "", observations = {} } = body;
+    const body = safeJson(req.body);
+    const report = body?.report || {};
 
-    const out = await callOpenAI({ meta, filename, observations });
+    const enhanced = await openaiJsonCompletion({
+      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      system: SYSTEM,
+      user: userPromptFromReport(report),
+    });
 
-    // sanity defaults
-    out.power = out.power || {};
-    if (!out.power.score) out.power.score = 74;
-    if (!out.power.tempo) out.power.tempo = "3:1";
-    if (!out.power.release_timing) out.power.release_timing = 68;
-
-    return res.status(200).json(out);
+    // Return *only* the enhancement object; saver merges safely
+    return res.status(200).json(enhanced || {});
   } catch (e) {
-    return res.status(500).json({ error: String(e?.message || e) });
+    console.error(e);
+    return res.status(500).json({
+      error: String(e?.message || e),
+      hint:
+        "Ensure OPENAI_API_KEY is set and that incoming report JSON is not empty.",
+    });
   }
 }
+
