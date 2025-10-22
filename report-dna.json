@@ -1,0 +1,125 @@
+{
+  "status": "ready",
+  "swingScore": 91,
+  "power": { "score": 91, "tempo": "3:1", "release_timing": 86 },
+  "meta": { "name": "Player", "email": "", "hcap": "", "handed": "right", "eye": "right", "height": 70 },
+
+  "topPriorityFixes": [
+    "P4 — Top: Earlier pressure shift to lead side before arm pull (stop ‘all-arms’ transition).",
+    "P7 — Impact: Low-point control — brush ahead of the ball; align handle forward.",
+    "Tempo/Sequence: Groove consistent 3:1 cadence (metronome: 3 slow-mo reps + 5 normal, repeat)."
+  ],
+  "topPowerFixes": [
+    "Lead-leg braking: Increase vertical + anterior braking to spike GRF at transition.",
+    "Torso-pelvis separation: Maintain stretch-shorten window into P5–P6.",
+    "Release timing: Train lead-wrist flexion and exit high left (gate drill, 10 reps)."
+  ],
+
+  "positionConsistency": {
+    "score": 86,
+    "notes": "Set-up and checkpoints are repeatable; windows are tight from P1–P4 with small drift late."
+  },
+  "swingConsistency": {
+    "score": 82,
+    "notes": "Sequence holds under speed; occasional timing slippage at P6–P7 when effort spikes."
+  },
+
+  "phases": [
+    {
+      "id": "P1",
+      "name": "Setup",
+      "grade": "good",
+      "short": "Balanced, athletic posture; even pressure; neutral grip.",
+      "long": "• Feet hip-width; pressure mid-feet.\n• Neutral grip; lead hand supports, trail hand sets face.\n• Chin up to free shoulders; slight trail shoulder tilt.\n• Routine order: face → feet → hips → shoulders — same each time.",
+      "video": "https://www.youtube.com/results?search_query=P1%20setup%20golf%20checkpoint"
+    },
+    {
+      "id": "P2",
+      "name": "Shaft Parallel (Backswing Start)",
+      "grade": "good",
+      "short": "One-piece start; chest turns; clubhead stays outside hands.",
+      "long": "• Initiate with torso; don’t throw hands early.\n• Shaft slightly inside while clubhead remains outside hands.\n• Maintain wrist structure; clubface neutral.\n• Tempo target: smooth 3:1 (one-two-set).",
+      "video": "https://www.youtube.com/results?search_query=P2%20takeaway%20golf%20checkpoint"
+    },
+    {
+      "id": "P3",
+      "name": "Lead Arm Parallel",
+      "grade": "ok",
+      "short": "Width maintained; trail elbow folds softly; toe modestly up.",
+      "long": "• Lead arm long to keep radius.\n• Trail elbow soft, not jammed behind.\n• Shaft parallel to ground; toe slightly up.\n• Pressure gradually loads into trail heel and glute.",
+      "video": "https://www.youtube.com/results?search_query=P3%20lead%20arm%20parallel%20golf"
+    },
+    {
+      "id": "P4",
+      "name": "Top of Backswing",
+      "grade": "ok",
+      "short": "Complete coil; trail elbow under; hands not too deep behind head.",
+      "long": "• Hips ~45°, shoulders ~90°; keep head level.\n• Trail elbow points down; hands just trail of head.\n• Wrist set without collapse; face not overly shut.\n• **Key**: shift pressure to lead side *before* pulling arms — start the chain from the ground.",
+      "video": "https://www.youtube.com/results?search_query=P4%20top%20of%20backswing%20golf"
+    },
+    {
+      "id": "P5",
+      "name": "Lead Arm Parallel (Downswing)",
+      "grade": "ok",
+      "short": "Transition sequenced; pelvis starts to clear; shallow slightly.",
+      "long": "• First move: tiny pressure shift to lead foot.\n• Trail elbow moves in front of ribcage.\n• Lead wrist flat/bowed; avoid early cast.\n• Maintain width; speed arrives from rotation, not throw.",
+      "video": "https://www.youtube.com/results?search_query=P5%20downswing%20golf%20checkpoint"
+    },
+    {
+      "id": "P6",
+      "name": "Shaft Parallel (Late Downswing)",
+      "grade": "good",
+      "short": "Handle leads; chest opening; lag retained; club on hand path.",
+      "long": "• Hips open 25–40°; chest beginning to open.\n• Handle leads for forward shaft lean.\n• Trail elbow not trapped; keep rotation going.\n• Maintain posture — steady head through strike.",
+      "video": "https://www.youtube.com/results?search_query=P6%20late%20downswing%20golf"
+    },
+    {
+      "id": "P7",
+      "name": "Impact",
+      "grade": "ok",
+      "short": "Forward shaft lean; low-point ahead; pressure left.",
+      "long": "• 80–90% pressure lead side.\n• With irons: handle ahead; face square-to-path.\n• Brush/delot ahead of ball.\n• Rotate through — avoid slide or stall.",
+      "video": "https://www.youtube.com/results?search_query=P7%20impact%20golf%20checkpoint"
+    },
+    {
+      "id": "P8",
+      "name": "Early Follow Through",
+      "grade": "good",
+      "short": "Arms extend; chest continues; passive hands.",
+      "long": "• Both arms long; club exits high lead side.\n• Keep spine angle; no early lift.\n• Face squares via rotation, not flip.\n• Tempo constant — no late surge.",
+      "video": "https://www.youtube.com/results?search_query=P8%20follow%20through%20golf"
+    },
+    {
+      "id": "P9",
+      "name": "Finish",
+      "grade": "good",
+      "short": "Balanced pose; belt buckle at target; trail foot vertical.",
+      "long": "• Weight fully lead side; torso to target.\n• Trail foot vertical; hold the pose.\n• Ribcage stacked over hips; no reverse tilt.\n• Freeze 2–3 seconds for feedback.",
+      "video": "https://www.youtube.com/results?search_query=P9%20finish%20golf%20checkpoint"
+    }
+  ],
+
+  "practicePlan": [
+    { "day": 1,  "title": "Mirror P1–P2 (10m)",              "items": ["Athletic posture checkpoints", "One-piece takeaway with stick"] },
+    { "day": 2,  "title": "Tempo & Pump step",                "items": ["Metronome 3:1 — 5m", "Pump-step drill — 10 reps"] },
+    { "day": 3,  "title": "Lead wrist at P4",                 "items": ["Bow lead wrist at top — 15 reps", "Record 3 swings"] },
+    { "day": 4,  "title": "Low-point gates",                  "items": ["Impact line — 20 brush strikes", "3 slow-motion swings"] },
+    { "day": 5,  "title": "Path & start line",                "items": ["Alignment stick start line — 15 balls"] },
+    { "day": 6,  "title": "Speed windows",                    "items": ["Light–medium–full windows — 15 balls"] },
+    { "day": 7,  "title": "Review + light day",               "items": ["Re-record P1–P4 checkpoints"] },
+    { "day": 8,  "title": "Re-load wrist set",                "items": ["Set by P2.5 — 15 reps"] },
+    { "day": 9,  "title": "Face-to-path",                     "items": ["Start left, curve back — 10 balls"] },
+    { "day": 10, "title": "Ground forces (lead-leg brake)",   "items": ["Hold trail heel; post into lead — 10 reps"] },
+    { "day": 11, "title": "Tempo 3:1",                        "items": ["Metronome — 5 min"] },
+    { "day": 12, "title": "Pressure shift",                   "items": ["Step-change — 10 reps"] },
+    { "day": 13, "title": "Combine",                          "items": ["Alternate drills — 20 balls"] },
+    { "day": 14, "title": "Retest",                           "items": ["Film 3 swings — upload new report"] }
+  ],
+
+  "swingSummary": {
+    "paragraph": "Your overall power score is 91% with a 3:1 tempo and 86% release timing. The strongest areas are setup quality, takeaway structure, and late-downswing alignments; the biggest opportunity is sharpening the transition into P5 and controlling low-point at P7. Over the next two weeks, bias training towards early pressure shift, lead-leg braking, and release timing. Keep reps short (10–12 balls) and finish each with a balanced hold.",
+    "good": ["Ground-up sequencing", "Right-foot mechanics (big toe retention)", "Lag and delivery angles", "Balanced finish"],
+    "bad": ["Occasional late timing at P6–P7 when effort spikes", "Low-point shifts on faster swings"],
+    "goals": ["Groove 3:1 cadence under speed", "Lead-leg braking to spike GRF at transition", "Gate work for start line + low-point"]
+  }
+}
