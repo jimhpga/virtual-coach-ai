@@ -6,7 +6,6 @@
 <title>Virtual Coach AI — Swing Report</title>
 <link rel="stylesheet" href="/styles.css" />
 <style>
-  /* ===== Page polish (keeps your theme) ===== */
   .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
   .muted { color: var(--muted); }
   .pill { background:#0f1b22;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:700 }
@@ -20,7 +19,7 @@
   .bar > i { display:block; height:100%; width:0%; background:var(--accent, #4ad0ff); transition: width .5s ease; }
   .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; }
 
-  /* ===== Practice plan accordion ===== */
+  /* Practice plan */
   .accordion { border:1px solid var(--line); border-radius:14px; overflow:hidden; background:rgba(255,255,255,.03) }
   .ac-head { padding:12px; display:flex; align-items:center; justify-content:space-between; cursor:pointer }
   .ac-body { padding:12px; display:none }
@@ -28,12 +27,12 @@
   .caret { display:inline-block; transform: rotate(0deg); transition: transform .2s ease; }
   .ac-open .caret { transform: rotate(90deg); }
 
-  /* ===== P1–P9: full-width vertical ===== */
+  /* P1–P9 vertical full width */
   .p-list { display:flex; flex-direction:column; gap:16px; }
   .p-card { background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:0 6px 14px rgba(0,0,0,.25); }
   .p-head { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
   .p-title { font-weight:800; margin:0 0 10px; font-size:18px }
-  .p-short { color:var(--muted); margin: 6px 0 12px; line-height:1.5 }
+  .p-short { color:var(--muted); margin: 6px 0 12px; line-height:1.6 }
   .p-actions { display:flex; gap:8px; flex-wrap:wrap }
   .btn-sm { border:1px solid var(--line); padding:6px 10px; border-radius:8px; background:#0f1b22; color:#fff; text-decoration:none; cursor:pointer }
   .btn-sm:hover { background:#122734 }
@@ -44,9 +43,9 @@
   details.p-details summary::-webkit-details-marker { display:none }
   details.p-details summary .caret { font-size:12px }
   details[open].p-details summary .caret { transform: rotate(90deg); }
-  .p-details .body { margin-top:8px; line-height:1.6; white-space:pre-wrap }
+  .p-details .body { margin-top:8px; line-height:1.7; white-space:pre-wrap }
 
-  /* ===== Grade colour ===== */
+  /* Grade colour */
   .grade-chip { border-radius:999px; padding:2px 8px; font-size:12px; border:1px solid var(--line) }
   .grade-good     { background:rgba(40,167,69,.15);  color:#7dff98; }
   .grade-ok       { background:rgba(255,193,7,.15);  color:#ffe28a; }
@@ -57,11 +56,15 @@
   .big-num { font-size:22px; font-weight:800; margin:6px 0 2px }
   .label-sm { font-size:12px; color:var(--muted) }
 
-  /* Coaching card lists numbered */
+  /* Coaching card numbered */
   .numlist { margin:0; padding-left:20px }
   .numlist li { margin:4px 0 }
 
-  /* ===== Responsive ===== */
+  /* Summary bullets + paragraph */
+  .bullets { margin:0; padding-left:18px }
+  .bullets li { margin:4px 0 }
+  .summary-paragraph { margin-top:10px; line-height:1.7; color:var(--muted) }
+
   @media (max-width: 980px) { .grid3,.grid2 { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -87,7 +90,7 @@
     <h1>Swing Report — P1–P9</h1>
     <div id="metaRow" class="muted" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px"></div>
 
-    <!-- Summary -->
+    <!-- Summary strip -->
     <section class="grid3" style="margin-top:12px">
       <!-- Coaching Card -->
       <div class="card">
@@ -156,11 +159,31 @@
       </div>
     </section>
 
-    <!-- P1–P9 vertical full-width -->
+    <!-- P1–P9 full-width vertical -->
     <section style="margin-top:14px">
       <h2 style="margin:0 0 8px">P1–P9</h2>
       <div id="pList" class="p-list"></div>
       <div id="pEmpty" class="muted" style="margin-top:6px"></div>
+    </section>
+
+    <!-- Swing Summary (auto paragraph + bullets) -->
+    <section id="autoSummary" class="card" style="margin-top:14px; display:none">
+      <h3 style="margin:0 0 8px">Swing Summary</h3>
+      <div id="summaryPara" class="summary-paragraph"></div>
+      <div class="grid3" style="margin-top:10px">
+        <div>
+          <div class="muted" style="font-weight:700;margin-bottom:6px">What You’re Doing Well</div>
+          <ul id="sumGood" class="bullets"></ul>
+        </div>
+        <div>
+          <div class="muted" style="font-weight:700;margin-bottom:6px">Needs Attention</div>
+          <ul id="sumBad" class="bullets"></ul>
+        </div>
+        <div>
+          <div class="muted" style="font-weight:700;margin-bottom:6px">Next 2–3 Goals</div>
+          <ul id="sumGoals" class="bullets"></ul>
+        </div>
+      </div>
     </section>
 
     <!-- Optional Note -->
@@ -189,9 +212,108 @@ async function fetchJson(url) {
   return JSON.parse(t.trim().replace(/^\uFEFF/, ''));
 }
 
-/* ---------- Summary painters ---------- */
+/* ---------- Utilities ---------- */
 const pct = n => Math.max(0, Math.min(100, Number(n ?? 0)));
+const cap = s => (s||'').slice(0,1).toUpperCase() + (s||'').slice(1);
+const ensureArr = v => Array.isArray(v) ? v : (v ? [v] : []);
 
+const P_TITLES = {
+  P1:'Address', P2:'Takeaway', P3:'Lead arm parallel', P4:'Top',
+  P5:'Shaft parallel down', P6:'Club parallel before impact',
+  P7:'Impact', P8:'Post impact', P9:'Finish'
+};
+
+/* Default P1–P9 text, expanded */
+function defaultPhaseContent(id, meta={}) {
+  const hand = (meta.handed || 'right').toLowerCase();
+  const lead = hand === 'left' ? 'right' : 'left';
+  const trail = hand === 'left' ? 'left' : 'right';
+  const sideWord = hand === 'left' ? 'trail' : 'lead';
+  const h = meta.height ? ` (~${meta.height}in)` : '';
+  const map = {
+    P1: {
+      short: `Athletic stance${h}, weight centered; neutral grip. ${cap(sideWord)} shoulder a touch higher.`,
+      long: `• Feet hip width; pressure mid-feet.\n• Neutral grip; ${sideWord} hand supports, ${trail} hand sets face.\n• Chin up to free shoulders; minimal side bend.\n• Routine: face, feet, hips, shoulders — same each time.`
+    },
+    P2: {
+      short: `One-piece start: chest turns; club stays outside hands; face square.`,
+      long: `• Initiate with torso, not just hands.\n• Shaft slightly inside; clubhead outside hands.\n• Maintain wrist angles; keep clubface neutral.\n• Tempo target: smooth 3:1 (one-two-set).`
+    },
+    P3: {
+      short: `Width maintained; ${cap(trail)} elbow folds softly; club parallel to ground.`,
+      long: `• ${cap(sideWord)} arm long to keep radius.\n• Trail elbow “soft”, not jammed.\n• Shaft parallel to ground; toe modestly up.\n• Build pressure gradually toward ${lead} foot.`
+    },
+    P4: {
+      short: `Complete turn; trail elbow under; handle not behind head.`,
+      long: `• Hips ~45°, shoulders ~90°; stay centered.\n• Trail elbow points down; hands just ${trail} of head.\n• Wrist set but not collapsed; face not shut.\n• Transition: shift pressure to ${lead} foot *before* pulling arms.`
+    },
+    P5: {
+      short: `Shallow slightly; hands inside clubhead; pelvis shifting forward.`,
+      long: `• From top: small shift toward ${lead} side.\n• Trail elbow moves in front of ribcage.\n• Lead wrist stays flat/bowed; avoid early cast.\n• Maintain width; speed later.`
+    },
+    P6: {
+      short: `Handle ahead; chest opening; club on hands path.`,
+      long: `• Hips open 25–40°; chest beginning to open.\n• Lead with handle; create forward shaft lean.\n• Avoid trail elbow trapped; keep rotation.\n• Hold posture — head steady through strike.`
+    },
+    P7: {
+      short: `Impact: forward shaft lean; low-point ahead; pressure left.`,
+      long: `• 80–90% pressure ${lead} side.\n• With irons: handle ahead; face square-to-path.\n• Brush/delot forward of ball.\n• Rotate through — don’t slide.`
+    },
+    P8: {
+      short: `Arms extend; chest continues; passive hands.`,
+      long: `• Both arms long; club exits high ${lead} side.\n• Maintain spine angle; avoid early lift.\n• Face squares via rotation, not flip.\n• Tempo constant — no stall or surge.`
+    },
+    P9: {
+      short: `Balanced finish; belt buckle at target; trail foot up.`,
+      long: `• Weight fully ${lead} side; torso to target.\n• Trail foot vertical; could you pose?\n• No sway; stack ribcage over hips.\n• Hold for 2–3 seconds for feedback.`
+    }
+  };
+  return map[id] || { short:'—', long:'' };
+}
+
+/* Grade helpers */
+function mapGrade(grade='') {
+  const g = (grade||'').toLowerCase();
+  if (/^good|great|green|pass$/.test(g)) return 90;
+  if (/^ok|fine|yellow$/.test(g))       return 70;
+  if (/^need|help|orange$/.test(g))     return 50;
+  if (/^bad|poor|fail|red|critical$/.test(g)) return 30;
+  return 60;
+}
+function gradeClass(grade='') {
+  const g = (grade||'').toLowerCase();
+  if (/^good|great|green|pass$/.test(g)) return 'grade-good';
+  if (/^ok|fine|yellow$/.test(g))       return 'grade-ok';
+  if (/^need|help|orange$/.test(g))     return 'grade-help';
+  if (/^bad|poor|fail|red|critical$/.test(g)) return 'grade-bad';
+  return '';
+}
+function gradeLabel(grade='') {
+  const g = (grade||'').toLowerCase();
+  if (/^good|great|green|pass$/.test(g)) return 'Good';
+  if (/^ok|fine|yellow$/.test(g))       return 'OK';
+  if (/^need|help|orange$/.test(g))     return 'Needs help';
+  if (/^bad|poor|fail|red|critical$/.test(g)) return 'Critical';
+  return grade || '—';
+}
+function avgFromGrades(phases=[]) {
+  if (!phases.length) return null;
+  const vals = phases.map(p => mapGrade(p.grade));
+  return Math.round(vals.reduce((a,b)=>a+b,0) / vals.length);
+}
+function consistencyBlurb(v) {
+  if (v == null) return '—';
+  if (v >= 85) return 'Highly repeatable motion with tight windows.';
+  if (v >= 70) return 'Solid repeatability; small timing variance.';
+  if (v >= 55) return 'Pattern shifts at times; work sequencing and start line.';
+  return 'Large variability; stabilize setup/tempo and improve low-point control.';
+}
+function youtubeLink(name) {
+  const q = encodeURIComponent(`${name} golf swing checkpoint`);
+  return `https://www.youtube.com/results?search_query=${q}`;
+}
+
+/* ---------- Summary painters ---------- */
 function pillRow(data) {
   const row = $('#metaRow'); row.innerHTML = '';
   const pills = [
@@ -217,56 +339,103 @@ function powerBars(data) {
   $('#barRelease').style.width = rel + '%';
   $('#txtRelease').textContent = `${rel}%`;
 
-  $('#txtTempo').textContent = data.power?.tempo ?? '—';
+  $('#txtTempo').textContent = data.power?.tempo ?? '3:1';
 }
 
-/* ===== Consistency numbers (use explicit numbers, else fallback from grades) ===== */
-function mapGrade(grade='') {
-  const g = (grade||'').toLowerCase();
-  if (/^good|great|green|pass$/.test(g)) return 90;
-  if (/^ok|fine|yellow$/.test(g))       return 70;
-  if (/^need|help|orange$/.test(g))     return 40;
-  if (/^bad|poor|fail|red$/.test(g))    return 20;
-  return 60; // neutral default
-}
-function gradeFallbackAverage(phases=[]) {
-  if (!phases.length) return null;
-  const vals = phases.map(p => mapGrade(p.grade));
-  const avg = Math.round(vals.reduce((a,b)=>a+b,0) / vals.length);
-  return avg;
-}
-function setConsistency(data) {
-  // Text notes (if present)
-  $('#posConsistency').textContent   = data.positionConsistency?.notes ?? data.position_consistency?.notes ?? '—';
-  $('#swingConsistency').textContent = data.swingConsistency?.notes ?? data.swing_consistency?.notes ?? '—';
+/* Build fallback phases if JSON has none */
+function buildPhasesIfMissing(data) {
+  let phases = Array.isArray(data.p1p9) ? data.p1p9
+             : Array.isArray(data.phases) ? data.phases : [];
+  if (phases.length) return phases;
 
-  // Numbers (prefer explicit scores/values)
-  let posNum = data.positionConsistency?.score ?? data.positionConsistency?.value ??
-               data.position_consistency?.score ?? data.position_consistency?.value;
-  let swgNum = data.swingConsistency?.score ?? data.swingConsistency?.value ??
-               data.swing_consistency?.score ?? data.swing_consistency?.value;
+  // Heuristic grading from power score
+  const base = Number(data.power?.score ?? data.swingScore ?? 70);
+  const bucket = (n) => (n>=80?'good':n>=65?'ok':n>=50?'needs help':'bad');
 
-  // Fallback: compute from P1–P9 grades
-  const phases = Array.isArray(data.p1p9) ? data.p1p9
-               : Array.isArray(data.phases) ? data.phases : [];
-  if (posNum == null) posNum = gradeFallbackAverage(phases);
-  if (swgNum == null) swgNum = gradeFallbackAverage(phases);
-
-  $('#posConsistencyNum').textContent   = (posNum != null) ? `${posNum}%` : '—';
-  $('#swingConsistencyNum').textContent = (swgNum != null) ? `${swgNum}%` : '—';
+  const ids = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
+  const meta = data.meta || {};
+  phases = ids.map((id, i) => {
+    const def = defaultPhaseContent(id, meta);
+    const adj = Math.max(30, Math.min(90, base + (i-4)*3)); // tiny variation across positions
+    return {
+      id, name: P_TITLES[id],
+      short: def.short,
+      long:  def.long,
+      grade: bucket(adj),
+      video: youtubeLink(`${id} ${P_TITLES[id]}`)
+    };
+  });
+  return phases;
 }
 
-function coachingCard(data) {
-  const pri = (data.topPriorityFixes || data.top_priority_fixes || []).slice(0,3);
-  const pow = (data.topPowerFixes    || data.top_power_fixes    || []).slice(0,3);
+/* Consistency numbers + notes (always fills) */
+function setConsistency(data, phases) {
+  const pos = data.positionConsistency || data.position_consistency || {};
+  const swg = data.swingConsistency || data.swing_consistency || {};
+
+  let posNum = pos.score ?? pos.value;
+  let swgNum = swg.score ?? swg.value;
+
+  // fallback from phases average or from overall score
+  if (posNum == null) posNum = avgFromGrades(phases) ?? pct((data.power?.score ?? data.swingScore) - 5);
+  if (swgNum == null) swgNum = avgFromGrades(phases) ?? pct((data.power?.score ?? data.swingScore) - 8);
+
+  $('#posConsistencyNum').textContent = `${posNum}%`;
+  $('#swingConsistencyNum').textContent = `${swgNum}%`;
+  $('#posConsistency').textContent = pos.notes || consistencyBlurb(posNum);
+  $('#swingConsistency').textContent = swg.notes || consistencyBlurb(swgNum);
+}
+
+/* Coaching Card: use given lists or derive even with empty phases */
+function deriveCoachingLists(data, phases) {
+  const arr = phases.length ? [...phases] : [
+    {id:'P1', name:P_TITLES.P1, short:'Sharpen setup and aim.', grade:'ok'},
+    {id:'P4', name:P_TITLES.P4, short:'Top position shape + wrist set.', grade:'needs help'},
+    {id:'P7', name:P_TITLES.P7, short:'Impact alignments & low-point.', grade:'needs help'},
+    {id:'P5', name:P_TITLES.P5, short:'Transition shallow & pressure shift.', grade:'ok'},
+    {id:'P6', name:P_TITLES.P6, short:'Handle lead & face control.', grade:'ok'}
+  ];
+
+  arr.sort((a,b)=>mapGrade(a.grade)-mapGrade(b.grade));
+  const topPriority = arr.slice(0,3).map(p => `${p.id} — ${p.name}: ${p.short}`);
+
+  const powerIds = new Set(['P3','P4','P5','P6','P7','P8']);
+  const powerPool = arr.filter(p => powerIds.has((p.id||'').toUpperCase()));
+  const pool = powerPool.length ? powerPool : arr;
+  const topPower = pool.slice(0,3).map(p => `${p.id} — ${p.name}: ${p.short}`);
+
+  // Tiny personalization from tempo/release
+  const t = (data.power?.tempo||'').toString();
+  const rel = pct(data.power?.release_timing);
+  if (t && !topPriority.find(x=>x.toLowerCase().includes('tempo'))) {
+    topPriority[2] = `Tempo — Groove ${t} with metronome: 3 slow motion reps, 5 normal, repeat.`;
+  }
+  if (!isNaN(rel) && rel<65 && !topPower.find(x=>/release/i.test(x))) {
+    topPower[2] = `Release — Train lead-wrist flexion to time release (gate drill, 10 reps).`;
+  }
+
+  return { topPriority, topPower };
+}
+function coachingCard(data, phases) {
+  const pri = ensureArr(data.topPriorityFixes || data.top_priority_fixes);
+  const pow = ensureArr(data.topPowerFixes    || data.top_power_fixes);
+
+  let topPriority = pri.length ? pri.slice(0,3) : null;
+  let topPower    = pow.length ? pow.slice(0,3) : null;
+
+  if (!topPriority || !topPower) {
+    const d = deriveCoachingLists(data, phases);
+    if (!topPriority) topPriority = d.topPriority;
+    if (!topPower)    topPower    = d.topPower;
+  }
+
   const priBox = $('#topPriority'); const powBox = $('#topPower');
   priBox.innerHTML = powBox.innerHTML = '';
-  if (!pri.length) { const li=document.createElement('li'); li.textContent='—'; priBox.appendChild(li); }
-  else { pri.forEach(x => { const li=document.createElement('li'); li.textContent = String(x); priBox.appendChild(li); }); }
-  if (!pow.length) { const li=document.createElement('li'); li.textContent='—'; powBox.appendChild(li); }
-  else { pow.forEach(x => { const li=document.createElement('li'); li.textContent = String(x); powBox.appendChild(li); }); }
+  (topPriority.length ? topPriority : ['—']).forEach(x => { const li=document.createElement('li'); li.textContent=String(x); priBox.appendChild(li); });
+  (topPower.length ? topPower : ['—']).forEach(x => { const li=document.createElement('li'); li.textContent=String(x); powBox.appendChild(li); });
 }
 
+/* Practice plan accordion (keeps optional) */
 function practicePlan(data) {
   const list = data.practicePlan || data.practice_plan || [];
   $('#planCount').textContent = `${list.length} items`;
@@ -285,81 +454,93 @@ function practicePlan(data) {
   const root = $('#planAcc');
   const head = root.querySelector('.ac-head');
   head.onclick = () => root.classList.toggle('ac-open');
-  head.onkeydown = (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); root.classList.toggle('ac-open'); } }
+  head.onkeydown = (e) => { if (e.key===' ' || e.key==='Enter'){ e.preventDefault(); root.classList.toggle('ac-open'); } };
 }
 
-/* ---------- P1–P9 renderer (full width) ---------- */
-function gradeClass(grade='') {
-  const g = grade.toLowerCase();
-  if (/^good|great|green|pass$/.test(g)) return 'grade-good';
-  if (/^ok|fine|yellow$/.test(g))       return 'grade-ok';
-  if (/^need|help|orange$/.test(g))     return 'grade-help';
-  if (/^bad|poor|fail|red$/.test(g))    return 'grade-bad';
-  return '';
-}
-function gradeLabel(grade='') {
-  const g = grade.toLowerCase();
-  if (/^good|great|green|pass$/.test(g)) return 'Good';
-  if (/^ok|fine|yellow$/.test(g))       return 'OK';
-  if (/^need|help|orange$/.test(g))     return 'Needs help';
-  if (/^bad|poor|fail|red$/.test(g))    return 'Critical';
-  return grade || '—';
-}
-function youtubeLink(name) {
-  const q = encodeURIComponent(`${name} golf swing checkpoint`);
-  return `https://www.youtube.com/results?search_query=${q}`;
-}
-
-function renderPList(data) {
-  const src = Array.isArray(data.p1p9) ? data.p1p9
-            : Array.isArray(data.phases) ? data.phases : [];
+/* P1–P9 renderer (vertical, richer text) */
+function renderPList(data, phases) {
   const list = $('#pList'); list.innerHTML = '';
   const empty = $('#pEmpty'); empty.textContent = '';
+  if (!phases.length) { empty.textContent = 'No P1–P9 items in this report.'; return; }
 
-  if (!src.length) { empty.textContent = 'No P1–P9 items in this report.'; return; }
+  const meta = data.meta || {};
 
-  src.forEach((p, idx) => {
-    const id    = p.id || `P${idx+1}`;
-    const name  = p.name || p.title || `P${idx+1}`;
-    const short = p.short || p.note || '—';
-    const long  = p.long  || p.details || '';
-    const video = p.video || youtubeLink(name);
+  phases.forEach((p,idx) => {
+    const id    = (p.id || `P${idx+1}`).toUpperCase();
+    const name  = p.name || P_TITLES[id] || `P${idx+1}`;
+    const def   = defaultPhaseContent(id, meta);
+
+    const short = p.short || p.note || def.short;
+    const long  = p.long  || p.details || def.long;
+    const video = p.video || youtubeLink(`${id} ${name}`);
     const grade = p.grade || '';
 
-    const card  = document.createElement('div'); card.className = 'p-card';
+    const card = document.createElement('div'); card.className = 'p-card';
 
-    const head  = document.createElement('div'); head.className = 'p-head';
-    const ttl   = document.createElement('div'); ttl.className = 'p-title'; ttl.textContent = `${id} — ${name}`;
-    const chip  = document.createElement('span'); chip.className = `grade-chip ${gradeClass(grade)}`; chip.textContent = gradeLabel(grade);
+    const head = document.createElement('div'); head.className = 'p-head';
+    const ttl  = document.createElement('div'); ttl.className = 'p-title'; ttl.textContent = `${id} — ${name}`;
+    const chip = document.createElement('span'); chip.className = `grade-chip ${gradeClass(grade)}`; chip.textContent = gradeLabel(grade);
     head.appendChild(ttl); head.appendChild(chip);
     card.appendChild(head);
 
-    const s = document.createElement('div'); s.className = 'p-short';
-    s.textContent = short;   /* longer paragraph-friendly area */
+    const s = document.createElement('div'); s.className = 'p-short'; s.textContent = short;
     card.appendChild(s);
 
-    /* Quick watch button (next to title) — optional; keep or remove */
-    const quick = document.createElement('div'); quick.className = 'p-actions';
-    const aWatch = document.createElement('a'); aWatch.className='btn-sm'; aWatch.textContent='Watch'; aWatch.target='_blank'; aWatch.href = video;
-    quick.appendChild(aWatch); card.appendChild(quick);
+    const quick = document.createElement('div'); quick.className='p-actions';
+    const a = document.createElement('a'); a.className='btn-sm'; a.textContent='Watch'; a.href=video; a.target='_blank'; quick.appendChild(a);
+    card.appendChild(quick);
 
-    /* Details block with longer explanation + watch link again */
-    if (long) {
-      const det = document.createElement('details'); det.className='p-details';
-      const sum = document.createElement('summary');
-      const car = document.createElement('span'); car.className='caret'; car.textContent='▶';
-      const t   = document.createElement('span'); t.textContent='Details';
-      sum.appendChild(car); sum.appendChild(t);
-      const body = document.createElement('div'); body.className='body';
-      body.innerHTML = `${escapeHtml(long)}<div style="margin-top:10px"><a class="btn-sm" href="${video}" target="_blank" rel="noopener">Watch on YouTube</a></div>`;
-      det.appendChild(sum); det.appendChild(body);
-      card.appendChild(det);
-    }
+    const det = document.createElement('details'); det.className='p-details';
+    const sum = document.createElement('summary'); const car = document.createElement('span'); car.className='caret'; car.textContent='▶';
+    const t = document.createElement('span'); t.textContent='Details'; sum.appendChild(car); sum.appendChild(t);
+    const body = document.createElement('div'); body.className='body';
+    body.innerHTML = `${escapeHtml(long)}<div style="margin-top:10px"><a class="btn-sm" href="${video}" target="_blank" rel="noopener">Watch on YouTube</a></div>`;
+    det.appendChild(sum); det.appendChild(body);
+    card.appendChild(det);
 
     list.appendChild(card);
   });
 }
 
+/* Auto “Swing Summary” paragraph + bullets */
+function autoSummary(data, phases) {
+  const good = [...phases].filter(p => mapGrade(p.grade) >= 80).slice(0,4);
+  const bad  = [...phases].filter(p => mapGrade(p.grade) <= 55).slice(0,4);
+  const goals = [...phases]
+    .sort((a,b)=>mapGrade(a.grade)-mapGrade(b.grade))
+    .slice(0,3)
+    .map(p => `${p.id || ''} — ${p.name || ''}: Convert the note into action with 10-minute blocks daily.`);
+
+  const gUL = $('#sumGood'); const bUL = $('#sumBad'); const goalUL = $('#sumGoals');
+  gUL.innerHTML = bUL.innerHTML = goalUL.innerHTML = '';
+
+  (good.length ? good : [{name:'Tempo/sequence', id:'—', short:'Rhythm is steady'}])
+    .forEach(p => { const li=document.createElement('li'); li.textContent = `${p.id || ''} ${p.name || ''} — ${p.short || 'solid fundamentals'}`; gUL.appendChild(li); });
+
+  (bad.length ? bad : [{name:'Low-point control', id:'—', short:'Brush ahead of ball more consistently'}])
+    .forEach(p => { const li=document.createElement('li'); li.textContent = `${p.id || ''} ${p.name || ''} — ${p.short || 'needs attention'}`; bUL.appendChild(li); });
+
+  (goals.length ? goals : ['Build a daily 15-minute P1–P4 routine','Re-film in 14 days to measure change','Track start-line windows (pull/straight/push)'])
+    .forEach(txt => { const li=document.createElement('li'); li.textContent = txt; goalUL.appendChild(li); });
+
+  // One cohesive paragraph using available info
+  const name = (data.meta?.name || 'Player');
+  const ps   = pct(data.power?.score ?? data.swingScore);
+  const tempo= data.power?.tempo || '3:1';
+  const rel  = pct(data.power?.release_timing);
+  const weakest = [...phases].sort((a,b)=>mapGrade(a.grade)-mapGrade(b.grade))[0] || {};
+  const strongest = [...phases].sort((a,b)=>mapGrade(b.grade)-mapGrade(a.grade))[0] || {};
+
+  const para = `${name}, your overall power score is ${ps}% with a ${tempo} tempo and a ${rel}% release timing. \
+Your strongest checkpoint appears to be ${strongest.id||'P?'} ${strongest.name||''}, while ${weakest.id||'P?'} ${weakest.name||''} shows the biggest opportunity. \
+Focus your next two weeks on repeating your setup, sharpening transition (pressure to lead side before the arms), \
+and controlling low-point so contact and start line tighten up. Keep reps short (10–12 balls) and finish each with a balanced hold.`;
+
+  $('#summaryPara').textContent = para;
+  $('#autoSummary').style.display = 'block';
+}
+
+/* Note */
 function noteBox(data) {
   const n = (data.note || '').trim();
   if (!n) return;
@@ -367,24 +548,32 @@ function noteBox(data) {
   $('#noteBox').style.display = 'block';
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-}
-
 /* ---------- Boot ---------- */
 (async () => {
   try {
     let url = directUrl ? directUrl : (rid ? blobFromId(rid) : null);
+    let data;
     if (!url) {
       const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
       if (!raw) throw new Error('Missing ?id or ?url. Use Upload or Reports to create/open a report.');
-      const data = JSON.parse(raw);
-      pillRow(data); powerBars(data); setConsistency(data); coachingCard(data); practicePlan(data); renderPList(data); noteBox(data);
-      return;
+      data = JSON.parse(raw);
+    } else {
+      data = await fetchJson(url);
+      try { localStorage.setItem('vc_last_report', JSON.stringify(data)); } catch {}
     }
-    const data = await fetchJson(url);
-    pillRow(data); powerBars(data); setConsistency(data); coachingCard(data); practicePlan(data); renderPList(data); noteBox(data);
-    try { localStorage.setItem('vc_last_report', JSON.stringify(data)); } catch {}
+
+    pillRow(data);
+    powerBars(data);
+
+    // Ensure phases exist (build if missing)
+    const phases = buildPhasesIfMissing(data);
+
+    setConsistency(data, phases);
+    coachingCard(data, phases);
+    practicePlan(data);
+    renderPList(data, phases);
+    autoSummary(data, phases);
+    noteBox(data);
   } catch (err) {
     alert(err?.message || String(err));
   }
