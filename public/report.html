@@ -18,7 +18,7 @@
   .section-title { display:flex; align-items:center; justify-content:space-between; margin:0 0 8px; }
   .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; }
   .pill-tiny { font-size: 12px; padding: 3px 8px; border-radius: 999px; border:1px solid var(--line); background:#0f1b22 }
-  .pgrid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; } /* two thinner columns */
+  .pgrid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .p-card { background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:14px; padding:10px 12px;
             box-shadow:0 6px 14px rgba(0,0,0,.25); }
   .p-card h4 { margin:0 0 6px; font-size:15px }
@@ -42,7 +42,9 @@
   .infobox { font-size:12px; color:var(--muted) }
   .kpi { display:flex; align-items:center; gap:8px; }
   .kpi .num { font-weight:700; }
-  /* tighter vertical rhythm for cards */
+  .seg { display:flex; align-items:center; gap:.5rem; }
+  .seg button { border:1px solid var(--line); background:#0f1b22; color:#fff; padding:6px 10px; border-radius:999px; cursor:pointer }
+  .seg button[aria-pressed="true"] { background:#163243; font-weight:700; }
   .p-card p { margin: 0 0 6px; line-height:1.35 }
   @media (max-width: 900px) {
     .grid3 { grid-template-columns: 1fr; }
@@ -70,15 +72,22 @@
 
 <div class="scrim">
   <main class="wrap" id="app">
-    <h1 style="margin-bottom:6px">Swing Report — P1–P9</h1>
+    <div class="meta-row" style="justify-content:space-between; margin-bottom:6px">
+      <h1 style="margin:0">Swing Report — P1–P9</h1>
+      <!-- Level Switcher -->
+      <div class="seg" aria-label="Experience level">
+        <span class="muted">Level:</span>
+        <button id="lvlBeg" type="button" aria-pressed="false">Beginner</button>
+        <button id="lvlInt" type="button" aria-pressed="true">Intermediate</button>
+        <button id="lvlAdv" type="button" aria-pressed="false">Advanced</button>
+      </div>
+    </div>
     <div class="meta-row muted" id="metaRow"></div>
 
     <!-- SUMMARY STRIP -->
     <section class="grid3" style="margin-top:14px">
       <div class="card">
-        <div class="section-title">
-          <h3>Coaching Card</h3>
-        </div>
+        <div class="section-title"><h3>Coaching Card</h3></div>
         <div class="grid2">
           <div>
             <div class="muted" style="font-weight:700; margin-bottom:6px">Top 3 Priority Fixes</div>
@@ -92,9 +101,7 @@
       </div>
 
       <div class="card">
-        <div class="section-title">
-          <h3>Power Score Summary</h3>
-        </div>
+        <div class="section-title"><h3>Power Score Summary</h3></div>
         <div class="list-tight">
           <div>
             <div class="muted">Power Score</div>
@@ -151,7 +158,7 @@
       <div class="infobox" id="pGridEmpty" style="margin-top:8px"></div>
     </section>
 
-    <!-- AI SUMMARY -->
+    <!-- SUMMARY -->
     <section id="sumBox" class="card hide" style="margin-top:14px">
       <h3 style="margin:0 0 8px">Swing Summary</h3>
       <p id="sumPara" class="muted"></p>
@@ -176,11 +183,65 @@
       <h3 style="margin:0 0 8px">Note</h3>
       <div id="noteTxt" class="muted"></div>
     </section>
-
   </main>
 </div>
 
 <script>
+/* ---------- tone helpers ---------- */
+const LEVELS = ['beginner','intermediate','advanced'];
+function normalizeLevel(v){
+  v = String(v||'').toLowerCase();
+  if (LEVELS.includes(v)) return v;
+  return 'intermediate';
+}
+function getSavedLevel(){
+  const qp = new URLSearchParams(location.search);
+  const urlLv = qp.get('level');
+  const saved = sessionStorage.getItem('vc_level');
+  return normalizeLevel(urlLv || saved);
+}
+function setSavedLevel(lv){ sessionStorage.setItem('vc_level', normalizeLevel(lv)); }
+function setLevelButtons(lv){
+  const map = { beginner:'#lvlBeg', intermediate:'#lvlInt', advanced:'#lvlAdv' };
+  LEVELS.forEach(k=>{
+    const b = document.querySelector(map[k]);
+    b.setAttribute('aria-pressed', String(k===lv));
+  });
+}
+
+/* wording adapter (light touch) */
+function adaptText(txt, level){
+  if (!txt) return '';
+  txt = String(txt);
+
+  if (level === 'beginner'){
+    // simpler words
+    const repl = [
+      [/kinematic/gi,'sequence'],
+      [/ground forces?/gi,'leg push'],
+      [/braking/gi,'stopping'],
+      [/internal rotation/gi,'turn'],
+      [/lag/gi,'angle'],
+      [/release timing/gi,'club release'],
+      [/trail/gi,'back'],
+      [/lead/gi,'front']
+    ];
+    repl.forEach(([a,b])=>txt=txt.replace(a,b));
+    // shorter sentences
+    if (txt.length > 160) txt = txt.split(/[.]/).slice(0,2).join('. ').trim()+'.';
+    return txt;
+  }
+
+  if (level === 'advanced'){
+    // allow concise/technical; add one cue if short
+    if (txt.length < 70) txt += ' (maintain kinematic flow and GRF timing).';
+    return txt;
+  }
+
+  // intermediate: small nudge
+  return txt;
+}
+
 /* ----------- CONFIG ----------- */
 window.BLOB_PUBLIC_BASE =
   window.BLOB_PUBLIC_BASE || "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com";
@@ -251,7 +312,7 @@ function youtubeLink(name){
   const q = encodeURIComponent(`${name} golf checkpoint`);
   return `https://www.youtube.com/results?search_query=${q}`;
 }
-function renderPGrid(data){
+function renderPGrid(data, level){
   const list = Array.isArray(data.p1p9 || data.phases) ? (data.p1p9 || data.phases) : [];
   const grid = $('#pGrid'); grid.innerHTML = '';
   const empty = $('#pGridEmpty'); empty.textContent='';
@@ -262,8 +323,8 @@ function renderPGrid(data){
     const name = p.name || p.title || `P${i+1}`;
     const idTxt = p.id || `P${i+1}`;
     const grade = (p.grade || '').toString();
-    const short = p.short || p.note || '—';
-    const long  = p.long  || p.details || '';
+    const short = adaptText(p.short || p.note || '—', level);
+    const long  = adaptText(p.long  || p.details || '', level);
     const video = p.video || youtubeLink(name);
 
     const card = document.createElement('div');
@@ -276,22 +337,19 @@ function renderPGrid(data){
     const g = document.createElement('span'); g.className='pill-tiny'; g.textContent = grade ? `grade: ${grade}` : 'grade: —';
     head.appendChild(h4); head.appendChild(g); card.appendChild(head);
 
-    // watch button immediately under grade
+    // watch button below grade
     const btnRow = document.createElement('div'); btnRow.className='row';
     const aWatch = document.createElement('a'); aWatch.className='btn-sm'; aWatch.target='_blank'; aWatch.href=video; aWatch.textContent='Watch';
     btnRow.appendChild(aWatch); card.appendChild(btnRow);
 
-    // short line
     const s = document.createElement('p'); s.className='short'; s.textContent = short; card.appendChild(s);
 
-    // details
     if(long){
       const det = document.createElement('details'); det.className='p1long';
       const sum = document.createElement('summary'); sum.innerHTML = `<span class="caret">▶</span><span> Details</span>`;
       const body = document.createElement('div'); body.style.marginTop='6px'; body.textContent = long;
       det.appendChild(sum); det.appendChild(body); card.appendChild(det);
     }
-
     grid.appendChild(card);
   });
 }
@@ -321,9 +379,8 @@ function setNote(data){
 }
 
 /* ----------- Summary (AI + heuristic) ----------- */
-function heuristicSummary(data){
+function heuristicSummary(data, level){
   const phases = (data.p1p9 || data.phases || []).map(p => ({ id:(p.id||''), grade:(p.grade||'').toLowerCase() }));
-  const idx = i => ['p1','p2','p3','p4','p5','p6','p7','p8','p9'].indexOf(String(i).toLowerCase());
   const worstI = phases.reduce((a,p,i)=>{
     const score = /bad|poor|needs|weak/.test(p.grade) ? 0 : /ok|fair/.test(p.grade) ? 1 : /good|great|excellent/.test(p.grade) ? 2 : 1;
     return (score < a.score) ? {i,score} : a;
@@ -344,7 +401,6 @@ function heuristicSummary(data){
   const bad = [];
   const goals = [];
 
-  // simple reads
   if ((data.power?.tempo || '').includes('3:1')) good.push("Tempo 3:1 baseline is present");
   if ((data.power?.release_timing ?? 0) >= 60) good.push("Release timing trending positive");
   good.push("Balanced finish and clean sequencing (ground-up)");
@@ -356,20 +412,35 @@ function heuristicSummary(data){
   } else {
     goals.push("Hold finish for 2–3 seconds to reinforce balance and face control");
   }
-
-  // add a power-focused goal
   goals.push("Add lead-leg braking drills to spike ground force at transition");
 
-  return { paragraph: para, good, bad, goals };
+  // adapt to tone
+  const tone = {
+    beginner: {
+      para: adaptText(para,'beginner'),
+      good: good.map(x=>adaptText(x,'beginner')),
+      bad: bad.map(x=>adaptText(x,'beginner')),
+      goals: goals.map(x=>adaptText(x,'beginner'))
+    },
+    intermediate: { para, good, bad, goals },
+    advanced: {
+      para: adaptText(para,'advanced'),
+      good: good.map(x=>adaptText(x,'advanced')),
+      bad: bad.map(x=>adaptText(x,'advanced')),
+      goals: goals.map(x=>adaptText(x,'advanced'))
+    }
+  };
+  return tone[level] || tone.intermediate;
 }
 
-async function aiSummary(report, ms=4500){
+async function aiSummary(report, level, ms=4500){
   const ctl = new AbortController();
   const to = setTimeout(()=>ctl.abort(), ms);
   try{
     const r = await fetch('/api/generate-report-llm', {
-      method:'POST', headers:{'content-type':'application/json'},
-      body: JSON.stringify({ report, ask: 'summary' }),
+      method:'POST',
+      headers:{'content-type':'application/json'},
+      body: JSON.stringify({ report, ask: 'summary', level }),
       signal: ctl.signal
     });
     clearTimeout(to);
@@ -380,14 +451,13 @@ async function aiSummary(report, ms=4500){
   }catch(_){ clearTimeout(to); return null; }
 }
 
-async function setSummary(data){
-  // prefer server LLM; fall back to heuristic
-  let sum = await aiSummary(data);
-  if (!sum) sum = data.swingSummary || heuristicSummary(data);
+async function setSummary(data, level){
+  let sum = await aiSummary(data, level);
+  if (!sum) sum = data.swingSummary || heuristicSummary(data, level);
   if (!sum) { $('#sumBox').classList.add('hide'); return; }
 
   $('#sumPara').textContent = sum.paragraph || '';
-  const g = $('#sumGood'); const b = $('#sumBad'); const go = $('#sumGoals');
+  const g = $('#sumGood'), b = $('#sumBad'), go = $('#sumGoals');
   g.innerHTML=''; b.innerHTML=''; go.innerHTML='';
   (sum.good||[]).forEach(x=>g.appendChild(li(String(x))));
   (sum.bad||[]).forEach(x=>b.appendChild(li(String(x))));
@@ -396,18 +466,26 @@ async function setSummary(data){
 }
 
 /* ----------- render pipeline ----------- */
+let CURRENT_LEVEL = getSavedLevel();
+function getReportLevelFallback(data){
+  return normalizeLevel(data?.meta?.level || CURRENT_LEVEL);
+}
 async function renderAll(data){
+  const level = getReportLevelFallback(data);
+  CURRENT_LEVEL = level; setSavedLevel(level); setLevelButtons(level);
+
   fillMeta(data);
   setBars(data);
   setConsistency(data);
   setCoachingCard(data);
-  renderPGrid(data);
+  renderPGrid(data, level);
   setPracticePlan(data);
-  await setSummary(data);
+  await setSummary(data, level);
   setNote(data);
 }
 
 /* ----------- boot ----------- */
+let REPORT_DATA = null;
 (async ()=>{
   try{
     let url = null;
@@ -416,12 +494,23 @@ async function renderAll(data){
     else {
       const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
       if (!raw) throw new Error('Missing ?url or ?id. Use upload flow or reports page.');
-      renderAll(JSON.parse(raw.trim().replace(/^\uFEFF/, ''))); return;
+      REPORT_DATA = JSON.parse(raw.trim().replace(/^\uFEFF/, ''));
+      await renderAll(REPORT_DATA);
+      return;
     }
-    const data = await fetchJson(url);
-    renderAll(data);
+    REPORT_DATA = await fetchJson(url);
+    await renderAll(REPORT_DATA);
   }catch(err){ showErr(err?.message || String(err)); }
 })();
+
+/* ----------- level toggle handlers ----------- */
+['lvlBeg','lvlInt','lvlAdv'].forEach(id=>{
+  document.getElementById(id).addEventListener('click', async ()=>{
+    const map = { lvlBeg:'beginner', lvlInt:'intermediate', lvlAdv:'advanced' };
+    CURRENT_LEVEL = map[id]; setSavedLevel(CURRENT_LEVEL); setLevelButtons(CURRENT_LEVEL);
+    if (REPORT_DATA) await renderAll(REPORT_DATA);
+  });
+});
 </script>
 </body>
 </html>
