@@ -1,235 +1,223 @@
 // api/generate-report-llm.js
-export const config = { runtime: "nodejs" };
+export const config = { runtime: 'nodejs' };
 
-/** Safe JSON parse */
-function safeJson(input) {
+import OpenAI from 'openai';
+
+/**
+ * Expected POST body:
+ * {
+ *   report: { ...existing report json... },   // required-ish
+ *   level: "beginner" | "intermediate" | "advanced",  // optional
+ *   focusAreas: ["swing_plane","hand_path", ...],      // optional []
+ *   save: false                                      // optional (unused here)
+ * }
+ */
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
   try {
-    if (!input) return {};
-    if (typeof input === "string") return JSON.parse(input);
-    return input;
-  } catch {
-    return {};
+    const body =
+      typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+    const report = body.report || {};
+    const level = (body.level || report?.meta?.level || 'intermediate')
+      .toString()
+      .toLowerCase();
+    const focusAreas = Array.isArray(body.focusAreas) ? body.focusAreas : [];
+
+    // ---------- If no API key, return a deterministic "sample" ------------
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(200).json(buildFallback(report, level, focusAreas));
+    }
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+    const system = [
+      'You are Virtual Coach AI, a tour-level instructor.',
+      'Blend insights from Jim Hartnett, Jim McLean, Butch Harmon, Dr. Kwon, and Dave Tutelman.',
+      'Write in the style that matches the golfer level: beginner = very plain, intermediate = practical coaching with light biomechanics, advanced = technical/biomechanics forward.',
+      'Always personalize. Use the existing report fields when present (power tempo release, notes, name, height, handed, p1p9 array).',
+      'Focus on actionable tips; tie suggestions to the chosen focus areas if provided.',
+      'Return **only** valid JSON matching the schema specified in the user message.',
+    ].join(' ');
+
+    const schema = `
+Return a single JSON object with this shape:
+{
+  "topPriorityFixes": [string, string, string],     // 0-3 items
+  "topPowerFixes": [string, string, string],        // 0-3 items
+  "consistency": {
+    "position": { "score": number, "notes": string },
+    "swing": { "score": number, "notes": string }
+  },
+  "power": {
+    "score": number,            // 0-100
+    "tempo": string,            // e.g. "3:1"
+    "release_timing": number    // 0-100
+  },
+  "p1p9": [
+    {
+      "id": "P1",
+      "name": "Address",
+      "grade": "ok|good|needs help|excellent",
+      "short": "1-2 sentence short label",
+      "long": "3-7 sentence expanded explanation, personalized",
+      "video": "https://youtube.com/... (search hint is fine)"
+    }
+    // ... P2..P9
+  ],
+  "practicePlan": [
+    {
+      "day": 1,
+      "title": "short drill title",
+      "items": ["bullet","bullet"]
+    }
+    // 10-14 days preferred
+  ],
+  "swingSummary": {
+    "whatYouDoWell": [string,string,string],
+    "needsAttention": [string,string,string],
+    "goals": [string,string,string],
+    "paragraph": "1-3 paragraphs summarizing the swing and priorities"
+  },
+  "meta": {
+    "level": "beginner|intermediate|advanced"       // echo what you used
+  }
+}
+`;
+
+    const user = {
+      role: 'user',
+      content: [
+        {
+          type: 'text',
+          text: [
+            'Here is the current report JSON (may be partial). Use it to personalize.',
+            'Then return a fully fleshed-out JSON object in the EXACT schema below.',
+            '',
+            `Golfer level to use: ${level}`,
+            `Focus areas to emphasize (optional): ${focusAreas.join(', ') || 'none supplied'}`,
+            '',
+            '--- CURRENT REPORT JSON START ---',
+            JSON.stringify(report, null, 2),
+            '--- CURRENT REPORT JSON END ---',
+            '',
+            schema
+          ].join('\n')
+        }
+      ]
+    };
+
+    const resp = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      temperature: 0.6,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: system },
+        user
+      ]
+    });
+
+    let json;
+    try {
+      json = JSON.parse(resp.choices?.[0]?.message?.content || '{}');
+    } catch (e) {
+      json = buildFallback(report, level, focusAreas);
+      json._warn = 'LLM JSON parse failed; returned fallback.';
+    }
+
+    // Merge light power defaults if missing
+    if (!json.power) {
+      json.power = {
+        score: Number(report.swingScore ?? 72) || 72,
+        tempo: report.power?.tempo || '3:1',
+        release_timing: Number(report.power?.release_timing ?? 60) || 60
+      };
+    }
+
+    // Echo level in meta
+    json.meta = { ...(json.meta || {}), level };
+
+    return res.status(200).json(json);
+  } catch (e) {
+    return res.status(500).json({ error: String(e?.message || e) });
   }
 }
 
-/** Deterministic enhancement so UI is always filled out */
-function buildFallbackEnhancement(report) {
-  const meta = report?.meta || {};
-  const tempo = meta.tempo || "3:1";
+function buildFallback(report = {}, level = 'intermediate', focusAreas = []) {
+  const lvlNote = level === 'beginner'
+    ? 'Simple cues first; minimal jargon.'
+    : level === 'advanced'
+    ? 'More technical language and biomechanical detail.'
+    : 'Balanced coaching with light biomechanics.';
+
+  const focus = focusAreas.length ? `Focus areas requested: ${focusAreas.join(', ')}.` : 'No specific focus areas provided.';
 
   return {
     topPriorityFixes: [
-      "Posture & spine angle stable through P2",
-      "Clubface square by P3 (lead wrist flat)",
-      "Finish chest to target, 90% lead side",
+      'Check alignment and ball position at setup.',
+      'Keep lead wrist flatter at P3–P4.',
+      'Match face to path through P6–P7.'
     ],
     topPowerFixes: [
-      "Earlier wrist set by P2.5",
-      "Lead hip posts into impact",
-      "Release speed later (closer to impact)",
+      'Add lead-leg braking at transition.',
+      'Push vertical force windows (light→medium→full).',
+      'Stabilize trail foot pressure longer in backswing.'
     ],
-    positionConsistency: {
-      notes: "Set consistent ball position; rehearse same start line.",
-    },
-    swingConsistency: {
-      notes: "Re-center pressure forward by P4; rotate to a held finish.",
+    consistency: {
+      position: { score: 72, notes: 'Setup repeatable; small drift late.' },
+      swing: { score: 70, notes: 'Sequence mostly holds; timing slips under max effort.' }
     },
     power: {
-      score: Math.max(60, Number(report?.swingScore ?? 74)),
-      tempo,
-      release_timing: 65,
+      score: Number(report.swingScore ?? 78),
+      tempo: report?.power?.tempo || '3:1',
+      release_timing: Number(report?.power?.release_timing ?? 66)
     },
     p1p9: [
-      {
-        id: "P1",
-        name: "Address",
-        grade: "ok",
-        short: "Athletic stance; weight centered; neutral grip.",
-        long:
-          "Hand height to hip crease; slight knee flex; align zipper through ball; trail hand soft to avoid shutting face.",
-        video:
-          "https://www.youtube.com/results?search_query=P1+address+golf",
-      },
-      {
-        id: "P2",
-        name: "Takeaway",
-        grade: "good",
-        short: "One-piece move; club outside hands; face square.",
-        long:
-          "Keep trail wrist soft; maintain triangle; shaft parallel to target line; avoid early roll-in.",
-        video:
-          "https://www.youtube.com/results?search_query=P2+takeaway+golf",
-      },
-      {
-        id: "P3",
-        name: "Lead arm parallel",
-        grade: "ok",
-        short: "Width maintained; club parallel to spine.",
-        long:
-          "Lead wrist more flat; trail elbow points down; don’t over-rotate chest.",
-        video:
-          "https://www.youtube.com/results?search_query=P3+lead+arm+parallel+golf",
-      },
-      {
-        id: "P4",
-        name: "Top",
-        grade: "needs help",
-        short: "Complete turn; trail elbow under; face not shut.",
-        long:
-          "Feel trail hip deep; lead wrist flat not cupped; avoid across-the-line; small pause helps sequence.",
-        video:
-          "https://www.youtube.com/results?search_query=P4+top+of+backswing+golf",
-      },
-      {
-        id: "P5",
-        name: "Shaft parallel down",
-        grade: "ok",
-        short: "Shallow slightly; hands inside clubhead.",
-        long:
-          "Pressure to lead foot; trail elbow in front of hip; retain wrist angles.",
-        video:
-          "https://www.youtube.com/results?search_query=P5+downswing+golf",
-      },
-      {
-        id: "P6",
-        name: "Club parallel before impact",
-        grade: "ok",
-        short: "Handle leads; face square; chest open.",
-        long:
-          "Lead hip posted; keep trail heel light; strike ball then turf.",
-        video:
-          "https://www.youtube.com/results?search_query=P6+pre+impact+golf",
-      },
-      {
-        id: "P7",
-        name: "Impact",
-        grade: "good",
-        short: "Forward shaft lean; weight left; low point ahead.",
-        long:
-          "Lead wrist flat/bowed; keep head back of ball; compress with hands leading.",
-        video:
-          "https://www.youtube.com/results?search_query=P7+impact+golf",
-      },
-      {
-        id: "P8",
-        name: "Post impact",
-        grade: "ok",
-        short: "Arms extend; chest rotates; face passive.",
-        long: "Keep width; rotate through; maintain speed into P9.",
-        video:
-          "https://www.youtube.com/results?search_query=P8+post+impact+golf",
-      },
-      {
-        id: "P9",
-        name: "Finish",
-        grade: "ok",
-        short: "Balanced, chest to target, trail foot up.",
-        long:
-          "Hold finish; belt buckle to target; weight 90% lead side.",
-        video:
-          "https://www.youtube.com/results?search_query=P9+finish+golf",
-      },
+      { id:'P1', name:'Address', grade:'ok', short:'Athletic stance.', long:'Neutral grip and centered weight. Maintain soft knees and balanced foot pressure. Keep chest proud without arching lower back.', video: yt('address golf setup') },
+      { id:'P2', name:'Takeaway', grade:'good', short:'One-piece move.', long:'Club outside hands with face square. Keep trail wrist soft so shaft stays on plane rather than fanning open too quickly.', video: yt('golf takeaway on plane') },
+      { id:'P3', name:'Lead arm parallel', grade:'ok', short:'Width maintained.', long:'Club parallel to spine. Avoid collapsing trail elbow—hold radius to keep swing arc wide and stable.', video: yt('lead arm parallel checkpoints') },
+      { id:'P4', name:'Top', grade:'needs help', short:'Elbow under; face not shut.', long:'Trail elbow should point more down to support shallowing later. Keep face neutral relative to forearm.', video: yt('top of backswing trail elbow down') },
+      { id:'P5', name:'Shaft parallel down', grade:'ok', short:'Shallow slightly.', long:'Retain hinge while routing shaft slightly from inside. This reduces across-the-line delivery.', video: yt('shallower downswing drill') },
+      { id:'P6', name:'Club parallel before impact', grade:'ok', short:'Handle forward; square face.', long:'Match face-to-path; preserve wrist structure into delivery. Push handle slightly forward to control loft/face.', video: yt('p6 position face to path') },
+      { id:'P7', name:'Impact', grade:'good', short:'Forward lean; low point ahead.', long:'Lead side braced with shaft lean. Keep trail foot pressure releasing as chest rotates through.', video: yt('golf impact position drill') },
+      { id:'P8', name:'Post impact', grade:'ok', short:'Arms extend; chest rotates.', long:'Let arms extend while torso continues to rotate; avoid early stall/flip.', video: yt('post impact extension drill') },
+      { id:'P9', name:'Finish', grade:'ok', short:'Balanced, tall.', long:'Weight fully left; belt buckle to target. Hold finish for two counts for balance training.', video: yt('finish position hold drill') },
     ],
-    practicePlan: Array.from({ length: 14 }, (_, i) => {
-      const day = i + 1;
-      if (day === 1)
-        return {
-          day,
-          title: "Mirror P1–P2 (10m)",
-          items: ["Athletic posture checkpoints", "One-piece takeaway with stick"],
-        };
-      if (day === 2)
-        return {
-          day,
-          title: "Tempo & pump",
-          items: ["Metronome " + tempo + " (5m)", "Pump drill — 10 reps"],
-        };
-      if (day === 3)
-        return {
-          day,
-          title: "Lead wrist at P4",
-          items: ["Bow lead wrist at top — 15 reps", "Record 3 swings"],
-        };
-      if (day === 4)
-        return {
-          day,
-          title: "Low-point gates",
-          items: ["Impact line — 20 brush strikes", "3 slow-motion swings"],
-        };
-      if (day === 5)
-        return {
-          day,
-          title: "Path & start line",
-          items: ["Alignment stick start line — 15 balls"],
-        };
-      if (day === 6)
-        return {
-          day,
-          title: "Speed windows",
-          items: ["Light → medium → full — 15 balls"],
-        };
-      if (day === 7)
-        return {
-          day,
-          title: "Review",
-          items: ["Re-record P1–P4 checkpoints"],
-        };
-      if (day === 8)
-        return {
-          day,
-          title: "Re-load wrist set",
-          items: ["Set by P2.5 — 15 reps"],
-        };
-      if (day === 9)
-        return {
-          day,
-          title: "Face-to-path",
-          items: ["Start left, curve back — 10 balls"],
-        };
-      if (day === 10)
-        return {
-          day,
-          title: "Ground forces",
-          items: ["Hold trail heel, post into lead — 10 reps"],
-        };
-      if (day === 11)
-        return {
-          day,
-          title: "Tempo " + tempo,
-          items: ["Metronome — 5 min"],
-        };
-      if (day === 12)
-        return {
-          day,
-          title: "Pressure shift",
-          items: ["Step-change — 10 reps"],
-        };
-      if (day === 13)
-        return {
-          day,
-          title: "Combine",
-          items: ["Alternate drills — 20 balls"],
-        };
-      return {
-        day,
-        title: "Retest",
-        items: ["Film 3 swings — upload new report"],
-      };
-    }),
+    practicePlan: Array.from({ length: 14 }).map((_, i) => ({
+      day: i + 1,
+      title: i % 2 ? 'Tempo window + align start line' : 'Mirror P1–P2 + wrist set control',
+      items: i % 2
+        ? ['Metronome 3:1 for 5 min', 'Start-line stick—10 balls']
+        : ['Mirror checkpoint P1–P2 (10m)', 'Set by P2.5; 15 reps']
+    })),
+    swingSummary: {
+      whatYouDoWell: [
+        'Ground-up sequencing is solid.',
+        'Lag retention into P6 is consistent.',
+        'Balanced finish indicates efficient energy use.'
+      ],
+      needsAttention: [
+        'Trail elbow orientation at P4 for shallowing later.',
+        'Face-to-path match between P5–P6 under speed.',
+        'Lead wrist structure—avoid late flip.'
+      ],
+      goals: [
+        'Sharpen delivery windows (face & start-line).',
+        'Increase lead-leg braking at transition.',
+        'Build tolerance for speed without timing loss.'
+      ],
+      paragraph: [
+        lvlNote,
+        focus,
+        'Overall you’re strong from P1 to P3, store energy well to P4, and deliver with good structure. The main gains lie in improving trail-elbow orientation at the top and stabilizing face-to-path at P6 under speed. Use the 14-day plan to reinforce setup precision, then add speed windows and lead-leg braking for a clean, powerful release.'
+      ].join(' ')
+    },
+    meta: { level }
   };
 }
 
-export default async function handler(req, res) {
-  try {
-    if (req.method !== "POST") {
-      return res.status(405).json({ error: "Method Not Allowed" });
-    }
-    const body = safeJson(req.body);
-    const report = body?.report || {};
-    const enhanced = buildFallbackEnhancement(report);
-    return res.status(200).json(enhanced);
-  } catch (e) {
-    // ultra-safe: never throw
-    return res.status(200).json(buildFallbackEnhancement({}));
-  }
+function yt(query) {
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
 }
