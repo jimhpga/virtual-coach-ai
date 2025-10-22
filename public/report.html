@@ -6,47 +6,49 @@
 <title>Virtual Coach AI — Swing Report</title>
 <link rel="stylesheet" href="/styles.css" />
 <style>
-  /* ---------- MVP viewer look ---------- */
-  :root{
-    --panel: rgba(10,18,24,.24);
-    --line:  rgba(255,255,255,.10);
-    --muted:#bcd2db;
-    --ok:#19c37d; --warn:#f6c453; --bad:#ff6b6b;
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+  .pill { background:#0f1b22;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:700 }
+  .meta-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center }
+  .card h3 { margin: 0 0 10px; }
+  .muted { color: var(--muted); }
+  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+  .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
+  .bar { height:8px; border-radius:999px; background:#0f1b22; border:1px solid var(--line); overflow:hidden; }
+  .bar > i { display:block; height:100%; width:0%; background:var(--accent, #4ad0ff); transition: width .5s ease; }
+  .section-title { display:flex; align-items:center; justify-content:space-between; margin:0 0 8px; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; }
+  .pill-tiny { font-size: 12px; padding: 3px 8px; border-radius: 999px; border:1px solid var(--line); background:#0f1b22 }
+  .pgrid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; } /* two thinner columns */
+  .p-card { background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:14px; padding:10px 12px;
+            box-shadow:0 6px 14px rgba(0,0,0,.25); }
+  .p-card h4 { margin:0 0 6px; font-size:15px }
+  .p-card .short { color:var(--muted); margin:6px 0 6px }
+  .p-card .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px }
+  .btn-sm { border:1px solid var(--line); padding:6px 10px; border-radius:8px; background:#0f1b22; color:#fff; text-decoration:none; cursor:pointer }
+  .btn-sm:hover { background:#122734 }
+  details.p1long summary { cursor:pointer; list-style:none; display:flex; align-items:center; gap:6px; }
+  details.p1long summary::-webkit-details-marker{ display:none }
+  .caret { display:inline-block; transform: rotate(0deg); transition: transform .2s ease; }
+  details[open] .caret { transform: rotate(90deg); }
+  .list-tight > div { margin:6px 0; }
+  .list-dot { padding-left:18px }
+  .list-dot li { margin:4px 0 }
+  .accordion { border:1px solid var(--line); border-radius:14px; overflow:hidden }
+  .ac-head { background:rgba(255,255,255,.03); padding:10px 12px; display:flex; align-items:center; justify-content:space-between; cursor:pointer }
+  .ac-body { padding:12px; display:none }
+  .ac-open .ac-body { display:block }
+  .ac-open .caret { transform: rotate(90deg); }
+  .hide { display:none !important; }
+  .infobox { font-size:12px; color:var(--muted) }
+  .kpi { display:flex; align-items:center; gap:8px; }
+  .kpi .num { font-weight:700; }
+  /* tighter vertical rhythm for cards */
+  .p-card p { margin: 0 0 6px; line-height:1.35 }
+  @media (max-width: 900px) {
+    .grid3 { grid-template-columns: 1fr; }
+    .grid2 { grid-template-columns: 1fr; }
+    .pgrid { grid-template-columns: 1fr; }
   }
-  .wrap{max-width:1100px;margin:0 auto;padding:20px}
-  .pill{background:#0f1b22;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:700}
-  .muted{color:var(--muted)}
-  .card{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 20px rgba(0,0,0,.25);padding:14px 16px}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-  @media(max-width:900px){.grid3,.grid2{grid-template-columns:1fr}}
-  .section-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px}
-  .bar{height:8px;border:1px solid var(--line);border-radius:999px;background:#0f1b22;overflow:hidden}
-  .bar>i{display:block;height:100%;width:0%}
-  .pct{font-family:ui-monospace,Menlo,Consolas,monospace}
-  .krow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  .pill.s{font-size:12px;padding:3px 8px}
-  .pcol{display:flex;flex-direction:column;gap:12px}
-  /* P1–P9 stacked cards */
-  .p-card{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:14px;padding:12px}
-  .p-head{display:flex;gap:10px;align-items:center;justify-content:space-between}
-  .p-id{font-weight:800}
-  .p-grade{border:1px solid var(--line);border-radius:999px;padding:3px 8px;font-size:12px}
-  .g-good{background:rgba(25,195,125,.18);color:#eafff4}
-  .g-ok{background:rgba(246,196,83,.18);color:#2a2300}
-  .g-bad{background:rgba(255,107,107,.18);color:#fff}
-  .p-short{color:var(--muted);margin:6px 0 8px}
-  .btn-sm{border:1px solid var(--line);padding:6px 10px;border-radius:8px;background:#0f1b22;color:#fff;text-decoration:none;cursor:pointer}
-  .btn-sm:hover{background:#122734}
-  details.px{margin-top:6px}
-  details.px summary{list-style:none;cursor:pointer}
-  details.px summary::-webkit-details-marker{display:none}
-  .caret{display:inline-block;transform:rotate(0deg);transition:transform .2s}
-  details[open].px .caret{transform:rotate(90deg)}
-  /* small info */
-  .infobox{font-size:13px;color:var(--muted)}
-  /* hide raw json forever in MVP */
-  #raw{display:none!important}
 </style>
 </head>
 <body>
@@ -67,314 +69,358 @@
 </header>
 
 <div class="scrim">
-  <main class="wrap">
-    <h1 style="margin:0 0 6px">Swing Report — P1–P9</h1>
-    <div id="metaRow" class="krow muted"></div>
+  <main class="wrap" id="app">
+    <h1 style="margin-bottom:6px">Swing Report — P1–P9</h1>
+    <div class="meta-row muted" id="metaRow"></div>
 
-    <!-- TOP STRIP: Coaching • Power • Consistency -->
+    <!-- SUMMARY STRIP -->
     <section class="grid3" style="margin-top:14px">
       <div class="card">
-        <div class="section-title"><h3 style="margin:0">Coaching Card</h3></div>
+        <div class="section-title">
+          <h3>Coaching Card</h3>
+        </div>
         <div class="grid2">
           <div>
-            <div class="muted" style="font-weight:700;margin-bottom:6px">Top 3 Priority Fixes</div>
-            <div id="fixPriority" class="pcol"></div>
+            <div class="muted" style="font-weight:700; margin-bottom:6px">Top 3 Priority Fixes</div>
+            <div id="topPriority" class="list-tight"></div>
           </div>
           <div>
-            <div class="muted" style="font-weight:700;margin-bottom:6px">Top 3 Power Fixes</div>
-            <div id="fixPower" class="pcol"></div>
+            <div class="muted" style="font-weight:700; margin-bottom:6px">Top 3 Power Fixes</div>
+            <div id="topPower" class="list-tight"></div>
           </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="section-title"><h3 style="margin:0">Power Score Summary</h3></div>
-        <div class="pcol">
+        <div class="section-title">
+          <h3>Power Score Summary</h3>
+        </div>
+        <div class="list-tight">
           <div>
             <div class="muted">Power Score</div>
             <div class="bar"><i id="barScore"></i></div>
-            <div class="pct" id="txtScore">—</div>
+            <div class="mono" id="txtScore"></div>
           </div>
           <div>
             <div class="muted">Tempo</div>
-            <div class="pct" id="txtTempo">—</div>
+            <div class="mono" id="txtTempo">—</div>
           </div>
           <div>
             <div class="muted">Release Timing</div>
             <div class="bar"><i id="barRelease"></i></div>
-            <div class="pct" id="txtRelease">—</div>
+            <div class="mono" id="txtRelease"></div>
           </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="section-title"><h3 style="margin:0">Consistency</h3></div>
+        <div class="section-title"><h3>Consistency</h3></div>
         <div class="grid2">
           <div>
-            <div class="muted" style="font-weight:700;margin-bottom:6px">Position Consistency</div>
-            <div class="krow">
-              <span id="posScore" class="pill s">—</span>
-            </div>
-            <div id="posNotes" class="infobox" style="margin-top:6px">—</div>
+            <div class="muted" style="font-weight:700; margin-bottom:6px">Position Consistency</div>
+            <div class="kpi"><span id="posPct" class="num">—</span><span id="posNote" class="muted"> </span></div>
           </div>
           <div>
-            <div class="muted" style="font-weight:700;margin-bottom:6px">Swing Consistency</div>
-            <div class="krow">
-              <span id="swingScore" class="pill s">—</span>
-            </div>
-            <div id="swingNotes" class="infobox" style="margin-top:6px">—</div>
+            <div class="muted" style="font-weight:700; margin-bottom:6px">Swing Consistency</div>
+            <div class="kpi"><span id="swingPct" class="num">—</span><span id="swingNote" class="muted"> </span></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- PRACTICE PLAN (collapsible) -->
+    <!-- PRACTICE PLAN ACCORDION -->
     <section style="margin-top:14px">
-      <div class="card">
-        <details id="planBox">
-          <summary style="cursor:pointer;list-style:none">
-            <span class="caret">▶</span> <b>Practice Plan (optional)</b>
-            <span id="planCount" class="pill s" style="margin-left:8px">0 items</span>
-          </summary>
-          <div id="planList" class="infobox" style="margin-top:10px"></div>
-        </details>
+      <div class="accordion" id="planAcc">
+        <div class="ac-head" role="button" tabindex="0">
+          <div style="display:flex; gap:10px; align-items:center">
+            <span class="caret">▶</span>
+            <h3 style="margin:0">Practice Plan (optional)</h3>
+          </div>
+          <span class="pill-tiny" id="planCount">0 items</span>
+        </div>
+        <div class="ac-body">
+          <div id="planList" class="list-dot"></div>
+        </div>
       </div>
     </section>
 
-    <!-- P1–P9 stacked vertically -->
+    <!-- P1–P9 -->
     <section style="margin-top:14px">
       <h2 style="margin:0 0 8px">P1–P9</h2>
-      <div id="pList" class="pcol"></div>
-      <div id="pEmpty" class="infobox" style="margin-top:8px"></div>
+      <div class="pgrid" id="pGrid"></div>
+      <div class="infobox" id="pGridEmpty" style="margin-top:8px"></div>
     </section>
 
-    <!-- Written summary -->
-    <section id="summaryCard" class="card" style="margin-top:14px;display:none">
+    <!-- AI SUMMARY -->
+    <section id="sumBox" class="card hide" style="margin-top:14px">
       <h3 style="margin:0 0 8px">Swing Summary</h3>
-      <div id="sumPara" class="muted" style="margin-bottom:8px"></div>
-      <div class="grid2">
+      <p id="sumPara" class="muted"></p>
+      <div class="grid3">
         <div>
-          <div class="muted" style="font-weight:700">What’s Good</div>
-          <ul id="sumGood" class="infobox" style="margin-top:6px"></ul>
+          <div class="muted" style="font-weight:700; margin-bottom:6px">What’s working</div>
+          <ul id="sumGood" class="list-dot"></ul>
         </div>
         <div>
-          <div class="muted" style="font-weight:700">Needs Work</div>
-          <ul id="sumBad" class="infobox" style="margin-top:6px"></ul>
+          <div class="muted" style="font-weight:700; margin-bottom:6px">Needs attention</div>
+          <ul id="sumBad" class="list-dot"></ul>
         </div>
-      </div>
-      <div style="margin-top:8px">
-        <div class="muted" style="font-weight:700">Goals</div>
-        <ul id="sumGoals" class="infobox" style="margin-top:6px"></ul>
+        <div>
+          <div class="muted" style="font-weight:700; margin-bottom:6px">Goals</div>
+          <ul id="sumGoals" class="list-dot"></ul>
+        </div>
       </div>
     </section>
+
+    <!-- Note -->
+    <section id="noteBox" class="card hide" style="margin-top:14px">
+      <h3 style="margin:0 0 8px">Note</h3>
+      <div id="noteTxt" class="muted"></div>
+    </section>
+
   </main>
 </div>
 
 <script>
-/* ---------------- config ---------------- */
+/* ----------- CONFIG ----------- */
 window.BLOB_PUBLIC_BASE =
   window.BLOB_PUBLIC_BASE || "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com";
 
-/* ---------------- utils ---------------- */
+/* ----------- helpers ----------- */
 const $ = s => document.querySelector(s);
 const qp = new URLSearchParams(location.search);
-const rid = qp.get("id");
-const directUrl = qp.get("url");
-
-const blobFromId = (id) =>
+const rid = qp.get('id');
+const directUrl = qp.get('url');
+const blobFromId = id =>
   `${window.BLOB_PUBLIC_BASE.replace(/\/+$/,'')}/reports/${encodeURIComponent(id)}.json?cb=${Date.now()}`;
 
-const clampPct = v => Math.max(0, Math.min(100, Number(v||0)));
-const bandColor = (v) => v>=75 ? "ok" : v>=55 ? "warn" : "bad";
+function showErr(msg){ alert(msg); }
+async function fetchJson(url){
+  const res = await fetch(url, {cache:'no-store'});
+  if(!res.ok) throw new Error(`Fetch ${res.status} for ${url}`);
+  const txt = await res.text();
+  return JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
+}
+function pct(n){ if(n == null || isNaN(n)) return 0; return Math.max(0, Math.min(100, Number(n))); }
 
-/* ---------------- mapping ---------------- */
-function fillMeta(d){
-  const row = $("#metaRow"); row.innerHTML = "";
-  const chips = [
-    ["Score", d.swingScore ?? d.score ?? "—"],
-    ["Status", d.status ?? "—"],
-    ["Tempo", d.power?.tempo ?? "—"],
-    ["Release", (d.power?.release_timing!=null ? d.power.release_timing+"%" : "—")]
+/* ----------- UI ----------- */
+function fillMeta(data){
+  const row = $('#metaRow'); row.innerHTML = '';
+  const pills = [
+    ['Score', (data.swingScore ?? data.score ?? '—')],
+    ['Status', (data.status ?? '—')],
+    ['Tempo', (data.power?.tempo ?? '—')],
+    ['Release', (data.power?.release_timing != null ? (data.power.release_timing + '%') : '—')],
   ];
-  chips.forEach(([k,v])=>{
-    const s = document.createElement("span");
-    s.className = "pill";
-    s.textContent = `${k}: ${v}`;
-    row.appendChild(s);
+  pills.forEach(([k,v])=>{
+    const s = document.createElement('span'); s.className='pill'; s.textContent = `${k}: ${v}`; row.appendChild(s);
   });
-  const created = document.createElement("span");
-  created.className = "muted";
-  created.style.marginLeft = "8px";
+  const created = document.createElement('span');
+  created.className = 'muted'; created.style.marginLeft='8px';
   created.textContent = `Created: ${new Date().toLocaleString()}`;
   row.appendChild(created);
 }
-
-function setPower(d){
-  const score = clampPct(d.power?.score ?? d.swingScore ?? 0);
-  const rel   = clampPct(d.power?.release_timing ?? 0);
-  const scoreBar = $("#barScore");
-  const relBar   = $("#barRelease");
-  const setBar = (el, val) => {
-    el.style.width = val + "%";
-    el.style.background = val>=75 ? "var(--ok)" : val>=55 ? "var(--warn)" : "var(--bad)";
-  };
-  setBar(scoreBar, score);
-  setBar(relBar, rel);
-  $("#txtScore").textContent = score + "%";
-  $("#txtRelease").textContent = rel + "%";
-  $("#txtTempo").textContent = d.power?.tempo ?? "—";
+function setBars(data){
+  const score = pct(data.power?.score ?? data.swingScore ?? 0);
+  $('#barScore').style.width = score + '%';
+  $('#txtScore').textContent = `${score}%`;
+  const rel = pct(data.power?.release_timing ?? 0);
+  $('#barRelease').style.width = rel + '%';
+  $('#txtRelease').textContent = `${rel}%`;
+  $('#txtTempo').textContent = data.power?.tempo ?? '—';
 }
-
-function setConsistency(d){
-  const posScore = d.positionConsistency?.score ?? d.position_consistency?.score;
-  const posNotes = d.positionConsistency?.notes ?? d.position_consistency?.notes;
-  const swScore  = d.swingConsistency?.score ?? d.swing_consistency?.score;
-  const swNotes  = d.swingConsistency?.notes ?? d.swing_consistency?.notes;
-
-  const setPill = (el, v) => {
-    const n = clampPct(v);
-    el.textContent = isFinite(n) && v!=null ? (n + "%") : "—";
-    el.style.background = isFinite(n) ? (n>=75?"rgba(25,195,125,.18)":n>=55?"rgba(246,196,83,.18)":"rgba(255,107,107,.18)") : "#0f1b22";
-  };
-  setPill($("#posScore"), posScore);
-  setPill($("#swingScore"), swScore);
-  $("#posNotes").textContent = posNotes || "—";
-  $("#swingNotes").textContent = swNotes || "—";
+function setConsistency(data){
+  const ps = Number(data.positionConsistency?.score ?? data.position_consistency?.score ?? NaN);
+  const pn = data.positionConsistency?.notes ?? data.position_consistency?.notes ?? '';
+  const ss = Number(data.swingConsistency?.score ?? data.swing_consistency?.score ?? NaN);
+  const sn = data.swingConsistency?.notes ?? data.swing_consistency?.notes ?? '';
+  $('#posPct').textContent = isNaN(ps) ? '—' : `${ps}%`;
+  $('#swingPct').textContent = isNaN(ss) ? '—' : `${ss}%`;
+  $('#posNote').textContent = pn || ' ';
+  $('#swingNote').textContent = sn || ' ';
 }
-
-function chipClass(g){
-  const t = String(g||"ok").toLowerCase();
-  if (t==="good") return "p-grade g-good";
-  if (t==="bad"||t==="needs help") return "p-grade g-bad";
-  return "p-grade g-ok";
+function li(txt){ const li = document.createElement('li'); li.textContent = txt; return li; }
+function setCoachingCard(data){
+  const pri = (data.topPriorityFixes || data.top_priority_fixes || []).slice(0,3);
+  const pow = (data.topPowerFixes || data.top_power_fixes || []).slice(0,3);
+  const priBox = $('#topPriority'); const powBox = $('#topPower');
+  priBox.innerHTML=''; powBox.innerHTML='';
+  (pri.length ? pri : ['—']).forEach(x => priBox.appendChild(li(String(x))));
+  (pow.length ? pow : ['—']).forEach(x => powBox.appendChild(li(String(x))));
 }
-
-function ytSearch(q){
-  return `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`;
+function youtubeLink(name){
+  const q = encodeURIComponent(`${name} golf checkpoint`);
+  return `https://www.youtube.com/results?search_query=${q}`;
 }
+function renderPGrid(data){
+  const list = Array.isArray(data.p1p9 || data.phases) ? (data.p1p9 || data.phases) : [];
+  const grid = $('#pGrid'); grid.innerHTML = '';
+  const empty = $('#pGridEmpty'); empty.textContent='';
 
-function renderP(d){
-  const list = Array.isArray(d.phases||d.p1p9) ? (d.phases||d.p1p9) : [];
-  const root = $("#pList"); root.innerHTML = "";
-  $("#pEmpty").textContent = list.length ? "" : "No P1–P9 items in this report.";
+  if(!list.length){ empty.textContent = 'No P1–P9 items in this report.'; return; }
+
   list.forEach((p,i)=>{
-    const cid = p.id || `P${i+1}`;
-    const name = p.name || p.title || cid;
-    const short = p.short || p.note || "";
-    const long  = p.long  || p.details || "";
-    const grade = p.grade || "ok";
-    const video = p.video || p.video_url || ytSearch(`${cid} ${name} golf checkpoint`);
+    const name = p.name || p.title || `P${i+1}`;
+    const idTxt = p.id || `P${i+1}`;
+    const grade = (p.grade || '').toString();
+    const short = p.short || p.note || '—';
+    const long  = p.long  || p.details || '';
+    const video = p.video || youtubeLink(name);
 
-    const card = document.createElement("div");
-    card.className = "p-card";
+    const card = document.createElement('div');
+    card.className='p-card';
 
-    const head = document.createElement("div");
-    head.className = "p-head";
-    const left = document.createElement("div");
-    left.innerHTML = `<span class="p-id">${cid}.</span> <b>${name}</b>`;
-    const g = document.createElement("span");
-    g.className = chipClass(grade);
-    g.textContent = `grade: ${String(grade).toLowerCase()}`;
-    head.appendChild(left); head.appendChild(g);
-    card.appendChild(head);
+    // header: title + grade pill
+    const head = document.createElement('div');
+    head.style.display='flex'; head.style.justifyContent='space-between'; head.style.alignItems='center'; head.style.gap='8px';
+    const h4 = document.createElement('h4'); h4.textContent = `${idTxt}. ${name}`;
+    const g = document.createElement('span'); g.className='pill-tiny'; g.textContent = grade ? `grade: ${grade}` : 'grade: —';
+    head.appendChild(h4); head.appendChild(g); card.appendChild(head);
 
-    if (short) {
-      const s = document.createElement("div");
-      s.className = "p-short";
-      s.textContent = short;
-      card.appendChild(s);
+    // watch button immediately under grade
+    const btnRow = document.createElement('div'); btnRow.className='row';
+    const aWatch = document.createElement('a'); aWatch.className='btn-sm'; aWatch.target='_blank'; aWatch.href=video; aWatch.textContent='Watch';
+    btnRow.appendChild(aWatch); card.appendChild(btnRow);
+
+    // short line
+    const s = document.createElement('p'); s.className='short'; s.textContent = short; card.appendChild(s);
+
+    // details
+    if(long){
+      const det = document.createElement('details'); det.className='p1long';
+      const sum = document.createElement('summary'); sum.innerHTML = `<span class="caret">▶</span><span> Details</span>`;
+      const body = document.createElement('div'); body.style.marginTop='6px'; body.textContent = long;
+      det.appendChild(sum); det.appendChild(body); card.appendChild(det);
     }
 
-    const row = document.createElement("div");
-    row.className = "krow";
-    const a = document.createElement("a");
-    a.className = "btn-sm"; a.target = "_blank"; a.rel="noopener";
-    a.href = video; a.textContent = "Watch";
-    row.appendChild(a);
-    card.appendChild(row);
-
-    if (long) {
-      const det = document.createElement("details");
-      det.className = "px";
-      const sum = document.createElement("summary");
-      sum.innerHTML = `<span class="caret">▶</span> Details`;
-      const body = document.createElement("div");
-      body.style.marginTop = "8px";
-      body.style.whiteSpace = "pre-wrap";
-      body.textContent = long;
-      det.appendChild(sum); det.appendChild(body);
-      card.appendChild(det);
-    }
-
-    root.appendChild(card);
+    grid.appendChild(card);
   });
 }
-
-function setPlan(d){
-  const list = d.practicePlan || d.practice_plan || [];
-  const count = $("#planCount");
-  const pl = $("#planList"); pl.innerHTML = "";
-  count.textContent = `${list.length} items`;
-  if (!list.length){
-    pl.textContent = "No plan included in this report.";
-    return;
+function setPracticePlan(data){
+  const list = data.practicePlan || data.practice_plan || [];
+  const root = $('#planAcc'); const count = $('#planCount'); const out  = $('#planList');
+  out.innerHTML=''; count.textContent = `${list.length} items`;
+  if(!list.length) { out.innerHTML = '<div class="infobox">No plan found.</div>'; }
+  else {
+    const ul = document.createElement('ul'); ul.className='list-dot';
+    list.forEach(it=>{
+      const li = document.createElement('li');
+      const d = it.day != null ? `Day ${it.day}: ` : '';
+      const title = it.title || it.name || '';
+      const items = Array.isArray(it.items) ? ` — ${it.items.join('; ')}` : '';
+      li.textContent = `${d}${title}${items}`; ul.appendChild(li);
+    }); out.appendChild(ul);
   }
-  const ul = document.createElement("ul");
-  ul.style.margin = "6px 0 0";
-  list.forEach(it=>{
-    const li = document.createElement("li");
-    const day = it.day!=null ? `Day ${it.day}: ` : "";
-    const title = it.title || it.name || "";
-    const items = Array.isArray(it.items) ? ` — ${it.items.join("; ")}` : "";
-    li.textContent = `${day}${title}${items}`;
-    ul.appendChild(li);
-  });
-  pl.appendChild(ul);
+  const head = root.querySelector('.ac-head');
+  head.onclick = () => root.classList.toggle('ac-open');
+  head.onkeydown = (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); root.classList.toggle('ac-open'); }};
+}
+function setNote(data){
+  const n = (data.note || '').trim();
+  if(!n){ $('#noteBox').classList.add('hide'); return; }
+  $('#noteTxt').textContent = n; $('#noteBox').classList.remove('hide');
 }
 
-function setSummary(d){
-  const box = $("#summaryCard");
-  const para = d.swingSummary?.paragraph || d.summary?.paragraph || "";
-  const good = d.swingSummary?.good || d.summary?.good || [];
-  const bad  = d.swingSummary?.bad  || d.summary?.bad  || [];
-  const goals= d.swingSummary?.goals|| d.summary?.goals|| [];
-  if (!para && !good.length && !bad.length && !goals.length){
-    box.style.display = "none";
-    return;
+/* ----------- Summary (AI + heuristic) ----------- */
+function heuristicSummary(data){
+  const phases = (data.p1p9 || data.phases || []).map(p => ({ id:(p.id||''), grade:(p.grade||'').toLowerCase() }));
+  const idx = i => ['p1','p2','p3','p4','p5','p6','p7','p8','p9'].indexOf(String(i).toLowerCase());
+  const worstI = phases.reduce((a,p,i)=>{
+    const score = /bad|poor|needs|weak/.test(p.grade) ? 0 : /ok|fair/.test(p.grade) ? 1 : /good|great|excellent/.test(p.grade) ? 2 : 1;
+    return (score < a.score) ? {i,score} : a;
+  }, {i:-1,score:3}).i;
+
+  let para = "Solid fundamentals with clear sequencing. ";
+  if (worstI >= 0) {
+    const tag = (phases[worstI].id || `P${worstI+1}`).toUpperCase();
+    para += `Strong through earlier phases; breakdown begins around ${tag}. Focus there to stabilize delivery and finish. `;
   }
-  $("#sumPara").textContent = para || "—";
-  const fillList = (ul, arr)=>{
-    ul.innerHTML = "";
-    if (!arr.length){ ul.innerHTML = "<li>—</li>"; return; }
-    arr.forEach(t=>{ const li=document.createElement("li"); li.textContent = String(t); ul.appendChild(li); });
-  };
-  fillList($("#sumGood"),  good);
-  fillList($("#sumBad"),   bad);
-  fillList($("#sumGoals"), goals);
-  box.style.display = "";
+  const posS = Number(data.positionConsistency?.score ?? data.position_consistency?.score ?? NaN);
+  const swS  = Number(data.swingConsistency?.score ?? data.swing_consistency?.score ?? NaN);
+  if (!isNaN(posS) || !isNaN(swS)) {
+    para += `Consistency: position ${isNaN(posS)?'—':posS+'%'}, swing ${isNaN(swS)?'—':swS+'%'}.`;
+  }
+
+  const good = [];
+  const bad = [];
+  const goals = [];
+
+  // simple reads
+  if ((data.power?.tempo || '').includes('3:1')) good.push("Tempo 3:1 baseline is present");
+  if ((data.power?.release_timing ?? 0) >= 60) good.push("Release timing trending positive");
+  good.push("Balanced finish and clean sequencing (ground-up)");
+
+  if (worstI >= 0) {
+    const tag = (phases[worstI].id || `P${worstI+1}`).toUpperCase();
+    bad.push(`${tag} requires attention; maintain structure and face control through delivery`);
+    goals.push(`Stabilize ${tag} with 10 slow-motion reps before full swings`);
+  } else {
+    goals.push("Hold finish for 2–3 seconds to reinforce balance and face control");
+  }
+
+  // add a power-focused goal
+  goals.push("Add lead-leg braking drills to spike ground force at transition");
+
+  return { paragraph: para, good, bad, goals };
 }
 
-/* ---------------- boot ---------------- */
+async function aiSummary(report, ms=4500){
+  const ctl = new AbortController();
+  const to = setTimeout(()=>ctl.abort(), ms);
+  try{
+    const r = await fetch('/api/generate-report-llm', {
+      method:'POST', headers:{'content-type':'application/json'},
+      body: JSON.stringify({ report, ask: 'summary' }),
+      signal: ctl.signal
+    });
+    clearTimeout(to);
+    if (!r.ok) throw new Error('llm bad');
+    const j = await r.json();
+    if (j?.swingSummary?.paragraph) return j.swingSummary;
+    return null;
+  }catch(_){ clearTimeout(to); return null; }
+}
+
+async function setSummary(data){
+  // prefer server LLM; fall back to heuristic
+  let sum = await aiSummary(data);
+  if (!sum) sum = data.swingSummary || heuristicSummary(data);
+  if (!sum) { $('#sumBox').classList.add('hide'); return; }
+
+  $('#sumPara').textContent = sum.paragraph || '';
+  const g = $('#sumGood'); const b = $('#sumBad'); const go = $('#sumGoals');
+  g.innerHTML=''; b.innerHTML=''; go.innerHTML='';
+  (sum.good||[]).forEach(x=>g.appendChild(li(String(x))));
+  (sum.bad||[]).forEach(x=>b.appendChild(li(String(x))));
+  (sum.goals||[]).forEach(x=>go.appendChild(li(String(x))));
+  $('#sumBox').classList.remove('hide');
+}
+
+/* ----------- render pipeline ----------- */
+async function renderAll(data){
+  fillMeta(data);
+  setBars(data);
+  setConsistency(data);
+  setCoachingCard(data);
+  renderPGrid(data);
+  setPracticePlan(data);
+  await setSummary(data);
+  setNote(data);
+}
+
+/* ----------- boot ----------- */
 (async ()=>{
   try{
     let url = null;
     if (directUrl) url = directUrl;
     else if (rid)   url = blobFromId(rid);
     else {
-      const raw = sessionStorage.getItem("vc_report") || localStorage.getItem("vc_last_report");
-      if (!raw) throw new Error("Missing ?url or ?id. Open from Upload or Reports.");
-      const data = JSON.parse(raw.trim().replace(/^\uFEFF/,""));
-      fillMeta(data); setPower(data); setConsistency(data); renderP(data); setPlan(data); setSummary(data);
-      return;
+      const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
+      if (!raw) throw new Error('Missing ?url or ?id. Use upload flow or reports page.');
+      renderAll(JSON.parse(raw.trim().replace(/^\uFEFF/, ''))); return;
     }
-    const res = await fetch(url, {cache:"no-store"});
-    if (!res.ok) throw new Error(`Fetch ${res.status} for ${url}`);
-    const txt = await res.text();
-    const data = JSON.parse(txt.trim().replace(/^\uFEFF/,""));
-    fillMeta(data); setPower(data); setConsistency(data); renderP(data); setPlan(data); setSummary(data);
-  } catch(err){
-    alert(err?.message || String(err));
-  }
+    const data = await fetchJson(url);
+    renderAll(data);
+  }catch(err){ showErr(err?.message || String(err)); }
 })();
 </script>
 </body>
