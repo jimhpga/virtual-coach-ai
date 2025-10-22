@@ -3,87 +3,47 @@ export const config = { runtime: 'nodejs' };
 
 import OpenAI from 'openai';
 
-/**
- * Expected POST body:
- * {
- *   report: { ...existing report json... },   // required-ish
- *   level: "beginner" | "intermediate" | "advanced",  // optional
- *   focusAreas: ["swing_plane","hand_path", ...],      // optional []
- *   save: false                                      // optional (unused here)
- * }
- */
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
     const body =
       typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
     const report = body.report || {};
-    const level = (body.level || report?.meta?.level || 'intermediate')
-      .toString()
-      .toLowerCase();
+    const level = (body.level || report?.meta?.level || 'intermediate').toString().toLowerCase();
     const focusAreas = Array.isArray(body.focusAreas) ? body.focusAreas : [];
 
-    // ---------- If no API key, return a deterministic "sample" ------------
     if (!process.env.OPENAI_API_KEY) {
-      return res.status(200).json(buildFallback(report, level, focusAreas));
+      const fb = buildFallback(report, level, focusAreas);
+      fb.aiEnhanced = true; // <— add this
+      return res.status(200).json(fb);
     }
 
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
     const system = [
       'You are Virtual Coach AI, a tour-level instructor.',
-      'Blend insights from Jim Hartnett, Jim McLean, Butch Harmon, Dr. Kwon, and Dave Tutelman.',
-      'Write in the style that matches the golfer level: beginner = very plain, intermediate = practical coaching with light biomechanics, advanced = technical/biomechanics forward.',
-      'Always personalize. Use the existing report fields when present (power tempo release, notes, name, height, handed, p1p9 array).',
-      'Focus on actionable tips; tie suggestions to the chosen focus areas if provided.',
-      'Return **only** valid JSON matching the schema specified in the user message.',
+      'Blend insights from Jim Hartnett, Jim McLean, Butch Harmon, Dr. Kwon, Dave Tutelman.',
+      'Match tone to golfer level: beginner (plain), intermediate (balanced), advanced (technical).',
+      'Personalize using the provided report JSON (power, notes, p1p9, meta).',
+      'Focus on requested areas when provided.',
+      'Return ONLY valid JSON in the schema requested.'
     ].join(' ');
 
     const schema = `
-Return a single JSON object with this shape:
+Return one JSON object:
 {
-  "topPriorityFixes": [string, string, string],     // 0-3 items
-  "topPowerFixes": [string, string, string],        // 0-3 items
-  "consistency": {
-    "position": { "score": number, "notes": string },
-    "swing": { "score": number, "notes": string }
+  "topPriorityFixes":[string],
+  "topPowerFixes":[string],
+  "consistency":{
+    "position":{"score":number,"notes":string},
+    "swing":{"score":number,"notes":string}
   },
-  "power": {
-    "score": number,            // 0-100
-    "tempo": string,            // e.g. "3:1"
-    "release_timing": number    // 0-100
-  },
-  "p1p9": [
-    {
-      "id": "P1",
-      "name": "Address",
-      "grade": "ok|good|needs help|excellent",
-      "short": "1-2 sentence short label",
-      "long": "3-7 sentence expanded explanation, personalized",
-      "video": "https://youtube.com/... (search hint is fine)"
-    }
-    // ... P2..P9
-  ],
-  "practicePlan": [
-    {
-      "day": 1,
-      "title": "short drill title",
-      "items": ["bullet","bullet"]
-    }
-    // 10-14 days preferred
-  ],
-  "swingSummary": {
-    "whatYouDoWell": [string,string,string],
-    "needsAttention": [string,string,string],
-    "goals": [string,string,string],
-    "paragraph": "1-3 paragraphs summarizing the swing and priorities"
-  },
-  "meta": {
-    "level": "beginner|intermediate|advanced"       // echo what you used
-  }
+  "power":{"score":number,"tempo":string,"release_timing":number},
+  "p1p9":[{"id":"P1","name":"Address","grade":"ok|good|needs help|excellent","short":"...", "long":"...", "video":"https://..."}],
+  "practicePlan":[{"day":1,"title":"...","items":["..."]}],
+  "swingSummary":{"whatYouDoWell":[string],"needsAttention":[string],"goals":[string],"paragraph":"..."},
+  "meta":{"level":"beginner|intermediate|advanced"}
 }
 `;
 
@@ -93,16 +53,11 @@ Return a single JSON object with this shape:
         {
           type: 'text',
           text: [
-            'Here is the current report JSON (may be partial). Use it to personalize.',
-            'Then return a fully fleshed-out JSON object in the EXACT schema below.',
-            '',
-            `Golfer level to use: ${level}`,
-            `Focus areas to emphasize (optional): ${focusAreas.join(', ') || 'none supplied'}`,
-            '',
-            '--- CURRENT REPORT JSON START ---',
+            `Level: ${level}`,
+            `Focus areas: ${focusAreas.join(', ') || 'none'}`,
+            'Use report JSON to personalize:',
             JSON.stringify(report, null, 2),
-            '--- CURRENT REPORT JSON END ---',
-            '',
+            'SCHEMA:',
             schema
           ].join('\n')
         }
@@ -113,33 +68,24 @@ Return a single JSON object with this shape:
       model: 'gpt-4o-mini',
       temperature: 0.6,
       response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: system },
-        user
-      ]
+      messages: [{ role: 'system', content: system }, user]
     });
 
-    let json;
-    try {
-      json = JSON.parse(resp.choices?.[0]?.message?.content || '{}');
-    } catch (e) {
-      json = buildFallback(report, level, focusAreas);
-      json._warn = 'LLM JSON parse failed; returned fallback.';
-    }
+    let out;
+    try { out = JSON.parse(resp.choices?.[0]?.message?.content || '{}'); }
+    catch { out = buildFallback(report, level, focusAreas); out._warn = 'LLM JSON parse failed'; }
 
-    // Merge light power defaults if missing
-    if (!json.power) {
-      json.power = {
+    if (!out.power) {
+      out.power = {
         score: Number(report.swingScore ?? 72) || 72,
         tempo: report.power?.tempo || '3:1',
         release_timing: Number(report.power?.release_timing ?? 60) || 60
       };
     }
+    out.meta = { ...(out.meta || {}), level };
+    out.aiEnhanced = true; // <— tell the viewer it’s already enhanced
 
-    // Echo level in meta
-    json.meta = { ...(json.meta || {}), level };
-
-    return res.status(200).json(json);
+    return res.status(200).json(out);
   } catch (e) {
     return res.status(500).json({ error: String(e?.message || e) });
   }
@@ -151,10 +97,9 @@ function buildFallback(report = {}, level = 'intermediate', focusAreas = []) {
     : level === 'advanced'
     ? 'More technical language and biomechanical detail.'
     : 'Balanced coaching with light biomechanics.';
+  const focus = focusAreas.length ? `Focus areas: ${focusAreas.join(', ')}.` : 'No specific focus areas.';
 
-  const focus = focusAreas.length ? `Focus areas requested: ${focusAreas.join(', ')}.` : 'No specific focus areas provided.';
-
-  return {
+  const fb = {
     topPriorityFixes: [
       'Check alignment and ball position at setup.',
       'Keep lead wrist flatter at P3–P4.',
@@ -162,12 +107,12 @@ function buildFallback(report = {}, level = 'intermediate', focusAreas = []) {
     ],
     topPowerFixes: [
       'Add lead-leg braking at transition.',
-      'Push vertical force windows (light→medium→full).',
-      'Stabilize trail foot pressure longer in backswing.'
+      'Push vertical force windows.',
+      'Stabilize trail-foot pressure longer in backswing.'
     ],
     consistency: {
       position: { score: 72, notes: 'Setup repeatable; small drift late.' },
-      swing: { score: 70, notes: 'Sequence mostly holds; timing slips under max effort.' }
+      swing: { score: 70, notes: 'Sequence holds; timing slips under max effort.' }
     },
     power: {
       score: Number(report.swingScore ?? 78),
@@ -187,10 +132,10 @@ function buildFallback(report = {}, level = 'intermediate', focusAreas = []) {
     ],
     practicePlan: Array.from({ length: 14 }).map((_, i) => ({
       day: i + 1,
-      title: i % 2 ? 'Tempo window + align start line' : 'Mirror P1–P2 + wrist set control',
+      title: i % 2 ? 'Tempo window + start line' : 'Mirror P1–P2 + wrist set control',
       items: i % 2
-        ? ['Metronome 3:1 for 5 min', 'Start-line stick—10 balls']
-        : ['Mirror checkpoint P1–P2 (10m)', 'Set by P2.5; 15 reps']
+        ? ['Metronome 3:1 for 5 min', 'Start-line stick — 10 balls']
+        : ['Mirror checkpoint P1–P2 (10m)', 'Set by P2.5 — 15 reps']
     })),
     swingSummary: {
       whatYouDoWell: [
@@ -199,25 +144,21 @@ function buildFallback(report = {}, level = 'intermediate', focusAreas = []) {
         'Balanced finish indicates efficient energy use.'
       ],
       needsAttention: [
-        'Trail elbow orientation at P4 for shallowing later.',
+        'Trail-elbow orientation at P4 for shallowing later.',
         'Face-to-path match between P5–P6 under speed.',
-        'Lead wrist structure—avoid late flip.'
+        'Lead-wrist structure — avoid late flip.'
       ],
       goals: [
         'Sharpen delivery windows (face & start-line).',
         'Increase lead-leg braking at transition.',
         'Build tolerance for speed without timing loss.'
       ],
-      paragraph: [
-        lvlNote,
-        focus,
-        'Overall you’re strong from P1 to P3, store energy well to P4, and deliver with good structure. The main gains lie in improving trail-elbow orientation at the top and stabilizing face-to-path at P6 under speed. Use the 14-day plan to reinforce setup precision, then add speed windows and lead-leg braking for a clean, powerful release.'
-      ].join(' ')
+      paragraph: [lvlNote, focus, 'Overall you’re strong from P1 to P3, store energy well to P4, and deliver with good structure. The main gains lie in improving trail-elbow orientation at the top and stabilizing face-to-path at P6 under speed. Use the 14-day plan to reinforce setup precision, then add speed windows and lead-leg braking for a clean, powerful release.'].join(' ')
     },
-    meta: { level }
+    meta: { level },
+    aiEnhanced: true
   };
+  return fb;
 }
 
-function yt(query) {
-  return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-}
+function yt(q){ return `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`; }
