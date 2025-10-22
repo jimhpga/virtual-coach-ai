@@ -6,51 +6,34 @@
 <title>Virtual Coach AI — Swing Report</title>
 <link rel="stylesheet" href="/styles.css" />
 <style>
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
-  .pill { background:#0f1b22;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:700 }
-  .meta-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center }
-  .card h3 { margin: 0 0 10px; }
-  .muted { color: var(--muted); }
-  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
-  .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
-  .bar { height:8px; border-radius:999px; background:#0f1b22; border:1px solid var(--line); overflow:hidden; }
-  .bar > i { display:block; height:100%; width:0%; background:var(--accent, #4ad0ff); transition: width .5s ease; }
-  .section-title { display:flex; align-items:center; justify-content:space-between; margin:0 0 8px; }
-  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; }
-  .pill-tiny { font-size: 12px; padding: 3px 8px; border-radius: 999px; border:1px solid var(--line); background:#0f1b22 }
-  .pgrid { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .p-card { background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:14px; padding:10px 12px;
-            box-shadow:0 6px 14px rgba(0,0,0,.25); }
-  .p-card h4 { margin:0 0 6px; font-size:15px }
-  .p-card .short { color:var(--muted); margin:6px 0 6px }
-  .p-card .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px }
-  .btn-sm { border:1px solid var(--line); padding:6px 10px; border-radius:8px; background:#0f1b22; color:#fff; text-decoration:none; cursor:pointer }
-  .btn-sm:hover { background:#122734 }
-  details.p1long summary { cursor:pointer; list-style:none; display:flex; align-items:center; gap:6px; }
-  details.p1long summary::-webkit-details-marker{ display:none }
-  .caret { display:inline-block; transform: rotate(0deg); transition: transform .2s ease; }
-  details[open] .caret { transform: rotate(90deg); }
-  .list-tight > div { margin:6px 0; }
-  .list-dot { padding-left:18px }
-  .list-dot li { margin:4px 0 }
-  .accordion { border:1px solid var(--line); border-radius:14px; overflow:hidden }
-  .ac-head { background:rgba(255,255,255,.03); padding:10px 12px; display:flex; align-items:center; justify-content:space-between; cursor:pointer }
-  .ac-body { padding:12px; display:none }
-  .ac-open .ac-body { display:block }
-  .ac-open .caret { transform: rotate(90deg); }
-  .hide { display:none !important; }
-  .infobox { font-size:12px; color:var(--muted) }
-  .kpi { display:flex; align-items:center; gap:8px; }
-  .kpi .num { font-weight:700; }
-  .seg { display:flex; align-items:center; gap:.5rem; }
-  .seg button { border:1px solid var(--line); background:#0f1b22; color:#fff; padding:6px 10px; border-radius:999px; cursor:pointer }
-  .seg button[aria-pressed="true"] { background:#163243; font-weight:700; }
-  .p-card p { margin: 0 0 6px; line-height:1.35 }
-  @media (max-width: 900px) {
-    .grid3 { grid-template-columns: 1fr; }
-    .grid2 { grid-template-columns: 1fr; }
-    .pgrid { grid-template-columns: 1fr; }
+  :root{
+    --pill:#0f1b22; --glass: rgba(255,255,255,.06); --glass2: rgba(255,255,255,.03);
   }
+  .wrap{max-width:1140px;margin:0 auto;padding:20px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .pill{background:var(--pill);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-weight:700}
+  .card{background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 10px 22px rgba(0,0,0,.22)}
+  .grid3{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .bar{height:10px;background:#0f1b22;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+  .bar>i{display:block;height:100%;background:#24c1ff;width:0}
+  .muted{color:var(--muted)}
+  .h2{margin:18px 0 8px;font-size:22px;font-weight:800}
+  .h3{margin:0 0 8px;font-weight:800}
+  .small{font-size:12px}
+  .btn{border:1px solid var(--line);background:#0f1b22;color:#fff;padding:8px 12px;border-radius:10px;cursor:pointer}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  select, textarea{background:var(--glass2);border:1px solid var(--line);color:#fff;border-radius:10px;padding:8px}
+  textarea{width:100%;min-height:90px}
+  details.p{background:var(--glass2);border:1px solid var(--line);border-radius:12px;padding:10px}
+  details.p summary{cursor:pointer;list-style:none;font-weight:700}
+  .p-card{border:1px solid var(--line);border-radius:12px;background:var(--glass2);padding:10px}
+  .yt{display:inline-block;margin-left:8px}
+  .list>li{margin:4px 0}
+  .tag{border:1px solid var(--line);border-radius:999px;padding:4px 8px;font-size:12px}
+  .stackP .p-col{display:block}
+  .stackP .p-col .p-card{margin-bottom:10px}
+  @media(max-width:1000px){.grid3{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -71,446 +54,358 @@
 </header>
 
 <div class="scrim">
-  <main class="wrap" id="app">
-    <div class="meta-row" style="justify-content:space-between; margin-bottom:6px">
-      <h1 style="margin:0">Swing Report — P1–P9</h1>
-      <!-- Level Switcher -->
-      <div class="seg" aria-label="Experience level">
-        <span class="muted">Level:</span>
-        <button id="lvlBeg" type="button" aria-pressed="false">Beginner</button>
-        <button id="lvlInt" type="button" aria-pressed="true">Intermediate</button>
-        <button id="lvlAdv" type="button" aria-pressed="false">Advanced</button>
-      </div>
-    </div>
-    <div class="meta-row muted" id="metaRow"></div>
+  <main class="wrap">
+    <h1 style="margin:0 0 8px">Swing Report — P1–P9</h1>
+    <div id="meta" class="row muted"></div>
 
-    <!-- SUMMARY STRIP -->
+    <!-- AI PERSONALIZER -->
+    <section class="card" style="margin-top:12px">
+      <div class="row" style="align-items:flex-end">
+        <div>
+          <div class="small muted">Golfer level</div>
+          <select id="level">
+            <option value="beginner">Beginner (plain language)</option>
+            <option value="intermediate" selected>Intermediate (balanced)</option>
+            <option value="advanced">Advanced (technical)</option>
+          </select>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <div class="small muted">What do you want to work on? (multi-select)</div>
+          <select id="focus" multiple size="5" style="width:100%">
+            <option value="swing_plane">Swing plane</option>
+            <option value="hand_path">Hand path</option>
+            <option value="clubface_control">Clubface control</option>
+            <option value="tempo">Tempo</option>
+            <option value="ground_forces">Ground forces</option>
+            <option value="wrist_angles">Wrist angles</option>
+            <option value="release_timing">Release timing</option>
+            <option value="start_line">Start line</option>
+            <option value="low_point">Low point</option>
+          </select>
+        </div>
+        <div>
+          <button id="btnGen" class="btn">Generate with AI</button>
+        </div>
+        <div class="muted small" id="aiMsg"></div>
+      </div>
+    </section>
+
+    <!-- TOP STRIP -->
     <section class="grid3" style="margin-top:14px">
       <div class="card">
-        <div class="section-title"><h3>Coaching Card</h3></div>
+        <div class="h3">Coaching Card</div>
         <div class="grid2">
           <div>
-            <div class="muted" style="font-weight:700; margin-bottom:6px">Top 3 Priority Fixes</div>
-            <div id="topPriority" class="list-tight"></div>
+            <div class="small muted">Top 3 Priority Fixes</div>
+            <ul id="prio" class="list"></ul>
           </div>
           <div>
-            <div class="muted" style="font-weight:700; margin-bottom:6px">Top 3 Power Fixes</div>
-            <div id="topPower" class="list-tight"></div>
+            <div class="small muted">Top 3 Power Fixes</div>
+            <ul id="pfix" class="list"></ul>
           </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="section-title"><h3>Power Score Summary</h3></div>
-        <div class="list-tight">
-          <div>
-            <div class="muted">Power Score</div>
-            <div class="bar"><i id="barScore"></i></div>
-            <div class="mono" id="txtScore"></div>
-          </div>
-          <div>
-            <div class="muted">Tempo</div>
-            <div class="mono" id="txtTempo">—</div>
-          </div>
-          <div>
-            <div class="muted">Release Timing</div>
-            <div class="bar"><i id="barRelease"></i></div>
-            <div class="mono" id="txtRelease"></div>
-          </div>
-        </div>
+        <div class="h3">Power Score Summary</div>
+        <div class="small muted">Power Score</div>
+        <div class="bar"><i id="bScore"></i></div>
+        <div id="tScore" class="small"></div>
+        <div class="small muted" style="margin-top:6px">Tempo</div>
+        <div id="tTempo" class="small">—</div>
+        <div class="small muted" style="margin-top:6px">Release Timing</div>
+        <div class="bar"><i id="bRel"></i></div>
+        <div id="tRel" class="small"></div>
       </div>
 
       <div class="card">
-        <div class="section-title"><h3>Consistency</h3></div>
+        <div class="h3">Consistency</div>
         <div class="grid2">
           <div>
-            <div class="muted" style="font-weight:700; margin-bottom:6px">Position Consistency</div>
-            <div class="kpi"><span id="posPct" class="num">—</span><span id="posNote" class="muted"> </span></div>
+            <div class="small muted">Position Consistency</div>
+            <div class="row">
+              <span id="posScore" class="tag">—</span>
+            </div>
+            <div id="posNotes" class="small muted" style="margin-top:6px">—</div>
           </div>
           <div>
-            <div class="muted" style="font-weight:700; margin-bottom:6px">Swing Consistency</div>
-            <div class="kpi"><span id="swingPct" class="num">—</span><span id="swingNote" class="muted"> </span></div>
+            <div class="small muted">Swing Consistency</div>
+            <div class="row">
+              <span id="swingScore" class="tag">—</span>
+            </div>
+            <div id="swingNotes" class="small muted" style="margin-top:6px">—</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- PRACTICE PLAN ACCORDION -->
-    <section style="margin-top:14px">
-      <div class="accordion" id="planAcc">
-        <div class="ac-head" role="button" tabindex="0">
-          <div style="display:flex; gap:10px; align-items:center">
-            <span class="caret">▶</span>
-            <h3 style="margin:0">Practice Plan (optional)</h3>
-          </div>
-          <span class="pill-tiny" id="planCount">0 items</span>
-        </div>
-        <div class="ac-body">
-          <div id="planList" class="list-dot"></div>
-        </div>
-      </div>
+    <!-- PRACTICE PLAN -->
+    <section class="card" style="margin-top:14px">
+      <details id="planDetails" open>
+        <summary class="h3">Practice Plan (14 days)</summary>
+        <ul id="plan" class="list"></ul>
+      </details>
     </section>
 
     <!-- P1–P9 -->
     <section style="margin-top:14px">
-      <h2 style="margin:0 0 8px">P1–P9</h2>
-      <div class="pgrid" id="pGrid"></div>
-      <div class="infobox" id="pGridEmpty" style="margin-top:8px"></div>
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div class="h2" style="margin:0">P1–P9</div>
+        <div class="row small muted">
+          <label><input type="checkbox" id="stackChk"> Stack vertically</label>
+        </div>
+      </div>
+      <div id="pWrap" class="grid2" style="margin-top:8px"></div>
+      <div id="pEmpty" class="muted small" style="margin-top:6px"></div>
     </section>
 
     <!-- SUMMARY -->
-    <section id="sumBox" class="card hide" style="margin-top:14px">
-      <h3 style="margin:0 0 8px">Swing Summary</h3>
-      <p id="sumPara" class="muted"></p>
+    <section class="card" style="margin-top:14px">
+      <div class="h3">Swing Summary</div>
+      <div id="sumParagraph" class="small" style="margin:8px 0 10px"></div>
       <div class="grid3">
         <div>
-          <div class="muted" style="font-weight:700; margin-bottom:6px">What’s working</div>
-          <ul id="sumGood" class="list-dot"></ul>
+          <div class="small muted">What you do well</div>
+          <ul id="sumGood" class="list"></ul>
         </div>
         <div>
-          <div class="muted" style="font-weight:700; margin-bottom:6px">Needs attention</div>
-          <ul id="sumBad" class="list-dot"></ul>
+          <div class="small muted">Needs attention</div>
+          <ul id="sumNeed" class="list"></ul>
         </div>
         <div>
-          <div class="muted" style="font-weight:700; margin-bottom:6px">Goals</div>
-          <ul id="sumGoals" class="list-dot"></ul>
+          <div class="small muted">Goals</div>
+          <ul id="sumGoals" class="list"></ul>
         </div>
       </div>
     </section>
 
-    <!-- Note -->
-    <section id="noteBox" class="card hide" style="margin-top:14px">
-      <h3 style="margin:0 0 8px">Note</h3>
-      <div id="noteTxt" class="muted"></div>
+    <!-- NOTE -->
+    <section id="noteBox" class="card" style="margin-top:14px;display:none">
+      <div class="h3">Note</div>
+      <div id="note" class="small muted"></div>
     </section>
   </main>
 </div>
 
 <script>
-/* ---------- tone helpers ---------- */
-const LEVELS = ['beginner','intermediate','advanced'];
-function normalizeLevel(v){
-  v = String(v||'').toLowerCase();
-  if (LEVELS.includes(v)) return v;
-  return 'intermediate';
-}
-function getSavedLevel(){
+  const $ = s => document.querySelector(s);
   const qp = new URLSearchParams(location.search);
-  const urlLv = qp.get('level');
-  const saved = sessionStorage.getItem('vc_level');
-  return normalizeLevel(urlLv || saved);
-}
-function setSavedLevel(lv){ sessionStorage.setItem('vc_level', normalizeLevel(lv)); }
-function setLevelButtons(lv){
-  const map = { beginner:'#lvlBeg', intermediate:'#lvlInt', advanced:'#lvlAdv' };
-  LEVELS.forEach(k=>{
-    const b = document.querySelector(map[k]);
-    b.setAttribute('aria-pressed', String(k===lv));
-  });
-}
+  const rid = qp.get('id');
+  const directUrl = qp.get('url');
+  const BLOB = "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com";
 
-/* wording adapter (light touch) */
-function adaptText(txt, level){
-  if (!txt) return '';
-  txt = String(txt);
-
-  if (level === 'beginner'){
-    // simpler words
-    const repl = [
-      [/kinematic/gi,'sequence'],
-      [/ground forces?/gi,'leg push'],
-      [/braking/gi,'stopping'],
-      [/internal rotation/gi,'turn'],
-      [/lag/gi,'angle'],
-      [/release timing/gi,'club release'],
-      [/trail/gi,'back'],
-      [/lead/gi,'front']
-    ];
-    repl.forEach(([a,b])=>txt=txt.replace(a,b));
-    // shorter sentences
-    if (txt.length > 160) txt = txt.split(/[.]/).slice(0,2).join('. ').trim()+'.';
-    return txt;
+  function urlForId(id){
+    return BLOB.replace(/\/+$/,'') + "/reports/" + encodeURIComponent(id) + ".json?cb=" + Date.now();
   }
 
-  if (level === 'advanced'){
-    // allow concise/technical; add one cue if short
-    if (txt.length < 70) txt += ' (maintain kinematic flow and GRF timing).';
-    return txt;
+  async function fetchJson(u){
+    const r = await fetch(u, { cache: 'no-store' });
+    if(!r.ok) throw new Error("Fetch " + r.status);
+    const t = await r.text();
+    return JSON.parse(t.trim().replace(/^\\uFEFF/, ''));
   }
 
-  // intermediate: small nudge
-  return txt;
-}
+  function bar(i, pct){ i.style.width = Math.max(0, Math.min(100, +pct||0)) + "%"; }
 
-/* ----------- CONFIG ----------- */
-window.BLOB_PUBLIC_BASE =
-  window.BLOB_PUBLIC_BASE || "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com";
-
-/* ----------- helpers ----------- */
-const $ = s => document.querySelector(s);
-const qp = new URLSearchParams(location.search);
-const rid = qp.get('id');
-const directUrl = qp.get('url');
-const blobFromId = id =>
-  `${window.BLOB_PUBLIC_BASE.replace(/\/+$/,'')}/reports/${encodeURIComponent(id)}.json?cb=${Date.now()}`;
-
-function showErr(msg){ alert(msg); }
-async function fetchJson(url){
-  const res = await fetch(url, {cache:'no-store'});
-  if(!res.ok) throw new Error(`Fetch ${res.status} for ${url}`);
-  const txt = await res.text();
-  return JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
-}
-function pct(n){ if(n == null || isNaN(n)) return 0; return Math.max(0, Math.min(100, Number(n))); }
-
-/* ----------- UI ----------- */
-function fillMeta(data){
-  const row = $('#metaRow'); row.innerHTML = '';
-  const pills = [
-    ['Score', (data.swingScore ?? data.score ?? '—')],
-    ['Status', (data.status ?? '—')],
-    ['Tempo', (data.power?.tempo ?? '—')],
-    ['Release', (data.power?.release_timing != null ? (data.power.release_timing + '%') : '—')],
-  ];
-  pills.forEach(([k,v])=>{
-    const s = document.createElement('span'); s.className='pill'; s.textContent = `${k}: ${v}`; row.appendChild(s);
-  });
-  const created = document.createElement('span');
-  created.className = 'muted'; created.style.marginLeft='8px';
-  created.textContent = `Created: ${new Date().toLocaleString()}`;
-  row.appendChild(created);
-}
-function setBars(data){
-  const score = pct(data.power?.score ?? data.swingScore ?? 0);
-  $('#barScore').style.width = score + '%';
-  $('#txtScore').textContent = `${score}%`;
-  const rel = pct(data.power?.release_timing ?? 0);
-  $('#barRelease').style.width = rel + '%';
-  $('#txtRelease').textContent = `${rel}%`;
-  $('#txtTempo').textContent = data.power?.tempo ?? '—';
-}
-function setConsistency(data){
-  const ps = Number(data.positionConsistency?.score ?? data.position_consistency?.score ?? NaN);
-  const pn = data.positionConsistency?.notes ?? data.position_consistency?.notes ?? '';
-  const ss = Number(data.swingConsistency?.score ?? data.swing_consistency?.score ?? NaN);
-  const sn = data.swingConsistency?.notes ?? data.swing_consistency?.notes ?? '';
-  $('#posPct').textContent = isNaN(ps) ? '—' : `${ps}%`;
-  $('#swingPct').textContent = isNaN(ss) ? '—' : `${ss}%`;
-  $('#posNote').textContent = pn || ' ';
-  $('#swingNote').textContent = sn || ' ';
-}
-function li(txt){ const li = document.createElement('li'); li.textContent = txt; return li; }
-function setCoachingCard(data){
-  const pri = (data.topPriorityFixes || data.top_priority_fixes || []).slice(0,3);
-  const pow = (data.topPowerFixes || data.top_power_fixes || []).slice(0,3);
-  const priBox = $('#topPriority'); const powBox = $('#topPower');
-  priBox.innerHTML=''; powBox.innerHTML='';
-  (pri.length ? pri : ['—']).forEach(x => priBox.appendChild(li(String(x))));
-  (pow.length ? pow : ['—']).forEach(x => powBox.appendChild(li(String(x))));
-}
-function youtubeLink(name){
-  const q = encodeURIComponent(`${name} golf checkpoint`);
-  return `https://www.youtube.com/results?search_query=${q}`;
-}
-function renderPGrid(data, level){
-  const list = Array.isArray(data.p1p9 || data.phases) ? (data.p1p9 || data.phases) : [];
-  const grid = $('#pGrid'); grid.innerHTML = '';
-  const empty = $('#pGridEmpty'); empty.textContent='';
-
-  if(!list.length){ empty.textContent = 'No P1–P9 items in this report.'; return; }
-
-  list.forEach((p,i)=>{
-    const name = p.name || p.title || `P${i+1}`;
-    const idTxt = p.id || `P${i+1}`;
-    const grade = (p.grade || '').toString();
-    const short = adaptText(p.short || p.note || '—', level);
-    const long  = adaptText(p.long  || p.details || '', level);
-    const video = p.video || youtubeLink(name);
-
-    const card = document.createElement('div');
-    card.className='p-card';
-
-    // header: title + grade pill
-    const head = document.createElement('div');
-    head.style.display='flex'; head.style.justifyContent='space-between'; head.style.alignItems='center'; head.style.gap='8px';
-    const h4 = document.createElement('h4'); h4.textContent = `${idTxt}. ${name}`;
-    const g = document.createElement('span'); g.className='pill-tiny'; g.textContent = grade ? `grade: ${grade}` : 'grade: —';
-    head.appendChild(h4); head.appendChild(g); card.appendChild(head);
-
-    // watch button below grade
-    const btnRow = document.createElement('div'); btnRow.className='row';
-    const aWatch = document.createElement('a'); aWatch.className='btn-sm'; aWatch.target='_blank'; aWatch.href=video; aWatch.textContent='Watch';
-    btnRow.appendChild(aWatch); card.appendChild(btnRow);
-
-    const s = document.createElement('p'); s.className='short'; s.textContent = short; card.appendChild(s);
-
-    if(long){
-      const det = document.createElement('details'); det.className='p1long';
-      const sum = document.createElement('summary'); sum.innerHTML = `<span class="caret">▶</span><span> Details</span>`;
-      const body = document.createElement('div'); body.style.marginTop='6px'; body.textContent = long;
-      det.appendChild(sum); det.appendChild(body); card.appendChild(det);
-    }
-    grid.appendChild(card);
-  });
-}
-function setPracticePlan(data){
-  const list = data.practicePlan || data.practice_plan || [];
-  const root = $('#planAcc'); const count = $('#planCount'); const out  = $('#planList');
-  out.innerHTML=''; count.textContent = `${list.length} items`;
-  if(!list.length) { out.innerHTML = '<div class="infobox">No plan found.</div>'; }
-  else {
-    const ul = document.createElement('ul'); ul.className='list-dot';
-    list.forEach(it=>{
+  function list(el, arr){
+    el.innerHTML = "";
+    (arr||[]).forEach(s=>{
       const li = document.createElement('li');
-      const d = it.day != null ? `Day ${it.day}: ` : '';
-      const title = it.title || it.name || '';
-      const items = Array.isArray(it.items) ? ` — ${it.items.join('; ')}` : '';
-      li.textContent = `${d}${title}${items}`; ul.appendChild(li);
-    }); out.appendChild(ul);
-  }
-  const head = root.querySelector('.ac-head');
-  head.onclick = () => root.classList.toggle('ac-open');
-  head.onkeydown = (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); root.classList.toggle('ac-open'); }};
-}
-function setNote(data){
-  const n = (data.note || '').trim();
-  if(!n){ $('#noteBox').classList.add('hide'); return; }
-  $('#noteTxt').textContent = n; $('#noteBox').classList.remove('hide');
-}
-
-/* ----------- Summary (AI + heuristic) ----------- */
-function heuristicSummary(data, level){
-  const phases = (data.p1p9 || data.phases || []).map(p => ({ id:(p.id||''), grade:(p.grade||'').toLowerCase() }));
-  const worstI = phases.reduce((a,p,i)=>{
-    const score = /bad|poor|needs|weak/.test(p.grade) ? 0 : /ok|fair/.test(p.grade) ? 1 : /good|great|excellent/.test(p.grade) ? 2 : 1;
-    return (score < a.score) ? {i,score} : a;
-  }, {i:-1,score:3}).i;
-
-  let para = "Solid fundamentals with clear sequencing. ";
-  if (worstI >= 0) {
-    const tag = (phases[worstI].id || `P${worstI+1}`).toUpperCase();
-    para += `Strong through earlier phases; breakdown begins around ${tag}. Focus there to stabilize delivery and finish. `;
-  }
-  const posS = Number(data.positionConsistency?.score ?? data.position_consistency?.score ?? NaN);
-  const swS  = Number(data.swingConsistency?.score ?? data.swing_consistency?.score ?? NaN);
-  if (!isNaN(posS) || !isNaN(swS)) {
-    para += `Consistency: position ${isNaN(posS)?'—':posS+'%'}, swing ${isNaN(swS)?'—':swS+'%'}.`;
-  }
-
-  const good = [];
-  const bad = [];
-  const goals = [];
-
-  if ((data.power?.tempo || '').includes('3:1')) good.push("Tempo 3:1 baseline is present");
-  if ((data.power?.release_timing ?? 0) >= 60) good.push("Release timing trending positive");
-  good.push("Balanced finish and clean sequencing (ground-up)");
-
-  if (worstI >= 0) {
-    const tag = (phases[worstI].id || `P${worstI+1}`).toUpperCase();
-    bad.push(`${tag} requires attention; maintain structure and face control through delivery`);
-    goals.push(`Stabilize ${tag} with 10 slow-motion reps before full swings`);
-  } else {
-    goals.push("Hold finish for 2–3 seconds to reinforce balance and face control");
-  }
-  goals.push("Add lead-leg braking drills to spike ground force at transition");
-
-  // adapt to tone
-  const tone = {
-    beginner: {
-      para: adaptText(para,'beginner'),
-      good: good.map(x=>adaptText(x,'beginner')),
-      bad: bad.map(x=>adaptText(x,'beginner')),
-      goals: goals.map(x=>adaptText(x,'beginner'))
-    },
-    intermediate: { para, good, bad, goals },
-    advanced: {
-      para: adaptText(para,'advanced'),
-      good: good.map(x=>adaptText(x,'advanced')),
-      bad: bad.map(x=>adaptText(x,'advanced')),
-      goals: goals.map(x=>adaptText(x,'advanced'))
-    }
-  };
-  return tone[level] || tone.intermediate;
-}
-
-async function aiSummary(report, level, ms=4500){
-  const ctl = new AbortController();
-  const to = setTimeout(()=>ctl.abort(), ms);
-  try{
-    const r = await fetch('/api/generate-report-llm', {
-      method:'POST',
-      headers:{'content-type':'application/json'},
-      body: JSON.stringify({ report, ask: 'summary', level }),
-      signal: ctl.signal
+      li.textContent = s;
+      el.appendChild(li);
     });
-    clearTimeout(to);
-    if (!r.ok) throw new Error('llm bad');
-    const j = await r.json();
-    if (j?.swingSummary?.paragraph) return j.swingSummary;
-    return null;
-  }catch(_){ clearTimeout(to); return null; }
-}
+    if(!el.children.length) el.innerHTML = '<li class="muted">—</li>';
+  }
 
-async function setSummary(data, level){
-  let sum = await aiSummary(data, level);
-  if (!sum) sum = data.swingSummary || heuristicSummary(data, level);
-  if (!sum) { $('#sumBox').classList.add('hide'); return; }
+  function metaPills(data){
+    const row = $('#meta'); row.innerHTML = '';
+    [
+      ['Score', data.swingScore ?? data.power?.score ?? '—'],
+      ['Status', data.status ?? 'ready'],
+      ['Tempo', data.power?.tempo ?? '—'],
+      ['Release', (data.power?.release_timing ?? '—') + (data.power?.release_timing != null ? '%' : '')],
+      ['Created', new Date().toLocaleString()]
+    ].forEach(([k,v])=>{
+      const s = document.createElement('span');
+      s.className = 'pill';
+      s.textContent = k + ': ' + v;
+      row.appendChild(s);
+    });
+  }
 
-  $('#sumPara').textContent = sum.paragraph || '';
-  const g = $('#sumGood'), b = $('#sumBad'), go = $('#sumGoals');
-  g.innerHTML=''; b.innerHTML=''; go.innerHTML='';
-  (sum.good||[]).forEach(x=>g.appendChild(li(String(x))));
-  (sum.bad||[]).forEach(x=>b.appendChild(li(String(x))));
-  (sum.goals||[]).forEach(x=>go.appendChild(li(String(x))));
-  $('#sumBox').classList.remove('hide');
-}
+  function renderTop(data){
+    // Coaching card
+    list($('#prio'), data.topPriorityFixes || data.top_priority_fixes);
+    list($('#pfix'), data.topPowerFixes || data.top_power_fixes);
 
-/* ----------- render pipeline ----------- */
-let CURRENT_LEVEL = getSavedLevel();
-function getReportLevelFallback(data){
-  return normalizeLevel(data?.meta?.level || CURRENT_LEVEL);
-}
-async function renderAll(data){
-  const level = getReportLevelFallback(data);
-  CURRENT_LEVEL = level; setSavedLevel(level); setLevelButtons(level);
+    // Power
+    const score = data.power?.score ?? data.swingScore ?? 0;
+    bar($('#bScore'), score);
+    $('#tScore').textContent = score + '%';
 
-  fillMeta(data);
-  setBars(data);
-  setConsistency(data);
-  setCoachingCard(data);
-  renderPGrid(data, level);
-  setPracticePlan(data);
-  await setSummary(data, level);
-  setNote(data);
-}
+    const rel = data.power?.release_timing ?? 0;
+    bar($('#bRel'), rel);
+    $('#tRel').textContent = rel + '%';
 
-/* ----------- boot ----------- */
-let REPORT_DATA = null;
-(async ()=>{
-  try{
-    let url = null;
-    if (directUrl) url = directUrl;
-    else if (rid)   url = blobFromId(rid);
-    else {
-      const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
-      if (!raw) throw new Error('Missing ?url or ?id. Use upload flow or reports page.');
-      REPORT_DATA = JSON.parse(raw.trim().replace(/^\uFEFF/, ''));
-      await renderAll(REPORT_DATA);
-      return;
+    $('#tTempo').textContent = data.power?.tempo ?? '—';
+
+    // Consistency
+    $('#posScore').textContent = (data.consistency?.position?.score ?? '—') + (data.consistency?.position?.score != null ? '%' : '');
+    $('#posNotes').textContent = data.consistency?.position?.notes ?? '—';
+
+    $('#swingScore').textContent = (data.consistency?.swing?.score ?? '—') + (data.consistency?.swing?.score != null ? '%' : '');
+    $('#swingNotes').textContent = data.consistency?.swing?.notes ?? '—';
+  }
+
+  function youtubeLink(q){ return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q); }
+
+  function renderP1P9(data){
+    const list = Array.isArray(data.p1p9) ? data.p1p9 : [];
+    const wrap = $('#pWrap'); wrap.innerHTML=""; $('#pEmpty').textContent = '';
+    if(!list.length){ $('#pEmpty').textContent = 'No P1–P9 items in this report.'; return; }
+
+    // two columns by default
+    const left = document.createElement('div'); left.className='p-col';
+    const right = document.createElement('div'); right.className='p-col';
+
+    list.forEach((p, idx)=>{
+      const card = document.createElement('div');
+      card.className = 'p-card';
+      const h = document.createElement('div');
+      h.innerHTML = '<span class="tag">'+(p.id || 'P?')+'</span> <b>'+ (p.name || '') +'</b> <span class="tag" style="margin-left:8px">grade: '+(p.grade || '—')+'</span>';
+      card.appendChild(h);
+
+      const s = document.createElement('div');
+      s.className='small muted';
+      s.style.margin='6px 0';
+      s.textContent = p.short || '—';
+      card.appendChild(s);
+
+      const det = document.createElement('details');
+      det.className='p';
+      const sum = document.createElement('summary');
+      sum.textContent = 'Details';
+      det.appendChild(sum);
+
+      const body = document.createElement('div');
+      body.className='small';
+      body.style.marginTop='8px';
+      body.textContent = p.long || '—';
+      det.appendChild(body);
+
+      // watch button under grade
+      const row = document.createElement('div'); row.className='row small';
+      const a = document.createElement('a');
+      a.className='btn';
+      a.textContent='Watch';
+      a.target='_blank';
+      a.href = p.video || youtubeLink((p.name||'golf swing checkpoint'));
+      row.appendChild(a);
+      det.appendChild(row);
+
+      card.appendChild(det);
+
+      (idx % 2 === 0 ? left : right).appendChild(card);
+    });
+
+    wrap.appendChild(left);
+    wrap.appendChild(right);
+  }
+
+  function renderPlan(data){
+    const ul = $('#plan'); ul.innerHTML='';
+    (data.practicePlan || data.practice_plan || []).forEach(it=>{
+      const li = document.createElement('li');
+      li.innerHTML = '<b>Day '+ (it.day ?? '?') + ':</b> ' + (it.title || '') +
+        (Array.isArray(it.items) ? ' — ' + it.items.join('; ') : '');
+      ul.appendChild(li);
+    });
+    if(!ul.children.length) ul.innerHTML = '<li class="muted">No plan found.</li>';
+  }
+
+  function renderSummary(data){
+    list($('#sumGood'), data.swingSummary?.whatYouDoWell);
+    list($('#sumNeed'), data.swingSummary?.needsAttention);
+    list($('#sumGoals'), data.swingSummary?.goals);
+    $('#sumParagraph').textContent = data.swingSummary?.paragraph || '—';
+  }
+
+  function showNote(data){
+    const t = (data.note || '').trim();
+    if(!t){ $('#noteBox').style.display='none'; return; }
+    $('#note').textContent = t;
+    $('#noteBox').style.display='block';
+  }
+
+  function applyStack(on){
+    const wrap = $('#pWrap');
+    if(on){ wrap.classList.add('stackP'); wrap.classList.remove('grid2'); }
+    else { wrap.classList.remove('stackP'); wrap.classList.add('grid2'); }
+  }
+
+  function renderAll(d){
+    metaPills(d);
+    renderTop(d);
+    renderPlan(d);
+    renderP1P9(d);
+    renderSummary(d);
+    showNote(d);
+  }
+
+  // -------- AI call --------
+  async function generateWithAI(base){
+    const level = $('#level').value;
+    const focus = Array.from($('#focus').selectedOptions).map(o=>o.value);
+    $('#aiMsg').textContent = 'Thinking…';
+    $('#btnGen').disabled = true;
+    try{
+      const r = await fetch('/api/generate-report-llm', {
+        method:'POST',
+        headers:{ 'content-type':'application/json' },
+        body: JSON.stringify({ report: base, level, focusAreas: focus })
+      });
+      const j = await r.json();
+      if(!r.ok) throw new Error(j?.error || 'AI error');
+
+      // merge power score for the top meta bar
+      j.swingScore = j.power?.score ?? base.swingScore;
+      j.status = base.status || 'ready';
+      j.note = base.note || j.note;
+
+      renderAll(j);
+      // remember last
+      try { localStorage.setItem('vc_last_report', JSON.stringify(j)); } catch {}
+      $('#aiMsg').textContent = 'Personalized by AI ✓';
+    }catch(e){
+      $('#aiMsg').textContent = 'Error: ' + (e?.message || e);
+    }finally{
+      $('#btnGen').disabled = false;
     }
-    REPORT_DATA = await fetchJson(url);
-    await renderAll(REPORT_DATA);
-  }catch(err){ showErr(err?.message || String(err)); }
-})();
+  }
 
-/* ----------- level toggle handlers ----------- */
-['lvlBeg','lvlInt','lvlAdv'].forEach(id=>{
-  document.getElementById(id).addEventListener('click', async ()=>{
-    const map = { lvlBeg:'beginner', lvlInt:'intermediate', lvlAdv:'advanced' };
-    CURRENT_LEVEL = map[id]; setSavedLevel(CURRENT_LEVEL); setLevelButtons(CURRENT_LEVEL);
-    if (REPORT_DATA) await renderAll(REPORT_DATA);
-  });
-});
+  // boot
+  (async ()=>{
+    try{
+      let data;
+      if(directUrl) data = await fetchJson(directUrl);
+      else if(rid)  data = await fetchJson(urlForId(rid));
+      else {
+        const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
+        if(!raw) throw new Error('Missing ?url or ?id and no cached report.');
+        data = JSON.parse(raw);
+      }
+      // Default level if report carries one
+      if(data.meta?.level) $('#level').value = (data.meta.level||'intermediate');
+
+      renderAll(data);
+
+      // UI hooks
+      $('#btnGen').onclick = ()=> generateWithAI(data);
+      $('#stackChk').onchange = (e)=> applyStack(e.target.checked);
+    }catch(e){
+      alert(e?.message || e);
+    }
+  })();
 </script>
 </body>
 </html>
