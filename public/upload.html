@@ -4,7 +4,6 @@
 <title>Upload • Virtual Coach AI</title>
 <link rel="stylesheet" href="/styles.css" />
 <body>
-  <!-- Header -->
   <header class="site">
     <div class="navwrap">
       <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
@@ -26,7 +25,7 @@
       <h1>Upload Your Swing</h1>
 
       <section class="card">
-        <div class="grid2" style="align-items:flex-end">
+        <div class="grid2" style="align-items:flex-start">
           <div>
             <label class="field"><span>Name (optional)</span><input id="name" placeholder="Your name" /></label>
             <label class="field"><span>Email (optional)</span><input id="email" type="email" placeholder="you@example.com" /></label>
@@ -38,6 +37,26 @@
               <select id="eye"><option value="">—</option><option>right</option><option>left</option></select>
             </label>
             <label class="field"><span>Height in inches *</span><input id="height" inputmode="numeric" placeholder="e.g. 70" /></label>
+
+            <div class="grid2" style="margin-top:8px">
+              <label class="field"><span>Player Level *</span>
+                <select id="level">
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate" selected>Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+              </label>
+              <label class="field"><span>Primary Goal *</span>
+                <select id="goal">
+                  <option value="consistency">Consistency</option>
+                  <option value="power" selected>Power / Distance</option>
+                  <option value="accuracy">Accuracy / Start Line</option>
+                  <option value="swing_plane">Swing Plane</option>
+                  <option value="clubface">Clubface Control</option>
+                  <option value="low_point">Low-Point Control</option>
+                </select>
+              </label>
+            </div>
           </div>
 
           <div>
@@ -46,6 +65,7 @@
               <input id="file" type="file" accept="video/*" />
             </label>
             <button id="uploadBtn" class="btn primary" type="button" style="margin-top:10px">Upload & Analyze</button>
+            <p class="muted" style="margin-top:8px">We’ll upload directly to Mux, then generate a personalized report with AI.</p>
           </div>
         </div>
 
@@ -61,18 +81,19 @@
   </style>
 
   <script>
-  // Full flow: Mux upload -> LLM personalize -> Save to Blob -> Open viewer
+  // Minimal Mux + Blob + AI-enhanced save; redirects to report.html
   (function(){
     const $ = s => document.querySelector(s);
     const el = {
       name: $("#name"), email: $("#email"), hcap: $("#handicap"),
       handed: $("#handed"), eye: $("#eye"), height: $("#height"),
+      level: $("#level"), goal: $("#goal"),
       file: $("#file"), btn: $("#uploadBtn"), log: $("#log")
     };
     const log = m => { el.log.textContent += (el.log.textContent ? "\n" : "") + m; el.log.scrollTop = el.log.scrollHeight; };
     const busy = on => {
       el.btn.disabled = on; el.file.disabled = on;
-      [el.name, el.email, el.hcap, el.handed, el.eye, el.height].forEach(x=>x.disabled = on);
+      [el.name, el.email, el.hcap, el.handed, el.eye, el.height, el.level, el.goal].forEach(x=>x.disabled = on);
     };
     const readForm = () => ({
       name: (el.name.value||"").trim(),
@@ -81,6 +102,8 @@
       handed: (el.handed.value||"").trim(),
       eye: (el.eye.value||"").trim(),
       height: (el.height.value||"").trim(),
+      level: (el.level.value||"intermediate").trim(),
+      goal: (el.goal.value||"power").trim()
     });
     const validateHeight = h => {
       if (!h) return "Height is required.";
@@ -110,70 +133,39 @@
         }
 
         // 2) Upload the file to Mux
-        log("Uploading to Mux (this can take a minute)...");
+        log("Uploading to Mux (this can take a minute)…");
         const r2 = await fetch(j1.upload.url, { method: "PUT", body: file });
         if (!r2.ok) throw new Error("Mux upload failed (" + r2.status + ")");
 
-        // 3) Ask the LLM for personalized content
-        log("Personalizing report with pro patterns…");
-        let gen = null;
-        try {
-          const rGen = await fetch("/api/generate-report-llm", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-              meta,
-              filename: file.name,
-              observations: {
-                // place for future auto-detected notes
-              }
-            })
-          });
-          gen = await rGen.json();
-          if (!rGen.ok) throw new Error(gen?.error || "generate-report-llm failed");
-        } catch (e) {
-          log("Warn: personalization failed, using defaults. " + (e?.message || e));
-          gen = null;
-        }
-
-        // 4) Save final report JSON to Blob
-        log("Saving report JSON…");
+        // 3) Save + AI enhance report JSON to Blob
+        log("Generating personalized report…");
         const r3 = await fetch("/api/save-report", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             status: "ready",
-            swingScore: (gen?.power?.score ?? 80),
+            swingScore: 80,
             muxPlaybackId: null,
-            muxUploadId: j1.upload.id,       // resolved later by a poller if you add one
-            // --- personalized sections ---
-            p1p9: gen?.p1p9 ?? [],
-            faults: [],                       // keep if you use a faults table elsewhere
-            note: `uploaded ${file.name}`,
-            power: gen?.power ?? { score: 74, tempo: "3:1", release_timing: 68 },
-            positionConsistency: gen?.position_consistency ?? { notes: "—" },
-            swingConsistency: gen?.swing_consistency ?? { notes: "—" },
-            topPriorityFixes: gen?.top_priority_fixes ?? [],
-            topPowerFixes: gen?.top_power_fixes ?? [],
-            practicePlan: gen?.practice_plan ?? [],
-            meta
+            muxUploadId: j1.upload.id,
+            meta,
+            // pass hints for LLM
+            hints: {
+              level: meta.level,
+              goal: meta.goal
+            }
           })
         });
 
-        // tolerant response handling
         let rep, ct = (r3.headers.get("content-type") || "").toLowerCase();
         if (ct.includes("application/json")) rep = await r3.json(); else {
           const txt = await r3.text(); throw new Error("save-report returned non-JSON ("+r3.status+"): " + txt.slice(0,200));
         }
         if (!r3.ok || (!rep?.url && !rep?.id)) throw new Error("Report save failed (" + r3.status + ")");
 
-        // 5) Open the viewer — prefer ?url= for 100% load
+        // 4) Open report viewer (prefer direct URL)
         log("Opening report…");
-        if (rep.url) {
-          location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
-        } else {
-          location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
-        }
+        const u = rep.url ? `/report.html?url=${encodeURIComponent(rep.url)}` : `/report.html?id=${encodeURIComponent(rep.id)}`;
+        location.assign(u + "&v=" + Date.now());
       } catch (e) {
         log("Error: " + (e?.message || e));
         busy(false);
