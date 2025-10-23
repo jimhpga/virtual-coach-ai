@@ -18,14 +18,15 @@
   .pill-tiny { font-size: 12px; padding: 3px 8px; border-radius: 999px; border:1px solid var(--line); background:#0f1b22 }
   .pcol { display:block }
   .p-card { background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:14px; padding:12px; margin:12px 0; box-shadow:0 6px 14px rgba(0,0,0,.25); }
-  .p-card h4 { margin:0 0 6px; font-size:15px }
-  .p-card .short { color:var(--muted); margin-bottom:8px }
+  .p-card h4 { margin:0 0 6px; font-size:16px }
+  .p-card .short { color:var(--muted); margin:10px 0 10px; line-height:1.55 }
+  .p-card .subrow { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:4px }
   .btn-sm { border:1px solid var(--line); padding:6px 10px; border-radius:8px; background:#0f1b22; color:#fff; text-decoration:none; cursor:pointer }
   .btn-sm:hover { background:#122734 }
-  details.p1long { margin-top:6px }
-  details.p1long summary { cursor:pointer; list-style:none; }
+  details.p1long { margin-top:8px }
+  details.p1long summary { cursor:pointer; list-style:none; font-weight:700; }
   details.p1long summary::-webkit-details-marker{ display:none }
-  details.p1long summary .caret { display:inline-block; transform: rotate(0deg); transition: transform .2s ease; }
+  details.p1long summary .caret { display:inline-block; transform: rotate(0deg); transition: transform .2s ease; margin-right:6px }
   details[open].p1long summary .caret { transform: rotate(90deg); }
   .accordion { border:1px solid var(--line); border-radius:14px; overflow:hidden }
   .ac-head { background:rgba(255,255,255,.03); padding:10px 12px; display:flex; align-items:center; justify-content:space-between; cursor:pointer }
@@ -243,41 +244,40 @@ function renderPList(data){
     const idTxt = p.id || `P${i+1}`;
     const name  = p.name || p.title || `Position ${i+1}`;
     const grade = p.grade || 'ok';
-    const short = p.short || p.note || '—';
-    const long  = p.long  || p.details || '';
+    const short = p.short || p.note || '—';        // expanded text delivered by AI
+    const long  = p.long  || p.details || '';      // longer text delivered by AI
     const video = p.video || youtubeLink(name);
 
     const card = document.createElement('div');
     card.className='p-card';
 
-    const head = document.createElement('div');
-    head.style.display = 'flex';
-    head.style.alignItems = 'center';
-    head.style.justifyContent = 'space-between';
-    head.style.gap = '8px';
-
+    // Title
     const h4 = document.createElement('h4');
     h4.textContent = `${idTxt}. ${name}`;
-    head.appendChild(h4);
+    card.appendChild(h4);
 
-    head.appendChild(gradeChip(grade));
-    card.appendChild(head);
+    // Subrow: grade (left) + watch (right)
+    const sub = document.createElement('div');
+    sub.className = 'subrow';
+    const g = gradeChip(grade);
+    sub.appendChild(g);
 
-    const s = document.createElement('div');
-    s.className='short';
-    s.textContent = short;
-    card.appendChild(s);
-
-    // Watch button UNDER the grade/short
-    const row = document.createElement('div');
     const aWatch = document.createElement('a');
     aWatch.className='btn-sm';
     aWatch.target = '_blank';
     aWatch.href = video;
     aWatch.textContent = 'Watch';
-    row.appendChild(aWatch);
-    card.appendChild(row);
+    sub.appendChild(aWatch);
 
+    card.appendChild(sub);
+
+    // Short (richer)
+    const s = document.createElement('div');
+    s.className='short';
+    s.textContent = short;
+    card.appendChild(s);
+
+    // Long (expandable)
     if(long){
       const det = document.createElement('details');
       det.className='p1long';
@@ -287,12 +287,13 @@ function renderPList(data){
       caret.textContent = '▶';
       sum.appendChild(caret);
       const t = document.createElement('span');
-      t.textContent = '  Details';
+      t.textContent = '  Expanded coaching notes';
       sum.appendChild(t);
       det.appendChild(sum);
 
       const body = document.createElement('div');
       body.style.marginTop='8px';
+      body.style.lineHeight = '1.55';
       body.textContent = long;
       det.appendChild(body);
       card.appendChild(det);
@@ -341,7 +342,7 @@ function renderAll(data){
   setBars(data);
   setConsistency(data);
   setCoachingCard(data);
-  renderPList(data);
+  renderPList(data);           // <- now with watch button right under grade
   setPracticePlan(data);
   setNote(data);
   $('#summaryText').textContent = data.summary || data.aiSummary || '—';
