@@ -1,205 +1,317 @@
-<!-- ... head & styles from previous version are unchanged ... -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI — Swing Report</title>
+<link rel="stylesheet" href="/styles.css" />
+<style>
+  :root{--glass:rgba(255,255,255,.04)}
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+  .pill { background:#0f1b22;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:700 }
+  .meta-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center }
+  .card { background:var(--glass); border:1px solid var(--line); border-radius:14px; padding:12px; box-shadow:0 6px 14px rgba(0,0,0,.25) }
+  .card h3 { margin: 0 0 10px; }
+  .muted { color: var(--muted); }
+  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+  .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
+  .bar { height:8px; border-radius:999px; background:#0f1b22; border:1px solid var(--line); overflow:hidden; }
+  .bar > i { display:block; height:100%; width:0%; background:var(--accent, #4ad0ff); transition: width .5s ease; }
+  .section-title { display:flex; align-items:center; justify-content:space-between; margin:0 0 8px; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; }
+  .pill-tiny { font-size: 12px; padding: 3px 8px; border-radius: 999px; border:1px solid var(--line); background:#0f1b22 }
+  .pgrid{ display:grid; grid-template-columns: 1fr; gap:14px; } /* STACK */
+  .p-card { background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:14px; padding:12px; box-shadow:0 6px 14px rgba(0,0,0,.25); }
+  .p-card h4 { margin:0 0 6px; font-size:15px }
+  .p-card .short { color:var(--muted); margin-bottom:8px }
+  .p-card .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+  .btn-sm, .btn { border:1px solid var(--line); padding:6px 10px; border-radius:8px; background:#0f1b22; color:#fff; text-decoration:none; cursor:pointer }
+  .btn-sm:hover, .btn:hover { background:#122734 }
+  .btn.primary{ background:#2b7cff; border-color:#2b7cff}
+  .btn.primary:hover{ filter:brightness(1.05) }
+  details.p1long { margin-top:6px }
+  details.p1long summary { cursor:pointer; list-style:none; }
+  details.p1long summary::-webkit-details-marker{ display:none }
+  details.p1long summary .caret { display:inline-block; transform: rotate(0deg); transition: transform .2s ease; }
+  details[open].p1long summary .caret { transform: rotate(90deg); }
+  .list-tight > div { margin:6px 0; }
+  .list-dot { padding-left:18px }
+  .list-dot li { margin:4px 0 }
+  .accordion { border:1px solid var(--line); border-radius:14px; overflow:hidden }
+  .ac-head { background:rgba(255,255,255,.03); padding:10px 12px; display:flex; align-items:center; justify-content:space-between; cursor:pointer }
+  .ac-body { padding:12px; display:none }
+  .ac-open .ac-body { display:block }
+  .ac-open .caret { transform: rotate(90deg); }
+  .hide { display:none !important; }
+  .infobox { font-size:12px; color:var(--muted) }
+  .kpis{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  @media (max-width: 900px) {
+    .grid3 { grid-template-columns: 1fr; }
+    .grid2 { grid-template-columns: 1fr; }
+    .pgrid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
 <body>
-<!-- ... header ... -->
+<header class="site">
+  <div class="navwrap">
+    <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
+    <nav aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/upload">Upload</a>
+      <a href="/reports">Reports</a>
+      <a href="/coming-soon">Coming&nbsp;Soon</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/faq">FAQ</a>
+      <a href="/contact">Contact</a>
+      <a href="/about">About</a>
+    </nav>
+  </div>
+</header>
 
 <div class="scrim">
-  <main class="wrap">
-    <h1 style="margin:0 0 8px">Swing Report — P1–P9</h1>
-    <div id="meta" class="row muted"></div>
+  <main class="wrap" id="app">
+    <h1 style="margin-bottom:6px">Swing Report — P1–P9</h1>
+    <div class="meta-row muted" id="metaRow"></div>
 
-    <!-- AI PERSONALIZER -->
+    <!-- Personalize -->
     <section class="card" style="margin-top:12px">
-      <div class="row" style="align-items:flex-end">
-        <div>
-          <div class="small muted">Golfer level</div>
-          <select id="level">
-            <option value="beginner">Beginner (plain language)</option>
-            <option value="intermediate" selected>Intermediate (balanced)</option>
-            <option value="advanced">Advanced (technical)</option>
+      <div class="section-title"><h3>Personalize with AI</h3></div>
+      <div class="kpis">
+        <label>Level:
+          <select id="levelSelect">
+            <option value="beginner">Beginner</option>
+            <option value="intermediate" selected>Intermediate</option>
+            <option value="advanced">Advanced</option>
           </select>
-        </div>
-        <div style="flex:1;min-width:260px">
-          <div class="small muted">What do you want to work on? (multi-select)</div>
-          <select id="focus" multiple size="5" style="width:100%">
+        </label>
+
+        <label>Goals:
+          <select id="goalsSelect" multiple size="3" style="min-width:240px">
             <option value="swing_plane">Swing plane</option>
-            <option value="hand_path">Hand path</option>
-            <option value="clubface_control">Clubface control</option>
-            <option value="tempo">Tempo</option>
-            <option value="ground_forces">Ground forces</option>
-            <option value="wrist_angles">Wrist angles</option>
+            <option value="hand_plane">Hand plane</option>
+            <option value="tempo">Tempo (3:1)</option>
             <option value="release_timing">Release timing</option>
-            <option value="start_line">Start line</option>
-            <option value="low_point">Low point</option>
+            <option value="face_to_path">Face-to-path</option>
+            <option value="ground_forces">Ground forces</option>
           </select>
+        </label>
+
+        <button class="btn primary" id="aiBtn">Generate with AI</button>
+        <button class="btn" id="saveBtn">Save</button>
+      </div>
+      <div class="infobox" style="margin-top:6px">Tip: choose a level and a few goals, then “Generate with AI” to fill coaching card, consistency notes, longer P1–P9 details, and the Swing Summary automatically.</div>
+    </section>
+
+    <!-- SUMMARY STRIP -->
+    <section class="grid3" style="margin-top:14px">
+      <div class="card">
+        <div class="section-title">
+          <h3>Coaching Card</h3>
         </div>
-        <div>
-          <button id="btnGen" class="btn">Generate with AI</button>
+        <div class="grid2">
+          <div>
+            <div class="muted" style="font-weight:700; margin-bottom:6px">Top 3 Priority Fixes</div>
+            <div id="topPriority" class="list-tight"></div>
+          </div>
+          <div>
+            <div class="muted" style="font-weight:700; margin-bottom:6px">Top 3 Power Fixes</div>
+            <div id="topPower" class="list-tight"></div>
+          </div>
         </div>
-        <div class="muted small" id="aiMsg"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">
+          <h3>Power Score Summary</h3>
+        </div>
+        <div class="list-tight">
+          <div>
+            <div class="muted">Power Score</div>
+            <div class="bar"><i id="barScore"></i></div>
+            <div class="mono" id="txtScore"></div>
+          </div>
+          <div>
+            <div class="muted">Tempo</div>
+            <div class="mono" id="txtTempo">—</div>
+          </div>
+          <div>
+            <div class="muted">Release Timing</div>
+            <div class="bar"><i id="barRelease"></i></div>
+            <div class="mono" id="txtRelease"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title"><h3>Consistency</h3></div>
+        <div class="grid2">
+          <div>
+            <div class="muted" style="font-weight:700; margin-bottom:6px">Position Consistency</div>
+            <div class="mono" id="posScore">—</div>
+            <div id="posConsistency" class="infobox">—</div>
+          </div>
+          <div>
+            <div class="muted" style="font-weight:700; margin-bottom:6px">Swing Consistency</div>
+            <div class="mono" id="swScore">—</div>
+            <div id="swingConsistency" class="infobox">—</div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- top strip (unchanged) -->
+    <!-- PRACTICE PLAN ACCORDION -->
+    <section style="margin-top:14px">
+      <div class="accordion" id="planAcc">
+        <div class="ac-head" role="button" tabindex="0">
+          <div style="display:flex; gap:10px; align-items:center">
+            <span class="caret">▶</span>
+            <h3 style="margin:0">Practice Plan (optional)</h3>
+          </div>
+          <span class="pill-tiny" id="planCount">0 items</span>
+        </div>
+        <div class="ac-body">
+          <div id="planList" class="list-dot"></div>
+        </div>
+      </div>
+    </section>
 
     <!-- P1–P9 -->
     <section style="margin-top:14px">
-      <div class="row" style="justify-content:space-between;align-items:center">
-        <div class="h2" style="margin:0">P1–P9</div>
-        <div class="row small muted">
-          <!-- pre-checked so it stacks by default -->
-          <label><input type="checkbox" id="stackChk" checked> Stack vertically</label>
-        </div>
-      </div>
-      <div id="pWrap" class="grid2" style="margin-top:8px"></div>
-      <div id="pEmpty" class="muted small" style="margin-top:6px"></div>
+      <h2 style="margin:0 0 8px">P1–P9</h2>
+      <div class="pgrid" id="pGrid"></div>
+      <div class="infobox" id="pGridEmpty" style="margin-top:8px"></div>
     </section>
 
-    <!-- summary + note (unchanged) -->
+    <!-- Swing Summary -->
+    <section id="sumBox" class="card hide" style="margin-top:14px">
+      <div class="section-title"><h3>Swing Summary</h3></div>
+      <div class="grid3">
+        <div>
+          <div class="muted" style="font-weight:700;margin-bottom:6px">What you do well</div>
+          <ul id="sumGood" class="list-dot"></ul>
+        </div>
+        <div>
+          <div class="muted" style="font-weight:700;margin-bottom:6px">Needs attention</div>
+          <ul id="sumNeeds" class="list-dot"></ul>
+        </div>
+        <div>
+          <div class="muted" style="font-weight:700;margin-bottom:6px">Goals</div>
+          <ul id="sumGoals" class="list-dot"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Note area -->
+    <section id="noteBox" class="card hide" style="margin-top:14px">
+      <h3 style="margin:0 0 8px">Note</h3>
+      <div id="noteTxt" class="muted"></div>
+    </section>
+
   </main>
 </div>
 
 <script>
-  const $ = s => document.querySelector(s);
-  const qp = new URLSearchParams(location.search);
-  const rid = qp.get('id');
-  const directUrl = qp.get('url');
-  const BLOB = "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com";
+/* ----------- CONFIG / HELPERS ----------- */
+window.BLOB_PUBLIC_BASE =
+  window.BLOB_PUBLIC_BASE || "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com";
 
-  function urlForId(id){ return BLOB.replace(/\/+$/,'') + "/reports/" + encodeURIComponent(id) + ".json?cb=" + Date.now(); }
-  async function fetchJson(u){ const r = await fetch(u,{cache:'no-store'}); if(!r.ok) throw new Error("Fetch "+r.status); const t=await r.text(); return JSON.parse(t.trim().replace(/^\uFEFF/,'')); }
-  function bar(i,p){ i.style.width = Math.max(0,Math.min(100,+p||0)) + "%"; }
-  function list(el,arr){ el.innerHTML=""; (arr||[]).forEach(s=>{ const li=document.createElement('li'); li.textContent=s; el.appendChild(li); }); if(!el.children.length) el.innerHTML='<li class="muted">—</li>'; }
+const $ = s => document.querySelector(s);
+const qp = new URLSearchParams(location.search);
+const rid = qp.get('id');
+const directUrl = qp.get('url');
+const blobFromId = id =>
+  `${window.BLOB_PUBLIC_BASE.replace(/\/+$/,'')}/reports/${encodeURIComponent(id)}.json?cb=${Date.now()}`;
 
-  function metaPills(data){
-    const row=$('#meta'); row.innerHTML='';
-    [['Score', data.swingScore ?? data.power?.score ?? '—'],
-     ['Status', data.status ?? 'ready'],
-     ['Tempo', data.power?.tempo ?? '—'],
-     ['Release', (data.power?.release_timing ?? '—') + (data.power?.release_timing!=null?'%':'')],
-     ['Created', new Date().toLocaleString()]].forEach(([k,v])=>{
-       const s=document.createElement('span'); s.className='pill'; s.textContent=k+': '+v; row.appendChild(s);
-     });
+function pct(n){ if(n==null||isNaN(n)) return 0; return Math.max(0, Math.min(100, Number(n))); }
+function itemDiv(txt){ const d=document.createElement('div'); d.textContent=txt; return d; }
+function youtubeLink(name){ return `https://www.youtube.com/results?search_query=${encodeURIComponent(name+' golf checkpoint')}`; }
+
+/* ----------- RENDERERS ----------- */
+function fillMeta(data){
+  const row = $('#metaRow'); row.innerHTML='';
+  const pills = [
+    ['Score', (data.swingScore ?? data.score ?? '—')],
+    ['Status', (data.status ?? '—')],
+    ['Tempo', (data.power?.tempo ?? '—')],
+    ['Release', (data.power?.release_timing != null ? (data.power.release_timing + '%') : '—')],
+  ];
+  pills.forEach(([k,v])=>{
+    const s = document.createElement('span');
+    s.className='pill';
+    s.textContent = `${k}: ${v}`;
+    row.appendChild(s);
+  });
+  const created = document.createElement('span');
+  created.className = 'muted';
+  created.style.marginLeft='8px';
+  created.textContent = `Created: ${new Date().toLocaleString()}`;
+  row.appendChild(created);
+}
+
+function setBars(data){
+  const score = pct(data.power?.score ?? data.swingScore ?? 0);
+  $('#barScore').style.width = score + '%';
+  $('#txtScore').textContent = `${score}%`;
+  const rel = pct(data.power?.release_timing ?? 0);
+  $('#barRelease').style.width = rel + '%';
+  $('#txtRelease').textContent = `${rel}%`;
+  $('#txtTempo').textContent = data.power?.tempo ?? '—';
+}
+
+function setConsistency(data){
+  const posS = data.consistency?.position?.score ?? data.positionConsistency?.score ?? null;
+  const posN = data.consistency?.position?.note  ?? data.positionConsistency?.notes ?? '—';
+  const swS  = data.consistency?.swing?.score    ?? data.swingConsistency?.score ?? null;
+  const swN  = data.consistency?.swing?.note     ?? data.swingConsistency?.notes ?? '—';
+  $('#posScore').textContent = posS != null ? `${posS}%` : '—';
+  $('#posConsistency').textContent = posN || '—';
+  $('#swScore').textContent = swS != null ? `${swS}%` : '—';
+  $('#swingConsistency').textContent = swN || '—';
+}
+
+function setCoachingCard(data){
+  const pri = (data.coachingCard?.topPriorityFixes || data.topPriorityFixes || data.top_priority_fixes || []).slice(0,3);
+  const pow = (data.coachingCard?.topPowerFixes    || data.topPowerFixes    || data.top_power_fixes    || []).slice(0,3);
+  const priBox = $('#topPriority'); priBox.innerHTML='';
+  const powBox = $('#topPower'); powBox.innerHTML='';
+  if(!pri.length) priBox.appendChild(itemDiv('—'));
+  if(!pow.length) powBox.appendChild(itemDiv('—'));
+  pri.forEach(x => priBox.appendChild(itemDiv('• ' + String(x))));
+  pow.forEach(x => powBox.appendChild(itemDiv('• ' + String(x))));
+}
+
+function renderPGrid(data){
+  const list = Array.isArray(data.p1p9 || data.phases) ? (data.p1p9 || data.phases) : [];
+  const grid = $('#pGrid'); grid.innerHTML = '';
+  const empty = $('#pGridEmpty'); empty.textContent='';
+
+  if(!list.length){
+    empty.textContent = 'No P1–P9 items in this report.';
+    return;
   }
 
-  function renderTop(d){
-    list($('#prio'), d.topPriorityFixes || d.top_priority_fixes);
-    list($('#pfix'),  d.topPowerFixes    || d.top_power_fixes);
-    bar($('#bScore'), d.power?.score ?? d.swingScore ?? 0); $('#tScore').textContent = (d.power?.score ?? d.swingScore ?? 0) + '%';
-    bar($('#bRel'),   d.power?.release_timing ?? 0);        $('#tRel').textContent   = (d.power?.release_timing ?? 0) + '%';
-    $('#tTempo').textContent = d.power?.tempo ?? '—';
-    $('#posScore').textContent   = (d.consistency?.position?.score ?? '—') + (d.consistency?.position?.score!=null?'%':'');
-    $('#posNotes').textContent   = d.consistency?.position?.notes ?? '—';
-    $('#swingScore').textContent = (d.consistency?.swing?.score ?? '—') + (d.consistency?.swing?.score!=null?'%':'');
-    $('#swingNotes').textContent = d.consistency?.swing?.notes ?? '—';
-  }
+  list.forEach((p,i)=>{
+    const idTxt = p.id || `P${i+1}`;
+    const name  = p.name || p.title || idTxt;
+    const grade = (p.grade || '').toString();
+    const short = p.short || p.note || '—';
+    const long  = p.long  || p.details || '';
+    const video = p.video || youtubeLink(name);
 
-  function youtubeLink(q){ return 'https://www.youtube.com/results?search_query='+encodeURIComponent(q); }
+    const c = document.createElement('div');
+    c.className='p-card';
 
-  function renderP1P9(d){
-    const arr=Array.isArray(d.p1p9)?d.p1p9:[];
-    const wrap=$('#pWrap'); wrap.innerHTML=''; $('#pEmpty').textContent='';
-    if(!arr.length){ $('#pEmpty').textContent='No P1–P9 items in this report.'; return; }
+    const head = document.createElement('div');
+    head.style.display = 'flex';
+    head.style.alignItems = 'center';
+    head.style.justifyContent = 'space-between';
+    head.style.gap = '8px';
 
-    const left=document.createElement('div'); left.className='p-col';
-    const right=document.createElement('div'); right.className='p-col';
+    const h4 = document.createElement('h4');
+    h4.textContent = `${idTxt}. ${name}`;
+    head.appendChild(h4);
 
-    arr.forEach((p,i)=>{
-      const card=document.createElement('div'); card.className='p-card';
-      const h=document.createElement('div');
-      h.innerHTML='<span class="tag">'+(p.id||'P?')+'</span> <b>'+(p.name||'')+'</b> <span class="tag" style="margin-left:8px">grade: '+(p.grade||'—')+'</span>';
-      card.appendChild(h);
-
-      const s=document.createElement('div'); s.className='small muted'; s.style.margin='6px 0'; s.textContent=p.short||'—'; card.appendChild(s);
-
-      const det=document.createElement('details'); det.className='p'; const sum=document.createElement('summary'); sum.textContent='Details'; det.appendChild(sum);
-      const body=document.createElement('div'); body.className='small'; body.style.marginTop='8px'; body.textContent=p.long||'—'; det.appendChild(body);
-      const row=document.createElement('div'); row.className='row small'; const a=document.createElement('a'); a.className='btn'; a.textContent='Watch'; a.target='_blank'; a.href=p.video||youtubeLink(p.name||'golf swing checkpoint'); row.appendChild(a); det.appendChild(row);
-      card.appendChild(det);
-
-      (i%2===0?left:right).appendChild(card);
-    });
-
-    wrap.appendChild(left); wrap.appendChild(right);
-  }
-
-  function renderPlan(d){
-    const ul=$('#plan'); ul.innerHTML='';
-    (d.practicePlan || d.practice_plan || []).forEach(it=>{
-      const li=document.createElement('li');
-      li.innerHTML='<b>Day '+(it.day??'?')+':</b> '+(it.title||'')+(Array.isArray(it.items)?' — '+it.items.join('; '):'');
-      ul.appendChild(li);
-    });
-    if(!ul.children.length) ul.innerHTML='<li class="muted">No plan found.</li>';
-  }
-
-  function renderSummary(d){
-    list($('#sumGood'),  d.swingSummary?.whatYouDoWell);
-    list($('#sumNeed'),  d.swingSummary?.needsAttention);
-    list($('#sumGoals'), d.swingSummary?.goals);
-    $('#sumParagraph').textContent = d.swingSummary?.paragraph || '—';
-  }
-
-  function showNote(d){ const t=(d.note||'').trim(); if(!t){ $('#noteBox').style.display='none'; return; } $('#note').textContent=t; $('#noteBox').style.display='block'; }
-
-  function applyStack(on){
-    const wrap=$('#pWrap');
-    if(on){ wrap.classList.add('stackP'); wrap.classList.remove('grid2'); }
-    else  { wrap.classList.remove('stackP'); wrap.classList.add('grid2'); }
-  }
-
-  function renderAll(d){
-    metaPills(d); renderTop(d); renderPlan(d); renderP1P9(d); renderSummary(d); showNote(d);
-  }
-
-  async function generateWithAI(base){
-    const level=$('#level').value;
-    const focus=Array.from($('#focus').selectedOptions).map(o=>o.value);
-    $('#aiMsg').textContent='Thinking…'; $('#btnGen').disabled=true;
-    try{
-      const r=await fetch('/api/generate-report-llm',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({report:base,level,focusAreas:focus})});
-      const j=await r.json(); if(!r.ok) throw new Error(j?.error||'AI error');
-      j.swingScore = j.power?.score ?? base.swingScore;
-      j.status     = base.status || 'ready';
-      j.note       = base.note || j.note;
-      renderAll(j);
-      try{ localStorage.setItem('vc_last_report', JSON.stringify(j)); }catch{}
-      $('#aiMsg').textContent='Personalized by AI ✓';
-    }catch(e){ $('#aiMsg').textContent='Error: '+(e?.message||e); }
-    finally{ $('#btnGen').disabled=false; }
-  }
-
-  (async ()=>{
-    try{
-      let data;
-      if(directUrl) data = await fetchJson(directUrl);
-      else if(rid)  data = await fetchJson(urlForId(rid));
-      else {
-        const raw=sessionStorage.getItem('vc_report')||localStorage.getItem('vc_last_report');
-        if(!raw) throw new Error('Missing ?url or ?id and no cached report.');
-        data=JSON.parse(raw);
-      }
-
-      // set level from report if exists
-      if(data.meta?.level) $('#level').value = (data.meta.level||'intermediate');
-
-      // Stack vertically by default
-      $('#stackChk').checked = true;
-      applyStack(true);
-      $('#stackChk').onchange = (e)=> applyStack(e.target.checked);
-
-      // Initial render (so there is something on screen)
-      renderAll(data);
-
-      // Auto-AI: if this report is not yet enhanced, try to enhance immediately
-      if (!data.aiEnhanced) {
-        // let the user see something, then enhance
-        setTimeout(()=> generateWithAI(data), 200);
-      }
-
-      // Manual regenerate
-      $('#btnGen').onclick = ()=> generateWithAI(data);
-    }catch(e){ alert(e?.message||e); }
-  })();
-</script>
-</body>
-</html>
+    const g = document.createElement('span');
+    g.className='pill-tiny';
+   
