@@ -3,85 +3,92 @@ export const config = { runtime: "nodejs" };
 
 import { put } from "@vercel/blob";
 
-/** Optional: lightweight heuristic enhancer if no OPENAI_API_KEY */
+/** Local fallback when OPENAI_API_KEY is missing or fails. */
 function localEnhance(base) {
   const level = base.level || base?.meta?.level || "intermediate";
   const goal  = base.goal  || base?.meta?.goal  || "power";
-  const score = Number(base.swingScore ?? 75);
-
-  const mk = (t,s,l)=>({title:t, short:s, long:l});
+  const score = Number(base.swingScore ?? 76);
 
   const p1p9 = [
     { id:"P1", name:"Address", grade: score>70?"good":"ok",
-      short:"Athletic, balanced posture with neutral grip.",
-      long:"Set up with feet shoulder-width, slight knee flex, neutral spine. Pressure 55/45 trail/lead, handle modestly forward. Vision matched to aim." },
+      short:"Athletic, balanced setup with neutral grip and calm upper body.",
+      long:"Stand tall through the chest with soft knees, neutral pelvis, and balanced foot pressure (roughly 55/45 trail/lead). Ball position appropriate for the club and handle slightly forward. Build a consistent pre-shot routine to lock this in each time.",
+      video:"https://www.youtube.com/results?search_query=address+golf+checkpoint" },
     { id:"P2", name:"Takeaway", grade:"ok",
-      short:"One-piece move with clubface square.",
-      long:"Clubhead stays outside hands through knee height. Minimal forearm roll. Maintain triangle; trail hip begins to load." },
+      short:"One-piece start; clubhead stays outside the hands; face stays square.",
+      long:"Move the chest and ribcage to start the club—avoid over-rolling the forearms. Keep width in the triangle and maintain posture while trail hip begins to accept pressure. Tempo stays smooth (about 3:1).",
+      video:"https://www.youtube.com/results?search_query=takeaway+golf+checkpoint" },
     { id:"P3", name:"Lead arm parallel", grade:"ok",
-      short:"Width maintained, shaft near plane.",
-      long:"Lead arm across chest without collapse; trail wrist extended, lead wrist flatter. Pressure continues into trail heel." },
+      short:"Width preserved; lead wrist flatter; shaft stays near plane.",
+      long:"Lead arm continues across the chest without collapse; trail wrist extends to set the angle. Pressure continues into the trail heel, not the toes. This stores energy without swaying off the ball.",
+      video:"https://www.youtube.com/results?search_query=P3+lead+arm+parallel+golf" },
     { id:"P4", name:"Top", grade: score>82?"good":"ok",
-      short:"Full coil without excessive sway.",
-      long:"Lead shoulder under chin, pelvis turned 35–45°, thorax 80–100°. Wrists set; club short of across-the-line unless speed training." },
+      short:"Full coil with minimal sway; wrists set; structure intact.",
+      long:"Lead shoulder gets under the chin; pelvis ~35–45° and thorax ~80–100° turned. Club is short of across-the-line unless you’re speed training. Feel width and a soft trail arm rather than a lift.",
+      video:"https://www.youtube.com/results?search_query=P4+top+of+backswing+golf" },
     { id:"P5", name:"Delivery", grade:"ok",
-      short:"Lower body leads; shaft shallows.",
-      long:"Pelvis shifts/rotates to lead side. Trail elbow in front of hip pocket. Handle leads while club shallows from P4." },
+      short:"Lower body leads; shaft shallows into delivery slot.",
+      long:"From transition, shift and rotate into the lead side. Trail elbow moves in front of the hip pocket as the handle leads. This creates efficient sequencing and preserves lag.",
+      video:"https://www.youtube.com/results?search_query=P5+delivery+position+golf" },
     { id:"P6", name:"Shaft parallel down", grade: score>78?"good":"ok",
-      short:"Lag retained; face square-ish.",
-      long:"Shaft near parallel to target line; hands just ahead of trail thigh. Trail heel beginning to release; torso open ~25°." },
+      short:"Lag retained; shaft parallel to target line; face stable.",
+      long:"Hands just ahead of trail thigh with shaft leaning slightly forward. Trail heel begins to release naturally; chest continues opening. Keep the club outside hands longer to avoid early throw.",
+      video:"https://www.youtube.com/results?search_query=P6+shaft+parallel+downswing+golf" },
     { id:"P7", name:"Impact", grade: score>85?"good":"ok",
-      short:"Forward shaft lean and stable face.",
-      long:"Lead side braced, handle ahead, low-point in front, face delivered square-to-path. Lead wrist flexed; trail wrist extended." },
+      short:"Forward shaft lean; lead side braced; face delivered square-to-path.",
+      long:"Low point ahead of the ball with stable head and balanced pressure into the lead foot. Lead wrist flexed, trail wrist extended—compress the ball before the turf.",
+      video:"https://www.youtube.com/results?search_query=P7+impact+golf" },
     { id:"P8", name:"Post-impact", grade:"ok",
-      short:"Arms extend; rotation continues.",
-      long:"Both arms extended after strike; chest continues left. Trail wrist gradually unhinges; no stall/flip." },
+      short:"Arms extend; rotation continues left; no stall.",
+      long:"Both arms long after strike with chest continuing to rotate. Trail wrist gradually unhinges; handle keeps moving. This prevents a flip and tightens start-line.",
+      video:"https://www.youtube.com/results?search_query=P8+post+impact+golf" },
     { id:"P9", name:"Finish", grade:"good",
-      short:"Balanced, fully rotated to target.",
-      long:"Weight 90% lead side; belt buckle target-ward; trail foot vertical or released. Hold pose for 2 seconds." },
+      short:"Balanced, fully rotated; weight mostly left; tall finish.",
+      long:"Weight ~90% lead side with belt buckle at the target and trail foot released. Hold your pose for two counts to hard-wire balance and rhythm.",
+      video:"https://www.youtube.com/results?search_query=P9+finish+golf" },
   ];
 
   const topPriorityFixes =
     goal==="consistency" ? [
+      "Stabilize face-to-path via lead-wrist flex and neutral grip",
       "Smoother lower-to-upper sequence from P4→P6",
-      "Stabilize face angles with grip/lead-wrist match",
-      "Repeatable setup alignments (stance/ball position)"
+      "Repeatable setup alignments (stance width/ball position)"
     ] : goal==="accuracy" ? [
-      "Tighten start-line with intermediate target",
-      "Match face-to-path via grip and lead wrist",
-      "Calm head sway for centered strike"
+      "Intermediate target + start-line calibration",
+      "Reduce head sway to center low point",
+      "Match face to path with grip and wrist conditions"
     ] : goal==="swing_plane" ? [
-      "Match takeaway arc (club outside hands at P2)",
-      "Shallow from P4 without early cast",
-      "Finish chest left to avoid stall"
+      "One-piece takeaway (club outside hands to P2)",
+      "Early shallow from P4 without casting",
+      "Keep chest turning through P7 to avoid stall"
     ] : [
-      "More lead-leg braking from P4",
+      "Stronger lead-leg post/braking at transition",
       "Faster chest rotation through P7",
-      "Wider backswing to maintain speed windows"
+      "Maintain width in backswing to open speed windows"
     ];
 
   const topPowerFixes = [
     "Lead-leg post/brake at transition",
-    "Pump-step or step-change for pressure shift",
-    "Overspeed windows (light/medium/full)"
+    "Pump-step or step-change for dynamic pressure shift",
+    "Overspeed windows (light/medium/full) 2×/week"
   ];
 
   const summary =
     level==="beginner"
-    ? "Solid base from setup through impact. Keep it simple: stable posture, one-piece takeaway, and finish your chest to the target. We’ll build power by learning a smooth pressure shift and a firm lead-leg post."
+    ? "You’ve built a solid base from setup through impact. Keep it simple: consistent posture, a one-piece takeaway, and finish your chest to the target. We’ll add distance by learning a smooth pressure shift and a firm lead-leg post."
     : level==="advanced"
-    ? "Sequencing and delivery are close to tour corridor. Gains are in lead-leg braking, chest rotation, and face-to-path harmony. Small changes at P6/P7 will tighten strike windows without sacrificing speed."
-    : "Good motion through P7 with a few energy leaks. We’ll clean up takeaway shape, shallow the shaft sooner, and add a stronger post into lead side for more speed and tighter dispersion.";
+    ? "Your sequencing and delivery are close to a tour corridor. Most gains are in lead-leg braking, chest rotation speed, and face-to-path harmony. Small improvements around P6/P7 will tighten strike windows without sacrificing speed."
+    : "You move well through P7 with a couple of energy leaks. We’ll clean up takeaway shape, shallow the shaft sooner, and post harder into the lead side for more speed and tighter dispersion.";
 
-  const positionConsistency = { notes: "Setup and transition are repeatable; minor variability in face control around P6." };
-  const swingConsistency    = { notes: "Tempo stable (~3:1). Occasional timing drift under speed—use metronome and step drills." };
+  const positionConsistency = { notes: "Setup and transition repeat nicely; variability shows up in face control near P6. Use checkpoints at P2/P6 and a metronome to stabilize rhythm (≈3:1)." };
+  const swingConsistency    = { notes: "Tempo holds around 3:1 under stock speed. During speed-up, timing drifts slightly—alternate step drills with slow-motion reps." };
 
   const practicePlan = Array.from({length:14}, (_,i)=>({
     day: i+1,
-    title: i%2? "Step-change & tempo" : "Mirror P1-P3 + impact line",
+    title: i%2? "Step-change & tempo calibration" : "Mirror P1–P3 + impact line",
     items: i%2
       ? ["Step-change drill — 10 reps", "Metronome 3:1 — 5 min", "Record 3 swings"]
-      : ["Mirror P1-P3 checkpoints — 10 reps", "Impact line — 15 brush strikes", "3 slow swings focusing on finish"]
+      : ["Mirror P1–P3 checkpoints — 10 reps", "Impact line — 15 brush strikes", "3 slow swings focusing on finish"]
   }));
 
   return {
@@ -100,25 +107,25 @@ async function enhanceWithOpenAI(base) {
   const key = process.env.OPENAI_API_KEY;
   if (!key) return { enhanced:false, ...localEnhance(base) };
 
-  // Lazy, robust prompt (short for MVP)
   const prompt = `
 You are a world-class golf coach (Butch Harmon, Dr. Kwon, Jim McLean, Dave Tutelman combined).
-Create a JSON report with fields:
-- summary (2-4 sentences, personalized for level="${base?.meta?.level||base.level||'intermediate'}" and goal="${base?.meta?.goal||base.goal||'power'}")
-- p1p9: array of 9 items {id,name,grade,short,long,video}
-- topPriorityFixes: 3 bullets
-- topPowerFixes: 3 bullets
-- power {score,tempo,release_timing}
-- positionConsistency {notes}
-- swingConsistency {notes}
-- practicePlan: 14 items {day,title,items[]}
+Create a DETAILED, PERSONALIZED JSON report with fields:
+- summary (3–6 sentences, specific to level="${base?.meta?.level||base.level||'intermediate'}" and goal="${base?.meta?.goal||base.goal||'power'}"; mention strengths AND 1–2 clear priorities)
+- p1p9: array of 9 items:
+  { id, name, grade in ["good","ok","bad"], short (2–3 sentences), long (3–6 sentences, concrete cues/checkpoints), video (YouTube search URL) }
+- topPriorityFixes: 3 highly actionable bullets
+- topPowerFixes: 3 highly actionable bullets
+- power: { score (0–100), tempo (e.g., "3:1"), release_timing (0–100) }
+- positionConsistency: { notes (2–3 sentences with what is repeatable vs variable) }
+- swingConsistency: { notes (2–3 sentences with tempo/timing notes) }
+- practicePlan: 14 items { day (1–14), title, items [2–4 drills] }
 
-Focus on *actionable, non-generic* coaching. Keep "short" 1 sentence; "long" 2–4 sentences. If you add video, use a useful YouTube search link.
-Return ONLY valid JSON.
-Given: swingScore=${Number(base.swingScore??76)}; height=${base?.meta?.height ?? 'n/a'}; handed=${base?.meta?.handed ?? 'n/a'}.
+Constraints:
+- Be specific to swingScore=${Number(base.swingScore??76)}, height=${base?.meta?.height ?? 'n/a'}, handed=${base?.meta?.handed ?? 'n/a'}.
+- Avoid generic fluff; use clear checkpoints (P1..P9) and practical feels.
+- Return ONLY valid JSON.
   `.trim();
 
-  // OpenAI Responses API (JSON mode) – minimal client to avoid extra deps
   const resp = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
@@ -130,10 +137,8 @@ Given: swingScore=${Number(base.swingScore??76)}; height=${base?.meta?.height ??
   });
 
   if (!resp.ok) {
-    // Fall back if OpenAI fails
     return { enhanced:false, ...localEnhance(base) };
   }
-
   const data = await resp.json().catch(()=> ({}));
   const txt = data?.output_text || data?.output?.[0]?.content?.[0]?.text || "";
   try {
@@ -145,9 +150,7 @@ Given: swingScore=${Number(base.swingScore??76)}; height=${base?.meta?.height ??
 }
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
 
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
@@ -168,10 +171,8 @@ export default async function handler(req, res) {
       note: body.note || ""
     };
 
-    // AI enhancement (OpenAI if available, otherwise heuristic localEnhance)
     const ai = await enhanceWithOpenAI(base);
 
-    // Merge
     const report = {
       ...base,
       summary: ai.summary,
@@ -189,11 +190,12 @@ export default async function handler(req, res) {
       contentType: "application/json"
     });
 
-    return res.status(200).json({ id, url, enhanced: !!ai.enhanced });
+    // expose level/goal too to display in meta pills
+    return res.status(200).json({ id, url, enhanced: !!ai.enhanced, level: report.level, goal: report.goal });
   } catch (e) {
     return res.status(500).json({
       error: String(e?.message || e),
-      hint: "Ensure @vercel/blob is installed and BLOB_READ_WRITE_TOKEN is set. For AI, set OPENAI_API_KEY."
+      hint: "Set BLOB_READ_WRITE_TOKEN. For AI, set OPENAI_API_KEY."
     });
   }
 }
