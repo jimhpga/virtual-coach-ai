@@ -1,118 +1,73 @@
-export const config = { runtime: "nodejs" };
+export const config = { runtime: "edge" };
 
-export default async function handler(req, res) {
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+export default async function handler(req) {
   try {
-    if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
+    const body = await req.json();
+    const report = body.report || {};
+    const player = report.meta || {};
+    const level = player.level || "intermediate"; // beginner | intermediate | advanced
+    const focus = player.focus || "overall swing improvement";
 
-    const { report = {}, goals = [], level = "intermediate" } =
-      typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
-
-    // --- Lightweight guard so route works even if OPENAI_API_KEY is absent
-    const hasKey = !!process.env.OPENAI_API_KEY;
-
-    // Tone per level
-    const tone = {
-      beginner:      "plain, helpful, avoid jargon, short sentences",
-      intermediate:  "coaching tone, some terminology, clear steps",
-      advanced:      "technical, biomechanics-aware, detailed cues"
-    }[level] || "coaching tone";
-
-    // (A) build a robust prompt for P1–P9, coaching card, consistency & summary
     const prompt = `
-You are a PGA-level coach. Personalize this golf swing report. Keep it factual, concise and useful.
-Audience tone: ${tone}
-Player goals: ${goals.join(", ") || "not stated"}
+You are an elite golf instructor combining Jim Hartnett, Dr. Kwon, Butch Harmon, and Dave Tuttleman.
+Generate a highly personalized swing report based on this data:
 
-INPUT REPORT (JSON):
-${JSON.stringify(report).slice(0, 12000)}
+Player info:
+- Level: ${level}
+- Focus: ${focus}
+- Height: ${player.height || "unknown"}
+- Handed: ${player.handed || "right"}
+- Eye dominance: ${player.eye || "unknown"}
+- Swing Score: ${report.swingScore || "unknown"}
 
-Write JSON with this shape:
+Requirements:
+1. Write a detailed summary (2–3 paragraphs) of their current swing strengths, weaknesses, and key improvement themes.
+2. Create 3 Priority Fixes and 3 Power Fixes with concise titles, a short version (3 lines max), and a longer expanded “why/how” version.
+3. Identify 3 Power Leaks with biomechanical explanation (e.g., early release, lead leg brake, torso timing).
+4. Include a realistic 14-day Practice Plan with drills, structure, and focus progression.
+5. Use natural coaching tone, avoid robotic phrasing.
+6. Match depth to the player’s level (${level}): Beginner = simple, Advanced = biomechanical.
+
+Return JSON with this exact structure:
 {
- "coachingCard": {
-   "topPriorityFixes": ["...", "...", "..."],
-   "topPowerFixes": ["...", "...", "..."]
- },
- "consistency": {
-   "position": { "score": 60-95, "note": "1–2 sentences" },
-   "swing":    { "score": 60-95, "note": "1–2 sentences" }
- },
- "p1p9": [   // keep 9 items in order
-   {
-     "id":"P1","name":"Address","grade":"good|ok|needs help",
-     "short":"1-line useful description",
-     "long":"3–6 lines, concrete, personalized, include 1 actionable cue",
-     "video":"YouTube search URL that matches the checkpoint"
-   },
-   ...
- ],
- "summary": {
-   "whatYouDoWell": ["bullet", "bullet"],
-   "needsAttention": ["bullet", "bullet"],
-   "goals": ["bullet", "bullet"]
- }
-}
-Return ONLY JSON.
-    `.trim();
+  "summary": "...",
+  "topPriorityFixes": [
+    {"title":"...", "why":"...", "how":"..."}
+  ],
+  "topPowerFixes": [
+    {"title":"...", "why":"...", "how":"..."}
+  ],
+  "powerLeaks": [
+    {"title":"...", "why":"...", "how":"..."}
+  ],
+  "practicePlan": [
+    {"day":1, "title":"...", "items":["...", "..."] }
+  ]
+}`;
 
-    // (B) If we have a key, call the LLM. Else, fall back to a deterministic stub so the flow still works.
-    let enriched;
-    if (hasKey) {
-      // Use OpenAI Responses API (works with o3 or gpt-4o-mini)
-      const r = await fetch("https://api.openai.com/v1/responses", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          input: prompt,
-          temperature: 0.6
-        })
-      });
-      const data = await r.json();
-      const text = data?.output?.[0]?.content?.[0]?.text || data?.choices?.[0]?.message?.content || "{}";
-      enriched = JSON.parse(text);
-    } else {
-      // Safe fallback: create something reasonable so the UI isn’t empty in dev
-      enriched = {
-        coachingCard: {
-          topPriorityFixes: ["Neutralize grip pressure", "Match shaft and hand plane", "Keep trail heel grounded to P5"],
-          topPowerFixes: ["Later wrist set", "Stronger lead-leg brake", "Tempo 3:1 metronome"]
-        },
-        consistency: {
-          position: { score: 72, note: "Setup repeatable; small drift late." },
-          swing: { score: 70, note: "Sequence holds; timing slips under max effort." }
-        },
-        p1p9: (report.p1p9 || []).map((p,i) => ({
-          id: p.id || `P${i+1}`,
-          name: p.name || `P${i+1}`,
-          grade: p.grade || ["good","ok","needs help"][i%3],
-          short: p.short || "Short AI hint.",
-          long:  p.long  || "Longer AI explanation with 1+ concrete drills.",
-          video: p.video || `https://www.youtube.com/results?search_query=${encodeURIComponent((p.name||`P${i+1}`)+" golf checkpoint")}`
-        })),
-        summary: {
-          whatYouDoWell: ["Ground-up sequencing", "Balanced finish"],
-          needsAttention: ["Lead-wrist structure at P4", "Face-to-path control through P7"],
-          goals: goals.length ? goals : ["Tempo 3:1", "Swing plane"]
-        }
-      };
-    }
+    const completion = await client.chat.completions.create({
+      model: "gpt-5",
+      temperature: 0.9,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: "You are Virtual Coach AI, a professional golf coach with biomechanical expertise." },
+        { role: "user", content: prompt }
+      ]
+    });
 
-    // (C) Merge with incoming report
-    const merged = {
-      ...report,
-      level,
-      goals,
-      coachingCard: enriched.coachingCard,
-      consistency: enriched.consistency,
-      p1p9: enriched.p1p9,
-      summary: enriched.summary
-    };
+    const data = JSON.parse(completion.choices[0].message.content || "{}");
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: { "Content-Type": "application/json" },
+      status: 200
+    });
 
-    res.status(200).json({ enhanced: true, report: merged });
   } catch (err) {
-    res.status(500).json({ error: "AI route failed", detail: String(err) });
+    return new Response(JSON.stringify({ error: err.message || String(err) }), { status: 500 });
   }
 }
