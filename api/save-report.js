@@ -1,3 +1,4 @@
+// api/save-report.js
 export const config = { runtime: "nodejs" };
 
 import { put } from "@vercel/blob";
@@ -13,7 +14,7 @@ function localEnhance(base) {
   const p1p9 = [
     { id:"P1", name:"Address", grade: score>70?"good":"ok",
       short:"Balanced, athletic setup with neutral grip and calm upper body.",
-      long:"Stand tall through the chest, soft knees, and neutral pelvis. Balance pressure ~55/45 (trail/lead). Ball position appropriate for the club and handle slightly forward.",
+      long:"Stand tall through the chest, soft knees, and neutral pelvis. Balance pressure ~55/45 (trail/lead). Ball position appropriate for the club and handle slightly forward. Lock this with a brief, repeatable pre-shot routine.",
       video:"https://www.youtube.com/results?search_query=address+golf+checkpoint" },
     { id:"P2", name:"Takeaway", grade:"ok",
       short:"One-piece start; clubhead stays outside the hands; face square early.",
@@ -25,7 +26,7 @@ function localEnhance(base) {
       video:"https://www.youtube.com/results?search_query=P3+lead+arm+parallel+golf" },
     { id:"P4", name:"Top", grade: score>82?"good":"ok",
       short:"Full coil with minimal sway; wrists set; structure intact.",
-      long:"Lead shoulder under chin; pelvis ~35–45° and thorax ~80–100° turned. Keep the club from getting too long unless speed training.",
+      long:"Lead shoulder under chin; pelvis ~35–45° and thorax ~80–100° turned. Keep the club from getting too long unless speed training. Feel width and a soft trail arm rather than lifting.",
       video:"https://www.youtube.com/results?search_query=P4+top+of+backswing+golf" },
     { id:"P5", name:"Delivery", grade:"ok",
       short:"Lower body leads; shaft shallows; handle forward.",
@@ -63,7 +64,7 @@ function localEnhance(base) {
     {
       title: "Repeatable setup windows",
       why:   "Variable stance width and ball position move low point and face presentation.",
-      how:   "Mark feet/ball on a mat; rehearse same windows (iron/driver) for 10 reps before every session."
+      how:   "Mark feet/ball on a mat; rehearse the same windows (iron/driver) for 10 reps before every session."
     }
   ];
 
@@ -75,32 +76,34 @@ function localEnhance(base) {
     },
     {
       title: "Dynamic pressure shift",
-      why:   "Under-shifting limits torque and vertical power.",
-      how:   "Step-change drill alternating slow/normal; record 3 swings to verify rhythm (≈3:1)."
+      why:   "Under-shifting limits available verticals/torque—robs effortless mph.",
+      how:   "Step-change and pump-step: 10 reps alternating slow/normal; record 3 swings to verify rhythm (≈3:1)."
     },
     {
       title: "Speed windows",
-      why:   "Training at varied intents teaches faster patterns without chaos.",
-      how:   "Light/medium/full sets (5-5-5) twice weekly; hold finish and confirm centered strike."
+      why:   "Practice at varied intents teaches faster patterns without chaos.",
+      how:   "Light/medium/full sets (5-5-5) twice weekly; hold finish and confirm strike quality."
     }
   ];
 
   const summary_long =
     `Level: ${level}. Goal: ${goal}. Height: ${height} in. Handed: ${handed}.
-You present a stable base at P1 and maintain structure into P4 with a clean coil. Transition shallows slightly late, costing compression and spin loft control. Through P6-P7 you’re near tour-caliber; more lead-leg posting and chest rotation will increase power and tighten path. Off-days show face/path drift—lead wrist flex and start-line gates fix that. Power comes from better braking, not more effort; tempo ≈3:1. Practice plan balances structure (P1–P3), delivery (P5–P7), and two days of speed.`
+You present a stable base at P1 and maintain structure into P4 with a coil that fits your build. The transition pattern shows good intent but can shallow earlier to reduce handle-stall and improve strike tightness. Through P6–P7 you’re close to a tour-like delivery—power grows rapidly when the lead-leg posts sooner and the chest keeps rotating. On off-days, dispersion spreads when the face outruns the path; start-line gates and lead-wrist flex cure most of it. Speed will come from better braking and pressure shift, not ‘trying harder’; keep tempo near 3:1 while adding speed windows. The plan balances movement quality (P1–P3), delivery dynamics (P5–P7), and two days of scalable speed.`
 
-  const positionConsistency = { notes: "Setup/transition repeat well; small variation in face angle at P6." };
-  const swingConsistency    = { notes: "Tempo consistent (~3:1) except during max-speed swings; add slow reps to stabilize timing." };
+  const positionConsistency = { notes: "Setup/transition repeat well. Variability shows mostly in face delivery around P6; add lead-wrist flex checkpoints and start-line gates." };
+  const swingConsistency    = { notes: "Tempo near 3:1 on stock swings; creeps faster during speed work. Alternate slow-motion rehearsals with step-change to keep timing constant." };
 
-  const practicePlan = Array.from({ length: 14 }, (_, i) => ({
-    day: i + 1,
-    title: i % 2 ? "Step-change & tempo calibration" : "Mirror P1–P3 + impact line",
-    items: i % 2
+  const practicePlan = Array.from({length:14}, (_,i)=>({
+    day: i+1,
+    title: i%2? "Step-change & tempo calibration" : "Mirror P1–P3 + impact line",
+    items: i%2
       ? ["Step-change drill — 10 reps", "Metronome 3:1 — 5 min", "Record 3 swings"]
       : ["Mirror P1–P3 checkpoints — 10 reps", "Impact line — 15 brush strikes", "3 slow swings focusing on finish"]
   }));
 
   return {
+    model: 'local',
+    enhanced: false,
     summary_long,
     p1p9,
     topPriorityFixes,
@@ -112,21 +115,46 @@ You present a stable base at P1 and maintain structure into P4 with a clean coil
   };
 }
 
-/** ---------- TRY AI ENRICHMENT ---------- */
-async function enrichWithAI(base) {
+/** ---------- OPENAI (preferred) ---------- */
+async function enhanceWithOpenAI(base) {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) return localEnhance(base);
+
+  const prompt = `
+You are a world-class golf coach (Butch Harmon + Dr. Kwon + Jim McLean + Dave Tutelman). Return ONLY valid JSON:
+{
+  "summary_long": "6–10 sentence personalized narrative summary",
+  "p1p9": [ { "id":"P1","name":"...","grade":"good|ok|bad","short":"2–3 sentences","long":"3–6 sentences","video":"YT search URL" }, ... ],
+  "topPriorityFixes": [ { "title":"...", "why":"1–2 sentences", "how":"2–4 steps/drills" }, ...3 items total ],
+  "topPowerFixes":    [ { "title":"...", "why":"1–2 sentences", "how":"2–4 steps/drills" }, ...3 items total ],
+  "power": { "score": 0-100, "tempo":"e.g. 3:1", "release_timing": 0-100 },
+  "positionConsistency": { "notes":"2–3 sentences" },
+  "swingConsistency":    { "notes":"2–3 sentences" },
+  "practicePlan": [ { "day":1-14, "title":"...", "items":["...", "..."] }, ... 14 items ]
+}
+Personalize to: swingScore=${Number(base.swingScore??76)}, height=${base?.meta?.height ?? 'n/a'}, handed=${base?.meta?.handed ?? 'n/a'}, level=${base?.meta?.level || base.level || 'intermediate'}, goal=${base?.meta?.goal || base.goal || 'power'}.
+Use precise checkpoint language (P1..P9), avoid fluff, include concrete feels/cues. Ensure valid JSON.
+`.trim();
+
+  const resp = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: { "Authorization": `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "gpt-4.1-mini",
+      input: prompt,
+      response_format: { type: "json_object" }
+    })
+  });
+
+  if (!resp.ok) return localEnhance(base);
+
+  const data = await resp.json().catch(()=> ({}));
+  const txt = data?.output_text || data?.output?.[0]?.content?.[0]?.text || "";
   try {
-    const aiUrl = `${process.env.VERCEL_URL || "https://virtualcoachai.net"}/api/generate-report-llm`;
-    const res = await fetch(aiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ report: base })
-    });
-    if (!res.ok) throw new Error("AI enrichment failed");
-    const data = await res.json();
-    return { enhanced: true, ...data };
-  } catch (e) {
-    console.warn("AI enrichment fallback:", e.message);
-    return { enhanced: false, ...localEnhance(base) };
+    const j = JSON.parse(txt);
+    return { model: 'gpt-4.1-mini', enhanced: true, ...j };
+  } catch {
+    return localEnhance(base);
   }
 }
 
@@ -136,6 +164,7 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
+
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const key = `reports/${id}.json`;
 
@@ -147,36 +176,41 @@ export default async function handler(req, res) {
       muxPlaybackId: body.muxPlaybackId ?? null,
       muxUploadId: body.muxUploadId ?? null,
       level: body?.meta?.level || body?.hints?.level,
-      goal: body?.meta?.goal || body?.hints?.goal,
+      goal:  body?.meta?.goal  || body?.hints?.goal,
       meta: body.meta || {},
       note: body.note || ""
     };
 
-    const ai = await enrichWithAI(base);
+    const ai = await enhanceWithOpenAI(base);
 
     const report = {
       ...base,
-      summary_long: ai.summary || ai.summary_long,
+      enhanced: !!ai.enhanced,
+      level: base.level || base?.meta?.level,
+      goal:  base.goal  || base?.meta?.goal,
+      ai: { model: ai.model || (ai.enhanced ? 'LLM' : 'local'), enhanced: !!ai.enhanced, version: 1 },
+      summary_long: ai.summary_long,
+      p1p9: ai.p1p9,
       topPriorityFixes: ai.topPriorityFixes,
       topPowerFixes: ai.topPowerFixes,
-      powerLeaks: ai.powerLeaks || [],
-      power: ai.power || { score: base.swingScore ?? 76, tempo: "3:1", release_timing: 62 },
-      p1p9: ai.p1p9,
+      power: ai.power,
       positionConsistency: ai.positionConsistency,
       swingConsistency: ai.swingConsistency,
       practicePlan: ai.practicePlan
     };
 
+    // Write to Vercel Blob (public)
     const { url } = await put(key, JSON.stringify(report), {
       access: "public",
       contentType: "application/json"
     });
 
-    return res.status(200).json({ id, url, enhanced: !!ai.enhanced, level: report.level, goal: report.goal });
+    console.log('[save-report]', { id, enhanced: report.enhanced, level: report.level, goal: report.goal });
+    return res.status(200).json({ id, url, enhanced: report.enhanced, level: report.level, goal: report.goal });
   } catch (e) {
     return res.status(500).json({
       error: String(e?.message || e),
-      hint: "Set BLOB_READ_WRITE_TOKEN and OPENAI_API_KEY."
+      hint: "Set BLOB_READ_WRITE_TOKEN. For AI, set OPENAI_API_KEY."
     });
   }
 }
