@@ -20,6 +20,15 @@
   .bar > i { display:block; height:100%; width:0%; background:var(--accent, #4ad0ff); transition: width .5s ease; }
   .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; }
 
+  /* Summary block styles */
+  .summary-block { border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.03); box-shadow:0 6px 14px rgba(0,0,0,.25); padding:16px; margin-top:14px; }
+  .summary-flex { display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start; }
+  .summary-score { min-width:120px; }
+  .summary-score-number { font-size:32px; font-weight:700; line-height:1; color:var(--accent,#33b5ff); }
+  .summary-score-label { font-size:13px; line-height:1.4; margin-top:4px; }
+  .summary-col { flex:1; min-width:240px; font-size:14px; line-height:1.5; }
+  .summary-heading { font-size:14px; font-weight:600; color:#fff; margin-bottom:4px; }
+
   /* P1–P9 stacked vertically */
   .pgrid { display:grid; grid-template-columns: 1fr; gap: 14px; }
   .p-card { background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:14px; padding:12px; box-shadow:0 6px 14px rgba(0,0,0,.25); max-width: 900px; margin: 0 auto; }
@@ -61,7 +70,13 @@
 
   /* Print */
   @media print{
-    header.site, .navwrap, .accordion .ac-head, .actions, .brand, .scrim #focusBar, #qrBox { display:none !important; }
+    header.site,
+    .navwrap,
+    .accordion .ac-head,
+    .actions,
+    .brand,
+    .scrim #focusBar,
+    #qrBox { display:none !important; }
     .wrap{ max-width: 100%; margin:0; padding:0; }
     .card{ break-inside: avoid; box-shadow:none; }
     body{ background:#fff; color:#000; }
@@ -89,6 +104,7 @@
 
   <div class="scrim">
     <main class="wrap" id="app">
+      <!-- HEADER / ACTIONS -->
       <h1 style="margin-bottom:6px">Swing Report — P1–P9</h1>
       <div class="actions">
         <button id="btnCopy" class="btn">Copy link</button>
@@ -96,9 +112,11 @@
         <button id="btnQR" class="btn">QR</button>
         <button id="btnPrint" class="btn">Print / PDF</button>
       </div>
+
+      <!-- META ROW (badges like Score, Tempo, etc.) -->
       <div class="meta-row muted" id="metaRow" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap"></div>
 
-      <!-- Focus selector -->
+      <!-- FOCUS SELECTOR (biases language in view only) -->
       <section id="focusBar" class="card" style="margin-top:10px">
         <div class="section-title">
           <h3>Focus this report on…</h3>
@@ -111,16 +129,64 @@
             <option value="speed">Speed</option>
           </select>
         </div>
-        <div class="infobox">Refines Coaching Card & P1–P9 language on-screen (doesn’t overwrite your saved report).</div>
+        <div class="infobox">This changes how we talk about your swing here on-screen. Your saved report stays the same.</div>
       </section>
 
-      <!-- Skeleton while loading -->
+      <!-- LOADING STATE -->
       <div id="skeleton" class="card skeleton" style="padding:16px; margin-top:12px">
         <div class="muted">Loading your swing report…</div>
         <div class="bar" style="height:12px; border-radius:6px; margin-top:10px"></div>
       </div>
 
-      <!-- SUMMARY STRIP -->
+      <!-- COACH SUMMARY BLOCK -->
+      <section id="coachSummary" class="summary-block" hidden>
+        <!-- SCORE + PROFILE -->
+        <div class="summary-flex">
+          <div class="summary-score">
+            <div id="swingScore" class="summary-score-number">—</div>
+            <div class="summary-score-label muted">
+              Swing Score<br/>
+              (higher = more repeatable)
+            </div>
+          </div>
+          <div class="summary-col">
+            <div class="summary-heading">Profile Read</div>
+            <div id="profileRead" class="muted">
+              <!-- example:
+              This is an advanced, tour-pattern swing. Lower body starts first,
+              shaft shallows correctly, and impact is athletic. We’re tightening windows,
+              not rebuilding from scratch.
+              -->
+            </div>
+          </div>
+        </div>
+
+        <!-- ELITE TRAITS -->
+        <div style="margin-top:20px;">
+          <div class="summary-heading">Elite Traits (keep these)</div>
+          <ul id="eliteTraits" class="muted" style="font-size:14px; line-height:1.5; padding-left:18px; margin:0;">
+            <!-- <li>P6 delivery is tour-level: shaft under trail forearm, handle forward.</li> -->
+          </ul>
+        </div>
+
+        <!-- PRIMARY FOCUS -->
+        <div style="margin-top:20px;">
+          <div class="summary-heading">Primary Focus (this is the thing)</div>
+          <div id="primaryFocus" class="muted" style="font-size:14px; line-height:1.5;">
+            <!-- Clubface is a little active at impact (P7). Stabilize it and your start line tightens. -->
+          </div>
+        </div>
+
+        <!-- 14-DAY PLAN HIGH-LEVEL -->
+        <div style="margin-top:20px;">
+          <div class="summary-heading">14-Day Plan</div>
+          <div id="planHighLevel" class="muted" style="font-size:14px; line-height:1.5;">
+            <!-- Days 1–4: Impact drill... -->
+          </div>
+        </div>
+      </section>
+
+      <!-- SUMMARY STRIP (PRIORITY / POWER / CONSISTENCY) -->
       <section class="grid3" style="margin-top:14px" id="summaryStrip" hidden>
         <div class="card">
           <div class="section-title">
@@ -139,9 +205,7 @@
         </div>
 
         <div class="card">
-          <div class="section-title">
-            <h3>Power Score Summary</h3>
-          </div>
+          <div class="section-title"><h3>Power / Tempo</h3></div>
           <div class="list-tight">
             <div>
               <div class="muted">Power Score</div>
@@ -194,26 +258,26 @@
         </div>
       </section>
 
-      <!-- P1–P9 -->
+      <!-- P1–P9 CHECKPOINTS -->
       <section style="margin-top:14px">
-        <h2 style="margin:0 0 8px">P1–P9</h2>
+        <h2 style="margin:0 0 8px">P1–P9 Checkpoints</h2>
         <div class="pgrid" id="pGrid"></div>
         <div class="infobox" id="pGridEmpty" style="margin-top:8px"></div>
       </section>
 
-      <!-- Narrative Summary -->
+      <!-- NARRATIVE SUMMARY -->
       <section class="card" style="margin-top:14px" id="summaryCard" hidden>
-        <h3 style="margin:0 0 8px">Narrative Summary</h3>
+        <h3 style="margin:0 0 8px">Full Swing Summary</h3>
         <div id="summaryText" class="muted"></div>
       </section>
 
-      <!-- Optional Note -->
+      <!-- OPTIONAL COACH NOTE -->
       <section id="noteBox" class="card" style="margin-top:14px; display:none">
-        <h3 style="margin:0 0 8px">Note</h3>
+        <h3 style="margin:0 0 8px">Coach Note</h3>
         <div id="noteTxt" class="muted"></div>
       </section>
 
-      <!-- QR container -->
+      <!-- QR CONTAINER -->
       <div id="qrBox" class="card" style="display:none;margin-top:10px;padding:10px"></div>
     </main>
   </div>
@@ -285,13 +349,17 @@ const pct = n => Math.max(0, Math.min(100, Number(n||0)));
 
 function fillMeta(data){
   const row = $('#metaRow'); row.innerHTML = '';
-  // AI badge first if persisted
+
+  // badge if AI enhanced
   if (data.enhanced || (data.ai && data.ai.enhanced)){
     const s = document.createElement('span');
     s.className = 'pill';
-    s.textContent = (data.ai && data.ai.enhanced) ? `AI Enhanced ✓ (${data.ai.model||'LLM'})` : 'AI Enhanced ✓';
+    s.textContent = (data.ai && data.ai.enhanced)
+      ? `AI Enhanced ✓ (${data.ai.model||'LLM'})`
+      : 'AI Enhanced ✓';
     row.appendChild(s);
   }
+
   const pills = [
     ['Score', (data.power?.score ?? data.swingScore ?? '—')],
     ['Status', (data.status ?? '—')],
@@ -300,11 +368,14 @@ function fillMeta(data){
     ['Level', (data.level || data.meta?.level || '—')],
     ['Goal', (data.goal || data.meta?.goal || '—')],
   ];
+
   pills.forEach(([k,v])=>{
     const x = document.createElement('span');
-    x.className='pill'; x.textContent=`${k}: ${v}`;
+    x.className='pill';
+    x.textContent=`${k}: ${v}`;
     row.appendChild(x);
   });
+
   const created = document.createElement('span');
   created.className = 'muted';
   created.style.marginLeft='8px';
@@ -313,22 +384,27 @@ function fillMeta(data){
 }
 
 function setBars(data){
-  const score = pct(data.power?.score ?? data.swingScore ?? 0);
-  $('#barScore').style.width = score + '%';
-  $('#txtScore').textContent = `${score}%`;
+  const scoreVal = pct(data.power?.score ?? data.swingScore ?? 0);
+  $('#barScore').style.width = scoreVal + '%';
+  $('#txtScore').textContent = `${scoreVal}%`;
+
   const rel = pct(data.power?.release_timing ?? 0);
   $('#barRelease').style.width = rel + '%';
   $('#txtRelease').textContent = `${rel}%`;
+
   $('#txtTempo').textContent = data.power?.tempo ?? '—';
+
+  // also feed Swing Score into coachSummary section
+  $('#swingScore').textContent = scoreVal ? scoreVal : '—';
 }
 
 function setConsistency(data){
   const pos = data.positionConsistency?.notes
           || data.position_consistency?.notes
-          || "You show solid setup/transition repeatability; variability appears in face delivery around P6.";
+          || "Setup and transition are repeating. Minor variability shows up around clubface delivery.";
   const sw  = data.swingConsistency?.notes
           || data.swing_consistency?.notes
-          || "Tempo trends near 3:1; add slow rehearsals between speed sets to stabilize timing.";
+          || "Tempo is mostly stable; rehearse a few slow-motion reps between full swings to lock timing.";
   $('#posConsistency').textContent = pos;
   $('#swingConsistency').textContent = sw;
 }
@@ -338,11 +414,15 @@ function setPowerLeaks(data){
   const s = Number(data.power?.score ?? data.swingScore ?? 0);
   const rel = Number(data.power?.release_timing ?? 0);
   const tempo = String(data.power?.tempo || '3:1');
-  if (s < 85) out.push('Lead-leg braking at transition can increase pelvis speed and transfer.');
-  if (rel < 70) out.push('Release timing behind — add P6 lead-wrist flex and start-line gates.');
-  if (!/3:1/.test(tempo)) out.push('Tempo drifting from 3:1 under speed — alternate slow rehearsals.');
+
+  if (s < 85) out.push('Add lead-side post / bracing at transition for more efficient speed transfer.');
+  if (rel < 70) out.push('Clubface is getting “saved” late. Stabilize face through impact (P7) for tighter start line.');
+  if (!/3:1/.test(tempo)) out.push('Tempo drifting. Hold rehearsals at slow speed between full swings.');
+
   const ul = $('#powerLeaks');
-  ul.innerHTML = out.length ? out.slice(0,3).map(t=>`<li>${t}</li>`).join('') : '<li>None detected</li>';
+  ul.innerHTML = out.length
+    ? out.slice(0,3).map(t=>`<li>${t}</li>`).join('')
+    : '<li>No obvious power leaks detected.</li>';
 }
 
 function itemDiv(txt){
@@ -355,18 +435,28 @@ function setCoachingCard(data){
   const focus = data._focus;
   const pri = (data.topPriorityFixes || data.top_priority_fixes || []).slice(0,3);
   const pow = (data.topPowerFixes || data.top_power_fixes || []).slice(0,3);
-  const priBox = $('#topPriority'); const powBox = $('#topPower');
+
+  const priBox = $('#topPriority');
+  const powBox = $('#topPower');
   priBox.innerHTML=''; powBox.innerHTML='';
+
   if(!pri.length) priBox.appendChild(itemDiv('—'));
   if(!pow.length) powBox.appendChild(itemDiv('—'));
+
   pri.forEach(x => {
-    const text = typeof x === 'string' ? x : (x.title ? `${x.title} — ${x.how||x.why||''}` : JSON.stringify(x));
+    const text = typeof x === 'string'
+      ? x
+      : (x.title ? `${x.title} — ${x.how||x.why||''}` : JSON.stringify(x));
     priBox.appendChild(itemDiv('• ' + text + (focus ? ` (focus: ${focus})` : '')));
   });
+
   pow.forEach(x => {
-    const text = typeof x === 'string' ? x : (x.title ? `${x.title} — ${x.how||x.why||''}` : JSON.stringify(x));
+    const text = typeof x === 'string'
+      ? x
+      : (x.title ? `${x.title} — ${x.how||x.why||''}` : JSON.stringify(x));
     powBox.appendChild(itemDiv('• ' + text + (focus ? ` (focus: ${focus})` : '')));
   });
+
   // show strip
   $('#summaryStrip').hidden = false;
 }
@@ -381,10 +471,11 @@ function renderPGrid(data){
   const grid = $('#pGrid'); grid.innerHTML = '';
   const empty = $('#pGridEmpty'); empty.textContent='';
   if(!list.length){ empty.textContent = 'No P1–P9 items in this report.'; return; }
+
   const focus = data._focus;
 
   list.forEach((p,i)=>{
-    const name = p.name || p.title || `P${i+1}`;
+    const name  = p.name || p.title || `P${i+1}`;
     const grade = (p.grade || '').toString();
     const short = p.short || p.note || '—';
     const long  = p.long  || p.details || '';
@@ -394,7 +485,7 @@ function renderPGrid(data){
     const c = document.createElement('div');
     c.className='p-card';
 
-    // header row with title and grade chip
+    // header row
     const head = document.createElement('div');
     head.style.display = 'flex';
     head.style.alignItems = 'center';
@@ -411,7 +502,7 @@ function renderPGrid(data){
     head.appendChild(g);
     c.appendChild(head);
 
-    // Watch button directly UNDER the grade chip
+    // watch link
     const watch = document.createElement('a');
     watch.className = 'btn-sm';
     watch.target = '_blank';
@@ -420,29 +511,33 @@ function renderPGrid(data){
     watch.style.marginTop = '4px';
     c.appendChild(watch);
 
-    // short
+    // short summary
     const s = document.createElement('div');
     s.className='short';
     s.textContent = short;
     c.appendChild(s);
 
-    // expandable long
+    // details/expansion
     if(long || focus){
       const det = document.createElement('details');
       det.className='p1long';
+
       const sum = document.createElement('summary');
       const caret = document.createElement('span');
       caret.className='caret';
       caret.textContent = '▶';
       sum.appendChild(caret);
+
       const t = document.createElement('span');
       t.textContent = ' Details';
       sum.appendChild(t);
+
       det.appendChild(sum);
 
       const body = document.createElement('div');
       body.style.marginTop='8px';
       body.textContent = long || '';
+
       if (focus){
         const extra = document.createElement('div');
         extra.className = 'infobox';
@@ -451,6 +546,7 @@ function renderPGrid(data){
         body.appendChild(document.createElement('br'));
         body.appendChild(extra);
       }
+
       det.appendChild(body);
       c.appendChild(det);
     }
@@ -464,12 +560,16 @@ function setPracticePlan(data){
   const root = $('#planAcc');
   const count = $('#planCount');
   const out  = $('#planList');
-  out.innerHTML=''; count.textContent = `${list.length} items`;
+
+  out.innerHTML='';
+  count.textContent = `${list.length} items`;
+
   if(!list.length) {
     out.innerHTML = '<div class="infobox">No plan found.</div>';
   } else {
     const ul = document.createElement('ul');
     ul.className='list-dot';
+
     list.forEach(it=>{
       const li = document.createElement('li');
       const d = it.day != null ? `Day ${it.day}: ` : '';
@@ -478,19 +578,31 @@ function setPracticePlan(data){
       li.textContent = `${d}${title}${items}`;
       ul.appendChild(li);
     });
+
     out.appendChild(ul);
   }
-  // Toggle
+
+  // High-level summary of first ~3 plan items for the "14-Day Plan" block at the top
+  const highLevel = list.slice(0,3).map(it=>{
+    const d = (it.day != null) ? `Day ${it.day}: ` : '';
+    return d + (it.title || it.name || '');
+  }).join(' • ');
+  $('#planHighLevel').textContent = highLevel || 'Structured 14-day plan is attached below. Work in order, not all at once.';
+
+  // Toggle open/close
   const head = root.querySelector('.ac-head');
   head.onclick = () => root.classList.toggle('ac-open');
   head.onkeydown = (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); root.classList.toggle('ac-open'); }};
-  // show block
+
   document.getElementById('practiceBlock').hidden = false;
 }
 
 function setSummary(data){
   const txt = (data.summary_long || '').trim();
-  if(!txt){ document.getElementById('summaryCard').hidden = true; return; }
+  if(!txt){
+    document.getElementById('summaryCard').hidden = true;
+    return;
+  }
   document.getElementById('summaryText').textContent = txt;
   document.getElementById('summaryCard').hidden = false;
 }
@@ -498,9 +610,52 @@ function setSummary(data){
 function setNote(data){
   const n = (data.note || '').trim();
   const box = $('#noteBox');
-  if(!n){ box.style.display='none'; return; }
+  if(!n){
+    box.style.display='none';
+    return;
+  }
   $('#noteTxt').textContent = n;
   box.style.display='block';
+}
+
+/* NEW: coach summary block population */
+function setCoachSummary(data){
+  // Profile Read / Elite Traits / Primary Focus all depend on data we have.
+  // We’ll do safe fallbacks so the report never looks empty.
+
+  // Profile Read
+  const profile =
+    data.profileRead ||
+    data.profile_read ||
+    "This swing uses an athletic lower-body sequence and delivers the club on-plane. We're not rebuilding — we're tightening windows.";
+
+  $('#profileRead').textContent = profile;
+
+  // Elite Traits
+  const traitsBox = $('#eliteTraits');
+  traitsBox.innerHTML = '';
+  const traits = data.eliteTraits || data.elite_traits || [
+    "Transition starts from the ground up. Lower body leads, not the hands.",
+    "Delivery into P6 shows the shaft under the trail forearm — tour-style compression.",
+    "Balanced, stable finish (P9). You're not falling out of the shot."
+  ];
+  traits.forEach(t=>{
+    const li = document.createElement('li');
+    li.textContent = t;
+    traitsBox.appendChild(li);
+  });
+
+  // Primary Focus
+  const focus =
+    data.primaryFocus ||
+    data.primary_focus ||
+    "Clubface is a little active at impact (P7). Quiet the face through the ball so your start line tightens under pressure.";
+  $('#primaryFocus').textContent = focus;
+
+  // planHighLevel is set in setPracticePlan, so nothing else needed here.
+
+  // Un-hide block
+  $('#coachSummary').hidden = false;
 }
 
 function renderAll(data){
@@ -516,8 +671,9 @@ function renderAll(data){
   setPracticePlan(data);
   setSummary(data);
   setNote(data);
+  setCoachSummary(data);
 
-  // ensure summary strip is visible (in case data lacked any lists)
+  // Make sure summary strip is visible even if data was light
   document.getElementById('summaryStrip').hidden = false;
 }
 
@@ -528,6 +684,7 @@ function renderAll(data){
     if (directUrl) url = directUrl;
     else if (rid)   url = blobFromId(rid);
     else {
+      // fallback: last viewed report from session/local storage
       const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
       if (!raw) throw new Error('Missing ?url or ?id. Use upload flow or reports page.');
       renderAll(JSON.parse(raw.trim().replace(/^\uFEFF/, '')));
@@ -535,10 +692,13 @@ function renderAll(data){
     }
     const data = await fetchJson(url);
     renderAll(data);
-  }catch(err){ $('#skeleton')?.remove(); showErr(err?.message || String(err)); }
+  }catch(err){
+    $('#skeleton')?.remove();
+    showErr(err?.message || String(err));
+  }
 })();
 
-/* focus changes: re-render view-only language bias */
+/* focus changes: re-render with focus context baked into text */
 document.getElementById('focusSelect')?.addEventListener('change', (e)=>{
   if (!lastReport) return;
   const focused = { ...lastReport, _focus: e.target.value || null };
