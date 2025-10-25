@@ -1,22 +1,20 @@
 // api/generate-report.js
 //
-// Goal:
-// Safe serverless (Node) function for producing a swing report draft.
-// This is NOT an Edge Function. We explicitly tell Vercel to use nodejs runtime
-// so we can import 'openai' normally without killing the build.
+// Production AI coaching card generator for Virtual Coach AI.
+// - Runs as Node, not Edge (so OpenAI client is allowed).
+// - Tries OpenAI first.
+// - If OpenAI fails OR there's no OPENAI_API_KEY set, returns a strong fallback card.
+// - Never throws an uncaught error, so Vercel won't 500 on a player.
 
 export const config = {
-  runtime: 'nodejs', // <- IMPORTANT: forces Node serverless, not Edge
+  runtime: 'nodejs',
 };
 
-// If you're using Vercel env vars, you'll want OPENAI_API_KEY set in Vercel.
-// We import OpenAI and create a client. If there's no key, we'll fall back to stub text.
 import OpenAI from "openai";
 
 function getOpenAIClient() {
-  if (!process.env.OPENAI_API_KEY) {
-    return null;
-  }
+  // If there's no key in env, return null
+  if (!process.env.OPENAI_API_KEY) return null;
   try {
     return new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
@@ -27,108 +25,161 @@ function getOpenAIClient() {
   }
 }
 
-// helper to build a prompt from basic swing notes
-function buildPrompt(body) {
-  // body might include: level, missPattern, club, goals, etc.
-  const level = body.level || "intermediate";
-  const miss = body.miss || "push-fade";
-  const goal = body.goal || "more consistency under pressure";
+// Helper: build the coaching prompt we send to the model
+function buildPrompt({ level, miss, goal }) {
+  const lvl = level || "intermediate";
+  const missDesc = miss || "pull-hook under pressure";
+  const aim = goal || "more control under pressure";
 
-  // Tone matches site voice — direct, no fluff, no talking down.
   return `
-You are Virtual Coach AI, a PGA-teaching style swing coach.
-Write a short coaching card for this player.
+You are Virtual Coach AI, a veteran PGA-teaching style swing coach.
+Your job is to build a focused improvement card for THIS player.
 
-Player level: ${level}
-Typical miss: ${miss}
-Main goal: ${goal}
+Player level: ${lvl}
+Typical miss: ${missDesc}
+Main goal: ${aim}
 
 Do the following:
-1. Give 2 Priority Fixes (control/consistency first). Explain in plain English.
-2. Give 1 Power Fix (speed, only if they're stable enough to chase speed).
-3. Give 1 simple drill they can start today.
+1. Give exactly TWO Priority Fixes. These should tighten control/consistency first.
+   They should sound like: "Post into the lead leg earlier so you don't have to flip the face."
+   Each should include what to feel, and WHY it matters for ball flight.
+2. Give ONE Power Note. Only talk about speed if control is stable. Be honest.
+3. Give ONE Day-One Drill. Simple, specific, can do today.
 
 Rules:
-- Be specific ("post into lead leg earlier", "quiet the hands at P6"), not generic ("stay down").
-- Do NOT shame the player.
-- Keep it short and punchy. No fluff. No "try 10 feels".
+- Speak directly to the player, not like a textbook.
+- No shame. No "just keep your head down" garbage.
+- Use the language a lesson tee coach would use: P6, face control, start line, rotate instead of flip.
+- Keep it punchy. No fluff paragraphs.
+- Output plain text, no markdown.
 `;
 }
 
-// fallback coaching card if OpenAI isn't available
-function fallbackCoachText() {
+// Fallback card (no OpenAI / OpenAI failed)
+function fallbackCard({ level, miss, goal }) {
+  const lvl = level || "intermediate";
+  const missDesc = miss || "pull-hook under pressure";
+  const aim = goal || "more control under pressure";
+
   return [
-    "PRIORITY FIX 1: Clubface control at P6. Quiet the hands and let your body rotation square the face. If the hands try to save it late, start line jumps.",
-    "PRIORITY FIX 2: Stop hanging back. Post into your lead leg earlier so contact isn't thin/high/right. You want your chest slightly more over the ball by impact.",
-    "POWER FIX: Add speed only after ball start line is stable. Work lead wrist flex at P6, then release later so you’re not dumping speed early.",
-    "DRILL: Slow-motion rehearsals to P6, pause, then turn through. 5 slow reps, then 2 normal-speed reps. That builds sequence you can actually repeat under pressure."
+    `PLAYER SNAPSHOT
+Level: ${lvl}
+Typical miss: ${missDesc}
+Main goal: ${aim}`,
+
+    `PRIORITY FIX 1:
+Stabilize the clubface through impact instead of "saving it" with the hands.
+Right now you're shutting the face late to not miss right, and that turns into the pull-hook.
+Quiet the hands at P6 (shaft just before impact) and let your chest rotation square the face.
+Rotation squares the face repeatably. Flip is timing-based, and it breaks under pressure.`,
+
+    `PRIORITY FIX 2:
+Get onto your lead side sooner so you don't have to throw the face.
+You're hanging back, then slamming the face shut to square it.
+Post into the lead leg earlier, chest more over the ball at impact.
+When you move left and rotate, you control start line without needing a panic release.`,
+
+    `POWER NOTE:
+Do not chase speed yet. Speed on top of chaos just gives you faster chaos.
+First we make start line predictable. Then we add ground force and rotation for distance.`,
+
+    `DAY-ONE DRILL:
+Make slow-motion swings to P6 and freeze.
+Feel: weight already into the lead leg, chest starting to open, hands quiet.
+Then turn through without throwing the face.
+Do 5 slow reps, then 2 normal-speed swings. That's how you build a motion you can actually trust on the course.`
   ].join("\n\n");
 }
 
-// Vercel-style handler for Node serverless functions
+// Safe body parsing for Vercel serverless
+async function readJsonBody(req) {
+  // If Vercel already parsed JSON body:
+  if (req.body && typeof req.body === "object") {
+    return req.body;
+  }
+
+  // If it's a raw string:
+  if (typeof req.body === "string") {
+    try {
+      return JSON.parse(req.body || "{}");
+    } catch {
+      return {};
+    }
+  }
+
+  // Otherwise read the stream manually:
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  const raw = Buffer.concat(chunks).toString("utf8");
+
+  try {
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
 export default async function handler(req, res) {
-  // Only allow POST for now
   if (req.method !== "POST") {
     res.status(405).json({ error: "Use POST" });
     return;
   }
 
   try {
-    // Parse the request body safely (handles raw string or already-parsed JSON)
-    const body =
-      typeof req.body === "string"
-        ? JSON.parse(req.body || "{}")
-        : (req.body || {});
+    const body = await readJsonBody(req);
 
-    // Build the model prompt
-    const prompt = buildPrompt(body);
+    const { level, miss, goal } = body;
 
-    // Try to get an OpenAI client if we have a key
-    const openai = getOpenAIClient();
+    const client = getOpenAIClient();
+    let cardText = "";
 
-    let coachText = "";
-
-    if (openai) {
+    if (client) {
+      // Try model path first
       try {
-        // Call OpenAI
-        // Using responses API for assistants-style structured output
-        const completion = await openai.responses.create({
+        const completion = await client.responses.create({
           model: "gpt-4o-mini",
-          input: prompt,
+          input: buildPrompt({ level, miss, goal }),
         });
 
-        // SDK surfaces text as `output_text`
-        coachText = completion.output_text || "";
+        // SDK helper
+        cardText = completion.output_text || "";
       } catch (err) {
         console.error("OpenAI call failed, using fallback:", err);
-        coachText = fallbackCoachText();
+        cardText = fallbackCard({ level, miss, goal });
       }
     } else {
-      // No API key, just return demo text so you can still show value
-      coachText = fallbackCoachText();
+      // no OPENAI_API_KEY in env
+      cardText = fallbackCard({ level, miss, goal });
     }
 
-    // Shape a payload roughly in line with what your viewer wants
-    // (This is intentionally simple. We can evolve this to include
-    // topPriorityFixes, topPowerFixes, etc. once we standardize report.html.)
-    const responsePayload = {
+    const payload = {
       ok: true,
-      summary: coachText,
+      summary: cardText,
       meta: {
-        level: body.level || null,
-        miss: body.miss || null,
-        goal: body.goal || null,
+        level: level || null,
+        miss: miss || null,
+        goal: goal || null,
         generated_at: new Date().toISOString(),
+        model_used: client ? "openai:gpt-4o-mini" : "fallback:no-openai",
       },
     };
 
-    res.status(200).json(responsePayload);
+    res.status(200).json(payload);
   } catch (err) {
-    console.error("generate-report error:", err);
-    res.status(500).json({
-      ok: false,
-      error: "Could not generate report",
-      detail: String(err && err.message ? err.message : err),
+    console.error("generate-report fatal error:", err);
+
+    // Even in a fatal case, we still respond with something useful.
+    res.status(200).json({
+      ok: true,
+      summary: fallbackCard({}),
+      meta: {
+        level: null,
+        miss: null,
+        goal: null,
+        generated_at: new Date().toISOString(),
+        model_used: "fallback:fatal",
+      },
+      warning: "AI call failed at runtime; fallback used.",
     });
   }
 }
