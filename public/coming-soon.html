@@ -2,40 +2,323 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate"/>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Coming Soon • Virtual Coach AI</title>
+<title>Virtual Coach AI — Coming Soon</title>
 <link rel="stylesheet" href="/styles.css" />
+<style>
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+  .hero { padding: 32px 0 16px; }
+  .hero h1 { font-size: 32px; margin: 0 0 10px; color:#fff; }
+  .hero p { font-size: 16px; color: var(--muted); margin: 0 0 6px; max-width: 800px; }
+
+  /* Card grid */
+  .feature-grid {
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap:16px;
+    margin-top:20px;
+  }
+
+  @media (max-width: 900px){
+    .feature-grid {
+      grid-template-columns: 1fr;
+    }
+    .hero h1 { font-size: 26px; }
+  }
+
+  .feature-card {
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.03);
+    border-radius:14px;
+    padding:16px 16px 14px;
+    box-shadow:0 6px 14px rgba(0,0,0,.25);
+    display:flex;
+    flex-direction:column;
+    min-height:220px;
+  }
+
+  .feature-head {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:8px;
+  }
+
+  .feature-head h2 {
+    margin:0;
+    font-size:16px;
+    line-height:1.4;
+    color:#fff;
+    font-weight:600;
+    max-width:80%;
+  }
+
+  .pill {
+    background:#0f1b22;
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:4px 10px;
+    font-weight:600;
+    font-size:12px;
+    line-height:1.2;
+    color:#fff;
+    white-space:nowrap;
+  }
+  .pill.upcoming {
+    background:var(--accent,#33b5ff);
+    border-color:var(--accent,#33b5ff);
+    color:#00131d;
+    font-weight:700;
+  }
+  .pill.dev {
+    background:#0f1b22;
+    border-color:var(--line);
+    color:#fff;
+  }
+  .pill.review {
+    background:#241b00;
+    border-color:#5a4717;
+    color:#ffeb99;
+  }
+
+  .feature-body {
+    font-size:14px;
+    color:var(--muted);
+    line-height:1.5;
+  }
+
+  .feature-body ul {
+    margin:8px 0 0;
+    padding-left:18px;
+  }
+  .feature-body li { margin:4px 0; }
+
+  .disclaimer {
+    margin-top:32px;
+    font-size:12px;
+    line-height:1.4;
+    color:var(--muted);
+    max-width:800px;
+  }
+
+  @media print {
+    header.site, .navwrap { display:none !important; }
+    body { background:#fff; color:#000; }
+    .wrap { max-width:100%; padding:0; }
+    .feature-card { box-shadow:none; border-color:#999; background:#fff; }
+    .pill { border-color:#000 !important; color:#000 !important; background:#fff !important; }
+    .pill.upcoming { background:#fff !important; color:#000 !important; }
+    .pill.review { background:#fff !important; color:#000 !important; }
+  }
+</style>
 </head>
 <body>
-  <!-- Header -->
-  <header class="site">
-    <div class="navwrap">
-      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
-      <nav aria-label="Primary">
-        <a href="/">Home</a>
-        <a href="/upload">Upload</a>
-        <a href="/reports">Reports</a>
-        <a href="/coming-soon" aria-current="page">Coming&nbsp;Soon</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/faq">FAQ</a>
-        <a href="/contact">Contact</a>
-        <a href="/about">About</a>
-      </nav>
-    </div>
-  </header>
-
-  <div class="scrim">
-    <main class="wrap">
-      <h1>What’s next</h1>
-      <section class="card">
-        <ul class="tight">
-          <li>Automatic playback clips for each checkpoint</li>
-          <li>Side-by-side pro model comparisons</li>
-          <li>Coach dashboards & annotations</li>
-          <li>Putting & short-game modules</li>
-        </ul>
-      </section>
-    </main>
+<header class="site">
+  <div class="navwrap">
+    <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
+    <nav aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/upload">Upload</a>
+      <a href="/reports">Reports</a>
+      <a href="/coming-soon">Coming&nbsp;Soon</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/faq">FAQ</a>
+      <a href="/contact">Contact</a>
+      <a href="/about">About</a>
+    </nav>
   </div>
+</header>
+
+<div class="scrim">
+  <main class="wrap">
+
+    <section class="hero">
+      <h1>Coming Soon to Virtual Coach AI</h1>
+      <p>
+        This is the build sheet. Some of this is already in testing, some of it is in development, some of it is “we’re doing it, but don’t ask for an ETA.”
+      </p>
+      <p>
+        Bottom line: we’re not guessing. We’re building tools that lower scores, travel to the golf course, and don’t waste your range buckets.
+      </p>
+    </section>
+
+    <section class="feature-grid">
+
+      <!-- Face Control / Start Line -->
+      <article class="feature-card">
+        <header class="feature-head">
+          <h2>Face Control / Start Line Tracker</h2>
+          <span class="pill upcoming">Upcoming</span>
+        </header>
+        <div class="feature-body">
+          <p>
+            We read how “quiet” the clubface is through impact (P7–P8) and tell you if your start line is actually trustworthy or just held together with timing and prayers.
+          </p>
+          <ul>
+            <li>Green / Yellow / Red face stability readout</li>
+            <li>“Will this hold up under pressure?” honesty score</li>
+            <li>One specific face-control drill, not YouTube soup</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- Tour Comparison -->
+      <article class="feature-card">
+        <header class="feature-head">
+          <h2>Side-by-Side Tour Comparison</h2>
+          <span class="pill dev">In&nbsp;Development</span>
+        </header>
+        <div class="feature-body">
+          <p>
+            Your P4 next to a vetted tour model P4. Your P6 next to their P6. No influencer posing, just actual body positions and delivery windows.
+          </p>
+          <ul>
+            <li>“You already do this like a tour player — don’t change it.”</li>
+            <li>“This is the one difference that actually matters.”</li>
+            <li>Coach mode: use it live during lessons</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- Pressure / Will it travel -->
+      <article class="feature-card">
+        <header class="feature-head">
+          <h2>“Will It Travel?” Pressure Score</h2>
+          <span class="pill review">Under&nbsp;Review</span>
+        </header>
+        <div class="feature-body">
+          <p>
+            Range swings lie. Course swings expose you. We flag patterns that tend to fall apart on holes that matter.
+          </p>
+          <ul>
+            <li>Hanging back = range-only move</li>
+            <li>Posted left / quiet face = course-ready move</li>
+            <li>Goal: “Will this motion survive #1 tee with 3 people watching?”</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- Junior Mode -->
+      <article class="feature-card">
+        <header class="feature-head">
+          <h2>Junior Mode / Parent Report</h2>
+          <span class="pill dev">In&nbsp;Development</span>
+        </header>
+        <div class="feature-body">
+          <p>
+            Kid-friendly breakdowns and parent-facing bullet points. No biomechanics lecture. Just “here’s what your kid should work on this week.”
+          </p>
+          <ul>
+            <li>Simple checkpoints kids can remember</li>
+            <li>Progress framing: “getting better at ___” not “you’re doing it wrong”</li>
+            <li>Print / text share for mom or dad</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- Mental Game / Pressure Routine -->
+      <article class="feature-card">
+        <header class="feature-head">
+          <h2>Mental Game & Shot Routine Builder</h2>
+          <span class="pill upcoming">Upcoming</span>
+        </header>
+        <div class="feature-body">
+          <p>
+            We attach a simple pre-shot routine and “miss management” plan to your swing profile, so you’re not guessing under pressure.
+          </p>
+          <ul>
+            <li>Your trigger word / feel at address</li>
+            <li>Your “safe miss” when you get tight</li>
+            <li>Your reset routine after a bad swing (no meltdown drama)</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- Markerless Kinematics -->
+      <article class="feature-card">
+        <header class="feature-head">
+          <h2>Markerless Kinematic Checkpoints (K-Vest style)</h2>
+          <span class="pill dev">In&nbsp;Development</span>
+        </header>
+        <div class="feature-body">
+          <p>
+            Body position and segment sequencing read from normal phone video. No suit, no wires, no dots. Think K-Vest, without the $5,000 vest.
+          </p>
+          <ul>
+            <li>Hip–torso separation in transition</li>
+            <li>Upper vs lower sequence timing</li>
+            <li>“Are you actually turning, or just thinking you’re turning?” readout</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- Ground / Force -->
+      <article class="feature-card">
+        <header class="feature-head">
+          <h2>Ground Use / Force Pattern Estimation (Markerless)</h2>
+          <span class="pill review">Under&nbsp;Review</span>
+        </header>
+        <div class="feature-body">
+          <p>
+            Estimate how you’re using the ground to create speed — bracing, pushing, rotating — using only video. No force plates in your garage required.
+          </p>
+          <ul>
+            <li>“You’re jumping early” vs “You’re posting and turning”</li>
+            <li>When in the downswing you’re actually creating speed</li>
+            <li>What to change to unlock distance without swinging harder</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- Coach Tools / Multiple Players -->
+      <article class="feature-card">
+        <header class="feature-head">
+          <h2>Coach Locker / Player History</h2>
+          <span class="pill upcoming">Upcoming</span>
+        </header>
+        <div class="feature-body">
+          <p>
+            One place for coaches: all students, all swings, all reports. Repeatable structure so you’re not rewriting the same lesson 40 times a week.
+          </p>
+          <ul>
+            <li>Before / after swing snapshots</li>
+            <li>Shareable improvement timeline for parents or players</li>
+            <li>Lesson prep in 30 seconds, not 30 minutes</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- Dispersion / Gapping -->
+      <article class="feature-card">
+        <header class="feature-head">
+          <h2>Dispersion & Gapping Feedback</h2>
+          <span class="pill review">Under&nbsp;Review</span>
+        </header>
+        <div class="feature-body">
+          <p>
+            Tie your swing pattern to your on-course shot pattern. Not just “you missed left,” but “here’s the body move that created that miss.”
+          </p>
+          <ul>
+            <li>“Your miss is a pattern, not bad luck.”</li>
+            <li>“This setup adjustment takes the big miss out of play.”</li>
+            <li>“Bag gapping: where you’re leaving free yardage on the table.”</li>
+          </ul>
+        </div>
+      </article>
+
+    </section>
+
+    <section class="disclaimer">
+      We’re not promising magic. We’re promising clarity.
+      If it doesn’t help you hit it better under pressure, it doesn’t ship.
+    </section>
+
+  </main>
+</div>
+
 </body>
 </html>
