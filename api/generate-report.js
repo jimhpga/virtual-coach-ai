@@ -2,31 +2,32 @@
 //
 // Virtual Coach AI — Coaching Card Generator
 // - Node runtime (NOT Edge) so we can talk to OpenAI
-// - CommonJS style (require/module.exports) so it runs clean in your app
-// - Will ALWAYS return 200 with some coaching text, even if OpenAI explodes
+// - 100% CommonJS so Vercel's Node runtime won't choke
+// - Always returns 200 with coaching info (never leaves the golfer with an error)
+// - Uses OpenAI if OPENAI_API_KEY is set, otherwise uses a strong fallback card
 //
-// After deploy + alias, test with:
+// Test (PowerShell):
 // curl -Method POST `
 //   -Uri https://virtualcoachai.net/api/generate-report `
 //   -Headers @{ "Content-Type" = "application/json" } `
 //   -Body '{ "level": "intermediate", "miss": "pull-hook", "goal": "stop bowling it left under pressure" }'
 
-export const config = {
-  // force Vercel to treat this as a Node Serverless Function, not Edge
-  runtime: "nodejs",
+// ---- RUNTIME CONFIG (CommonJS form) ----
+const config = {
+  runtime: "nodejs", // tell Vercel: run this in Node, not Edge
 };
 
-// --- OpenAI client loader (safe) ----------------------------------------
-
+// ---- OpenAI client loader (lazy require) ----
 function getOpenAIClient() {
-  // lazy-require so Node doesn't throw just from parsing the file
   try {
     const key = process.env.OPENAI_API_KEY;
     if (!key) {
       console.warn("No OPENAI_API_KEY in env; using fallback mode.");
       return null;
     }
-    const OpenAI = require("openai"); // CommonJS require
+
+    // require *inside* the function so Node doesn't fail to parse if it's missing, etc.
+    const OpenAI = require("openai");
 
     return new OpenAI({
       apiKey: key,
@@ -37,8 +38,7 @@ function getOpenAIClient() {
   }
 }
 
-// --- Prompt builder ------------------------------------------------------
-
+// ---- Prompt builder for the AI model ----
 function buildPrompt({ level, miss, goal }) {
   const lvl = level || "intermediate";
   const missDesc = miss || "pull-hook under pressure";
@@ -68,8 +68,7 @@ Rules:
 `;
 }
 
-// --- Fallback card (no AI / AI failed) ----------------------------------
-
+// ---- Fallback (no OpenAI or OpenAI blew up) ----
 function fallbackCard({ level, miss, goal }) {
   const lvl = level || "intermediate";
   const missDesc = miss || "pull-hook under pressure";
@@ -105,15 +104,14 @@ Do 5 slow reps, then 2 normal-speed swings. That's how you build a motion you ca
   ].join("\n\n");
 }
 
-// --- Body reader: handles req.body OR raw stream -----------------------
-
+// ---- Body reader: handles all cases ----
 async function readJsonBody(req) {
-  // Sometimes Vercel gives us parsed JSON already:
+  // Sometimes Vercel gives req.body already parsed
   if (req.body && typeof req.body === "object") {
     return req.body;
   }
 
-  // Sometimes it's a string:
+  // Sometimes it's a string
   if (typeof req.body === "string") {
     try {
       return JSON.parse(req.body || "{}");
@@ -122,13 +120,12 @@ async function readJsonBody(req) {
     }
   }
 
-  // Fallback: read the stream
+  // Fallback: read raw stream
   const chunks = [];
   for await (const chunk of req) {
     chunks.push(chunk);
   }
   const raw = Buffer.concat(chunks).toString("utf8");
-
   try {
     return raw ? JSON.parse(raw) : {};
   } catch {
@@ -136,21 +133,22 @@ async function readJsonBody(req) {
   }
 }
 
-// --- Response helper to *always* send JSON and not crash CORS -----------
-
+// ---- Unified JSON sender with CORS ----
 function sendJson(res, statusCode, data) {
   res.status(statusCode);
   res.setHeader("Content-Type", "application/json; charset=utf-8");
+
+  // CORS so the browser and PowerShell curl are both happy
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   res.end(JSON.stringify(data));
 }
 
-// --- MAIN HANDLER -------------------------------------------------------
-
-module.exports = async function handler(req, res) {
-  // Handle preflight for browser fetch/POST
+// ---- MAIN HANDLER (CommonJS export) ----
+async function handler(req, res) {
+  // CORS preflight for browser `fetch`
   if (req.method === "OPTIONS") {
     sendJson(res, 200, { ok: true, preflight: true });
     return;
@@ -161,43 +159,38 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  // We wrap the whole body in try/catch so NOTHING throws uncaught
   try {
     const body = await readJsonBody(req);
     const { level, miss, goal } = body || {};
 
-    // Try to get OpenAI client
     const client = getOpenAIClient();
-
-    // default output
     let cardText = "";
     let modelUsed = "";
 
     if (client) {
       try {
-        // Call OpenAI using the new SDK style
         const completion = await client.responses.create({
           model: "gpt-4o-mini",
           input: buildPrompt({ level, miss, goal }),
         });
 
-        // This is how the new SDK exposes text. If it's empty, we fall back.
+        // New OpenAI Responses API: output_text is flattened text
         cardText = (completion && completion.output_text || "").trim();
 
         if (!cardText) {
-          console.warn("OpenAI returned empty text; using fallback");
+          console.warn("OpenAI returned empty output_text; using fallback.");
           cardText = fallbackCard({ level, miss, goal });
-          modelUsed = "fallback:empty-openai-output";
+          modelUsed = "fallback:empty-output";
         } else {
           modelUsed = "openai:gpt-4o-mini";
         }
       } catch (err) {
-        console.error("OpenAI call exploded, using fallback:", err);
+        console.error("OpenAI call failed:", err);
         cardText = fallbackCard({ level, miss, goal });
         modelUsed = "fallback:openai-error";
       }
     } else {
-      // No OpenAI client => no key or init error
+      // No OPENAI_API_KEY or couldn't init client
       cardText = fallbackCard({ level, miss, goal });
       modelUsed = "fallback:no-openai";
     }
@@ -218,7 +211,7 @@ module.exports = async function handler(req, res) {
   } catch (err) {
     console.error("generate-report FATAL catch:", err);
 
-    // even in total failure, send a baseline card
+    // Absolute worst case: still give them coaching, never give them 500.
     const payload = {
       ok: true,
       summary: fallbackCard({}),
@@ -234,4 +227,8 @@ module.exports = async function handler(req, res) {
 
     sendJson(res, 200, payload);
   }
-};
+}
+
+// CommonJS export of BOTH handler and config so Vercel sees runtime
+module.exports = handler;
+module.exports.config = config;
