@@ -1,44 +1,20 @@
 // api/generate-report.js
 //
-// Virtual Coach AI — Coaching Card Generator
-// - Node runtime (NOT Edge) so we can talk to OpenAI
-// - 100% CommonJS so Vercel's Node runtime won't choke
-// - Always returns 200 with coaching info (never leaves the golfer with an error)
-// - Uses OpenAI if OPENAI_API_KEY is set, otherwise uses a strong fallback card
+// FINAL VERSION
+// - Minimal Vercel-compatible serverless function
+// - Pure CommonJS
+// - No custom runtime export (Vercel will treat this as Node by default since it's using module.exports)
+// - Always returns 200 with actionable coaching
+// - Uses OpenAI if OPENAI_API_KEY is set; otherwise uses fallback
 //
-// Test (PowerShell):
+// Test from PowerShell:
 // curl -Method POST `
 //   -Uri https://virtualcoachai.net/api/generate-report `
 //   -Headers @{ "Content-Type" = "application/json" } `
 //   -Body '{ "level": "intermediate", "miss": "pull-hook", "goal": "stop bowling it left under pressure" }'
 
-// ---- RUNTIME CONFIG (CommonJS form) ----
-const config = {
-  runtime: "nodejs", // tell Vercel: run this in Node, not Edge
-};
 
-// ---- OpenAI client loader (lazy require) ----
-function getOpenAIClient() {
-  try {
-    const key = process.env.OPENAI_API_KEY;
-    if (!key) {
-      console.warn("No OPENAI_API_KEY in env; using fallback mode.");
-      return null;
-    }
-
-    // require *inside* the function so Node doesn't fail to parse if it's missing, etc.
-    const OpenAI = require("openai");
-
-    return new OpenAI({
-      apiKey: key,
-    });
-  } catch (err) {
-    console.error("OpenAI init failed:", err);
-    return null;
-  }
-}
-
-// ---- Prompt builder for the AI model ----
+// ---------- helper: build AI prompt ----------
 function buildPrompt({ level, miss, goal }) {
   const lvl = level || "intermediate";
   const missDesc = miss || "pull-hook under pressure";
@@ -54,21 +30,20 @@ Main goal: ${aim}
 
 Do the following:
 1. Give exactly TWO Priority Fixes. These should tighten control/consistency first.
-   They should sound like: "Post into the lead leg earlier so you don't have to flip the face."
-   Each should include what to feel, and WHY it matters for ball flight.
+   Each should include: what to feel, and WHY it matters for ball flight.
 2. Give ONE Power Note. Only talk about speed if control is stable. Be honest.
 3. Give ONE Day-One Drill. Simple, specific, can do today.
 
 Rules:
-- Speak directly to the player, not like a textbook.
-- No shame. No "just keep your head down" garbage.
-- Use the language a lesson tee coach would use: P6, face control, start line, rotate instead of flip.
-- Keep it punchy. No fluff paragraphs.
+- Talk directly to the player.
+- No shame. No "keep your head down" nonsense.
+- Use lesson-tee language: P6, face control, start line, rotate not flip.
+- Be punchy. No fluff.
 - Output plain text, no markdown.
 `;
 }
 
-// ---- Fallback (no OpenAI or OpenAI blew up) ----
+// ---------- helper: offline fallback card ----------
 function fallbackCard({ level, miss, goal }) {
   const lvl = level || "intermediate";
   const missDesc = miss || "pull-hook under pressure";
@@ -104,14 +79,13 @@ Do 5 slow reps, then 2 normal-speed swings. That's how you build a motion you ca
   ].join("\n\n");
 }
 
-// ---- Body reader: handles all cases ----
+// ---------- helper: parse request body safely ----------
 async function readJsonBody(req) {
-  // Sometimes Vercel gives req.body already parsed
+  // sometimes Vercel gives parsed object
   if (req.body && typeof req.body === "object") {
     return req.body;
   }
-
-  // Sometimes it's a string
+  // sometimes it's a string
   if (typeof req.body === "string") {
     try {
       return JSON.parse(req.body || "{}");
@@ -119,8 +93,7 @@ async function readJsonBody(req) {
       return {};
     }
   }
-
-  // Fallback: read raw stream
+  // fallback: read stream
   const chunks = [];
   for await (const chunk of req) {
     chunks.push(chunk);
@@ -133,22 +106,35 @@ async function readJsonBody(req) {
   }
 }
 
-// ---- Unified JSON sender with CORS ----
+// ---------- helper: send JSON response with CORS ----------
 function sendJson(res, statusCode, data) {
-  res.status(statusCode);
+  res.statusCode = statusCode;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
-
-  // CORS so the browser and PowerShell curl are both happy
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
   res.end(JSON.stringify(data));
 }
 
-// ---- MAIN HANDLER (CommonJS export) ----
+// ---------- lazy load OpenAI client so require() doesn't kill cold start ----------
+function getOpenAIClient() {
+  try {
+    const key = process.env.OPENAI_API_KEY;
+    if (!key) {
+      console.warn("No OPENAI_API_KEY in env; fallback mode.");
+      return null;
+    }
+    const OpenAI = require("openai"); // CommonJS require
+    return new OpenAI({ apiKey: key });
+  } catch (err) {
+    console.error("OpenAI init failed:", err);
+    return null;
+  }
+}
+
+// ---------- the actual handler ----------
 async function handler(req, res) {
-  // CORS preflight for browser `fetch`
+  // Handle browser preflight from fetch()
   if (req.method === "OPTIONS") {
     sendJson(res, 200, { ok: true, preflight: true });
     return;
@@ -164,8 +150,8 @@ async function handler(req, res) {
     const { level, miss, goal } = body || {};
 
     const client = getOpenAIClient();
-    let cardText = "";
-    let modelUsed = "";
+    let summaryText;
+    let flavor;
 
     if (client) {
       try {
@@ -174,45 +160,44 @@ async function handler(req, res) {
           input: buildPrompt({ level, miss, goal }),
         });
 
-        // New OpenAI Responses API: output_text is flattened text
-        cardText = (completion && completion.output_text || "").trim();
+        const aiText = (completion && completion.output_text || "").trim();
 
-        if (!cardText) {
-          console.warn("OpenAI returned empty output_text; using fallback.");
-          cardText = fallbackCard({ level, miss, goal });
-          modelUsed = "fallback:empty-output";
+        if (aiText) {
+          summaryText = aiText;
+          flavor = "openai:gpt-4o-mini";
         } else {
-          modelUsed = "openai:gpt-4o-mini";
+          summaryText = fallbackCard({ level, miss, goal });
+          flavor = "fallback:empty-ai-output";
         }
       } catch (err) {
         console.error("OpenAI call failed:", err);
-        cardText = fallbackCard({ level, miss, goal });
-        modelUsed = "fallback:openai-error";
+        summaryText = fallbackCard({ level, miss, goal });
+        flavor = "fallback:openai-error";
       }
     } else {
-      // No OPENAI_API_KEY or couldn't init client
-      cardText = fallbackCard({ level, miss, goal });
-      modelUsed = "fallback:no-openai";
+      // no API key or init failed
+      summaryText = fallbackCard({ level, miss, goal });
+      flavor = "fallback:no-openai";
     }
 
     const payload = {
       ok: true,
-      summary: cardText,
+      summary: summaryText,
       meta: {
         level: level || null,
         miss: miss || null,
         goal: goal || null,
         generated_at: new Date().toISOString(),
-        model_used: modelUsed,
+        model_used: flavor,
       },
     };
 
     sendJson(res, 200, payload);
   } catch (err) {
-    console.error("generate-report FATAL catch:", err);
+    console.error("FATAL handler error:", err);
 
-    // Absolute worst case: still give them coaching, never give them 500.
-    const payload = {
+    // absolute worst case: still give them a usable coaching card
+    sendJson(res, 200, {
       ok: true,
       summary: fallbackCard({}),
       meta: {
@@ -223,12 +208,9 @@ async function handler(req, res) {
         model_used: "fallback:fatal",
       },
       warning: "AI call failed at runtime; fallback used.",
-    };
-
-    sendJson(res, 200, payload);
+    });
   }
 }
 
-// CommonJS export of BOTH handler and config so Vercel sees runtime
+// Vercel Node serverless expects module.exports = (req,res)=>{...}
 module.exports = handler;
-module.exports.config = config;
