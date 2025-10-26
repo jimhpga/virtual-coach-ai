@@ -7,11 +7,13 @@
 // - ALWAYS returns 200 with something useful (never strands the player).
 //
 // After deploying this and aliasing, you should be able to:
-// curl -Method POST -Uri https://virtualcoachai.net/api/generate-report -Headers @{ "Content-Type"="application/json" } -Body '{ "level":"intermediate","miss":"pull-hook","goal":"stop bowling it left under pressure"}'
+// curl -Method POST -Uri https://virtualcoachai.net/api/generate-report `
+//   -Headers @{ "Content-Type"="application/json" } `
+//   -Body '{ "level":"intermediate","miss":"pull-hook","goal":"stop bowling it left under pressure"}'
 
 export const config = {
   // force Vercel to treat this as a Node Serverless Function, not Edge
-  runtime: "nodejs18.x",
+  runtime: "nodejs", // <-- MUST be exactly "nodejs"
 };
 
 import OpenAI from "openai";
@@ -167,10 +169,9 @@ export default async function handler(req, res) {
         });
 
         // Newer OpenAI SDK: output_text tries to flatten all parts.
-        // We'll fall back to something sane if it's missing.
+        // We'll fall back if it's missing/empty.
         cardText = (completion && completion.output_text || "").trim();
         if (!cardText) {
-          // just in case model returns structured content w/out output_text
           cardText = fallbackCard({ level, miss, goal });
           modelUsed = "fallback:empty-output";
         } else {
