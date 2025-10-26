@@ -1,39 +1,44 @@
 // api/generate-report.js
 //
-// Production AI coaching card generator for Virtual Coach AI.
-// - Runs in Node (serverless), NOT Edge, so we can call OpenAI.
-// - Uses OpenAI first if OPENAI_API_KEY is set.
-// - Falls back to a hand-written coaching card if OpenAI fails or is missing.
-// - ALWAYS returns 200 with something useful (never strands the player).
+// Virtual Coach AI — Coaching Card Generator
+// - Node runtime (NOT Edge) so we can talk to OpenAI
+// - CommonJS style (require/module.exports) so it runs clean in your app
+// - Will ALWAYS return 200 with some coaching text, even if OpenAI explodes
 //
-// After deploying this and aliasing, you should be able to:
-// curl -Method POST -Uri https://virtualcoachai.net/api/generate-report `
-//   -Headers @{ "Content-Type"="application/json" } `
-//   -Body '{ "level":"intermediate","miss":"pull-hook","goal":"stop bowling it left under pressure"}'
+// After deploy + alias, test with:
+// curl -Method POST `
+//   -Uri https://virtualcoachai.net/api/generate-report `
+//   -Headers @{ "Content-Type" = "application/json" } `
+//   -Body '{ "level": "intermediate", "miss": "pull-hook", "goal": "stop bowling it left under pressure" }'
 
 export const config = {
   // force Vercel to treat this as a Node Serverless Function, not Edge
-  runtime: "nodejs", // <-- MUST be exactly "nodejs"
+  runtime: "nodejs",
 };
 
-import OpenAI from "openai";
+// --- OpenAI client loader (safe) ----------------------------------------
 
-// Safely build an OpenAI client. If there's no key or it errors, return null.
 function getOpenAIClient() {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) {
-    console.warn("No OPENAI_API_KEY in env; using fallback mode.");
-    return null;
-  }
+  // lazy-require so Node doesn't throw just from parsing the file
   try {
-    return new OpenAI({ apiKey: key });
+    const key = process.env.OPENAI_API_KEY;
+    if (!key) {
+      console.warn("No OPENAI_API_KEY in env; using fallback mode.");
+      return null;
+    }
+    const OpenAI = require("openai"); // CommonJS require
+
+    return new OpenAI({
+      apiKey: key,
+    });
   } catch (err) {
     console.error("OpenAI init failed:", err);
     return null;
   }
 }
 
-// Helper to build the coaching prompt sent to the model.
+// --- Prompt builder ------------------------------------------------------
+
 function buildPrompt({ level, miss, goal }) {
   const lvl = level || "intermediate";
   const missDesc = miss || "pull-hook under pressure";
@@ -63,8 +68,8 @@ Rules:
 `;
 }
 
-// Hand-tuned fallback card for when OpenAI isn't available.
-// This still sounds like a real coach, not a robot.
+// --- Fallback card (no AI / AI failed) ----------------------------------
+
 function fallbackCard({ level, miss, goal }) {
   const lvl = level || "intermediate";
   const missDesc = miss || "pull-hook under pressure";
@@ -100,15 +105,15 @@ Do 5 slow reps, then 2 normal-speed swings. That's how you build a motion you ca
   ].join("\n\n");
 }
 
-// Read JSON body safely in Vercel's Node runtime.
-// We support three cases:
-//   - req.body is already an object (some runtimes parse it for you)
-//   - req.body is a string
-//   - req is a stream we need to read
+// --- Body reader: handles req.body OR raw stream -----------------------
+
 async function readJsonBody(req) {
+  // Sometimes Vercel gives us parsed JSON already:
   if (req.body && typeof req.body === "object") {
     return req.body;
   }
+
+  // Sometimes it's a string:
   if (typeof req.body === "string") {
     try {
       return JSON.parse(req.body || "{}");
@@ -117,12 +122,13 @@ async function readJsonBody(req) {
     }
   }
 
-  // Fallback: manual stream read
+  // Fallback: read the stream
   const chunks = [];
   for await (const chunk of req) {
     chunks.push(chunk);
   }
   const raw = Buffer.concat(chunks).toString("utf8");
+
   try {
     return raw ? JSON.parse(raw) : {};
   } catch {
@@ -130,19 +136,21 @@ async function readJsonBody(req) {
   }
 }
 
-// Small helper to standardize all responses with proper headers.
+// --- Response helper to *always* send JSON and not crash CORS -----------
+
 function sendJson(res, statusCode, data) {
   res.status(statusCode);
   res.setHeader("Content-Type", "application/json; charset=utf-8");
-  // Allow browser fetch() from your domain in the future:
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.end(JSON.stringify(data));
 }
 
-export default async function handler(req, res) {
-  // Handle browser preflight (OPTIONS) nicely so front-end can call this API.
+// --- MAIN HANDLER -------------------------------------------------------
+
+module.exports = async function handler(req, res) {
+  // Handle preflight for browser fetch/POST
   if (req.method === "OPTIONS") {
     sendJson(res, 200, { ok: true, preflight: true });
     return;
@@ -153,37 +161,43 @@ export default async function handler(req, res) {
     return;
   }
 
+  // We wrap the whole body in try/catch so NOTHING throws uncaught
   try {
     const body = await readJsonBody(req);
-    const { level, miss, goal } = body;
+    const { level, miss, goal } = body || {};
 
+    // Try to get OpenAI client
     const client = getOpenAIClient();
+
+    // default output
     let cardText = "";
     let modelUsed = "";
 
     if (client) {
       try {
+        // Call OpenAI using the new SDK style
         const completion = await client.responses.create({
           model: "gpt-4o-mini",
           input: buildPrompt({ level, miss, goal }),
         });
 
-        // Newer OpenAI SDK: output_text tries to flatten all parts.
-        // We'll fall back if it's missing/empty.
+        // This is how the new SDK exposes text. If it's empty, we fall back.
         cardText = (completion && completion.output_text || "").trim();
+
         if (!cardText) {
+          console.warn("OpenAI returned empty text; using fallback");
           cardText = fallbackCard({ level, miss, goal });
-          modelUsed = "fallback:empty-output";
+          modelUsed = "fallback:empty-openai-output";
         } else {
           modelUsed = "openai:gpt-4o-mini";
         }
       } catch (err) {
-        console.error("OpenAI call failed, using fallback:", err);
+        console.error("OpenAI call exploded, using fallback:", err);
         cardText = fallbackCard({ level, miss, goal });
         modelUsed = "fallback:openai-error";
       }
     } else {
-      // No OPENAI_API_KEY or client creation blew up
+      // No OpenAI client => no key or init error
       cardText = fallbackCard({ level, miss, goal });
       modelUsed = "fallback:no-openai";
     }
@@ -202,9 +216,9 @@ export default async function handler(req, res) {
 
     sendJson(res, 200, payload);
   } catch (err) {
-    console.error("generate-report fatal error:", err);
+    console.error("generate-report FATAL catch:", err);
 
-    // Absolute worst case: still reply 200 with a rock-solid card.
+    // even in total failure, send a baseline card
     const payload = {
       ok: true,
       summary: fallbackCard({}),
@@ -220,4 +234,4 @@ export default async function handler(req, res) {
 
     sendJson(res, 200, payload);
   }
-}
+};
