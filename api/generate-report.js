@@ -1,32 +1,26 @@
 // api/generate-report.js
 //
 // Virtual Coach AI — Coaching Card Generator
-// - Runs in Node (NOT Edge) so we can talk to OpenAI
-// - 100% CommonJS so Vercel's Node runtime won't choke
-// - Always returns 200 with coaching info (never leaves the golfer with an error)
-// - Uses OpenAI if OPENAI_API_KEY is set, otherwise uses a strong fallback card
-//
-// Test (PowerShell):
-// curl -Method POST `
-//   -Uri https://virtualcoachai.net/api/generate-report `
-//   -Headers @{ "Content-Type" = "application/json" } `
-//   -Body '{ "level": "intermediate", "miss": "pull-hook", "goal": "stop bowling it left under pressure" }'
+// - CommonJS module, safe for Vercel's Node runtime
+// - Forces Node runtime (not Edge) via module.exports.config
+// - Never throws a 500 at the player
+// - Uses OpenAI if available, otherwise returns a strong fallback card
 
-// ---- RUNTIME CONFIG (CommonJS form) ----
+// Tell Vercel: run this as Node (NOT Edge)
 const config = {
-  runtime: "nodejs", // force Node runtime, not Edge
+  runtime: "nodejs",
 };
 
-// ---- OpenAI client loader (lazy require) ----
+// Lazy-load OpenAI client safely
 function getOpenAIClient() {
   try {
     const key = process.env.OPENAI_API_KEY;
     if (!key) {
-      console.warn("No OPENAI_API_KEY in env; using fallback mode.");
+      console.warn("No OPENAI_API_KEY in env; fallback mode.");
       return null;
     }
 
-    // lazy require so the file still loads even if openai lib isn't bundled
+    // Require here so build doesn't explode if module isn't bundled for edge
     const OpenAI = require("openai");
 
     return new OpenAI({
@@ -38,19 +32,19 @@ function getOpenAIClient() {
   }
 }
 
-// ---- Prompt builder for the AI model ----
-function buildPrompt({ level, miss, goal }) {
-  const lvl = level || "intermediate";
-  const missDesc = miss || "pull-hook under pressure";
-  const aim = goal || "more control under pressure";
+// Build the coaching prompt for AI
+function buildPrompt(opts) {
+  const level = opts && opts.level ? opts.level : "intermediate";
+  const miss = opts && opts.miss ? opts.miss : "pull-hook under pressure";
+  const goal = opts && opts.goal ? opts.goal : "more control under pressure";
 
-  return `
-You are Virtual Coach AI, a veteran PGA-teaching style swing coach.
+  return (
+`You are Virtual Coach AI, a veteran PGA-teaching style swing coach.
 Your job is to build a focused improvement card for THIS player.
 
-Player level: ${lvl}
-Typical miss: ${missDesc}
-Main goal: ${aim}
+Player level: ${level}
+Typical miss: ${miss}
+Main goal: ${goal}
 
 Do the following:
 1. Give exactly TWO Priority Fixes. These should tighten control/consistency first.
@@ -64,27 +58,27 @@ Rules:
 - No shame. No "just keep your head down" garbage.
 - Use the language a lesson tee coach would use: P6, face control, start line, rotate instead of flip.
 - Keep it punchy. No fluff paragraphs.
-- Output plain text, no markdown.
-`;
+- Output plain text only.`
+  );
 }
 
-// ---- Fallback (no OpenAI or OpenAI blew up) ----
-function fallbackCard({ level, miss, goal }) {
-  const lvl = level || "intermediate";
-  const missDesc = miss || "pull-hook under pressure";
-  const aim = goal || "more control under pressure";
+// Fallback card if OpenAI isn't available
+function fallbackCard(opts) {
+  const level = (opts && opts.level) || "intermediate";
+  const miss = (opts && opts.miss) || "pull-hook under pressure";
+  const goal = (opts && opts.goal) || "more control under pressure";
 
   return [
     `PLAYER SNAPSHOT
-Level: ${lvl}
-Typical miss: ${missDesc}
-Main goal: ${aim}`,
+Level: ${level}
+Typical miss: ${miss}
+Main goal: ${goal}`,
 
     `PRIORITY FIX 1:
 Stabilize the clubface through impact instead of "saving it" with the hands.
 Right now you're shutting the face late to not miss right, and that turns into the pull-hook.
 Quiet the hands at P6 (shaft just before impact) and let your chest rotation square the face.
-Rotation squares the face repeatably. Flip is timing-based, and it breaks under pressure.`,
+Rotation squares the face repeatably. Flip is timing-based, and it falls apart under pressure.`,
 
     `PRIORITY FIX 2:
 Get onto your lead side sooner so you don't have to throw the face.
@@ -100,27 +94,28 @@ First we make start line predictable. Then we add ground force and rotation for 
 Make slow-motion swings to P6 and freeze.
 Feel: weight already into the lead leg, chest starting to open, hands quiet.
 Then turn through without throwing the face.
-Do 5 slow reps, then 2 normal-speed swings. That's how you build a motion you can actually trust on the course.`
+Do 5 slow reps, then 2 normal-speed swings.
+This is how you build a motion you can trust on the course.`
   ].join("\n\n");
 }
 
-// ---- Body reader: handles all cases ----
+// Read request body as JSON, safely
 async function readJsonBody(req) {
-  // If Vercel already parsed JSON
+  // Case 1: already parsed
   if (req.body && typeof req.body === "object") {
     return req.body;
   }
 
-  // If it's a string
+  // Case 2: body is a string
   if (typeof req.body === "string") {
     try {
       return JSON.parse(req.body || "{}");
-    } catch {
+    } catch (err) {
       return {};
     }
   }
 
-  // Otherwise read raw stream
+  // Case 3: stream
   const chunks = [];
   for await (const chunk of req) {
     chunks.push(chunk);
@@ -128,12 +123,12 @@ async function readJsonBody(req) {
   const raw = Buffer.concat(chunks).toString("utf8");
   try {
     return raw ? JSON.parse(raw) : {};
-  } catch {
+  } catch (err) {
     return {};
   }
 }
 
-// ---- Unified JSON sender with CORS (Node http style) ----
+// Send JSON with proper headers (NO res.status())
 function sendJson(res, statusCode, data) {
   const body = JSON.stringify(data);
 
@@ -147,11 +142,17 @@ function sendJson(res, statusCode, data) {
   res.end(body);
 }
 
-// ---- MAIN HANDLER ----
+// Main handler
 async function handler(req, res) {
-  // CORS preflight for browser fetch
+  // Handle CORS preflight quickly
   if (req.method === "OPTIONS") {
     sendJson(res, 200, { ok: true, preflight: true });
+    return;
+  }
+
+  // Friendly message for GET (browser poke / health check)
+  if (req.method === "GET") {
+    sendJson(res, 200, { ok: false, error: "Use POST" });
     return;
   }
 
@@ -162,7 +163,9 @@ async function handler(req, res) {
 
   try {
     const body = await readJsonBody(req);
-    const { level, miss, goal } = body || {};
+    const level = body.level || null;
+    const miss = body.miss || null;
+    const goal = body.goal || null;
 
     const client = getOpenAIClient();
     let cardText = "";
@@ -170,20 +173,20 @@ async function handler(req, res) {
 
     if (client) {
       try {
+        // OpenAI "responses" API
         const completion = await client.responses.create({
           model: "gpt-4o-mini",
           input: buildPrompt({ level, miss, goal }),
         });
 
-        // New OpenAI Responses API
-        cardText = (completion && completion.output_text || "").trim();
-
-        if (!cardText) {
-          console.warn("OpenAI returned empty output_text; using fallback.");
+        // Try to pull plain text off response
+        if (completion && completion.output_text) {
+          cardText = String(completion.output_text || "").trim();
+          modelUsed = "openai:gpt-4o-mini";
+        } else {
+          console.warn("OpenAI gave no output_text. Using fallback.");
           cardText = fallbackCard({ level, miss, goal });
           modelUsed = "fallback:empty-output";
-        } else {
-          modelUsed = "openai:gpt-4o-mini";
         }
       } catch (err) {
         console.error("OpenAI call failed:", err);
@@ -191,7 +194,7 @@ async function handler(req, res) {
         modelUsed = "fallback:openai-error";
       }
     } else {
-      // No OPENAI_API_KEY or client init failed
+      // No OPENAI_API_KEY or cannot init client
       cardText = fallbackCard({ level, miss, goal });
       modelUsed = "fallback:no-openai";
     }
@@ -200,9 +203,9 @@ async function handler(req, res) {
       ok: true,
       summary: cardText,
       meta: {
-        level: level || null,
-        miss: miss || null,
-        goal: goal || null,
+        level,
+        miss,
+        goal,
         generated_at: new Date().toISOString(),
         model_used: modelUsed,
       },
@@ -212,7 +215,6 @@ async function handler(req, res) {
   } catch (err) {
     console.error("generate-report FATAL catch:", err);
 
-    // Worst case: still give them coaching
     const payload = {
       ok: true,
       summary: fallbackCard({}),
@@ -230,6 +232,6 @@ async function handler(req, res) {
   }
 }
 
-// CommonJS export
+// Export for Vercel (CommonJS style)
 module.exports = handler;
 module.exports.config = config;
