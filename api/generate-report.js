@@ -4,24 +4,26 @@
 //
 // Goals:
 // - Runs in Node serverless (NOT Edge)
-// - CommonJS (module.exports)
-// - Dynamic import of "openai" so cold start won't explode if require() isn't supported
+// - CommonJS export (module.exports)
+// - Dynamic import("openai") so build/runtime won't explode if require() isn't supported in this env
 // - Never returns a 500 to the golfer
 // - GET returns a harmless JSON message so we can health-check with curl
 //
-// After deploying + aliasing, test:
+// After deploy + alias, test:
 //   curl https://virtualcoachai.net/api/generate-report
-// and:
+//
+// And real inference test (PowerShell):
 //   curl -Method POST `
 //     -Uri https://virtualcoachai.net/api/generate-report `
 //     -Headers @{ "Content-Type"="application/json" } `
 //     -Body '{ "level":"intermediate","miss":"pull-hook","goal":"stop bowling it left" }'
 
+// Tell Vercel: run this as Node (not Edge)
 const config = {
-  runtime: "nodejs", // <- tell Vercel this is Node, not Edge
+  runtime: "nodejs",
 };
 
-// ---------------------------------------------------------------------
+// -------------------------
 // prompt builder
 function buildPrompt(opts) {
   const level = (opts && opts.level) || "intermediate";
@@ -52,8 +54,9 @@ Rules:
   );
 }
 
-// ---------------------------------------------------------------------
-// fallback card (no AI or AI failed)
+// -------------------------
+// fallback card (if AI missing / fails)
+// This is what keeps us from ever giving a 500.
 function fallbackCard(opts) {
   const level = (opts && opts.level) || "intermediate";
   const miss = (opts && opts.miss) || "pull-hook under pressure";
@@ -90,15 +93,15 @@ This is how you build a motion you can trust on the course.`
   ].join("\n\n");
 }
 
-// ---------------------------------------------------------------------
-// tiny helper: try to parse JSON body regardless of how Vercel fed it
+// -------------------------
+// read request body as JSON safely in Vercel's Node runtime
 async function readJsonBody(req) {
-  // already-object case
+  // If req.body is already a parsed object (sometimes in Vercel), use it
   if (req.body && typeof req.body === "object") {
     return req.body;
   }
 
-  // string case
+  // If req.body is a string, try to parse it
   if (typeof req.body === "string") {
     try {
       return JSON.parse(req.body || "{}");
@@ -107,12 +110,13 @@ async function readJsonBody(req) {
     }
   }
 
-  // stream case
+  // Otherwise, read the request stream manually
   const chunks = [];
   for await (const chunk of req) {
     chunks.push(chunk);
   }
   const raw = Buffer.concat(chunks).toString("utf8");
+
   try {
     return raw ? JSON.parse(raw) : {};
   } catch {
@@ -120,10 +124,10 @@ async function readJsonBody(req) {
   }
 }
 
-// ---------------------------------------------------------------------
-// send JSON with headers in plain Node style
+// -------------------------
+// send JSON with proper headers using plain Node response methods
 function sendJson(res, statusCode, data) {
-  const out = JSON.stringify(data);
+  const body = JSON.stringify(data);
 
   res.writeHead(statusCode, {
     "Content-Type": "application/json; charset=utf-8",
@@ -132,13 +136,13 @@ function sendJson(res, statusCode, data) {
     "Access-Control-Allow-Headers": "Content-Type",
   });
 
-  res.end(out);
+  res.end(body);
 }
 
-// ---------------------------------------------------------------------
-// create coaching card (AI first, fallback if not available)
+// -------------------------
+// try AI first, fallback if anything goes sideways
 async function createCard(level, miss, goal) {
-  // 1. If there's no API key, skip AI entirely
+  // 1. If no OPENAI_API_KEY, skip AI entirely
   const key = process.env.OPENAI_API_KEY;
   if (!key) {
     return {
@@ -147,12 +151,10 @@ async function createCard(level, miss, goal) {
     };
   }
 
-  // 2. We DO have a key. Now dynamically import the ESM client.
-  //    We wrap in try so if import() isn't allowed for some reason, we still live.
+  // 2. dynamic import of openai (ESM client)
   let OpenAI;
   try {
-    // dynamic import returns a module namespace object
-    const mod = await import("openai");
+    const mod = await import("openai"); // returns ESM module namespace
     OpenAI = mod.default || mod.OpenAI || mod;
   } catch (err) {
     console.error("Dynamic import('openai') failed:", err);
@@ -162,7 +164,7 @@ async function createCard(level, miss, goal) {
     };
   }
 
-  // 3. Try to call the model
+  // 3. actually call the model
   try {
     const client = new OpenAI({ apiKey: key });
 
@@ -171,9 +173,12 @@ async function createCard(level, miss, goal) {
       input: buildPrompt({ level, miss, goal }),
     });
 
-    const txt = (completion && completion.output_text) ? String(completion.output_text).trim() : "";
+    const txt = (completion && completion.output_text)
+      ? String(completion.output_text).trim()
+      : "";
 
     if (!txt) {
+      // AI responded but gave nothing usable
       return {
         text: fallbackCard({ level, miss, goal }),
         modelUsed: "fallback:empty-output",
@@ -193,16 +198,16 @@ async function createCard(level, miss, goal) {
   }
 }
 
-// ---------------------------------------------------------------------
-// main handler Vercel will invoke
+// -------------------------
+// main handler that Vercel will invoke
 async function handler(req, res) {
-  // handle preflight
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     sendJson(res, 200, { ok: true, preflight: true });
     return;
   }
 
-  // health check + debug: should NEVER crash here
+  // Health check / sanity check (no crash on GET)
   if (req.method === "GET") {
     sendJson(res, 200, {
       ok: false,
@@ -212,6 +217,7 @@ async function handler(req, res) {
     return;
   }
 
+  // Reject anything that's not POST
   if (req.method !== "POST") {
     sendJson(res, 405, { ok: false, error: "Use POST" });
     return;
@@ -219,6 +225,7 @@ async function handler(req, res) {
 
   try {
     const body = await readJsonBody(req);
+
     const level = body.level || null;
     const miss = body.miss || null;
     const goal = body.goal || null;
@@ -241,7 +248,7 @@ async function handler(req, res) {
   } catch (err) {
     console.error("generate-report FATAL catch:", err);
 
-    // last-resort safety
+    // absolutely last resort: still feed them a legit card
     const payload = {
       ok: true,
       summary: fallbackCard({}),
