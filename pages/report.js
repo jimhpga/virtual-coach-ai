@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { generateCoachingCard } from "../lib/coachApi";
 
 export default function ReportPage() {
