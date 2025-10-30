@@ -1,34 +1,4 @@
-.vercel
-node_modules/
-dist/
-public/data/
-dist/
-public/data/
-*.bak
-
-# local secrets & zips
-.env
+.next
+node_modules
 .env.local
-*.zip
-docs/access keys.txt
-
-
-# secrets & local stuff
-.env
-.env.local
-docs/access keys.txt
-*.zip
-
-# Local backup artifacts
-*.bak
-*.bak*
-*backup*
-*.bak-*
-api/*.js
-api/*.mjs
-api/*.cjs
-api/*.map
-api/*.js
-api/*.mjs
-api/*.cjs
-api/*.map
+.DS_Store
