@@ -1,4 +1,4 @@
-// pages/report.js
+﻿// pages/report.js
 import { useState } from "react";
 import { generateCoachingCard } from "../lib/coachApi";
 
@@ -39,3 +39,4 @@ export default function Report() {
     </main>
   );
 }
+
