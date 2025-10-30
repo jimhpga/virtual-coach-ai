@@ -1,4 +1,4 @@
-// pages/upload.js
+﻿// pages/upload.js
 export default function Upload() {
   return (
     <main style={{padding:20,fontFamily:"system-ui"}}>
@@ -8,3 +8,4 @@ export default function Upload() {
     </main>
   );
 }
+
