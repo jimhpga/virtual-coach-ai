@@ -1,2 +1,858 @@
-﻿<!DOCTYPE html><html><head><title>Report</title></head>
-<body><h1>Report Page</h1><p>Static version.</p></body></html>
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate"/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Virtual Coach AI ΓÇö Swing Report</title>
+<link rel="stylesheet" href="/styles.css" />
+<style>
+  /* ---- Local polish exclusive to the report viewer ---- */
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+  .pill { background:#0f1b22;border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-weight:700 }
+  .pill-tiny { font-size:12px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);background:#0f1b22 }
+  .muted { color: var(--muted); }
+  .card h3 { margin: 0 0 10px; }
+  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+  .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
+  .section-title { display:flex; align-items:center; justify-content:space-between; margin:0 0 8px; gap:12px; }
+  .bar { height:8px; border-radius:999px; background:#0f1b22; border:1px solid var(--line); overflow:hidden; }
+  .bar > i { display:block; height:100%; width:0%; background:var(--accent, #4ad0ff); transition: width .5s ease; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px; }
+
+  /* Summary block styles */
+  .summary-block { border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.03); box-shadow:0 6px 14px rgba(0,0,0,.25); padding:16px; margin-top:14px; }
+  .summary-flex { display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start; }
+  .summary-score { min-width:120px; }
+  .summary-score-number { font-size:32px; font-weight:700; line-height:1; color:var(--accent,#33b5ff); }
+  .summary-score-label { font-size:13px; line-height:1.4; margin-top:4px; }
+  .summary-col { flex:1; min-width:240px; font-size:14px; line-height:1.5; }
+  .summary-heading { font-size:14px; font-weight:600; color:#fff; margin-bottom:4px; }
+
+  /* P1ΓÇôP9 stacked vertically */
+  .pgrid { display:grid; grid-template-columns: 1fr; gap: 14px; }
+  .p-card { background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:14px; padding:12px; box-shadow:0 6px 14px rgba(0,0,0,.25); max-width: 900px; margin: 0 auto; }
+  .p-card h4 { margin:0 0 6px; font-size:15px }
+  .p-card .short { color:var(--muted); margin-bottom:8px }
+  .btn-sm { border:1px solid var(--line); padding:6px 10px; border-radius:8px; background:#0f1b22; color:#fff; text-decoration:none; cursor:pointer; display:inline-block }
+  .btn-sm:hover { background:#122734 }
+  details.p1long { margin-top:8px }
+  details.p1long summary { cursor:pointer; list-style:none; }
+  details.p1long summary::-webkit-details-marker{ display:none }
+  details.p1long summary .caret { display:inline-block; transform: rotate(0deg); transition: transform .2s ease; }
+  details[open].p1long summary .caret { transform: rotate(90deg); }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+
+  .accordion { border:1px solid var(--line); border-radius:14px; overflow:hidden }
+  .ac-head { background:rgba(255,255,255,.03); padding:10px 12px; display:flex; align-items:center; justify-content:space-between; cursor:pointer }
+  .ac-body { padding:12px; display:none }
+  .ac-open .ac-body { display:block }
+  .ac-open .caret { transform: rotate(90deg); }
+  .list-dot { padding-left:18px }
+  .list-dot li { margin:4px 0 }
+  .infobox { font-size:12px; color:var(--muted) }
+  .actions { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 }
+  .btn { border:1px solid var(--line); background:#0f1b22; color:#fff; padding:8px 12px; border-radius:10px; text-decoration:none; cursor:pointer }
+
+  /* Skeleton */
+  .skeleton .bar { position:relative; overflow:hidden }
+  .skeleton .bar::after{
+    content:""; position:absolute; inset:0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent);
+    animation: shimmer 1.2s infinite;
+  }
+  @keyframes shimmer{ 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} }
+
+  @media (max-width: 900px) {
+    .grid3 { grid-template-columns: 1fr; }
+    .grid2 { grid-template-columns: 1fr; }
+  }
+
+  /* Print */
+  @media print{
+    header.site,
+    .navwrap,
+    .accordion .ac-head,
+    .actions,
+    .brand,
+    .scrim #focusBar,
+    #qrBox { display:none !important; }
+    .wrap{ max-width: 100%; margin:0; padding:0; }
+    .card{ break-inside: avoid; box-shadow:none; }
+    body{ background:#fff; color:#000; }
+    .p-card{ border-color:#ddd; }
+  }
+</style>
+<link rel="stylesheet" href="/styles/globals.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="site">
+    <div class="navwrap">
+      <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
+      <nav aria-label="Primary">
+        <a href="/">Home</a>
+        <a href="/upload">Upload</a>
+        <a href="/reports">Reports</a>
+        <a href="/coming-soon">Coming&nbsp;Soon</a>
+        <a href="/pricing">Pricing</a>
+        <a href="/faq">FAQ</a>
+        <a href="/contact">Contact</a>
+        <a href="/about">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="scrim">
+    <main class="wrap" id="app">
+      <!-- HEADER / ACTIONS -->
+      <h1 style="margin-bottom:6px">Swing Report ΓÇö P1ΓÇôP9</h1>
+      <div class="actions">
+        <button id="btnCopy" class="btn">Copy link</button>
+        <button id="btnDownload" class="btn">Download HTML</button>
+        <button id="btnQR" class="btn">QR</button>
+        <button id="btnPrint" class="btn">Print / PDF</button>
+      </div>
+
+      <!-- META ROW -->
+      <div class="meta-row muted" id="metaRow" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap"></div>
+
+      <!-- FOCUS SELECTOR -->
+      <section id="focusBar" class="card" style="margin-top:10px">
+        <div class="section-title">
+          <h3>Focus this report onΓÇª</h3>
+          <select id="focusSelect">
+            <option value="">Balanced</option>
+            <option value="swing plane">Swing Plane</option>
+            <option value="hand path">Hand Path</option>
+            <option value="face control">Face Control</option>
+            <option value="low point">Low Point</option>
+            <option value="speed">Speed</option>
+          </select>
+        </div>
+        <div class="infobox">This changes how we talk about your swing here on-screen. Your saved report stays the same.</div>
+      </section>
+
+      <!-- LOADING STATE -->
+      <div id="skeleton" class="card skeleton" style="padding:16px; margin-top:12px">
+        <div class="muted">Loading your swing reportΓÇª</div>
+        <div class="bar" style="height:12px; border-radius:6px; margin-top:10px"></div>
+      </div>
+
+      <!-- COACH SUMMARY BLOCK -->
+      <section id="coachSummary" class="summary-block" hidden>
+        <!-- SCORE + PROFILE -->
+        <div class="summary-flex">
+          <div class="summary-score">
+            <div id="swingScore" class="summary-score-number">ΓÇö</div>
+            <div class="summary-score-label muted">
+              Swing Score<br/>
+              (higher = more repeatable)
+            </div>
+          </div>
+          <div class="summary-col">
+            <div class="summary-heading">Profile Read</div>
+            <div id="profileRead" class="muted"></div>
+          </div>
+        </div>
+
+        <!-- ELITE TRAITS -->
+        <div style="margin-top:20px;">
+          <div class="summary-heading">Elite Traits (keep these)</div>
+          <ul id="eliteTraits" class="muted" style="font-size:14px; line-height:1.5; padding-left:18px; margin:0;"></ul>
+        </div>
+
+        <!-- PRIMARY FOCUS -->
+        <div style="margin-top:20px;">
+          <div class="summary-heading">Primary Focus (this is the thing)</div>
+          <div id="primaryFocus" class="muted" style="font-size:14px; line-height:1.5;"></div>
+        </div>
+
+        <!-- 14-DAY PLAN HIGH-LEVEL -->
+        <div style="margin-top:20px;">
+          <div class="summary-heading">14-Day Plan</div>
+          <div id="planHighLevel" class="muted" style="font-size:14px; line-height:1.5;"></div>
+        </div>
+      </section>
+
+      <!-- SUMMARY STRIP -->
+      <section class="grid3" style="margin-top:14px" id="summaryStrip" hidden>
+        <div class="card">
+          <div class="section-title">
+            <h3>Coaching Card</h3>
+          </div>
+          <div class="grid2">
+            <div>
+              <div class="muted" style="font-weight:700; margin-bottom:6px">Top 3 Priority Fixes</div>
+              <div id="topPriority" class="list-tight"></div>
+            </div>
+            <div>
+              <div class="muted" style="font-weight:700; margin-bottom:6px">Top 3 Power Fixes</div>
+              <div id="topPower" class="list-tight"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><h3>Power / Tempo</h3></div>
+          <div class="list-tight">
+            <div>
+              <div class="muted">Power Score</div>
+              <div class="bar"><i id="barScore"></i></div>
+              <div class="mono" id="txtScore"></div>
+            </div>
+            <div>
+              <div class="muted">Tempo</div>
+              <div class="mono" id="txtTempo">ΓÇö</div>
+            </div>
+            <div>
+              <div class="muted">Release Timing</div>
+              <div class="bar"><i id="barRelease"></i></div>
+              <div class="mono" id="txtRelease"></div>
+            </div>
+
+            <div class="muted" style="font-weight:700; margin-top:8px">Likely Power Leaks</div>
+            <ul id="powerLeaks" class="list-dot" style="margin-top:6px"></ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title"><h3>Consistency</h3></div>
+          <div class="grid2">
+            <div>
+              <div class="muted" style="font-weight:700; margin-bottom:6px">Position Consistency</div>
+              <div id="posConsistency" class="infobox">ΓÇö</div>
+            </div>
+            <div>
+              <div class="muted" style="font-weight:700; margin-bottom:6px">Swing Consistency</div>
+              <div id="swingConsistency" class="infobox">ΓÇö</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PRACTICE PLAN ACCORDION -->
+      <section style="margin-top:14px" id="practiceBlock" hidden>
+        <div class="accordion" id="planAcc">
+          <div class="ac-head" role="button" tabindex="0">
+            <div style="display:flex; gap:10px; align-items:center">
+              <span class="caret">Γû╢</span>
+              <h3 style="margin:0">Practice Plan (14 days)</h3>
+            </div>
+            <span class="pill-tiny" id="planCount">0 items</span>
+          </div>
+          <div class="ac-body">
+            <div id="planList" class="list-dot"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- P1ΓÇôP9 CHECKPOINTS -->
+      <section style="margin-top:14px">
+        <h2 style="margin:0 0 8px">P1ΓÇôP9 Checkpoints</h2>
+        <div class="pgrid" id="pGrid"></div>
+        <div class="infobox" id="pGridEmpty" style="margin-top:8px"></div>
+      </section>
+
+      <!-- NARRATIVE SUMMARY -->
+      <section class="card" style="margin-top:14px" id="summaryCard" hidden>
+        <h3 style="margin:0 0 8px">Full Swing Summary</h3>
+        <div id="summaryText" class="muted"></div>
+      </section>
+
+      <!-- OPTIONAL COACH NOTE -->
+      <section id="noteBox" class="card" style="margin-top:14px; display:none">
+        <h3 style="margin:0 0 8px">Coach Note</h3>
+        <div id="noteTxt" class="muted"></div>
+      </section>
+
+      <!-- QR CONTAINER -->
+      <div id="qrBox" class="card" style="display:none;margin-top:10px;padding:10px"></div>
+    </main>
+  </div>
+
+<script>
+/* ----------- CONFIG ----------- */
+window.BLOB_PUBLIC_BASE =
+  window.BLOB_PUBLIC_BASE || "https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com";
+
+/* ----------- helpers ----------- */
+const $ = s => document.querySelector(s);
+const qp = new URLSearchParams(location.search);
+const rid = qp.get('id');
+const directUrl = qp.get('url');
+
+const blobFromId = id =>
+  `${window.BLOB_PUBLIC_BASE.replace(/\/+$/,'')}/reports/${encodeURIComponent(id)}.json?cb=${Date.now()}`;
+
+function showErr(msg){ alert(msg); }
+
+async function fetchJson(url, tries=3){
+  let last;
+  for(let i=0;i<tries;i++){
+    const res = await fetch(url, {cache:'no-store'});
+    if (res.ok){
+      const txt = await res.text();
+      return JSON.parse(txt.trim().replace(/^\uFEFF/, ''));
+    }
+    last = res.status;
+    await new Promise(r=>setTimeout(r, 400*(i+1)));
+  }
+  throw new Error(`Fetch ${last} for ${url}`);
+}
+
+function shareUrl(){
+  const u = new URL(location.href);
+  if (directUrl) { u.searchParams.set('url', directUrl); u.searchParams.delete('id'); }
+  else if (rid) { u.searchParams.set('id', rid); u.searchParams.delete('url'); }
+  return u.toString();
+}
+$("#btnCopy").addEventListener('click', async ()=>{
+  const link = shareUrl();
+  try{ await navigator.clipboard.writeText(link); alert('Share link copied'); }
+  catch{ prompt('Copy link:', link); }
+});
+$("#btnDownload").addEventListener('click', ()=>{
+  const html = document.documentElement.outerHTML;
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'swing-report.html';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+});
+$("#btnQR")?.addEventListener('click', ()=>{
+  const link = shareUrl();
+  const img = new Image();
+  img.alt = 'QR';
+  img.src = 'https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=' + encodeURIComponent(link);
+  const box = $("#qrBox");
+  box.innerHTML = ''; box.appendChild(img); box.style.display='block';
+});
+$("#btnPrint")?.addEventListener('click', ()=> window.print());
+
+/* ----------- RANDOMIZATION + PERSONALIZATION ENGINE ----------- */
+function pickRandom(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function inferTier(data) {
+  const score = Number(data.power?.score ?? data.swingScore ?? 0);
+  const release = Number(data.power?.release_timing ?? 0);
+  if (score >= 85 && release >= 70) return "advanced";
+  if (score >= 70) return "intermediate";
+  return "developing";
+}
+
+const profileReadTemplates = {
+  advanced: [
+    "This is an advanced pattern. Lower body starts first, the club shallows instead of dumping over the top, and you finish balanced. WeΓÇÖre not rebuilding you ΓÇö weΓÇÖre just tightening control windows.",
+    "You move like a high-level player. Hips lead transition, delivery is on track, and youΓÇÖre finishing in balance. We're talking precision tweaks, not a swing overhaul.",
+    "YouΓÇÖre sequencing like a player. Belt gets ahead first, shaft falls into the slot, and the finish is stable. You're already in the good column; now we sharpen face control.",
+    "This is tour-style sequencing. Lower body drives, arms follow, face control is mostly managed. YouΓÇÖre in tune with the motion ΓÇö weΓÇÖre chasing repeatability under pressure.",
+    "This is a legit, athletic move. YouΓÇÖre using the ground, not just your hands, and youΓÇÖre delivering the club from a powerful slot. WeΓÇÖre hunting small misses now."
+  ],
+  intermediate: [
+    "You have a lot of the motion built. The body starts things, and the club is close to the slot. The main goal now is cleaning up impact so the ball starts where you think it will.",
+    "The core motion is there. YouΓÇÖre not just throwing your hands at it. We just need to stabilize one or two leaks so the strike gets more predictable.",
+    "YouΓÇÖre creating speed the right way, not just slapping at it. Contact/face control is where youΓÇÖll pick up the biggest gains next.",
+    "YouΓÇÖve got a playable motion. YouΓÇÖre using rotation, not only arms. Now we lock in the timing around the ball so it holds up on the course.",
+    "ThereΓÇÖs structure here. YouΓÇÖre loading, youΓÇÖre turning, youΓÇÖre posting up. The next jump is taking the hand-save out of impact."
+  ],
+  developing: [
+    "YouΓÇÖre in build mode. YouΓÇÖre starting to use your body instead of just your hands, and thatΓÇÖs the right direction. WeΓÇÖre going to stabilize contact first.",
+    "This is a foundation swing. YouΓÇÖre getting the club around the same way each time, and now weΓÇÖll get you more solid at impact so you stop guessing.",
+    "YouΓÇÖre starting to move like a golfer, not just hit at the ball. Step one is contact you can trust. Then weΓÇÖll chase speed.",
+    "YouΓÇÖre laying the base. WeΓÇÖll get you into a repeatable setup and a calmer strike, so you stop fighting the big miss.",
+    "This is the right starting point. YouΓÇÖre learning to load, turn, and post. WeΓÇÖre going to make the strike cleaner and easier to repeat."
+  ]
+};
+
+const eliteTraitTemplates = {
+  lower_body_lead: [
+    "You start the downswing with your legs, not your hands. ThatΓÇÖs real sequence ΓÇö keep it.",
+    "Your hips fire first and pull everything else. ThatΓÇÖs a tour pattern. Do not mess with that.",
+    "You clear the belt before the club comes down. ThatΓÇÖs how better players create speed without forcing it.",
+    "Your lower body actually starts the move. Most golfers canΓÇÖt do that. Huge plus.",
+    "You drive from the ground up, not just arms. ThatΓÇÖs going to hold up under pressure."
+  ],
+  slot_delivery: [
+    "The club falls into the slot under your trail forearm instead of casting over the top. ThatΓÇÖs compression-friendly.",
+    "YouΓÇÖre not throwing it over the top. You shallow it and deliver from the inside. ThatΓÇÖs why you can flight it.",
+    "ClubΓÇÖs coming from a strong delivery position instead of across the line. ThatΓÇÖs a ball-striker move.",
+    "You deliver the shaft on plane instead of dumping from the top. ThatΓÇÖs advanced.",
+    "You drop it into a powerful slot. ThatΓÇÖs how you get speed without chaos."
+  ],
+  balanced_finish: [
+    "YouΓÇÖre posting up and finishing on balance, not falling out of the shot. That will travel to the course.",
+    "You land in control. Chest up, weight left, no spin-out. ThatΓÇÖs a stable finish.",
+    "YouΓÇÖre not falling off it. YouΓÇÖre holding posture through the strike and into the finish. Keep that.",
+    "Your finish is calm and tall, not out of control. ThatΓÇÖs why you can repeat it.",
+    "YouΓÇÖre not bailing out after contact. ThatΓÇÖs a sign you trust the motion."
+  ],
+  tempo_control: [
+    "Your tempo is consistent. ThatΓÇÖs rare. Keep that rhythm; itΓÇÖs the glue.",
+    "YouΓÇÖre not rushing from the top. That slow start creates effortless speed.",
+    "Your backswing-to-downswing ratio is repeatable. ThatΓÇÖs why you can find the center.",
+    "You keep the same tempo swing to swing. ThatΓÇÖs a serious weapon.",
+    "You donΓÇÖt lunge at it from the top. ThatΓÇÖs why contact is playable."
+  ],
+  forward_hands: [
+    "You get the hands forward at impact instead of flipping. ThatΓÇÖs compression.",
+    "YouΓÇÖre de-lofting the club at impact instead of adding loft. ThatΓÇÖs how you get a strong ball flight.",
+    "YouΓÇÖre not scooping it. YouΓÇÖre hitting it with forward shaft lean. ThatΓÇÖs grown-up golf.",
+    "YouΓÇÖre compressing the ball instead of trying to help it in the air. ThatΓÇÖs legit.",
+    "YouΓÇÖre delivering the face with authority, not flipping to save it. ThatΓÇÖs control."
+  ]
+};
+
+const primaryFocusTemplates = {
+  face_control: [
+    "At P7 (impact) youΓÇÖre saving it with your hands. The face is getting adjusted late instead of staying stable through the ball. WeΓÇÖre going to quiet that down so your start line tightens.",
+    "Impact is handsy. YouΓÇÖre catching the face up right at the ball instead of letting it ride in square. WeΓÇÖll lock the face in earlier so you donΓÇÖt have to steer it.",
+    "Right now youΓÇÖre timing the clubface instead of trusting it. ThatΓÇÖs fragile under pressure. Goal one is to stabilize the face through impact.",
+    "YouΓÇÖre flipping the face late to square it. ThatΓÇÖs why you fear both left and right. WeΓÇÖre going to take the flip out.",
+    "Clubface control at impact is the leak. WeΓÇÖll quiet the hands so you can swing through it without babysitting the ball."
+  ],
+  weight_shift: [
+    "YouΓÇÖre hanging back instead of getting pressure left by impact. That makes you guide it. WeΓÇÖre going to get you posted left earlier so you can hit through it.",
+    "YouΓÇÖre not fully into your lead side at P7, so youΓÇÖre forced to save it with your hands. WeΓÇÖll fix that weight move so impact cleans up automatically.",
+    "PressureΓÇÖs not getting forward soon enough. YouΓÇÖre stuck on the trail side and then flipping the club through. WeΓÇÖre going to get you braced left sooner.",
+    "YouΓÇÖre late getting to your lead leg, so the club has to catch up. We fix the shift first, not the hands.",
+    "Weight is trailing behind the swing. We fix that by posting up earlier so you can rotate and let it go."
+  ],
+  early_extension: [
+    "YouΓÇÖre standing up out of posture through impact. That crowds the strike and makes face control a guess. WeΓÇÖll train you to stay in the shot longer.",
+    "Your hips are jumping toward the ball before impact. ThatΓÇÖs why contact feels jammed. WeΓÇÖll smooth that out.",
+    "YouΓÇÖre losing your space through impact ΓÇö hips drift in, chest stands up. WeΓÇÖll keep you out of the ball so the club can exit clean.",
+    "You pop out of posture through the ball. ThatΓÇÖs why the strike feels inconsistent. WeΓÇÖll build a feel that keeps you down and turning.",
+    "YouΓÇÖre early-extending through P7. WeΓÇÖre going to calm that chase so you rotate through it instead of jumping at it."
+  ],
+  over_the_top: [
+    "Club is starting down a little over the top. That forces you to cut across it. WeΓÇÖll shallow the first move so you can swing through, not across.",
+    "The club is working across the ball instead of through it. WeΓÇÖre going to get you delivering from the inside so contact stops bleeding energy.",
+    "YouΓÇÖre coming in across it, not from the slot. WeΓÇÖll retrain the first move from the top so you donΓÇÖt have to carve across it.",
+    "Downswing starts out over the plane, so the path has to save itself. WeΓÇÖll fix that transition first.",
+    "YouΓÇÖre cutting across the ball. WeΓÇÖre going to drop the club in, not throw it over."
+  ]
+};
+
+const planIntroTemplates = [
+  "Do this in order. DonΓÇÖt jump ahead.",
+  "Follow this order. DonΓÇÖt try to fix all three things in one bucket session.",
+  "One piece at a time. Give each feel a few days before you add speed.",
+  "Treat this like a ladder: contact first, control second, speed last.",
+  "This is your next two weeks. ItΓÇÖs built to work on the course, not just look pretty on the range."
+];
+
+function inferFlagsFromData(data) {
+  const flags = {
+    lower_body_lead: !!data.sequenceGood || !!data.transition?.lowerBodyFirst,
+    slot_delivery:   !!data.deliveryGood || !!data.p6Slot || !!data.delivery?.inSlot,
+    balanced_finish: !!data.finishGood  || !!data.p9Balance || !!data.finish?.balanced,
+    tempo_control:   !!data.tempoGood   || !!data.power?.tempoStable,
+    forward_hands:   !!data.forwardLean || !!data.impact?.handsForward,
+  };
+
+  let issue = data.main_issue;
+  if (!issue) {
+    if (data.faceControlBad || data.impact?.faceActive) issue = "face_control";
+    else if (data.weightShiftLate || data.impact?.hangBack) issue = "weight_shift";
+    else if (data.earlyExtend || data.postureLoss) issue = "early_extension";
+    else if (data.pathOverTop || data.transition?.overTheTop) issue = "over_the_top";
+    else issue = "face_control";
+  }
+
+  return { flags, issue };
+}
+
+function buildEliteTraits(flags) {
+  const chosen = [];
+  if (flags.lower_body_lead) { chosen.push(pickRandom(eliteTraitTemplates.lower_body_lead)); }
+  if (flags.slot_delivery)   { chosen.push(pickRandom(eliteTraitTemplates.slot_delivery)); }
+  if (flags.balanced_finish) { chosen.push(pickRandom(eliteTraitTemplates.balanced_finish)); }
+  if (flags.tempo_control)   { chosen.push(pickRandom(eliteTraitTemplates.tempo_control)); }
+  if (flags.forward_hands)   { chosen.push(pickRandom(eliteTraitTemplates.forward_hands)); }
+
+  return chosen.slice(0,3); // keep it readable
+}
+
+function buildPrimaryFocus(issue) {
+  const bank = primaryFocusTemplates[issue] || primaryFocusTemplates.face_control;
+  return pickRandom(bank);
+}
+
+function personalizeReport(data) {
+  const tier = inferTier(data);
+  const { flags, issue } = inferFlagsFromData(data);
+
+  // profileRead
+  const tierPool = profileReadTemplates[tier] || profileReadTemplates.developing;
+  data.profileRead = pickRandom(tierPool);
+
+  // eliteTraits
+  data.eliteTraits = buildEliteTraits(flags);
+
+  // primaryFocus
+  data.primaryFocus = buildPrimaryFocus(issue);
+
+  // planHighLevelIntro ΓÇô rotated voice for the 14-day block
+  data.planHighLevelIntro = pickRandom(planIntroTemplates);
+
+  return data;
+}
+
+/* ----------- render helpers ----------- */
+let lastReport = null;
+const pct = n => Math.max(0, Math.min(100, Number(n||0)));
+
+function fillMeta(data){
+  const row = $('#metaRow'); row.innerHTML = '';
+
+  if (data.enhanced || (data.ai && data.ai.enhanced)){
+    const s = document.createElement('span');
+    s.className = 'pill';
+    s.textContent = (data.ai && data.ai.enhanced)
+      ? `AI Enhanced Γ£ô (${data.ai.model||'LLM'})`
+      : 'AI Enhanced Γ£ô';
+    row.appendChild(s);
+  }
+
+  const pills = [
+    ['Score', (data.power?.score ?? data.swingScore ?? 'ΓÇö')],
+    ['Status', (data.status ?? 'ΓÇö')],
+    ['Tempo', (data.power?.tempo ?? 'ΓÇö')],
+    ['Release', (data.power?.release_timing != null ? (data.power.release_timing + '%') : 'ΓÇö')],
+    ['Level', (data.level || data.meta?.level || 'ΓÇö')],
+    ['Goal', (data.goal || data.meta?.goal || 'ΓÇö')],
+  ];
+
+  pills.forEach(([k,v])=>{
+    const x = document.createElement('span');
+    x.className='pill';
+    x.textContent=`${k}: ${v}`;
+    row.appendChild(x);
+  });
+
+  const created = document.createElement('span');
+  created.className = 'muted';
+  created.style.marginLeft='8px';
+  created.textContent = `Created: ${new Date().toLocaleString()}`;
+  row.appendChild(created);
+}
+
+function setBars(data){
+  const scoreVal = pct(data.power?.score ?? data.swingScore ?? 0);
+  $('#barScore').style.width = scoreVal + '%';
+  $('#txtScore').textContent = `${scoreVal}%`;
+
+  const rel = pct(data.power?.release_timing ?? 0);
+  $('#barRelease').style.width = rel + '%';
+  $('#txtRelease').textContent = `${rel}%`;
+
+  $('#txtTempo').textContent = data.power?.tempo ?? 'ΓÇö';
+  $('#swingScore').textContent = scoreVal ? scoreVal : 'ΓÇö';
+}
+
+function setConsistency(data){
+  const pos = data.positionConsistency?.notes
+          || data.position_consistency?.notes
+          || "Setup and transition are repeating. Minor variability shows up around clubface delivery.";
+  const sw  = data.swingConsistency?.notes
+          || data.swing_consistency?.notes
+          || "Tempo is mostly stable; rehearse a few slow-motion reps between full swings to lock timing.";
+  $('#posConsistency').textContent = pos;
+  $('#swingConsistency').textContent = sw;
+}
+
+function setPowerLeaks(data){
+  const out = [];
+  const s = Number(data.power?.score ?? data.swingScore ?? 0);
+  const rel = Number(data.power?.release_timing ?? 0);
+  const tempo = String(data.power?.tempo || '3:1');
+
+  if (s < 85) out.push('Add lead-side post / bracing at transition for more efficient speed transfer.');
+  if (rel < 70) out.push('Clubface is getting ΓÇ£savedΓÇ¥ late. Stabilize face through impact (P7) for tighter start line.');
+  if (!/3:1/.test(tempo)) out.push('Tempo drifting. Hold rehearsals at slow speed between full swings.');
+
+  const ul = $('#powerLeaks');
+  ul.innerHTML = out.length
+    ? out.slice(0,3).map(t=>`<li>${t}</li>`).join('')
+    : '<li>No obvious power leaks detected.</li>';
+}
+
+function itemDiv(txt){
+  const d = document.createElement('div');
+  d.textContent = txt;
+  return d;
+}
+
+function setCoachingCard(data){
+  const focus = data._focus;
+  const pri = (data.topPriorityFixes || data.top_priority_fixes || []).slice(0,3);
+  const pow = (data.topPowerFixes || data.top_power_fixes || []).slice(0,3);
+
+  const priBox = $('#topPriority');
+  const powBox = $('#topPower');
+  priBox.innerHTML=''; powBox.innerHTML='';
+
+  if(!pri.length) priBox.appendChild(itemDiv('ΓÇö'));
+  if(!pow.length) powBox.appendChild(itemDiv('ΓÇö'));
+
+  pri.forEach(x => {
+    const text = typeof x === 'string'
+      ? x
+      : (x.title ? `${x.title} ΓÇö ${x.how||x.why||''}` : JSON.stringify(x));
+    priBox.appendChild(itemDiv('ΓÇó ' + text + (focus ? ` (focus: ${focus})` : '')));
+  });
+
+  pow.forEach(x => {
+    const text = typeof x === 'string'
+      ? x
+      : (x.title ? `${x.title} ΓÇö ${x.how||x.why||''}` : JSON.stringify(x));
+    powBox.appendChild(itemDiv('ΓÇó ' + text + (focus ? ` (focus: ${focus})` : '')));
+  });
+
+  $('#summaryStrip').hidden = false;
+}
+
+function youtubeLink(name){
+  const q = encodeURIComponent(`${name} golf checkpoint`);
+  return `https://www.youtube.com/results?search_query=${q}`;
+}
+
+function renderPGrid(data){
+  const list = Array.isArray(data.p1p9 || data.phases) ? (data.p1p9 || data.phases) : [];
+  const grid = $('#pGrid'); grid.innerHTML = '';
+  const empty = $('#pGridEmpty'); empty.textContent='';
+  if(!list.length){ empty.textContent = 'No P1ΓÇôP9 items in this report.'; return; }
+
+  const focus = data._focus;
+
+  list.forEach((p,i)=>{
+    const name  = p.name || p.title || `P${i+1}`;
+    const grade = (p.grade || '').toString();
+    const short = p.short || p.note || 'ΓÇö';
+    const long  = p.long  || p.details || '';
+    const video = p.video || youtubeLink(name);
+    const idTxt = p.id || `P${i+1}`;
+
+    const c = document.createElement('div');
+    c.className='p-card';
+
+    const head = document.createElement('div');
+    head.style.display = 'flex';
+    head.style.alignItems = 'center';
+    head.style.justifyContent = 'space-between';
+    head.style.gap = '8px';
+
+    const h4 = document.createElement('h4');
+    h4.textContent = `${idTxt}. ${name}`;
+    head.appendChild(h4);
+
+    const g = document.createElement('span');
+    g.className='pill-tiny';
+    g.textContent = grade ? `grade: ${grade}` : 'grade: ΓÇö';
+    head.appendChild(g);
+    c.appendChild(head);
+
+    const watch = document.createElement('a');
+    watch.className = 'btn-sm';
+    watch.target = '_blank';
+    watch.href = video;
+    watch.textContent = 'Watch';
+    watch.style.marginTop = '4px';
+    c.appendChild(watch);
+
+    const s = document.createElement('div');
+    s.className='short';
+    s.textContent = short;
+    c.appendChild(s);
+
+    if(long || focus){
+      const det = document.createElement('details');
+      det.className='p1long';
+
+      const sum = document.createElement('summary');
+      const caret = document.createElement('span');
+      caret.className='caret';
+      caret.textContent = 'Γû╢';
+      sum.appendChild(caret);
+
+      const t = document.createElement('span');
+      t.textContent = ' Details';
+      sum.appendChild(t);
+
+      det.appendChild(sum);
+
+      const body = document.createElement('div');
+      body.style.marginTop='8px';
+      body.textContent = long || '';
+
+      if (focus){
+        const extra = document.createElement('div');
+        extra.className = 'infobox';
+        extra.style.marginTop = '6px';
+        extra.textContent = `Focus note: relate this checkpoint to ${focus}.`;
+        body.appendChild(document.createElement('br'));
+        body.appendChild(extra);
+      }
+
+      det.appendChild(body);
+      c.appendChild(det);
+    }
+
+    grid.appendChild(c);
+  });
+}
+
+function setPracticePlan(data){
+  const list = data.practicePlan || data.practice_plan || [];
+  const root = $('#planAcc');
+  const count = $('#planCount');
+  const out  = $('#planList');
+
+  out.innerHTML='';
+  count.textContent = `${list.length} items`;
+
+  if(!list.length) {
+    out.innerHTML = '<div class="infobox">No plan found.</div>';
+    data.planHighLevel = '';
+  } else {
+    const ul = document.createElement('ul');
+    ul.className='list-dot';
+
+    list.forEach(it=>{
+      const li = document.createElement('li');
+      const d = it.day != null ? `Day ${it.day}: ` : '';
+      const title = it.title || it.name || '';
+      const items = Array.isArray(it.items) ? ` ΓÇö ${it.items.join('; ')}` : '';
+      li.textContent = `${d}${title}${items}`;
+      ul.appendChild(li);
+    });
+
+    out.appendChild(ul);
+
+    const preview = list.slice(0,3).map(it=>{
+      const d = (it.day != null) ? `Day ${it.day}: ` : '';
+      return d + (it.title || it.name || '');
+    }).join(' ΓÇó ');
+    data.planHighLevel = preview;
+  }
+
+  const head = root.querySelector('.ac-head');
+  head.onclick = () => root.classList.toggle('ac-open');
+  head.onkeydown = (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); root.classList.toggle('ac-open'); }};
+
+  document.getElementById('practiceBlock').hidden = false;
+}
+
+function setSummary(data){
+  const txt = (data.summary_long || '').trim();
+  if(!txt){
+    document.getElementById('summaryCard').hidden = true;
+    return;
+  }
+  document.getElementById('summaryText').textContent = txt;
+  document.getElementById('summaryCard').hidden = false;
+}
+
+function setNote(data){
+  const n = (data.note || '').trim();
+  const box = $('#noteBox');
+  if(!n){
+    box.style.display='none';
+    return;
+  }
+  $('#noteTxt').textContent = n;
+  box.style.display='block';
+}
+
+function setCoachSummary(data){
+  $('#profileRead').textContent =
+    data.profileRead ||
+    "YouΓÇÖre building a repeatable motion. WeΓÇÖre tightening control, not starting over.";
+
+  const traitsBox = $('#eliteTraits');
+  traitsBox.innerHTML = '';
+  const traits = data.eliteTraits && data.eliteTraits.length
+    ? data.eliteTraits
+    : [
+        "YouΓÇÖre starting the downswing with the body, not just hands. ThatΓÇÖs a real move.",
+        "YouΓÇÖre finishing in balance instead of falling out of it. That will hold up on the course."
+      ];
+  traits.forEach(t=>{
+    const li = document.createElement('li');
+    li.textContent = t;
+    traitsBox.appendChild(li);
+  });
+
+  $('#primaryFocus').textContent =
+    data.primaryFocus ||
+    "Clubface gets saved late. WeΓÇÖre going to quiet that move so you can trust start line.";
+
+  const intro  = data.planHighLevelIntro ||
+    "Do this in order. DonΓÇÖt jump ahead.";
+  const block  = data.planHighLevel || "";
+  const finalPlan = intro + (block ? " " + block : "");
+  $('#planHighLevel').textContent = finalPlan;
+
+  $('#coachSummary').hidden = false;
+}
+
+/* ----------- render orchestration ----------- */
+let lastReport = null;
+
+function renderAll(data){
+  lastReport = data || {};
+  $('#skeleton')?.remove();
+
+  fillMeta(data);
+  setBars(data);
+  setConsistency(data);
+  setPowerLeaks(data);
+  setCoachingCard(data);
+  renderPGrid(data);
+  setPracticePlan(data);
+  setSummary(data);
+  setNote(data);
+  setCoachSummary(data);
+
+  document.getElementById('summaryStrip').hidden = false;
+}
+
+/* ----------- boot ----------- */
+(async ()=> {
+  try{
+    let url = null;
+    if (directUrl) url = directUrl;
+    else if (rid)   url = blobFromId(rid);
+    else {
+      const raw = sessionStorage.getItem('vc_report') || localStorage.getItem('vc_last_report');
+      if (!raw) throw new Error('Missing ?url or ?id. Use upload flow or reports page.');
+      const parsed = JSON.parse(raw.trim().replace(/^\uFEFF/, ''));
+      const personalized = personalizeReport(parsed);
+      renderAll(personalized);
+      return;
+    }
+
+    const data = await fetchJson(url);
+    const personalized = personalizeReport(data);
+    renderAll(personalized);
+  }catch(err){
+    $('#skeleton')?.remove();
+    showErr(err?.message || String(err));
+  }
+})();
+
+/* focus changes: re-render text bias with selected focus */
+document.getElementById('focusSelect')?.addEventListener('change', (e)=>{
+  if (!lastReport) return;
+  const focused = { ...lastReport, _focus: e.target.value || null };
+  // re-run personalization? No ΓÇö keep the same randomized language.
+  renderAll(focused);
+});
+</script>
+</body>
+</html>
+
