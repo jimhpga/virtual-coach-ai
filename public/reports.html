@@ -1,10 +1,10 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate"/>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Virtual Coach AI — Swing Report</title>
+<title>Virtual Coach AI â€” Swing Report</title>
 <link rel="stylesheet" href="/styles.css" />
 <style>
   .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
@@ -34,7 +34,7 @@
   .coach-toggle:hover { background:#122734 }
   .coach-chip { font-size:11px; border:1px solid var(--line); border-radius:999px; padding:2px 8px; background:#0f1b22; }
 
-  /* P1–P9 stacked vertically */
+  /* P1â€“P9 stacked vertically */
   .pgrid { display:grid; grid-template-columns: 1fr; gap: 14px; }
   .p-card { background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:14px; padding:12px; box-shadow:0 6px 14px rgba(0,0,0,.25); max-width: 900px; margin: 0 auto; }
   .p-card h4 { margin:0 0 6px; font-size:15px }
@@ -100,7 +100,7 @@
 
   <div class="scrim">
     <main class="wrap" id="app">
-      <h1 style="margin-bottom:6px">Swing Report — P1–P9</h1>
+      <h1 style="margin-bottom:6px">Swing Report â€” P1â€“P9</h1>
 
       <div class="actions">
         <button id="btnCopy" class="btn">Copy link</button>
@@ -114,7 +114,7 @@
       <!-- Focus selector -->
       <section id="focusBar" class="card" style="margin-top:10px">
         <div class="section-title">
-          <h3>Focus this report on…</h3>
+          <h3>Focus this report onâ€¦</h3>
           <select id="focusSelect">
             <option value="">Balanced</option>
             <option value="swing plane">Swing Plane</option>
@@ -124,12 +124,12 @@
             <option value="speed">Speed</option>
           </select>
         </div>
-        <div class="infobox">This only adjusts the wording you see here (it won’t overwrite the saved report).</div>
+        <div class="infobox">This only adjusts the wording you see here (it wonâ€™t overwrite the saved report).</div>
       </section>
 
       <!-- Loading skeleton -->
       <div id="skeleton" class="card skeleton" style="padding:16px; margin-top:12px">
-        <div class="muted">Loading your swing report…</div>
+        <div class="muted">Loading your swing reportâ€¦</div>
         <div class="bar" style="height:12px; border-radius:6px; margin-top:10px"></div>
       </div>
 
@@ -145,7 +145,7 @@
             </div>
             <div>
               <div class="muted">Tempo</div>
-              <div class="mono" id="txtTempo">—</div>
+              <div class="mono" id="txtTempo">â€”</div>
             </div>
             <div>
               <div class="muted">Release Timing</div>
@@ -160,18 +160,18 @@
           <div class="grid2">
             <div>
               <div class="muted" style="font-weight:700; margin-bottom:6px">Position Consistency</div>
-              <div id="posConsistency" class="infobox">—</div>
+              <div id="posConsistency" class="infobox">â€”</div>
             </div>
             <div>
               <div class="muted" style="font-weight:700; margin-bottom:6px">Swing Consistency</div>
-              <div id="swingConsistency" class="infobox">—</div>
+              <div id="swingConsistency" class="infobox">â€”</div>
             </div>
           </div>
         </div>
 
         <div class="card">
           <div class="section-title"><h3>Quick Summary</h3></div>
-          <div id="quickSummary" class="infobox">—</div>
+          <div id="quickSummary" class="infobox">â€”</div>
         </div>
       </section>
 
@@ -196,7 +196,7 @@
         <div class="accordion" id="planAcc">
           <div class="ac-head" role="button" tabindex="0">
             <div style="display:flex; gap:10px; align-items:center">
-              <span class="caret">▶</span>
+              <span class="caret">â–¶</span>
               <h3 style="margin:0">Practice Plan (14 days)</h3>
             </div>
             <span class="pill-tiny" id="planCount">0 items</span>
@@ -207,9 +207,9 @@
         </div>
       </section>
 
-      <!-- P1–P9 -->
+      <!-- P1â€“P9 -->
       <section style="margin-top:14px">
-        <h2 style="margin:0 0 8px">P1–P9</h2>
+        <h2 style="margin:0 0 8px">P1â€“P9</h2>
         <div class="pgrid" id="pGrid"></div>
         <div class="infobox" id="pGridEmpty" style="margin-top:8px"></div>
       </section>
@@ -348,16 +348,16 @@ function fillMeta(data){
   if (data.enhanced || (data.ai && data.ai.enhanced)){
     const s = document.createElement('span');
     s.className = 'pill';
-    s.textContent = (data.ai && data.ai.enhanced) ? `AI Enhanced ✓ (${data.ai.model||'LLM'})` : 'AI Enhanced ✓';
+    s.textContent = (data.ai && data.ai.enhanced) ? `AI Enhanced âœ“ (${data.ai.model||'LLM'})` : 'AI Enhanced âœ“';
     row.appendChild(s);
   }
   const pills = [
-    ['Score', (data.power?.score ?? data.swingScore ?? '—')],
-    ['Status', (data.status ?? '—')],
-    ['Tempo', (data.power?.tempo ?? '—')],
-    ['Release', (data.power?.release_timing != null ? (data.power.release_timing + '%') : '—')],
-    ['Level', (data.level || data.meta?.level || '—')],
-    ['Goal', (data.goal || data.meta?.goal || '—')],
+    ['Score', (data.power?.score ?? data.swingScore ?? 'â€”')],
+    ['Status', (data.status ?? 'â€”')],
+    ['Tempo', (data.power?.tempo ?? 'â€”')],
+    ['Release', (data.power?.release_timing != null ? (data.power.release_timing + '%') : 'â€”')],
+    ['Level', (data.level || data.meta?.level || 'â€”')],
+    ['Goal', (data.goal || data.meta?.goal || 'â€”')],
   ];
   pills.forEach(([k,v])=>{
     const x = document.createElement('span');
@@ -378,7 +378,7 @@ function setPowerAndConsistency(data){
   const rel = pct(data.power?.release_timing ?? 0);
   $('#barRelease').style.width = rel + '%';
   $('#txtRelease').textContent = `${rel}%`;
-  $('#txtTempo').textContent = data.power?.tempo ?? '—';
+  $('#txtTempo').textContent = data.power?.tempo ?? 'â€”';
 
   const pos = data.positionConsistency?.notes
           || data.position_consistency?.notes
@@ -393,7 +393,7 @@ function setPowerAndConsistency(data){
   const qs = [];
   if (score >= 80) qs.push("Plenty of stored power ready to go.");
   if (rel < 70)    qs.push("Tidy up release timing for tighter start-lines.");
-  if (!qs.length)  qs.push("Solid foundations—let’s refine delivery windows.");
+  if (!qs.length)  qs.push("Solid foundationsâ€”letâ€™s refine delivery windows.");
   $('#quickSummary').textContent = qs.join(' ');
   $('#pcStrip').hidden = false;
 }
@@ -406,7 +406,7 @@ function setCoachingCards(data){
   const priBox = $('#priorityList'); priBox.innerHTML='';
   const powBox = $('#powerFixList'); powBox.innerHTML='';
 
-  (pri.length ? pri : [{title:'Dial in face control', why:'We’ll shrink curve and tighten start-line.'}])
+  (pri.length ? pri : [{title:'Dial in face control', why:'Weâ€™ll shrink curve and tighten start-line.'}])
     .forEach(x=> priBox.appendChild(coachItemDOM(x)));
   (pow.length ? pow : [{title:'Post the lead leg', why:'Better braking = better energy transfer.'}])
     .forEach(x=> powBox.appendChild(coachItemDOM(x)));
@@ -420,7 +420,7 @@ function setCoachingCards(data){
     const rel = Number(data.power?.release_timing ?? 0);
     const tempo = String(data.power?.tempo || '3:1');
     const inferred = [];
-    if (s < 85) inferred.push({title:'Lead-leg braking', why:'Stronger post boosts pelvis speed.', how:'“Stick the post” drill—hold 2 beats.'});
+    if (s < 85) inferred.push({title:'Lead-leg braking', why:'Stronger post boosts pelvis speed.', how:'â€œStick the postâ€ drillâ€”hold 2 beats.'});
     if (rel < 70) inferred.push({title:'Late release timing', why:'Face outruns path; curve gets wild.', how:'Lead-wrist flex to P6 + start-line gates.'});
     if (!/3:1/.test(tempo)) inferred.push({title:'Tempo drift', why:'Speed work nudges rhythm off.', how:'Alternate slow-motion rehearsals between full swings.'});
     L = inferred.slice(0,3);
@@ -439,13 +439,13 @@ function renderPGrid(data){
   const list = Array.isArray(data.p1p9 || data.phases) ? (data.p1p9 || data.phases) : [];
   const grid = $('#pGrid'); grid.innerHTML = '';
   const empty = $('#pGridEmpty'); empty.textContent='';
-  if(!list.length){ empty.textContent = 'No P1–P9 items in this report.'; return; }
+  if(!list.length){ empty.textContent = 'No P1â€“P9 items in this report.'; return; }
   const focus = data._focus;
 
   list.forEach((p,i)=>{
     const name = p.name || p.title || `P${i+1}`;
     const grade = (p.grade || '').toString();
-    const short = p.short || p.note || '—';
+    const short = p.short || p.note || 'â€”';
     const long  = p.long  || p.details || '';
     const video = p.video || youtubeLink(name);
     const idTxt = p.id || `P${i+1}`;
@@ -466,7 +466,7 @@ function renderPGrid(data){
 
     const g = document.createElement('span');
     g.className='pill-tiny';
-    g.textContent = grade ? `grade: ${grade}` : 'grade: —';
+    g.textContent = grade ? `grade: ${grade}` : 'grade: â€”';
     head.appendChild(g);
     c.appendChild(head);
 
@@ -493,7 +493,7 @@ function renderPGrid(data){
       const sum = document.createElement('summary');
       const caret = document.createElement('span');
       caret.className='caret';
-      caret.textContent = '▶';
+      caret.textContent = 'â–¶';
       sum.appendChild(caret);
       const t = document.createElement('span');
       t.textContent = ' Details';
@@ -534,7 +534,7 @@ function setPracticePlan(data){
       const li = document.createElement('li');
       const d = it.day != null ? `Day ${it.day}: ` : '';
       const title = it.title || it.name || '';
-      const items = Array.isArray(it.items) ? ` — ${it.items.join('; ')}` : '';
+      const items = Array.isArray(it.items) ? ` â€” ${it.items.join('; ')}` : '';
       li.textContent = `${d}${title}${items}`;
       ul.appendChild(li);
     });
@@ -601,4 +601,5 @@ document.getElementById('focusSelect')?.addEventListener('change', (e)=>{
 </script>
 </body>
 </html>
+
 
