@@ -1,97 +1,16 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Virtual Coach AI — Your personal swing coach</title>
-<link rel="preload" as="image" href="/homepage-background.png" />
-<style>
-  :root{
-    --nav:#0c2a18; --scrim:rgba(0,0,0,.08);
-    --panel:rgba(13,23,28,.28); --line:rgba(255,255,255,.10);
-    --text:#ecf3f7; --muted:#cfe0e6; --accent:#19c37d;
-    --radius:16px; --shadow:0 8px 28px rgba(0,0,0,.22);
-  }
-  *{box-sizing:border-box} html,body{height:100%}
-  body{
-    margin:0; color:var(--text);
-    font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial;
-    background:url('/homepage-background.png') center/cover fixed no-repeat;
-  }
-  header{position:sticky;top:0;z-index:20;background:var(--nav);border-bottom:1px solid rgba(255,255,255,.08)}
-  .nav{width:min(1080px,94%);margin:0 auto;padding:10px 0;display:flex;gap:16px;align-items:center;justify-content:space-between}
-  .brand{display:flex;gap:10px;align-items:center;color:#fff;text-decoration:none;font-weight:800}
-  nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;border:1px solid transparent}
-  nav a:hover{background:rgba(255,255,255,.08)}
-  nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.10)}
-  .scrim{min-height:100vh;background:var(--scrim)}
-  .wrap{width:min(1080px,92%);margin:0 auto;padding:26px 0 64px}
-  .hero h1{font-size:44px;line-height:1.1;margin:24px 0 12px}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px);padding:16px}
-  .row{display:flex;flex-wrap:wrap;gap:10px}
-  .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:rgba(255,255,255,.10);color:#fff;padding:10px 14px;border-radius:12px;text-decoration:none}
-  .btn:hover{background:rgba(255,255,255,.16)}
-  .btn.primary{background:rgba(25,195,125,.18);border-color:#2a6}
-  .list{margin:8px 0 0 18px;color:var(--muted)}
-</style>
+  <meta charset="utf-8"/>
+  <title>About · Virtual Coach AI</title>
+  <link rel="stylesheet" href="/styles/globals.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
 </head>
 <body>
-<header>
-  <div class="nav">
-    <a class="brand" href="/">Virtual Coach AI</a>
-    <nav aria-label="Primary">
-      <a href="/" aria-current="page">Home</a>
-      <a href="/upload.html">Upload</a>
-      <a href="/reports.html">Reports</a>
-      <a href="/coming-soon.html">Coming Soon</a>
-      <a href="/pricing.html">Pricing</a>
-      <a href="/faq.html">FAQ</a>
-      <a href="/contact.html">Contact</a>
-      <a href="/about.html">About</a>
-    </nav>
-  </div>
-</header>
-
-<div class="scrim">
-  <main class="wrap">
-    <section class="hero">
-      <h1>Your personal swing coach</h1>
-      <div class="card" style="max-width:980px">
-        <p style="margin:0 0 8px">
-          Upload a single swing and get instant feedback across the classic P1–P9 checkpoints. We distill
-          fundamentals into simple, coachable cards you can share with friends or your instructor.
-        </p>
-        <div class="row" style="margin-top:10px">
-          <a class="btn primary" href="/upload.html">Upload a swing</a>
-          <a class="btn" href="/reports.html">Open a report</a>
-          <a class="btn" href="/about.html">About the project</a>
-        </div>
-      </div>
-    </section>
-
-    <section style="margin-top:16px" class="card">
-      <h3 style="margin:0 0 8px">How it works</h3>
-      <ol class="list">
-        <li>Record one down-the-line swing on your phone.</li>
-        <li>Upload it — we create a secure, private report in seconds.</li>
-        <li>Review P1–P9, your top priority fixes, and a power summary.</li>
-        <li>Copy a share link or email it to your coach.</li>
-      </ol>
-      <div class="row" style="margin-top:10px">
-        <a class="btn" href="/upload.html">Get started</a>
-      </div>
-    </section>
-
-    <section style="margin-top:14px" class="card">
-      <h3 style="margin:0 0 8px">What you’ll see</h3>
-      <ul class="list">
-        <li>P1–P9 checkpoints with notes & links</li>
-        <li>Coaching cards (Priority & Power)</li>
-        <li>Position & swing consistency bars</li>
-        <li>Power score, tempo, release timing</li>
-      </ul>
-    </section>
+  <main style="max-width:1100px;margin:40px auto;padding:16px;">
+    <h1>About</h1>
+    <p>This is a placeholder. We’ll wire real content next.</p>
+    <p><a href="/">← Back home</a></p>
   </main>
-</div>
 </body>
 </html>
