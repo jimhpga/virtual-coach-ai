@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Virtual Coach AI — Shared Report</title>
+<title>Virtual Coach AI â€” Shared Report</title>
 <meta name="robots" content="noindex, nofollow" />
 <style>
   body { margin:0; color:#f5f5f5; background:#0a0a0a url("homepage-background.png") center/cover no-repeat fixed;
@@ -34,7 +34,7 @@
 <body>
 <div class="wrap">
   <h1>Shared Swing Report</h1>
-  <div class="muted" id="meta">Loading…</div>
+  <div class="muted" id="meta">Loadingâ€¦</div>
 
   <details open>
     <summary>Tempo</summary>
@@ -42,7 +42,7 @@
   </details>
 
   <details open>
-    <summary>P1–P9 Assessment</summary>
+    <summary>P1â€“P9 Assessment</summary>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Checkpoint</th><th>Status</th></tr></thead>
@@ -77,7 +77,7 @@
     if (!r.ok || !j?.ok) { meta.textContent = 'Report not found.'; return; }
     const { report, thumbs } = j.doc || {};
 
-    meta.textContent = `ID: ${id} • ${new Date(j.doc.createdAt).toLocaleString()}`;
+    meta.textContent = `ID: ${id} â€¢ ${new Date(j.doc.createdAt).toLocaleString()}`;
 
     // Tempo
     const chips = document.getElementById('chips');
@@ -89,7 +89,7 @@
       <span class="chip">Ratio: ${t.ratio ?? '-' }:1</span>
     `;
 
-    // P1–P9
+    // P1â€“P9
     const map = { g:'Good', y:'Okay', r:'Needs Work' };
     const rows = document.getElementById('pRows');
     rows.innerHTML = '';
@@ -123,3 +123,4 @@
 </script>
 </body>
 </html>
+
