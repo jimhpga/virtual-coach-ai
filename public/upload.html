@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Upload ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ Virtual Coach AI</title>
+<title>Upload ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ Virtual Coach AI</title>
 <link rel="stylesheet" href="/styles.css" />
 <body>
   <header class="site">
@@ -31,10 +31,10 @@
             <label class="field"><span>Email (optional)</span><input id="email" type="email" placeholder="you@example.com" /></label>
             <label class="field"><span>Handicap (optional)</span><input id="handicap" placeholder="e.g. 10" /></label>
             <label class="field"><span>Hand (optional)</span>
-              <select id="handed"><option value="">ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</option><option>right</option><option>left</option></select>
+              <select id="handed"><option value="">ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â</option><option>right</option><option>left</option></select>
             </label>
             <label class="field"><span>Eye dominance (optional)</span>
-              <select id="eye"><option value="">ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â</option><option>right</option><option>left</option></select>
+              <select id="eye"><option value="">ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â</option><option>right</option><option>left</option></select>
             </label>
             <label class="field"><span>Height in inches *</span><input id="height" inputmode="numeric" placeholder="e.g. 70" /></label>
 
@@ -65,7 +65,7 @@
               <input id="file" type="file" accept="video/*" />
             </label>
             <button id="uploadBtn" class="btn primary" type="button" style="margin-top:10px">Upload & Analyze</button>
-            <p class="muted" style="margin-top:8px">WeÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ll upload directly to Mux, then generate a personalized report with AI.</p>
+            <p class="muted" style="margin-top:8px">WeÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ll upload directly to Mux, then generate a personalized report with AI.</p>
           </div>
         </div>
 
@@ -125,7 +125,7 @@
       busy(true);
       try {
         // 1) Mint Mux direct-upload URL
-        log("Requesting Mux upload URLÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦");
+        log("Requesting Mux upload URLÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦");
         const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
         const j1 = await r1.json().catch(() => ({}));
         if (!r1.ok || !j1?.upload?.url) {
@@ -133,12 +133,12 @@
         }
 
         // 2) Upload the file to Mux
-        log("Uploading to Mux (this can take a minute)ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦");
+        log("Uploading to Mux (this can take a minute)ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦");
         const r2 = await fetch(j1.upload.url, { method: "PUT", body: file });
         if (!r2.ok) throw new Error("Mux upload failed (" + r2.status + ")");
 
         // 3) Save + AI enhance report JSON to Blob
-        log("Generating personalized reportÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦");
+        log("Generating personalized reportÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦");
         const r3 = await fetch("/api/save-report", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -163,7 +163,7 @@
         if (!r3.ok || (!rep?.url && !rep?.id)) throw new Error("Report save failed (" + r3.status + ")");
 
         // 4) Open report viewer (prefer direct URL)
-        log("Opening reportÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦");
+        log("Opening reportÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦");
         const u = rep.url ? `/report.html?url=${encodeURIComponent(rep.url)}` : `/report.html?id=${encodeURIComponent(rep.id)}`;
         location.assign(u + "&v=" + Date.now());
       } catch (e) {

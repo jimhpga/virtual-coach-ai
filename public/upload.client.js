@@ -1,4 +1,4 @@
-// /public/upload.client.js Ã¢â‚¬â€ Mux flow (no S3)
+// /public/upload.client.js ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Mux flow (no S3)
 // v5-final
 
 (() => {
@@ -111,7 +111,7 @@
     busy(true);
     try {
       // 1) Get a Mux direct-upload URL
-      log("Requesting Mux upload URLÃ¢â‚¬Â¦");
+      log("Requesting Mux upload URLÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦");
       const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
       const j1 = await jsonOrThrow(r1, "Mux upload URL request failed");
       const upload = j1?.upload;
@@ -123,7 +123,7 @@
       if (!put.ok) throw new Error(`Mux upload failed (${put.status})`);
 
       // 3) Save your report JSON (store the Mux upload id so your backend can resolve playback later)
-      log("Saving report JSONÃ¢â‚¬Â¦");
+      log("Saving report JSONÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦");
       const r2 = await fetch("/api/save-report", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -140,8 +140,8 @@
       });
       const rep = await jsonOrThrow(r2, "Report save failed");
 
-      // 4) Open the report Ã¢â‚¬â€ prefer the direct Blob URL, fall back to id
-      log("Opening report viewÃ¢â‚¬Â¦");
+      // 4) Open the report ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â prefer the direct Blob URL, fall back to id
+      log("Opening report viewÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦");
       if (rep.url) {
         location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
       } else if (rep.id) {
