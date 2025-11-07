@@ -1,4 +1,4 @@
-<!doctype html><title>Pipeline Health</title>
+﻿<!doctype html><title>Pipeline Health</title>
 <style>
   body{font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto;max-width:960px;margin:40px auto;padding:0 16px}
   table{width:100%;border-collapse:collapse}
@@ -21,7 +21,7 @@ const checks=[
 ];
 const tbody=document.querySelector("#t tbody");
 function row(label, ok, code, body){ const tr=document.createElement('tr');
-  tr.innerHTML=`<td>${label}</td><td class="${ok?'ok':'bad'}">${ok?'Â¢Ã…â€œÃ¢â‚¬Â¦':'Â¢Ã‚ÂÃ…â€™'}</td><td>${code||''}</td><td><pre>${body}</pre></td>`;
+  tr.innerHTML=`<td>${label}</td><td class="${ok?'ok':'bad'}">${ok?'Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦':'Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒâ€¦Ã¢â‚¬â„¢'}</td><td>${code||''}</td><td><pre>${body}</pre></td>`;
   tbody.appendChild(tr);
 }
 (async()=>{
@@ -49,3 +49,4 @@ function row(label, ok, code, body){ const tr=document.createElement('tr');
   }catch(e){ row("fatal",false,0,String(e)); }
 })();
 </script>
+
