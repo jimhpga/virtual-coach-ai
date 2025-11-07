@@ -12,7 +12,7 @@ export async function OPTIONS() {
   });
 }
 
-export async function POST(req) {
+export async function POST() {
   const upstream = await fetch(`${API}/api/mux-direct-upload`, { method: "POST" });
   const body = await upstream.text();
   return new Response(body, {

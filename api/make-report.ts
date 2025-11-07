@@ -13,7 +13,7 @@ export async function OPTIONS() {
 }
 
 export async function POST(req) {
-  const json = await req.text();
+  const json = await req.text(); // pass-through raw body
   const upstream = await fetch(`${API}/api/make-report`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
