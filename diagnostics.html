@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
@@ -51,28 +51,28 @@ const escape = s => s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;
 
 document.getElementById('btnVersion').onclick = async () => {
   try {
-    const r = await fetch('https://api.virtualcoachai.net/api/version', { cache: 'no-store' });
+    const r = await fetch('/api/version', { cache: 'no-store' });
     const j = await r.json();
-    log('https://api.virtualcoachai.net/api/version', j, r.ok);
+    log('/api/version', j, r.ok);
   } catch (e) {
-    log('https://api.virtualcoachai.net/api/version FAILED', { error: String(e) }, false);
+    log('/api/version FAILED', { error: String(e) }, false);
   }
 };
 
 document.getElementById('btnSelf').onclick = async () => {
   try {
-    const r = await fetch('https://api.virtualcoachai.net/api/self-test', { method: 'POST' });
+    const r = await fetch('/api/self-test', { method: 'POST' });
     const j = await r.json();
-    log('https://api.virtualcoachai.net/api/self-test', j, j.ok);
+    log('/api/self-test', j, j.ok);
   } catch (e) {
-    log('https://api.virtualcoachai.net/api/self-test FAILED', { error: String(e) }, false);
+    log('/api/self-test FAILED', { error: String(e) }, false);
   }
 };
 
 document.getElementById('btnClient').onclick = async () => {
   try {
     const payload = { filename: 'probe.mov', contentType: 'video/quicktime' };
-    const r = await fetch('https://api.virtualcoachai.net/api/s3-presign', {
+    const r = await fetch('/api/s3-presign', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -80,9 +80,9 @@ document.getElementById('btnClient').onclick = async () => {
     const txt = await r.text();
     let j;
     try { j = JSON.parse(txt); } catch { j = { raw: txt }; }
-    log('https://api.virtualcoachai.net/api/s3-presign (client)', { status: r.status, body: j }, r.ok);
+    log('/api/s3-presign (client)', { status: r.status, body: j }, r.ok);
   } catch (e) {
-    log('https://api.virtualcoachai.net/api/s3-presign FAILED', { error: String(e) }, false);
+    log('/api/s3-presign FAILED', { error: String(e) }, false);
   }
 };
 </script>

@@ -1,4 +1,4 @@
-﻿// middleware.js
+// middleware.js
 import { NextResponse } from 'next/server';
 
 const PROTECT_PATHS = [
@@ -8,7 +8,7 @@ const PROTECT_PATHS = [
 ];
 
 // Donâ€™t block these (debug/health)
-const OPEN_PATHS = ['https://api.virtualcoachai.net/api/health', 'https://api.virtualcoachai.net/api/env-check', 'https://api.virtualcoachai.net/api/frames', 'https://api.virtualcoachai.net/api/frames-zip', 'https://api.virtualcoachai.net/api/healthz'];
+const OPEN_PATHS = ['/api/health', '/api/env-check', '/api/frames', '/api/frames-zip', '/api/healthz'];
 
 export function middleware(req) {
   const { pathname } = new URL(req.url);

@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
@@ -200,7 +200,7 @@
     // Fetch
     (async()=>{
       try{
-        const r = await fetch('https://api.virtualcoachai.net/api/get?id='+encodeURIComponent(id), { cache:'no-store' });
+        const r = await fetch('/api/get?id='+encodeURIComponent(id), { cache:'no-store' });
         let data; try { data = await r.json(); } catch { setNotice('Server returned non-JSON.','error'); return; }
         if (!r.ok) { setNotice(data?.error || ('Failed to load report ('+r.status+')'),'error'); return; }
         if (!data) { setNotice('Empty report payload.','error'); return; }
@@ -278,13 +278,13 @@
     const imgGrid = document.getElementById('imgGrid');
     const showBtn = document.getElementById('showImagesBtn');
     const zipLink = document.getElementById('downloadZip');
-    if (zipLink) zipLink.href = 'https://api.virtualcoachai.net/api/frames-zip?id=' + encodeURIComponent(id);
+    if (zipLink) zipLink.href = '/api/frames-zip?id=' + encodeURIComponent(id);
 
     async function loadImages() {
       imgStatus.textContent = 'Loading thumbnailsâ€¦';
       imgGrid.innerHTML = '';
       try {
-        const r = await fetch('https://api.virtualcoachai.net/api/frames?id=' + encodeURIComponent(id) + '&size=thumb', { cache: 'no-store' });
+        const r = await fetch('/api/frames?id=' + encodeURIComponent(id) + '&size=thumb', { cache: 'no-store' });
         let data; try { data = await r.json(); } catch { imgStatus.textContent = 'Server returned non-JSON.'; return; }
         if (!r.ok) { imgStatus.textContent = data?.error || ('Failed to load images ('+r.status+')'); return; }
         const urls = data?.urls || [];
@@ -292,7 +292,7 @@
         imgStatus.textContent = '';
         urls.forEach((u, i) => {
           const a = document.createElement('a');
-          a.href = 'https://api.virtualcoachai.net/api/frames?id=' + encodeURIComponent(id) + '&size=full&index=' + i;
+          a.href = '/api/frames?id=' + encodeURIComponent(id) + '&size=full&index=' + i;
           a.target = '_blank';
           const img = document.createElement('img');
           img.loading = 'lazy'; img.alt = 'P' + (i+1); img.src = u;

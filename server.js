@@ -1,4 +1,4 @@
-﻿const express = require("express");
+const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -18,8 +18,8 @@ function makeReport(key){
   };
 }
 
-app.get("https://api.virtualcoachai.net/api/analyze",  (req, res) => res.json(makeReport(req.query.key)));
-app.post("https://api.virtualcoachai.net/api/analyze", (req, res) => {
+app.get("/api/analyze",  (req, res) => res.json(makeReport(req.query.key)));
+app.post("/api/analyze", (req, res) => {
   let body = req.body;
   if (typeof body === "string") { try { body = JSON.parse(body) } catch {} }
   res.json(makeReport(body?.key));

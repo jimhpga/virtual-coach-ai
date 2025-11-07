@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <meta charset="utf-8">
 <title>Test save-report</title>
 <body style="font-family:system-ui; margin:2rem; max-width:900px">
@@ -44,7 +44,7 @@
     };
 
     try {
-      const r = await fetch('https://api.virtualcoachai.net/api/save-report', {
+      const r = await fetch('/api/save-report', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(sample)

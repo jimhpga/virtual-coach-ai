@@ -1,4 +1,4 @@
-﻿// helpers-upload.js
+// helpers-upload.js
 // Small utilities used by upload.html and any page that needs /api/report + /api/analyze
 
 // Turn "uploads/1234-name.mov" into a stable jobId "1234-name"
@@ -12,7 +12,7 @@ export async function reportReady({ key, jobId, status = "ready", data = {} }) {
   if (!jobId && key) jobId = jobIdFromKey(key);
   if (!jobId) throw new Error("reportReady: missing jobId or key");
 
-  const r = await fetch("https://api.virtualcoachai.net/api/report", {
+  const r = await fetch("/api/report", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ jobId, status, data, key })
