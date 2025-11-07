@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
+<head>`n<meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Upload â€” Virtual Coach AI</title>
+<title>Upload Ã¢â‚¬â€ Virtual Coach AI</title>
 <link rel="preload" as="image" href="/homepage-background.png" />
 <style>
   :root{
@@ -39,7 +39,7 @@
       <h1 style="margin:6px 0 12px">Upload Your Swing</h1>
       <div class="card">
         <p class="hint">
-          On iPhone, tap <strong>Choose File</strong> â†’ pick <em>Take Video</em>, <em>Photo Library</em>, or <em>Browse</em>.
+          On iPhone, tap <strong>Choose File</strong> Ã¢â€ â€™ pick <em>Take Video</em>, <em>Photo Library</em>, or <em>Browse</em>.
           Face-on & down-the-line both work.
         </p>
 
@@ -51,8 +51,8 @@
           <div class="kv"><div>Duration</div><div id="m_dur"></div></div>
         </div>
 
-        <!-- â€œ~1 minuteâ€ note -->
-        <div class="note">After you submit, weâ€™ll analyze your swing. This usually takes about a minute. Please keep this tab open.</div>
+        <!-- Ã¢â‚¬Å“~1 minuteÃ¢â‚¬Â note -->
+        <div class="note">After you submit, weÃ¢â‚¬â„¢ll analyze your swing. This usually takes about a minute. Please keep this tab open.</div>
 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
           <button id="make" class="btn primary" disabled>Submit Video</button>
@@ -66,7 +66,7 @@
       </div>
     </main>
 
-    <footer>Â© <span id="y"></span> Virtual Coach AI</footer>
+    <footer>Ã‚Â© <span id="y"></span> Virtual Coach AI</footer>
   </div>
 
 <script>
@@ -114,7 +114,7 @@
       .then(r=>r.ok?r.text():Promise.reject(r)).then(h=>{mount.innerHTML=h;markCurrent();}).catch(fallback);
   })();
 
-  // --- iPhone/desktop upload â†’ build report â†’ force-redirect to report ---
+  // --- iPhone/desktop upload Ã¢â€ â€™ build report Ã¢â€ â€™ force-redirect to report ---
   const fileEl = document.getElementById('file');
   const makeBtn = document.getElementById('make');
   const resetBtn = document.getElementById('reset');
@@ -131,12 +131,12 @@
 
   function fmtBytes(b){
     if (b === 0) return '0 B';
-    if (!b) return 'â€”';
+    if (!b) return 'Ã¢â‚¬â€';
     const u=['B','KB','MB','GB']; let i=0; let n=b;
     while(n>=1024 && i<u.length-1){ n/=1024; i++; }
     return n.toFixed(1)+' '+u[i];
   }
-  function fmtSec(s){ if(!s) return 'â€”'; const m=Math.floor(s/60); const r=Math.round(s%60); return `${m}:${String(r).padStart(2,'0')}`; }
+  function fmtSec(s){ if(!s) return 'Ã¢â‚¬â€'; const m=Math.floor(s/60); const r=Math.round(s%60); return `${m}:${String(r).padStart(2,'0')}`; }
 
   function showStatus(msg){
     statusEl.innerHTML = `<span class="spin"></span>${msg}`;
@@ -198,7 +198,7 @@
       errEl.textContent='Choose a video first.'; return;
     }
 
-    showStatus('Analyzing your swingâ€¦ ~1 minute');
+    showStatus('Analyzing your swingÃ¢â‚¬Â¦ ~1 minute');
 
     try{
       // Lightweight placeholder analysis; replace with backend results later
@@ -224,7 +224,7 @@
         coaching:{
           priority_fixes:[
             {title:'One Key Feel', short:'Pick one cue only', long:'Use one external cue for 15 balls (e.g., finish tall).'},
-            {title:'Tempo Baseline', short:'3:1 feel', long:'Count â€œone-two-three-hitâ€ to smooth transition.'},
+            {title:'Tempo Baseline', short:'3:1 feel', long:'Count Ã¢â‚¬Å“one-two-three-hitÃ¢â‚¬Â to smooth transition.'},
             {title:'Impact Check', short:'Ball then turf', long:'Half swings with a mid-iron; brush after impact.'},
           ],
           power_fixes:[
@@ -243,7 +243,7 @@
         power:{score:durScore, tempo:'~3:1', release_timing:relScore}
       };
 
-      // Try to persist (ok if it failsâ€”redirect still happens)
+      // Try to persist (ok if it failsÃ¢â‚¬â€redirect still happens)
       try{
         sessionStorage.setItem('vc_report', JSON.stringify(report));
         localStorage.setItem('vc_last_report', JSON.stringify(report));

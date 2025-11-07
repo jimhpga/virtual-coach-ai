@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
+<head>`n<meta charset="UTF-8">
+
 <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate"/>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Virtual Coach AI â€” Swing Report</title>
+<title>Virtual Coach AI Ã¢â‚¬â€ Swing Report</title>
 <link rel="stylesheet" href="/styles.css" />
 <style>
   /* ---- Local polish exclusive to the report viewer ---- */
@@ -29,7 +29,7 @@
   .summary-col { flex:1; min-width:240px; font-size:14px; line-height:1.5; }
   .summary-heading { font-size:14px; font-weight:600; color:#fff; margin-bottom:4px; }
 
-  /* P1â€“P9 stacked vertically */
+  /* P1Ã¢â‚¬â€œP9 stacked vertically */
   .pgrid { display:grid; grid-template-columns: 1fr; gap: 14px; }
   .p-card { background:rgba(255,255,255,.03); border:1px solid var(--line); border-radius:14px; padding:12px; box-shadow:0 6px 14px rgba(0,0,0,.25); max-width: 900px; margin: 0 auto; }
   .p-card h4 { margin:0 0 6px; font-size:15px }
@@ -86,7 +86,7 @@
 </head>
 <body>
   <!-- Header -->
-  <header class="site">
+  <header class="site">`n<meta charset="UTF-8">
     <div class="navwrap">
       <a class="brand" href="/"><img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI"><span>Virtual Coach AI</span></a>
       <nav aria-label="Primary">
@@ -105,7 +105,7 @@
   <div class="scrim">
     <main class="wrap" id="app">
       <!-- HEADER / ACTIONS -->
-      <h1 style="margin-bottom:6px">Swing Report â€” P1â€“P9</h1>
+      <h1 style="margin-bottom:6px">Swing Report Ã¢â‚¬â€ P1Ã¢â‚¬â€œP9</h1>
       <div class="actions">
         <button id="btnCopy" class="btn">Copy link</button>
         <button id="btnDownload" class="btn">Download HTML</button>
@@ -119,7 +119,7 @@
       <!-- FOCUS SELECTOR -->
       <section id="focusBar" class="card" style="margin-top:10px">
         <div class="section-title">
-          <h3>Focus this report onâ€¦</h3>
+          <h3>Focus this report onÃ¢â‚¬Â¦</h3>
           <select id="focusSelect">
             <option value="">Balanced</option>
             <option value="swing plane">Swing Plane</option>
@@ -134,7 +134,7 @@
 
       <!-- LOADING STATE -->
       <div id="skeleton" class="card skeleton" style="padding:16px; margin-top:12px">
-        <div class="muted">Loading your swing reportâ€¦</div>
+        <div class="muted">Loading your swing reportÃ¢â‚¬Â¦</div>
         <div class="bar" style="height:12px; border-radius:6px; margin-top:10px"></div>
       </div>
 
@@ -143,7 +143,7 @@
         <!-- SCORE + PROFILE -->
         <div class="summary-flex">
           <div class="summary-score">
-            <div id="swingScore" class="summary-score-number">â€”</div>
+            <div id="swingScore" class="summary-score-number">Ã¢â‚¬â€</div>
             <div class="summary-score-label muted">
               Swing Score<br/>
               (higher = more repeatable)
@@ -202,7 +202,7 @@
             </div>
             <div>
               <div class="muted">Tempo</div>
-              <div class="mono" id="txtTempo">â€”</div>
+              <div class="mono" id="txtTempo">Ã¢â‚¬â€</div>
             </div>
             <div>
               <div class="muted">Release Timing</div>
@@ -220,11 +220,11 @@
           <div class="grid2">
             <div>
               <div class="muted" style="font-weight:700; margin-bottom:6px">Position Consistency</div>
-              <div id="posConsistency" class="infobox">â€”</div>
+              <div id="posConsistency" class="infobox">Ã¢â‚¬â€</div>
             </div>
             <div>
               <div class="muted" style="font-weight:700; margin-bottom:6px">Swing Consistency</div>
-              <div id="swingConsistency" class="infobox">â€”</div>
+              <div id="swingConsistency" class="infobox">Ã¢â‚¬â€</div>
             </div>
           </div>
         </div>
@@ -235,7 +235,7 @@
         <div class="accordion" id="planAcc">
           <div class="ac-head" role="button" tabindex="0">
             <div style="display:flex; gap:10px; align-items:center">
-              <span class="caret">â–¶</span>
+              <span class="caret">Ã¢â€“Â¶</span>
               <h3 style="margin:0">Practice Plan (14 days)</h3>
             </div>
             <span class="pill-tiny" id="planCount">0 items</span>
@@ -246,9 +246,9 @@
         </div>
       </section>
 
-      <!-- P1â€“P9 CHECKPOINTS -->
+      <!-- P1Ã¢â‚¬â€œP9 CHECKPOINTS -->
       <section style="margin-top:14px">
-        <h2 style="margin:0 0 8px">P1â€“P9 Checkpoints</h2>
+        <h2 style="margin:0 0 8px">P1Ã¢â‚¬â€œP9 Checkpoints</h2>
         <div class="pgrid" id="pGrid"></div>
         <div class="infobox" id="pGridEmpty" style="margin-top:8px"></div>
       </section>
@@ -345,103 +345,103 @@ function inferTier(data) {
 
 const profileReadTemplates = {
   advanced: [
-    "This is an advanced pattern. Lower body starts first, the club shallows instead of dumping over the top, and you finish balanced. Weâ€™re not rebuilding you â€” weâ€™re just tightening control windows.",
-    "You move like a high-level player. Hips lead transition, delivery is on track, and youâ€™re finishing in balance. We're talking precision tweaks, not a swing overhaul.",
-    "Youâ€™re sequencing like a player. Belt gets ahead first, shaft falls into the slot, and the finish is stable. You're already in the good column; now we sharpen face control.",
-    "This is tour-style sequencing. Lower body drives, arms follow, face control is mostly managed. Youâ€™re in tune with the motion â€” weâ€™re chasing repeatability under pressure.",
-    "This is a legit, athletic move. Youâ€™re using the ground, not just your hands, and youâ€™re delivering the club from a powerful slot. Weâ€™re hunting small misses now."
+    "This is an advanced pattern. Lower body starts first, the club shallows instead of dumping over the top, and you finish balanced. WeÃ¢â‚¬â„¢re not rebuilding you Ã¢â‚¬â€ weÃ¢â‚¬â„¢re just tightening control windows.",
+    "You move like a high-level player. Hips lead transition, delivery is on track, and youÃ¢â‚¬â„¢re finishing in balance. We're talking precision tweaks, not a swing overhaul.",
+    "YouÃ¢â‚¬â„¢re sequencing like a player. Belt gets ahead first, shaft falls into the slot, and the finish is stable. You're already in the good column; now we sharpen face control.",
+    "This is tour-style sequencing. Lower body drives, arms follow, face control is mostly managed. YouÃ¢â‚¬â„¢re in tune with the motion Ã¢â‚¬â€ weÃ¢â‚¬â„¢re chasing repeatability under pressure.",
+    "This is a legit, athletic move. YouÃ¢â‚¬â„¢re using the ground, not just your hands, and youÃ¢â‚¬â„¢re delivering the club from a powerful slot. WeÃ¢â‚¬â„¢re hunting small misses now."
   ],
   intermediate: [
     "You have a lot of the motion built. The body starts things, and the club is close to the slot. The main goal now is cleaning up impact so the ball starts where you think it will.",
-    "The core motion is there. Youâ€™re not just throwing your hands at it. We just need to stabilize one or two leaks so the strike gets more predictable.",
-    "Youâ€™re creating speed the right way, not just slapping at it. Contact/face control is where youâ€™ll pick up the biggest gains next.",
-    "Youâ€™ve got a playable motion. Youâ€™re using rotation, not only arms. Now we lock in the timing around the ball so it holds up on the course.",
-    "Thereâ€™s structure here. Youâ€™re loading, youâ€™re turning, youâ€™re posting up. The next jump is taking the hand-save out of impact."
+    "The core motion is there. YouÃ¢â‚¬â„¢re not just throwing your hands at it. We just need to stabilize one or two leaks so the strike gets more predictable.",
+    "YouÃ¢â‚¬â„¢re creating speed the right way, not just slapping at it. Contact/face control is where youÃ¢â‚¬â„¢ll pick up the biggest gains next.",
+    "YouÃ¢â‚¬â„¢ve got a playable motion. YouÃ¢â‚¬â„¢re using rotation, not only arms. Now we lock in the timing around the ball so it holds up on the course.",
+    "ThereÃ¢â‚¬â„¢s structure here. YouÃ¢â‚¬â„¢re loading, youÃ¢â‚¬â„¢re turning, youÃ¢â‚¬â„¢re posting up. The next jump is taking the hand-save out of impact."
   ],
   developing: [
-    "Youâ€™re in build mode. Youâ€™re starting to use your body instead of just your hands, and thatâ€™s the right direction. Weâ€™re going to stabilize contact first.",
-    "This is a foundation swing. Youâ€™re getting the club around the same way each time, and now weâ€™ll get you more solid at impact so you stop guessing.",
-    "Youâ€™re starting to move like a golfer, not just hit at the ball. Step one is contact you can trust. Then weâ€™ll chase speed.",
-    "Youâ€™re laying the base. Weâ€™ll get you into a repeatable setup and a calmer strike, so you stop fighting the big miss.",
-    "This is the right starting point. Youâ€™re learning to load, turn, and post. Weâ€™re going to make the strike cleaner and easier to repeat."
+    "YouÃ¢â‚¬â„¢re in build mode. YouÃ¢â‚¬â„¢re starting to use your body instead of just your hands, and thatÃ¢â‚¬â„¢s the right direction. WeÃ¢â‚¬â„¢re going to stabilize contact first.",
+    "This is a foundation swing. YouÃ¢â‚¬â„¢re getting the club around the same way each time, and now weÃ¢â‚¬â„¢ll get you more solid at impact so you stop guessing.",
+    "YouÃ¢â‚¬â„¢re starting to move like a golfer, not just hit at the ball. Step one is contact you can trust. Then weÃ¢â‚¬â„¢ll chase speed.",
+    "YouÃ¢â‚¬â„¢re laying the base. WeÃ¢â‚¬â„¢ll get you into a repeatable setup and a calmer strike, so you stop fighting the big miss.",
+    "This is the right starting point. YouÃ¢â‚¬â„¢re learning to load, turn, and post. WeÃ¢â‚¬â„¢re going to make the strike cleaner and easier to repeat."
   ]
 };
 
 const eliteTraitTemplates = {
   lower_body_lead: [
-    "You start the downswing with your legs, not your hands. Thatâ€™s real sequence â€” keep it.",
-    "Your hips fire first and pull everything else. Thatâ€™s a tour pattern. Do not mess with that.",
-    "You clear the belt before the club comes down. Thatâ€™s how better players create speed without forcing it.",
-    "Your lower body actually starts the move. Most golfers canâ€™t do that. Huge plus.",
-    "You drive from the ground up, not just arms. Thatâ€™s going to hold up under pressure."
+    "You start the downswing with your legs, not your hands. ThatÃ¢â‚¬â„¢s real sequence Ã¢â‚¬â€ keep it.",
+    "Your hips fire first and pull everything else. ThatÃ¢â‚¬â„¢s a tour pattern. Do not mess with that.",
+    "You clear the belt before the club comes down. ThatÃ¢â‚¬â„¢s how better players create speed without forcing it.",
+    "Your lower body actually starts the move. Most golfers canÃ¢â‚¬â„¢t do that. Huge plus.",
+    "You drive from the ground up, not just arms. ThatÃ¢â‚¬â„¢s going to hold up under pressure."
   ],
   slot_delivery: [
-    "The club falls into the slot under your trail forearm instead of casting over the top. Thatâ€™s compression-friendly.",
-    "Youâ€™re not throwing it over the top. You shallow it and deliver from the inside. Thatâ€™s why you can flight it.",
-    "Clubâ€™s coming from a strong delivery position instead of across the line. Thatâ€™s a ball-striker move.",
-    "You deliver the shaft on plane instead of dumping from the top. Thatâ€™s advanced.",
-    "You drop it into a powerful slot. Thatâ€™s how you get speed without chaos."
+    "The club falls into the slot under your trail forearm instead of casting over the top. ThatÃ¢â‚¬â„¢s compression-friendly.",
+    "YouÃ¢â‚¬â„¢re not throwing it over the top. You shallow it and deliver from the inside. ThatÃ¢â‚¬â„¢s why you can flight it.",
+    "ClubÃ¢â‚¬â„¢s coming from a strong delivery position instead of across the line. ThatÃ¢â‚¬â„¢s a ball-striker move.",
+    "You deliver the shaft on plane instead of dumping from the top. ThatÃ¢â‚¬â„¢s advanced.",
+    "You drop it into a powerful slot. ThatÃ¢â‚¬â„¢s how you get speed without chaos."
   ],
   balanced_finish: [
-    "Youâ€™re posting up and finishing on balance, not falling out of the shot. That will travel to the course.",
-    "You land in control. Chest up, weight left, no spin-out. Thatâ€™s a stable finish.",
-    "Youâ€™re not falling off it. Youâ€™re holding posture through the strike and into the finish. Keep that.",
-    "Your finish is calm and tall, not out of control. Thatâ€™s why you can repeat it.",
-    "Youâ€™re not bailing out after contact. Thatâ€™s a sign you trust the motion."
+    "YouÃ¢â‚¬â„¢re posting up and finishing on balance, not falling out of the shot. That will travel to the course.",
+    "You land in control. Chest up, weight left, no spin-out. ThatÃ¢â‚¬â„¢s a stable finish.",
+    "YouÃ¢â‚¬â„¢re not falling off it. YouÃ¢â‚¬â„¢re holding posture through the strike and into the finish. Keep that.",
+    "Your finish is calm and tall, not out of control. ThatÃ¢â‚¬â„¢s why you can repeat it.",
+    "YouÃ¢â‚¬â„¢re not bailing out after contact. ThatÃ¢â‚¬â„¢s a sign you trust the motion."
   ],
   tempo_control: [
-    "Your tempo is consistent. Thatâ€™s rare. Keep that rhythm; itâ€™s the glue.",
-    "Youâ€™re not rushing from the top. That slow start creates effortless speed.",
-    "Your backswing-to-downswing ratio is repeatable. Thatâ€™s why you can find the center.",
-    "You keep the same tempo swing to swing. Thatâ€™s a serious weapon.",
-    "You donâ€™t lunge at it from the top. Thatâ€™s why contact is playable."
+    "Your tempo is consistent. ThatÃ¢â‚¬â„¢s rare. Keep that rhythm; itÃ¢â‚¬â„¢s the glue.",
+    "YouÃ¢â‚¬â„¢re not rushing from the top. That slow start creates effortless speed.",
+    "Your backswing-to-downswing ratio is repeatable. ThatÃ¢â‚¬â„¢s why you can find the center.",
+    "You keep the same tempo swing to swing. ThatÃ¢â‚¬â„¢s a serious weapon.",
+    "You donÃ¢â‚¬â„¢t lunge at it from the top. ThatÃ¢â‚¬â„¢s why contact is playable."
   ],
   forward_hands: [
-    "You get the hands forward at impact instead of flipping. Thatâ€™s compression.",
-    "Youâ€™re de-lofting the club at impact instead of adding loft. Thatâ€™s how you get a strong ball flight.",
-    "Youâ€™re not scooping it. Youâ€™re hitting it with forward shaft lean. Thatâ€™s grown-up golf.",
-    "Youâ€™re compressing the ball instead of trying to help it in the air. Thatâ€™s legit.",
-    "Youâ€™re delivering the face with authority, not flipping to save it. Thatâ€™s control."
+    "You get the hands forward at impact instead of flipping. ThatÃ¢â‚¬â„¢s compression.",
+    "YouÃ¢â‚¬â„¢re de-lofting the club at impact instead of adding loft. ThatÃ¢â‚¬â„¢s how you get a strong ball flight.",
+    "YouÃ¢â‚¬â„¢re not scooping it. YouÃ¢â‚¬â„¢re hitting it with forward shaft lean. ThatÃ¢â‚¬â„¢s grown-up golf.",
+    "YouÃ¢â‚¬â„¢re compressing the ball instead of trying to help it in the air. ThatÃ¢â‚¬â„¢s legit.",
+    "YouÃ¢â‚¬â„¢re delivering the face with authority, not flipping to save it. ThatÃ¢â‚¬â„¢s control."
   ]
 };
 
 const primaryFocusTemplates = {
   face_control: [
-    "At P7 (impact) youâ€™re saving it with your hands. The face is getting adjusted late instead of staying stable through the ball. Weâ€™re going to quiet that down so your start line tightens.",
-    "Impact is handsy. Youâ€™re catching the face up right at the ball instead of letting it ride in square. Weâ€™ll lock the face in earlier so you donâ€™t have to steer it.",
-    "Right now youâ€™re timing the clubface instead of trusting it. Thatâ€™s fragile under pressure. Goal one is to stabilize the face through impact.",
-    "Youâ€™re flipping the face late to square it. Thatâ€™s why you fear both left and right. Weâ€™re going to take the flip out.",
-    "Clubface control at impact is the leak. Weâ€™ll quiet the hands so you can swing through it without babysitting the ball."
+    "At P7 (impact) youÃ¢â‚¬â„¢re saving it with your hands. The face is getting adjusted late instead of staying stable through the ball. WeÃ¢â‚¬â„¢re going to quiet that down so your start line tightens.",
+    "Impact is handsy. YouÃ¢â‚¬â„¢re catching the face up right at the ball instead of letting it ride in square. WeÃ¢â‚¬â„¢ll lock the face in earlier so you donÃ¢â‚¬â„¢t have to steer it.",
+    "Right now youÃ¢â‚¬â„¢re timing the clubface instead of trusting it. ThatÃ¢â‚¬â„¢s fragile under pressure. Goal one is to stabilize the face through impact.",
+    "YouÃ¢â‚¬â„¢re flipping the face late to square it. ThatÃ¢â‚¬â„¢s why you fear both left and right. WeÃ¢â‚¬â„¢re going to take the flip out.",
+    "Clubface control at impact is the leak. WeÃ¢â‚¬â„¢ll quiet the hands so you can swing through it without babysitting the ball."
   ],
   weight_shift: [
-    "Youâ€™re hanging back instead of getting pressure left by impact. That makes you guide it. Weâ€™re going to get you posted left earlier so you can hit through it.",
-    "Youâ€™re not fully into your lead side at P7, so youâ€™re forced to save it with your hands. Weâ€™ll fix that weight move so impact cleans up automatically.",
-    "Pressureâ€™s not getting forward soon enough. Youâ€™re stuck on the trail side and then flipping the club through. Weâ€™re going to get you braced left sooner.",
-    "Youâ€™re late getting to your lead leg, so the club has to catch up. We fix the shift first, not the hands.",
+    "YouÃ¢â‚¬â„¢re hanging back instead of getting pressure left by impact. That makes you guide it. WeÃ¢â‚¬â„¢re going to get you posted left earlier so you can hit through it.",
+    "YouÃ¢â‚¬â„¢re not fully into your lead side at P7, so youÃ¢â‚¬â„¢re forced to save it with your hands. WeÃ¢â‚¬â„¢ll fix that weight move so impact cleans up automatically.",
+    "PressureÃ¢â‚¬â„¢s not getting forward soon enough. YouÃ¢â‚¬â„¢re stuck on the trail side and then flipping the club through. WeÃ¢â‚¬â„¢re going to get you braced left sooner.",
+    "YouÃ¢â‚¬â„¢re late getting to your lead leg, so the club has to catch up. We fix the shift first, not the hands.",
     "Weight is trailing behind the swing. We fix that by posting up earlier so you can rotate and let it go."
   ],
   early_extension: [
-    "Youâ€™re standing up out of posture through impact. That crowds the strike and makes face control a guess. Weâ€™ll train you to stay in the shot longer.",
-    "Your hips are jumping toward the ball before impact. Thatâ€™s why contact feels jammed. Weâ€™ll smooth that out.",
-    "Youâ€™re losing your space through impact â€” hips drift in, chest stands up. Weâ€™ll keep you out of the ball so the club can exit clean.",
-    "You pop out of posture through the ball. Thatâ€™s why the strike feels inconsistent. Weâ€™ll build a feel that keeps you down and turning.",
-    "Youâ€™re early-extending through P7. Weâ€™re going to calm that chase so you rotate through it instead of jumping at it."
+    "YouÃ¢â‚¬â„¢re standing up out of posture through impact. That crowds the strike and makes face control a guess. WeÃ¢â‚¬â„¢ll train you to stay in the shot longer.",
+    "Your hips are jumping toward the ball before impact. ThatÃ¢â‚¬â„¢s why contact feels jammed. WeÃ¢â‚¬â„¢ll smooth that out.",
+    "YouÃ¢â‚¬â„¢re losing your space through impact Ã¢â‚¬â€ hips drift in, chest stands up. WeÃ¢â‚¬â„¢ll keep you out of the ball so the club can exit clean.",
+    "You pop out of posture through the ball. ThatÃ¢â‚¬â„¢s why the strike feels inconsistent. WeÃ¢â‚¬â„¢ll build a feel that keeps you down and turning.",
+    "YouÃ¢â‚¬â„¢re early-extending through P7. WeÃ¢â‚¬â„¢re going to calm that chase so you rotate through it instead of jumping at it."
   ],
   over_the_top: [
-    "Club is starting down a little over the top. That forces you to cut across it. Weâ€™ll shallow the first move so you can swing through, not across.",
-    "The club is working across the ball instead of through it. Weâ€™re going to get you delivering from the inside so contact stops bleeding energy.",
-    "Youâ€™re coming in across it, not from the slot. Weâ€™ll retrain the first move from the top so you donâ€™t have to carve across it.",
-    "Downswing starts out over the plane, so the path has to save itself. Weâ€™ll fix that transition first.",
-    "Youâ€™re cutting across the ball. Weâ€™re going to drop the club in, not throw it over."
+    "Club is starting down a little over the top. That forces you to cut across it. WeÃ¢â‚¬â„¢ll shallow the first move so you can swing through, not across.",
+    "The club is working across the ball instead of through it. WeÃ¢â‚¬â„¢re going to get you delivering from the inside so contact stops bleeding energy.",
+    "YouÃ¢â‚¬â„¢re coming in across it, not from the slot. WeÃ¢â‚¬â„¢ll retrain the first move from the top so you donÃ¢â‚¬â„¢t have to carve across it.",
+    "Downswing starts out over the plane, so the path has to save itself. WeÃ¢â‚¬â„¢ll fix that transition first.",
+    "YouÃ¢â‚¬â„¢re cutting across the ball. WeÃ¢â‚¬â„¢re going to drop the club in, not throw it over."
   ]
 };
 
 const planIntroTemplates = [
-  "Do this in order. Donâ€™t jump ahead.",
-  "Follow this order. Donâ€™t try to fix all three things in one bucket session.",
+  "Do this in order. DonÃ¢â‚¬â„¢t jump ahead.",
+  "Follow this order. DonÃ¢â‚¬â„¢t try to fix all three things in one bucket session.",
   "One piece at a time. Give each feel a few days before you add speed.",
   "Treat this like a ladder: contact first, control second, speed last.",
-  "This is your next two weeks. Itâ€™s built to work on the course, not just look pretty on the range."
+  "This is your next two weeks. ItÃ¢â‚¬â„¢s built to work on the course, not just look pretty on the range."
 ];
 
 function inferFlagsFromData(data) {
@@ -495,7 +495,7 @@ function personalizeReport(data) {
   // primaryFocus
   data.primaryFocus = buildPrimaryFocus(issue);
 
-  // planHighLevelIntro â€“ rotated voice for the 14-day block
+  // planHighLevelIntro Ã¢â‚¬â€œ rotated voice for the 14-day block
   data.planHighLevelIntro = pickRandom(planIntroTemplates);
 
   return data;
@@ -512,18 +512,18 @@ function fillMeta(data){
     const s = document.createElement('span');
     s.className = 'pill';
     s.textContent = (data.ai && data.ai.enhanced)
-      ? `AI Enhanced âœ“ (${data.ai.model||'LLM'})`
-      : 'AI Enhanced âœ“';
+      ? `AI Enhanced Ã¢Å“â€œ (${data.ai.model||'LLM'})`
+      : 'AI Enhanced Ã¢Å“â€œ';
     row.appendChild(s);
   }
 
   const pills = [
-    ['Score', (data.power?.score ?? data.swingScore ?? 'â€”')],
-    ['Status', (data.status ?? 'â€”')],
-    ['Tempo', (data.power?.tempo ?? 'â€”')],
-    ['Release', (data.power?.release_timing != null ? (data.power.release_timing + '%') : 'â€”')],
-    ['Level', (data.level || data.meta?.level || 'â€”')],
-    ['Goal', (data.goal || data.meta?.goal || 'â€”')],
+    ['Score', (data.power?.score ?? data.swingScore ?? 'Ã¢â‚¬â€')],
+    ['Status', (data.status ?? 'Ã¢â‚¬â€')],
+    ['Tempo', (data.power?.tempo ?? 'Ã¢â‚¬â€')],
+    ['Release', (data.power?.release_timing != null ? (data.power.release_timing + '%') : 'Ã¢â‚¬â€')],
+    ['Level', (data.level || data.meta?.level || 'Ã¢â‚¬â€')],
+    ['Goal', (data.goal || data.meta?.goal || 'Ã¢â‚¬â€')],
   ];
 
   pills.forEach(([k,v])=>{
@@ -549,8 +549,8 @@ function setBars(data){
   $('#barRelease').style.width = rel + '%';
   $('#txtRelease').textContent = `${rel}%`;
 
-  $('#txtTempo').textContent = data.power?.tempo ?? 'â€”';
-  $('#swingScore').textContent = scoreVal ? scoreVal : 'â€”';
+  $('#txtTempo').textContent = data.power?.tempo ?? 'Ã¢â‚¬â€';
+  $('#swingScore').textContent = scoreVal ? scoreVal : 'Ã¢â‚¬â€';
 }
 
 function setConsistency(data){
@@ -571,7 +571,7 @@ function setPowerLeaks(data){
   const tempo = String(data.power?.tempo || '3:1');
 
   if (s < 85) out.push('Add lead-side post / bracing at transition for more efficient speed transfer.');
-  if (rel < 70) out.push('Clubface is getting â€œsavedâ€ late. Stabilize face through impact (P7) for tighter start line.');
+  if (rel < 70) out.push('Clubface is getting Ã¢â‚¬Å“savedÃ¢â‚¬Â late. Stabilize face through impact (P7) for tighter start line.');
   if (!/3:1/.test(tempo)) out.push('Tempo drifting. Hold rehearsals at slow speed between full swings.');
 
   const ul = $('#powerLeaks');
@@ -595,21 +595,21 @@ function setCoachingCard(data){
   const powBox = $('#topPower');
   priBox.innerHTML=''; powBox.innerHTML='';
 
-  if(!pri.length) priBox.appendChild(itemDiv('â€”'));
-  if(!pow.length) powBox.appendChild(itemDiv('â€”'));
+  if(!pri.length) priBox.appendChild(itemDiv('Ã¢â‚¬â€'));
+  if(!pow.length) powBox.appendChild(itemDiv('Ã¢â‚¬â€'));
 
   pri.forEach(x => {
     const text = typeof x === 'string'
       ? x
-      : (x.title ? `${x.title} â€” ${x.how||x.why||''}` : JSON.stringify(x));
-    priBox.appendChild(itemDiv('â€¢ ' + text + (focus ? ` (focus: ${focus})` : '')));
+      : (x.title ? `${x.title} Ã¢â‚¬â€ ${x.how||x.why||''}` : JSON.stringify(x));
+    priBox.appendChild(itemDiv('Ã¢â‚¬Â¢ ' + text + (focus ? ` (focus: ${focus})` : '')));
   });
 
   pow.forEach(x => {
     const text = typeof x === 'string'
       ? x
-      : (x.title ? `${x.title} â€” ${x.how||x.why||''}` : JSON.stringify(x));
-    powBox.appendChild(itemDiv('â€¢ ' + text + (focus ? ` (focus: ${focus})` : '')));
+      : (x.title ? `${x.title} Ã¢â‚¬â€ ${x.how||x.why||''}` : JSON.stringify(x));
+    powBox.appendChild(itemDiv('Ã¢â‚¬Â¢ ' + text + (focus ? ` (focus: ${focus})` : '')));
   });
 
   $('#summaryStrip').hidden = false;
@@ -624,14 +624,14 @@ function renderPGrid(data){
   const list = Array.isArray(data.p1p9 || data.phases) ? (data.p1p9 || data.phases) : [];
   const grid = $('#pGrid'); grid.innerHTML = '';
   const empty = $('#pGridEmpty'); empty.textContent='';
-  if(!list.length){ empty.textContent = 'No P1â€“P9 items in this report.'; return; }
+  if(!list.length){ empty.textContent = 'No P1Ã¢â‚¬â€œP9 items in this report.'; return; }
 
   const focus = data._focus;
 
   list.forEach((p,i)=>{
     const name  = p.name || p.title || `P${i+1}`;
     const grade = (p.grade || '').toString();
-    const short = p.short || p.note || 'â€”';
+    const short = p.short || p.note || 'Ã¢â‚¬â€';
     const long  = p.long  || p.details || '';
     const video = p.video || youtubeLink(name);
     const idTxt = p.id || `P${i+1}`;
@@ -651,7 +651,7 @@ function renderPGrid(data){
 
     const g = document.createElement('span');
     g.className='pill-tiny';
-    g.textContent = grade ? `grade: ${grade}` : 'grade: â€”';
+    g.textContent = grade ? `grade: ${grade}` : 'grade: Ã¢â‚¬â€';
     head.appendChild(g);
     c.appendChild(head);
 
@@ -675,7 +675,7 @@ function renderPGrid(data){
       const sum = document.createElement('summary');
       const caret = document.createElement('span');
       caret.className='caret';
-      caret.textContent = 'â–¶';
+      caret.textContent = 'Ã¢â€“Â¶';
       sum.appendChild(caret);
 
       const t = document.createElement('span');
@@ -725,7 +725,7 @@ function setPracticePlan(data){
       const li = document.createElement('li');
       const d = it.day != null ? `Day ${it.day}: ` : '';
       const title = it.title || it.name || '';
-      const items = Array.isArray(it.items) ? ` â€” ${it.items.join('; ')}` : '';
+      const items = Array.isArray(it.items) ? ` Ã¢â‚¬â€ ${it.items.join('; ')}` : '';
       li.textContent = `${d}${title}${items}`;
       ul.appendChild(li);
     });
@@ -735,7 +735,7 @@ function setPracticePlan(data){
     const preview = list.slice(0,3).map(it=>{
       const d = (it.day != null) ? `Day ${it.day}: ` : '';
       return d + (it.title || it.name || '');
-    }).join(' â€¢ ');
+    }).join(' Ã¢â‚¬Â¢ ');
     data.planHighLevel = preview;
   }
 
@@ -770,15 +770,15 @@ function setNote(data){
 function setCoachSummary(data){
   $('#profileRead').textContent =
     data.profileRead ||
-    "Youâ€™re building a repeatable motion. Weâ€™re tightening control, not starting over.";
+    "YouÃ¢â‚¬â„¢re building a repeatable motion. WeÃ¢â‚¬â„¢re tightening control, not starting over.";
 
   const traitsBox = $('#eliteTraits');
   traitsBox.innerHTML = '';
   const traits = data.eliteTraits && data.eliteTraits.length
     ? data.eliteTraits
     : [
-        "Youâ€™re starting the downswing with the body, not just hands. Thatâ€™s a real move.",
-        "Youâ€™re finishing in balance instead of falling out of it. That will hold up on the course."
+        "YouÃ¢â‚¬â„¢re starting the downswing with the body, not just hands. ThatÃ¢â‚¬â„¢s a real move.",
+        "YouÃ¢â‚¬â„¢re finishing in balance instead of falling out of it. That will hold up on the course."
       ];
   traits.forEach(t=>{
     const li = document.createElement('li');
@@ -788,10 +788,10 @@ function setCoachSummary(data){
 
   $('#primaryFocus').textContent =
     data.primaryFocus ||
-    "Clubface gets saved late. Weâ€™re going to quiet that move so you can trust start line.";
+    "Clubface gets saved late. WeÃ¢â‚¬â„¢re going to quiet that move so you can trust start line.";
 
   const intro  = data.planHighLevelIntro ||
-    "Do this in order. Donâ€™t jump ahead.";
+    "Do this in order. DonÃ¢â‚¬â„¢t jump ahead.";
   const block  = data.planHighLevel || "";
   const finalPlan = intro + (block ? " " + block : "");
   $('#planHighLevel').textContent = finalPlan;
@@ -848,7 +848,7 @@ function renderAll(data){
 document.getElementById('focusSelect')?.addEventListener('change', (e)=>{
   if (!lastReport) return;
   const focused = { ...lastReport, _focus: e.target.value || null };
-  // re-run personalization? No â€” keep the same randomized language.
+  // re-run personalization? No Ã¢â‚¬â€ keep the same randomized language.
   renderAll(focused);
 });
 </script>
