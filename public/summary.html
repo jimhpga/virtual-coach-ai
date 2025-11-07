@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Virtual Coach AI â€” Swing Summary</title>
+  <title>Virtual Coach AI ¢â‚¬â€ Swing Summary</title>
   <link rel="stylesheet" href="style.css?v=12"/>
   <style>
     .tile { background: var(--card); border:1px solid var(--border); border-radius:14px; margin:10px 0; overflow:hidden; }
@@ -16,7 +16,7 @@
     .bar > span { display:block; height:100%; background: var(--accent); width:0%; }
     .actions { display:flex; gap:10px; flex-wrap:wrap; }
 
-    /* P1â€“P9 stacked (4 columns) */
+    /* P1¢â‚¬â€œP9 stacked (4 columns) */
     table.pstack { width:100%; border-collapse:collapse; }
     table.pstack th, table.pstack td { border:1px solid var(--border); padding:10px; vertical-align:top; }
     table.pstack thead { background: rgba(255,255,255,.06); }
@@ -61,7 +61,7 @@
 
     <!-- Top bar: ID + Actions -->
     <section class="card" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-      <div id="reportId">ID: â€”</div>
+      <div id="reportId">ID: ¢â‚¬â€</div>
       <div class="actions">
         <button id="exportJsonBtn" title="Download JSON">Export JSON</button>
         <button id="printBtn" title="Print or Save as PDF">Print / PDF</button>
@@ -70,28 +70,28 @@
 
     <!-- Summary -->
     <section class="tile">
-      <button data-acc="summary"><span>Swing Summary</span><span>â–¾</span></button>
+      <button data-acc="summary"><span>Swing Summary</span><span>¢â€“Â¾</span></button>
       <div class="tile-body" id="tile-summary">
         <div class="grid two">
           <div class="card">
             <h3 class="section-title">Profile</h3>
-            <div id="profile">â€”</div>
+            <div id="profile">¢â‚¬â€</div>
           </div>
           <div class="card">
             <h3 class="section-title">Tempo</h3>
-            <div id="tempo">â€”</div>
+            <div id="tempo">¢â‚¬â€</div>
           </div>
         </div>
         <div class="card" style="margin-top:10px;">
           <h3 class="section-title">Totals</h3>
-          <div id="totals">â€”</div>
+          <div id="totals">¢â‚¬â€</div>
         </div>
       </div>
     </section>
 
-    <!-- P1â€“P9 vertically stacked (Checkpoint | Rating | Short | Long) -->
+    <!-- P1¢â‚¬â€œP9 vertically stacked (Checkpoint | Rating | Short | Long) -->
     <section class="tile">
-      <button data-acc="pstack"><span>P1â€“P9 Details</span><span>â–¾</span></button>
+      <button data-acc="pstack"><span>P1¢â‚¬â€œP9 Details</span><span>¢â€“Â¾</span></button>
       <div class="tile-body" id="tile-pstack">
         <table class="pstack" id="pTable">
           <colgroup>
@@ -115,7 +115,7 @@
 
     <!-- Images on demand -->
     <section class="tile">
-      <button data-acc="images"><span>P1â€“P9 Images</span><span>â–¾</span></button>
+      <button data-acc="images"><span>P1¢â‚¬â€œP9 Images</span><span>¢â€“Â¾</span></button>
       <div class="tile-body" id="tile-images">
         <div class="img-actions">
           <button id="showImagesBtn">Show Images</button>
@@ -128,30 +128,30 @@
 
     <!-- Coaching tiles -->
     <section class="tile">
-      <button data-acc="improve"><span>3 Things to Improve</span><span>â–¾</span></button>
+      <button data-acc="improve"><span>3 Things to Improve</span><span>¢â€“Â¾</span></button>
       <div class="tile-body">
         <ol class="list" id="tips3"></ol>
       </div>
     </section>
 
     <section class="tile">
-      <button data-acc="power"><span>Power Assessment</span><span>â–¾</span></button>
+      <button data-acc="power"><span>Power Assessment</span><span>¢â€“Â¾</span></button>
       <div class="tile-body" id="tile-power">
-        <div style="margin-bottom:8px;">Overall Power: <b id="powerScore">â€”</b></div>
+        <div style="margin-bottom:8px;">Overall Power: <b id="powerScore">¢â‚¬â€</b></div>
         <div class="bar"><span id="powerBar"></span></div>
         <ul class="list" id="powerNotes" style="margin-top:10px;"></ul>
       </div>
     </section>
 
     <section class="tile">
-      <button data-acc="power-tips"><span>3 Power Things to Improve</span><span>â–¾</span></button>
+      <button data-acc="power-tips"><span>3 Power Things to Improve</span><span>¢â€“Â¾</span></button>
       <div class="tile-body">
         <ol class="list" id="powerTips3"></ol>
       </div>
     </section>
 
     <section class="tile">
-      <button data-acc="lessons"><span>14-Day Lesson Plan</span><span>â–¾</span></button>
+      <button data-acc="lessons"><span>14-Day Lesson Plan</span><span>¢â€“Â¾</span></button>
       <div class="tile-body">
         <ol class="list" id="lessons14"></ol>
       </div>
@@ -166,7 +166,7 @@
         const body = btn.parentElement.querySelector('.tile-body');
         const open = body.style.display === 'block';
         body.style.display = open ? 'none' : 'block';
-        btn.lastElementChild.textContent = open ? 'â–¾' : 'â–´';
+        btn.lastElementChild.textContent = open ? '¢â€“Â¾' : '¢â€“Â´';
       });
     });
   })();
@@ -177,7 +177,7 @@
     const $ = (s)=>document.querySelector(s);
     const notice = $('#notice');
     const setNotice=(m,t='info')=>{ if(!notice) return; notice.textContent=m||''; notice.style.display=m?'block':'none'; notice.setAttribute('data-type',t); };
-    const setText=(sel,val)=>{ const el=$(sel); if(el) el.textContent=(val??'â€”'); };
+    const setText=(sel,val)=>{ const el=$(sel); if(el) el.textContent=(val??'¢â‚¬â€'); };
 
     // ID (fallback demo)
     const params = new URLSearchParams(location.search);
@@ -206,11 +206,11 @@
         if (!data) { setNotice('Empty report payload.','error'); return; }
         lastData = data;
 
-        setText('#profile', data.profile || 'â€”');
-        setText('#tempo', data.tempo || 'â€”');
-        setText('#totals', data.totals ? JSON.stringify(data.totals) : 'â€”');
+        setText('#profile', data.profile || '¢â‚¬â€');
+        setText('#tempo', data.tempo || '¢â‚¬â€');
+        setText('#totals', data.totals ? JSON.stringify(data.totals) : '¢â‚¬â€');
 
-        // Build P1â€“P9 rows (Checkpoint | Rating | Short | Long)
+        // Build P1¢â‚¬â€œP9 rows (Checkpoint | Rating | Short | Long)
         const tbody = document.querySelector('#pTable tbody');
         tbody.innerHTML = '';
         const order = ['P1','P2','P3','P4','P5','P6','P7','P8','P9'];
@@ -220,7 +220,7 @@
 
           const tdCheckpoint = document.createElement('td');
           tdCheckpoint.className = 'pname';
-          tdCheckpoint.innerHTML = `<div><b>${k}</b></div><div>${it.condition ?? 'â€”'}</div>`;
+          tdCheckpoint.innerHTML = `<div><b>${k}</b></div><div>${it.condition ?? '¢â‚¬â€'}</div>`;
 
           const tdRating = document.createElement('td');
           tdRating.className = 'rating';
@@ -230,7 +230,7 @@
 
           const tdShort = document.createElement('td');
           tdShort.className = 'short';
-          tdShort.textContent = it.short ?? it.description ?? 'â€”';
+          tdShort.textContent = it.short ?? it.description ?? '¢â‚¬â€';
 
           const tdLong = document.createElement('td');
           tdLong.className = 'long';
@@ -246,26 +246,26 @@
         // Other tiles
         const tips3 = document.getElementById('tips3'); tips3.innerHTML='';
         (data.tips3 || []).slice(0,3).forEach(t=>{ const li=document.createElement('li'); li.textContent=t; tips3.appendChild(li); });
-        if (!tips3.children.length) tips3.innerHTML = '<li>â€”</li>';
+        if (!tips3.children.length) tips3.innerHTML = '<li>¢â‚¬â€</li>';
 
         const power = data.power || { score: 0, notes: [] };
         setText('#powerScore', (power.score ?? 0) + '/100');
         const bar = document.getElementById('powerBar'); bar.style.width = Math.max(0, Math.min(100, power.score || 0)) + '%';
         const pNotes = document.getElementById('powerNotes'); pNotes.innerHTML='';
         (power.notes || []).forEach(n=>{ const li=document.createElement('li'); li.textContent=n; pNotes.appendChild(li); });
-        if (!pNotes.children.length) pNotes.innerHTML = '<li>â€”</li>';
+        if (!pNotes.children.length) pNotes.innerHTML = '<li>¢â‚¬â€</li>';
 
         const powerTips3 = document.getElementById('powerTips3'); powerTips3.innerHTML='';
         (data.powerTips3 || []).slice(0,3).forEach(t=>{ const li=document.createElement('li'); li.textContent=t; powerTips3.appendChild(li); });
-        if (!powerTips3.children.length) powerTips3.innerHTML = '<li>â€”</li>';
+        if (!powerTips3.children.length) powerTips3.innerHTML = '<li>¢â‚¬â€</li>';
 
         const lessons = document.getElementById('lessons14'); lessons.innerHTML='';
         (data.lessons14 || []).slice(0,14).forEach((d,i)=>{
           const li=document.createElement('li'); li.innerHTML = `<b>Day ${i+1}:</b> ${d}`; lessons.appendChild(li);
         });
-        if (!lessons.children.length) lessons.innerHTML = '<li>â€”</li>';
+        if (!lessons.children.length) lessons.innerHTML = '<li>¢â‚¬â€</li>';
 
-        // Open Summary + P1â€“P9 by default
+        // Open Summary + P1¢â‚¬â€œP9 by default
         document.querySelector('#tile-summary').style.display = 'block';
         document.querySelector('#tile-pstack').style.display = 'block';
       } catch(e){
@@ -281,7 +281,7 @@
     if (zipLink) zipLink.href = '/api/frames-zip?id=' + encodeURIComponent(id);
 
     async function loadImages() {
-      imgStatus.textContent = 'Loading thumbnailsâ€¦';
+      imgStatus.textContent = 'Loading thumbnails¢â‚¬Â¦';
       imgGrid.innerHTML = '';
       try {
         const r = await fetch('/api/frames?id=' + encodeURIComponent(id) + '&size=thumb', { cache: 'no-store' });
