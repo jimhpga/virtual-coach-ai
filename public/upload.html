@@ -126,7 +126,7 @@
       try {
         // 1) Mint Mux direct-upload URL
         log("Requesting Mux upload URLâ€¦");
-        const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
+        const r1 = await fetch("https://api.virtualcoachai.net/api/mux-direct-upload", { method: "POST" });
         const j1 = await r1.json().catch(() => ({}));
         if (!r1.ok || !j1?.upload?.url) {
           throw new Error("mux-direct-upload failed (" + r1.status + "): " + (j1?.error || JSON.stringify(j1)));
@@ -139,7 +139,7 @@
 
         // 3) Save + AI enhance report JSON to Blob
         log("Generating personalized reportâ€¦");
-        const r3 = await fetch("/api/save-report", {
+        const r3 = await fetch("https://api.virtualcoachai.net/api/save-report", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
@@ -174,5 +174,6 @@
   })();
   </script>
 </body>
+
 
 
