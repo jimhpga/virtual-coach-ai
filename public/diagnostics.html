@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>VirtualCoachAI â€“ Diagnostics</title>
+<title>VirtualCoachAI ¢â‚¬â€œ Diagnostics</title>
 <style>
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:0;background:#0d0f10;color:#fff}
   .wrap{max-width:900px;margin:0 auto;padding:24px}
@@ -25,7 +25,7 @@
       <button id="btnVersion">Check /api/version</button>
       <button id="btnSelf">Run Server Self-Test</button>
       <button id="btnClient">Run Client S3 Test (no upload)</button>
-      <a href="upload-html" style="margin-left:auto;color:#8fd1ff">Go to Upload Page â†’</a>
+      <a href="upload-html" style="margin-left:auto;color:#8fd1ff">Go to Upload Page ¢â€ â€™</a>
     </div>
     <div id="out"></div>
   </div>
@@ -35,7 +35,7 @@
       <ul>
         <li><b>/api/version</b>: proves this deployment is reachable.</li>
         <li><b>/api/self-test</b>: verifies env vars and that S3 presign works.</li>
-        <li><b>Client S3 Test</b>: calls <code>/api/s3-presign</code> (must exist) and shows the S3 POST URL/fields weâ€™d use to upload.</li>
+        <li><b>Client S3 Test</b>: calls <code>/api/s3-presign</code> (must exist) and shows the S3 POST URL/fields we¢â‚¬â„¢d use to upload.</li>
       </ul>
     </div>
   </div>
@@ -44,7 +44,7 @@
 const out = document.getElementById('out');
 const log = (title, obj, ok = true) => {
   const h = document.createElement('div');
-  h.innerHTML = `<h3 class="${ok?'ok':'bad'}">${ok?'âœ“':'âœ—'} ${title}</h3><pre>${escape(JSON.stringify(obj, null, 2))}</pre>`;
+  h.innerHTML = `<h3 class="${ok?'ok':'bad'}">${ok?'¢Å“â€œ':'¢Å“â€”'} ${title}</h3><pre>${escape(JSON.stringify(obj, null, 2))}</pre>`;
   out.prepend(h);
 };
 const escape = s => s.replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m]));
