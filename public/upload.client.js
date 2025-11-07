@@ -1,4 +1,4 @@
-// /public/upload.client.js — Mux flow (no S3)
+﻿// /public/upload.client.js â€” Mux flow (no S3)
 // v5-final
 
 (() => {
@@ -111,8 +111,8 @@
     busy(true);
     try {
       // 1) Get a Mux direct-upload URL
-      log("Requesting Mux upload URL…");
-      const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
+      log("Requesting Mux upload URLâ€¦");
+      const r1 = await fetch("https://api.virtualcoachai.net/api/mux-direct-upload", { method: "POST" });
       const j1 = await jsonOrThrow(r1, "Mux upload URL request failed");
       const upload = j1?.upload;
       if (!upload?.url) throw new Error("Mux upload URL missing");
@@ -123,8 +123,8 @@
       if (!put.ok) throw new Error(`Mux upload failed (${put.status})`);
 
       // 3) Save your report JSON (store the Mux upload id so your backend can resolve playback later)
-      log("Saving report JSON…");
-      const r2 = await fetch("/api/save-report", {
+      log("Saving report JSONâ€¦");
+      const r2 = await fetch("https://api.virtualcoachai.net/api/save-report", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -140,8 +140,8 @@
       });
       const rep = await jsonOrThrow(r2, "Report save failed");
 
-      // 4) Open the report — prefer the direct Blob URL, fall back to id
-      log("Opening report view…");
+      // 4) Open the report â€” prefer the direct Blob URL, fall back to id
+      log("Opening report viewâ€¦");
       if (rep.url) {
         location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
       } else if (rep.id) {

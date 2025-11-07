@@ -1,4 +1,4 @@
-// script.js — S3 presign + direct upload + preview + redirect
+﻿// script.js â€” S3 presign + direct upload + preview + redirect
 
 function setStatus(text, isError = false) {
   const box = document.getElementById('status');
@@ -34,11 +34,11 @@ export async function uploadVideo() {
 
   // 1) ask backend for a presigned POST
   const contentType = guessContentType(file);
-  setStatus(`Requesting upload link… (${contentType})`);
+  setStatus(`Requesting upload linkâ€¦ (${contentType})`);
 
   let presign;
   try {
-    const res = await fetch('/api/s3-presign', {
+    const res = await fetch('https://api.virtualcoachai.net/api/s3-presign', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ filename: file.name, contentType })
@@ -61,7 +61,7 @@ export async function uploadVideo() {
   }
 
   // 2) upload the big file directly to S3
-  setStatus('Uploading to cloud…');
+  setStatus('Uploading to cloudâ€¦');
   const formData = new FormData();
   Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
   formData.append('file', file);
@@ -84,7 +84,7 @@ export async function uploadVideo() {
 
   // 3) hand off to report page
   try { sessionStorage.setItem('uploadedVideoUrl', publicUrl); } catch {}
-  setStatus('Upload complete. Redirecting…');
+  setStatus('Upload complete. Redirectingâ€¦');
   window.location.href = 'report.html';
 }
 

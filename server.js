@@ -18,8 +18,8 @@ function makeReport(key){
   };
 }
 
-app.get("/api/analyze",  (req, res) => res.json(makeReport(req.query.key)));
-app.post("/api/analyze", (req, res) => {
+app.get("https://api.virtualcoachai.net/api/analyze",  (req, res) => res.json(makeReport(req.query.key)));
+app.post("https://api.virtualcoachai.net/api/analyze", (req, res) => {
   let body = req.body;
   if (typeof body === "string") { try { body = JSON.parse(body) } catch {} }
   res.json(makeReport(body?.key));

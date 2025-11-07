@@ -1,4 +1,4 @@
-<!doctype html><meta charset="utf-8"><title>API Smoke</title>
+﻿<!doctype html><meta charset="utf-8"><title>API Smoke</title>
 <body style="font:16px system-ui;padding:20px">
 <h1>API Smoke</h1>
 <p>
@@ -15,12 +15,12 @@ document.getElementById('go').onclick = async ()=>{
   const key = "uploads/test-smoke-" + Date.now();
   out("Key: " + key);
   try{
-    const r1 = await fetch(base + "/api/report", {
+    const r1 = await fetch(base + "https://api.virtualcoachai.net/api/report", {
       method:"POST", headers:{ "Content-Type":"application/json" },
       body: JSON.stringify({ key, report:{ status:"ready", note:"smoke" } })
     });
     out("POST /api/report -> " + r1.status + " " + (await r1.text()));
-    const r2 = await fetch(base + "/api/analyze?key=" + encodeURIComponent(key));
+    const r2 = await fetch(base + "https://api.virtualcoachai.net/api/analyze?key=" + encodeURIComponent(key));
     out("GET  /api/analyze -> " + r2.status + " " + (await r2.text()));
   }catch(e){ out("ERR " + e); }
 };

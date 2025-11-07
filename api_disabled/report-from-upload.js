@@ -72,7 +72,7 @@
       body: JSON.stringify({ report: rep })
     });
     const j = await (async()=>{ try { return await r.json() } catch { return {} } })();
-    if (!r.ok || !j?.key) return res.status(r.status || 502).json({ ok:false, error:"/api/report failed", body:j });
+    if (!r.ok || !j?.key) return res.status(r.status || 502).json({ ok:false, error:"https://api.virtualcoachai.net/api/report failed", body:j });
 
     const print = `${origin}/api/print?key=${encodeURIComponent(key)}&objKey=${encodeURIComponent(j.key)}`;
     return res.status(200).json({ ok:true, key: j.key, print });
