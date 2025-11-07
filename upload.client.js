@@ -1,4 +1,4 @@
-﻿// /public/upload.client.js  (Mux + Blob)
+// /public/upload.client.js  (Mux + Blob)
 // No tokens in here. They live server-side.
 (function () {
   console.log("[upload mux v2] client JS loaded");
@@ -57,7 +57,7 @@
     busy(true);
     try {
       log("Requesting Mux upload URLâ€¦");
-      const { upload } = await fetch("https://api.virtualcoachai.net/api/mux-direct-upload", { method: "POST" }).then(r => r.json());
+      const { upload } = await fetch("/api/mux-direct-upload", { method: "POST" }).then(r => r.json());
       if (!upload?.url) throw new Error("Mux upload URL missing");
 
       log("Uploading to Mux (this can take a minute)...");
@@ -65,7 +65,7 @@
       if (!put.ok) throw new Error(`Mux upload failed (${put.status})`);
 
       log("Saving report JSONâ€¦");
-      const rep = await fetch("https://api.virtualcoachai.net/api/save-report", {
+      const rep = await fetch("/api/save-report", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({

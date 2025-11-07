@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -72,7 +72,7 @@
   if (!id) { meta.textContent = 'Missing id.'; return; }
 
   try {
-    const r = await fetch('https://api.virtualcoachai.net/api/get?id=' + encodeURIComponent(id));
+    const r = await fetch('/api/get?id=' + encodeURIComponent(id));
     const j = await r.json();
     if (!r.ok || !j?.ok) { meta.textContent = 'Report not found.'; return; }
     const { report, thumbs } = j.doc || {};

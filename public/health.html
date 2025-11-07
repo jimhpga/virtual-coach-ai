@@ -1,4 +1,4 @@
-﻿<!doctype html><meta charset="utf-8"><title>Pipeline Health</title>
+<!doctype html><meta charset="utf-8"><title>Pipeline Health</title>
 <style>
   body{font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto;max-width:960px;margin:40px auto;padding:0 16px}
   table{width:100%;border-collapse:collapse}
@@ -11,13 +11,13 @@
 <table id="t"><thead><tr><th>Check</th><th>Status</th><th>HTTP</th><th>Body</th></tr></thead><tbody></tbody></table>
 <script>
 const checks=[ 
-  { label:"API: /api/health", url:"https://api.virtualcoachai.net/api/health" },
-  { label:"API: /api/upload (POST)", url:"https://api.virtualcoachai.net/api/upload", method:"POST",
+  { label:"API: /api/health", url:"/api/health" },
+  { label:"API: /api/upload (POST)", url:"/api/upload", method:"POST",
     body:{ jobId:"smoke", key:"uploads/smoke.txt", contentType:"text/plain" } },
   { label:"API: PUT to signed URL", url:"", method:"PUT", followSigned:true },
-  { label:"API: /api/report (POST)", url:"https://api.virtualcoachai.net/api/report", method:"POST",
+  { label:"API: /api/report (POST)", url:"/api/report", method:"POST",
     body:{ jobId:"smoke", status:"ready", data:{ t:Date.now() } } },
-  { label:"API: /api/analyze?jobId=smoke", url:"https://api.virtualcoachai.net/api/analyze?jobId=smoke" },
+  { label:"API: /api/analyze?jobId=smoke", url:"/api/analyze?jobId=smoke" },
 ];
 const tbody=document.querySelector("#t tbody");
 function row(label, ok, code, body){ const tr=document.createElement('tr');
@@ -41,7 +41,7 @@ function row(label, ok, code, body){ const tr=document.createElement('tr');
         const text = await resp.text();
         let pretty = text; try{ pretty = JSON.stringify(JSON.parse(text), null, 2);}catch{}
         row(c.label, resp.ok, resp.status, pretty);
-        if(c.label.includes("https://api.virtualcoachai.net/api/upload") && resp.ok){
+        if(c.label.includes("/api/upload") && resp.ok){
           try{ const j = JSON.parse(text); signedURL = j.url; }catch{}
         }
       }catch(e){ row(c.label,false,0,String(e)); }
