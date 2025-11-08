@@ -1,0 +1,32 @@
+// api/ai-predict.js
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+
+  let body = {};
+  try { body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body; } 
+  catch { return res.status(400).json({ error: 'Bad JSON' }); }
+
+  const sport = (body.sport || 'NFL').toUpperCase();
+  const games = Array.isArray(body.games) ? body.games : [];
+
+  const weights = { eloDiff: 0.4, restDiff: 0.2, vegasEdge: 0.25, qbAdj: 0.15, injAway: -0.1 };
+  const analyze = (f) =>
+    Object.entries(weights).reduce((a, [k, w]) => a + ((f[k] || 0) * w), 0);
+
+  const picks = games.map(g => {
+    const score = analyze(g.features);
+    const tier = score >= 0.35 ? 'GREEN' : score >= 0.15 ? 'YELLOW' : 'RED';
+    const reason =
+      tier === 'GREEN' ? 'Strong combined edge' :
+      tier === 'YELLOW' ? 'Moderate advantage' : 'Weak / volatile matchup';
+
+    return {
+      title: `${g.away} @ ${g.home}`,
+      date: g.date,
+      market: g.market,
+      tier, score, reason, sport
+    };
+  });
+
+  res.status(200).json({ sport, picks });
+};
