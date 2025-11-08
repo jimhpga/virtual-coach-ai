@@ -1,4 +1,3 @@
-
 // api/mux-direct-upload.js  (CommonJS version)
 module.exports = async (req, res) => {
   // CORS + preflight
