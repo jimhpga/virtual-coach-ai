@@ -1,5 +1,19 @@
-.next
-node_modules
-.env.local
-.DS_Store
-.vercel
+﻿# Ignore backup / temp files
+*.bak
+*.bak2
+*.bak3
+*.bak.*
+*preutf8.bak
+*.2025*.bak
+
+# Old experimental report folders (keep them local only)
+public/docs/report/
+public/report/
+public/reports/demo/
+public/reports/players/
+
+# Old backup HTML singletons
+public/report.backup.html
+public/upload.backup.html
+reports.html.broken-*
+vercel.broken.json
