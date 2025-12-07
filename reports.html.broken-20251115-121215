@@ -1,0 +1,30 @@
+cd C:\Sites\virtual-coach-ai
+
+$vercelJson = @'
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "builds": [
+    {
+      "src": "**/*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    { "src": "^/api/(.*)$", "dest": "/api/$1.js" },
+    { "src": "^/$", "dest": "/index.html" },
+    { "src": "^/upload$", "dest": "/upload.html" },
+    { "src": "^/pricing$", "dest": "/pricing.html" },
+    { "src": "^/faq$", "dest": "/faq.html" },
+    { "src": "^/contact$", "dest": "/contact.html" },
+    { "src": "^/reports?$", "dest": "/reports.html" },
+    { "src": "^/about$", "dest": "/about.html" }
+  ]
+}
+'@
+
+$vercelJson | Set-Content -Path ".\vercel.json" -Encoding utf8

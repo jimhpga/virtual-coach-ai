@@ -1,0 +1,258 @@
+[00:00:00.971] Server  LOG      ✓ Ready in 686ms
+[00:00:02.991] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:03.147] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:00:03.147] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:00:16.040] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:16.040] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:00:16.040] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:05:06.957] Server  LOG      ✓ Compiled in 80ms
+[00:05:19.631] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:19.747] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:05:19.747] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:05:22.605] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:22.725] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:05:22.725] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:05:26.168] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:05:26.282] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:05:26.282] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:05:35.078] Browser DEBUG   TSS: Counted history being pushed
+[00:05:35.078] Browser DEBUG   TSS: Caught history
+[00:05:35.078] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {}
+[00:07:46.446] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:07:46.446] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:07:46.446] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:12:52.896] Server  LOG      ✓ Compiled in 71ms
+[00:13:29.989] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:13:29.989] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:13:29.989] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:37:20.454] Server  LOG      ✓ Compiled in 52ms
+[00:38:45.938] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:38:45.938] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:38:45.938] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:40:21.290] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:40:21.401] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:40:21.402] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:40:23.679] Browser DEBUG   TSS: Counted history being pushed
+[00:40:23.679] Browser DEBUG   TSS: Caught history
+[00:40:23.679] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {}
+[00:40:25.324] Browser DEBUG   TSS: Counted history being replaced
+[00:40:25.324] Browser DEBUG   TSS: Caught history
+[00:40:25.324] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765068673155}
+[00:40:27.057] Browser DEBUG   TSS: Counted history being replaced
+[00:40:27.057] Browser DEBUG   TSS: Caught history
+[00:40:27.057] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765068674812}
+[00:40:27.897] Browser DEBUG   TSS: Counted history being replaced
+[00:40:27.897] Browser DEBUG   TSS: Caught history
+[00:40:27.897] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765068676537}
+[00:40:28.755] Browser DEBUG   TSS: Counted history being replaced
+[00:40:28.755] Browser DEBUG   TSS: Caught history
+[00:40:28.755] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":2,"lastTime":1765068676537}
+[00:40:29.534] Browser DEBUG   TSS: Counted history being pushed
+[00:40:29.534] Browser DEBUG   TSS: Caught history
+[00:40:29.534] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765068678240}
+[00:40:31.540] Browser DEBUG   TSS: Counted history being pushed
+[00:40:31.540] Browser DEBUG   TSS: Caught history
+[00:40:31.540] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":2,"lastTime":1765068678240}
+[00:40:46.433] Browser DEBUG   TSS: Counted history being pushed
+[00:40:46.433] Browser DEBUG   TSS: Caught history
+[00:40:46.433] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765068681029}
+[00:40:59.877] Browser DEBUG   TSS: Counted history being pushed
+[00:40:59.877] Browser DEBUG   TSS: Caught history
+[00:40:59.877] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765068695917}
+[00:41:37.230] Browser DEBUG   TSS: Counted history being replaced
+[00:41:37.230] Browser DEBUG   TSS: Caught history
+[00:41:37.230] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765068709364}
+[00:41:50.411] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:41:50.518] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:41:50.518] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:42:03.083] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:42:03.084] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:42:03.084] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:49:35.199] Server  LOG      ✓ Compiled in 53ms
+[00:49:35.591] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:49:35.591] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:49:35.591] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:50:18.747] Server  LOG      ✓ Compiled in 45ms
+[00:50:19.098] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:50:19.210] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:50:19.210] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[00:50:54.638] Server  LOG      ✓ Compiled in 39ms
+[00:50:55.004] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:50:55.004] Browser DEBUG   injection-tss TSS: hosted page injected
+[00:50:55.004] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[01:12:51.730] Server  LOG      ✓ Compiled in 49ms
+[01:13:09.835] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:13:09.951] Browser DEBUG   injection-tss TSS: hosted page injected
+[01:13:09.951] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[01:13:12.190] Browser DEBUG   TSS: Counted history being pushed
+[01:13:12.190] Browser DEBUG   TSS: Caught history
+[01:13:12.190] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {}
+[01:13:13.967] Browser DEBUG   TSS: Counted history being pushed
+[01:13:13.967] Browser DEBUG   TSS: Caught history
+[01:13:13.967] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765070641662}
+[01:13:15.859] Browser DEBUG   TSS: Counted history being replaced
+[01:13:15.859] Browser DEBUG   TSS: Caught history
+[01:13:15.859] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765070643436}
+[01:13:20.793] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:13:20.793] Browser DEBUG   injection-tss TSS: hosted page injected
+[01:13:20.793] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[01:13:22.272] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:13:22.272] Browser DEBUG   injection-tss TSS: hosted page injected
+[01:13:22.272] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[01:13:23.832] Browser DEBUG   TSS: Counted history being pushed
+[01:13:23.832] Browser DEBUG   TSS: Caught history
+[01:13:23.832] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {}
+[01:51:26.241] Browser DEBUG   TSS: Counted history being replaced
+[01:51:26.241] Browser DEBUG   TSS: Caught history
+[01:51:26.241] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765070653298}
+[01:56:06.147] Browser DEBUG   TSS: Counted history being pushed
+[01:56:06.147] Browser DEBUG   TSS: Caught history
+[01:56:06.147] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765072935692}
+[01:56:07.205] Browser DEBUG   TSS: Counted history being pushed
+[01:56:07.205] Browser DEBUG   TSS: Caught history
+[01:56:07.205] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765073215598}
+[01:56:08.007] Browser DEBUG   TSS: Counted history being replaced
+[01:56:08.007] Browser DEBUG   TSS: Caught history
+[01:56:08.007] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765073216644}
+[01:56:08.903] Browser DEBUG   TSS: Counted history being replaced
+[01:56:08.903] Browser DEBUG   TSS: Caught history
+[01:56:08.903] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":2,"lastTime":1765073216644}
+[01:56:09.820] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:56:09.924] Browser DEBUG   injection-tss TSS: hosted page injected
+[01:56:09.924] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[01:56:11.242] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:56:11.357] Browser DEBUG   injection-tss TSS: hosted page injected
+[01:56:11.357] Browser DEBUG   injection-tss MBTSS: Nonce:  nonce
+[01:56:13.187] Browser DEBUG   TSS: Counted history being pushed
+[01:56:13.187] Browser DEBUG   TSS: Caught history
+[01:56:13.187] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {}
+[01:56:13.983] Browser DEBUG   TSS: Counted history being pushed
+[01:56:13.983] Browser DEBUG   TSS: Caught history
+[01:56:13.983] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765073222634}
+[01:56:15.781] Browser DEBUG   TSS: Counted history being pushed
+[01:56:15.781] Browser DEBUG   TSS: Caught history
+[01:56:15.781] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":2,"lastTime":1765073222634}
+[01:56:17.053] Browser DEBUG   TSS: Counted history being pushed
+[01:56:17.053] Browser DEBUG   TSS: Caught history
+[01:56:17.053] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765073225234}
+[02:09:20.211] Browser DEBUG   TSS: Counted history being replaced
+[02:09:20.211] Browser DEBUG   TSS: Caught history
+[02:09:20.211] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765073226496}
+[02:09:37.498] Browser DEBUG   TSS: Counted history being replaced
+[02:09:37.498] Browser DEBUG   TSS: Caught history
+[02:09:37.498] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765074009646}
+[02:10:04.249] Server  LOG      ✓ Compiled in 38ms
+[02:10:30.266] Browser DEBUG   TSS: Counted history being replaced
+[02:10:30.267] Browser DEBUG   TSS: Caught history
+[02:10:30.267] Browser DEBUG   TSS: Checking if repeated 500 times for interval 1000 against data:  {"lastCount":1,"lastTime":1765074026942}
+[02:27:54.695] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.696] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.699] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.700] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.700] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.701] Server  ERROR    ⨯ "unhandledRejection:" Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.702] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.703] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.703] Server  ERROR    ⨯ "unhandledRejection: " Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.723] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.723] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.724] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.725] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.725] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.726] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.742] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.743] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.743] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.743] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.744] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.744] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.762] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.762] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.763] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.764] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.764] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.765] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.781] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.781] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.782] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.782] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.783] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.783] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.801] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.802] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.802] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.803] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.803] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.804] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.819] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.819] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.820] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.821] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.822] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.822] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.839] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.840] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.840] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.841] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.841] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.842] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.858] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.858] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.859] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.860] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.860] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.860] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.879] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.879] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.880] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.880] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.881] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.881] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.899] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.900] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.900] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.901] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.902] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.902] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.916] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.917] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.917] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.918] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.918] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.918] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.936] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.936] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.936] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.937] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.937] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.937] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.953] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.954] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.954] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.955] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.955] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.956] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.971] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.971] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.971] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.972] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.972] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.972] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.990] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.990] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.991] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:54.992] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.992] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:54.992] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:55.006] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:55.006] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:55.007] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:55.007] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:55.008] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:55.008] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:55.032] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:55.033] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:55.033] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'
+[02:27:55.034] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\lib\recursive-readdir.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:55.034] Server  ERROR   C:\Sites\virtual-coach-ai\virtual-coach-ai\node_modules\next\dist\server\route-matcher-providers\dev\helpers\file-reader\batched-file-reader.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[02:27:55.034] Server  ERROR   Error: ENOENT: no such file or directory, scandir 'C:\Sites\virtual-coach-ai\virtual-coach-ai\src\app'

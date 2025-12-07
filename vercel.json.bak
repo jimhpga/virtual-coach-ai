@@ -1,9 +1,12 @@
 {
-  "functions": {
-    "api/*.js": { "runtime": "nodejs20.x" }
-  },
-  "rewrites": [
-    { "source": "/upload", "destination": "/upload.html" },
-    { "source": "/report", "destination": "/report.html" }
+  "version": 2,
+  "routes": [
+    { "src": "/",            "dest": "/index.html" },
+    { "src": "/upload",      "dest": "/upload.html" },
+    { "src": "/report",      "dest": "/report.html" },
+    { "src": "/pricing",     "dest": "/pricing.html" },
+    { "src": "/faq",         "dest": "/faq.html" },
+    { "src": "/contact",     "dest": "/contact.html" },
+    { "src": "/coming-soon", "dest": "/coming-soon.html" }
   ]
 }

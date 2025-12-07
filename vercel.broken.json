@@ -1,0 +1,17 @@
+﻿{
+  "version": 2,
+  "functions": { "api/*.cjs": { "runtime": "nodejs20.x" } },
+  "routes": [
+    { "src": "/api/ping",              "dest": "/api/ping.cjs" },
+    { "src": "/api/env-check",         "dest": "/api/env-check.cjs" },
+    { "src": "/api/mux-direct-upload", "dest": "/api/mux-direct-upload.cjs" },
+
+    { "src": "/",            "dest": "/index.html" },
+    { "src": "/upload",      "dest": "/upload.html" },
+    { "src": "/report",      "dest": "/report.html" },
+    { "src": "/pricing",     "dest": "/pricing.html" },
+    { "src": "/faq",         "dest": "/faq.html" },
+    { "src": "/contact",     "dest": "/contact.html" },
+    { "src": "/coming-soon", "dest": "/coming-soon.html" }
+  ]
+}

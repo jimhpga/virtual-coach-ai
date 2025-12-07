@@ -21,7 +21,7 @@ const checks=[
 ];
 const tbody=document.querySelector("#t tbody");
 function row(label, ok, code, body){ const tr=document.createElement('tr');
-  tr.innerHTML=`<td>${label}</td><td class="${ok?'ok':'bad'}">${ok?'âœ…':'âŒ'}</td><td>${code||''}</td><td><pre>${body}</pre></td>`;
+  tr.innerHTML=`<td>${label}</td><td class="${ok?'ok':'bad'}">${ok?'Ã¢Å“â€¦':'Ã¢ÂÅ’'}</td><td>${code||''}</td><td><pre>${body}</pre></td>`;
   tbody.appendChild(tr);
 }
 (async()=>{

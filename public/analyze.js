@@ -1,4 +1,4 @@
-// api/analyze.js
+﻿// api/analyze.js
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Readable } from "node:stream";
 
@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
       return res.status(200).json(payload);
     } catch (e) {
-      // If the file isn’t there yet, we’re still pending
+      // If the file isnâ€™t there yet, weâ€™re still pending
       if (e?.name === "NoSuchKey" || e?.$metadata?.httpStatusCode === 404) {
         return res.status(200).json({ status: "pending" });
       }
@@ -56,3 +56,6 @@ export default async function handler(req, res) {
     });
   }
 }
+
+
+

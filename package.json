@@ -1,9 +1,12 @@
 {
-  "name": "virtual-coach-ai",
-  "private": true,
-  "type": "module",
-  "dependencies": {
-    "@vercel/blob": "^0.24.0",
-    "openai": "^6.7.0"
-  }
+    "name":  "virtual-coach-ai",
+    "private":  true,
+    "version":  "0.0.1",
+    "scripts":  {
+                    "build":  "echo Static + API; nothing to build",
+                    "vercel-build":  "npm run build"
+                },
+    "engines":  {
+                    "node":  "\u003e=20"
+                }
 }

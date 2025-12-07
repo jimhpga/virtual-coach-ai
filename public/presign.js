@@ -1,4 +1,4 @@
-// /api/presign  (POST { filename, type, key? } -> { key, putUrl })
+﻿// /api/presign  (POST { filename, type, key? } -> { key, putUrl })
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -49,3 +49,6 @@ export default async function handler(req, res){
     res.status(500).json({ error: String(e.message || e) });
   }
 }
+
+
+
