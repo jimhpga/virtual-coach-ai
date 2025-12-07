@@ -1,0 +1,58 @@
+﻿{
+  "checkpoints": [
+    {
+      "pos": "P1",
+      "name": "Setup",
+      "phase": "Address",
+      "description": "Neutral stance with feet roughly shoulder-width and square to the target line. Trail knee slightly more flexed than lead, spine and head in a neutral tilt, arms relaxed with a soft trail elbow. Everything looks ready to turn, not locked up."
+    },
+    {
+      "pos": "P2",
+      "name": "Shaft parallel (backswing)",
+      "phase": "Backswing",
+      "description": "Club shaft parallel to the ground in the takeaway. Lead arm and club roughly parallel to the target line, shaft just outside the trail thigh. Trail knee gaining a bit of flex, wrists beginning to set without losing posture."
+    },
+    {
+      "pos": "P3",
+      "name": "Lead arm parallel (backswing)",
+      "phase": "Backswing",
+      "description": "Lead arm parallel to the ground, elbows level. Club on plane, shaft pointing toward the baseline of the plane and roughly bisecting the lead biceps. Spine tilt and lower-body structure held, with the right side loaded but stable."
+    },
+    {
+      "pos": "P4",
+      "name": "Top of swing",
+      "phase": "Backswing",
+      "description": "Top of backswing. Hands deeper than the trail shoulder, club set on plane. Trail leg straighter but not locked, lead side forming a strong angle as the spine extends. Pressure loaded into the trail hip without losing balance."
+    },
+    {
+      "pos": "P5",
+      "name": "Lead arm parallel (downswing)",
+      "phase": "Downswing",
+      "description": "Lead arm parallel to the ground again, now on the way down. Lead side moving over the lead foot, hips clearing while the chest stays slightly closed. Arms dropping in front of the body, club shallow and powerful with pressure building into the lead leg."
+    },
+    {
+      "pos": "P6",
+      "name": "Shaft parallel (downswing)",
+      "phase": "Downswing",
+      "description": "Club shaft parallel to the ground in the strike zone. Lead leg firming up, trail shoulder moving down and in. Hands slightly ahead of the clubhead, wrists still loaded, shaft on plane with the club approaching from the inside window."
+    },
+    {
+      "pos": "P7",
+      "name": "Impact",
+      "phase": "Impact",
+      "description": "Lead knee close to straight, hips and chest slightly open to the target. Hands ahead of the clubhead, lead wrist flat, trail wrist bent. Pressure predominantly on the lead side with a forward-leaning shaft and compressed strike."
+    },
+    {
+      "pos": "P8",
+      "name": "Trail arm parallel (follow-through)",
+      "phase": "Follow-through",
+      "description": "Clubshaft parallel to the ground after impact. Trail arm extending, lead arm rotating and folding, lead shoulder moving up and around. Right heel lifting with weight continuing into the lead side, club exiting left on a balanced arc."
+    },
+    {
+      "pos": "P9",
+      "name": "Finish",
+      "phase": "Finish",
+      "description": "Full, balanced finish. Chest and belt buckle facing the target (or slightly left), nearly all weight on the lead leg. Trail foot up on the toe, spine tall, arms wrapped around with the club behind the head and no loss of balance."
+    }
+  ]
+}

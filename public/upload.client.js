@@ -1,4 +1,4 @@
-// /public/upload.client.js Ã†â€™Ã¢â‚¬â„¢Ã¢â‚¬Å¡Ã‚Â¢Ã†â€™Ã‚Â¢Ã‚Â¢Ã¢â‚¬Å¡Ã‚Â¬Ã‚Â¡Ã¢â‚¬Å¡Ã‚Â¬Ã†â€™Ã‚Â¢Ã‚Â¢Ã¢â€šÂ¬Ã…Â¡Ã‚Â¬Ã¢â‚¬Å¡Ã‚Â Mux flow (no S3)
+﻿// /public/upload.client.js Ãƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¢Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â Mux flow (no S3)
 // v5-final
 
 (() => {
@@ -111,7 +111,7 @@
     busy(true);
     try {
       // 1) Get a Mux direct-upload URL
-      log("Requesting Mux upload URLÃ†â€™Ã¢â‚¬â„¢Ã¢â‚¬Å¡Ã‚Â¢Ã†â€™Ã‚Â¢Ã‚Â¢Ã¢â‚¬Å¡Ã‚Â¬Ã‚Â¡Ã¢â‚¬Å¡Ã‚Â¬Ã†â€™Ã¢â€šÂ¬Ã…Â¡Ã¢â‚¬Å¡Ã‚Â¦");
+      log("Requesting Mux upload URLÃƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¢Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¦");
       const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
       const j1 = await jsonOrThrow(r1, "Mux upload URL request failed");
       const upload = j1?.upload;
@@ -123,7 +123,7 @@
       if (!put.ok) throw new Error(`Mux upload failed (${put.status})`);
 
       // 3) Save your report JSON (store the Mux upload id so your backend can resolve playback later)
-      log("Saving report JSONÃ†â€™Ã¢â‚¬â„¢Ã¢â‚¬Å¡Ã‚Â¢Ã†â€™Ã‚Â¢Ã‚Â¢Ã¢â‚¬Å¡Ã‚Â¬Ã‚Â¡Ã¢â‚¬Å¡Ã‚Â¬Ã†â€™Ã¢â€šÂ¬Ã…Â¡Ã¢â‚¬Å¡Ã‚Â¦");
+      log("Saving report JSONÃƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¢Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¦");
       const r2 = await fetch("/api/save-report", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -140,8 +140,8 @@
       });
       const rep = await jsonOrThrow(r2, "Report save failed");
 
-      // 4) Open the report Ã†â€™Ã¢â‚¬â„¢Ã¢â‚¬Å¡Ã‚Â¢Ã†â€™Ã‚Â¢Ã‚Â¢Ã¢â‚¬Å¡Ã‚Â¬Ã‚Â¡Ã¢â‚¬Å¡Ã‚Â¬Ã†â€™Ã‚Â¢Ã‚Â¢Ã¢â€šÂ¬Ã…Â¡Ã‚Â¬Ã¢â‚¬Å¡Ã‚Â prefer the direct Blob URL, fall back to id
-      log("Opening report viewÃ†â€™Ã¢â‚¬â„¢Ã¢â‚¬Å¡Ã‚Â¢Ã†â€™Ã‚Â¢Ã‚Â¢Ã¢â‚¬Å¡Ã‚Â¬Ã‚Â¡Ã¢â‚¬Å¡Ã‚Â¬Ã†â€™Ã¢â€šÂ¬Ã…Â¡Ã¢â‚¬Å¡Ã‚Â¦");
+      // 4) Open the report Ãƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¢Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â prefer the direct Blob URL, fall back to id
+      log("Opening report viewÃƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¢Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¦");
       if (rep.url) {
         location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
       } else if (rep.id) {
@@ -160,3 +160,5 @@
 async function safeJson(res) {
   try { return await res.json() } catch { return {} }
 }
+
+

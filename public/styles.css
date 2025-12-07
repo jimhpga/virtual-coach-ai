@@ -1,4 +1,4 @@
-:root{
+﻿:root{
   --bg:#0c141a;
   --nav:#082712;
   --panel: rgba(10,18,24,.24);
@@ -60,3 +60,7 @@ h2{font-size:26px; margin:6px 0 12px}
 @media(max-width:960px){.grid2{grid-template-columns:1fr}}
 ul.tight{margin:6px 0 0 18px}
 .hero-pad{padding:10px 14px}
+
+
+
+

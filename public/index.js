@@ -1,4 +1,4 @@
-// vca-s3-report-writer (Node.js 20.x, CommonJS)
+﻿// vca-s3-report-writer (Node.js 20.x, CommonJS)
 const {
   S3Client,
   HeadObjectCommand,
@@ -53,3 +53,6 @@ exports.handler = async (event) => {
   }
   return { ok: true };
 };
+
+
+

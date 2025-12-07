@@ -1,8 +1,8 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Upload â€¢ Virtual Coach AI</title>
   <link rel="stylesheet" href="/styles.css?v=9" />
 </head>
@@ -100,89 +100,60 @@
   </style>
 
   <script>
-    (function(){
-      const $ = s => document.querySelector(s);
-      const el = {
-        name: $("#name"), email: $("#email"), hcap: $("#handicap"),
-        handed: $("#handed"), eye: $("#eye"), height: $("#height"),
-        level: $("#level"), goal: $("#goal"),
-        file: $("#file"), btn: $("#uploadBtn"), log: $("#log")
-      };
-      const log = m => { el.log.textContent += (el.log.textContent ? "\n" : "") + m; el.log.scrollTop = el.log.scrollHeight; };
-      const busy = on => {
-        el.btn.disabled = on; el.file.disabled = on;
-        [el.name, el.email, el.hcap, el.handed, el.eye, el.height, el.level, el.goal].forEach(x => x.disabled = on);
-      };
-      const readForm = () => ({
-        name: (el.name.value||"").trim(),
-        email: (el.email.value||"").trim(),
-        hcap: (el.hcap.value||"").trim(),
-        handed: (el.handed.value||"").trim(),
-        eye: (el.eye.value||"").trim(),
-        height: (el.height.value||"").trim(),
-        level: (el.level.value||"intermediate").trim(),
-        goal: (el.goal.value||"power").trim()
-      });
-      const validateHeight = h => {
-        if (!h) return "Height is required.";
-        const n = Number(h); if (!Number.isFinite(n)) return "Height must be a number.";
-        if (n < 48 || n > 84) return "Height should be between 48 and 84 inches.";
-        return "";
-      };
+  (async function() {
+    const $ = s => document.querySelector(s);
+    const file = $('#file');
+    const btn  = $('#uploadBtn');
+    const log  = $('#log');
+    const logMsg = t => { log.textContent += (log.textContent ? "\n" : "") + t; };
 
-      el.btn.addEventListener("click", async (e) => {
-        e.preventDefault(); e.stopPropagation();
-        const file = el.file.files && el.file.files[0];
-        if (!file) return log("Pick a video first.");
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const f = file.files?.[0];
+      if (!f) return logMsg("Pick a video first.");
+      btn.disabled = true;
 
-        const meta = readForm();
-        const err = validateHeight(meta.height);
-        if (err) return log("Error: " + err);
+      try {
+        logMsg("Requesting Mux upload URL...");
+        const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
+        const j1 = await r1.json().catch(() => ({}));
+        const uploadUrl = j1?.upload?.url ?? j1?.url;
+        const uploadId  = j1?.upload?.id  ?? j1?.upload_id ?? j1?.id;
+        if (!r1.ok || !uploadUrl) throw new Error("mux-direct-upload failed: " + JSON.stringify(j1));
 
-        busy(true);
-        try {
-          log("Requesting Mux upload URL...");
-          const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
-          const j1 = await r1.json().catch(() => ({}));
-          if (!r1.ok || !j1 || !j1.upload || !j1.upload.url) {
-            throw new Error("mux-direct-upload failed (" + r1.status + "): " + (j1.error || JSON.stringify(j1)));
-          }
+        logMsg("Uploading video to Mux...");
+        const r2 = await fetch(uploadUrl, {
+          method: "PUT",
+          headers: { "content-type": f.type || "application/octet-stream" },
+          body: f
+        });
+        if (!r2.ok) throw new Error("Mux PUT failed: " + r2.status);
 
-          log("Uploading to Mux (this can take a minute)...");
-          const r2 = await fetch(j1.upload.url, { method: "PUT", body: file });
-          if (!r2.ok) throw new Error("Mux upload failed (" + r2.status + ")");
+        logMsg("Saving report...");
+        const r3 = await fetch("/api/save-report", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ muxUploadId: uploadId, meta: { fileName: f.name } })
+        });
+        const j3 = await r3.json().catch(() => ({}));
+        if (!r3.ok || (!j3?.url && !j3?.id)) throw new Error("save-report failed: " + JSON.stringify(j3));
 
-          log("Saving report data...");
-          const r3 = await fetch("/api/save-report", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({
-              status: "ready",
-              swingScore: 80,
-              muxPlaybackId: null,
-              muxUploadId: j1.upload.id,
-              meta,
-              hints: { level: meta.level, goal: meta.goal }
-            })
-          });
-          let rep;
-          const ct = (r3.headers.get("content-type") || "").toLowerCase();
-          if (ct.includes("application/json")) rep = await r3.json();
-          else throw new Error("save-report returned non-JSON (" + r3.status + ")");
+        const redirect = j3.url
+          ? `/report.html?url=${encodeURIComponent(j3.url)}`
+          : `/report.html?id=${encodeURIComponent(j3.id)}`;
 
-          if (!r3.ok || (!rep.url && !rep.id)) throw new Error("Report save failed (" + r3.status + ")");
-
-          log("Opening report...");
-          const u = rep.url ? ("/report.html?url=" + encodeURIComponent(rep.url))
-                            : ("/report.html?id=" + encodeURIComponent(rep.id));
-          location.assign(u + "&v=" + Date.now());
-        } catch (e) {
-          log("Error: " + (e && e.message ? e.message : String(e)));
-          busy(false);
-        }
-      });
-    })();
+        logMsg("Opening report...");
+        location.assign(redirect + "&v=" + Date.now());
+      } catch (err) {
+        logMsg("Error: " + (err?.message || err));
+        btn.disabled = false;
+      }
+    });
+  })();
   </script>
 </body>
 </html>
+
+
+
 

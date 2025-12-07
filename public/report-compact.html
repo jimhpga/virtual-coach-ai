@@ -1,4 +1,4 @@
-﻿<!doctype html><html lang="en"><head>`n<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Virtual Coach AI ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Swing Report</title><style>
+<!doctype html><html lang="en"><head>`n<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Virtual Coach AI ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Swing Report</title><style>
 :root{--bg:#0e1a22;--panel:#16242e;--muted:#8aa5b5;--text:#0e1a22;--accent:#5eb3ff;--ok:#19c37d;--warn:#f6c453;--bad:#ff6b6b;--chip:#f2f7fb;--radius:16px;--shadow:0 8px 24px rgba(0,0,0,.25)}
 *{box-sizing:border-box}html,body{height:100%}body{margin:0;color:#0f2330;font:16px/1.45 system-ui,-apple-system,Segoe UI,Inter,Roboto,Helvetica,Arial,sans-serif;background:#e9f4fb}
 .bg{position:fixed;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(255,255,255,.50),rgba(255,255,255,.50)),url('/homepage-background.png') center/cover no-repeat fixed,url('/golf-course-bg.jpg') center/cover no-repeat fixed,url('/virtualcoach-bg.png') center/cover no-repeat fixed;background-color:#e9f4fb}
@@ -64,4 +64,7 @@ bindUI();document.addEventListener('DOMContentLoaded',bindUI);
 document.getElementById('plist').addEventListener('click',e=>{const btn=e.target.closest('.view-video');if(!btn)return;const url=btn.getAttribute('data-url');const mount=document.getElementById('videoMount');if(mount){mount.innerHTML='';if(url){const v=document.createElement('video');v.controls=true;v.playsInline=true;v.style.width='100%';v.src=url;mount.appendChild(v)}else{mount.textContent='No video for this phase.'}const ov=document.getElementById('videoOverlay');if(ov)ov.hidden=false}});
 const auto=new URLSearchParams(location.search).get('report')||document.body.dataset.reportSrc||'/reports/demo/report.json';if(auto)loadReport(auto);
 </script></body></html>
+
+
+
 

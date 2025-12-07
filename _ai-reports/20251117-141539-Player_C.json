@@ -1,0 +1,238 @@
+﻿{
+    "meta":  {
+                 "playerName":  "Player C",
+                 "generatedAt":  "2024-06-21T12:00:00Z",
+                 "hand":  "Right",
+                 "eye":  "Right",
+                 "handicap":  "5",
+                 "height":  "5-11",
+                 "notes":  "Mid-handicap right-handed player with right eye dominance using a 7-iron mid-iron for full swings."
+             },
+    "summary":  {
+                    "headline":  "Solid fundamentals with good pivot and path control, minor adjustments in clubface and low point will improve consistency and distance.",
+                    "bullets":  [
+                                    "Balanced and athletic setup supporting a repeatable pivot.",
+                                    "Good swing path generally in-to-out producing a slight draw bias.",
+                                    "Clubface control is steady but occasionally opens at impact causing fade shots.",
+                                    "Low point consistently just after the ball, but sometimes moves forward causing thin strikes.",
+                                    "Start line is acceptable but occasionally drifts right, affecting shot shape."
+                                ]
+                },
+    "scores":  {
+                   "swing":  {
+                                 "grade":  "B",
+                                 "label":  "Overall mechanics"
+                             },
+                   "power":  {
+                                 "grade":  "B-",
+                                 "label":  "Speed and power generation"
+                             },
+                   "reliability":  {
+                                       "grade":  "B",
+                                       "label":  "Consistency under pressure"
+                                   }
+               },
+    "strengths":  [
+                      "Athletic, balanced setup with good posture and alignment.",
+                      "Strong and coordinated pivot generating efficient energy transfer.",
+                      "Good swing path control maintaining an in-to-out route.",
+                      "Repeatable low point control with slight improvements needed.",
+                      "Able to maintain good tempo and rhythm throughout the swing."
+                  ],
+    "priorityFixes":  [
+                          {
+                              "title":  "Refine clubface control at impact",
+                              "detail":  "Focus on keeping the clubface square through impact to reduce open face shots that cause fades and reduce distance."
+                          },
+                          {
+                              "title":  "Optimize low point location",
+                              "detail":  "Work on striking the turf just after the ball to avoid thin or fat shots; improve awareness of low point through impact."
+                          },
+                          {
+                              "title":  "Control start line to avoid rightward pushes",
+                              "detail":  "Improve setup alignment and initial path control to keep the start line straighter, reducing shot dispersion."
+                          }
+                      ],
+    "powerLeaks":  [
+                       "Slight early extension in downswing reducing leverage and power.",
+                       "Limited wrist hinge release timing causes loss in clubhead speed.",
+                       "Occasional tension in grip and forearms limiting swing speed.",
+                       "Insufficient use of ground force to maximize power generation."
+                   ],
+    "checkpoints":  [
+                        {
+                            "id":  "P1",
+                            "label":  "Setup",
+                            "status":  "GREEN",
+                            "note":  "Balanced posture with correct spine angle and relaxed grip pressure.",
+                            "errors":  [
+                                           "Feet alignment closed or open by more than 5 degrees.",
+                                           "Tension in hands or arms at address.",
+                                           "Ball position too far forward or back for 7-iron."
+                                       ],
+                            "drills":  [
+                                           "Practice setup in front of a mirror to confirm posture.",
+                                           "Use alignment sticks to check feet and shoulder line.",
+                                           "Grip pressure drill: squeeze a tennis ball gently then swing."
+                                       ]
+                        },
+                        {
+                            "id":  "P2",
+                            "label":  "Takeaway \u0026 Backswing",
+                            "status":  "GREEN",
+                            "note":  "Smooth takeaway with clubhead staying low and wide; backswing achieves good width.",
+                            "errors":  [
+                                           "Club gets too inside/outside early causing path issues.",
+                                           "Over-rotation causing loss of balance.",
+                                           "Wrist set too early changing swing plane."
+                                       ],
+                            "drills":  [
+                                           "Wall drill to keep clubhead low during takeaway.",
+                                           "Slow motion swings focusing on wide arc.",
+                                           "Pause backswing drill to check position at top."
+                                       ]
+                        },
+                        {
+                            "id":  "P3",
+                            "label":  "Transition",
+                            "status":  "YELLOW",
+                            "note":  "Good weight shift but slight early downswing casting noted.",
+                            "errors":  [
+                                           "Casting causing club to lose lag.",
+                                           "Body movement stalling transition.",
+                                           "Hands dropping too early."
+                                       ],
+                            "drills":  [
+                                           "Pump drill focusing on maintaining wrist lag.",
+                                           "Slow transition swings feeling weight moving to front foot.",
+                                           "Swing thought: \u0027Start down with hips\u0027 to encourage proper sequencing."
+                                       ]
+                        },
+                        {
+                            "id":  "P4",
+                            "label":  "Downswing",
+                            "status":  "YELLOW",
+                            "note":  "Mostly efficient pivot but minor early extension reduces power.",
+                            "errors":  [
+                                           "Early standing up or spine straightening.",
+                                           "Overuse of arms rather than body rotation.",
+                                           "Loss of lag due to wrist breakdown."
+                                       ],
+                            "drills":  [
+                                           "Split step drill to feel proper downswing balance.",
+                                           "Hip bump drill to encourage lower body lead.",
+                                           "Video review checking posture consistency through downswing."
+                                       ]
+                        },
+                        {
+                            "id":  "P5",
+                            "label":  "Impact",
+                            "status":  "YELLOW",
+                            "note":  "Clubface tends to open slightly, and low point shifts occasionally causing thin strikes.",
+                            "errors":  [
+                                           "Open clubface causes pushes/fades.",
+                                           "Low point ahead of ball causing thin strikes.",
+                                           "Hands too far behind the ball at impact."
+                                       ],
+                            "drills":  [
+                                           "Impact bag drill focusing on square clubface and forward shaft lean.",
+                                           "Divot placement practice to feel correct low point.",
+                                           "Slow motion impact holding pose to reinforce feel."
+                                       ]
+                        },
+                        {
+                            "id":  "P6",
+                            "label":  "Release",
+                            "status":  "YELLOW",
+                            "note":  "Release timing slightly early causing loss of clubhead speed.",
+                            "errors":  [
+                                           "Premature wrist uncocking.",
+                                           "Flip at impact reducing power.",
+                                           "Insufficient forearm rotation."
+                                       ],
+                            "drills":  [
+                                           "Lag drill with pause before release.",
+                                           "Impact position holds focusing on forearm rotation.",
+                                           "Slow tempo swings emphasizing late release."
+                                       ]
+                        },
+                        {
+                            "id":  "P7",
+                            "label":  "Finish",
+                            "status":  "GREEN",
+                            "note":  "Balanced finish showing good extension and rotation.",
+                            "errors":  [
+                                           "Loss of balance after impact.",
+                                           "Incomplete follow-through stopping early.",
+                                           "Excessive sway or loss of posture."
+                                       ],
+                            "drills":  [
+                                           "Hold finish pose for 5 seconds to build balance.",
+                                           "Finish alignment drill with mirror feedback.",
+                                           "Slow smooth follow-through swings focusing on extension."
+                                       ]
+                        },
+                        {
+                            "id":  "P8",
+                            "label":  "Start Line Control",
+                            "status":  "YELLOW",
+                            "note":  "Start line slightly right of target noticeably on some shots.",
+                            "errors":  [
+                                           "Misalignment of feet and shoulders.",
+                                           "Early inside takeaway leading to path variation.",
+                                           "Clubface open relative to path at impact."
+                                       ],
+                            "drills":  [
+                                           "Alignment stick setup for feet and shoulders.",
+                                           "Gate drill to promote consistent path.",
+                                           "Impact tape to check face angle."
+                                       ]
+                        },
+                        {
+                            "id":  "P9",
+                            "label":  "Low Point Control",
+                            "status":  "YELLOW",
+                            "note":  "Turf interaction good but sometimes low point moves forward causing thin or fat shots.",
+                            "errors":  [
+                                           "Early low point causing fat shots.",
+                                           "Late low point causing thin shots.",
+                                           "Inconsistent ball-first ball-first contact."
+                                       ],
+                            "drills":  [
+                                           "Divot pattern drill focusing on divot length and location.",
+                                           "Half swing drills emphasizing crisp strike.",
+                                           "Use tees to check hitting down angle."
+                                       ]
+                        }
+                    ],
+    "practicePlan":  {
+                         "overview":  "Next 14 days focus on refining impact quality and start line control to improve accuracy and consistency, while maintaining the strong fundamentals of setup and pivot. Incorporate drills for clubface control and low point awareness daily.",
+                         "days":  [
+                                      {
+                                          "label":  "DAYS 1–2: Setup \u0026 Alignment",
+                                          "focus":  "Perfect posture and alignment",
+                                          "detail":  "Work in front of a mirror confirming balanced, athletic posture and consistent alignment using alignment sticks. Use grip pressure drills to ensure tension is relaxed at address."
+                                      },
+                                      {
+                                          "label":  "DAYS 3–5: Backswing \u0026 Transition",
+                                          "focus":  "Smooth takeaway and weight shift",
+                                          "detail":  "Practice takeaway wall drill and slow backswing to build wide arc. Use pump drill to maintain wrist lag and avoid casting during transition."
+                                      },
+                                      {
+                                          "label":  "DAYS 6–8: Impact \u0026 Clubface Control",
+                                          "focus":  "Square clubface and forward shaft lean",
+                                          "detail":  "Spend time hitting into an impact bag and practicing divot placement drills for proper low point. Focus on maintaining clubface control through impact to eliminate fades."
+                                      },
+                                      {
+                                          "label":  "DAYS 9–11: Release \u0026 Power Generation",
+                                          "focus":  "Correct release timing and lag",
+                                          "detail":  "Incorporate lag drills with pauses and slow tempo swings focusing on delayed release. Address early extension with hip bump and split step drills."
+                                      },
+                                      {
+                                          "label":  "DAYS 12–14: Start Line \u0026 Consistency",
+                                          "focus":  "Straight start line and repeatability",
+                                          "detail":  "Use alignment stick setup for feet and shoulders daily. Practice gate drills for path control and use impact tape to verify clubface angle at impact. Finish with balanced finish holds."
+                                      }
+                                  ]
+                     }
+}

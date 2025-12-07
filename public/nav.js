@@ -1,4 +1,4 @@
-// public/nav.js
+﻿// public/nav.js
 (function () {
   const links = [
     { href: "/",            label: "Home",        id: "home" },
@@ -29,3 +29,6 @@
   const hdr = document.getElementById("site-header");
   if (hdr) hdr.innerHTML = html;
 })();
+
+
+

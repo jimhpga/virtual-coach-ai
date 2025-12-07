@@ -1,0 +1,862 @@
+cd C:\Sites\virtual-coach-ai\public
+
+@'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Virtual Coach AI â€” Swing Report</title>
+  <link rel="preload" as="image" href="homepage-background.png" />
+
+  <style>
+    :root {
+      --nav:#0b2b12;
+      --brand:#0b2b12;
+      --scrim:rgba(0,0,0,.05);
+      --panel:rgba(0,0,0,.32);
+      --panel-light:rgba(0,0,0,.24);
+      --line:rgba(255,255,255,.12);
+      --text:#f2f7f9;
+      --muted:#cfe0e6;
+      --maxw:1100px;
+      --radius:14px;
+      --shadow:0 10px 24px rgba(0,0,0,.28);
+      --green:#2ecc71;
+      --yellow:#f1c40f;
+      --red:#e74c3c;
+    }
+
+    * { box-sizing:border-box; }
+
+    html, body { height:100%; }
+
+    body {
+      margin:0;
+      color:var(--text);
+      font:16px/1.5 system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif;
+      background:url("homepage-background.png") center/cover fixed no-repeat;
+    }
+
+    .scrim {
+      min-height:100vh;
+      background:var(--scrim);
+    }
+
+    /* TOP NAV (same as home) */
+    header.top {
+      position:sticky;
+      top:0;
+      z-index:100;
+      background:var(--nav);
+      border-bottom:1px solid rgba(255,255,255,.1);
+    }
+
+    .navwrap {
+      width:min(var(--maxw),94%);
+      margin:0 auto;
+      padding:10px 0;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      color:#fff;
+      text-decoration:none;
+      font-weight:800;
+    }
+
+    .brand-logo {
+      height:36px;
+      width:auto;
+      display:block;
+    }
+
+    .menu-toggle {
+      display:none;
+      align-items:center;
+      gap:8px;
+      color:#fff;
+      background:transparent;
+      border:1px solid rgba(255,255,255,.3);
+      border-radius:10px;
+      padding:6px 10px;
+      cursor:pointer;
+      font:inherit;
+    }
+
+    nav.nav {
+      display:flex;
+      gap:8px;
+    }
+
+    nav.nav a {
+      color:#fff;
+      text-decoration:none;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid transparent;
+      white-space:nowrap;
+      font-size:14px;
+    }
+
+    nav.nav a:hover {
+      background:rgba(255,255,255,.08);
+    }
+
+    nav.nav a[aria-current="page"] {
+      border-color:rgba(255,255,255,.18);
+      background:rgba(255,255,255,.10);
+    }
+
+    @media (max-width:820px) {
+      .menu-toggle { display:inline-flex; }
+
+      nav.nav {
+        position:absolute;
+        right:0;
+        top:100%;
+        background:var(--nav);
+        border-bottom:1px solid rgba(255,255,255,.1);
+        display:none;
+        flex-direction:column;
+        padding:8px;
+      }
+
+      header.top.open nav.nav {
+        display:flex;
+      }
+    }
+
+    main.report-main {
+      width:min(var(--maxw),94%);
+      margin:0 auto;
+      padding:20px 0 40px;
+      display:grid;
+      gap:16px;
+    }
+
+    .card {
+      padding:16px 18px;
+      border-radius:var(--radius);
+      border:1px solid var(--line);
+      background:var(--panel);
+      backdrop-filter:blur(2px);
+      box-shadow:var(--shadow);
+    }
+
+    .card-light {
+      background:var(--panel-light);
+    }
+
+    .report-header-top {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:space-between;
+      align-items:flex-start;
+      margin-bottom:10px;
+    }
+
+    .report-title {
+      font-size:1.4rem;
+      font-weight:700;
+    }
+
+    .chip-row {
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      justify-content:flex-end;
+    }
+
+    .chip {
+      font-size:11px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.2);
+      background:rgba(0,0,0,.18);
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      white-space:nowrap;
+    }
+
+    .chip.accent {
+      border-color:#00e69f;
+      background:rgba(0,255,153,.18);
+      color:#eafff8;
+      font-weight:600;
+    }
+
+    .player-row {
+      display:flex;
+      gap:8px;
+      align-items:center;
+      font-size:14px;
+    }
+
+    .player-label {
+      opacity:.8;
+    }
+
+    .player-name {
+      font-weight:600;
+    }
+
+    .summary-grid {
+      display:grid;
+      gap:12px;
+    }
+
+    @media (min-width:900px) {
+      .summary-grid {
+        grid-template-columns:2.1fr .9fr;
+      }
+    }
+
+    h2 {
+      margin:0 0 6px;
+      font-size:1.05rem;
+    }
+
+    .muted {
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .summary-tags {
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:8px;
+    }
+
+    .pill {
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      font-size:11px;
+      white-space:nowrap;
+    }
+
+    .ratings-grid {
+      display:grid;
+      gap:8px;
+    }
+
+    .rating-block {
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.3);
+    }
+
+    .rating-label {
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      opacity:.9;
+    }
+
+    .rating-score {
+      font-size:20px;
+      font-weight:700;
+      margin-top:4px;
+    }
+
+    .tri-grid {
+      display:grid;
+      gap:12px;
+    }
+
+    @media (min-width:900px) {
+      .tri-grid {
+        grid-template-columns:1.1fr 1.1fr 1.1fr;
+      }
+    }
+
+    ul.bullet {
+      margin:6px 0 0;
+      padding-left:18px;
+      font-size:14px;
+    }
+
+    ul.bullet li + li {
+      margin-top:4px;
+    }
+
+    .checkpoint-card {
+      margin-top:4px;
+    }
+
+    table.checkpoints {
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+      margin-top:6px;
+    }
+
+    table.checkpoints th,
+    table.checkpoints td {
+      padding:6px 8px;
+      border-bottom:1px solid rgba(255,255,255,.14);
+    }
+
+    table.checkpoints th {
+      text-align:left;
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      opacity:.85;
+    }
+
+    .status-pill {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:600;
+    }
+
+    .status-green {
+      background:rgba(0,200,120,.18);
+      border:1px solid rgba(0,200,120,.9);
+      color:#b9ffe0;
+    }
+
+    .status-yellow {
+      background:rgba(240,200,0,.2);
+      border:1px solid rgba(240,200,0,.9);
+      color:#fff3c2;
+    }
+
+    .status-red {
+      background:rgba(240,60,60,.22);
+      border:1px solid rgba(240,60,60,.9);
+      color:#ffe0e0;
+    }
+
+    .practice-card {
+      margin-top:10px;
+    }
+
+    .practice-grid {
+      display:grid;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    @media (min-width:900px) {
+      .practice-grid {
+        grid-template-columns:repeat(4,1fr);
+      }
+    }
+
+    .practice-box {
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(0,0,0,.35);
+      font-size:13px;
+    }
+
+    .practice-box h3 {
+      margin:0 0 4px;
+      font-size:13px;
+    }
+
+    footer {
+      width:min(var(--maxw),94%);
+      margin:10px auto 26px;
+      text-align:center;
+      color:#cbd9de;
+      font-size:12px;
+    }
+  </style>
+</head>
+<body>
+  <header class="top" id="site-header">
+    <div class="navwrap">
+      <a class="brand" href="index.html" aria-label="Virtual Coach AI">
+        <img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo" />
+        <span>Virtual Coach AI</span>
+      </a>
+
+      <button class="menu-toggle" id="menuBtn" aria-expanded="false" type="button">
+        Menu â–¾
+      </button>
+
+      <nav class="nav" id="siteNav" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="upload.html">Upload</a>
+        <a href="report.html?report=reports/demo/report.json">Reports</a>
+        <a href="coming-soon.html">Coming&nbsp;Soon</a>
+        <a href="pricing.html">Pricing</a>
+        <a href="faq.html">FAQ</a>
+        <a href="contact.html">Contact</a>
+        <a href="login.html">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="scrim">
+    <main class="report-main">
+      <!-- HEADER -->
+      <section class="card card-light">
+        <div class="report-header-top">
+          <div>
+            <div class="report-title">Virtual Coach AI â€” Swing Report</div>
+            <div class="player-row">
+              <div class="player-label">Player</div>
+              <div class="player-name" id="player-name">Player</div>
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="chip accent">Live AI Demo</span>
+            <span class="chip">P1â€“P9 Checkpoints</span>
+            <span class="chip">Top 3 Priority Fixes</span>
+            <span class="chip">14-Day Practice Plan</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- SUMMARY + RATINGS -->
+      <section class="card summary-grid">
+        <article>
+          <h2>All Swing Summary</h2>
+          <p class="muted" id="summary-body">
+            Solid, athletic motion with room to grow. This text will expand on whatâ€™s
+            working, what leaks power, and where your consistency gains will come from.
+          </p>
+          <div class="summary-tags" id="summary-tags">
+            <span class="pill">First AI Review</span>
+            <span class="pill">Cue: Clubface Control</span>
+            <span class="pill">Cue: Lead-Leg Braking</span>
+          </div>
+        </article>
+
+        <aside class="ratings-grid">
+          <div class="rating-block">
+            <div class="rating-label">Swing Rating</div>
+            <div class="rating-score" id="rating-swing">B+</div>
+            <div class="muted" style="font-size:12px">Overall mechanics</div>
+          </div>
+          <div class="rating-block">
+            <div class="rating-label">Power Rating</div>
+            <div class="rating-score" id="rating-power">B</div>
+            <div class="muted" style="font-size:12px">Speed / window</div>
+          </div>
+          <div class="rating-block">
+            <div class="rating-label">Reliability</div>
+            <div class="rating-score" id="rating-reliability">B-</div>
+            <div class="muted" style="font-size:12px">Pattern under pressure</div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- GOOD / FIXES / LEAKS -->
+      <section class="card tri-grid">
+        <article>
+          <h2>Good Swing Characteristics</h2>
+          <ul class="bullet" id="good-list">
+            <li>Balanced address and posture.</li>
+            <li>Tempo and rhythm in a playable window.</li>
+            <li>Solid shaft delivery through impact.</li>
+          </ul>
+        </article>
+
+        <article>
+          <h2>Top 3 Priority Fixes</h2>
+          <ul class="bullet" id="priority-list">
+            <li>P3 clubface control. Tighten the face vs. spine angle window.</li>
+            <li>Lead-leg braking. Post harder into lead leg to unlock speed.</li>
+            <li>Handle turn-through. Clean up handle exit and match the rotation.</li>
+          </ul>
+        </article>
+
+        <article>
+          <h2>Top Power Leaks</h2>
+          <ul class="bullet" id="leaks-list">
+            <li>Soft lead-leg block. Some ground force never converts into rotation.</li>
+            <li>Open window at P3. Costs compression and curve control.</li>
+            <li>Handle stall through impact. Leaves speed and strike consistency.</li>
+          </ul>
+        </article>
+      </section>
+
+      <!-- CHECKPOINT TABLE -->
+      <section class="card checkpoint-card">
+        <h2>Checkpoint Map (P1â€“P9)</h2>
+        <table class="checkpoints">
+          <thead>
+            <tr>
+              <th style="width:40px;">Pos</th>
+              <th style="width:110px;">Label</th>
+              <th style="width:80px;">Status</th>
+              <th>Note</th>
+            </tr>
+          </thead>
+          <tbody id="checkpoint-body">
+            <!-- Defaults / will be replaced if JSON has checkpoints -->
+            <tr>
+              <td>P1</td>
+              <td>Setup</td>
+              <td><span class="status-pill status-green">GREEN</span></td>
+              <td>Solid address. Posture, ball and alignment all in a playable window.</td>
+            </tr>
+            <tr>
+              <td>P2</td>
+              <td>Shaft parallel (backswing)</td>
+              <td><span class="status-pill status-yellow">YELLOW</span></td>
+              <td>Club a touch inside and face a bit open. Needs a slightly tighter window.</td>
+            </tr>
+            <tr>
+              <td>P3</td>
+              <td>Lead arm parallel</td>
+              <td><span class="status-pill status-yellow">YELLOW</span></td>
+              <td>Face a few degrees open vs. spine. This is the main control checkpoint.</td>
+            </tr>
+            <tr>
+              <td>P4</td>
+              <td>Top of swing</td>
+              <td><span class="status-pill status-green">GREEN</span></td>
+              <td>Classic tour-type top. Good depth and width.</td>
+            </tr>
+            <tr>
+              <td>P5</td>
+              <td>Lead arm parallel (downswing)</td>
+              <td><span class="status-pill status-yellow">YELLOW</span></td>
+              <td>Lead leg is soft. More pressure into the ground will tighten dispersion.</td>
+            </tr>
+            <tr>
+              <td>P6</td>
+              <td>Shaft parallel (downswing)</td>
+              <td><span class="status-pill status-yellow">YELLOW</span></td>
+              <td>Handle tends to stop turning. Club lags and start lines wander.</td>
+            </tr>
+            <tr>
+              <td>P7</td>
+              <td>Impact</td>
+              <td><span class="status-pill status-green">GREEN</span></td>
+              <td>Playable strike, but thereâ€™s still more compression and ball speed available.</td>
+            </tr>
+            <tr>
+              <td>P8</td>
+              <td>Trail arm parallel</td>
+              <td><span class="status-pill status-yellow">YELLOW</span></td>
+              <td>Nice extension, rotation patterns still settling.</td>
+            </tr>
+            <tr>
+              <td>P9</td>
+              <td>Finish</td>
+              <td><span class="status-pill status-green">GREEN</span></td>
+              <td>Balanced finish. Good posture and rhythm all the way through.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 14-DAY PRACTICE PLAN -->
+      <section class="card">
+        <h2>14-Day Practice Plan â€” Overview</h2>
+        <p class="muted" id="practice-overview">
+          Over the next 14 days the focus is P3 clubface control, stronger lead-leg
+          braking, and a cleaner handle turn-through. Expect tighter start lines,
+          fewer big misses, and a more automatic driver window.
+        </p>
+
+        <div class="practice-grid" id="practice-grid">
+          <article class="practice-box">
+            <h3>DAYS 1â€“2: BASELINE &amp; FEELS</h3>
+            <p>
+              Film 10 swings face-on and down-the-line. Note your default curve and miss.
+              Do slow-motion rehearsals pausing at P3 to feel a â€œsquareâ€ window.
+            </p>
+          </article>
+          <article class="practice-box">
+            <h3>DAYS 3â€“5: P3 FACE CONTROL</h3>
+            <p>
+              Half-swings and Â¾ swings. Pause at P3, check the live spine angle, then swing
+              through. 3 sets of 10 balls with that checkpoint.
+            </p>
+          </article>
+          <article class="practice-box">
+            <h3>DAYS 6â€“8: LEAD-LEG BRAKING</h3>
+            <p>
+              No-ball drills focusing on posting into the lead leg. Add 10 half-swings
+              feeling the ground push under your lead foot.
+            </p>
+          </article>
+          <article class="practice-box">
+            <h3>DAYS 9â€“14: BLEND &amp; PLAY</h3>
+            <p>
+              Shift into on-course or game-like practice. 3-ball windows per shot: one
+              â€œtech,â€ one â€œfeel,â€ one â€œplayâ€ ball combining all three.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Â© <span id="y"></span> Virtual Coach AI. All rights reserved.
+    </footer>
+  </div>
+
+  <script>
+    // Set current year
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // Mobile hamburger toggle
+    const headerEl = document.getElementById('site-header');
+    const menuBtn = document.getElementById('menuBtn');
+    const navEl = document.getElementById('siteNav');
+
+    menuBtn.addEventListener('click', () => {
+      const open = headerEl.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+
+    navEl.addEventListener('click', (e) => {
+      if (e.target.tagName === 'A') {
+        headerEl.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Highlight current page in nav
+    const current =
+      (location.pathname.split('/').pop() || 'report.html')
+        .split('?')[0]
+        .toLowerCase();
+
+    document.querySelectorAll('nav.nav a').forEach((a) => {
+      const href = (a.getAttribute('href') || '')
+        .split('?')[0]
+        .toLowerCase();
+      if (href === current) {
+        a.setAttribute('aria-current', 'page');
+      }
+    });
+
+    // ---- JSON BINDING ----
+
+    function getReportPath() {
+      const params = new URLSearchParams(window.location.search);
+      const p = params.get('report');
+      return p || 'reports/demo/report.json';
+    }
+
+    function renderList(containerId, items) {
+      const el = document.getElementById(containerId);
+      if (!el || !Array.isArray(items) || !items.length) return;
+      el.innerHTML = '';
+      items.forEach((text) => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        el.appendChild(li);
+      });
+    }
+
+    function renderTags(containerId, items) {
+      const el = document.getElementById(containerId);
+      if (!el || !Array.isArray(items) || !items.length) return;
+      el.innerHTML = '';
+      items.forEach((text) => {
+        const span = document.createElement('span');
+        span.className = 'pill';
+        span.textContent = text;
+        el.appendChild(span);
+      });
+    }
+
+    function statusClass(status) {
+      const s = String(status || '').toUpperCase();
+      if (s === 'GREEN') return 'status-pill status-green';
+      if (s === 'YELLOW') return 'status-pill status-yellow';
+      if (s === 'RED') return 'status-pill status-red';
+      return 'status-pill';
+    }
+
+    function renderCheckpoints(rows) {
+      const tbody = document.getElementById('checkpoint-body');
+      if (!tbody || !Array.isArray(rows) || !rows.length) return;
+      tbody.innerHTML = '';
+      rows.forEach((cp) => {
+        const tr = document.createElement('tr');
+
+        const tdPos = document.createElement('td');
+        tdPos.textContent = cp.pos || cp.label || '';
+        tr.appendChild(tdPos);
+
+        const tdName = document.createElement('td');
+        tdName.textContent = cp.name || cp.title || '';
+        tr.appendChild(tdName);
+
+        const tdStatus = document.createElement('td');
+        const span = document.createElement('span');
+        span.className = statusClass(cp.status);
+        span.textContent = (cp.status || '').toString().toUpperCase();
+        tdStatus.appendChild(span);
+        tr.appendChild(tdStatus);
+
+        const tdNote = document.createElement('td');
+        tdNote.textContent = cp.note || cp.comment || '';
+        tr.appendChild(tdNote);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderPractice(blocks) {
+      const grid = document.getElementById('practice-grid');
+      if (!grid || !Array.isArray(blocks) || !blocks.length) return;
+      grid.innerHTML = '';
+      blocks.forEach((b) => {
+        const box = document.createElement('article');
+        box.className = 'practice-box';
+
+        const h = document.createElement('h3');
+        h.textContent = b.title || '';
+        box.appendChild(h);
+
+        const p = document.createElement('p');
+        p.textContent = b.body || '';
+        box.appendChild(p);
+
+        grid.appendChild(box);
+      });
+    }
+
+    async function loadReport() {
+      const path = getReportPath();
+      console.log('Loading report JSON from:', path);
+
+      try {
+        const res = await fetch(path);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        console.log('Report JSON (raw):', data);
+
+        // Support both S3 wrapper { player, generatedAt, report: { ... } }
+        // and legacy flat JSON.
+        const core = data.report || data;
+
+        // Player name: JSON or ?player= query
+        const params = new URLSearchParams(window.location.search);
+        const fromQuery = params.get('player');
+        const playerName =
+          core.playerName ||
+          core.player ||
+          data.player ||
+          fromQuery ||
+          'Player';
+
+        const nameEl = document.getElementById('player-name');
+        if (nameEl) nameEl.textContent = playerName;
+
+        document.title = 'Virtual Coach AI â€” ' + playerName + ' Swing Report';
+
+        // Summary body
+        const summaryBody =
+          core.summary?.body ||
+          core.swingSummary?.body ||
+          data.summary?.body ||
+          data.swingSummary?.body;
+
+        if (summaryBody) {
+          const el = document.getElementById('summary-body');
+          if (el) el.textContent = summaryBody;
+        }
+
+        // Tags / cues
+        const tags =
+          core.summary?.tags ||
+          core.swingSummary?.tags ||
+          core.tags ||
+          data.summary?.tags ||
+          data.swingSummary?.tags ||
+          data.tags ||
+          [];
+        renderTags('summary-tags', tags);
+
+        // Ratings
+        const ratings = core.ratings || data.ratings || null;
+        if (ratings) {
+          const r = ratings;
+          const s = document.getElementById('rating-swing');
+          const p = document.getElementById('rating-power');
+          const rel = document.getElementById('rating-reliability');
+          if (s && r.swing) s.textContent = r.swing;
+          if (p && r.power) p.textContent = r.power;
+          if (rel && r.reliability) rel.textContent = r.reliability;
+        }
+
+        // Bullet lists
+        renderList(
+          'good-list',
+          core.goodCharacteristics ||
+            core.good ||
+            data.goodCharacteristics ||
+            data.good ||
+            []
+        );
+        renderList(
+          'priority-list',
+          core.priorityFixes ||
+            core.topFixes ||
+            data.priorityFixes ||
+            data.topFixes ||
+            []
+        );
+        renderList(
+          'leaks-list',
+          core.powerLeaks ||
+            core.leaks ||
+            data.powerLeaks ||
+            data.leaks ||
+            []
+        );
+
+        // Checkpoints
+        renderCheckpoints(
+          core.checkpoints ||
+            core.pCheckpoints ||
+            data.checkpoints ||
+            data.pCheckpoints ||
+            []
+        );
+
+        // Practice overview
+        const practiceOverview =
+          core.practice?.overview || data.practice?.overview;
+        if (practiceOverview) {
+          const el = document.getElementById('practice-overview');
+          if (el) el.textContent = practiceOverview;
+        }
+
+        // Practice blocks
+        renderPractice(
+          core.practice?.blocks ||
+            core.practiceBlocks ||
+            data.practice?.blocks ||
+            data.practiceBlocks ||
+            []
+        );
+      } catch (err) {
+        console.error('Failed to load report JSON:', err);
+      }
+    }
+
+    loadReport();
+  </script>
+</body>
+</html>
+'@ | Set-Content -Encoding UTF8 .\report.html

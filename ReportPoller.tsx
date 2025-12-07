@@ -39,8 +39,8 @@ export default function ReportPoller({ statusKey }: { statusKey: string }) {
     return () => { cancelled = true; };
   }, [statusKey]);
 
-  if (state === "pending") return <p>⏳ analyzing…</p>;
-  if (state === "error")   return <p>❌ {error}</p>;
+  if (state === "pending") return <p>Ã¢ÂÂ³ analyzingÃ¢â‚¬Â¦</p>;
+  if (state === "error")   return <p>Ã¢ÂÅ’ {error}</p>;
   if (!report)             return null;
 
   return (
@@ -50,7 +50,7 @@ export default function ReportPoller({ statusKey }: { statusKey: string }) {
         <h3 className="font-medium">Checkpoints</h3>
         <ul className="list-disc pl-6">
           {report.checkpoints.map(c => (
-            <li key={c.p}>P{c.p}{c.label ? ` – ${c.label}` : ""}</li>
+            <li key={c.p}>P{c.p}{c.label ? ` Ã¢â‚¬â€œ ${c.label}` : ""}</li>
           ))}
         </ul>
       </div>
@@ -58,7 +58,7 @@ export default function ReportPoller({ statusKey }: { statusKey: string }) {
         <h3 className="font-medium">Faults</h3>
         <ul className="list-disc pl-6">
           {report.faults.map(f => (
-            <li key={f.code}><strong>{f.code}</strong> ({f.severity}) – {f.note}</li>
+            <li key={f.code}><strong>{f.code}</strong> ({f.severity}) Ã¢â‚¬â€œ {f.note}</li>
           ))}
         </ul>
       </div>

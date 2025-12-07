@@ -1,0 +1,139 @@
+﻿{
+  "meta": {
+    "playerName": "Player",
+    "generatedAt": "2024-06-13T12:00:00Z",
+    "hand": "right",
+    "eye": "right",
+    "handicap": "1",
+    "height": "6'0\"",
+    "notes": "High level amateur right-handed golfer with right eye dominance and good athletic build, swinging a mid-iron."
+  },
+  "summary": {
+    "headline": "Solid fundamentally sound mid-iron swing with small opportunities to clean up transition and low point control.",
+    "bullets": [
+      "Athletic, balanced setup that supports a powerful coil.",
+      "Good wrist hinge and width in the backswing.",
+      "Clubface control is generally very good through impact.",
+      "Transition timing can get a touch upper-body dominant.",
+      "Low point control can tighten up for more compression."
+    ]
+  },
+  "scores": {
+    "swing": { "grade": "A-", "label": "Overall mechanics" },
+    "power": { "grade": "B+", "label": "Speed and efficiency" },
+    "reliability": { "grade": "A-", "label": "Consistency and shotmaking" }
+  },
+  "strengths": [
+    "Athletic setup with clean spine tilt and balance.",
+    "Solid connection between arms and body in the takeaway.",
+    "Good wrist hinge that creates width and leverage.",
+    "Clubface control is generally stable through impact.",
+    "Finish is balanced with full rotation toward the target."
+  ],
+  "priorityFixes": [
+    {
+      "title": "Clean up transition timing",
+      "detail": "Start the downswing from the ground up: lead foot pressure, then hips, then torso, then arms. This will sharpen low point and contact."
+    },
+    {
+      "title": "Shallow the downswing a touch",
+      "detail": "Feel the club falling slightly behind you at P5–P6 instead of straight down. This reduces steepness and helps compress the ball."
+    },
+    {
+      "title": "Keep pivot centered through impact",
+      "detail": "Avoid sliding or backing away at impact. Stay centered and rotate so low point is in front of the ball more often."
+    }
+  ],
+  "powerLeaks": [
+    "Upper body wants to start the downswing before the lower body.",
+    "Slight casting in the transition when you go after it hard.",
+    "Early extension under max effort swings.",
+    "Downswing can get a fraction steep, costing you smash factor."
+  ],
+  "checkpoints": [
+    {
+      "id": "P1",
+      "label": "Setup",
+      "status": "GREEN",
+      "note": "Balanced, athletic posture with clean alignments."
+    },
+    {
+      "id": "P2",
+      "label": "Shaft parallel backswing",
+      "status": "GREEN",
+      "note": "Clubhead tracks nicely along the target line with good face control."
+    },
+    {
+      "id": "P3",
+      "label": "Lead arm parallel backswing",
+      "status": "GREEN",
+      "note": "Good width and depth with plenty of rotation and coil potential."
+    },
+    {
+      "id": "P4",
+      "label": "Top of swing",
+      "status": "GREEN",
+      "note": "Plenty of turn with a playable club position at the top."
+    },
+    {
+      "id": "P5",
+      "label": "Lead arm parallel downswing",
+      "status": "YELLOW",
+      "note": "Club is close to on-plane but can get just a touch steep under pressure."
+    },
+    {
+      "id": "P6",
+      "label": "Shaft parallel downswing",
+      "status": "YELLOW",
+      "note": "Face and path are playable but a fraction steep, which can steal compression."
+    },
+    {
+      "id": "P7",
+      "label": "Impact",
+      "status": "GREEN",
+      "note": "Clubface is generally square with decent shaft lean and compression."
+    },
+    {
+      "id": "P8",
+      "label": "Trail arm parallel follow-through",
+      "status": "GREEN",
+      "note": "Arms and body are synced with a clean extension toward the target."
+    },
+    {
+      "id": "P9",
+      "label": "Finish",
+      "status": "GREEN",
+      "note": "Balanced, full finish with chest facing the target and weight left."
+    }
+  ],
+  "practicePlan": {
+    "overview": "Next 14 days: lock in transition, shallow the downswing slightly, and keep the great fundamentals you already own.",
+    "days": [
+      {
+        "label": "DAYS 1–2: Setup & Alignment",
+        "focus": "Start from a repeatable blueprint every time.",
+        "detail": "10–15 minutes per session on mirror checks and alignment rods. Build a pre-shot routine that hits posture, ball position, and aim."
+      },
+      {
+        "label": "DAYS 3–5: Transition Timing",
+        "focus": "Lower body starts, upper body follows.",
+        "detail": "Step drills and pause-at-top swings to rehearse the correct sequence. Film 3–5 swings each day to confirm feel vs. real."
+      },
+      {
+        "label": "DAYS 6–7: Shallow Downswing",
+        "focus": "Get the club coming in from the slot.",
+        "detail": "Use an external tee or headcover just outside the ball line. Hit 40–60 balls focusing only on path and contact."
+      },
+      {
+        "label": "DAYS 8–10: Low Point Control",
+        "focus": "Move the strike consistently in front of the ball.",
+        "detail": "Paint a line on the turf or mat and train divots to start just ahead of it. Track how often you hit the correct side."
+      },
+      {
+        "label": "DAYS 11–14: Full Swing Integration",
+        "focus": "Blend the new feels into normal speed.",
+        "detail": "Play random-shot practice: different clubs, different targets, full routine. Track contact quality and start line."
+      }
+    ]
+  }
+}

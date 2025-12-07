@@ -1,10 +1,10 @@
 <!doctype html><meta charset="utf-8"><title>Report Test</title>
-<pre id="out">Runningâ€¦</pre>
+<pre id="out">RunningÃ¢â‚¬Â¦</pre>
 <script>
 const out = m => (document.getElementById('out').textContent += "\n" + m);
 (async()=>{
   try{
-    out("Posting to /api/report â€¦");
+    out("Posting to /api/report Ã¢â‚¬Â¦");
     const r = await fetch('/api/report', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
@@ -13,7 +13,7 @@ const out = m => (document.getElementById('out').textContent += "\n" + m);
     out("report status: " + r.status);
     const jr = await r.text(); out("report body: " + jr);
 
-    out("Fetching /api/analyze?jobId=smoke â€¦");
+    out("Fetching /api/analyze?jobId=smoke Ã¢â‚¬Â¦");
     const a = await fetch('/api/analyze?jobId=smoke');
     out("analyze status: " + a.status);
     out("analyze body: " + await a.text());
