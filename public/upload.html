@@ -1,159 +1,125 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Upload â€¢ Virtual Coach AI</title>
-  <link rel="stylesheet" href="/styles.css?v=9" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Virtual Coach AI - Upload</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; max-width: 860px; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .btn { padding: 10px 14px; border-radius: 10px; border: 0; cursor: pointer; }
+    .btn-primary { background: #0a7; color: #fff; }
+    .btn-disabled { background: #bbb; color: #fff; cursor: not-allowed; }
+    .hint { color: #444; line-height: 1.4; }
+    .error { background: #ffe5e5; border: 1px solid #ff8a8a; padding: 12px; border-radius: 10px; color: #7a0000; display:none; margin-top:12px; }
+    .ok { background: #e7fff1; border: 1px solid #7ee2a8; padding: 12px; border-radius: 10px; color: #0b5a2a; display:none; margin-top:12px; }
+    video { width: 100%; max-height: 420px; border-radius: 12px; background: #000; margin-top: 12px; display:none; }
+    .small { font-size: 12px; color: #666; margin-top: 8px; }
+  </style>
 </head>
 <body>
-  <header class="site">
-    <div class="navwrap">
-      <a class="brand" href="/">
-        <img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI">
-        <span>Virtual Coach AI</span>
-      </a>
-      <nav aria-label="Primary">
-        <a href="/">Home</a>
-        <a href="/upload" aria-current="page">Upload</a>
-        <a href="/reports">Reports</a>
-        <a href="/coming-soon">Coming&nbsp;Soon</a>
-        <a href="/pricing">Pricing</a>
-        <a href="/faq">FAQ</a>
-        <a href="/contact">Contact</a>
-        <a href="/about">About</a>
-      </nav>
+  <h1>Upload Your Swing</h1>
+  <p class="hint">
+    MVP rule: <b>clip must be 12 seconds or less</b> (ideal: 7–10 seconds).<br/>
+    Start about 1 second before takeaway. End about 1 second after finish.
+  </p>
+
+  <div class="card">
+    <div class="row">
+      <input id="file" type="file" accept="video/*" />
+      <button id="uploadBtn" class="btn btn-primary btn-disabled" disabled>Upload</button>
     </div>
-  </header>
 
-  <div class="scrim">
-    <main class="wrap">
-      <h1>Upload Your Swing</h1>
-      <section class="card">
-        <div class="grid2" style="align-items:flex-start">
-          <div>
-            <label class="field"><span>Name (optional)</span><input id="name" placeholder="Your name" /></label>
-            <label class="field"><span>Email (optional)</span><input id="email" type="email" placeholder="you@example.com" /></label>
-            <label class="field"><span>Handicap (optional)</span><input id="handicap" placeholder="e.g. 10" /></label>
+    <div id="error" class="error"></div>
+    <div id="ok" class="ok"></div>
 
-            <label class="field"><span>Hand (optional)</span>
-              <select id="handed">
-                <option value="">â€” Select â€”</option>
-                <option value="right">right</option>
-                <option value="left">left</option>
-              </select>
-            </label>
-
-            <label class="field"><span>Eye dominance (optional)</span>
-              <select id="eye">
-                <option value="">â€” Select â€”</option>
-                <option value="right">right</option>
-                <option value="left">left</option>
-              </select>
-            </label>
-
-            <label class="field"><span>Height in inches *</span><input id="height" inputmode="numeric" placeholder="e.g. 70" /></label>
-
-            <div class="grid2" style="margin-top:8px">
-              <label class="field"><span>Player Level *</span>
-                <select id="level">
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate" selected>Intermediate</option>
-                  <option value="advanced">Advanced</option>
-                </select>
-              </label>
-
-              <label class="field"><span>Primary Goal *</span>
-                <select id="goal">
-                  <option value="consistency">Consistency</option>
-                  <option value="power" selected>Power / Distance</option>
-                  <option value="accuracy">Accuracy / Start Line</option>
-                  <option value="swing_plane">Swing Plane</option>
-                  <option value="clubface">Clubface Control</option>
-                  <option value="low_point">Low-Point Control</option>
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label class="field">
-              <span>Video *</span>
-              <input id="file" type="file" accept="video/*" />
-            </label>
-            <button id="uploadBtn" class="btn primary" type="button" style="margin-top:10px">Upload & Analyze</button>
-            <p class="muted" style="margin-top:8px">
-              We upload directly to Mux, then generate a personalized report with AI.
-            </p>
-          </div>
-        </div>
-
-        <pre id="log" class="muted" style="margin-top:12px;white-space:pre-wrap"></pre>
-      </section>
-    </main>
+    <video id="preview" controls playsinline></video>
+    <div id="meta" class="small"></div>
   </div>
 
-  <style>
-    .field{display:block;margin:6px 0}
-    .field>span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
-    input,select{width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:#fff}
-  </style>
+<script>
+  const fileEl = document.getElementById("file");
+  const uploadBtn = document.getElementById("uploadBtn");
+  const errorEl = document.getElementById("error");
+  const okEl = document.getElementById("ok");
+  const preview = document.getElementById("preview");
+  const meta = document.getElementById("meta");
 
-  <script>
-  (async function() {
-    const $ = s => document.querySelector(s);
-    const file = $('#file');
-    const btn  = $('#uploadBtn');
-    const log  = $('#log');
-    const logMsg = t => { log.textContent += (log.textContent ? "\n" : "") + t; };
+  function showError(msg) {
+    okEl.style.display = "none";
+    errorEl.textContent = msg;
+    errorEl.style.display = "block";
+  }
+  function showOk(msg) {
+    errorEl.style.display = "none";
+    okEl.textContent = msg;
+    okEl.style.display = "block";
+  }
 
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const f = file.files?.[0];
-      if (!f) return logMsg("Pick a video first.");
-      btn.disabled = true;
+  fileEl.addEventListener("change", () => {
+    errorEl.style.display = "none";
+    okEl.style.display = "none";
+    const f = fileEl.files && fileEl.files[0];
+    if (!f) {
+      uploadBtn.disabled = true;
+      uploadBtn.classList.add("btn-disabled");
+      preview.style.display = "none";
+      meta.textContent = "";
+      return;
+    }
 
-      try {
-        logMsg("Requesting Mux upload URL...");
-        const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
-        const j1 = await r1.json().catch(() => ({}));
-        const uploadUrl = j1?.upload?.url ?? j1?.url;
-        const uploadId  = j1?.upload?.id  ?? j1?.upload_id ?? j1?.id;
-        if (!r1.ok || !uploadUrl) throw new Error("mux-direct-upload failed: " + JSON.stringify(j1));
+    // local preview
+    const url = URL.createObjectURL(f);
+    preview.src = url;
+    preview.style.display = "block";
+    meta.textContent = "Selected: " + f.name + " (" + Math.round(f.size/1024/1024) + " MB)";
 
-        logMsg("Uploading video to Mux...");
-        const r2 = await fetch(uploadUrl, {
-          method: "PUT",
-          headers: { "content-type": f.type || "application/octet-stream" },
-          body: f
-        });
-        if (!r2.ok) throw new Error("Mux PUT failed: " + r2.status);
+    uploadBtn.disabled = false;
+    uploadBtn.classList.remove("btn-disabled");
+  });
 
-        logMsg("Saving report...");
-        const r3 = await fetch("/api/save-report", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ muxUploadId: uploadId, meta: { fileName: f.name } })
-        });
-        const j3 = await r3.json().catch(() => ({}));
-        if (!r3.ok || (!j3?.url && !j3?.id)) throw new Error("save-report failed: " + JSON.stringify(j3));
+  uploadBtn.addEventListener("click", async () => {
+    const f = fileEl.files && fileEl.files[0];
+    if (!f) return;
 
-        const redirect = j3.url
-          ? `/report.html?url=${encodeURIComponent(j3.url)}`
-          : `/report.html?id=${encodeURIComponent(j3.id)}`;
+    uploadBtn.disabled = true;
+    uploadBtn.classList.add("btn-disabled");
+    showOk("Uploading…");
 
-        logMsg("Opening report...");
-        location.assign(redirect + "&v=" + Date.now());
-      } catch (err) {
-        logMsg("Error: " + (err?.message || err));
-        btn.disabled = false;
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "x-file-name": f.name },
+        body: f
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.ok) {
+        showError(data.error || "Upload failed.");
+        uploadBtn.disabled = false;
+        uploadBtn.classList.remove("btn-disabled");
+        return;
       }
-    });
-  })();
-  </script>
+
+      // Save for next page (optional)
+      sessionStorage.setItem("vca_videoUrl", data.videoUrl);
+      sessionStorage.setItem("vca_durationSec", String(data.durationSec || ""));
+
+      showOk("Upload complete (" + (data.durationSec || 0).toFixed(1) + "s). Ready for analysis.");
+      meta.textContent = "Saved: " + data.videoUrl;
+
+      // OPTIONAL redirect:
+      window.location.href = "/report.html";
+
+    } catch (e) {
+      showError("Network error. Try again.");
+      uploadBtn.disabled = false;
+      uploadBtn.classList.remove("btn-disabled");
+    }
+  });
+</script>
 </body>
 </html>
-
-
-
 
