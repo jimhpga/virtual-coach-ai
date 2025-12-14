@@ -1,92 +1,92 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate"/>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Virtual Coach AI â€” Golf swing reports, powered by AI</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0, must-revalidate" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virtual Coach AI — Golf swing reports, powered by AI</title>
 
-<!-- local stylesheet -->
-<link rel="stylesheet" href="style.css" />
+  <!-- local stylesheet -->
+  <link rel="stylesheet" href="style.css" />
 
-<style>
-  /* Page-local layout helpers. Global theme (colors, background, header, cards, etc)
-     still lives in style.css */
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
-  .hero { padding: 36px 0 22px; }
-  .hero h1 { font-size: 36px; margin: 0 0 10px }
-  .hero p.lead { font-size: 18px; color: var(--muted); margin: 4px 0 14px }
-  .cta-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px }
+  <style>
+    /* Page-local layout helpers. Global theme (colors, background, header, cards, etc)
+       still lives in style.css */
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px; }
+    .hero { padding: 36px 0 22px; }
+    .hero h1 { font-size: 36px; margin: 0 0 10px }
+    .hero p.lead { font-size: 18px; color: var(--muted); margin: 4px 0 14px }
+    .cta-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:12px }
 
-  .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
-  .card h3 { margin:0 0 8px }
-  .muted { color: var(--muted) }
+    .grid3 { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
+    .card h3 { margin:0 0 8px }
+    .muted { color: var(--muted) }
 
-  .btn {
-    border:1px solid var(--line);
-    background:#0f1b22;
-    color:#fff;
-    padding:10px 14px;
-    border-radius:12px;
-    text-decoration:none;
-    display:inline-flex;
-    gap:8px;
-    align-items:center;
-    font-size:14px;
-    line-height:1.2;
-  }
-  .btn:hover { background:#122734 }
-  .btn.primary {
-    background: var(--accent,#33b5ff);
-    border-color: var(--accent,#33b5ff);
-    color:#00131d;
-    font-weight:700;
-  }
+    .btn {
+      border:1px solid var(--line);
+      background:#0f1b22;
+      color:#fff;
+      padding:10px 14px;
+      border-radius:12px;
+      text-decoration:none;
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      font-size:14px;
+      line-height:1.2;
+    }
+    .btn:hover { background:#122734 }
+    .btn.primary {
+      background: var(--accent,#33b5ff);
+      border-color: var(--accent,#33b5ff);
+      color:#00131d;
+      font-weight:700;
+    }
 
-  .how { display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
-  .how .step-num {
-    display:inline-block;
-    border:1px solid var(--line);
-    border-radius:999px;
-    padding:2px 10px;
-    font-weight:700;
-    margin-bottom:6px;
-    background:#0f1b22;
-    font-size:13px;
-    line-height:1.2;
-  }
-  .bullets li { margin:6px 0 }
+    .how { display:grid; grid-template-columns: repeat(3,1fr); gap:14px; }
+    .how .step-num {
+      display:inline-block;
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:2px 10px;
+      font-weight:700;
+      margin-bottom:6px;
+      background:#0f1b22;
+      font-size:13px;
+      line-height:1.2;
+    }
+    .bullets li { margin:6px 0 }
 
-  .strip {
-    margin-top:24px;
-    display:grid;
-    gap:14px;
-    grid-template-columns: 1.2fr .8fr;
-  }
-  .preview {
-    border:1px solid var(--line);
-    border-radius:14px;
-    overflow:hidden;
-    background:#0b171e;
-  }
-  .preview iframe,
-  .preview img {
-    width:100%;
-    display:block;
-    border:0;
-    aspect-ratio: 16/10;
-  }
+    .strip {
+      margin-top:24px;
+      display:grid;
+      gap:14px;
+      grid-template-columns: 1.2fr .8fr;
+    }
+    .preview {
+      border:1px solid var(--line);
+      border-radius:14px;
+      overflow:hidden;
+      background:#0b171e;
+    }
+    .preview iframe,
+    .preview img {
+      width:100%;
+      display:block;
+      border:0;
+      aspect-ratio: 16/10;
+    }
 
-  .faq dt { font-weight:700; margin-top:10px }
-  .faq dd { margin:6px 0 12px; color:var(--muted) }
+    .faq dt { font-weight:700; margin-top:10px }
+    .faq dd { margin:6px 0 12px; color:var(--muted) }
 
-  @media (max-width: 1000px){
-    .grid3 { grid-template-columns: 1fr; }
-    .how { grid-template-columns: 1fr; }
-    .strip { grid-template-columns: 1fr; }
-    .hero h1{ font-size: 28px }
-  }
-</style>
+    @media (max-width: 1000px){
+      .grid3 { grid-template-columns: 1fr; }
+      .how { grid-template-columns: 1fr; }
+      .strip { grid-template-columns: 1fr; }
+      .hero h1{ font-size: 28px }
+    }
+  </style>
 </head>
 <body>
 
@@ -111,7 +111,7 @@
   </div>
 </header>
 
-<!-- Page content â€œglass cardâ€ wrapper -->
+<!-- Page content “glass card” wrapper -->
 <div class="scrim">
   <main class="wrap">
 
@@ -119,24 +119,24 @@
     <section class="hero">
       <h1>
         Welcome to <span style="color:var(--accent,#33b5ff)">Virtual Coach AI</span><br/>
-        Where golf instruction meets AI â€” and stays honest.
+        Where golf instruction meets AI — and stays honest.
       </h1>
 
       <p class="lead">
         Virtual Coach AI was designed by a veteran PGA staff instructor after thousands of real lessons with real players.
-        Most golfers are guessing what their body is doing. They donâ€™t need more swing tips â€” they need clarity.
-        Thatâ€™s exactly what this system delivers.
+        Most golfers are guessing what their body is doing. They don’t need more swing tips — they need clarity.
+        That’s exactly what this system delivers.
       </p>
 
       <p class="lead">
-        You upload one swing. You get a full breakdown â€” setup through finish (P1 to P9), the single thing thatâ€™s costing
-        you the most, and what to work on first. No fluff. No â€œtry 10 feels.â€ A plan you can actually follow.
+        You upload one swing. You get a full breakdown — setup through finish (P1 to P9), the single thing that’s costing
+        you the most, and what to work on first. No fluff. No “try 10 feels.” A plan you can actually follow.
       </p>
 
       <div class="cta-row">
-        <a class="btn primary" href="/upload">âž• Upload Your Swing</a>
-        <a class="btn" href="/report.html?url=https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com/reports/demo/report.json">ðŸ‘€ View Sample Report</a>
-        <a class="btn" href="/reports">ðŸ“„ My Saved Reports</a>
+        <a class="btn primary" href="/upload">➜ Upload Your Swing</a>
+        <a class="btn" href="/report.html?url=https://yw0bpv5czlbqowjq.public.blob.vercel-storage.com/reports/demo/report.json">👀 View Sample Report</a>
+        <a class="btn" href="/reports">📄 My Saved Reports</a>
       </div>
     </section>
 
@@ -151,7 +151,7 @@
             <h4>Record</h4>
             <p class="muted">
               Use your phone. One down-the-line swing (behind you), iron or driver.
-              Doesnâ€™t have to be fancy â€” 240p to 480p is fine. Keep the club in frame.
+              Doesn’t have to be fancy — 240p to 480p is fine. Keep the club in frame.
             </p>
           </div>
 
@@ -159,8 +159,8 @@
             <span class="step-num">2</span>
             <h4>Upload</h4>
             <p class="muted">
-              Upload the clip here. We map your motion through P1â€“P9, look at sequence,
-              delivery, impact, and face control â€” the same checkpoints used on a live lesson tee.
+              Upload the clip here. We map your motion through P1–P9, look at sequence,
+              delivery, impact, and face control — the same checkpoints used on a live lesson tee.
             </p>
           </div>
 
@@ -168,7 +168,7 @@
             <span class="step-num">3</span>
             <h4>Train</h4>
             <p class="muted">
-              You get your Swing Score, your top 2â€“3 fixes, and a focused 14-day plan.
+              You get your Swing Score, your top 2–3 fixes, and a focused 14-day plan.
               Do this, in this order. Then re-check.
             </p>
           </div>
@@ -198,7 +198,7 @@
         </p>
         <ul class="bullets">
           <li>Your Swing Score (repeatability baseline)</li>
-          <li>Full P1â€“P9 breakdown in plain language</li>
+          <li>Full P1–P9 breakdown in plain language</li>
           <li>Your top problems, not every problem</li>
           <li>Simple plan you can follow without a coach standing there</li>
         </ul>
@@ -207,28 +207,28 @@
       <div class="card">
         <h3>Why this is different</h3>
         <p class="muted">
-          Most golf â€œadviceâ€ is noise. â€œKeep your head down.â€ â€œTurn more.â€ Okay, thanks.
+          Most golf “advice” is noise. “Keep your head down.” “Turn more.” Okay, thanks.
           We actually tell you why the ball flies the way it flies.
         </p>
         <p class="muted">
-          We look at sequencing, face control, how you deliver the club at P6â€“P7,
-          whether youâ€™re posting up or hanging back, and what will fall apart under pressure.
+          We look at sequencing, face control, how you deliver the club at P6–P7,
+          whether you’re posting up or hanging back, and what will fall apart under pressure.
         </p>
         <p class="muted">
-          Short version: itâ€™s the stuff that actually changes ball flight.
+          Short version: it’s the stuff that actually changes ball flight.
         </p>
       </div>
 
       <div class="card">
-        <h3>Who itâ€™s for</h3>
+        <h3>Who it’s for</h3>
         <ul class="bullets">
           <li><strong>Beginners</strong> who want a clean starting blueprint, not a lecture</li>
           <li><strong>Competitive players</strong> who want tighter start line / less chaos under pressure</li>
           <li><strong>Coaches</strong> who want fast, consistent lesson visuals for students</li>
         </ul>
         <p class="muted">
-          The language adapts to you. A 20-handicap doesnâ€™t get tour-speak.
-          A tournament player doesnâ€™t get kiddie talk.
+          The language adapts to you. A 20-handicap doesn’t get tour-speak.
+          A tournament player doesn’t get kiddie talk.
         </p>
       </div>
     </section>
@@ -245,11 +245,11 @@
 
         <dt>Biggest leaks</dt>
         <dd class="muted">
-          Where youâ€™re actually losing consistency or distance â€” face control,
+          Where you’re actually losing consistency or distance — face control,
           early spin-out, hanging back, timing the clubface, etc.
         </dd>
 
-        <dt>Your checkpoints (P1â€“P9)</dt>
+        <dt>Your checkpoints (P1–P9)</dt>
         <dd class="muted">
           Setup, takeaway, top, transition, delivery, impact, release, finish.
           The same language tour coaches use.
@@ -258,7 +258,7 @@
         <dt>Your 14-day plan</dt>
         <dd class="muted">
           Exactly what to work on first, and how long to stick with it before checking again.
-          No more â€œhit balls and hope.â€
+          No more “hit balls and hope.”
         </dd>
       </dl>
     </section>
@@ -269,14 +269,14 @@
         <h3>Private by default</h3>
         <p class="muted">
           Your swing and your report are yours. You decide who sees it.
-          Every report can be downloaded, printed, or shared with a link â€” only if you choose.
+          Every report can be downloaded, printed, or shared with a link — only if you choose.
         </p>
       </div>
 
       <div class="card">
         <h3>Built by a coach</h3>
         <p class="muted">
-          This is not an â€œapp team.â€ This is 40 years of real lesson tee work,
+          This is not an “app team.” This is 40 years of real lesson tee work,
           turned into something you can access without booking a lesson.
         </p>
       </div>
@@ -284,8 +284,8 @@
       <div class="card">
         <h3>Built for progress</h3>
         <p class="muted">
-          You donâ€™t need a tour swing. You need something you can repeat on the course.
-          Thatâ€™s what actually lowers score.
+          You don’t need a tour swing. You need something you can repeat on the course.
+          That’s what actually lowers score.
         </p>
       </div>
     </section>
@@ -300,11 +300,11 @@
     <section class="card" style="margin-top:14px">
       <h3>Why we built Virtual Coach AI</h3>
       <p class="muted">
-        Most golfers practice with effort, not direction. They hit balls, film swings, scroll tipsâ€¦ and donâ€™t actually improve.
+        Most golfers practice with effort, not direction. They hit balls, film swings, scroll tips… and don’t actually improve.
       </p>
       <p class="muted">
-        This is not â€œmore tips.â€ This is a map.
-        Youâ€™ll see whatâ€™s working, whatâ€™s costing you, and the exact order to fix it in.
+        This is not “more tips.” This is a map.
+        You’ll see what’s working, what’s costing you, and the exact order to fix it in.
         Less guessing. More progress on the course.
       </p>
       <p class="muted" style="margin-top:10px; font-weight:600; color:#fff">

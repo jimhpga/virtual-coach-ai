@@ -1,1 +1,6 @@
-"use strict";(()=>{var e={};e.id=8,e.ids=[8],e.modules={399:e=>{e.exports=require("next/dist/compiled/next-server/app-page.runtime.prod.js")},517:e=>{e.exports=require("next/dist/compiled/next-server/app-route.runtime.prod.js")},8761:(e,t,r)=>{r.r(t),r.d(t,{originalPathname:()=>l,patchFetch:()=>g,requestAsyncStorage:()=>s,routeModule:()=>u,serverHooks:()=>c,staticGenerationAsyncStorage:()=>d});var a={};r.r(a),r.d(a,{GET:()=>p});var i=r(9303),n=r(8716),o=r(670);function p(){return Response.json({ok:!0,t:Date.now(),router:"app"},{status:200})}let u=new i.AppRouteRouteModule({definition:{kind:n.x.APP_ROUTE,page:"/api/ping/route",pathname:"/api/ping",filename:"route",bundlePath:"app/api/ping/route"},resolvedPagePath:"C:\\Sites\\virtual-coach-ai\\app\\api\\ping\\route.js",nextConfigOutput:"",userland:a}),{requestAsyncStorage:s,staticGenerationAsyncStorage:d,serverHooks:c}=u,l="/api/ping/route";function g(){return(0,o.patchFetch)({serverHooks:c,staticGenerationAsyncStorage:d})}}};var t=require("../../../webpack-runtime.js");t.C(e);var r=e=>t(t.s=e),a=t.X(0,[176],()=>r(8761));module.exports=a})();
+var R=require("../../../chunks/[turbopack]_runtime.js")("server/app/api/ping/route.js")
+R.c("server/chunks/[root-of-the-server]__6e707ba6._.js")
+R.c("server/chunks/[root-of-the-server]__8f5ebbc3._.js")
+R.c("server/chunks/_next-internal_server_app_api_ping_route_actions_8c5eb44e.js")
+R.m(88551)
+module.exports=R.m(88551).exports

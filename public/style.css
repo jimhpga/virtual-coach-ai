@@ -1,31 +1,26 @@
 ﻿/* =======================================================================
-   Virtual Coach AI â€“ Global Styles (drop-in)
-   - Unified background across all pages
-   - iPad/iOS cutoff fix
-   - Light utility system: layout, typography, buttons, cards, forms
-   - Edit --bg-image and --bg-brightness to taste
+   Virtual Coach AI – Global Styles (dark glass + golf background)
    ======================================================================= */
 
 :root{
   /* Theme */
   --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-  --text-color: #111;
-  --muted-text: #666;
-  --bg: #fff;
-  --card: rgba(255,255,255,0.9);
-  --border: rgba(0,0,0,0.08);
-  --primary: #0a7cff;
-  --primary-contrast: #fff;
+  --text-color: #ffffff;
+  --muted-text: #a7b4c4;
+  --bg: #020813;
+  --card: rgba(3, 14, 24, 0.9);
+  --border: rgba(255,255,255,0.12);
+  --primary: #33b5ff;
+  --primary-contrast: #00131d;
 
-  /* Background image + brightness (edit these) */
-  --bg-image: url('/virtualcoach-bg.png'); /* â† swap if needed */
-  --bg-brightness: 0.85;
+  /* Background image */
+  --bg-image: url('/virtualcoach-bg.png');
 
   /* Layout */
   --max-w: 1200px;
   --radius: 16px;
-  --shadow: 0 6px 24px rgba(0,0,0,0.08);
-  --shadow-strong: 0 10px 40px rgba(0,0,0,0.12);
+  --shadow: 0 12px 32px rgba(0,0,0,0.55);
+  --shadow-soft: 0 8px 24px rgba(0,0,0,0.35);
 }
 
 /* Reset-ish */
@@ -41,67 +36,73 @@ button { font: inherit; cursor: pointer; }
 input, select, textarea { font: inherit; }
 
 /* ======================================================================= */
-/* Global Background (iPad fix + uniform brightness)                       */
+/* Global Background – dark golf course                                    */
 /* ======================================================================= */
-body{
+
+html, body {
+  font-family: var(--font-sans);
+  line-height: 1.45;
   color: var(--text-color);
-  background: var(--bg) no-repeat center / cover;
-  background-image: var(--bg-image);
-  background-attachment: scroll;    /* iOS Safari cutoff bug fix */
-  min-height: 100vh;
+
+  background:
+    linear-gradient(130deg, rgba(0, 4, 12, 0.92), rgba(0, 12, 26, 0.88)),
+    var(--bg-image) center center / cover no-repeat fixed;
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  /* Make the background match Aboutâ€™s look */
-  filter: brightness(var(--bg-brightness));
-  -webkit-filter: brightness(var(--bg-brightness));
+  min-height: 100vh;
 }
 
-/* Optional: if some page puts an overlay, keep it subtle */
+/* Optional overlay if needed by any page */
 .overlay{
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.06);      /* was likely too dark before */
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 20% 0%, rgba(255,255,255,0.05), transparent 55%),
+              radial-gradient(circle at 80% 100%, rgba(0,0,0,0.55), rgba(0,0,0,0.85) 70%);
   pointer-events: none;
 }
 
-/* Ensure content never hides behind iPad safe-area bars */
+/* Avoid iOS weirdness with background cropping */
 @supports (padding: max(0px)){
   body{ padding-bottom: env(safe-area-inset-bottom); }
-}
-
-/* Landscape iPad: force-fit to avoid bottom crop */
-@media only screen and (min-device-width:768px) and (max-device-width:1024px) and (orientation:landscape){
-  body{ background-size: 100% 100%; }
 }
 
 /* ======================================================================= */
 /* Typography                                                              */
 /* ======================================================================= */
-body, input, button, select, textarea{
-  font-family: var(--font-sans);
-  line-height: 1.45;
+h1,h2,h3{
+  line-height: 1.2;
+  margin: 0 0 0.4em;
+  color: #ffffff;
 }
-h1,h2,h3{ line-height: 1.2; margin: 0 0 0.4em; }
 h1{ font-size: clamp(1.9rem, 2.2vw + 1rem, 3rem); }
 h2{ font-size: clamp(1.4rem, 1.2vw + 1rem, 2rem); }
 h3{ font-size: clamp(1.15rem, 0.8vw + 1rem, 1.4rem); }
-p{ margin: 0 0 1em; color: var(--text-color); }
+p{
+  margin: 0 0 1em;
+  color: var(--muted-text);
+}
 .muted{ color: var(--muted-text); }
 
 /* ======================================================================= */
 /* Layout Helpers                                                           */
 /* ======================================================================= */
+
 .container{
   max-width: var(--max-w);
   margin: 0 auto;
   padding: 24px;
 }
+
 .stack{ display: grid; gap: 16px; }
 .stack-lg{ display: grid; gap: 28px; }
+
 .center{ display: grid; place-items: center; }
+
 .grid{ display: grid; gap: 20px; }
 .grid-2{ grid-template-columns: repeat(2, minmax(0,1fr)); }
 .grid-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+
 @media (max-width: 900px){
   .grid-3{ grid-template-columns: 1fr 1fr; }
 }
@@ -109,141 +110,264 @@ p{ margin: 0 0 1em; color: var(--text-color); }
   .grid-2, .grid-3{ grid-template-columns: 1fr; }
 }
 
-/* Page wrappers (in case individual pages set their own background) */
-.page-container, .about-page, .coming-soon-page{
-  background: none;                  /* inherit bodyâ€™s background */
-  filter: brightness(var(--bg-brightness));
-  -webkit-filter: brightness(var(--bg-brightness));
+/* Main “glass card” wrapper some pages use */
+.scrim{
+  max-width: var(--max-w);
+  margin: 24px auto 60px auto;
+  padding: 24px 30px 40px 30px;
+  background: rgba(1, 8, 16, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.16);
+  box-shadow: var(--shadow);
+}
+
+/* Kill old fake overlays */
+.scrim::before{ display:none !important; }
+
+/* Page wrappers */
+.page-container,
+.about-page,
+.coming-soon-page{
+  background: none !important;
 }
 
 /* ======================================================================= */
 /* Header / Nav                                                             */
 /* ======================================================================= */
-.header{
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  background: rgba(255,255,255,0.6);
-  border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 100;
+
+.header,
+header.site{
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.78), rgba(0,0,0,0.62));
+  border-bottom: 1px solid rgba(255,255,255,0.14);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
-.nav{
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; padding: 12px 24px; max-width: var(--max-w); margin: 0 auto;
+
+.nav,
+.navwrap{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 24px;
+  max-width: var(--max-w);
+  margin: 0 auto;
 }
-.logo{ display: inline-flex; align-items: center; gap: 10px; }
-.logo img{ width: 42px; height: auto; }
+
+.logo,
+.brand{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo img,
+.brandmark{
+  width: 42px;
+  height: auto;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(255,255,255,0.22);
+  padding: 4px 6px;
+}
+
+.brandtext{
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.mainnav{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 13px;
+}
+
+.mainnav a{
+  color: #ffffff;
+  opacity: 0.88;
+  font-weight: 500;
+  text-decoration: none;
+}
+.mainnav a:hover{
+  opacity: 1;
+  color: var(--primary);
+}
 
 /* ======================================================================= */
 /* Cards                                                                    */
 /* ======================================================================= */
+
 .card{
   background: var(--card);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 20px;
+  box-shadow: var(--shadow-soft);
+  padding: 18px 18px 20px;
 }
-.card-strong{ box-shadow: var(--shadow-strong); }
+.card-strong{ box-shadow: var(--shadow); }
 
 /* ======================================================================= */
 /* Buttons                                                                  */
 /* ======================================================================= */
+
 .btn{
-  display: inline-flex; align-items: center; justify-content: center;
-  gap: 8px; padding: 12px 18px;
-  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
   border-radius: 999px;
-  background: #fff;
-  color: var(--text-color);
-  transition: transform .06s ease, box-shadow .2s ease, background .2s ease;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(3,17,27,0.9);
+  color: #f5f9ff;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+  transition: transform .06s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
 }
-.btn:hover{ transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.10); }
-.btn:active{ transform: translateY(0); }
+
+.btn:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.55);
+  background: rgba(8,28,42,0.95);
+}
 
 .btn-primary{
   background: var(--primary);
   color: var(--primary-contrast);
   border-color: rgba(0,0,0,0.0);
 }
-.btn-primary:hover{ filter: brightness(0.95); }
+.btn-primary:hover{
+  filter: brightness(1.03);
+}
+
 .btn-block{ width: 100%; }
 
 /* ======================================================================= */
 /* Forms                                                                    */
 /* ======================================================================= */
-.input, input[type="text"], input[type="email"], input[type="file"], textarea, select{
+
+.input,
+input[type="text"],
+input[type="email"],
+input[type="file"],
+textarea,
+select{
   width: 100%;
-  padding: 12px 14px;
-  border: 1px solid var(--border);
+  padding: 11px 13px;
   border-radius: 12px;
-  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(255,255,255,0.24);
+  background: rgba(3,14,24,0.9);
+  color: #f5f9ff;
   outline: none;
-  transition: box-shadow .2s ease, border-color .2s ease;
+  transition: box-shadow .2s ease, border-color .2s ease, background .2s ease;
 }
-.input:focus, input:focus, textarea:focus, select:focus{
-  border-color: rgba(10,124,255,0.35);
-  box-shadow: 0 0 0 4px rgba(10,124,255,0.12);
+.input::placeholder,
+input::placeholder,
+textarea::placeholder{
+  color: rgba(190,203,217,0.7);
+}
+
+.input:focus,
+input:focus,
+textarea:focus,
+select:focus{
+  border-color: rgba(51,181,255,0.65);
+  box-shadow: 0 0 0 3px rgba(51,181,255,0.3);
+  background: rgba(4,19,32,1);
 }
 
 .form-row{ display: grid; gap: 12px; }
+
 @media (min-width: 700px){
   .form-row-2{ grid-template-columns: 1fr 1fr; }
   .form-row-3{ grid-template-columns: 1fr 1fr 1fr; }
 }
 
-/* Upload area helper */
+/* File-drop helper */
 .dropzone{
-  border: 2px dashed var(--border);
+  border: 2px dashed rgba(255,255,255,0.25);
   border-radius: var(--radius);
-  padding: 24px;
-  background: rgba(255,255,255,0.7);
+  padding: 22px;
+  background: rgba(1,10,18,0.85);
   text-align: center;
+  color: var(--muted-text);
 }
 
 /* ======================================================================= */
-/* Tables (for reports)                                                     */
+/* Tables (reports)                                                         */
 /* ======================================================================= */
+
 .table{
-  width: 100%; border-collapse: collapse; overflow: hidden;
+  width: 100%;
+  border-collapse: collapse;
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  background: rgba(255,255,255,0.92);
+  overflow: hidden;
+  background: rgba(3,14,24,0.96);
+  box-shadow: var(--shadow-soft);
 }
-.table th, .table td{
-  padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left;
+.table th,
+.table td{
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  font-size: 13px;
 }
-.table th{ background: rgba(0,0,0,0.03); font-weight: 600; }
+.table th{
+  background: rgba(8,24,38,0.95);
+  font-weight: 600;
+  color: #e5f1ff;
+}
+.table tr:nth-child(even) td{
+  background: rgba(3,14,24,0.9);
+}
 
 /* ======================================================================= */
 /* Footer                                                                   */
 /* ======================================================================= */
+
 .footer{
-  margin-top: 48px; padding: 18px 24px;
-  background: rgba(255,255,255,0.6);
-  border-top: 1px solid var(--border);
+  margin-top: 48px;
+  padding: 16px 24px;
+  background: rgba(0,0,0,0.72);
+  border-top: 1px solid rgba(255,255,255,0.16);
   text-align: center;
+  color: var(--muted-text);
+  font-size: 13px;
 }
 
 /* ======================================================================= */
 /* Utilities                                                                */
 /* ======================================================================= */
+
 .hide{ display: none !important; }
 .center-text{ text-align: center; }
+
 .mt-0{ margin-top: 0; } .mt-8{ margin-top: 8px; } .mt-16{ margin-top: 16px; } .mt-24{ margin-top: 24px; }
 .mb-0{ margin-bottom: 0; } .mb-8{ margin-bottom: 8px; } .mb-16{ margin-bottom: 16px; } .mb-24{ margin-bottom: 24px; }
-.p-0{ padding: 0; } .p-8{ padding: 8px; } .p-16{ padding: 16px; } .p-24{ padding: 24px; }
-.round{ border-radius: var(--radius); }
-.shadow{ box-shadow: var(--shadow); }
-.blur{ backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 
-/* If any page forcibly sets its own background, neutralize it */
-[class*="section"], [class*="hero"]{
+.p-0{ padding: 0; } .p-8{ padding: 8px; } .p-16{ padding: 16px; } .p-24{ padding: 24px; }
+
+.round{ border-radius: var(--radius); }
+.shadow{ box-shadow: var(--shadow-soft); }
+
+.blur{
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Keep sections/heroes transparent so the background shows through */
+[class*="section"],
+[class*="hero"]{
   background-color: transparent !important;
   background-image: none !important;
 }
-
-
-

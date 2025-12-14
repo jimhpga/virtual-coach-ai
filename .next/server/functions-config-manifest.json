@@ -1,1 +1,8 @@
-{"version":1,"functions":{}}
+{
+  "version": 1,
+  "functions": {
+    "/api/ping": {},
+    "/api/extract-pframes": {},
+    "/api/upload": {}
+  }
+}

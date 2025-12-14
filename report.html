@@ -1,862 +1,1307 @@
-cd C:\Sites\virtual-coach-ai\public
-
-@'
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Virtual Coach AI â€” Swing Report</title>
-  <link rel="preload" as="image" href="homepage-background.png" />
-
+  <meta charset="UTF-8" />
+  <title>Swing Improvement Report – Virtual Coach AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
-      --nav:#0b2b12;
-      --brand:#0b2b12;
-      --scrim:rgba(0,0,0,.05);
-      --panel:rgba(0,0,0,.32);
-      --panel-light:rgba(0,0,0,.24);
-      --line:rgba(255,255,255,.12);
-      --text:#f2f7f9;
-      --muted:#cfe0e6;
-      --maxw:1100px;
-      --radius:14px;
-      --shadow:0 10px 24px rgba(0,0,0,.28);
-      --green:#2ecc71;
-      --yellow:#f1c40f;
-      --red:#e74c3c;
+      --bg: #020617;
+      --bg-elevated: #020617;
+      --card: #020617;
+      --card-soft: #020617;
+      --border-subtle: rgba(148, 163, 184, 0.35);
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.12);
+      --accent-warn: #f97316;
+      --accent-warn-soft: rgba(249, 115, 22, 0.12);
+      --pill-bg: rgba(15, 23, 42, 0.9);
+      --pill-border: rgba(148, 163, 184, 0.5);
+      --heading: #f9fafb;
     }
 
-    * { box-sizing:border-box; }
-
-    html, body { height:100%; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
-      margin:0;
-      color:var(--text);
-      font:16px/1.5 system-ui,-apple-system,"Segoe UI",Inter,Roboto,Arial,sans-serif;
-      background:url("homepage-background.png") center/cover fixed no-repeat;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top, #0b1120 0, #020617 40%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
     }
 
-    .scrim {
-      min-height:100vh;
-      background:var(--scrim);
+    a {
+      color: inherit;
+      text-decoration: none;
     }
 
-    /* TOP NAV (same as home) */
-    header.top {
-      position:sticky;
-      top:0;
-      z-index:100;
-      background:var(--nav);
-      border-bottom:1px solid rgba(255,255,255,.1);
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
     }
 
-    .navwrap {
-      width:min(var(--maxw),94%);
-      margin:0 auto;
-      padding:10px 0;
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
     }
 
-    .brand {
-      display:flex;
-      align-items:center;
-      gap:10px;
-      color:#fff;
-      text-decoration:none;
-      font-weight:800;
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .brand-logo {
-      height:36px;
-      width:auto;
-      display:block;
+    .logo-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0%, #22c55e, #15803d);
+      color: #020617;
+      font-weight: 700;
+      font-size: 14px;
     }
 
-    .menu-toggle {
-      display:none;
-      align-items:center;
-      gap:8px;
-      color:#fff;
-      background:transparent;
-      border:1px solid rgba(255,255,255,.3);
-      border-radius:10px;
-      padding:6px 10px;
-      cursor:pointer;
-      font:inherit;
+    .nav-links {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
     }
 
-    nav.nav {
-      display:flex;
-      gap:8px;
+    .nav-link {
+      opacity: 0.75;
     }
 
-    nav.nav a {
-      color:#fff;
-      text-decoration:none;
-      padding:8px 10px;
-      border-radius:10px;
-      border:1px solid transparent;
-      white-space:nowrap;
-      font-size:14px;
+    .nav-link:hover {
+      opacity: 1;
     }
 
-    nav.nav a:hover {
-      background:rgba(255,255,255,.08);
+    .back-link {
+      font-size: 12px;
+      opacity: 0.9;
     }
 
-    nav.nav a[aria-current="page"] {
-      border-color:rgba(255,255,255,.18);
-      background:rgba(255,255,255,.10);
+    .back-link a {
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.9);
     }
 
-    @media (max-width:820px) {
-      .menu-toggle { display:inline-flex; }
+    /* Header */
 
-      nav.nav {
-        position:absolute;
-        right:0;
-        top:100%;
-        background:var(--nav);
-        border-bottom:1px solid rgba(255,255,255,.1);
-        display:none;
-        flex-direction:column;
-        padding:8px;
-      }
-
-      header.top.open nav.nav {
-        display:flex;
-      }
+    .header {
+      margin-top: 12px;
+      margin-bottom: 20px;
     }
 
-    main.report-main {
-      width:min(var(--maxw),94%);
-      margin:0 auto;
-      padding:20px 0 40px;
-      display:grid;
-      gap:16px;
+    .title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
-    .card {
-      padding:16px 18px;
-      border-radius:var(--radius);
-      border:1px solid var(--line);
-      background:var(--panel);
-      backdrop-filter:blur(2px);
-      box-shadow:var(--shadow);
+    h1 {
+      font-size: 24px;
+      font-weight: 650;
+      letter-spacing: 0.02em;
+      color: var(--heading);
     }
 
-    .card-light {
-      background:var(--panel-light);
+    .meta-row {
+      display: flex;
+      gap: 16px;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      flex-wrap: wrap;
     }
 
-    .report-header-top {
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      justify-content:space-between;
-      align-items:flex-start;
-      margin-bottom:10px;
+    .meta-label {
+      font-weight: 500;
+      color: var(--text-main);
+      margin-right: 4px;
     }
 
-    .report-title {
-      font-size:1.4rem;
-      font-weight:700;
-    }
-
-    .chip-row {
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-      justify-content:flex-end;
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
     }
 
     .chip {
-      font-size:11px;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.2);
-      background:rgba(0,0,0,.18);
-      text-transform:uppercase;
-      letter-spacing:.04em;
-      white-space:nowrap;
+      font-size: 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 2px 10px;
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-muted);
     }
 
-    .chip.accent {
-      border-color:#00e69f;
-      background:rgba(0,255,153,.18);
-      color:#eafff8;
-      font-weight:600;
+    .chip.green {
+      border-color: rgba(34, 197, 94, 0.6);
+      color: #bbf7d0;
     }
 
-    .player-row {
-      display:flex;
-      gap:8px;
-      align-items:center;
-      font-size:14px;
+    /* Top layout */
+
+    .top-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2.4fr) minmax(0, 1.6fr);
+      gap: 24px;
+      align-items: flex-start;
     }
 
-    .player-label {
-      opacity:.8;
+    .right-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
 
-    .player-name {
-      font-weight:600;
+    .card {
+      border-radius: 18px;
+      background: radial-gradient(circle at 0 0, #020617 0, #020617 40%, #020617 100%);
+      border: 1px solid var(--border-subtle);
+      padding: 18px 18px 16px;
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.65);
     }
 
-    .summary-grid {
-      display:grid;
-      gap:12px;
+    .card h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--heading);
     }
 
-    @media (min-width:900px) {
-      .summary-grid {
-        grid-template-columns:2.1fr .9fr;
+    .summary-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-main);
+      margin-bottom: 10px;
+    }
+
+    .split-columns {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+      margin-top: 8px;
+    }
+
+    .sub-heading {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    .list-tight li {
+      font-size: 12px;
+      line-height: 1.5;
+      padding-left: 12px;
+      position: relative;
+      margin-bottom: 3px;
+      color: var(--text-main);
+    }
+
+    .list-tight li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-size: 10px;
+      top: 2px;
+    }
+
+    /* Power card */
+
+    .power-card h2 {
+      margin-bottom: 4px;
+    }
+
+    .power-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .metric-row {
+      margin-bottom: 10px;
+    }
+
+    .metric-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 3px;
+    }
+
+    .metric-bar {
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      overflow: hidden;
+    }
+
+    .metric-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(to right, #22c55e, #4ade80);
+      width: 76%;
+    }
+
+    .metric-fill.face {
+      width: 72%;
+    }
+
+    .metric-fill.power {
+      width: 81%;
+    }
+
+    .metric-fill.reliability {
+      width: 68%;
+    }
+
+    .power-tags {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .power-tag {
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 8px 10px;
+      font-size: 11px;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    .power-tag strong {
+      display: block;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    /* P1–P9 */
+
+    .section-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin: 26px 0 12px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    .section-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .blueprint-pill {
+      font-size: 11px;
+      border-radius: 999px;
+      padding: 3px 10px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .checkpoint-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    @media (max-width: 1024px) {
+      .top-layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .checkpoint-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .right-stack {
+        flex-direction: column;
       }
     }
 
-    h2 {
-      margin:0 0 6px;
-      font-size:1.05rem;
-    }
-
-    .muted {
-      color:var(--muted);
-      font-size:14px;
-    }
-
-    .summary-tags {
-      display:flex;
-      flex-wrap:wrap;
-      gap:6px;
-      margin-top:8px;
-    }
-
-    .pill {
-      padding:3px 8px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.18);
-      font-size:11px;
-      white-space:nowrap;
-    }
-
-    .ratings-grid {
-      display:grid;
-      gap:8px;
-    }
-
-    .rating-block {
-      padding:8px 10px;
-      border-radius:10px;
-      border:1px solid var(--line);
-      background:rgba(0,0,0,.3);
-    }
-
-    .rating-label {
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:.06em;
-      opacity:.9;
-    }
-
-    .rating-score {
-      font-size:20px;
-      font-weight:700;
-      margin-top:4px;
-    }
-
-    .tri-grid {
-      display:grid;
-      gap:12px;
-    }
-
-    @media (min-width:900px) {
-      .tri-grid {
-        grid-template-columns:1.1fr 1.1fr 1.1fr;
+    @media (max-width: 768px) {
+      .page {
+        padding: 16px 10px 32px;
+      }
+      .checkpoint-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .split-columns {
+        grid-template-columns: minmax(0, 1fr);
       }
     }
 
-    ul.bullet {
-      margin:6px 0 0;
-      padding-left:18px;
-      font-size:14px;
+    .check-card {
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(30, 64, 175, 0.4);
+      padding: 10px 10px 8px;
+      font-size: 11px;
+      line-height: 1.45;
     }
 
-    ul.bullet li + li {
-      margin-top:4px;
+    .check-card.needs {
+      border-color: rgba(249, 115, 22, 0.7);
+      box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.35);
     }
 
-    .checkpoint-card {
-      margin-top:4px;
+    .check-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      gap: 6px;
     }
 
-    table.checkpoints {
-      width:100%;
-      border-collapse:collapse;
-      font-size:13px;
-      margin-top:6px;
-    }
-
-    table.checkpoints th,
-    table.checkpoints td {
-      padding:6px 8px;
-      border-bottom:1px solid rgba(255,255,255,.14);
-    }
-
-    table.checkpoints th {
-      text-align:left;
-      font-size:11px;
-      text-transform:uppercase;
-      letter-spacing:.06em;
-      opacity:.85;
+    .check-title {
+      font-weight: 600;
+      color: var(--heading);
+      font-size: 11px;
     }
 
     .status-pill {
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:2px 8px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:600;
+      font-size: 10px;
+      border-radius: 999px;
+      padding: 2px 7px;
+      border: 1px solid rgba(34, 197, 94, 0.75);
+      background: var(--accent-soft);
+      color: #bbf7d0;
+      white-space: nowrap;
     }
 
-    .status-green {
-      background:rgba(0,200,120,.18);
-      border:1px solid rgba(0,200,120,.9);
-      color:#b9ffe0;
+    .status-pill.needs {
+      border-color: rgba(249, 115, 22, 0.85);
+      background: var(--accent-warn-soft);
+      color: #fed7aa;
     }
 
-    .status-yellow {
-      background:rgba(240,200,0,.2);
-      border:1px solid rgba(240,200,0,.9);
-      color:#fff3c2;
+    /* NEW: short description + buttons row */
+
+    .check-subrow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+      margin-top: 2px;
     }
 
-    .status-red {
-      background:rgba(240,60,60,.22);
-      border:1px solid rgba(240,60,60,.9);
-      color:#ffe0e0;
+    .check-short {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
     }
+
+    .check-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .check-pill-link {
+      font-size: 10px;
+      border-radius: 999px;
+      padding: 2px 8px;
+      border: 1px solid rgba(148, 163, 184, 0.7);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .check-pill-link.secondary {
+      border-color: rgba(56, 189, 248, 0.7);
+    }
+
+    .check-pill-link:hover {
+      border-color: var(--accent);
+    }
+
+    .check-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-top: 2px;
+      margin-bottom: 1px;
+    }
+
+    .check-block {
+      margin-bottom: 4px;
+    }
+
+    .check-block ul {
+      list-style: none;
+    }
+
+    .check-block li {
+      position: relative;
+      padding-left: 10px;
+      margin-bottom: 2px;
+      color: var(--text-main);
+    }
+
+    .check-block li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: rgba(148, 163, 184, 0.9);
+      font-size: 9px;
+      top: 1px;
+    }
+
+    /* Practice plan */
 
     .practice-card {
-      margin-top:10px;
+      margin-top: 22px;
     }
 
-    .practice-grid {
-      display:grid;
-      gap:10px;
-      margin-top:10px;
+    .practice-card h2 {
+      margin-bottom: 4px;
     }
 
-    @media (min-width:900px) {
-      .practice-grid {
-        grid-template-columns:repeat(4,1fr);
+    .practice-card p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .practice-card li {
+      font-size: 12px;
+      margin-bottom: 2px;
+      padding-left: 12px;
+      position: relative;
+    }
+
+    .practice-card li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: rgba(148, 163, 184, 0.9);
+      font-size: 9px;
+      top: 2px;
+    }
+
+    /* Video + metrics / how-to */
+
+    .bottom-layout {
+      margin-top: 20px;
+    }
+
+    .video-frame {
+      border-radius: 16px;
+      border: 1px dashed rgba(148, 163, 184, 0.6);
+      background: radial-gradient(circle at 0 0, #020617 0, #020617 45%, #020617 100%);
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .video-placeholder span {
+      opacity: 0.9;
+    }
+
+    .how-list {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .how-list li {
+      margin-bottom: 4px;
+      padding-left: 12px;
+      position: relative;
+    }
+
+    .how-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: rgba(148, 163, 184, 0.9);
+      font-size: 9px;
+      top: 2px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
       }
     }
 
-    .practice-box {
-      padding:10px 10px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:rgba(0,0,0,.35);
-      font-size:13px;
+    @media (max-width: 640px) {
+      .metrics-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
     }
 
-    .practice-box h3 {
-      margin:0 0 4px;
-      font-size:13px;
+    .metric-card {
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      padding: 8px 10px;
+      font-size: 11px;
+      background: rgba(15, 23, 42, 0.96);
+    }
+
+    .metric-card h4 {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 3px;
+      color: var(--heading);
+    }
+
+    .metric-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .metric-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .metric-list li {
+      margin-bottom: 3px;
+      padding-left: 10px;
+      position: relative;
+      color: var(--text-main);
+    }
+
+    .metric-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      font-size: 9px;
+      top: 1px;
+      color: rgba(148, 163, 184, 0.9);
+    }
+
+    /* Ask AI strip + footer */
+
+    .ask-strip {
+      margin-top: 22px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: radial-gradient(circle at 0 0, #0f172a 0, #020617 40%);
+      font-size: 12px;
+    }
+
+    .ask-main {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .ask-title {
+      font-weight: 600;
+      color: var(--heading);
+    }
+
+    .ask-text {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .ask-btn {
+      border-radius: 999px;
+      padding: 6px 14px;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      background: linear-gradient(to right, #22c55e, #4ade80);
+      color: #022c22;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .ask-btn span.icon {
+      font-size: 14px;
+    }
+
+    @media (max-width: 640px) {
+      .ask-strip {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .ask-btn {
+        width: 100%;
+        justify-content: center;
+      }
     }
 
     footer {
-      width:min(var(--maxw),94%);
-      margin:10px auto 26px;
-      text-align:center;
-      color:#cbd9de;
-      font-size:12px;
+      margin-top: 26px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      opacity: 0.85;
+    }
+
+    /* PRINT STYLES */
+
+    @media print {
+      body {
+        background: #ffffff;
+        color: #111827;
+      }
+      .page {
+        max-width: 100%;
+        padding: 16px 20px 32px;
+      }
+      .top-nav {
+        display: none;
+      }
+      .card,
+      .check-card,
+      .practice-card,
+      .metric-card,
+      .ask-strip {
+        background: #ffffff !important;
+        box-shadow: none !important;
+        border-color: #d1d5db !important;
+      }
+      .video-frame {
+        background: #f9fafb !important;
+      }
+      .status-pill,
+      .status-pill.needs {
+        border-color: #9ca3af !important;
+        background: #f9fafb !important;
+        color: #111827 !important;
+      }
+      .power-tag {
+        background: #f9fafb !important;
+      }
+      .ask-btn {
+        background: #111827 !important;
+        color: #f9fafb !important;
+      }
+      .metric-bar {
+        background: #e5e7eb !important;
+      }
+      .metric-fill,
+      .metric-fill.face,
+      .metric-fill.power,
+      .metric-fill.reliability {
+        background: #111827 !important;
+      }
     }
   </style>
 </head>
 <body>
-  <header class="top" id="site-header">
-    <div class="navwrap">
-      <a class="brand" href="index.html" aria-label="Virtual Coach AI">
-        <img src="virtualcoach-logo.png" alt="Virtual Coach AI" class="brand-logo" />
-        <span>Virtual Coach AI</span>
-      </a>
+  <div class="page">
 
-      <button class="menu-toggle" id="menuBtn" aria-expanded="false" type="button">
-        Menu â–¾
-      </button>
+    <header class="top-nav">
+      <div class="nav-left">
+        <div class="logo-pill">V</div>
+        <div>Virtual Coach AI</div>
+        <nav class="nav-links">
+          <span class="nav-link">Home</span>
+          <span class="nav-link">Upload</span>
+          <span class="nav-link">Reports</span>
+        </nav>
+      </div>
+      <div class="back-link">
+        <a href="/index.html">← Back to home</a>
+      </div>
+    </header>
 
-      <nav class="nav" id="siteNav" aria-label="Primary navigation">
-        <a href="index.html">Home</a>
-        <a href="upload.html">Upload</a>
-        <a href="report.html?report=reports/demo/report.json">Reports</a>
-        <a href="coming-soon.html">Coming&nbsp;Soon</a>
-        <a href="pricing.html">Pricing</a>
-        <a href="faq.html">FAQ</a>
-        <a href="contact.html">Contact</a>
-        <a href="login.html">Login</a>
-      </nav>
-    </div>
-  </header>
+    <section class="header">
+      <div class="title-row">
+        <h1>Swing Improvement Report</h1>
+      </div>
+      <div class="meta-row">
+        <span><span class="meta-label">Player:</span> Demo Player</span>
+        <span><span class="meta-label">Focus:</span> Balanced swing for competitive play</span>
+        <span><span class="meta-label">Generated:</span> Prototype build</span>
+      </div>
+      <div class="chips">
+        <span class="chip green">Report loaded.</span>
+        <span class="chip">First-pass template · AI video wiring coming next.</span>
+      </div>
+    </section>
 
-  <div class="scrim">
-    <main class="report-main">
-      <!-- HEADER -->
-      <section class="card card-light">
-        <div class="report-header-top">
-          <div>
-            <div class="report-title">Virtual Coach AI â€” Swing Report</div>
-            <div class="player-row">
-              <div class="player-label">Player</div>
-              <div class="player-name" id="player-name">Player</div>
-            </div>
-          </div>
-          <div class="chip-row">
-            <span class="chip accent">Live AI Demo</span>
-            <span class="chip">P1â€“P9 Checkpoints</span>
-            <span class="chip">Top 3 Priority Fixes</span>
-            <span class="chip">14-Day Practice Plan</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- SUMMARY + RATINGS -->
-      <section class="card summary-grid">
-        <article>
-          <h2>All Swing Summary</h2>
-          <p class="muted" id="summary-body">
-            Solid, athletic motion with room to grow. This text will expand on whatâ€™s
-            working, what leaks power, and where your consistency gains will come from.
-          </p>
-          <div class="summary-tags" id="summary-tags">
-            <span class="pill">First AI Review</span>
-            <span class="pill">Cue: Clubface Control</span>
-            <span class="pill">Cue: Lead-Leg Braking</span>
-          </div>
-        </article>
-
-        <aside class="ratings-grid">
-          <div class="rating-block">
-            <div class="rating-label">Swing Rating</div>
-            <div class="rating-score" id="rating-swing">B+</div>
-            <div class="muted" style="font-size:12px">Overall mechanics</div>
-          </div>
-          <div class="rating-block">
-            <div class="rating-label">Power Rating</div>
-            <div class="rating-score" id="rating-power">B</div>
-            <div class="muted" style="font-size:12px">Speed / window</div>
-          </div>
-          <div class="rating-block">
-            <div class="rating-label">Reliability</div>
-            <div class="rating-score" id="rating-reliability">B-</div>
-            <div class="muted" style="font-size:12px">Pattern under pressure</div>
-          </div>
-        </aside>
-      </section>
-
-      <!-- GOOD / FIXES / LEAKS -->
-      <section class="card tri-grid">
-        <article>
-          <h2>Good Swing Characteristics</h2>
-          <ul class="bullet" id="good-list">
-            <li>Balanced address and posture.</li>
-            <li>Tempo and rhythm in a playable window.</li>
-            <li>Solid shaft delivery through impact.</li>
-          </ul>
-        </article>
-
-        <article>
-          <h2>Top 3 Priority Fixes</h2>
-          <ul class="bullet" id="priority-list">
-            <li>P3 clubface control. Tighten the face vs. spine angle window.</li>
-            <li>Lead-leg braking. Post harder into lead leg to unlock speed.</li>
-            <li>Handle turn-through. Clean up handle exit and match the rotation.</li>
-          </ul>
-        </article>
-
-        <article>
-          <h2>Top Power Leaks</h2>
-          <ul class="bullet" id="leaks-list">
-            <li>Soft lead-leg block. Some ground force never converts into rotation.</li>
-            <li>Open window at P3. Costs compression and curve control.</li>
-            <li>Handle stall through impact. Leaves speed and strike consistency.</li>
-          </ul>
-        </article>
-      </section>
-
-      <!-- CHECKPOINT TABLE -->
-      <section class="card checkpoint-card">
-        <h2>Checkpoint Map (P1â€“P9)</h2>
-        <table class="checkpoints">
-          <thead>
-            <tr>
-              <th style="width:40px;">Pos</th>
-              <th style="width:110px;">Label</th>
-              <th style="width:80px;">Status</th>
-              <th>Note</th>
-            </tr>
-          </thead>
-          <tbody id="checkpoint-body">
-            <!-- Defaults / will be replaced if JSON has checkpoints -->
-            <tr>
-              <td>P1</td>
-              <td>Setup</td>
-              <td><span class="status-pill status-green">GREEN</span></td>
-              <td>Solid address. Posture, ball and alignment all in a playable window.</td>
-            </tr>
-            <tr>
-              <td>P2</td>
-              <td>Shaft parallel (backswing)</td>
-              <td><span class="status-pill status-yellow">YELLOW</span></td>
-              <td>Club a touch inside and face a bit open. Needs a slightly tighter window.</td>
-            </tr>
-            <tr>
-              <td>P3</td>
-              <td>Lead arm parallel</td>
-              <td><span class="status-pill status-yellow">YELLOW</span></td>
-              <td>Face a few degrees open vs. spine. This is the main control checkpoint.</td>
-            </tr>
-            <tr>
-              <td>P4</td>
-              <td>Top of swing</td>
-              <td><span class="status-pill status-green">GREEN</span></td>
-              <td>Classic tour-type top. Good depth and width.</td>
-            </tr>
-            <tr>
-              <td>P5</td>
-              <td>Lead arm parallel (downswing)</td>
-              <td><span class="status-pill status-yellow">YELLOW</span></td>
-              <td>Lead leg is soft. More pressure into the ground will tighten dispersion.</td>
-            </tr>
-            <tr>
-              <td>P6</td>
-              <td>Shaft parallel (downswing)</td>
-              <td><span class="status-pill status-yellow">YELLOW</span></td>
-              <td>Handle tends to stop turning. Club lags and start lines wander.</td>
-            </tr>
-            <tr>
-              <td>P7</td>
-              <td>Impact</td>
-              <td><span class="status-pill status-green">GREEN</span></td>
-              <td>Playable strike, but thereâ€™s still more compression and ball speed available.</td>
-            </tr>
-            <tr>
-              <td>P8</td>
-              <td>Trail arm parallel</td>
-              <td><span class="status-pill status-yellow">YELLOW</span></td>
-              <td>Nice extension, rotation patterns still settling.</td>
-            </tr>
-            <tr>
-              <td>P9</td>
-              <td>Finish</td>
-              <td><span class="status-pill status-green">GREEN</span></td>
-              <td>Balanced finish. Good posture and rhythm all the way through.</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <!-- 14-DAY PRACTICE PLAN -->
-      <section class="card">
-        <h2>14-Day Practice Plan â€” Overview</h2>
-        <p class="muted" id="practice-overview">
-          Over the next 14 days the focus is P3 clubface control, stronger lead-leg
-          braking, and a cleaner handle turn-through. Expect tighter start lines,
-          fewer big misses, and a more automatic driver window.
+    <section class="top-layout">
+      <!-- Summary + Priority fixes -->
+      <article class="card">
+        <h2>Summary</h2>
+        <p class="summary-text">
+          Your swing shows good potential but can be more consistent under pressure. By smoothing your tempo,
+          tightening clubface control, and matching your body rotation with arm swing, you’ll see better contact,
+          higher-quality misses, and more playable shots on the course.
         </p>
 
-        <div class="practice-grid" id="practice-grid">
-          <article class="practice-box">
-            <h3>DAYS 1â€“2: BASELINE &amp; FEELS</h3>
-            <p>
-              Film 10 swings face-on and down-the-line. Note your default curve and miss.
-              Do slow-motion rehearsals pausing at P3 to feel a â€œsquareâ€ window.
-            </p>
-          </article>
-          <article class="practice-box">
-            <h3>DAYS 3â€“5: P3 FACE CONTROL</h3>
-            <p>
-              Half-swings and Â¾ swings. Pause at P3, check the live spine angle, then swing
-              through. 3 sets of 10 balls with that checkpoint.
-            </p>
-          </article>
-          <article class="practice-box">
-            <h3>DAYS 6â€“8: LEAD-LEG BRAKING</h3>
-            <p>
-              No-ball drills focusing on posting into the lead leg. Add 10 half-swings
-              feeling the ground push under your lead foot.
-            </p>
-          </article>
-          <article class="practice-box">
-            <h3>DAYS 9â€“14: BLEND &amp; PLAY</h3>
-            <p>
-              Shift into on-course or game-like practice. 3-ball windows per shot: one
-              â€œtech,â€ one â€œfeel,â€ one â€œplayâ€ ball combining all three.
-            </p>
-          </article>
+        <div class="split-columns">
+          <div>
+            <div class="sub-heading">Top 3 priority fixes</div>
+            <ul class="list-tight">
+              <li>Keep your head steady throughout the swing to improve ball contact.</li>
+              <li>Maintain a smooth transition instead of rushing from backswing to downswing.</li>
+              <li>Square the clubface at impact for straighter shots and tighter dispersion.</li>
+            </ul>
+          </div>
+          <div>
+            <div class="sub-heading">Top 3 power fixes</div>
+            <ul class="list-tight">
+              <li>Use your lower body earlier to create ground-based speed.</li>
+              <li>Complete your shoulder turn to load the system more fully.</li>
+              <li>Release the clubhead through impact without hanging on.</li>
+            </ul>
+          </div>
         </div>
-      </section>
-    </main>
+      </article>
+
+      <!-- Right stack: Power & Reliability + Video -->
+      <div class="right-stack">
+        <!-- Power & Reliability -->
+        <aside class="card power-card">
+          <h2>Power &amp; Reliability</h2>
+          <p class="power-note">
+            Scores are prototype estimates based on your answers. AI-powered scoring from video is coming next.
+          </p>
+
+          <div class="metric-row">
+            <div class="metric-label">
+              <span>Consistency</span><span>76 / 100</span>
+            </div>
+            <div class="metric-bar">
+              <div class="metric-fill"></div>
+            </div>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-label">
+              <span>Face &amp; path control</span><span>72 / 100</span>
+            </div>
+            <div class="metric-bar">
+              <div class="metric-fill face"></div>
+            </div>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-label">
+              <span>Power potential</span><span>81 / 100</span>
+            </div>
+            <div class="metric-bar">
+              <div class="metric-fill power"></div>
+            </div>
+          </div>
+
+          <div class="metric-row">
+            <div class="metric-label">
+              <span>Reliability under pressure</span><span>68 / 100</span>
+            </div>
+            <div class="metric-bar">
+              <div class="metric-fill reliability"></div>
+            </div>
+          </div>
+
+          <div class="power-tags">
+            <div class="power-tag">
+              <strong>What you are built for</strong>
+              Smooth, athletic tempo with a playable draw pattern when the clubface and path match.
+            </div>
+            <div class="power-tag">
+              <strong>Where your leaks live</strong>
+              Setup alignment, top shape, and release timing when speed goes up or pressure increases.
+            </div>
+          </div>
+        </aside>
+
+        <!-- Swing video (top right) -->
+        <article class="card">
+          <h2>Swing video</h2>
+          <p class="power-note">
+            This is the swing that generated this report. We’ll wire this player to your Mux / S3 clip next.
+          </p>
+          <div class="video-frame">
+            <div class="video-placeholder">
+              <span>Video player · coming online soon.</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- P1–P9 -->
+
+    <section>
+      <div class="section-title-row">
+        <div>
+          <div class="section-title">P1–P9 checkpoints</div>
+          <div class="section-sub">
+            Setup through finish. Each tile shows what you’re doing well, what leaks under pressure, and how to train it.
+          </div>
+        </div>
+        <div class="blueprint-pill">Balanced swing for competitive play · Blueprint</div>
+      </div>
+
+      <div class="checkpoint-grid">
+        <!-- P1 -->
+        <article class="check-card">
+          <div class="check-head">
+            <div class="check-title">P1 · Setup</div>
+            <div class="status-pill">On track</div>
+          </div>
+          <div class="check-subrow">
+            <div class="check-short">
+              Setup checkpoint for grip, stance, posture and ball position.
+            </div>
+            <div class="check-actions">
+              <button type="button" class="check-pill-link">Full notes</button>
+              <a href="https://www.youtube.com/watch?v=P1_PLACEHOLDER" target="_blank" rel="noreferrer" class="check-pill-link secondary">YouTube</a>
+            </div>
+          </div>
+          <div class="check-label">What we see</div>
+          <div class="check-block">
+            <ul>
+              <li>Solid base address with grip, stance, and posture that can support your pattern.</li>
+            </ul>
+          </div>
+          <div class="check-label">Common misses</div>
+          <div class="check-block">
+            <ul>
+              <li>Alignment drifting open / closed to target.</li>
+              <li>Ball position creeping too far forward or back.</li>
+            </ul>
+          </div>
+          <div class="check-label">Key drills</div>
+          <div class="check-block">
+            <ul>
+              <li>Mirror checkpoints for start lines and ball position.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- P2 -->
+        <article class="check-card">
+          <div class="check-head">
+            <div class="check-title">P2 · Shaft parallel – backswing</div>
+            <div class="status-pill">On track</div>
+          </div>
+          <div class="check-subrow">
+            <div class="check-short">
+              Early takeaway checkpoint for club line and face control.
+            </div>
+            <div class="check-actions">
+              <button type="button" class="check-pill-link">Full notes</button>
+              <a href="https://www.youtube.com/watch?v=P2_PLACEHOLDER" target="_blank" rel="noreferrer" class="check-pill-link secondary">YouTube</a>
+            </div>
+          </div>
+          <div class="check-label">What we see</div>
+          <div class="check-block">
+            <ul>
+              <li>Club near the line with playable face control.</li>
+            </ul>
+          </div>
+          <div class="check-label">Common misses</div>
+          <div class="check-block">
+            <ul>
+              <li>Club too far inside with a shut face.</li>
+              <li>Club outside chasing “more turn”.</li>
+            </ul>
+          </div>
+          <div class="check-label">Key drills</div>
+          <div class="check-block">
+            <ul>
+              <li>Checkpoint drill with slow-motion rehearsals.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- P3 -->
+        <article class="check-card needs">
+          <div class="check-head">
+            <div class="check-title">P3 · Lead arm parallel – backswing</div>
+            <div class="status-pill needs">Needs attention</div>
+          </div>
+          <div class="check-subrow">
+            <div class="check-short">
+              Width and arm-structure checkpoint halfway back.
+            </div>
+            <div class="check-actions">
+              <button type="button" class="check-pill-link">Full notes</button>
+              <a href="https://www.youtube.com/watch?v=P3_PLACEHOLDER" target="_blank" rel="noreferrer" class="check-pill-link secondary">YouTube</a>
+            </div>
+          </div>
+          <div class="check-label">What we see</div>
+          <div class="check-block">
+            <ul>
+              <li>Good coil, but we want cleaner arm structure and width.</li>
+            </ul>
+          </div>
+          <div class="check-label">Common misses</div>
+          <div class="check-block">
+            <ul>
+              <li>Trail arm collapsing and losing width.</li>
+              <li>Club across the line or too laid off.</li>
+            </ul>
+          </div>
+          <div class="check-label">Key drills</div>
+          <div class="check-block">
+            <ul>
+              <li>Lead-arm width drill with towel under trail arm.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- P4 -->
+        <article class="check-card needs">
+          <div class="check-head">
+            <div class="check-title">P4 · Top of swing</div>
+            <div class="status-pill needs">Needs attention</div>
+          </div>
+          <div class="check-subrow">
+            <div class="check-short">
+              Top-of-swing checkpoint for loaded but balanced position.
+            </div>
+            <div class="check-actions">
+              <button type="button" class="check-pill-link">Full notes</button>
+              <a href="https://www.youtube.com/watch?v=P4_PLACEHOLDER" target="_blank" rel="noreferrer" class="check-pill-link secondary">YouTube</a>
+            </div>
+          </div>
+          <div class="check-label">What we see</div>
+          <div class="check-block">
+            <ul>
+              <li>Plenty of turn; we want a more repeatable, balanced top.</li>
+            </ul>
+          </div>
+          <div class="check-label">Common misses</div>
+          <div class="check-block">
+            <ul>
+              <li>Arms overswinging with the club going past what the body can support.</li>
+              <li>Face too closed or too open vs. lead arm.</li>
+            </ul>
+          </div>
+          <div class="check-label">Key drills</div>
+          <div class="check-block">
+            <ul>
+              <li>Three-quarter top-of-swing rehearsals with mirror checkpoints for arm / club match-up.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- P5 -->
+        <article class="check-card">
+          <div class="check-head">
+            <div class="check-title">P5 · Lead arm parallel – downswing</div>
+            <div class="status-pill">On track</div>
+          </div>
+          <div class="check-subrow">
+            <div class="check-short">
+              Transition checkpoint for shaft pitch and trail-arm delivery.
+            </div>
+            <div class="check-actions">
+              <button type="button" class="check-pill-link">Full notes</button>
+              <a href="https://www.youtube.com/watch?v=P5_PLACEHOLDER" target="_blank" rel="noreferrer" class="check-pill-link secondary">YouTube</a>
+            </div>
+          </div>
+          <div class="check-label">What we see</div>
+          <div class="check-block">
+            <ul>
+              <li>Shape is close; we’ll tighten shaft plane and rotation.</li>
+            </ul>
+          </div>
+          <div class="check-label">Common misses</div>
+          <div class="check-block">
+            <ul>
+              <li>Club stuck too far inside, dumping under plane.</li>
+              <li>Handle racing ahead and leaving the face open.</li>
+            </ul>
+          </div>
+          <div class="check-label">Key drills</div>
+          <div class="check-block">
+            <ul>
+              <li>Pump drill from P4 to P5 focusing on plane and face-to-path match-up.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- P6 -->
+        <article class="check-card">
+          <div class="check-head">
+            <div class="check-title">P6 · Shaft parallel – downswing</div>
+            <div class="status-pill">On track</div>
+          </div>
+          <div class="check-subrow">
+            <div class="check-short">
+              Delivery checkpoint for club on line with stable wrists.
+            </div>
+            <div class="check-actions">
+              <button type="button" class="check-pill-link">Full notes</button>
+              <a href="https://www.youtube.com/watch?v=P6_PLACEHOLDER" target="_blank" rel="noreferrer" class="check-pill-link secondary">YouTube</a>
+            </div>
+          </div>
+          <div class="check-label">What we see</div>
+          <div class="check-block">
+            <ul>
+              <li>Club generally on line with room to hold it under pressure.</li>
+            </ul>
+          </div>
+          <div class="check-label">Common misses</div>
+          <div class="check-block">
+            <ul>
+              <li>Club dropping under, leading to blocks and hooks.</li>
+              <li>Trail wrist dumping early, losing shaft lean.</li>
+            </ul>
+          </div>
+          <div class="check-label">Key drills</div>
+          <div class="check-block">
+            <ul>
+              <li>Slow-motion strike-line drill with P6 checkpoints into half-shots.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- P7 -->
+        <article class="check-card">
+          <div class="check-head">
+            <div class="check-title">P7 · Impact</div>
+            <div class="status-pill">On track</div>
+          </div>
+          <div class="check-subrow">
+            <div class="check-short">
+              Impact checkpoint for low point, shaft lean and face control.
+            </div>
+            <div class="check-actions">
+              <button type="button" class="check-pill-link">Full notes</button>
+              <a href="https://www.youtube.com/watch?v=P7_PLACEHOLDER" target="_blank" rel="noreferrer" class="check-pill-link secondary">YouTube</a>
+            </div>
+          </div>
+          <div class="check-label">What we see</div>
+          <div class="check-block">
+            <ul>
+              <li>Solid basic impact, especially with irons, when sequence is on time.</li>
+            </ul>
+          </div>
+          <div class="check-label">Common misses</div>
+          <div class="check-block">
+            <ul>
+              <li>Flip under pressure, losing shaft lean.</li>
+              <li>Face wandering with driver.</li>
+            </ul>
+          </div>
+          <div class="check-label">Key drills</div>
+          <div class="check-block">
+            <ul>
+              <li>Impact-bag work with body-driven rotation.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- P8 -->
+        <article class="check-card">
+          <div class="check-head">
+            <div class="check-title">P8 · Trail arm parallel – follow through</div>
+            <div class="status-pill">On track</div>
+          </div>
+          <div class="check-subrow">
+            <div class="check-short">
+              Extension checkpoint for rotation, trail-arm length and weight shift.
+            </div>
+            <div class="check-actions">
+              <button type="button" class="check-pill-link">Full notes</button>
+              <a href="https://www.youtube.com/watch?v=P8_PLACEHOLDER" target="_blank" rel="noreferrer" class="check-pill-link secondary">YouTube</a>
+            </div>
+          </div>
+          <div class="check-label">What we see</div>
+          <div class="check-block">
+            <ul>
+              <li>Balanced motion through the ball with room for more extension.</li>
+            </ul>
+          </div>
+          <div class="check-label">Common misses</div>
+          <div class="check-block">
+            <ul>
+              <li>Body stalling while arms keep going.</li>
+              <li>Weight hanging back instead of fully into lead side.</li>
+            </ul>
+          </div>
+          <div class="check-label">Key drills</div>
+          <div class="check-block">
+            <ul>
+              <li>Hold-the-finish drill to P8, step-through swings to train full rotation.</li>
+            </ul>
+          </div>
+        </article>
+
+        <!-- P9 -->
+        <article class="check-card">
+          <div class="check-head">
+            <div class="check-title">P9 · Finish</div>
+            <div class="status-pill">On track</div>
+          </div>
+          <div class="check-subrow">
+            <div class="check-short">
+              Finish checkpoint for balance, posture and clear target picture.
+            </div>
+            <div class="check-actions">
+              <button type="button" class="check-pill-link">Full notes</button>
+              <a href="https://www.youtube.com/watch?v=P9_PLACEHOLDER" target="_blank" rel="noreferrer" class="check-pill-link secondary">YouTube</a>
+            </div>
+          </div>
+          <div class="check-label">What we see</div>
+          <div class="check-block">
+            <ul>
+              <li>Generally balanced finish with a clear picture of the target.</li>
+            </ul>
+          </div>
+          <div class="check-label">Common misses</div>
+          <div class="check-block">
+            <ul>
+              <li>Leaning back or falling off balance after impact.</li>
+              <li>Club stopping short when you get tentative.</li>
+            </ul>
+          </div>
+          <div class="check-label">Key drills</div>
+          <div class="check-block">
+            <ul>
+              <li>10-second finish hold on every practice ball, target-picture routine before each swing.</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Practice plan -->
+
+    <section class="card practice-card">
+      <h2>14-Day practice plan</h2>
+      <p>
+        Simple, focused work. No range marathons – just the right reps on the right pieces.
+        As AI analysis comes online, this plan will auto-adjust around your actual swing data.
+      </p>
+      <ul>
+        <li><strong>Days 1–4 · Contact:</strong> setup, slow reps on P1–P2.</li>
+        <li><strong>Days 5–8 · Blend:</strong> backswing &amp; downswing, 50–70% speed.</li>
+        <li><strong>Days 9–12 · Mixed window:</strong> random clubs and targets.</li>
+        <li><strong>Days 13–14 · On-course testing:</strong> same focus, full pre-shot routine.</li>
+      </ul>
+    </section>
+
+    <!-- How to use view -->
+
+    <section class="card bottom-layout">
+      <h2>How to use this view</h2>
+      <ul class="how-list">
+        <li>Play the swing once just watching the ball flight.</li>
+        <li>Then scrub and pause at each P1–P9 checkpoint above.</li>
+        <li>Match what you see on video with the notes and drills for each tile.</li>
+      </ul>
+    </section>
+
+    <!-- Swing metrics snapshot -->
+
+    <section class="card" style="margin-top:16px;">
+      <h2>Swing metrics snapshot</h2>
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <h4>Face &amp; path control</h4>
+          <p class="metric-sub">How often the clubface and path start near your intended line.</p>
+          <div class="metric-bar">
+            <div class="metric-fill face"></div>
+          </div>
+          <p class="power-note" style="margin-top:4px;">
+            Prototype: start lines are solid with a few outliers.
+          </p>
+        </div>
+        <div class="metric-card">
+          <h4>Swing plane</h4>
+          <p class="metric-sub">How closely the club tracks your ideal swing arc.</p>
+          <div class="metric-bar">
+            <div class="metric-fill"></div>
+          </div>
+          <p class="power-note" style="margin-top:4px;">
+            Prototype: a good pattern with minor reroutes under pressure.
+          </p>
+        </div>
+        <div class="metric-card">
+          <h4>Today’s snapshot</h4>
+          <ul class="metric-list">
+            <li><strong>Working:</strong> contact quality, tempo, overall balance.</li>
+            <li><strong>Cleanup:</strong> setup alignment, top shape, release timing.</li>
+            <li><strong>Power leaks:</strong> late ground use, trail-arm collapse, early stall of rotation.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ask AI strip -->
+
+    <section class="ask-strip">
+      <div class="ask-main">
+        <div class="ask-title">Ask Virtual Coach AI</div>
+        <div class="ask-text">
+          Not sure what something means? Tap the button and this report will be explained in plain language.
+        </div>
+      </div>
+      <button class="ask-btn" type="button">
+        <span class="icon">🎙️</span>
+        Ask the Coach about this report
+      </button>
+    </section>
 
     <footer>
-      Â© <span id="y"></span> Virtual Coach AI. All rights reserved.
+      © 2025 Virtual Coach AI. All rights reserved. · Prototype swing report layout.
     </footer>
   </div>
-
-  <script>
-    // Set current year
-    document.getElementById('y').textContent = new Date().getFullYear();
-
-    // Mobile hamburger toggle
-    const headerEl = document.getElementById('site-header');
-    const menuBtn = document.getElementById('menuBtn');
-    const navEl = document.getElementById('siteNav');
-
-    menuBtn.addEventListener('click', () => {
-      const open = headerEl.classList.toggle('open');
-      menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-
-    navEl.addEventListener('click', (e) => {
-      if (e.target.tagName === 'A') {
-        headerEl.classList.remove('open');
-        menuBtn.setAttribute('aria-expanded', 'false');
-      }
-    });
-
-    // Highlight current page in nav
-    const current =
-      (location.pathname.split('/').pop() || 'report.html')
-        .split('?')[0]
-        .toLowerCase();
-
-    document.querySelectorAll('nav.nav a').forEach((a) => {
-      const href = (a.getAttribute('href') || '')
-        .split('?')[0]
-        .toLowerCase();
-      if (href === current) {
-        a.setAttribute('aria-current', 'page');
-      }
-    });
-
-    // ---- JSON BINDING ----
-
-    function getReportPath() {
-      const params = new URLSearchParams(window.location.search);
-      const p = params.get('report');
-      return p || 'reports/demo/report.json';
-    }
-
-    function renderList(containerId, items) {
-      const el = document.getElementById(containerId);
-      if (!el || !Array.isArray(items) || !items.length) return;
-      el.innerHTML = '';
-      items.forEach((text) => {
-        const li = document.createElement('li');
-        li.textContent = text;
-        el.appendChild(li);
-      });
-    }
-
-    function renderTags(containerId, items) {
-      const el = document.getElementById(containerId);
-      if (!el || !Array.isArray(items) || !items.length) return;
-      el.innerHTML = '';
-      items.forEach((text) => {
-        const span = document.createElement('span');
-        span.className = 'pill';
-        span.textContent = text;
-        el.appendChild(span);
-      });
-    }
-
-    function statusClass(status) {
-      const s = String(status || '').toUpperCase();
-      if (s === 'GREEN') return 'status-pill status-green';
-      if (s === 'YELLOW') return 'status-pill status-yellow';
-      if (s === 'RED') return 'status-pill status-red';
-      return 'status-pill';
-    }
-
-    function renderCheckpoints(rows) {
-      const tbody = document.getElementById('checkpoint-body');
-      if (!tbody || !Array.isArray(rows) || !rows.length) return;
-      tbody.innerHTML = '';
-      rows.forEach((cp) => {
-        const tr = document.createElement('tr');
-
-        const tdPos = document.createElement('td');
-        tdPos.textContent = cp.pos || cp.label || '';
-        tr.appendChild(tdPos);
-
-        const tdName = document.createElement('td');
-        tdName.textContent = cp.name || cp.title || '';
-        tr.appendChild(tdName);
-
-        const tdStatus = document.createElement('td');
-        const span = document.createElement('span');
-        span.className = statusClass(cp.status);
-        span.textContent = (cp.status || '').toString().toUpperCase();
-        tdStatus.appendChild(span);
-        tr.appendChild(tdStatus);
-
-        const tdNote = document.createElement('td');
-        tdNote.textContent = cp.note || cp.comment || '';
-        tr.appendChild(tdNote);
-
-        tbody.appendChild(tr);
-      });
-    }
-
-    function renderPractice(blocks) {
-      const grid = document.getElementById('practice-grid');
-      if (!grid || !Array.isArray(blocks) || !blocks.length) return;
-      grid.innerHTML = '';
-      blocks.forEach((b) => {
-        const box = document.createElement('article');
-        box.className = 'practice-box';
-
-        const h = document.createElement('h3');
-        h.textContent = b.title || '';
-        box.appendChild(h);
-
-        const p = document.createElement('p');
-        p.textContent = b.body || '';
-        box.appendChild(p);
-
-        grid.appendChild(box);
-      });
-    }
-
-    async function loadReport() {
-      const path = getReportPath();
-      console.log('Loading report JSON from:', path);
-
-      try {
-        const res = await fetch(path);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        console.log('Report JSON (raw):', data);
-
-        // Support both S3 wrapper { player, generatedAt, report: { ... } }
-        // and legacy flat JSON.
-        const core = data.report || data;
-
-        // Player name: JSON or ?player= query
-        const params = new URLSearchParams(window.location.search);
-        const fromQuery = params.get('player');
-        const playerName =
-          core.playerName ||
-          core.player ||
-          data.player ||
-          fromQuery ||
-          'Player';
-
-        const nameEl = document.getElementById('player-name');
-        if (nameEl) nameEl.textContent = playerName;
-
-        document.title = 'Virtual Coach AI â€” ' + playerName + ' Swing Report';
-
-        // Summary body
-        const summaryBody =
-          core.summary?.body ||
-          core.swingSummary?.body ||
-          data.summary?.body ||
-          data.swingSummary?.body;
-
-        if (summaryBody) {
-          const el = document.getElementById('summary-body');
-          if (el) el.textContent = summaryBody;
-        }
-
-        // Tags / cues
-        const tags =
-          core.summary?.tags ||
-          core.swingSummary?.tags ||
-          core.tags ||
-          data.summary?.tags ||
-          data.swingSummary?.tags ||
-          data.tags ||
-          [];
-        renderTags('summary-tags', tags);
-
-        // Ratings
-        const ratings = core.ratings || data.ratings || null;
-        if (ratings) {
-          const r = ratings;
-          const s = document.getElementById('rating-swing');
-          const p = document.getElementById('rating-power');
-          const rel = document.getElementById('rating-reliability');
-          if (s && r.swing) s.textContent = r.swing;
-          if (p && r.power) p.textContent = r.power;
-          if (rel && r.reliability) rel.textContent = r.reliability;
-        }
-
-        // Bullet lists
-        renderList(
-          'good-list',
-          core.goodCharacteristics ||
-            core.good ||
-            data.goodCharacteristics ||
-            data.good ||
-            []
-        );
-        renderList(
-          'priority-list',
-          core.priorityFixes ||
-            core.topFixes ||
-            data.priorityFixes ||
-            data.topFixes ||
-            []
-        );
-        renderList(
-          'leaks-list',
-          core.powerLeaks ||
-            core.leaks ||
-            data.powerLeaks ||
-            data.leaks ||
-            []
-        );
-
-        // Checkpoints
-        renderCheckpoints(
-          core.checkpoints ||
-            core.pCheckpoints ||
-            data.checkpoints ||
-            data.pCheckpoints ||
-            []
-        );
-
-        // Practice overview
-        const practiceOverview =
-          core.practice?.overview || data.practice?.overview;
-        if (practiceOverview) {
-          const el = document.getElementById('practice-overview');
-          if (el) el.textContent = practiceOverview;
-        }
-
-        // Practice blocks
-        renderPractice(
-          core.practice?.blocks ||
-            core.practiceBlocks ||
-            data.practice?.blocks ||
-            data.practiceBlocks ||
-            []
-        );
-      } catch (err) {
-        console.error('Failed to load report JSON:', err);
-      }
-    }
-
-    loadReport();
-  </script>
 </body>
 </html>
-'@ | Set-Content -Encoding UTF8 .\report.html

@@ -1,164 +1,74 @@
-﻿// /public/upload.client.js Ãƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¢Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â Mux flow (no S3)
-// v5-final
+﻿(() => {
+  const $ = (id) => document.getElementById(id);
 
-(() => {
-  console.log("[upload mux v5] client JS loaded");
+  const form = $("uploadForm");
+  const fileInput = $("videoFile");
+  const statusEl = $("status");
+  const errEl = $("error");
 
-  const $ = (s) => document.querySelector(s);
-
-  // Fallback-friendly selectors
-  const fileInput =
-    $("#fileInput") || $("#file") || document.querySelector('input[type="file"]');
-  const fileLabel = $("#fileLabel");
-  const btn =
-    $("#uploadBtn") ||
-    $("#submit") ||
-    document.querySelector('button[type="submit"]') ||
-    document.querySelector("button");
-
-  // Minimal log area if none exists
-  const logEl =
-    $("#log") ||
-    (() => {
-      const d = document.createElement("pre");
-      d.id = "log";
-      d.style.cssText =
-        "margin-top:1rem;color:#666;white-space:pre-wrap;background:#f7f7f8;border:1px solid #ddd;padding:.5rem;border-radius:8px;max-width:680px";
-      document.body.appendChild(d);
-      return d;
-    })();
-
-  const fields = {
-    name: $("#name"),
-    email: $("#email"),
-    hcap: $("#handicap"),
-    handed: $("#handed"),
-    eye: $("#eye"),
-    height: $("#height"),
-  };
-
-  const log = (m) => {
-    logEl.textContent += (logEl.textContent ? "\n" : "") + m;
-    logEl.scrollTop = logEl.scrollHeight;
-  };
-
-  const busy = (on) => {
-    btn && (btn.disabled = on);
-    fileInput && (fileInput.disabled = on);
-    Object.values(fields).forEach((el) => el && (el.disabled = on));
-  };
-
-  // File label update
-  fileInput?.addEventListener("change", (e) => {
-    const f = e.target.files?.[0];
-    if (fileLabel) fileLabel.textContent = f ? f.name : "(no file)";
-    if (f) log("Selected: " + f.name);
-  });
-
-  // Helpers
-  function readForm() {
-    return {
-      name: (fields.name?.value || "").trim(),
-      email: (fields.email?.value || "").trim(),
-      hcap: (fields.hcap?.value || "").trim(),
-      handed: (fields.handed?.value || "").trim(),
-      eye: (fields.eye?.value || "").trim(),
-      height: (fields.height?.value || "").trim(),
-    };
+  function showError(msg) {
+    errEl.textContent = msg;
+    errEl.style.display = "block";
+    statusEl.style.display = "none";
   }
 
-  function validateHeight(h) {
-    if (!h) return "Height is required.";
-    const n = Number(h);
-    if (!Number.isFinite(n)) return "Height must be a number.";
-    if (n < 48 || n > 84) return "Height should be between 48 and 84 inches.";
-    return "";
+  function showStatus(msg) {
+    statusEl.textContent = msg;
+    statusEl.style.display = "block";
+    errEl.style.display = "none";
   }
 
-  async function jsonOrThrow(res, fallback = "Request failed") {
-    let data = null;
-    try {
-      data = await res.json();
-    } catch (_) {}
-    if (!res.ok) throw new Error(data?.error || `${fallback} (${res.status})`);
-    return data || {};
-  }
-
-  // Main handler (blocks any old listeners)
-  btn?.addEventListener("click", async (e) => {
-    e?.preventDefault?.();
-    e?.stopPropagation?.();
-    e?.stopImmediatePropagation?.();
-
-    if (window.__uploadRunning) return;
-    window.__uploadRunning = true;
-
-    const file = fileInput?.files?.[0];
-    if (!file) {
-      log("Pick a video first.");
-      window.__uploadRunning = false;
-      return;
+  async function postForm(url, formData) {
+    const res = await fetch(url, { method: "POST", body: formData });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || `Request failed (${res.status})`);
     }
+    return data;
+  }
 
-    const data = readForm();
-    const heightError = validateHeight(data.height);
-    if (heightError) {
-      log("Error: " + heightError);
-      window.__uploadRunning = false;
-      return;
+  async function postJson(url, obj) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(obj)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || `Request failed (${res.status})`);
     }
+    return data;
+  }
 
-    busy(true);
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const f = fileInput.files && fileInput.files[0];
+    if (!f) return showError("Pick a video first.");
+
     try {
-      // 1) Get a Mux direct-upload URL
-      log("Requesting Mux upload URLÃƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¢Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¦");
-      const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
-      const j1 = await jsonOrThrow(r1, "Mux upload URL request failed");
-      const upload = j1?.upload;
-      if (!upload?.url) throw new Error("Mux upload URL missing");
+      showStatus("Uploading…");
 
-      // 2) PUT the file to Mux
-      log("Uploading to Mux (this can take a minute)...");
-      const put = await fetch(upload.url, { method: "PUT", body: file });
-      if (!put.ok) throw new Error(`Mux upload failed (${put.status})`);
+      const fd = new FormData();
+      fd.append("video", f);
 
-      // 3) Save your report JSON (store the Mux upload id so your backend can resolve playback later)
-      log("Saving report JSONÃƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¢Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¦");
-      const r2 = await fetch("/api/save-report", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          status: "ready",
-          swingScore: 80,
-          muxPlaybackId: null, // resolved later by /api/resolve-mux
-          muxUploadId: upload.id,
-          p1p9: [],
-          faults: [],
-          note: `uploaded ${file.name}`,
-          meta: data,
-        }),
-      });
-      const rep = await jsonOrThrow(r2, "Report save failed");
+      const up = await postForm("/api/upload", fd);
 
-      // 4) Open the report Ãƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¢Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡Ãƒâ€šÃ‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â prefer the direct Blob URL, fall back to id
-      log("Opening report viewÃƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¢Ãƒâ€ Ã¢â‚¬â„¢Ãƒâ€šÃ‚Â¢Ãƒâ€šÃ‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€šÃ‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬Ãƒâ€ Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¦");
-      if (rep.url) {
-        location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
-      } else if (rep.id) {
-        location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
-      } else {
-        throw new Error("Report response missing url/id");
-      }
+      showStatus(`Uploaded (${up.durationSec.toFixed(1)}s). Auto-detecting impact + extracting P1–P9…`);
+
+      const ex = await postJson("/api/extract-pframes", { videoUrl: up.videoUrl, jobId: up.jobId });
+
+      // store for the next page
+      sessionStorage.setItem("vca_jobId", ex.jobId);
+      sessionStorage.setItem("vca_videoUrl", ex.videoUrl);
+      sessionStorage.setItem("vca_impactSec", String(ex.impactSec || ""));
+      sessionStorage.setItem("vca_frames", JSON.stringify(ex.frames || {}));
+      sessionStorage.setItem("vca_ptimes", JSON.stringify(ex.ptimes || {}));
+
+      showStatus("Done. Sending you to your strip…");
+      window.location.href = `/strip?jobId=${encodeURIComponent(ex.jobId)}`;
     } catch (err) {
-      log("Error: " + (err?.message || err));
-      busy(false);
-      window.__uploadRunning = false;
+      showError(err.message || "Network error. Try again.");
     }
   });
 })();
-
-async function safeJson(res) {
-  try { return await res.json() } catch { return {} }
-}
-
-

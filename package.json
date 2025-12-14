@@ -1,12 +1,25 @@
 {
-    "name":  "virtual-coach-ai",
-    "private":  true,
-    "version":  "0.0.1",
-    "scripts":  {
-                    "build":  "echo Static + API; nothing to build",
-                    "vercel-build":  "npm run build"
-                },
-    "engines":  {
-                    "node":  "\u003e=20"
-                }
+    "name": "virtual-coach-ai",
+    "private": true,
+    "version": "0.0.1",
+    "scripts": {
+        "dev": "next dev -p 3001",
+        "build": "next build",
+        "start": "next start -p 3001",
+        "vercel-build": "next build"
+    },
+    "engines": {
+        "node": ">=20"
+    },
+    "dependencies": {
+        "next": "^16.0.10",
+        "openai": "^6.10.0",
+        "react": "^19.2.3",
+        "react-dom": "^19.2.3"
+    },
+    "devDependencies": {
+        "@types/node": "^25.0.1",
+        "@types/react": "^19.2.7",
+        "typescript": "^5.9.3"
+    }
 }
