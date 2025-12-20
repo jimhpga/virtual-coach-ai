@@ -1,4 +1,4 @@
-// pages/upload.tsx
+﻿// pages/upload.tsx
 import { useState, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/router";
 
@@ -16,6 +16,21 @@ export default function UploadPage() {
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     setFileName(file ? file.name : null);
+
+    // ✅ MVP: store a local preview URL for /report to play back
+    // This makes the report video preview work even before uploads are wired.
+    try {
+      if (typeof window !== "undefined") {
+        if (file) {
+          const localUrl = URL.createObjectURL(file);
+          window.sessionStorage.setItem("vca_video_preview_url", localUrl);
+        } else {
+          window.sessionStorage.removeItem("vca_video_preview_url");
+        }
+      }
+    } catch {
+      // ignore - preview is optional
+    }
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -45,12 +60,24 @@ export default function UploadPage() {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || "Failed to generate report.");
+      // ✅ Read body ONCE
+      const raw = await res.text();
+      let reportJson: any = null;
+
+      try {
+        reportJson = raw ? JSON.parse(raw) : null;
+      } catch {
+        reportJson = { _raw: raw };
       }
 
-      const reportJson = await res.json();
+      console.log("[VCA] ai-generate-report status:", res.status);
+      console.log("[VCA] ai-generate-report body:", reportJson);
+
+      if (!res.ok) {
+        throw new Error(
+          reportJson?.error || reportJson?._raw || "Failed to generate report."
+        );
+      }
 
       // Store report so /report can read it
       if (typeof window !== "undefined") {
@@ -64,7 +91,7 @@ export default function UploadPage() {
       await router.push("/report?mode=local");
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Something went wrong while building your report.");
+      setError(err?.message || "Something went wrong while building your report.");
     } finally {
       setSubmitting(false);
     }
@@ -82,15 +109,15 @@ export default function UploadPage() {
             Upload Your Swing
           </h1>
           <p className="text-sm md:text-base text-slate-300 max-w-2xl">
-            Drag in a face-on or down-the-line clip. We&apos;ll extract your P1â€“P9
-            checkpoints, find your top 2â€“3 faults, and build a simple practice plan.
+            Drag in a face-on or down-the-line clip. We&apos;ll extract your P1-P9
+            checkpoints, find your top 2-3 faults, and build a simple practice plan.
           </p>
 
           {/* BADGES */}
           <div className="mt-4 flex flex-wrap gap-2 text-[11px]">
             <div className="inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2" />
-              P1â€“P9 checkpoints
+              P1-P9 checkpoints
             </div>
             <div className="inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2" />
@@ -122,14 +149,14 @@ export default function UploadPage() {
               <label className="block rounded-2xl border border-dashed border-slate-600 bg-slate-900/80 px-4 py-6 cursor-pointer hover:border-emerald-400/70 hover:bg-slate-900 transition">
                 <div className="flex flex-col items-center text-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-emerald-500/15 border border-emerald-400/50 flex items-center justify-center text-emerald-300 text-xl">
-                    â†‘
+                    ^
                   </div>
                   <div className="text-xs text-slate-200">
                     <span className="font-semibold">
                       Click to browse or drag &amp; drop a video file
                     </span>
                     <span className="block text-[11px] text-slate-400 mt-1">
-                      MP4 / MOV recommended â€¢ Ideally 1â€“3 seconds from setup to finish
+                      MP4 / MOV recommended • Ideally 1-3 seconds from setup to finish
                     </span>
                   </div>
                   <input
@@ -224,9 +251,7 @@ export default function UploadPage() {
               </p>
 
               {error && (
-                <p className="text-[11px] text-red-400 max-w-md">
-                  {error}
-                </p>
+                <p className="text-[11px] text-red-400 max-w-md">{error}</p>
               )}
             </div>
           </form>
@@ -243,7 +268,7 @@ export default function UploadPage() {
                 </p>
               </div>
               <div className="px-3 py-1 rounded-full bg-slate-800 text-[11px] text-slate-300">
-                {fileName ? "File ready" : "Waiting for fileâ€¦"}
+                {fileName ? "File ready" : "Waiting for file..."}
               </div>
             </div>
 
@@ -258,7 +283,7 @@ export default function UploadPage() {
                     before we upload it.
                   </p>
                   <p className="text-[11px] text-slate-500 mt-2 max-w-xs mx-auto">
-                    Tip: a clean single-swing clip (setup â†’ finish) makes analysis
+                    Tip: a clean single-swing clip (setup → finish) makes analysis
                     easier.
                   </p>
                 </div>
@@ -281,8 +306,8 @@ export default function UploadPage() {
               </h3>
               <ol className="space-y-1 text-[11px] text-slate-400">
                 <li>1. We upload and store your swing securely.</li>
-                <li>2. AI extracts your P1â€“P9 positions and core metrics.</li>
-                <li>3. We score your swing and flag the top 2â€“3 faults.</li>
+                <li>2. AI extracts your P1-P9 positions and core metrics.</li>
+                <li>3. We score your swing and flag the top 2-3 faults.</li>
                 <li>4. You get a drill-based plan to fix them.</li>
               </ol>
               <p className="text-[11px] text-slate-500 mt-3">
@@ -296,3 +321,11 @@ export default function UploadPage() {
     </main>
   );
 }
+
+
+
+
+
+
+
+
