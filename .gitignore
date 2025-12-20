@@ -1,38 +1,28 @@
-.vercel
+﻿# Next.js
+.next/
+out/
+.turbo/
+
+# deps
 node_modules/
-dist/
-public/data/
-dist/
-public/data/
-*.bak
 
-# local secrets & zips
-.env
-.env.local
-*.zip
-docs/access keys.txt
+# env
+.env*
+!.env.example
 
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# secrets & local stuff
-.env
-.env.local
-docs/access keys.txt
-*.zip
+# OS / editor
+.DS_Store
+Thumbs.db
 
-# Local backup artifacts
-*.bak
-*.bak*
-*backup*
-*.bak-*
-api/*.js
-api/*.mjs
-api/*.cjs
-api/*.map
-api/*.js
-api/*.mjs
-api/*.cjs
-api/*.map
-.env*.local
-/public/uploads/
-/public/frames/
-/.next/
+# local artifacts
+public/clips/
+public/strips/
+test_clip.mp4
+tmp-payload.json
+tmp/
