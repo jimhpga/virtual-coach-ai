@@ -118,5 +118,26 @@
   // auto-run on load
   runExtract();
 </script>
+<script>
+  (function () {
+    const url = sessionStorage.getItem("vca_video_preview_url");
+    const v = document.getElementById("vid");
+
+    if (!v) return;
+
+    if (!url) {
+      // No preview stored (user came direct to report). Leave hidden.
+      return;
+    }
+
+    v.style.display = "block";
+    v.src = url;
+    v.load();
+  })();
+</script>
+
 </body>
 </html>
+
+
+
