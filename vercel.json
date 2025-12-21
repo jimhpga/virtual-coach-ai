@@ -1,5 +1,5 @@
 ﻿{
   "redirects": [
-    { "source": "/", "destination": "/upload", "permanent": false }
+    { "source": "/", "destination": "/upload", "statusCode": 307 }
   ]
 }
