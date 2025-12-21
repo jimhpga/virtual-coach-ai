@@ -6,23 +6,30 @@ out/
 # deps
 node_modules/
 
+# Vercel local
+.vercel/
+
 # env
 .env*
 !.env.example
 
+# local artifacts
+public/uploads/
+public/frames/
+public/clips/
+
 # logs
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 
 # OS / editor
 .DS_Store
 Thumbs.db
 
-# local artifacts
-public/clips/
-public/strips/
-test_clip.mp4
-tmp-payload.json
-tmp/
+# backups / scratch
+*.bak
+*.bak_*
+*.BAK_*
+*.STABLE_*
+tmp-*.json
