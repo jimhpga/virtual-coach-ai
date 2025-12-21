@@ -33,3 +33,23 @@ Thumbs.db
 *.BAK_*
 *.STABLE_*
 tmp-*.json
+
+# local dev artifacts
+public/frames/
+public/strips/
+public/uploads/
+test_clip.mp4
+tmp-*.json
+
+# experimental pages/tools
+pages/manual-anchors.tsx
+pages/manual-impact.tsx
+pages/api/
+app/api/extract-pframes/
+
+# local helper scripts (keep if you truly ship them)
+scripts/ImpactAssist.ps1
+scripts/ImpactTools.ps1
+scripts/Make-ImpactSlowmo.ps1
+scripts/Run-E2E.ps1
+scripts/Run-ImpactFrameGen.ps1
