@@ -1,3 +1,5 @@
-{
-  "framework": "nextjs"
+﻿{
+  "redirects": [
+    { "source": "/", "destination": "/upload", "permanent": false }
+  ]
 }
