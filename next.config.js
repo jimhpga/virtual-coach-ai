@@ -1,10 +1,7 @@
 ﻿/** @type {import("next").NextConfig} */
 const nextConfig = {
-  async redirects() {
-    return [
-      { source: "/", destination: "/upload", permanent: false },
-    ];
-  },
+  // IMPORTANT: do NOT use static export for this app (we need redirects + dynamic routes)
+  output: undefined,
 };
 
 module.exports = nextConfig;
