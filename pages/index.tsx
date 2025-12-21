@@ -1,6 +1,4 @@
-﻿import type { GetServerSideProps } from "next";
-
-export const getServerSideProps: GetServerSideProps = async () => {
+﻿export const getServerSideProps = async () => {
   return {
     redirect: {
       destination: "/upload",
