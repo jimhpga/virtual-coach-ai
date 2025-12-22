@@ -1,331 +1,255 @@
-﻿// pages/upload.tsx
-import { useState, ChangeEvent, FormEvent } from "react";
+import Head from "next/head";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 
 export default function UploadPage() {
   const router = useRouter();
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [playerName, setPlayerName] = useState("");
+  const eye = (router.query.eye as string) || "Right Eye";
+  const hand = (router.query.hand as string) || "Right-Handed";
+
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [club, setClub] = useState("");
-  const [handedness, setHandedness] = useState("");
   const [notes, setNotes] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
 
-  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    setFileName(file ? file.name : null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
-    // ✅ MVP: store a local preview URL for /report to play back
-    // This makes the report video preview work even before uploads are wired.
-    try {
-      if (typeof window !== "undefined") {
-        if (file) {
-          const localUrl = URL.createObjectURL(file);
-          window.sessionStorage.setItem("vca_video_preview_url", localUrl);
-        } else {
-          window.sessionStorage.removeItem("vca_video_preview_url");
-        }
-      }
-    } catch {
-      // ignore - preview is optional
-    }
+  useEffect(() => {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [file]);
+
+  const shell: React.CSSProperties = {
+    minHeight: "100vh",
+    background: "radial-gradient(1200px 800px at 20% 10%, rgba(34,197,94,0.12), transparent 60%), radial-gradient(900px 600px at 90% 20%, rgba(56,189,248,0.10), transparent 55%), #050b16",
+    color: "#e6edf6",
+    padding: "44px 22px",
+  };
+
+  const top: React.CSSProperties = { maxWidth: 1200, margin: "0 auto 18px auto" };
+  const h1: React.CSSProperties = { fontSize: 44, margin: "10px 0 8px 0", fontWeight: 900, letterSpacing: -0.8 };
+  const sub: React.CSSProperties = { opacity: 0.85, maxWidth: 840, lineHeight: 1.5 };
+
+  const row: React.CSSProperties = {
+    maxWidth: 1200,
+    margin: "22px auto 0 auto",
+    display: "grid",
+    gridTemplateColumns: "1.2fr 1fr",
+    gap: 18,
+  };
+
+  const card: React.CSSProperties = {
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.10)",
+    borderRadius: 18,
+    padding: 18,
+    boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
+    backdropFilter: "blur(10px)",
+  };
+
+  const pillRow: React.CSSProperties = { display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 };
+  const pill: React.CSSProperties = {
+    fontSize: 12,
+    borderRadius: 999,
+    padding: "6px 10px",
+    border: "1px solid rgba(34,197,94,0.35)",
+    background: "rgba(34,197,94,0.10)",
+    color: "#bff7d4",
+  };
+
+  const label: React.CSSProperties = { fontSize: 13, opacity: 0.9, marginBottom: 6 };
+  const input: React.CSSProperties = {
+    width: "100%",
+    height: 40,
+    borderRadius: 12,
+    border: "1px solid rgba(255,255,255,0.12)",
+    background: "rgba(0,0,0,0.22)",
+    color: "#e6edf6",
+    padding: "0 12px",
+    outline: "none",
+  };
+
+  const textarea: React.CSSProperties = {
+    width: "100%",
+    minHeight: 96,
+    borderRadius: 12,
+    border: "1px solid rgba(255,255,255,0.12)",
+    background: "rgba(0,0,0,0.22)",
+    color: "#e6edf6",
+    padding: "10px 12px",
+    outline: "none",
+    resize: "vertical",
+  };
+
+  const drop: React.CSSProperties = {
+    border: "1px dashed rgba(255,255,255,0.22)",
+    borderRadius: 16,
+    padding: 18,
+    textAlign: "center",
+    background: "rgba(0,0,0,0.22)",
+  };
+
+  const btn: React.CSSProperties = {
+    marginTop: 14,
+    height: 46,
+    padding: "0 18px",
+    borderRadius: 14,
+    border: "none",
+    background: "#22c55e",
+    color: "#05210f",
+    fontWeight: 900,
+    cursor: "pointer",
+    boxShadow: "0 18px 40px rgba(0,0,0,0.55)",
+  };
+
+  function onPick(f: File | null) {
+    if (!f) return;
+    setFile(f);
   }
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (submitting) return;
-
-    setSubmitting(true);
-    setError(null);
-
-    try {
-      // Build payload for the AI API.
-      const payload = {
-        name: playerName || "Player",
-        email: email || "",
-        club: club || "",
-        hand: (handedness as "right" | "left") || "right",
-        eye: "unknown" as const, // we can add a real field later
-        handicap: "1",
-        height: `6'0"`,
-        notes: notes || "",
-        fileName: fileName || "",
-      };
-
-      const res = await fetch("/api/ai-generate-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      // ✅ Read body ONCE
-      const raw = await res.text();
-      let reportJson: any = null;
-
-      try {
-        reportJson = raw ? JSON.parse(raw) : null;
-      } catch {
-        reportJson = { _raw: raw };
-      }
-
-      console.log("[VCA] ai-generate-report status:", res.status);
-      console.log("[VCA] ai-generate-report body:", reportJson);
-
-      if (!res.ok) {
-        throw new Error(
-          reportJson?.error || reportJson?._raw || "Failed to generate report."
-        );
-      }
-
-      // Store report so /report can read it
-      if (typeof window !== "undefined") {
-        window.sessionStorage.setItem(
-          "vca-last-report",
-          JSON.stringify(reportJson)
-        );
-      }
-
-      // Go to live report view
-      await router.push("/report?mode=local");
-    } catch (err: any) {
-      console.error(err);
-      setError(err?.message || "Something went wrong while building your report.");
-    } finally {
-      setSubmitting(false);
-    }
+  async function onSubmit() {
+    // MVP: route to report with basic params (backend wiring later)
+    router.push({
+      pathname: "/report",
+      query: {
+        eye,
+        hand,
+        name: name || "Player",
+        email,
+        club,
+        notes,
+      },
+    });
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50 px-4 py-10">
-      <section className="max-w-6xl mx-auto">
-        {/* TOP HEADER */}
-        <header className="mb-8">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80 mb-2">
-            VIRTUAL COACH AI
-          </p>
-          <h1 className="text-3xl md:text-4xl font-semibold mb-2">
-            Upload Your Swing
-          </h1>
-          <p className="text-sm md:text-base text-slate-300 max-w-2xl">
-            Drag in a face-on or down-the-line clip. We&apos;ll extract your P1-P9
-            checkpoints, find your top 2-3 faults, and build a simple practice plan.
-          </p>
+    <>
+     I()
+      <Head>
+        <title>Upload Your Swing | Virtual Coach AI</title>
+      </Head>
 
-          {/* BADGES */}
-          <div className="mt-4 flex flex-wrap gap-2 text-[11px]">
-            <div className="inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2" />
-              P1-P9 checkpoints
-            </div>
-            <div className="inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2" />
-              Power &amp; efficiency score
-            </div>
-            <div className="inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2" />
-              Drill prescriptions
-            </div>
-            <div className="inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-2" />
-              PDF report + email
-            </div>
+      <main style={shell}>
+        <div style={top}>
+          <div style={{ letterSpacing: 4, opacity: 0.75, fontSize: 12 }}>VIRTUAL COACH AI</div>
+          <div style={h1}>Upload Your Swing</div>
+          <div style={sub}>
+            Drag in a face-on or down-the-line clip. We&apos;ll extract your P1–P9 checkpoints, find your top 2–3 faults, and build a simple practice plan.
           </div>
-        </header>
+          <div style={pillRow}>
+            <span style={pill}>P1–P9 checkpoints</span>
+            <span style={pill}>Power &amp; efficiency score</span>
+            <span style={pill}>Drill prescriptions</span>
+            <span style={pill}>PDF report + email</span>
+          </div>
+          <div style={{ marginTop: 10, opacity: 0.75, fontSize: 12 }}>
+            <Link href="/" style={{ color: "#bfe7ff", textDecoration: "none" }}>← Back to home</Link>{" "}
+            <span style={{ marginLeft: 10 }}>|</span>{" "}
+            <span style={{ marginLeft: 10 }}>Eye: <strong>{eye}</strong> • Hand: <strong>{hand}</strong></span>
+          </div>
+        </div>
 
-        {/* MAIN GRID */}
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1.3fr)]">
-          {/* LEFT: FORM */}
-          <form
-            onSubmit={handleSubmit}
-            className="rounded-3xl border border-slate-800 bg-slate-900/70 shadow-[0_40px_120px_rgba(0,0,0,0.7)] p-6 md:p-8 space-y-5"
-          >
-            {/* File box */}
-            <div>
-              <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-300 mb-3">
-                1. Choose your swing video
-              </h2>
-              <label className="block rounded-2xl border border-dashed border-slate-600 bg-slate-900/80 px-4 py-6 cursor-pointer hover:border-emerald-400/70 hover:bg-slate-900 transition">
-                <div className="flex flex-col items-center text-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-emerald-500/15 border border-emerald-400/50 flex items-center justify-center text-emerald-300 text-xl">
-                    ^
-                  </div>
-                  <div className="text-xs text-slate-200">
-                    <span className="font-semibold">
-                      Click to browse or drag &amp; drop a video file
-                    </span>
-                    <span className="block text-[11px] text-slate-400 mt-1">
-                      MP4 / MOV recommended • Ideally 1-3 seconds from setup to finish
-                    </span>
-                  </div>
-                  <input
-                    type="file"
-                    accept="video/*"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                  {fileName && (
-                    <div className="mt-1 text-[11px] text-emerald-300">
-                      Selected: {fileName}
-                    </div>
-                  )}
-                </div>
-              </label>
-            </div>
+        <div style={row}>
+          {/* Left: form */}
+          <section style={card}>
+            <div style={{ fontWeight: 900, marginBottom: 10, opacity: 0.9 }}>1. CHOOSE YOUR SWING VIDEO</div>
 
-            {/* Player info */}
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1 text-xs">
-                <label className="text-slate-300">Your name (optional)</label>
-                <input
-                  type="text"
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="e.g. Jim H."
-                  className="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-400"
-                />
-              </div>
-              <div className="space-y-1 text-xs">
-                <label className="text-slate-300">Email for report</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-400"
-                />
-              </div>
-            </div>
+            <div style={drop}>
+              <div style={{ fontWeight: 800, marginBottom: 6 }}>Click to browse or drag &amp; drop a video file</div>
+              <div style={{ fontSize: 12, opacity: 0.75 }}>MP4 / MOV recommended • Ideally 1–3 seconds from setup to finish</div>
 
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1 text-xs">
-                <label className="text-slate-300">Club used (optional)</label>
-                <input
-                  type="text"
-                  value={club}
-                  onChange={(e) => setClub(e.target.value)}
-                  placeholder="Driver, 7 iron, etc."
-                  className="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-400"
-                />
-              </div>
-              <div className="space-y-1 text-xs">
-                <label className="text-slate-300">Handedness</label>
-                <select
-                  value={handedness}
-                  onChange={(e) => setHandedness(e.target.value)}
-                  className="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-50 focus:outline-none focus:ring-1 focus:ring-emerald-400"
-                >
-                  <option value="">Right or left-handed?</option>
-                  <option value="right">Right-handed</option>
-                  <option value="left">Left-handed</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-1 text-xs">
-              <label className="text-slate-300">
-                Anything specific you want us to look at?
-              </label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-                placeholder="e.g. Driver consistency, early extension, face control, etc."
-                className="w-full rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-400 resize-none"
+              <input
+                type="file"
+                accept="video/mp4,video/quicktime,video/*"
+                style={{ marginTop: 12 }}
+                onChange={(e) => onPick(e.target.files?.[0] || null)}
               />
             </div>
 
-            {/* Submit */}
-            <div className="pt-1 space-y-2">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full md:w-auto inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold bg-emerald-400 text-slate-950 hover:bg-emerald-300 disabled:opacity-60 disabled:cursor-not-allowed transition"
-              >
-                {submitting ? "Building your report..." : "Upload & analyze swing"}
-              </button>
-              <p className="text-[11px] text-slate-500 max-w-md">
-                Pilot phase: we&apos;ll process your swing, build your report, and
-                email you a link. No spam, no sharing.
-              </p>
-
-              {error && (
-                <p className="text-[11px] text-red-400 max-w-md">{error}</p>
-              )}
-            </div>
-          </form>
-
-          {/* RIGHT: LIVE PREVIEW / INFO */}
-          <aside className="rounded-3xl border border-slate-800 bg-slate-900/60 p-6 md:p-7 flex flex-col gap-4">
-            <div className="flex items-center justify-between gap-3">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 14 }}>
               <div>
-                <p className="text-xs font-semibold tracking-wide text-slate-300">
-                  LIVE PREVIEW
-                </p>
-                <p className="text-[11px] text-slate-500">
-                  You&apos;ll see your swing here once uploads are live.
-                </p>
+                <div style={label}>Your name (optional)</div>
+                <input style={input} value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Jim H." />
               </div>
-              <div className="px-3 py-1 rounded-full bg-slate-800 text-[11px] text-slate-300">
-                {fileName ? "File ready" : "Waiting for file..."}
+              <div>
+                <div style={label}>Email for report</div>
+                <input style={input} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+              </div>
+              <div>
+                <div style={label}>Club used (optional)</div>
+                <input style={input} value={club} onChange={(e) => setClub(e.target.value)} placeholder="Driver, 7 iron, etc." />
+              </div>
+              <div>
+                <div style={label}>Handedness</div>
+                <input style={input} value={hand} readOnly />
               </div>
             </div>
 
-            <div className="flex-1 rounded-2xl border border-slate-700 bg-slate-950/70 flex items-center justify-center px-4 py-6 text-center">
-              {!fileName ? (
-                <div className="space-y-1">
-                  <p className="text-xs font-semibold text-slate-200">
-                    No file selected yet
-                  </p>
-                  <p className="text-[11px] text-slate-400 max-w-xs mx-auto">
-                    Drop a swing video on the left and you&apos;ll see it here
-                    before we upload it.
-                  </p>
-                  <p className="text-[11px] text-slate-500 mt-2 max-w-xs mx-auto">
-                    Tip: a clean single-swing clip (setup → finish) makes analysis
-                    easier.
-                  </p>
+            <div style={{ marginTop: 12 }}>
+              <div style={label}>Anything specific you want us to look at?</div>
+              <textarea style={textarea} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="e.g. Driver consistency, early extension, face control, etc." />
+            </div>
+
+            <button style={btn} onClick={onSubmit} disabled={!file}>
+              Upload &amp; analyze swing
+            </button>
+
+            <div style={{ marginTop: 10, fontSize: 12, opacity: 0.65 }}>
+              Pilot phase: we&apos;ll process your swing, build your report, and email you a link. No spam, no sharing.
+            </div>
+          </section>
+
+          {/* Right: preview */}
+          <section style={card}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <div>
+                <div style={{ fontWeight: 900, opacity: 0.9 }}>LIVE PREVIEW</div>
+                <div style={{ fontSize: 12, opacity: 0.7 }}>You&apos;ll see your swing here once a file is selected.</div>
+              </div>
+              <div style={{ fontSize: 12, opacity: 0.8, border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, padding: "6px 10px" }}>
+                {file ? "Ready" : "Waiting for file..."}
+              </div>
+            </div>
+
+            <div style={{ borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.30)", padding: 12 }}>
+              {!previewUrl ? (
+                <div style={{ height: 340, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", opacity: 0.65, padding: 18 }}>
+                  <div>
+                    <div style={{ fontWeight: 800, marginBottom: 6 }}>No file selected yet</div>
+                    <div style={{ fontSize: 12, lineHeight: 1.4 }}>
+                      Drop a swing video on the left and you&apos;ll see it here before we upload it.
+                      <br />
+                      Tip: a clean single-swing clip (setup → finish) makes analysis easier.
+                    </div>
+                  </div>
                 </div>
               ) : (
-                <div className="space-y-1">
-                  <p className="text-xs font-semibold text-slate-200">
-                    Preview placeholder
-                  </p>
-                  <p className="text-[11px] text-slate-400 max-w-xs mx-auto">
-                    In the full version, this panel will show a frame from your
-                    uploaded swing and basic tracking info.
-                  </p>
-                </div>
+                <video
+                  ref={videoRef}
+                  src={previewUrl}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  style={{ width: "100%", height: 340, objectFit: "contain", borderRadius: 12, background: "#000" }}
+                />
               )}
             </div>
 
-            <div className="border-t border-slate-800 pt-3 mt-2">
-              <h3 className="text-xs font-semibold text-slate-300 mb-1">
-                What happens next?
-              </h3>
-              <ol className="space-y-1 text-[11px] text-slate-400">
-                <li>1. We upload and store your swing securely.</li>
-                <li>2. AI extracts your P1-P9 positions and core metrics.</li>
-                <li>3. We score your swing and flag the top 2-3 faults.</li>
-                <li>4. You get a drill-based plan to fix them.</li>
-              </ol>
-              <p className="text-[11px] text-slate-500 mt-3">
-                In this demo, the flow jumps straight to a live AI report. When the
-                full engine is wired to video, this same page will power full analyses.
-              </p>
+            <div style={{ marginTop: 14, borderTop: "1px solid rgba(255,255,255,0.10)", paddingTop: 12, fontSize: 12, opacity: 0.75, lineHeight: 1.6 }}>
+              <div style={{ fontWeight: 900, opacity: 0.9, marginBottom: 6 }}>What happens next?</div>
+              <div>1. We upload and store your swing securely.</div>
+              <div>2. AI extracts your P1–P9 positions and core metrics.</div>
+              <div>3. We score your swing and flag the top 2–3 faults.</div>
+              <div>4. You get a drill-based plan to fix them.</div>
             </div>
-          </aside>
+          </section>
         </div>
-      </section>
-    </main>
+      </main>
+    </>
   );
 }
-
-
-
-
-
-
-
-
