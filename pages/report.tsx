@@ -1,176 +1,174 @@
-﻿import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-
-// type ReportJson here should match what we returned from the API
-type ReportJson = {
-  ok: boolean;
-  profile: {
-    name: string;
-    hand: string;
-    eye: string;
-    handicap: string;
-    height: string;
-  };
-  report: {
-    meta: { playerName: string; generatedAt: string; notes: string };
-    summary: { headline: string; bullets: string[] };
-    scores: {
-      swing: { grade: string; label: string };
-      power: { grade: string; label: string };
-      reliability: { grade: string; label: string };
-    };
-  };
-};
+import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function ReportPage() {
   const router = useRouter();
-  const { mode, report: reportParam } = router.query;
+  const name = (router.query.name as string) || "Player";
+  const eye = (router.query.eye as string) || "Right Eye";
+  const hand = (router.query.hand as string) || "Right-Handed";
+  const club = (router.query.club as string) || "";
+  const notes = (router.query.notes as string) || "";
 
-  const [data, setData] = useState<ReportJson | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const shell: React.CSSProperties = {
+    minHeight: "100vh",
+    background: "radial-gradient(1100px 700px at 30% 10%, rgba(34,197,94,0.10), transparent 60%), radial-gradient(900px 600px at 90% 10%, rgba(59,130,246,0.10), transparent 55%), #050b16",
+    color: "#e6edf6",
+    padding: "26px 18px 60px",
+  };
 
-  // MVP: if upload page stored a local preview, show it here
-  useEffect(() => {
-    try {
-      const url = window.sessionStorage.getItem("vca_video_preview_url");
-      if (!url) return;
+  const max: React.CSSProperties = { maxWidth: 1200, margin: "0 auto" };
 
-      const v = document.getElementById("vid") as HTMLVideoElement | null;
-      if (!v) return;
+  const topbar: React.CSSProperties = {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 14,
+  };
 
-      const fb = document.getElementById("vidFallback");
-      if (fb) fb.style.display = "none";
+  const card: React.CSSProperties = {
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.10)",
+    borderRadius: 18,
+    padding: 16,
+    boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
+    backdropFilter: "blur(10px)",
+  };
 
-      v.src = url;
-      v.style.display = "block";
-      v.load();
-    } catch {
-      // silent by design (preview is optional)
-    }
-  }, []);
+  const grid: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "1.2fr 1fr",
+    gap: 14,
+  };
 
-  useEffect(() => {
-    // Wait until router is ready so query params are stable
-    if (!router.isReady) return;
+  const chip: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 8,
+    fontSize: 12,
+    padding: "6px 10px",
+    borderRadius: 999,
+    border: "1px solid rgba(255,255,255,0.12)",
+    background: "rgba(0,0,0,0.22)",
+    opacity: 0.9,
+  };
 
-    // Case 1: new AI report stored locally
-    if (mode === "local") {
-      try {
-        const raw =
-          typeof window !== "undefined"
-            ? window.sessionStorage.getItem("vca-last-report")
-            : null;
-
-        if (!raw) {
-          setError("No local report found. Please upload a swing first.");
-          return;
-        }
-
-        const json = JSON.parse(raw) as ReportJson;
-        setData(json);
-      } catch (err) {
-        console.error(err);
-        setError("Could not load local report.");
-      }
-      return;
-    }
-
-    // Case 2: existing behavior — static JSON path, e.g. reports/demo/report.json
-    if (typeof reportParam === "string" && reportParam.length) {
-      fetch("/" + reportParam)
-        .then((res) => res.json())
-        .then((json) => setData(json as ReportJson))
-        .catch((err) => {
-          console.error(err);
-          setError("Could not load report.");
-        });
-      return;
-    }
-
-    // If neither mode is used, just sit on loading state (or show a helpful message)
-    // You can optionally set an error here if you want.
-  }, [router.isReady, mode, reportParam]);
-
-  if (error) {
-    return (
-      <main className="min-h-screen bg-slate-950 text-slate-50 p-8">
-        <p className="text-red-400 text-sm">{error}</p>
-      </main>
-    );
-  }
-
-  if (!data) {
-    return (
-      <main className="min-h-screen bg-slate-950 text-slate-50 p-8">
-        <p className="text-slate-300 text-sm">Loading report...</p>
-      </main>
-    );
-  }
+  const btn: React.CSSProperties = {
+    height: 34,
+    padding: "0 12px",
+    borderRadius: 10,
+    border: "1px solid rgba(255,255,255,0.12)",
+    background: "rgba(0,0,0,0.22)",
+    color: "#e6edf6",
+    textDecoration: "none",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: 800,
+  };
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50 p-8">
-      {/* Swing video (MVP local preview) */}
-      <div
-        style={{
-          margin: "16px 0",
-          padding: 16,
-          border: "1px solid rgba(255,255,255,0.12)",
-          borderRadius: 12,
-          background: "rgba(0,0,0,0.25)",
-        }}
-      >
-        <h2 style={{ margin: "0 0 10px 0" }}>Swing video</h2>
-        <video
-          id="vid"
-          controls
-          playsInline
-          preload="metadata"
-          style={{
-            width: "100%",
-            borderRadius: 12,
-            background: "#000",
-            display: "none",
-          }}
-        />
-        <div id="vidFallback" style={{ padding: 10, opacity: 0.75 }}>
-          No video attached (yet). Upload a swing to preview it here.
+    <>
+      <Head>
+        <title>Report | Virtual Coach AI</title>
+      </Head>
+
+      <main style={shell}>
+        <div style={max}>
+          <div style={topbar}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(34,197,94,0.22)", border: "1px solid rgba(34,197,94,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900 }}>VC</div>
+              <div>
+                <div style={{ fontWeight: 900 }}>VIRTUAL COACH AI</div>
+                <div style={{ fontSize: 12, opacity: 0.75 }}>Tour-level swing feedback from a single upload</div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <Link href="/" style={btn}>← Back to home</Link>
+              <Link href="/upload" style={btn}>Upload another swing</Link>
+              <a href="#" onClick={(e) => { e.preventDefault(); window.print(); }} style={{ ...btn, background: "rgba(34,197,94,0.14)", borderColor: "rgba(34,197,94,0.35)" }}>
+                Print report
+              </a>
+            </div>
+          </div>
+
+          <div style={grid}>
+            {/* Summary / scores */}
+            <section style={card}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+                <div>
+                  <div style={{ fontSize: 12, letterSpacing: 3, opacity: 0.7 }}>PLAYER OVERVIEW</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, marginTop: 6 }}>{name}</div>
+                  <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <span style={chip}>{hand}</span>
+                    <span style={chip}>{eye}</span>
+                    {club ? <span style={chip}>{club}</span> : null}
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 12, opacity: 0.7 }}>Swing Score</div>
+                  <div style={{ fontSize: 34, fontWeight: 1000 }}>A-</div>
+                  <div style={{ fontSize: 12, opacity: 0.7 }}>Demo score (wiring next)</div>
+                </div>
+              </div>
+
+              {notes ? (
+                <div style={{ marginTop: 12, fontSize: 12, opacity: 0.8 }}>
+                  <strong>Focus request:</strong> {notes}
+                </div>
+              ) : null}
+
+              <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                {["Speed", "Control", "Consistency"].map((k) => (
+                  <div key={k} style={{ padding: 12, borderRadius: 14, border: "1px solid rgba(255,255,255,0.10)", background: "rgba(0,0,0,0.18)" }}>
+                    <div style={{ fontSize: 12, opacity: 0.7 }}>{k}</div>
+                    <div style={{ fontSize: 18, fontWeight: 900, marginTop: 6 }}>B+</div>
+                    <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,0.10)", marginTop: 10, overflow: "hidden" }}>
+                      <div style={{ width: "72%", height: "100%", background: "rgba(34,197,94,0.65)" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* VIDEO WINDOW (we keep this) */}
+            <section style={card}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                <div>
+                  <div style={{ fontWeight: 900, opacity: 0.9 }}>SWING VIDEO</div>
+                  <div style={{ fontSize: 12, opacity: 0.7 }}>Video window stays here. Wiring to upload next.</div>
+                </div>
+                <div style={{ fontSize: 12, opacity: 0.8, border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, padding: "6px 10px" }}>
+                  Coming soon
+                </div>
+              </div>
+
+              <div style={{ height: 320, borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.30)", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 16 }}>
+                <div style={{ opacity: 0.7 }}>
+                  <div style={{ fontWeight: 900, marginBottom: 6 }}>Video preview / playback</div>
+                  <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+                    Next step: pass a stored video URL into this panel and sync P1–P9 thumbnails.
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 12, fontSize: 12, opacity: 0.75, lineHeight: 1.5 }}>
+                This is where we’ll put the **impact-centered, short, never-cuts-downswing** clip (your north star).
+              </div>
+            </section>
+          </div>
+
+          {/* P1–P9 placeholder (we’ll plug your pixel-identical layout back in) */}
+          <section style={{ ...card, marginTop: 14 }}>
+            <div style={{ fontWeight: 900, marginBottom: 10 }}>P1–P9 CHECKPOINTS</div>
+            <div style={{ opacity: 0.75, fontSize: 12 }}>
+              Tomorrow: we restore your exact report layout + drill blocks and keep this page as the single source of truth.
+            </div>
+          </section>
         </div>
-      </div>
-
-      {/* ===== From here down: keep your existing beautiful report layout ===== */}
-      {/* Example usage:
-          data.report.summary.headline
-          data.report.summary.bullets
-          data.report.scores.swing.grade
-      */}
-
-      <section style={{ marginTop: 16 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700 }}>
-          {data.report.summary.headline}
-        </h1>
-        <ul style={{ marginTop: 10, paddingLeft: 18, opacity: 0.9 }}>
-          {data.report.summary.bullets.map((b, i) => (
-            <li key={i} style={{ marginBottom: 6 }}>
-              {b}
-            </li>
-          ))}
-        </ul>
-
-        <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
-          <div>
-            <strong>Swing:</strong> {data.report.scores.swing.grade} —{" "}
-            {data.report.scores.swing.label}
-          </div>
-          <div>
-            <strong>Power:</strong> {data.report.scores.power.grade} —{" "}
-            {data.report.scores.power.label}
-          </div>
-          <div>
-            <strong>Reliability:</strong> {data.report.scores.reliability.grade} —{" "}
-            {data.report.scores.reliability.label}
-          </div>
-        </div>
-      </section>
-    </main>
+      </main>
+    </>
   );
 }
