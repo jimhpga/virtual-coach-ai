@@ -1,9 +1,21 @@
+﻿import { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-
 export default function ReportPage() {
   const router = useRouter();
+
+  // --- VCA MVP: bring chosen upload preview into report via sessionStorage ---
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        setPreviewUrl(sessionStorage.getItem("vca_previewUrl"));
+      }
+    } catch {}
+  }, []);
+
   const name = (router.query.name as string) || "Player";
   const eye = (router.query.eye as string) || "Right Eye";
   const hand = (router.query.hand as string) || "Right-Handed";
@@ -86,7 +98,7 @@ export default function ReportPage() {
             </div>
 
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <Link href="/" style={btn}>← Back to home</Link>
+              <Link href="/" style={btn}>â† Back to home</Link>
               <Link href="/upload" style={btn}>Upload another swing</Link>
               <a href="#" onClick={(e) => { e.preventDefault(); window.print(); }} style={{ ...btn, background: "rgba(34,197,94,0.14)", borderColor: "rgba(34,197,94,0.35)" }}>
                 Print report
@@ -147,22 +159,33 @@ export default function ReportPage() {
 
               <div style={{ height: 320, borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.30)", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 16 }}>
                 <div style={{ opacity: 0.7 }}>
-                  <div style={{ fontWeight: 900, marginBottom: 6 }}>Video preview / playback</div>
+                  <div style={{ fontWeight: 900, marginBottom: 6 }}>{previewUrl && (
+  <div style={{ height: 360, borderRadius: 16, overflow: "hidden", background: "#000" }}>
+    <video
+      src={previewUrl}
+      controls
+      playsInline
+      preload="metadata"
+      style={{ width: "100%", height: "100%", display: "block" }}
+    />
+  </div>
+)}
+Video preview / playback</div>
                   <div style={{ fontSize: 12, lineHeight: 1.5 }}>
-                    Next step: pass a stored video URL into this panel and sync P1–P9 thumbnails.
+                    Next step: pass a stored video URL into this panel and sync P1â€“P9 thumbnails.
                   </div>
                 </div>
               </div>
 
               <div style={{ marginTop: 12, fontSize: 12, opacity: 0.75, lineHeight: 1.5 }}>
-                This is where we’ll put the **impact-centered, short, never-cuts-downswing** clip (your north star).
+                This is where weâ€™ll put the **impact-centered, short, never-cuts-downswing** clip (your north star).
               </div>
             </section>
           </div>
 
-          {/* P1–P9 placeholder (we’ll plug your pixel-identical layout back in) */}
+          {/* P1â€“P9 placeholder (weâ€™ll plug your pixel-identical layout back in) */}
           <section style={{ ...card, marginTop: 14 }}>
-            <div style={{ fontWeight: 900, marginBottom: 10 }}>P1–P9 CHECKPOINTS</div>
+            <div style={{ fontWeight: 900, marginBottom: 10 }}>P1â€“P9 CHECKPOINTS</div>
             <div style={{ opacity: 0.75, fontSize: 12 }}>
               Tomorrow: we restore your exact report layout + drill blocks and keep this page as the single source of truth.
             </div>
@@ -172,3 +195,6 @@ export default function ReportPage() {
     </>
   );
 }
+
+
+

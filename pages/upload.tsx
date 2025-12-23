@@ -1,4 +1,4 @@
-import Head from "next/head";
+﻿import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
@@ -107,13 +107,38 @@ export default function UploadPage() {
     boxShadow: "0 18px 40px rgba(0,0,0,0.55)",
   };
 
-  function onPick(f: File | null) {
+    function onPick(f: File | null) {
     if (!f) return;
+
+    // Revoke old blob URL (if any) before making a new one
+    try {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    } catch {}
+
     setFile(f);
+
+    // Create a local preview URL for the video element
+    const url = URL.createObjectURL(f);
+    setPreviewUrl(url);
+
+    // If a <video> already exists, reload it to show the new file immediately
+    try {
+      if (videoRef.current) {
+        videoRef.current.load();
+      }
+    } catch {}
   }
 
   async function onSubmit() {
-    // MVP: route to report with basic params (backend wiring later)
+    
+    // --- VCA MVP: carry selected preview video into /report ---
+    try {
+      if (typeof window !== "undefined" && previewUrl) {
+        sessionStorage.setItem("vca_previewUrl", previewUrl);
+      }
+    } catch {}
+
+// MVP: route to report with basic params (backend wiring later)
     router.push({
       pathname: "/report",
       query: {
@@ -139,18 +164,18 @@ export default function UploadPage() {
           <div style={{ letterSpacing: 4, opacity: 0.75, fontSize: 12 }}>VIRTUAL COACH AI</div>
           <div style={h1}>Upload Your Swing</div>
           <div style={sub}>
-            Drag in a face-on or down-the-line clip. We&apos;ll extract your P1–P9 checkpoints, find your top 2–3 faults, and build a simple practice plan.
+            Drag in a face-on or down-the-line clip. We&apos;ll extract your P1â€“P9 checkpoints, find your top 2â€“3 faults, and build a simple practice plan.
           </div>
           <div style={pillRow}>
-            <span style={pill}>P1–P9 checkpoints</span>
+            <span style={pill}>P1â€“P9 checkpoints</span>
             <span style={pill}>Power &amp; efficiency score</span>
             <span style={pill}>Drill prescriptions</span>
             <span style={pill}>PDF report + email</span>
           </div>
           <div style={{ marginTop: 10, opacity: 0.75, fontSize: 12 }}>
-            <Link href="/" style={{ color: "#bfe7ff", textDecoration: "none" }}>← Back to home</Link>{" "}
+            <Link href="/" style={{ color: "#bfe7ff", textDecoration: "none" }}>â† Back to home</Link>{" "}
             <span style={{ marginLeft: 10 }}>|</span>{" "}
-            <span style={{ marginLeft: 10 }}>Eye: <strong>{eye}</strong> • Hand: <strong>{hand}</strong></span>
+            <span style={{ marginLeft: 10 }}>Eye: <strong>{eye}</strong> â€¢ Hand: <strong>{hand}</strong></span>
           </div>
         </div>
 
@@ -161,7 +186,7 @@ export default function UploadPage() {
 
             <div style={drop}>
               <div style={{ fontWeight: 800, marginBottom: 6 }}>Click to browse or drag &amp; drop a video file</div>
-              <div style={{ fontSize: 12, opacity: 0.75 }}>MP4 / MOV recommended • Ideally 1–3 seconds from setup to finish</div>
+              <div style={{ fontSize: 12, opacity: 0.75 }}>MP4 / MOV recommended â€¢ Ideally 1â€“3 seconds from setup to finish</div>
 
               <input
                 type="file"
@@ -217,34 +242,44 @@ export default function UploadPage() {
             </div>
 
             <div style={{ borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.30)", padding: 12 }}>
-              {!previewUrl ? (
-                <div style={{ height: 340, display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", opacity: 0.65, padding: 18 }}>
-                  <div>
-                    <div style={{ fontWeight: 800, marginBottom: 6 }}>No file selected yet</div>
-                    <div style={{ fontSize: 12, lineHeight: 1.4 }}>
-                      Drop a swing video on the left and you&apos;ll see it here before we upload it.
-                      <br />
-                      Tip: a clean single-swing clip (setup → finish) makes analysis easier.
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <video
-                  ref={videoRef}
-                  src={previewUrl}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  style={{ width: "100%", height: 340, objectFit: "contain", borderRadius: 12, background: "#000" }}
-                />
-              )}
+{!previewUrl ? (
+  <div
+    style={{
+      height: 340,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
+      opacity: 0.65,
+      padding: 18,
+    }}
+  >
+    <div>
+      <div style={{ fontWeight: 800, marginBottom: 6 }}>No file selected yet</div>
+      <div style={{ fontSize: 12, lineHeight: 1.4 }}>
+        Drop a swing video on the left and you&apos;ll see it here before we upload it.
+        <br />
+        Tip: a clean single-swing clip (setup → finish) makes analysis easier.
+      </div>
+    </div>
+  </div>
+) : (
+  <video
+    ref={videoRef}
+    src={previewUrl}
+    controls
+    playsInline
+    preload="metadata"
+    style={{ width: "100%", height: 340, borderRadius: 12, background: "#000" }}
+  />
+)}
             </div>
 
             <div style={{ marginTop: 14, borderTop: "1px solid rgba(255,255,255,0.10)", paddingTop: 12, fontSize: 12, opacity: 0.75, lineHeight: 1.6 }}>
               <div style={{ fontWeight: 900, opacity: 0.9, marginBottom: 6 }}>What happens next?</div>
               <div>1. We upload and store your swing securely.</div>
-              <div>2. AI extracts your P1–P9 positions and core metrics.</div>
-              <div>3. We score your swing and flag the top 2–3 faults.</div>
+              <div>2. AI extracts your P1â€“P9 positions and core metrics.</div>
+              <div>3. We score your swing and flag the top 2â€“3 faults.</div>
               <div>4. You get a drill-based plan to fix them.</div>
             </div>
           </section>
@@ -253,3 +288,6 @@ export default function UploadPage() {
     </>
   );
 }
+
+
+
