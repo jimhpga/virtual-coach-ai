@@ -11,7 +11,11 @@ export default function ReportPage() {
   // --- VCA MVP: bring chosen upload preview into report via sessionStorage ---
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  // --- MVP fake AI payload (from public/mvp-report.json) ---
+useEffect(() => {
+  // Demo fallback so the report never looks empty
+  if (!previewUrl) setPreviewUrl("/test_clip.mp4");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);// --- MVP fake AI payload (from public/mvp-report.json) ---
   const [mvpReport, setMvpReport] = useState<any>(null);useEffect(() => {
   try {
     if (typeof window === "undefined") return;
@@ -315,6 +319,7 @@ export default function ReportPage() {
     </>
   );
 }
+
 
 
 
