@@ -2,6 +2,8 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import Disclosure from "@/components/Disclosure";
+
 export default function ReportPage() {
   const router = useRouter();
 
@@ -24,7 +26,8 @@ export default function ReportPage() {
 
   const shell: React.CSSProperties = {
     minHeight: "100vh",
-    background: "radial-gradient(1100px 700px at 30% 10%, rgba(34,197,94,0.10), transparent 60%), radial-gradient(900px 600px at 90% 10%, rgba(59,130,246,0.10), transparent 55%), #050b16",
+    background:
+      "radial-gradient(1100px 700px at 30% 10%, rgba(34,197,94,0.10), transparent 60%), radial-gradient(900px 600px at 90% 10%, rgba(59,130,246,0.10), transparent 55%), #050b16",
     color: "#e6edf6",
     padding: "26px 18px 60px",
   };
@@ -37,6 +40,7 @@ export default function ReportPage() {
     alignItems: "center",
     gap: 12,
     marginBottom: 14,
+    flexWrap: "wrap",
   };
 
   const card: React.CSSProperties = {
@@ -78,6 +82,8 @@ export default function ReportPage() {
     alignItems: "center",
     justifyContent: "center",
     fontWeight: 800,
+    cursor: "pointer",
+    whiteSpace: "nowrap",
   };
 
   return (
@@ -90,17 +96,44 @@ export default function ReportPage() {
         <div style={max}>
           <div style={topbar}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(34,197,94,0.22)", border: "1px solid rgba(34,197,94,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900 }}>VC</div>
+              <div
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 10,
+                  background: "rgba(34,197,94,0.22)",
+                  border: "1px solid rgba(34,197,94,0.35)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 900,
+                }}
+              >
+                VC
+              </div>
               <div>
                 <div style={{ fontWeight: 900 }}>VIRTUAL COACH AI</div>
-                <div style={{ fontSize: 12, opacity: 0.75 }}>Tour-level swing feedback from a single upload</div>
+                <div style={{ fontSize: 12, opacity: 0.75 }}>
+                  Tour-level swing feedback from a single upload
+                </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <Link href="/" style={btn}>â† Back to home</Link>
-              <Link href="/upload" style={btn}>Upload another swing</Link>
-              <a href="#" onClick={(e) => { e.preventDefault(); window.print(); }} style={{ ...btn, background: "rgba(34,197,94,0.14)", borderColor: "rgba(34,197,94,0.35)" }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <Link href="/" style={btn}>
+                ← Back to home
+              </Link>
+              <Link href="/upload" style={btn}>
+                Upload another swing
+              </Link>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.print();
+                }}
+                style={{ ...btn, background: "rgba(34,197,94,0.14)", borderColor: "rgba(34,197,94,0.35)" }}
+              >
                 Print report
               </a>
             </div>
@@ -119,6 +152,7 @@ export default function ReportPage() {
                     {club ? <span style={chip}>{club}</span> : null}
                   </div>
                 </div>
+
                 <div style={{ textAlign: "right" }}>
                   <div style={{ fontSize: 12, opacity: 0.7 }}>Swing Score</div>
                   <div style={{ fontSize: 34, fontWeight: 1000 }}>A-</div>
@@ -134,10 +168,26 @@ export default function ReportPage() {
 
               <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
                 {["Speed", "Control", "Consistency"].map((k) => (
-                  <div key={k} style={{ padding: 12, borderRadius: 14, border: "1px solid rgba(255,255,255,0.10)", background: "rgba(0,0,0,0.18)" }}>
+                  <div
+                    key={k}
+                    style={{
+                      padding: 12,
+                      borderRadius: 14,
+                      border: "1px solid rgba(255,255,255,0.10)",
+                      background: "rgba(0,0,0,0.18)",
+                    }}
+                  >
                     <div style={{ fontSize: 12, opacity: 0.7 }}>{k}</div>
                     <div style={{ fontSize: 18, fontWeight: 900, marginTop: 6 }}>B+</div>
-                    <div style={{ height: 8, borderRadius: 999, background: "rgba(255,255,255,0.10)", marginTop: 10, overflow: "hidden" }}>
+                    <div
+                      style={{
+                        height: 8,
+                        borderRadius: 999,
+                        background: "rgba(255,255,255,0.10)",
+                        marginTop: 10,
+                        overflow: "hidden",
+                      }}
+                    >
                       <div style={{ width: "72%", height: "100%", background: "rgba(34,197,94,0.65)" }} />
                     </div>
                   </div>
@@ -150,51 +200,84 @@ export default function ReportPage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                 <div>
                   <div style={{ fontWeight: 900, opacity: 0.9 }}>SWING VIDEO</div>
-                  <div style={{ fontSize: 12, opacity: 0.7 }}>Video window stays here. Wiring to upload next.</div>
-                </div>
-                <div style={{ fontSize: 12, opacity: 0.8, border: "1px solid rgba(255,255,255,0.12)", borderRadius: 999, padding: "6px 10px" }}>
-                  Coming soon
-                </div>
-              </div>
-
-              <div style={{ height: 320, borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.30)", display: "flex", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 16 }}>
-                <div style={{ opacity: 0.7 }}>
-                  <div style={{ fontWeight: 900, marginBottom: 6 }}>{previewUrl && (
-  <div style={{ height: 360, borderRadius: 16, overflow: "hidden", background: "#000" }}>
-    <video
-      src={previewUrl}
-      controls
-      playsInline
-      preload="metadata"
-      style={{ width: "100%", height: "100%", display: "block" }}
-    />
-  </div>
-)}
-Video preview / playback</div>
-                  <div style={{ fontSize: 12, lineHeight: 1.5 }}>
-                    Next step: pass a stored video URL into this panel and sync P1â€“P9 thumbnails.
+                  <div style={{ fontSize: 12, opacity: 0.7 }}>
+                    Video window stays here. Wiring to upload next.
                   </div>
                 </div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    opacity: 0.8,
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    borderRadius: 999,
+                    padding: "6px 10px",
+                  }}
+                >
+                  MVP
+                </div>
               </div>
 
+              {/* If we have previewUrl, show video. Otherwise show clean placeholder. */}
+              {previewUrl ? (
+                <div style={{ height: 360, borderRadius: 16, overflow: "hidden", background: "#000", border: "1px solid rgba(255,255,255,0.12)" }}>
+                  <video
+                    src={previewUrl}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    style={{ width: "100%", height: "100%", display: "block" }}
+                  />
+                </div>
+              ) : (
+                <div
+                  style={{
+                    height: 360,
+                    borderRadius: 16,
+                    border: "1px solid rgba(255,255,255,0.12)",
+                    background: "rgba(0,0,0,0.30)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    padding: 16,
+                  }}
+                >
+                  <div style={{ opacity: 0.75 }}>
+                    <div style={{ fontWeight: 900, marginBottom: 6 }}>No video attached (yet)</div>
+                    <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+                      Upload a swing to preview it here. Next: replace this local preview with Mux playback and P1–P9 sync.
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div style={{ marginTop: 12, fontSize: 12, opacity: 0.75, lineHeight: 1.5 }}>
-                This is where weâ€™ll put the **impact-centered, short, never-cuts-downswing** clip (your north star).
+                This is where we’ll put the <strong>impact-centered, short, never-cuts-downswing</strong> clip (your north star).
               </div>
             </section>
           </div>
 
-          {/* P1â€“P9 placeholder (weâ€™ll plug your pixel-identical layout back in) */}
-          <section style={{ ...card, marginTop: 14 }}>
-            <div style={{ fontWeight: 900, marginBottom: 10 }}>P1â€“P9 CHECKPOINTS</div>
-            <div style={{ opacity: 0.75, fontSize: 12 }}>
-              Tomorrow: we restore your exact report layout + drill blocks and keep this page as the single source of truth.
-            </div>
-          </section>
+          {/* Apple-style collapsed section */}
+          <div style={{ marginTop: 14 }}>
+            <Disclosure
+              title="P1–P9 Checkpoints"
+              subtitle="Tap to expand. We’ll keep details tucked away unless you ask."
+              defaultOpen={false}
+              persistKey="report_p1p9"
+            >
+              <div style={{ fontSize: 12, opacity: 0.85, lineHeight: 1.6 }}>
+                <div style={{ fontWeight: 900, marginBottom: 6 }}>Coming next</div>
+                <ul style={{ margin: 0, paddingLeft: 18 }}>
+                  <li>Restore your pixel-identical layout inside this dropdown</li>
+                  <li>One checkpoint open at a time (Apple-style)</li>
+                  <li>Nested dropdowns for “AI Notes”, “Need more info”, and “Key Drills”</li>
+                  <li>Sync P1–P9 thumbnails to the impact-centered clip</li>
+                </ul>
+              </div>
+            </Disclosure>
+          </div>
         </div>
       </main>
     </>
   );
 }
-
-
-
