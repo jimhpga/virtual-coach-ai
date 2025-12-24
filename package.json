@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@mux/mux-node": "^12.8.1",
+        "@mux/mux-player-react": "^3.10.2",
         "next": "^16.0.10",
         "openai": "^6.10.0",
         "react": "^19.2.3",
