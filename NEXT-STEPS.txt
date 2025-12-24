@@ -1,0 +1,8 @@
+﻿NEXT STEPS (do NOT touch today):
+
+1) Replace local preview with Mux playbackId
+2) Wire /api/analyze (stub first, AI later)
+3) Populate P1–P9 Disclosure with real data
+4) Add AI voice + drill cards LAST
+
+This commit = SAFE BASELINE.
