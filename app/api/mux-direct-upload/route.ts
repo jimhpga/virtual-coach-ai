@@ -3,23 +3,33 @@
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const mux = new Mux({
-  tokenId: process.env.MUX_TOKEN_ID!,
-  tokenSecret: process.env.MUX_TOKEN_SECRET!,
-});
-
 export async function POST() {
-  const upload = await mux.video.uploads.create({
-    cors_origin: "https://virtualcoachai.net",
-    new_asset_settings: {
-      playback_policy: ["public"],
-      mp4_support: "standard",
-    },
-  });
+  try {
+    const tokenId = process.env.MUX_TOKEN_ID;
+    const tokenSecret = process.env.MUX_TOKEN_SECRET;
 
-  return Response.json({
-    ok: true,
-    uploadId: upload.id,
-    uploadUrl: upload.url,
-  });
+    if (!tokenId || !tokenSecret) {
+      return Response.json(
+        { ok: false, error: "Missing MUX_TOKEN_ID or MUX_TOKEN_SECRET on server" },
+        { status: 500 }
+      );
+    }
+
+    const mux = new Mux({ tokenId, tokenSecret });
+
+    const upload = await mux.video.uploads.create({
+      cors_origin: "https://virtualcoachai.net",
+      new_asset_settings: {
+        playback_policy: ["public"],
+        mp4_support: "standard",
+      },
+    });
+
+    return Response.json({ ok: true, uploadId: upload.id, uploadUrl: upload.url });
+  } catch (e: any) {
+    return Response.json(
+      { ok: false, error: e?.message || String(e) },
+      { status: 500 }
+    );
+  }
 }
