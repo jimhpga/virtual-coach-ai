@@ -55,3 +55,5 @@ scripts/Run-E2E.ps1
 scripts/Run-ImpactFrameGen.ps1
 
 Backup-VCA.ps1
+# local backups
+*.bak-*
