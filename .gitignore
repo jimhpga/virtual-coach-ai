@@ -1,59 +1,25 @@
-﻿# Next.js
-.next/
-out/
-.turbo/
-
-# deps
+﻿# dependencies
 node_modules/
 
-# Vercel local
-.vercel/
+# Next.js
+.next/
+out/
 
-# env
-.env*
-!.env.example
-
-# local artifacts
-public/uploads/
-public/frames/
-public/clips/
+# local env
+.env*.local
+.env
 
 # logs
 npm-debug.log*
 yarn-debug.log*
+yarn-error.log*
 pnpm-debug.log*
 
 # OS / editor
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
 
-# backups / scratch
-*.bak
-*.bak_*
-*.BAK_*
-*.STABLE_*
-tmp-*.json
-
-# local dev artifacts
-public/frames/
-public/strips/
-public/uploads/
-test_clip.mp4
-tmp-*.json
-
-# experimental pages/tools
-pages/manual-anchors.tsx
-pages/manual-impact.tsx
-pages/api/
-app/api/extract-pframes/
-
-# local helper scripts (keep if you truly ship them)
-scripts/ImpactAssist.ps1
-scripts/ImpactTools.ps1
-scripts/Make-ImpactSlowmo.ps1
-scripts/Run-E2E.ps1
-scripts/Run-ImpactFrameGen.ps1
-
-Backup-VCA.ps1
 # local backups
 *.bak-*
