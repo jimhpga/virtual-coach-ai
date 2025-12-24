@@ -23,3 +23,33 @@ Thumbs.db
 
 # local backups
 *.bak-*
+
+# ---- DO NOT COMMIT (local/dev artifacts) ----
+.vercel/
+tmp-*/
+tmp*.json
+*.tmp
+
+# local backups (your existing patterns + extras)
+*.bak
+*.bak_*
+*.bak-*
+*.BAK_*
+*.STABLE_*
+*.backup
+*.old
+*.orig
+
+# generated media / local test artifacts
+public/uploads/
+public/frames/
+public/strips/
+public/clips/
+public/test_clip.mp4
+test_clip.mp4
+
+# local scripts backups
+scripts/*.bak
+scripts/*.BAK_*
+scripts/*.STABLE_*
+
