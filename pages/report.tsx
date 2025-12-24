@@ -10,7 +10,9 @@ export default function ReportPage() {
 
   // --- VCA MVP: bring chosen upload preview into report via sessionStorage ---
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-useEffect(() => {
+
+  // --- MVP fake AI payload (from public/mvp-report.json) ---
+  const [mvpReport, setMvpReport] = useState<any>(null);useEffect(() => {
   try {
     if (typeof window === "undefined") return;
 
@@ -275,21 +277,45 @@ useEffect(() => {
               persistKey="report_p1p9"
             >
               <div style={{ fontSize: 12, opacity: 0.85, lineHeight: 1.6 }}>
-                <div style={{ fontWeight: 900, marginBottom: 6 }}>Coming next</div>
-                <ul style={{ margin: 0, paddingLeft: 18 }}>
-                  <li>Restore your pixel-identical layout inside this dropdown</li>
-                  <li>One checkpoint open at a time (Apple-style)</li>
-                  <li>Nested dropdowns for “AI Notes”, “Need more info”, and “Key Drills”</li>
-                  <li>Sync P1–P9 thumbnails to the impact-centered clip</li>
-                </ul>
-              </div>
-            </Disclosure>
+  <div style={{ fontWeight: 900, marginBottom: 6 }}>MVP AI Preview (stub)</div>
+
+  {!mvpReport ? (
+    <div style={{ opacity: 0.75 }}>Loading stub report…</div>
+  ) : (
+    <>
+      <div style={{ marginBottom: 10 }}>
+        <div><strong>Top faults:</strong></div>
+        <ul style={{ margin: "6px 0 0 0", paddingLeft: 18 }}>
+          {mvpReport.topFaults?.slice(0, 3).map((t: string, i: number) => (
+            <li key={i}>{t}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div style={{ marginTop: 10 }}>
+        <div><strong>Priority drill:</strong> {mvpReport.priorityFix?.title}</div>
+        <div style={{ marginTop: 6 }}><strong>How:</strong> {mvpReport.priorityFix?.how}</div>
+        <div style={{ marginTop: 6 }}><strong>Why:</strong> {mvpReport.priorityFix?.why}</div>
+      </div>
+
+      <div style={{ marginTop: 12, opacity: 0.85 }}>
+        <div style={{ fontWeight: 900, marginBottom: 6 }}>P1–P9 notes (stub)</div>
+        <ul style={{ margin: 0, paddingLeft: 18 }}>
+          {mvpReport.p1p9?.map((x: any, i: number) => (
+            <li key={i}><strong>{x.p}:</strong> {x.note}</li>
+          ))}
+        </ul>
+      </div>
+    </>
+  )}
+</div></Disclosure>
           </div>
         </div>
       </main>
     </>
   );
 }
+
 
 
 
