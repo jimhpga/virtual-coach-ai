@@ -101,7 +101,7 @@ useEffect(() => {
         <title>Report | Virtual Coach AI</title>
       </Head>
 
-      <main style={shell}>
+      <main style={{ minHeight: "100vh", padding: "26px 18px 60px" }}>
         <div style={max}>
           <div style={topbar}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -290,6 +290,7 @@ useEffect(() => {
     </>
   );
 }
+
 
 
 

@@ -169,7 +169,7 @@ export default function UploadPage() {
         <title>Upload Your Swing | Virtual Coach AI</title>
       </Head>
 
-      <main style={shell}>
+      <main style={{ minHeight: "100vh", padding: "44px 22px" }}>
         <div style={top}>
           <div style={{ letterSpacing: 4, opacity: 0.75, fontSize: 12 }}>VIRTUAL COACH AI</div>
           <div style={h1}>Upload Your Swing</div>
@@ -288,4 +288,5 @@ export default function UploadPage() {
     </>
   );
 }
+
 
