@@ -9,12 +9,29 @@ const mux = new Mux({
 });
 
 export async function POST(req: Request) {
-  const { uploadId } = await req.json();
-  const upload = await mux.video.uploads.retrieve(uploadId);
+  try {
+    const { uploadId } = await req.json();
+    if (!uploadId) {
+      return Response.json({ ok: false, error: "Missing uploadId" }, { status: 400 });
+    }
 
-  return Response.json({
-    ok: true,
-    status: upload.status,
-    assetId: upload.asset_id ?? null,
-  });
+    const upload = await mux.video.uploads.retrieve(uploadId);
+
+    const assetId = upload.asset_id ?? null;
+    let playbackId: string | null = null;
+
+    if (assetId) {
+      const asset = await mux.video.assets.retrieve(assetId);
+      playbackId = asset.playback_ids?.[0]?.id ?? null;
+    }
+
+    return Response.json({
+      ok: true,
+      status: upload.status,
+      assetId,
+      playbackId,
+    });
+  } catch (e: any) {
+    return Response.json({ ok: false, error: e?.message || String(e) }, { status: 500 });
+  }
 }
