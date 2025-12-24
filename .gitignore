@@ -53,3 +53,14 @@ scripts/*.bak
 scripts/*.BAK_*
 scripts/*.STABLE_*
 
+# local tools / experiments (keep out of repo)
+Backup-VCA.ps1
+app/api/extract-pframes/
+pages/api/
+pages/manual-anchors.tsx
+pages/manual-impact.tsx
+scripts/ImpactAssist.ps1
+scripts/ImpactTools.ps1
+scripts/Make-ImpactSlowmo.ps1
+scripts/Run-E2E.ps1
+scripts/Run-ImpactFrameGen.ps1
