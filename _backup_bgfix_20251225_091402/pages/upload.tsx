@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 export default function UploadPage() {
   const router = useRouter();
-  const bg = useMemo(() => "/homepage-background.png", []);
+  const bg = useMemo(() => "/golf-course-bg.jpg", []);
 
   const eye = (router.query.eye as string) || "Right Eye";
   const hand = (router.query.hand as string) || "Right-Handed";
@@ -17,7 +17,7 @@ export default function UploadPage() {
   return (
     <>
       <Head>
-        <title>Upload Swing Ã¢â‚¬Â¢ Virtual Coach AI</title>
+        <title>Upload Swing â€¢ Virtual Coach AI</title>
       </Head>
 
       <main
@@ -56,7 +56,7 @@ export default function UploadPage() {
             }}
           >
             <div style={{ opacity: 0.9, marginBottom: 10, textAlign: "center" }}>
-              Eye: <strong>{eye}</strong> Ã¢â‚¬Â¢ Handedness: <strong>{hand}</strong>
+              Eye: <strong>{eye}</strong> â€¢ Handedness: <strong>{hand}</strong>
             </div>
 
             <div
@@ -72,7 +72,7 @@ export default function UploadPage() {
                 Click to browse or drag and drop a video file
               </div>
               <div style={{ fontSize: 13, opacity: 0.85 }}>
-                MP4 / MOV recommended Ã¢â‚¬Â¢ ideally 1Ã¢â‚¬â€œ3 seconds from setup to finish
+                MP4 / MOV recommended â€¢ ideally 1â€“3 seconds from setup to finish
               </div>
 
               <input type="file" accept="video/*" style={{ marginTop: 12 }} />
@@ -132,7 +132,7 @@ export default function UploadPage() {
             </button>
 
             <div style={{ fontSize: 12, opacity: 0.8, marginTop: 10, textAlign: "center" }}>
-              Pilot phase: weÃ¢â‚¬â„¢ll process your swing and email you a link. No spam, no sharing.
+              Pilot phase: weâ€™ll process your swing and email you a link. No spam, no sharing.
             </div>
           </div>
         </div>
