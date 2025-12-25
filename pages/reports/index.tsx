@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export default function ReportsIndex() {
   return (
@@ -16,13 +16,13 @@ export default function ReportsIndex() {
               Sample Swing Report (static)
             </h2>
             <p className="text-xs text-slate-300">
-              A fixed demo player with P1â€“P9 checkpoints, scores, and notes.
+              A fixed demo player with P1Ã¢‚¬€œP9 checkpoints, scores, and notes.
             </p>
             <Link
               href="/reports/sample"
               className="inline-flex text-xs font-semibold text-emerald-300 hover:text-emerald-200"
             >
-              View sample report â†’
+              View sample report Ã¢€ €™
             </Link>
           </div>
 
@@ -37,7 +37,7 @@ export default function ReportsIndex() {
               href="/report?report=reports/demo/report.json"
               className="inline-flex text-xs font-semibold text-emerald-300 hover:text-emerald-200"
             >
-              Open demo analyzer report â†’
+              Open demo analyzer report Ã¢€ €™
             </Link>
           </div>
         </div>
@@ -50,3 +50,4 @@ export default function ReportsIndex() {
     </main>
   );
 }
+
