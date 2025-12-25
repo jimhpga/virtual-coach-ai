@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from "react";
+import P1P9Accordion, { type P1P9Item } from "../components/P1P9Accordion";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -109,47 +110,47 @@ const handleP1P9Toggle = (open: boolean) => {
 
 
   const p1p9Items: P1P9Item[] = [
-    { id:"P1", label:"Setup", summary:"Balanced, athletic posture with clean alignments.", status:"ON_TRACK",
+    { id:"P1", title:"Setup", subtitle:"Balanced, athletic posture with clean alignments.", status:"ON_TRACK",
       coachNotes:"Balanced, athletic posture with clean alignments.",
       commonMisses:["Ball too far back","Grip too weak/strong for pattern"],
       keyDrills:["Mirror setup check","Alignment stick for feet/hips/shoulders"]
     },
-    { id:"P2", label:"Shaft parallel backswing", summary:"Clubhead tracks nicely with stable face control.", status:"ON_TRACK",
+    { id:"P2", title:"Shaft parallel backswing", subtitle:"Clubhead tracks nicely with stable face control.", status:"ON_TRACK",
       coachNotes:"Clubhead tracks nicely along the target line with good face control.",
       commonMisses:["Club rolling inside early","Getting too steep by P2"],
       keyDrills:["Low-and-slow takeaway","Alignment rod on ground (hands/club path)"]
     },
-    { id:"P3", label:"Lead arm parallel backswing", summary:"Good width and depth with solid coil potential.", status:"ON_TRACK",
+    { id:"P3", title:"Lead arm parallel backswing", subtitle:"Good width and depth with solid coil potential.", status:"ON_TRACK",
       coachNotes:"Good width and depth with plenty of rotation and coil potential.",
       commonMisses:["Lead arm collapses and loses width","Trail leg locks early"],
       keyDrills:["Wall drill (turn with space)","Towel-under-arms connection"]
     },
-    { id:"P4", label:"Top of swing", summary:"Playable top position with good structure.", status:"ON_TRACK",
+    { id:"P4", title:"Top of swing", subtitle:"Playable top position with good structure.", status:"ON_TRACK",
       coachNotes:"Plenty of turn with a playable club position at the top.",
       commonMisses:["Across-the-line when rushed","Over-long backswing when tempo gets fast"],
       keyDrills:["3-to-1 tempo rehearsal","Pause-at-the-top swing"]
     },
-    { id:"P5", label:"Lead arm parallel downswing", summary:"Club gets a touch steep under pressureâ€”easy fix.", status:"NEEDS_ATTENTION",
+    { id:"P5", title:"Lead arm parallel downswing", subtitle:"Club gets a touch steep under pressureÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Âeasy fix.", status:"NEEDS_ATTENTION",
       coachNotes:"Club is close to on-plane but can get just a touch steep under pressure.",
       commonMisses:["Upper body dives toward ball","Club drops too far outside hands"],
       keyDrills:["Pump drill (rehearse shallow)","Feet-together transition drill"]
     },
-    { id:"P6", label:"Shaft parallel downswing", summary:"Face/path playable but can get slightly steep.", status:"NEEDS_ATTENTION",
+    { id:"P6", title:"Shaft parallel downswing", subtitle:"Face/path playable but can get slightly steep.", status:"NEEDS_ATTENTION",
       coachNotes:"Face and path are playable but a fraction steep can steal compression.",
       commonMisses:["Handle gets too high at P6","Trail shoulder drives down"],
       keyDrills:["Headcover just outside ball line","Split-hand rehearsal"]
     },
-    { id:"P7", label:"Impact", summary:"Generally square with decent shaft lean and compression.", status:"ON_TRACK",
+    { id:"P7", title:"Impact", subtitle:"Generally square with decent shaft lean and compression.", status:"ON_TRACK",
       coachNotes:"Clubface is generally square with decent shaft lean and compression.",
       commonMisses:["Low-point drifts back","Hanging back adds loft"],
       keyDrills:["Divot-forward drill","Impact tape + strike pattern"]
     },
-    { id:"P8", label:"Trail arm parallel follow-through", summary:"Arms/body sync with a clean extension.", status:"ON_TRACK",
+    { id:"P8", title:"Trail arm parallel follow-through", subtitle:"Arms/body sync with a clean extension.", status:"ON_TRACK",
       coachNotes:"Arms and body are synced with a clean extension toward target.",
       commonMisses:["Club exits too low/left when held on","Arms outrace body"],
       keyDrills:["Hold P8 for 2 seconds","Throw-the-club (feel sequence)"]
     },
-    { id:"P9", label:"Finish", summary:"Balanced full finish with chest to target.", status:"ON_TRACK",
+    { id:"P9", title:"Finish", subtitle:"Balanced full finish with chest to target.", status:"ON_TRACK",
       coachNotes:"Balanced, full finish with chest facing the target and weight left.",
       commonMisses:["Falling toward toes/heels","Stopping rotation early"],
       keyDrills:["Hold finish 3-count","Eyes-closed finish balance"]
@@ -254,7 +255,7 @@ const handleP1P9Toggle = (open: boolean) => {
 
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
               <Link href="/" style={btn}>
-                â† Back to home
+                ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Ãƒâ€šÃ‚Â Back to home
               </Link>
               <Link href="/upload" style={btn}>
                 Upload another swing
@@ -334,14 +335,14 @@ const handleP1P9Toggle = (open: boolean) => {
                   <div style={{ opacity: 0.75 }}>
                     <div style={{ fontWeight: 900, marginBottom: 6 }}>No video attached (yet)</div>
                     <div style={{ fontSize: 12, lineHeight: 1.5 }}>
-                      Upload a swing to preview it here. Next: replace this local preview with Mux playback and P1â€“P9 sync.
+                      Upload a swing to preview it here. Next: replace this local preview with Mux playback and P1ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œP9 sync.
                     </div>
                   </div>
                 </div>
               )}
 
               <div style={{ marginTop: 12, fontSize: 12, opacity: 0.75, lineHeight: 1.5 }}>
-                This is where weâ€™ll put the <strong>impact-centered, short, never-cuts-downswing</strong> clip (your north star).
+                This is where weÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ll put the <strong>impact-centered, short, never-cuts-downswing</strong> clip (your north star).
               </div>
             </section>
           </div>
@@ -349,8 +350,8 @@ const handleP1P9Toggle = (open: boolean) => {
           {/* Apple-style collapsed section */}
           <div style={{ marginTop: 14 }}>
             <Disclosure
-              title="P1â€“P9 Checkpoints"
-              subtitle="Tap to expand. Weâ€™ll keep details tucked away unless you ask."
+              title="P1ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œP9 Checkpoints"
+              subtitle="Tap to expand. WeÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ll keep details tucked away unless you ask."
               defaultOpen={false}
               persistKey="report_p1p9"
              onToggle={handleP1P9Toggle}>
@@ -358,7 +359,7 @@ const handleP1P9Toggle = (open: boolean) => {
   <div style={{ fontWeight: 900, marginBottom: 6 }}>MVP AI Preview (stub)</div>
 
   {!mvpReport ? (
-    <div style={{ opacity: 0.75 }}>Loading stub reportâ€¦</div>
+    <div style={{ opacity: 0.75 }}>Loading stub reportÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦</div>
   ) : (
     <>
       <div style={{ marginBottom: 10 }}>
@@ -378,7 +379,7 @@ const handleP1P9Toggle = (open: boolean) => {
 
       <div style={{ marginTop: 12 }}>  <div ref={p1p9ScrollRef} style={{ marginTop: 10 }}>
 
-  <P1P9Accordion items={p1p9Items} defaultMode="single" showExpandAll  autoOpenPriority={true} priorityId="P5" showExpandAll={true} defaultMode="single" />
+  <P1P9Accordion items={p1p9Items} defaultMode="single" showExpandAll={true} autoOpenPriority={true} priorityId="P5" />
 
   </div>
 </div></>

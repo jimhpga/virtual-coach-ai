@@ -1,7 +1,7 @@
-﻿import React from "react";
+import React from "react";
 
 type Props = {
-  videoRef: React.RefObject<HTMLVideoElement>;
+  videoRef: React.RefObject<HTMLVideoElement | null>;
 };
 
 export default function ViewerBar({ videoRef }: Props) {
