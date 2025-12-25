@@ -17,13 +17,13 @@ export default function UploadPage() {
   return (
     <>
       <Head>
-        <title>Upload Swing Ã¢â‚¬Â¢ Virtual Coach AI</title>
+        <title>Upload Swing ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ Virtual Coach AI</title>
       </Head>
 
       <main
         style={{
           minHeight: "100vh",
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.20), rgba(0,0,0,0.45)), url(${bg})`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.22), rgba(0,0,0,0.55)), url(${bg})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           padding: 24,
@@ -56,7 +56,7 @@ export default function UploadPage() {
             }}
           >
             <div style={{ opacity: 0.9, marginBottom: 10, textAlign: "center" }}>
-              Eye: <strong>{eye}</strong> Ã¢â‚¬Â¢ Handedness: <strong>{hand}</strong>
+              Eye: <strong>{eye}</strong> ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ Handedness: <strong>{hand}</strong>
             </div>
 
             <div
@@ -72,7 +72,7 @@ export default function UploadPage() {
                 Click to browse or drag and drop a video file
               </div>
               <div style={{ fontSize: 13, opacity: 0.85 }}>
-                MP4 / MOV recommended Ã¢â‚¬Â¢ ideally 1Ã¢â‚¬â€œ3 seconds from setup to finish
+                MP4 / MOV recommended ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ ideally 1ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“3 seconds from setup to finish
               </div>
 
               <input type="file" accept="video/*" style={{ marginTop: 12 }} />
@@ -132,7 +132,7 @@ export default function UploadPage() {
             </button>
 
             <div style={{ fontSize: 12, opacity: 0.8, marginTop: 10, textAlign: "center" }}>
-              Pilot phase: weÃ¢â‚¬â„¢ll process your swing and email you a link. No spam, no sharing.
+              Pilot phase: weÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ll process your swing and email you a link. No spam, no sharing.
             </div>
           </div>
         </div>
