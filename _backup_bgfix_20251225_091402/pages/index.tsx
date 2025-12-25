@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 export default function Home() {
-  const bg = useMemo(() => "/homepage-background.png", []);
+  const bg = useMemo(() => "/golf-course-bg.jpg", []);
 
   const [eye, setEye] = useState("Right Eye");
   const [hand, setHand] = useState("Right-Handed");
