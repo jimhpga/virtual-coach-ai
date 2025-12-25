@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import BrandShell from "../components/BrandShell";
 
 export default function ViewPage() {
   const router = useRouter();
@@ -94,8 +93,7 @@ export default function ViewPage() {
   };
 
   return (
-<BrandShell title="Swing Viewer">
-<>
+    <>
       <Head>
         <title>Viewer | Virtual Coach AI</title>
       </Head>
@@ -107,24 +105,24 @@ export default function ViewPage() {
               <div style={{ fontWeight: 900, letterSpacing: 2, opacity: 0.8 }}>VIRTUAL COACH AI</div>
               <div style={{ fontSize: 22, fontWeight: 1000, marginTop: 6 }}>Swing Viewer</div>
               <div style={{ fontSize: 12, opacity: 0.7, marginTop: 6 }}>
-                Scrub, slow down, and live at impact like a normal person. ðŸ™‚
+                Scrub, slow down, and live at impact like a normal person. 🙂
               </div>
             </div>
 
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <Link href="/report" style={btn}>â† Back to report</Link>
+              <Link href="/report" style={btn}>← Back to report</Link>
               <Link href="/upload" style={btn}>Upload another swing</Link>
               <button
                 style={{ ...btn, borderColor: "rgba(34,197,94,0.35)", background: "rgba(34,197,94,0.14)" }}
                 onClick={() => { try { var v = videoRef.current; if(v){ v.currentTime = Math.max(0, (v.currentTime || 0) - 0.04); } } catch {} }}
               >
-                â—€ frame
+                ◀ frame
               </button>
               <button
                 style={{ ...btn, borderColor: "rgba(34,197,94,0.35)", background: "rgba(34,197,94,0.14)" }}
                 onClick={() => { try { var v = videoRef.current; if(v){ v.currentTime = (v.currentTime || 0) + 0.04; } } catch {} }}
               >
-                frame â–¶
+                frame ▶
               </button>
             </div>
           </div>
@@ -149,10 +147,10 @@ export default function ViewPage() {
                   defaultValue="0.5"
                   onChange={(e) => { try { if (videoRef.current) videoRef.current.playbackRate = Number(e.target.value); } catch {} }}
                 >
-                  <option value="0.25">0.25Ã—</option>
-                  <option value="0.5">0.5Ã—</option>
-                  <option value="0.75">0.75Ã—</option>
-                  <option value="1">1Ã—</option>
+                  <option value="0.25">0.25×</option>
+                  <option value="0.5">0.5×</option>
+                  <option value="0.75">0.75×</option>
+                  <option value="1">1×</option>
                 </select>
               </div>
             </div>
@@ -177,7 +175,5 @@ export default function ViewPage() {
         </div>
       </main>
     </>
-  
-</BrandShell>
-);
+  );
 }
