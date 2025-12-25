@@ -17,13 +17,13 @@ export default function UploadPage() {
   return (
     <>
       <Head>
-        <title>Upload Swing • Virtual Coach AI</title>
+        <title>Upload Swing â€¢ Virtual Coach AI</title>
       </Head>
 
       <main
         style={{
           minHeight: "100vh",
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.6)), url(${bg})`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.20), rgba(0,0,0,0.45)), url(${bg})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           padding: 24,
@@ -56,7 +56,7 @@ export default function UploadPage() {
             }}
           >
             <div style={{ opacity: 0.9, marginBottom: 10, textAlign: "center" }}>
-              Eye: <strong>{eye}</strong> • Handedness: <strong>{hand}</strong>
+              Eye: <strong>{eye}</strong> â€¢ Handedness: <strong>{hand}</strong>
             </div>
 
             <div
@@ -72,7 +72,7 @@ export default function UploadPage() {
                 Click to browse or drag and drop a video file
               </div>
               <div style={{ fontSize: 13, opacity: 0.85 }}>
-                MP4 / MOV recommended • ideally 1–3 seconds from setup to finish
+                MP4 / MOV recommended â€¢ ideally 1â€“3 seconds from setup to finish
               </div>
 
               <input type="file" accept="video/*" style={{ marginTop: 12 }} />
@@ -132,7 +132,7 @@ export default function UploadPage() {
             </button>
 
             <div style={{ fontSize: 12, opacity: 0.8, marginTop: 10, textAlign: "center" }}>
-              Pilot phase: we’ll process your swing and email you a link. No spam, no sharing.
+              Pilot phase: weâ€™ll process your swing and email you a link. No spam, no sharing.
             </div>
           </div>
         </div>
