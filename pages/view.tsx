@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -114,13 +114,13 @@ export default function ViewPage() {
               <Link href="/upload" style={btn}>Upload another swing</Link>
               <button
                 style={{ ...btn, borderColor: "rgba(34,197,94,0.35)", background: "rgba(34,197,94,0.14)" }}
-                onClick={() => { try { videoRef.current?.currentTime = Math.max(0, (videoRef.current?.currentTime || 0) - 0.04); } catch {} }}
+                onClick={() => { try { var v = videoRef.current; if(v){ v.currentTime = Math.max(0, (v.currentTime || 0) - 0.04); } } catch {} }}
               >
                 ◀ frame
               </button>
               <button
                 style={{ ...btn, borderColor: "rgba(34,197,94,0.35)", background: "rgba(34,197,94,0.14)" }}
-                onClick={() => { try { videoRef.current?.currentTime = (videoRef.current?.currentTime || 0) + 0.04; } catch {} }}
+                onClick={() => { try { var v = videoRef.current; if(v){ v.currentTime = (v.currentTime || 0) + 0.04; } } catch {} }}
               >
                 frame ▶
               </button>

@@ -1,14 +1,15 @@
-﻿import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Disclosure from "../components/Disclosure";
+import ReportNavBar from "../components/ReportNavBar";
+import ViewerBar from "../components/ViewerBar";
 
 
 
 
-import ReportNavBar from "../components/ReportNavBar";import ViewerBar from "../components/ViewerBar";
-import ReportNavBar from "../components/ReportNavBar";export default function ReportPage() {
+export default function ReportPage() {
   const router = useRouter();
 
   
@@ -128,7 +129,7 @@ const handleP1P9Toggle = (open: boolean) => {
       commonMisses:["Across-the-line when rushed","Over-long backswing when tempo gets fast"],
       keyDrills:["3-to-1 tempo rehearsal","Pause-at-the-top swing"]
     },
-    { id:"P5", label:"Lead arm parallel downswing", summary:"Club gets a touch steep under pressure—easy fix.", status:"NEEDS_ATTENTION",
+    { id:"P5", label:"Lead arm parallel downswing", summary:"Club gets a touch steep under pressureâ€”easy fix.", status:"NEEDS_ATTENTION",
       coachNotes:"Club is close to on-plane but can get just a touch steep under pressure.",
       commonMisses:["Upper body dives toward ball","Club drops too far outside hands"],
       keyDrills:["Pump drill (rehearse shallow)","Feet-together transition drill"]
@@ -253,7 +254,7 @@ const handleP1P9Toggle = (open: boolean) => {
 
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
               <Link href="/" style={btn}>
-                ← Back to home
+                â† Back to home
               </Link>
               <Link href="/upload" style={btn}>
                 Upload another swing
@@ -333,14 +334,14 @@ const handleP1P9Toggle = (open: boolean) => {
                   <div style={{ opacity: 0.75 }}>
                     <div style={{ fontWeight: 900, marginBottom: 6 }}>No video attached (yet)</div>
                     <div style={{ fontSize: 12, lineHeight: 1.5 }}>
-                      Upload a swing to preview it here. Next: replace this local preview with Mux playback and P1–P9 sync.
+                      Upload a swing to preview it here. Next: replace this local preview with Mux playback and P1â€“P9 sync.
                     </div>
                   </div>
                 </div>
               )}
 
               <div style={{ marginTop: 12, fontSize: 12, opacity: 0.75, lineHeight: 1.5 }}>
-                This is where we’ll put the <strong>impact-centered, short, never-cuts-downswing</strong> clip (your north star).
+                This is where weâ€™ll put the <strong>impact-centered, short, never-cuts-downswing</strong> clip (your north star).
               </div>
             </section>
           </div>
@@ -348,8 +349,8 @@ const handleP1P9Toggle = (open: boolean) => {
           {/* Apple-style collapsed section */}
           <div style={{ marginTop: 14 }}>
             <Disclosure
-              title="P1–P9 Checkpoints"
-              subtitle="Tap to expand. We’ll keep details tucked away unless you ask."
+              title="P1â€“P9 Checkpoints"
+              subtitle="Tap to expand. Weâ€™ll keep details tucked away unless you ask."
               defaultOpen={false}
               persistKey="report_p1p9"
              onToggle={handleP1P9Toggle}>
@@ -357,7 +358,7 @@ const handleP1P9Toggle = (open: boolean) => {
   <div style={{ fontWeight: 900, marginBottom: 6 }}>MVP AI Preview (stub)</div>
 
   {!mvpReport ? (
-    <div style={{ opacity: 0.75 }}>Loading stub report…</div>
+    <div style={{ opacity: 0.75 }}>Loading stub reportâ€¦</div>
   ) : (
     <>
       <div style={{ marginBottom: 10 }}>
