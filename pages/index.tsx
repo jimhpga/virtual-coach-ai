@@ -18,7 +18,7 @@ export default function Home() {
       <main
         style={{
           minHeight: "100vh",
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.55)), url(${bg})`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.22), rgba(0,0,0,0.55)), url(${bg})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           display: "flex",
@@ -32,7 +32,7 @@ export default function Home() {
             <img
               src="/virtualcoach-logo-transparent.png"
               alt="Virtual Coach AI"
-              style={{ maxWidth: 520, width: "90%", height: "auto" }}
+              style={{ maxWidth: 420, width: "90%", height: "auto" }}
             />
           </div>
 
