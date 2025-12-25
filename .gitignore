@@ -64,3 +64,9 @@ scripts/ImpactTools.ps1
 scripts/Make-ImpactSlowmo.ps1
 scripts/Run-E2E.ps1
 scripts/Run-ImpactFrameGen.ps1
+
+# local backups
+_backup/
+_legacy_*/
+_legacy_public_html/
+
