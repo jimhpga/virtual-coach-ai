@@ -1,179 +1,279 @@
-﻿import { useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 
-type Checkpoint = {
+type Status = "ON_TRACK" | "NEEDS_ATTENTION" | "UNKNOWN";
+
+export type P1P9Item = {
   id: string;
-  label: string;
-  status: "on_track" | "needs_attention" | "priority_fix";
-  coachNotes: string;
-  commonMisses: string[];
-  keyDrills: string[];
+  title: string;
+  subtitle?: string;
+  status?: Status | string;
+  coachNotes?: string;
+  commonMisses?: string[];
+  keyDrills?: string[];
 };
 
-const CHECKPOINTS: Checkpoint[] = [
-  { id: "P1", label: "Setup", status: "on_track", coachNotes: "Balanced, athletic posture with clean alignments.", commonMisses: ["Ball too far back", "Grip too weak/strong for pattern"], keyDrills: ["Mirror setup check", "Alignment stick for feet/hips/shoulders"] },
-  { id: "P2", label: "Shaft parallel backswing", status: "on_track", coachNotes: "Clubhead tracks nicely with stable face control.", commonMisses: ["Club inside early", "Face rolls open early"], keyDrills: ["Low-and-slow triangle", "Stop-at-P2 checkpoints"] },
-  { id: "P3", label: "Lead arm parallel backswing", status: "on_track", coachNotes: "Good width and depth with solid coil potential.", commonMisses: ["Arms collapse", "Over-rotation without depth"], keyDrills: ["Towel-under-arms", "Wall drill for depth"] },
-  { id: "P4", label: "Top of swing", status: "on_track", coachNotes: "Playable top position with good structure.", commonMisses: ["Across-the-line", "Over-long backswing"], keyDrills: ["Three-count backswing", "Pause-at-top rehearsals"] },
-  { id: "P5", label: "Lead arm parallel downswing", status: "needs_attention", coachNotes: "Club gets a touch steep under pressure—easy fix.", commonMisses: ["Upper body dives", "Handle too high"], keyDrills: ["Pump drill", "Shallow-to-slot rehearsals"] },
-  { id: "P6", label: "Shaft parallel downswing", status: "needs_attention", coachNotes: "Face/path playable but can get slightly steep.", commonMisses: ["Handle dragging high", "Trail shoulder down too soon"], keyDrills: ["Headcover outside the ball", "Split-hands delivery drill"] },
-  { id: "P7", label: "Impact", status: "on_track", coachNotes: "Generally square with decent shaft lean and compression.", commonMisses: ["Low-point drift", "Hanging back"], keyDrills: ["Divot-forward line", "Impact bag (light)"] },
-  { id: "P8", label: "Trail arm parallel follow-through", status: "on_track", coachNotes: "Arms/body sync well with clean extension.", commonMisses: ["Flip/roll early", "Arms outrun body"], keyDrills: ["Hold-P8 for 2s", "Throw-the-club feel (no release early)"] },
-  { id: "P9", label: "Finish", status: "on_track", coachNotes: "Balanced full finish with chest to target.", commonMisses: ["Falling to toes/heels", "Stopping rotation early"], keyDrills: ["Finish hold 3 seconds", "Step-through finish"] },
-];
+type Props = {
+  items?: P1P9Item[];
+  defaultMode?: "single" | "multi";
+  showExpandAll?: boolean;
+  autoOpenPriority?: boolean;
+  priorityId?: string;
+};
 
-function badgeStyle(status: Checkpoint["status"]): React.CSSProperties {
-  if (status === "on_track") {
-    return { background: "rgba(34,197,94,0.14)", borderColor: "rgba(34,197,94,0.35)", color: "rgba(220,255,236,0.95)" };
-  }
-  if (status === "priority_fix") {
-    return { background: "rgba(239,68,68,0.12)", borderColor: "rgba(239,68,68,0.35)", color: "rgba(255,235,235,0.95)" };
-  }
-  return { background: "rgba(234,179,8,0.12)", borderColor: "rgba(234,179,8,0.35)", color: "rgba(255,248,224,0.95)" };
-}
+export default function P1P9Accordion({
+  items = [],
+  defaultMode = "single",
+  showExpandAll = true,
+  autoOpenPriority = true,
+  priorityId = "P5",
+}: Props) {
+  const safeItems = Array.isArray(items) ? items : [];
 
-export default function P1P9Accordion() {
-  // single-open mode uses openId; expand-all mode uses openAll=true
-  const [openId, setOpenId] = useState<string | null>("P1");
-  const [openAll, setOpenAll] = useState(false);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [allOpen, setAllOpen] = useState(false);
+  const [openSet, setOpenSet] = useState<Set<string>>(new Set());
+  const [autoOpened, setAutoOpened] = useState(false);
 
-  const allIds = useMemo(() => CHECKPOINTS.map(c => c.id), []);
+  const norm = (s: any) => String(s ?? "").toLowerCase();
 
-  const isOpen = (id: string) => openAll || openId === id;
+  const getStatus = (x: P1P9Item): Status => {
+    const s = norm(x.status);
+    if (s.includes("needs")) return "NEEDS_ATTENTION";
+    if (s.includes("on_track") || s.includes("on track")) return "ON_TRACK";
+    return "UNKNOWN";
+  };
 
-  const toggleRow = (id: string) => {
-    if (openAll) {
-      // if user clicks a row while expanded-all, switch to single-open mode focused on that row
-      setOpenAll(false);
-      setOpenId(id);
+  const isOpen = (id: string) => {
+    if (allOpen) return true;
+    if (defaultMode === "single") return openId === id;
+    return openSet.has(id);
+  };
+
+  const toggleOne = (id: string) => {
+    if (allOpen) return;
+
+    if (defaultMode === "single") {
+      setOpenId((cur) => (cur === id ? null : id));
       return;
     }
-    setOpenId(prev => (prev === id ? null : id));
+
+    setOpenSet((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
-  const headerRow: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-    padding: "12px 14px",
-    cursor: "pointer",
-    userSelect: "none",
+  const toggleAll = () => {
+    const next = !allOpen;
+    setAllOpen(next);
+
+    if (!next) {
+      setOpenSet(new Set());
+      setOpenId(null);
+      setAutoOpened(false);
+    }
   };
 
-  const card: React.CSSProperties = {
-    borderRadius: 14,
-    border: "1px solid rgba(255,255,255,0.10)",
-    background: "rgba(0,0,0,0.18)",
-    overflow: "hidden",
-  };
+  useEffect(() => {
+    if (!autoOpenPriority) return;
+    if (allOpen) return;
+    if (autoOpened) return;
+    if (!safeItems.length) return;
+    if (defaultMode !== "single") return;
 
-  const pillBtn: React.CSSProperties = {
-    height: 28,
-    padding: "0 10px",
-    borderRadius: 999,
-    border: "1px solid rgba(255,255,255,0.12)",
-    background: "rgba(0,0,0,0.22)",
-    color: "#e6edf6",
-    fontWeight: 900,
-    fontSize: 12,
-    cursor: "pointer",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    whiteSpace: "nowrap",
-  };
+    const firstNeeds =
+      safeItems.find((x) => norm(x.status).includes("needs")) ||
+      safeItems.find((x) => norm(x.status).includes("attention"));
+
+    const p = safeItems.find((x) => norm(x.id) === norm(priorityId));
+    const target = firstNeeds?.id || p?.id || safeItems[0]?.id;
+
+    if (target) {
+      setOpenId(target);
+      setAutoOpened(true);
+    }
+  }, [safeItems, allOpen, autoOpened, autoOpenPriority, defaultMode, priorityId]);
+
+  const styles = useMemo(() => {
+    const card: React.CSSProperties = {
+      borderRadius: 18,
+      border: "1px solid rgba(255,255,255,0.10)",
+      background: "rgba(0,0,0,0.16)",
+      boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+      padding: 22,
+      color: "#e6edf6",
+    };
+
+    const row: React.CSSProperties = {
+      borderRadius: 16,
+      border: "1px solid rgba(255,255,255,0.10)",
+      background: "rgba(0,0,0,0.18)",
+      marginBottom: 12,
+      overflow: "hidden",
+    };
+
+    const header: React.CSSProperties = {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "14px 16px",
+      cursor: allOpen ? "default" : "pointer",
+      userSelect: "none",
+    };
+
+    const left: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12 };
+
+    const badge: React.CSSProperties = {
+      width: 34,
+      height: 34,
+      borderRadius: 10,
+      border: "1px solid rgba(255,255,255,0.12)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontWeight: 900,
+      background: "rgba(0,0,0,0.30)",
+    };
+
+    const btn: React.CSSProperties = {
+      height: 30,
+      padding: "0 10px",
+      borderRadius: 999,
+      border: "1px solid rgba(255,255,255,0.12)",
+      background: "rgba(0,0,0,0.20)",
+      color: "#e6edf6",
+      fontWeight: 900,
+      fontSize: 12,
+      whiteSpace: "nowrap",
+    };
+
+    const pill = (status: Status): React.CSSProperties => {
+      const isNeeds = status === "NEEDS_ATTENTION";
+      const isOn = status === "ON_TRACK";
+      return {
+        ...btn,
+        borderColor: isNeeds ? "rgba(234,179,8,0.45)" : isOn ? "rgba(34,197,94,0.45)" : "rgba(255,255,255,0.12)",
+        background: isNeeds ? "rgba(234,179,8,0.10)" : isOn ? "rgba(34,197,94,0.10)" : "rgba(0,0,0,0.20)",
+        color: isNeeds ? "#ffe9a6" : isOn ? "#bff7d1" : "#e6edf6",
+      };
+    };
+
+    const body: React.CSSProperties = {
+      padding: 16,
+      borderTop: "1px solid rgba(255,255,255,0.08)",
+      background: "rgba(0,0,0,0.14)",
+    };
+
+    const cols: React.CSSProperties = {
+      display: "grid",
+      gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+      gap: 12,
+    };
+
+    const box: React.CSSProperties = {
+      borderRadius: 16,
+      border: "1px solid rgba(255,255,255,0.10)",
+      background: "rgba(0,0,0,0.16)",
+      padding: 14,
+      minHeight: 92,
+    };
+
+    const highlight: React.CSSProperties = {
+      outline: "2px solid rgba(234,179,8,0.22)",
+      boxShadow: "0 0 0 2px rgba(234,179,8,0.10) inset",
+    };
+
+    return { card, row, header, left, badge, btn, pill, body, cols, box, highlight };
+  }, [allOpen]);
 
   return (
-    <div style={{ display: "grid", gap: 12 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-        <div style={{ fontSize: 12, opacity: 0.8 }}>
-          Click a checkpoint to open it. Use <strong>Expand all</strong> when you want the full scroll.
+    <div style={styles.card}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <div>
+          <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 0.3 }}>P1–P9 Accordion (Test)</div>
+          <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
+            Click a checkpoint to open it. Use Expand all when you want the full scroll.
+          </div>
         </div>
 
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {!openAll ? (
-            <button style={pillBtn} onClick={() => { setOpenAll(true); setOpenId(null); }}>
-              Expand all
-            </button>
-          ) : (
-            <button style={pillBtn} onClick={() => { setOpenAll(false); setOpenId("P1"); }}>
-              Collapse all
-            </button>
-          )}
-        </div>
+        {showExpandAll && (
+          <button onClick={toggleAll} style={styles.btn}>
+            {allOpen ? "Collapse all" : "Expand all"}
+          </button>
+        )}
       </div>
 
-      {CHECKPOINTS.map((p) => {
-        const opened = isOpen(p.id);
+      {safeItems.map((p) => {
+        const status = getStatus(p);
+        const open = isOpen(p.id);
+        const needs = status === "NEEDS_ATTENTION";
+        const isPriority = norm(p.id) === norm(priorityId);
 
         return (
-          <div key={p.id} style={card}>
-            <div style={headerRow} onClick={() => toggleRow(p.id)}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-                <div style={{ width: 34, height: 34, borderRadius: 10, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.22)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900 }}>
-                  {p.id}
-                </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {p.label}
-                  </div>
-                  <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2 }}>
-                    {p.coachNotes}
-                  </div>
+          <div key={p.id} style={{ ...styles.row, ...(needs && isPriority ? styles.highlight : {}) }}>
+            <div style={styles.header} onClick={() => toggleOne(p.id)}>
+              <div style={styles.left}>
+                <div style={styles.badge}>{p.id}</div>
+                <div>
+                  <div style={{ fontWeight: 900 }}>{p.title}</div>
+                  {p.subtitle && <div style={{ fontSize: 12, opacity: 0.7 }}>{p.subtitle}</div>}
                 </div>
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-                <span
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={styles.pill(status)}>
+                  {status === "NEEDS_ATTENTION" ? "NEEDS_ATTENTION" : status === "ON_TRACK" ? "ON_TRACK" : "OK"}
+                </span>
+                <div
                   style={{
-                    fontSize: 12,
-                    fontWeight: 900,
+                    width: 34,
+                    height: 34,
+                    borderRadius: 10,
                     border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: 999,
-                    padding: "6px 10px",
-                    ...badgeStyle(p.status),
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "rgba(0,0,0,0.25)",
+                    fontWeight: 900,
                   }}
                 >
-                  {p.status === "on_track" ? "ON TRACK" : p.status === "priority_fix" ? "PRIORITY FIX" : "NEEDS ATTENTION"}
-                </span>
-                <div style={{ width: 26, height: 26, borderRadius: 10, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.18)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900 }}>
-                  {opened ? "–" : "+"}
+                  {open ? "−" : "+"}
                 </div>
               </div>
             </div>
 
-            {opened && (
-              <div style={{ padding: "14px 16px", fontSize: 13, opacity: 0.92 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", gap: 12 }}>
-                  <div style={{ border: "1px solid rgba(255,255,255,0.10)", borderRadius: 12, padding: 12, background: "rgba(0,0,0,0.12)" }}>
-                    <div style={{ fontWeight: 900, marginBottom: 6 }}>Coach Notes</div>
-                    <div style={{ fontSize: 12, lineHeight: 1.6, opacity: 0.9 }}>{p.coachNotes}</div>
-                    <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      <button style={{ ...pillBtn, height: 30 }} onClick={(e) => e.stopPropagation()}>
-                        AI notes
-                      </button>
-                      <button style={{ ...pillBtn, height: 30 }} onClick={(e) => e.stopPropagation()}>
-                        Need more info
-                      </button>
-                      <button style={{ ...pillBtn, height: 30 }} onClick={(e) => e.stopPropagation()}>
-                        YouTube
-                      </button>
+            {open && (
+              <div style={styles.body}>
+                <div style={styles.cols}>
+                  <div style={styles.box}>
+                    <div style={{ fontWeight: 900, marginBottom: 8 }}>Coach Notes</div>
+                    <div style={{ fontSize: 13, opacity: 0.92 }}>{p.coachNotes || "—"}</div>
+                    <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+                      <button style={styles.btn}>AI notes</button>
+                      <button style={styles.btn}>Need more info</button>
+                      <button style={styles.btn}>YouTube</button>
                     </div>
                   </div>
 
-                  <div style={{ border: "1px solid rgba(255,255,255,0.10)", borderRadius: 12, padding: 12, background: "rgba(0,0,0,0.12)" }}>
-                    <div style={{ fontWeight: 900, marginBottom: 6 }}>Common Misses</div>
-                    <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, lineHeight: 1.7, opacity: 0.9 }}>
-                      {p.commonMisses.map((m) => <li key={m}>{m}</li>)}
+                  <div style={styles.box}>
+                    <div style={{ fontWeight: 900, marginBottom: 8 }}>Common Misses</div>
+                    <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, opacity: 0.92 }}>
+                      {(p.commonMisses?.length ? p.commonMisses : ["—"]).map((x, i) => (
+                        <li key={i}>{x}</li>
+                      ))}
                     </ul>
                   </div>
 
-                  <div style={{ border: "1px solid rgba(255,255,255,0.10)", borderRadius: 12, padding: 12, background: "rgba(0,0,0,0.12)" }}>
-                    <div style={{ fontWeight: 900, marginBottom: 6 }}>Key Drills</div>
-                    <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, lineHeight: 1.7, opacity: 0.9 }}>
-                      {p.keyDrills.map((d) => <li key={d}>{d}</li>)}
+                  <div style={styles.box}>
+                    <div style={{ fontWeight: 900, marginBottom: 8 }}>Key Drills</div>
+                    <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, opacity: 0.92 }}>
+                      {(p.keyDrills?.length ? p.keyDrills : ["—"]).map((x, i) => (
+                        <li key={i}>{x}</li>
+                      ))}
                     </ul>
-                    <div style={{ marginTop: 10, fontSize: 12, opacity: 0.7 }}>
+                    <div style={{ fontSize: 11, opacity: 0.65, marginTop: 8 }}>
                       (AI will later pick 1–2 drills that match your top faults.)
                     </div>
                   </div>

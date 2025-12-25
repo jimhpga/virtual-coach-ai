@@ -5,6 +5,10 @@ type Props = {
   subtitle?: string;
   defaultOpen?: boolean;
   persistKey?: string;
+
+  // NEW (optional): lets Report auto-scroll when the user opens it
+  onToggle?: (open: boolean) => void;
+
   children: React.ReactNode;
 };
 
@@ -13,90 +17,78 @@ export default function Disclosure({
   subtitle,
   defaultOpen = false,
   persistKey,
+  onToggle,
   children,
 }: Props) {
-  const storageKey = persistKey ? `vca_disclosure_${persistKey}` : null;
-
-  // SSR-safe: start with defaultOpen, then hydrate from sessionStorage in useEffect.
   const [open, setOpen] = useState<boolean>(defaultOpen);
 
-  // Hydrate once on mount
+  // Persist open/close across refresh
   useEffect(() => {
-    if (!storageKey) return;
+    if (!persistKey) return;
     try {
-      const v = sessionStorage.getItem(storageKey);
-      if (v === "1") setOpen(true);
-      if (v === "0") setOpen(false);
+      const v = localStorage.getItem(persistKey);
+      if (v === "open") setOpen(true);
+      if (v === "closed") setOpen(false);
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storageKey]);
+  }, [persistKey]);
 
-  // Persist on change
   useEffect(() => {
-    if (!storageKey) return;
-    try {
-      sessionStorage.setItem(storageKey, open ? "1" : "0");
-    } catch {}
-  }, [open, storageKey]);
+    if (!persistKey) return;
+    try { localStorage.setItem(persistKey, open ? "open" : "closed"); } catch {}
+  }, [persistKey, open]);
+
+  const toggle = () => {
+    setOpen((prev) => {
+      const next = !prev;
+      try { onToggle?.(next); } catch {}
+      return next;
+    });
+  };
+
+  const shell: React.CSSProperties = {
+    borderRadius: 18,
+    border: "1px solid rgba(255,255,255,0.10)",
+    background: "rgba(255,255,255,0.04)",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
+    backdropFilter: "blur(10px)",
+    overflow: "hidden",
+  };
+
+  const head: React.CSSProperties = {
+    padding: "14px 16px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    cursor: "pointer",
+    gap: 12,
+  };
+
+  const btn: React.CSSProperties = {
+    width: 34, height: 34, borderRadius: 12,
+    border: "1px solid rgba(255,255,255,0.12)",
+    background: "rgba(0,0,0,0.25)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    fontWeight: 900,
+    opacity: 0.9,
+    flexShrink: 0,
+  };
 
   return (
-    <section
-      style={{
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.10)",
-        borderRadius: 18,
-        padding: 14,
-        boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
-        backdropFilter: "blur(10px)",
-      }}
-    >
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          background: "transparent",
-          border: "none",
-          padding: 0,
-          color: "inherit",
-          cursor: "pointer",
-          textAlign: "left",
-        }}
-        aria-expanded={open}
-      >
-        <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: 900, letterSpacing: 0.2 }}>{title}</div>
-          {subtitle ? (
-            <div style={{ fontSize: 12, opacity: 0.75, marginTop: 3 }}>
-              {subtitle}
-            </div>
-          ) : null}
+    <div style={shell}>
+      <div style={head} onClick={toggle}>
+        <div>
+          <div style={{ fontWeight: 900 }}>{title}</div>
+          {subtitle ? <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>{subtitle}</div> : null}
         </div>
+        <div style={btn}>{open ? "−" : "+"}</div>
+      </div>
 
-        <div
-          style={{
-            width: 30,
-            height: 30,
-            borderRadius: 10,
-            border: "1px solid rgba(255,255,255,0.12)",
-            background: "rgba(0,0,0,0.20)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: 900,
-            flex: "0 0 auto",
-          }}
-          title={open ? "Collapse" : "Expand"}
-        >
-          {open ? "–" : "+"}
+      {open ? (
+        <div style={{ padding: "0 16px 16px" }}>
+          {children}
         </div>
-      </button>
-
-      {open ? <div style={{ marginTop: 12 }}>{children}</div> : null}
-    </section>
+      ) : null}
+    </div>
   );
 }

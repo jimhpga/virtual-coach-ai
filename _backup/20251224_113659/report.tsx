@@ -1,85 +1,17 @@
-﻿import { useRef, useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Disclosure from "../components/Disclosure";
 
 
-
-
-import ReportNavBar from "../components/ReportNavBar";import ViewerBar from "../components/ViewerBar";
-import ReportNavBar from "../components/ReportNavBar";export default function ReportPage() {
+export default function ReportPage() {
   const router = useRouter();
 
-  
-
-
-  // --- VCA: Sticky viewer + checkpoint seek sync ---
-  const viewerRef = useRef<HTMLDivElement | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  const scrollToViewer = () => {
-    setTimeout(() => {
-      try { viewerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); } catch {}
-    }, 60);
-  };
-
-  const seekByCheckpoint = (id: string) => {
-    const v = videoRef.current;
-    if (!v) return;
-    const d = v.duration;
-    if (!Number.isFinite(d) || d <= 0) return;
-
-    const norm = String(id || "").toUpperCase();
-
-    // MVP mapping: get them into the action fast (tune later)
-    let pct: number | null = null;
-    if (norm === "P5") pct = 0.65;      // transition/early downswing window
-    else if (norm === "P7") pct = 0.80; // impact window
-
-    if (pct === null) return;
-
-    try {
-      v.currentTime = Math.max(0, Math.min(d - 0.05, d * pct));
-    } catch {}
-  };
-
-  useEffect(() => {
-    const handler = (e: any) => {
-      const id = e?.detail?.id ?? e?.detail ?? "";
-      if (!id) return;
-      // make sure viewer is visible when a priority opens
-      scrollToViewer();
-      // then nudge the clip to the right part
-      setTimeout(() => seekByCheckpoint(String(id)), 120);
-    };
-
-    try {
-      if (typeof window === "undefined") return;
-      window.addEventListener("vca:p1p9_open", handler as any);
-      return () => window.removeEventListener("vca:p1p9_open", handler as any);
-    } catch {
-      return;
-    }
-  }, []);
-const p1p9ScrollRef = useRef<HTMLDivElement | null>(null);
-
-const handleP1P9Toggle = (open: boolean) => {
-  if (!open) return;
-  setTimeout(() => {
-    try { p1p9ScrollRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }); } catch {}
-  }, 80);
-};
-// --- VCA MVP: bring chosen upload preview into report via sessionStorage ---
+  // --- VCA MVP: bring chosen upload preview into report via sessionStorage ---
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-
-  const jumpToVideo = () => {
-    try {
-      const el = document.getElementById("vca_video");
-      el?.scrollIntoView({ behavior: "smooth", block: "start" });
-    } catch {}
-  };// --- MVP fake AI payload (from public/mvp-report.json) ---
+// --- MVP fake AI payload (from public/mvp-report.json) ---
   const [mvpReport, setMvpReport] = useState<any>(null);useEffect(() => {
   try {
     if (typeof window === "undefined") return;
@@ -217,10 +149,8 @@ const handleP1P9Toggle = (open: boolean) => {
   };
 
   return (
-  <>
-    <ReportNavBar onJumpVideo={jumpToVideo} />
-    <ReportNavBar onJumpVideo={jumpToVideo} />
-    <Head>
+    <>
+      <Head>
         <title>Report | Virtual Coach AI</title>
       </Head>
 
@@ -258,12 +188,6 @@ const handleP1P9Toggle = (open: boolean) => {
               <Link href="/upload" style={btn}>
                 Upload another swing
               </Link>
-              <Link
-                href={previewUrl ? `/view?src=${encodeURIComponent(previewUrl)}` : "/view"}
-                style={{ ...btn, borderColor: "rgba(59,130,246,0.35)", background: "rgba(59,130,246,0.14)" }}
-              >
-                View swing (viewer)
-              </Link>
               <a
                 href="#"
                 onClick={(e) => {
@@ -274,15 +198,67 @@ const handleP1P9Toggle = (open: boolean) => {
               >
                 Print report
               </a>
-              <Link href="/view" style={{ ...btn, background: "rgba(59,130,246,0.12)", borderColor: "rgba(59,130,246,0.30)" }}>
-                View swing
-              </Link>
             </div>
           </div>
 
           <div style={grid}>
             {/* Summary / scores */}
-            <section ref={viewerRef} style={{ ...card, position: "sticky", top: 14, alignSelf: "start" }}>
+            <section style={card}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}>
+                <div>
+                  <div style={{ fontSize: 12, letterSpacing: 3, opacity: 0.7 }}>PLAYER OVERVIEW</div>
+                  <div style={{ fontSize: 22, fontWeight: 900, marginTop: 6 }}>{name}</div>
+                  <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <span style={chip}>{hand}</span>
+                    <span style={chip}>{eye}</span>
+                    {club ? <span style={chip}>{club}</span> : null}
+                  </div>
+                </div>
+
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: 12, opacity: 0.7 }}>Swing Score</div>
+                  <div style={{ fontSize: 34, fontWeight: 1000 }}>A-</div>
+                  <div style={{ fontSize: 12, opacity: 0.7 }}>Demo score (wiring next)</div>
+                </div>
+              </div>
+
+              {notes ? (
+                <div style={{ marginTop: 12, fontSize: 12, opacity: 0.8 }}>
+                  <strong>Focus request:</strong> {notes}
+                </div>
+              ) : null}
+
+              <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+                {["Speed", "Control", "Consistency"].map((k) => (
+                  <div
+                    key={k}
+                    style={{
+                      padding: 12,
+                      borderRadius: 14,
+                      border: "1px solid rgba(255,255,255,0.10)",
+                      background: "rgba(0,0,0,0.18)",
+                    }}
+                  >
+                    <div style={{ fontSize: 12, opacity: 0.7 }}>{k}</div>
+                    <div style={{ fontSize: 18, fontWeight: 900, marginTop: 6 }}>B+</div>
+                    <div
+                      style={{
+                        height: 8,
+                        borderRadius: 999,
+                        background: "rgba(255,255,255,0.10)",
+                        marginTop: 10,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div style={{ width: "72%", height: "100%", background: "rgba(34,197,94,0.65)" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* VIDEO WINDOW (we keep this) */}
+            <section style={card}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                 <div>
                   <div style={{ fontWeight: 900, opacity: 0.9 }}>SWING VIDEO</div>
@@ -306,16 +282,14 @@ const handleP1P9Toggle = (open: boolean) => {
               {/* If we have previewUrl, show video. Otherwise show clean placeholder. */}
               {previewUrl ? (
                 <div style={{ height: 360, borderRadius: 16, overflow: "hidden", background: "#000", border: "1px solid rgba(255,255,255,0.12)" }}>
-                  <video id="vca_video"
-                    ref={videoRef} src={previewUrl}
+                  <video
+                    src={previewUrl}
                     controls
                     playsInline
                     preload="metadata"
                     style={{ width: "100%", height: "100%", display: "block" }}
                   />
-                
-                  <ViewerBar videoRef={videoRef} />
-</div>
+                </div>
               ) : (
                 <div
                   style={{
@@ -352,7 +326,7 @@ const handleP1P9Toggle = (open: boolean) => {
               subtitle="Tap to expand. We’ll keep details tucked away unless you ask."
               defaultOpen={false}
               persistKey="report_p1p9"
-             onToggle={handleP1P9Toggle}>
+            >
               <div style={{ fontSize: 12, opacity: 0.85, lineHeight: 1.6 }}>
   <div style={{ fontWeight: 900, marginBottom: 6 }}>MVP AI Preview (stub)</div>
 
@@ -375,11 +349,8 @@ const handleP1P9Toggle = (open: boolean) => {
         <div style={{ marginTop: 6 }}><strong>Why:</strong> {mvpReport.priorityFix?.why}</div>
       </div>
 
-      <div style={{ marginTop: 12 }}>  <div ref={p1p9ScrollRef} style={{ marginTop: 10 }}>
-
-  <P1P9Accordion items={p1p9Items} defaultMode="single" showExpandAll  autoOpenPriority={true} priorityId="P5" showExpandAll={true} defaultMode="single" />
-
-  </div>
+      <div style={{ marginTop: 12 }}>
+  <P1P9Accordion items={p1p9Items} defaultMode="single" showExpandAll />
 </div></>
   )}
 </div></Disclosure>
@@ -389,16 +360,6 @@ const handleP1P9Toggle = (open: boolean) => {
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
