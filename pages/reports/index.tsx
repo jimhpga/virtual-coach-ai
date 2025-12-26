@@ -22,7 +22,7 @@ export default function ReportsIndex() {
               href="/reports/sample"
               className="inline-flex text-xs font-semibold text-emerald-300 hover:text-emerald-200"
             >
-              View sample report ->
+              View sample report &#8594;
             </Link>
           </div>
 
@@ -37,7 +37,7 @@ export default function ReportsIndex() {
               href="/report?report=reports/demo/report.json"
               className="inline-flex text-xs font-semibold text-emerald-300 hover:text-emerald-200"
             >
-              Open demo analyzer report ->
+              Open demo analyzer report &#8594;
             </Link>
           </div>
         </div>
