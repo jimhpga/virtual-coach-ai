@@ -118,7 +118,9 @@ const DEFAULT_P1P9_ITEMS: P1P9Item[] = [
 export default function ReportPage() {
   const router = useRouter();
 
-  // Chosen upload preview into report via sessionStorage
+  
+  const notesText = String((router.query as any)?.notes ?? '').trim();
+// Chosen upload preview into report via sessionStorage
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // MVP fake AI payload (from public/mvp-report.json)
@@ -447,6 +449,7 @@ export default function ReportPage() {
     </>
   );
 }
+
 
 
 
