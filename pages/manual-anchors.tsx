@@ -1,6 +1,7 @@
-﻿// pages/manual-anchors.tsx
+// pages/manual-anchors.tsx
 "use client";
 import { useState } from "react";
+import BrandShell from "../components/BrandShell";
 
 export default function ManualAnchors() {
   const [videoPath, setVideoPath] = useState("");

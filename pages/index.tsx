@@ -1,4 +1,5 @@
-﻿import React from "react";
+import React from "react";
+import BrandShell from "../components/BrandShell";
 import Head from "next/head";
 import Link from "next/link";
 
@@ -52,7 +53,8 @@ export default function HomePage() {
         <title>Virtual Coach AI</title>
       </Head>
 
-      <main style={shell}>
+      <BrandShell title="Virtual Coach AI">
+<main style={shell}>
         <div style={card}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}>
             <img
@@ -86,6 +88,7 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+</BrandShell>
     </>
   );
 }

@@ -1,5 +1,6 @@
 // pages/demo-report.tsx
 import { useEffect } from "react";
+import BrandShell from "../components/BrandShell";
 import { useRouter } from "next/router";
 
 /**
