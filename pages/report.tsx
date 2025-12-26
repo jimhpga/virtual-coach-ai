@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import BrandShell from "../components/BrandShell";
 import Head from "next/head";
 import Link from "next/link";
@@ -411,13 +411,13 @@ export default function ReportPage() {
 
                     <div style={{ marginTop: 10 }}>
                       <div>
-                        <strong>Priority drill:</strong> {mvpReport.priorityFix?.title ?? "â€”"}
+                        <strong>Priority drill:</strong> {mvpReport.priorityFix?.title ?? "Ã¢â‚¬â€"}
                       </div>
                       <div style={{ marginTop: 6 }}>
-                        <strong>How:</strong> {mvpReport.priorityFix?.how ?? "â€”"}
+                        <strong>How:</strong> {mvpReport.priorityFix?.how ?? "Ã¢â‚¬â€"}
                       </div>
                       <div style={{ marginTop: 6 }}>
-                        <strong>Why:</strong> {mvpReport.priorityFix?.why ?? "â€”"}
+                        <strong>Why:</strong> {mvpReport.priorityFix?.why ?? "Ã¢â‚¬â€"}
                       </div>
                     </div>
                   </>
@@ -447,4 +447,6 @@ export default function ReportPage() {
     </>
   );
 }
+
+
 
