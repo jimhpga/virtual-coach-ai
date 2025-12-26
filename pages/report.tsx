@@ -238,33 +238,31 @@ export default function ReportPage() {
 
       <main style={shell}>
         <div style={max}>
-<div>
+          <div style={topbar}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 10,
+                  background: "rgba(34,197,94,0.22)",
+                  border: "1px solid rgba(34,197,94,0.35)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 900,
+                }}
+              >
+                VC
+              </div>
+              <div>
                 <div style={{ fontWeight: 900 }}>VIRTUAL COACH AI</div>
                 <div style={{ fontSize: 12, opacity: 0.75 }}>
                   Tour-level swing feedback from a single upload
                 </div>
               </div>
             </div>
-
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <Link href="/" style={btn}>
-                {"<-"} Back to home
-              </Link>
-              <Link href="/upload" style={btn}>
-                Upload another swing
-              </Link>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  window.print();
-                }}
-                style={{ ...btn, background: "rgba(34,197,94,0.14)", borderColor: "rgba(34,197,94,0.35)" }}
-              >
-                Print report
-              </a>
-            </div>
-          </div>
+</div>
 
           <div style={grid}>
             {/* Summary / scores */}
