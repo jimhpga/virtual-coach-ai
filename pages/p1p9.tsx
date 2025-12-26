@@ -52,7 +52,7 @@ const ITEMS: P1P9Item[] = [
 
 export default function P1P9TestPage() {
   return (
-<BrandShell title="P1ï¿½?"P9 Checkpoints">
+<BrandShell title="P1-P9 Checkpoints">
 <>
       <Head><title>P1-P9 Accordion Test</title></Head>
       <main style={{
