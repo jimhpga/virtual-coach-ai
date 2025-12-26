@@ -1,4 +1,5 @@
 import Head from "next/head";
+import BrandShell from "../components/BrandShell";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 
@@ -20,7 +21,8 @@ export default function UploadPage() {
         <title>Upload Swing - Virtual Coach AI</title>
       </Head>
 
-      <main
+      <BrandShell title="Upload">
+<main
         style={{
           minHeight: "100vh",
           backgroundImage: `linear-gradient(rgba(0,0,0,0.22), rgba(0,0,0,0.55)), url(${bg})`,
@@ -137,6 +139,7 @@ export default function UploadPage() {
           </div>
         </div>
       </main>
+</BrandShell>
     </>
   );
 }

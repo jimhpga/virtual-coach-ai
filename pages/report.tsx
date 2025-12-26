@@ -1,4 +1,5 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import BrandShell from "../components/BrandShell";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -236,7 +237,8 @@ export default function ReportPage() {
         <title>Report | Virtual Coach AI</title>
       </Head>
 
-      <main style={shell}>
+      <BrandShell title="Swing Report">
+<main style={shell}>
         <div style={max}>
           <div style={topbar}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -409,13 +411,13 @@ export default function ReportPage() {
 
                     <div style={{ marginTop: 10 }}>
                       <div>
-                        <strong>Priority drill:</strong> {mvpReport.priorityFix?.title ?? "—"}
+                        <strong>Priority drill:</strong> {mvpReport.priorityFix?.title ?? "â€”"}
                       </div>
                       <div style={{ marginTop: 6 }}>
-                        <strong>How:</strong> {mvpReport.priorityFix?.how ?? "—"}
+                        <strong>How:</strong> {mvpReport.priorityFix?.how ?? "â€”"}
                       </div>
                       <div style={{ marginTop: 6 }}>
-                        <strong>Why:</strong> {mvpReport.priorityFix?.why ?? "—"}
+                        <strong>Why:</strong> {mvpReport.priorityFix?.why ?? "â€”"}
                       </div>
                     </div>
                   </>
@@ -441,6 +443,7 @@ export default function ReportPage() {
           </div>
         </div>
       </main>
+</BrandShell>
     </>
   );
 }

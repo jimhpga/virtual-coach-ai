@@ -1,8 +1,10 @@
-import Link from "next/link";
+﻿import Link from "next/link";
+import BrandShell from "../../components/BrandShell";
 
 export default function ReportsIndex() {
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50 px-4 py-10">
+    <BrandShell title="Virtual Coach AI Reports">
+<main className="min-h-screen bg-slate-950 text-slate-50 px-4 py-10">
       <section className="max-w-5xl mx-auto">
         <h1 className="text-2xl md:text-3xl font-semibold mb-4">Reports</h1>
         <p className="text-sm md:text-base text-slate-300 mb-6 max-w-2xl">
@@ -48,6 +50,8 @@ export default function ReportsIndex() {
         </p>
       </section>
     </main>
+</BrandShell>
   );
 }
+
 

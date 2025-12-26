@@ -1,6 +1,6 @@
 import Head from "next/head";
-import P1P9Accordion, { P1P9Item } from "../components/P1P9Accordion";
 import BrandShell from "../components/BrandShell";
+import P1P9Accordion, { P1P9Item } from "../components/P1P9Accordion";
 
 const ITEMS: P1P9Item[] = [
   { id:"P1", title:"Setup", status:"ON_TRACK",

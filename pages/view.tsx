@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import BrandShell from "../components/BrandShell";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -91,7 +92,8 @@ export default function ViewPage() {
         <meta name="robots" content="noindex,nofollow" />
       </Head>
 
-      <main style={shell}>
+      <BrandShell title="View">
+<main style={shell}>
         <div style={max}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <div>
@@ -103,7 +105,7 @@ export default function ViewPage() {
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <Link href="/report" style={btn}>
-                ← Back to report
+                Ã¢â€ Â Back to report
               </Link>
               <Link href="/" style={btn}>
                 Home
@@ -137,7 +139,7 @@ export default function ViewPage() {
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
               <div style={{ fontSize: 12, opacity: 0.75 }}>
-                {ready ? "Tip: Use comma/period keys too ( , . ) if your keyboard supports it." : "Loading video…"}
+                {ready ? "Tip: Use comma/period keys too ( , . ) if your keyboard supports it." : "Loading videoÃ¢â‚¬Â¦"}
               </div>
 
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -171,10 +173,11 @@ export default function ViewPage() {
           <div style={{ height: 14 }} />
 
           <div style={{ fontSize: 12, opacity: 0.72, lineHeight: 1.6 }}>
-            Next: this page becomes the “impact-centered, short, never-cuts-downswing” clip viewer with anchors + P1–P9 sync.
+            Next: this page becomes the Ã¢â‚¬Å“impact-centered, short, never-cuts-downswingÃ¢â‚¬Â clip viewer with anchors + P1Ã¢â‚¬â€œP9 sync.
           </div>
         </div>
       </main>
+</BrandShell>
     </>
   );
 }
