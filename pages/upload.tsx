@@ -11,6 +11,7 @@ export default function UploadPage() {
   const [name, setName] = useState("");
   const [eye, setEye] = useState("Right Eye");
   const [hand, setHand] = useState("Right-Handed");
+  const [level, setLevel] = useState("Intermediate");
   const [club, setClub] = useState("Driver");
 
   const [notes, setNotes] = useState("");
@@ -118,13 +119,11 @@ export default function UploadPage() {
     const dataUrl = await toDataURL(f);
     try {
       sessionStorage.setItem("vca_video_base64", dataUrl);
-      // Keep a fallback to the local blob URL if you ever used it elsewhere
       if (previewUrl) sessionStorage.setItem("vca_previewUrl", previewUrl);
     } catch {}
   };
 
   const onContinue = async () => {
-    // Notes are optional. Name optional. Everything optional. (MVP rules)
     try {
       if (file) await stashVideoAsBase64(file);
     } catch {}
@@ -135,6 +134,7 @@ export default function UploadPage() {
         name: (name || "Player").trim(),
         eye,
         hand,
+        level,
         club,
         notes: notes.trim(),
       },
@@ -228,7 +228,8 @@ export default function UploadPage() {
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10, marginTop: 14 }}>
+            {/* NAME / EYE / HAND / LEVEL / CLUB */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr 1fr", gap: 10, marginTop: 14 }}>
               <div>
                 <div style={label}>Name (optional)</div>
                 <input style={input} value={name} onChange={(e) => setName(e.target.value)} placeholder="Player" />
@@ -246,6 +247,15 @@ export default function UploadPage() {
                 <select style={input as any} value={hand} onChange={(e) => setHand(e.target.value)}>
                   <option>Right-Handed</option>
                   <option>Left-Handed</option>
+                </select>
+              </div>
+              <div>
+                <div style={label}>Level</div>
+                <select style={input as any} value={level} onChange={(e) => setLevel(e.target.value)}>
+                  <option>Beginner</option>
+                  <option>Intermediate</option>
+                  <option>Advanced</option>
+                  <option>Tour</option>
                 </select>
               </div>
               <div>
