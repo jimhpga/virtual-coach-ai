@@ -1,5 +1,14 @@
-﻿# Always use LF in repo (prevents CRLF/LF warnings)
+﻿# Normalize line endings in git
 * text=auto eol=lf
 
-# PowerShell scripts keep CRLF
+# Windows scripts can stay CRLF if you want (optional)
 *.ps1 text eol=crlf
+
+# Common text formats
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.js   text eol=lf
+*.jsx  text eol=lf
+*.json text eol=lf
+*.css  text eol=lf
+*.md   text eol=lf

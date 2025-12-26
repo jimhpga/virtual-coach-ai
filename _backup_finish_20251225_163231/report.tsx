@@ -238,7 +238,24 @@ export default function ReportPage() {
 
       <main style={shell}>
         <div style={max}>
-<div>
+          <div style={topbar}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  width: 34,
+                  height: 34,
+                  borderRadius: 10,
+                  background: "rgba(34,197,94,0.22)",
+                  border: "1px solid rgba(34,197,94,0.35)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 900,
+                }}
+              >
+                VC
+              </div>
+              <div>
                 <div style={{ fontWeight: 900 }}>VIRTUAL COACH AI</div>
                 <div style={{ fontSize: 12, opacity: 0.75 }}>
                   Tour-level swing feedback from a single upload
@@ -446,4 +463,3 @@ export default function ReportPage() {
     </>
   );
 }
-
