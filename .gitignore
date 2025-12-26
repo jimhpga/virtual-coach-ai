@@ -70,3 +70,7 @@ _backup/
 _legacy_*/
 _legacy_public_html/
 
+# Local backups (do not commit)
+_backup_*
+_backup_finish_*
+_backup_mojibake_*
