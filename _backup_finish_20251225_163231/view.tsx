@@ -112,7 +112,8 @@ export default function ViewPage() {
             </div>
 
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-<Link href="/upload" style={btn}>Upload another swing</Link>
+              <Link href="/report" style={btn}>Ã¢€  Back to report</Link>
+              <Link href="/upload" style={btn}>Upload another swing</Link>
               <button
                 style={{ ...btn, borderColor: "rgba(34,197,94,0.35)", background: "rgba(34,197,94,0.14)" }}
                 onClick={() => { try { var v = videoRef.current; if(v){ v.currentTime = Math.max(0, (v.currentTime || 0) - 0.04); } } catch {} }}
@@ -180,5 +181,4 @@ export default function ViewPage() {
 </BrandShell>
 );
 }
-
 

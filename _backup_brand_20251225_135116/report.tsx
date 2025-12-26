@@ -107,7 +107,7 @@ const handleP1P9Toggle = (open: boolean) => {
   const hand = (router.query.hand as string) || "Right-Handed";
   const club = (router.query.club as string) || "";
   const notes = (router.query.notes as string) || "";
-
+
 
   const p1p9Items: P1P9Item[] = [
     { id:"P1", title:"Setup", subtitle:"Balanced, athletic posture with clean alignments.", status:"ON_TRACK",
