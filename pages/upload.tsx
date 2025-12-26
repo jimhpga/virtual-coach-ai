@@ -1,4 +1,4 @@
-﻿import Head from "next/head";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { useMemo, useState } from "react";
 
@@ -17,7 +17,7 @@ export default function UploadPage() {
   return (
     <>
       <Head>
-        <title>Upload Swing ÃƒÆ'Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ€šÃ‚¢ Virtual Coach AI</title>
+        <title>Upload Swing - Virtual Coach AI</title>
       </Head>
 
       <main
@@ -56,7 +56,7 @@ export default function UploadPage() {
             }}
           >
             <div style={{ opacity: 0.9, marginBottom: 10, textAlign: "center" }}>
-              Eye: <strong>{eye}</strong> ÃƒÆ'Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ€šÃ‚¢ Handedness: <strong>{hand}</strong>
+              Eye: <strong>{eye}</strong> | Handedness: <strong>{hand}</strong>
             </div>
 
             <div
@@ -72,7 +72,7 @@ export default function UploadPage() {
                 Click to browse or drag and drop a video file
               </div>
               <div style={{ fontSize: 13, opacity: 0.85 }}>
-                MP4 / MOV recommended ÃƒÆ'Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ€šÃ‚¢ ideally 1ÃƒÆ'Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ¢Ã¢€š¬Ã...€œ3 seconds from setup to finish
+                MP4 / MOV recommended | ideally 1-3 seconds from setup to finish
               </div>
 
               <input type="file" accept="video/*" style={{ marginTop: 12 }} />
@@ -132,7 +132,7 @@ export default function UploadPage() {
             </button>
 
             <div style={{ fontSize: 12, opacity: 0.8, marginTop: 10, textAlign: "center" }}>
-              Pilot phase: weÃƒÆ'Ã‚¢Ãƒ¢Ã¢‚¬Å¡Ã‚¬Ãƒ¢Ã¢‚¬Å¾Ã‚¢ll process your swing and email you a link. No spam, no sharing.
+              Pilot phase: we'll process your swing and email you a link. No spam, no sharing.
             </div>
           </div>
         </div>
