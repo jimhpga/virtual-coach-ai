@@ -15,6 +15,21 @@ type ReportLike = {
 };
 
 export default function ReportPage() {
+  // Analysis mode:
+  // "text" = coaching from descriptions only (low confidence)
+  // "pose" = coaching from pose/angles (higher confidence)
+  const analysisMode: "text" | "pose" = "text";
+
+  const guard = (s: string) => {
+    if(analysisMode === "text"){
+      // Strip overly certain language in text-only mode
+      return s
+        .replace(/\b(diagnosis|definitely|always|never|guarantee|will)\b/gi, "likely")
+        .replace(/\b(best current read)\b/gi, "best guess (text-only)");
+    }
+    return s;
+  };
+
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -73,8 +88,8 @@ export default function ReportPage() {
       coachNotes:"Athletic posture, neutral pelvis, soft knees. Start clean.",
       commonMisses:["Ball too far back/forward","Grip too weak/strong for your pattern"],
       keyDrills:["Mirror setup check","Alignment sticks for feet/hips/shoulders"] },
-    { id:"P2", title:"Shaft Parallel (Backswing)", subtitle:"Hands, club, and torso synced — no early throw.", status:"ON_TRACK",
-      coachNotes:"Keep structure. Turn, don’t snatch.",
+    { id:"P2", title:"Shaft Parallel (Backswing)", subtitle:"Hands, club, and torso synced â€” no early throw.", status:"ON_TRACK",
+      coachNotes:"Keep structure. Turn, donâ€™t snatch.",
       commonMisses:["Inside takeaway","Face rolls open early"],
       keyDrills:["One-piece takeaway to P2","Wall drill: club outside hands"] },
     { id:"P3", title:"Lead Arm Parallel (Backswing)", subtitle:"Depth + width without losing posture.", status:"UNKNOWN",
@@ -86,7 +101,7 @@ export default function ReportPage() {
       commonMisses:["Overrun/overswing","Across-the-line"],
       keyDrills:["3-second top pause","Top-to-P5 pump"] },
     { id:"P5", title:"Lead Arm Parallel (Downswing)", subtitle:"Get left before you rotate.", status:"NEEDS_ATTENTION",
-      coachNotes:"Priority: pressure shift left THEN unwind. Don’t spin in place.",
+      coachNotes:"Priority: pressure shift left THEN unwind. Donâ€™t spin in place.",
       commonMisses:["Early rotation (stuck arms)","Handle stalls/flip"],
       keyDrills:["Step-change drill","Pump to P5, then go"] },
     { id:"P6", title:"Shaft Parallel (Downswing)", subtitle:"Delivery: path, face, and low point control.", status:"UNKNOWN",
@@ -98,7 +113,7 @@ export default function ReportPage() {
       commonMisses:["Early extension","Flip / scooping"],
       keyDrills:["Impact bag","Line-in-sand low point"] },
     { id:"P8", title:"Trail Arm Parallel (Follow-through)", subtitle:"Spine-angle match + extension.", status:"ON_TRACK",
-      coachNotes:"Extend through, don’t dump angles.",
+      coachNotes:"Extend through, donâ€™t dump angles.",
       commonMisses:["Chicken wing","Stall + flip"],
       keyDrills:["Release to P8 checkpoint","Finish-hold drill"] },
     { id:"P9", title:"Finish", subtitle:"Balanced, tall, and posted.", status:"ON_TRACK",
@@ -116,7 +131,7 @@ export default function ReportPage() {
 
   return (
     <div style={shell}>
-      <Head><title>Virtual Coach AI — Report</title></Head>
+      <Head><title>Virtual Coach AI â€” Report</title></Head>
 
       <main style={main}>
         <div style={wrap}>
@@ -127,9 +142,9 @@ export default function ReportPage() {
           <div style={card}>
             <h1 style={h1}>Swing Report</h1>
             <div style={small}>
-              Eye: <strong>{report.eye || "—"}</strong> &nbsp;•&nbsp;
-              Handedness: <strong>{report.handedness || "—"}</strong> &nbsp;•&nbsp;
-              Club: <strong>{report.club || "—"}</strong>
+              Eye: <strong>{report.eye || "â€”"}</strong> &nbsp;â€¢&nbsp;
+              Handedness: <strong>{report.handedness || "â€”"}</strong> &nbsp;â€¢&nbsp;
+              Club: <strong>{report.club || "â€”"}</strong>
             </div>
 
             <div style={{ marginTop: 14 }}>
@@ -155,13 +170,13 @@ export default function ReportPage() {
                 </>
               ) : (
                 <div style={{ ...small, padding: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.04)" }}>
-                  No video attached on this view yet. (That’s okay — we can wire it to the upload flow next.)
+                  No video attached on this view yet. (Thatâ€™s okay â€” we can wire it to the upload flow next.)
                 </div>
               )}
             </div>
 
             <div style={{ marginTop: 18 }}>
-              <div style={{ fontWeight: 900, marginBottom: 8 }}>P1–P9 Checkpoints</div>
+              <div style={{ fontWeight: 900, marginBottom: 8 }}>P1â€“P9 Checkpoints</div>
               <P1P9Accordion items={p1p9Items} defaultMode="single" showExpandAll autoOpenPriority={true} priorityId="P5" />
             </div>
           </div>
