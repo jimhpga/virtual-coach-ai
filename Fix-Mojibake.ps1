@@ -1,8 +1,16 @@
-﻿Set-Location C:\Sites\virtual-coach-ai
+Set-Location C:\Sites\virtual-coach-ai
 
 function Write-Utf8NoBom($path, $content){
   $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
   [System.IO.File]::WriteAllText((Resolve-Path $path).Path, $content, $utf8NoBom)
+}
+
+# Converts common mojibake (UTF8 bytes mis-decoded as Latin1/Win1252) back to real UTF8
+function Fix-Moji($s){
+  $latin1 = [System.Text.Encoding]::GetEncoding(28591)  # ISO-8859-1
+  $utf8   = [System.Text.Encoding]::UTF8
+  $bytes  = $latin1.GetBytes($s)
+  return $utf8.GetString($bytes)
 }
 
 $stamp = (Get-Date).ToString("yyyyMMdd_HHmmss")
@@ -16,57 +24,33 @@ $files = Get-ChildItem -Recurse -File -Include *.ts,*.tsx |
     $_.FullName -notmatch '\\_backup'
   }
 
-# Build "bad" strings using Unicode escapes (ASCII-safe script)
-$replacements = @(
-  # bullet variants
-  @{ bad = "`u{00C3}`u{00A2}`u{00C2}`u{20AC}`u{00C2}`u{00A2}"; good = " - " }, # Ã¢Â€Â¢
-  @{ bad = "`u{00C3}`u{00A2}`u{00E2}`u{201A}`u{00AC}`u{00C2}`u{00A2}"; good = " - " }, # Ã¢â‚¬Â¢
-
-  # dashes
-  @{ bad = "`u{00C3}`u{00A2}`u{00C2}`u{20AC}`u{00C2}`u{2013}"; good = "-" }, # Ã¢Â€Â–
-  @{ bad = "`u{00C3}`u{00A2}`u{00C2}`u{20AC}`u{00C2}`u{2014}"; good = "-" }, # Ã¢Â€Â—
-
-  # apostrophes / quotes
-  @{ bad = "`u{00C3}`u{00A2}`u{00C2}`u{20AC}`u{00C2}`u{2122}"; good = "'" }, # Ã¢Â€Â™
-  @{ bad = "`u{00C3}`u{00A2}`u{00E2}`u{201A}`u{00AC}`u{00E2}`u{201E}`u{00A2}"; good = "'" }, # Ã¢â‚¬â„¢
-  @{ bad = "`u{00C3}`u{00A2}`u{00C2}`u{20AC}`u{00C2}`u{2018}"; good = "'" }, # Ã¢Â€Â‘ (left single quote)
-  @{ bad = "`u{00C3}`u{00A2}`u{00C2}`u{20AC}`u{00C2}`u{0153}"; good = '"' }, # Ã¢Â€Âœ (left double quote -> often shows as œ)
-  @{ bad = "`u{00C3}`u{00A2}`u{00C2}`u{20AC}`u{00C2}`u{009D}"; good = '"' }, # Ã¢Â€Â (right double quote sometimes lands here)
-
-  # NBSP-ish pattern seen as "Â " (A-circumflex + space)
-  @{ bad = "`u{00C2} "; good = " " }
-)
-
 $changed = @()
 
 foreach($f in $files){
   $raw = Get-Content $f.FullName -Raw
 
-  if($raw -match "[`u{00C2}`u{00C3}]"){
-    $orig = $raw
-    foreach($r in $replacements){
-      $raw = $raw.Replace($r.bad, $r.good)
-    }
+  # Only attempt fix if it looks suspicious
+  if($raw -match "Ã|Â"){
+    $fixed = Fix-Moji $raw
 
-    if($raw -ne $orig){
+    # Apply only if it reduces the suspicious markers
+    $before = ([regex]::Matches($raw,   "Ã|Â")).Count
+    $after  = ([regex]::Matches($fixed, "Ã|Â")).Count
+
+    if($after -lt $before){
       Copy-Item $f.FullName (Join-Path $bkdir $f.Name) -Force
-      Write-Utf8NoBom $f.FullName $raw
+      Write-Utf8NoBom $f.FullName $fixed
       $changed += $f.FullName
     }
   }
 }
 
-"`n✅ Mojibake cleanup complete."
-"Backups: $bkdir"
+"`nDONE. Backup folder: $bkdir"
 "Files changed: $($changed.Count)"
 if($changed.Count -gt 0){ $changed | ForEach-Object { " - $_" } }
 
-"`n--- Remaining suspicious hits (first 60) ---"
+"`nRemaining suspicious hits (first 80):"
 Get-ChildItem -Recurse -File -Include *.ts,*.tsx |
-  Where-Object {
-    $_.FullName -notmatch '\\node_modules\\' -and
-    $_.FullName -notmatch '\\.next\\' -and
-    $_.FullName -notmatch '\\_backup'
-  } |
-  Select-String -Pattern "Ã¢|Ãƒ|Â" |
-  Select-Object -First 60
+  Where-Object { $_.FullName -notmatch '\\node_modules\\' -and $_.FullName -notmatch '\\.next\\' -and $_.FullName -notmatch '\\_backup' } |
+  Select-String -Pattern "Ã|Â" |
+  Select-Object -First 80

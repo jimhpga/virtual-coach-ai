@@ -82,3 +82,12 @@ _backup_*/
 .backup*/
 .backups*/
 
+
+# --- ignore local backup folders (do not build/deploy) ---
+/_backup
+/_backup_*
+/_backup_*
+/_backup*
+/_backup_report_fix_*
+/_backup_bgfix_*
+/_backup_mojibake_*

@@ -105,7 +105,7 @@ export default function ViewPage() {
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <Link href="/report" style={btn}>
-                Ã¢â€ Â Back to report
+                �f¢â�,� �, Back to report
               </Link>
               <Link href="/" style={btn}>
                 Home
@@ -139,7 +139,7 @@ export default function ViewPage() {
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
               <div style={{ fontSize: 12, opacity: 0.75 }}>
-                {ready ? "Tip: Use comma/period keys too ( , . ) if your keyboard supports it." : "Loading videoÃ¢â‚¬Â¦"}
+                {ready ? "Tip: Use comma/period keys too ( , . ) if your keyboard supports it." : "Loading video�f¢â�?s¬�,¦"}
               </div>
 
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -173,7 +173,7 @@ export default function ViewPage() {
           <div style={{ height: 14 }} />
 
           <div style={{ fontSize: 12, opacity: 0.72, lineHeight: 1.6 }}>
-            Next: this page becomes the Ã¢â‚¬Å“impact-centered, short, never-cuts-downswingÃ¢â‚¬Â clip viewer with anchors + P1Ã¢â‚¬â€œP9 sync.
+            Next: this page becomes the �f¢â�?s¬�.�?oimpact-centered, short, never-cuts-downswing�f¢â�?s¬�, clip viewer with anchors + P1�f¢â�?s¬â�,��"P9 sync.
           </div>
         </div>
       </main>
