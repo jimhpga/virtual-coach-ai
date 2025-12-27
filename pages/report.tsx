@@ -17,6 +17,15 @@ type AiPayload = {
   camera_quality?: { status?: "PASS" | "WARN" | "FAIL"; reason?: string; tips?: string[] };
 };
 
+type Ctx = {
+  name: string;
+  club: string;
+  hand: string;
+  eye: string;
+  level: string;
+  notes: string;
+};
+
 export default function ReportPage() {
   const router = useRouter();
 
@@ -25,30 +34,37 @@ export default function ReportPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [err, setErr] = useState<string>("");
 
-  // read video preview (optional)
+  // Video preview (optional) — prefer base64 (portable), fallback to blob url
   useEffect(() => {
     try {
-      const v = sessionStorage.getItem("vca_preview_url") || "";
+      const b64 = sessionStorage.getItem("vca_video_base64") || "";
+      if (b64) {
+        setPreviewUrl(b64);
+        return;
+      }
+      const v = sessionStorage.getItem("vca_previewUrl") || "";
       if (v) setPreviewUrl(v);
     } catch {}
   }, []);
 
-  const ctx = useMemo(() => {
-    const q = router.query || {};
+  const ctx: Ctx = useMemo(() => {
+    const q: any = router.query || {};
     return {
       name: String(q.name || "Player").trim(),
       club: String(q.club || "").trim(),
       hand: String(q.hand || q.handedness || "").trim(),
       eye: String(q.eye || "").trim(),
+      level: String(q.level || "Intermediate").trim(),
       notes: String(q.notes || "").trim(),
     };
   }, [router.query]);
 
   useEffect(() => {
+    if (!router.isReady) return;
+
     let cancelled = false;
 
     async function go() {
-      if (!router.isReady) return;
       setLoading(true);
       setErr("");
 
@@ -61,6 +77,7 @@ export default function ReportPage() {
             club: ctx.club,
             handedness: ctx.hand,
             eye: ctx.eye,
+            level: ctx.level,
           }),
         });
 
@@ -81,10 +98,11 @@ export default function ReportPage() {
     }
 
     go();
+
     return () => {
       cancelled = true;
     };
-  }, [router.isReady, ctx.notes, ctx.club, ctx.hand, ctx.eye]);
+  }, [router.isReady, ctx.notes, ctx.club, ctx.hand, ctx.eye, ctx.level]);
 
   const shell: React.CSSProperties = {
     minHeight: "calc(100vh - 0px)",
@@ -147,7 +165,8 @@ export default function ReportPage() {
                 </div>
                 <div style={small}>
                   {ctx.club ? `Club: ${ctx.club}` : "Club: (not specified)"}{" "}
-                  {ctx.hand ? `• Hand: ${ctx.hand}` : ""} {ctx.eye ? `• Eye: ${ctx.eye}` : ""}
+                  {ctx.hand ? `• Hand: ${ctx.hand}` : ""} {ctx.eye ? `• Eye: ${ctx.eye}` : ""}{" "}
+                  {ctx.level ? `• Level: ${ctx.level}` : ""}
                 </div>
               </div>
 
@@ -230,9 +249,7 @@ export default function ReportPage() {
 
                 <div style={{ marginTop: 14 }}>
                   <div style={{ fontWeight: 900, marginBottom: 6 }}>Camera quality</div>
-                  <div style={small}>
-                    {ai?.camera_quality?.reason || "—"}
-                  </div>
+                  <div style={small}>{ai?.camera_quality?.reason || "—"}</div>
                   {(ai?.camera_quality?.tips || []).length ? (
                     <ul style={{ margin: "8px 0 0 0", paddingLeft: 18 }}>
                       {(ai?.camera_quality?.tips || []).slice(0, 3).map((t, i) => (
@@ -267,6 +284,3 @@ export default function ReportPage() {
     </>
   );
 }
-
-
-
