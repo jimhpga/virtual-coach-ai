@@ -5,6 +5,7 @@ type ReqBody = {
   club?: string;
   handedness?: string;
   eye?: string;
+  level?: string;
 };
 
 function safeJsonParse(s: string) {
@@ -91,13 +92,14 @@ function normalizeAiPayload(x: any) {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const key = process.env.OPENAI_API_KEY;
+  const key = (process.env.OPENAI_API_KEY || "").trim().replace(/^["']+|["']+$/g, "");
   if (!key) return res.status(500).json({ error: "Missing OPENAI_API_KEY" });
 
   const body = (req.body || {}) as ReqBody;
 
   const system = [
     "You are Virtual Coach AI, a golf instructor.",
+"Adjust explanations, drills, and language to the player's level (Beginner, Intermediate, Advanced, Tour).",
     "CRITICAL RULE: If you are not confident, say so clearly and ask 1-2 short questions to clarify before diagnosing.",
     "Never guess a diagnosis that could make the player worse.",
     "Write the summary longer than a tweet: intro, diagnosis, advice must feel complete and helpful.",
@@ -106,10 +108,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const user = {
     context: {
-      club: body.club || "",
-      handedness: body.handedness || "",
-      eye: body.eye || ""
-    },
+  club: body.club || "",
+  handedness: body.handedness || "",
+  eye: body.eye || "",
+  level: body.level || ""
+},
     player_request: (body.notes || "").trim()
   };
 
@@ -161,3 +164,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(500).json({ error: "Server error", detail: e?.message || String(e) });
   }
 }
+
+
+
+
+
+
+
