@@ -40,7 +40,7 @@ export default function ReportPoller({ statusKey }: { statusKey: string }) {
   }, [statusKey]);
 
   if (state === "pending") return <p>analyzing...</p>;
-  if (state === "error")   return <p>Ã¯Â¿Â½fÃ¯Â¿Â½Ã¯Â¿Â½,Ã¯Â¿Â½Ã¯Â¿Â½...?T {error}</p>;
+  if (state === "error")   return <p>�f¯�,¿�,½f�f¯�,¿�,½�f¯�,¿�,½,�f¯�,¿�,½�f¯�,¿�,½...?T {error}</p>;
   if (!report)             return null;
 
   return (

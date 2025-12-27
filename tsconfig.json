@@ -34,6 +34,13 @@
     "exclude":  [
                     "node_modules",
                     ".next",
-                    "api_disabled"
+                    "api_disabled",
+                    "_backup",
+                    "_backup_*",
+                    "_backup_report_fix_*",
+                    "_backup_bgfix_*",
+                    "_backup_mojibake_*",
+                    "_backup*",
+                    "_legacy_root_static"
                 ]
 }
