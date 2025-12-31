@@ -21,8 +21,19 @@
   async function postForm(url, formData) {
     const res = await fetch(url, { method: "POST", body: formData });
     const data = await res.json().catch(() => ({}));
+    // Persist server-side usable upload URL for downstream tools (pose, report, etc.)
+    try {
+      const u = data.uploadUrl || data.url || data.videoUrl || data.video_url;
+      if (u && typeof window !== "undefined" && window.sessionStorage) {
+        sessionStorage.setItem("vca_video_upload_url", String(u));
+      }
+    } catch {}
     if (!res.ok || !data.ok) {
       throw new Error(data.error || `Request failed (${res.status})`);
+    }
+    // Persist server-side usable upload URL for downstream APIs (pose, clips, etc.)
+    if (data && data.uploadUrl && typeof sessionStorage !== "undefined") {
+      sessionStorage.setItem("vca_video_upload_url", data.uploadUrl);
     }
     return data;
   }
@@ -34,8 +45,19 @@
       body: JSON.stringify(obj)
     });
     const data = await res.json().catch(() => ({}));
+    // Persist server-side usable upload URL for downstream tools (pose, report, etc.)
+    try {
+      const u = data.uploadUrl || data.url || data.videoUrl || data.video_url;
+      if (u && typeof window !== "undefined" && window.sessionStorage) {
+        sessionStorage.setItem("vca_video_upload_url", String(u));
+      }
+    } catch {}
     if (!res.ok || !data.ok) {
       throw new Error(data.error || `Request failed (${res.status})`);
+    }
+    // Persist server-side usable upload URL for downstream APIs (pose, clips, etc.)
+    if (data && data.uploadUrl && typeof sessionStorage !== "undefined") {
+      sessionStorage.setItem("vca_video_upload_url", data.uploadUrl);
     }
     return data;
   }
@@ -72,3 +94,5 @@
     }
   });
 })();
+
+

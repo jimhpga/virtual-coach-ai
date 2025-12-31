@@ -1,187 +1,175 @@
-import Head from "next/head";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/router";
-import ReportNavBar from "../components/ReportNavBar";
-import ViewerBar from "../components/ViewerBar";
-import P1P9Accordion, { type P1P9Item } from "../components/P1P9Accordion";
+﻿"use client";
 
-type ReportLike = {
-  email?: string;
-  name?: string;
-  club?: string;
-  handedness?: string;
-  eye?: string;
-  videoUrl?: string;
+import React, { useEffect, useMemo, useState } from "react";
+
+type DemoReport = {
+  title?: string;
+  createdAt?: string;
+  swingScore?: number;
+  priorities?: string[];
+  drills?: { title: string; steps: string[] }[];
+  checkpoints?: { key: string; label: string; note?: string }[];
 };
 
 export default function ReportPage() {
-  // Analysis mode:
-  // "text" = coaching from descriptions only (low confidence)
-  // "pose" = coaching from pose/angles (higher confidence)
-  const analysisMode: "text" | "pose" = "text";
+  const [data, setData] = useState<DemoReport | null>(null);
+  const [err, setErr] = useState<string | null>(null);
 
-  const guard = (s: string) => {
-    if(analysisMode === "text"){
-      // Strip overly certain language in text-only mode
-      return s
-        .replace(/\b(diagnosis|definitely|always|never|guarantee|will)\b/gi, "likely")
-        .replace(/\b(best current read)\b/gi, "best guess (text-only)");
-    }
-    return s;
-  };
+  const reportUrl = useMemo(() => "/reports/demo/report.json", []);
 
-  const router = useRouter();
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch(reportUrl, { cache: "no-store" as any });
+        if (!res.ok) throw new Error(`Failed to load report (${res.status})`);
+        const json = (await res.json()) as DemoReport;
+        if (alive) setData(json);
+      } catch (e: any) {
+        if (alive) setErr(e?.message || "Failed to load report.");
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [reportUrl]);
 
-  // ---- styles (MUST be inside component body) ----
   const shell: React.CSSProperties = {
     minHeight: "100vh",
-    background:
-      "radial-gradient(1100px 700px at 30% 10%, rgba(34,197,94,0.10), transparent 60%)," +
-      "radial-gradient(900px 600px at 90% 10%, rgba(59,130,246,0.10), transparent 55%)," +
-      "#050b16",
+    background: "#0b1220",
     color: "#e6edf6",
-  };
-
-  const main: React.CSSProperties = {
-    minHeight: "100vh",
-    backgroundImage:
-      "linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.60)), url(/homepage-background.png)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    padding: 24,
-  };
-
-  const wrap: React.CSSProperties = {
-    width: "100%",
-    maxWidth: 1100,
-    margin: "0 auto",
+    padding: 18,
+    fontFamily:
+      'ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"',
   };
 
   const card: React.CSSProperties = {
-    borderRadius: 18,
-    border: "1px solid rgba(255,255,255,0.14)",
-    background: "rgba(0,0,0,0.32)",
-    backdropFilter: "blur(10px)",
-    padding: 16,
-    boxShadow: "0 24px 60px rgba(0,0,0,0.45)",
+    maxWidth: 980,
+    margin: "0 auto",
+    padding: 18,
+    borderRadius: 16,
+    border: "1px solid rgba(255,255,255,0.12)",
+    background: "rgba(0,0,0,0.25)",
+    boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
   };
 
-  const h1: React.CSSProperties = { margin: "12px 0 8px 0", fontWeight: 950, letterSpacing: 0.2 };
-  const small: React.CSSProperties = { fontSize: 12, opacity: 0.80, lineHeight: 1.5 };
+  const h1: React.CSSProperties = { margin: 0, fontSize: 26, fontWeight: 900 };
+  const sub: React.CSSProperties = { marginTop: 6, opacity: 0.8, fontSize: 13 };
 
-  // ---- demo-ish data (you can wire to real report later) ----
-  const report: ReportLike = useMemo(() => {
-    const q = router.query || {};
-    return {
-      email: typeof q.email === "string" ? q.email : "",
-      name: typeof q.name === "string" ? q.name : "",
-      club: typeof q.club === "string" ? q.club : "",
-      handedness: typeof q.hand === "string" ? q.hand : "Right-Handed",
-      eye: typeof q.eye === "string" ? q.eye : "Right Eye",
-      videoUrl: typeof q.video === "string" ? q.video : "",
-    };
-  }, [router.query]);
+  const section: React.CSSProperties = {
+    marginTop: 14,
+    padding: 14,
+    borderRadius: 14,
+    border: "1px solid rgba(255,255,255,0.10)",
+    background: "rgba(255,255,255,0.04)",
+  };
 
-  const p1p9Items: P1P9Item[] = [
-    { id:"P1", title:"Setup", subtitle:"Balanced, athletic posture with clean alignments.", status:"ON_TRACK",
-      coachNotes:"Athletic posture, neutral pelvis, soft knees. Start clean.",
-      commonMisses:["Ball too far back/forward","Grip too weak/strong for your pattern"],
-      keyDrills:["Mirror setup check","Alignment sticks for feet/hips/shoulders"] },
-    { id:"P2", title:"Shaft Parallel (Backswing)", subtitle:"Hands, club, and torso synced â€” no early throw.", status:"ON_TRACK",
-      coachNotes:"Keep structure. Turn, donâ€™t snatch.",
-      commonMisses:["Inside takeaway","Face rolls open early"],
-      keyDrills:["One-piece takeaway to P2","Wall drill: club outside hands"] },
-    { id:"P3", title:"Lead Arm Parallel (Backswing)", subtitle:"Depth + width without losing posture.", status:"UNKNOWN",
-      coachNotes:"Hands deep enough, chest still over the ball.",
-      commonMisses:["Arms lift (no depth)","Early right-side bend"],
-      keyDrills:["Split-hands depth drill","Trail-arm only rehearsal"] },
-    { id:"P4", title:"Top", subtitle:"Coil loaded, pressure ready to shift.", status:"UNKNOWN",
-      coachNotes:"Finish the turn, keep pressure under trail foot but ready to move.",
-      commonMisses:["Overrun/overswing","Across-the-line"],
-      keyDrills:["3-second top pause","Top-to-P5 pump"] },
-    { id:"P5", title:"Lead Arm Parallel (Downswing)", subtitle:"Get left before you rotate.", status:"NEEDS_ATTENTION",
-      coachNotes:"Priority: pressure shift left THEN unwind. Donâ€™t spin in place.",
-      commonMisses:["Early rotation (stuck arms)","Handle stalls/flip"],
-      keyDrills:["Step-change drill","Pump to P5, then go"] },
-    { id:"P6", title:"Shaft Parallel (Downswing)", subtitle:"Delivery: path, face, and low point control.", status:"UNKNOWN",
-      coachNotes:"Club under hands, chest opening, pressure left.",
-      commonMisses:["Over-the-top","Late steepening"],
-      keyDrills:["9-to-3 drill","Split-stance delivery reps"] },
-    { id:"P7", title:"Impact", subtitle:"Forward shaft lean + centered strike.", status:"UNKNOWN",
-      coachNotes:"Handle ahead, trail wrist bent, chest slightly open.",
-      commonMisses:["Early extension","Flip / scooping"],
-      keyDrills:["Impact bag","Line-in-sand low point"] },
-    { id:"P8", title:"Trail Arm Parallel (Follow-through)", subtitle:"Spine-angle match + extension.", status:"ON_TRACK",
-      coachNotes:"Extend through, donâ€™t dump angles.",
-      commonMisses:["Chicken wing","Stall + flip"],
-      keyDrills:["Release to P8 checkpoint","Finish-hold drill"] },
-    { id:"P9", title:"Finish", subtitle:"Balanced, tall, and posted.", status:"ON_TRACK",
-      coachNotes:"Hold your finish like a statue (a cool statue).",
-      commonMisses:["Falling back","Over-rotating without balance"],
-      keyDrills:["3-sec finish hold","Feet-together swings"] },
-  ];
+  const pill: React.CSSProperties = {
+    display: "inline-block",
+    padding: "6px 10px",
+    borderRadius: 999,
+    border: "1px solid rgba(255,255,255,0.14)",
+    background: "rgba(0,0,0,0.20)",
+    fontSize: 12,
+    fontWeight: 800,
+  };
 
-  // autoplay attempt if a video is present
-  useEffect(() => {
-    if (!report.videoUrl) return;
-    const t = setTimeout(() => { try { videoRef.current?.play(); } catch {} }, 120);
-    return () => clearTimeout(t);
-  }, [report.videoUrl]);
+  const listItem: React.CSSProperties = {
+    padding: "10px 12px",
+    borderRadius: 12,
+    border: "1px solid rgba(255,255,255,0.10)",
+    background: "rgba(0,0,0,0.18)",
+    marginTop: 8,
+  };
 
   return (
     <div style={shell}>
-      <Head><title>Virtual Coach AI â€” Report</title></Head>
-
-      <main style={main}>
-        <div style={wrap}>
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
-            <img src="/virtualcoach-logo-transparent.png" alt="Virtual Coach AI" style={{ maxWidth: 420, width: "92%" }} />
+      <div style={card}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <div>
+            <h1 style={h1}>{data?.title || "Swing Report"}</h1>
+            <div style={sub}>
+              {data?.createdAt ? `Created: ${data.createdAt}` : "Demo report view"}
+              {" · "}
+              <a href={reportUrl} style={{ color: "#9bdcff" }}>
+                View JSON
+              </a>
+            </div>
           </div>
 
-          <div style={card}>
-            <h1 style={h1}>Swing Report</h1>
-            <div style={small}>
-              Eye: <strong>{report.eye || "â€”"}</strong> &nbsp;â€¢&nbsp;
-              Handedness: <strong>{report.handedness || "â€”"}</strong> &nbsp;â€¢&nbsp;
-              Club: <strong>{report.club || "â€”"}</strong>
-            </div>
-
-            <div style={{ marginTop: 14 }}>
-              <ReportNavBar onJumpVideo={() => {
-                const el = document.getElementById("videoPanel");
-                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-              }} />
-            </div>
-
-            <div id="videoPanel" style={{ marginTop: 16 }}>
-              <div style={{ fontWeight: 900, marginBottom: 8 }}>Video</div>
-              {report.videoUrl ? (
-                <>
-                  <video
-                    ref={videoRef}
-                    controls
-                    playsInline
-                    preload="metadata"
-                    style={{ width: "100%", borderRadius: 14, background: "#000" }}
-                    src={report.videoUrl}
-                  />
-                  <ViewerBar videoRef={videoRef} />
-                </>
-              ) : (
-                <div style={{ ...small, padding: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.04)" }}>
-                  No video attached on this view yet. (Thatâ€™s okay â€” we can wire it to the upload flow next.)
-                </div>
-              )}
-            </div>
-
-            <div style={{ marginTop: 18 }}>
-              <div style={{ fontWeight: 900, marginBottom: 8 }}>P1â€“P9 Checkpoints</div>
-              <P1P9Accordion items={p1p9Items} defaultMode="single" showExpandAll autoOpenPriority={true} priorityId="P5" />
+          <div style={{ textAlign: "right" }}>
+            <div style={{ ...pill, fontSize: 13 }}>
+              Swing Score: {typeof data?.swingScore === "number" ? data.swingScore : "—"}
             </div>
           </div>
         </div>
-      </main>
+
+        {err ? (
+          <div style={{ ...section, borderColor: "rgba(255,0,0,0.25)" }}>
+            <div style={{ fontWeight: 900 }}>Couldn’t load report</div>
+            <div style={{ opacity: 0.85, marginTop: 6 }}>{err}</div>
+            <div style={{ opacity: 0.75, marginTop: 10 }}>
+              Fix by placing a real JSON file at: <code>{reportUrl}</code>
+            </div>
+          </div>
+        ) : null}
+
+        <div style={section}>
+          <div style={{ fontWeight: 900, marginBottom: 6 }}>Top Priorities</div>
+          {(data?.priorities?.length ? data.priorities : ["No priorities found (demo)."])
+            .slice(0, 3)
+            .map((p, i) => (
+              <div key={i} style={listItem}>
+                <div style={{ fontWeight: 900 }}>#{i + 1}</div>
+                <div style={{ opacity: 0.9, marginTop: 4 }}>{p}</div>
+              </div>
+            ))}
+        </div>
+
+        <div style={section}>
+          <div style={{ fontWeight: 900, marginBottom: 6 }}>Drills</div>
+          {(data?.drills?.length ? data.drills : [{ title: "Demo Drill", steps: ["Add real drills in report.json"] }])
+            .slice(0, 2)
+            .map((d, i) => (
+              <div key={i} style={listItem}>
+                <div style={{ fontWeight: 900 }}>{d.title}</div>
+                <ol style={{ margin: "8px 0 0 18px", opacity: 0.9 }}>
+                  {d.steps?.map((s, idx) => (
+                    <li key={idx} style={{ marginTop: 4 }}>
+                      {s}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+        </div>
+
+        <div style={section}>
+          <div style={{ fontWeight: 900, marginBottom: 6 }}>P1–P9 Checkpoints (Demo)</div>
+          {(data?.checkpoints?.length
+            ? data.checkpoints
+            : [
+                { key: "P1", label: "Setup", note: "Demo placeholder" },
+                { key: "P2", label: "Shaft Parallel", note: "Demo placeholder" },
+                { key: "P3", label: "Lead Arm Parallel", note: "Demo placeholder" },
+              ]
+          ).map((c) => (
+            <div key={c.key} style={listItem}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                <div style={{ fontWeight: 900 }}>
+                  {c.key} — {c.label}
+                </div>
+                <div style={{ ...pill, fontWeight: 900 }}>{c.key}</div>
+              </div>
+              {c.note ? <div style={{ opacity: 0.88, marginTop: 6 }}>{c.note}</div> : null}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ marginTop: 14, opacity: 0.75, fontSize: 12 }}>
+          This is a minimal, build-safe report page. Replace the JSON at <code>{reportUrl}</code> with your real report payload when ready.
+        </div>
+      </div>
     </div>
   );
 }

@@ -13,14 +13,16 @@ export type P1P9Item = {
 };
 
 type Props = {
-  items?: P1P9Item[];
+  onSelectPose?: (poseId: string) => void;
+items?: P1P9Item[];
   defaultMode?: "single" | "multi";
   showExpandAll?: boolean;
   autoOpenPriority?: boolean;
   priorityId?: string;
 };
 
-export default function P1P9Accordion({
+export default function P1P9Accordion({ 
+  onSelectPose,
   items = [],
   defaultMode = "single",
   showExpandAll = true,
@@ -286,4 +288,7 @@ export default function P1P9Accordion({
     </div>
   );
 }
+
+
+
 
