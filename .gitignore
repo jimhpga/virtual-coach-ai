@@ -91,3 +91,4 @@ _backup_*/
 /_backup_report_fix_*
 /_backup_bgfix_*
 /_backup_mojibake_*
+tsconfig.tsbuildinfo
