@@ -31,6 +31,31 @@ export default function UploadPage() {
   }, []);
 
   // Build video preview when user picks a file
+  async function postForm(url: string, formData: FormData) {
+    const res = await fetch(url, { method: "POST", body: formData });
+    const data = await res.json().catch(() => ({} as any));
+    if (!res.ok || !(data as any).ok) {
+      throw new Error((data as any).error || `Request failed (${res.status})`);
+    }
+    return data as any;
+  }
+
+  async function doUpload(file: File) {
+    const formData = new FormData();
+    // IMPORTANT: server expects field name "video"
+    formData.append("video", file);
+    const data = await postForm("/api/upload", formData);
+
+    // Persist server-side usable upload URL for downstream tools (pose, report, etc.)
+    try {
+      const u = data.uploadUrl || data.url || data.videoUrl || data.video_url;
+      if (u && typeof window !== "undefined" && (window as any).sessionStorage) {
+        sessionStorage.setItem("vca_video_upload_url", String(u));
+      }
+    } catch {}
+    return data;
+  }
+
   useEffect(() => {
     try {
       if (!file) {
@@ -46,6 +71,7 @@ export default function UploadPage() {
   }, [file]);
 
   // Speech Recognition wiring (no installs)
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!canSpeech) return;
@@ -127,7 +153,37 @@ export default function UploadPage() {
     try {
       if (file) await stashVideoAsBase64(file);
     } catch {}
+    if (previewUrl) sessionStorage.setItem('vca_video_preview_url', previewUrl);
+    sessionStorage.setItem('vca_video_preview_set_at', new Date().toISOString());
+    sessionStorage.setItem('vca_video_preview_page', 'upload');
+        // Upload first so downstream can run pose + report from /uploads URL
+    try {
+      if (file) {
+        const up = await doUpload(file);
+        const u = up.uploadUrl || up.url || up.videoUrl || up.video_url;
+        if (u) {
+          router.push({
+            pathname: "/report",
+            query: {
+              name: (name || "Player").trim(),
+              eye,
+              hand,
+              level,
+              club,
+              notes: notes.trim(),
+              uploadUrl: String(u),
+            },
+          });
+          return;
+        }
+      }
+    } catch (e: any) {
+      console.error("Upload failed:", e);
+      alert(e?.message || "Upload failed");
+      return;
+    }
 
+    // Fallback: no file chosen -> go to report without uploadUrl
     router.push({
       pathname: "/report",
       query: {
@@ -211,7 +267,7 @@ export default function UploadPage() {
   };
 
   return (
-    <>
+<>
       <Head>
         <title>Upload | Virtual Coach AI</title>
       </Head>
@@ -350,3 +406,9 @@ export default function UploadPage() {
     </>
   );
 }
+
+
+
+
+
+
