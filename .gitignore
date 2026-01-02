@@ -16,3 +16,28 @@ _app_DISABLED_*/
 # OS
 .DS_Store
 Thumbs.db
+# --- Python / venv ---
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# --- Node / Next ---
+node_modules/
+.next/
+out/
+.vercel/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Logs / temp ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# --- Local artifacts ---
+LAST_PROD_URL.txt
+VERCEL_PROD_URL.txt
