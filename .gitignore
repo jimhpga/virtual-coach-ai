@@ -1,94 +1,18 @@
-﻿# dependencies
-node_modules/
-
-# Next.js
+﻿# Local / temp
 .next/
-out/
+node_modules/
+*.log
+LAST_PROD_URL.txt
+VERCEL_PROD_URL.txt
 
-# local env
-.env*.local
-.env
+# Backups you made
+package.json.bak*
+package.json.bak2_*
+package.json.bak3_*
 
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+# Disabled folders / temp renames
+_app_DISABLED_*/
 
-# OS / editor
+# OS
 .DS_Store
 Thumbs.db
-.vscode/
-.idea/
-
-# local backups
-*.bak-*
-
-# ---- DO NOT COMMIT (local/dev artifacts) ----
-.vercel/
-tmp-*/
-tmp*.json
-*.tmp
-
-# local backups (your existing patterns + extras)
-*.bak
-*.bak_*
-*.bak-*
-*.BAK_*
-*.STABLE_*
-*.backup
-*.old
-*.orig
-
-# generated media / local test artifacts
-public/uploads/
-public/frames/
-public/strips/
-public/clips/
-public/test_clip.mp4
-test_clip.mp4
-
-# local scripts backups
-scripts/*.bak
-scripts/*.BAK_*
-scripts/*.STABLE_*
-
-# local tools / experiments (keep out of repo)
-Backup-VCA.ps1
-app/api/extract-pframes/
-pages/api/
-pages/manual-anchors.tsx
-pages/manual-impact.tsx
-scripts/ImpactAssist.ps1
-scripts/ImpactTools.ps1
-scripts/Make-ImpactSlowmo.ps1
-scripts/Run-E2E.ps1
-scripts/Run-ImpactFrameGen.ps1
-
-# local backups
-_backup/
-_legacy_*/
-_legacy_public_html/
-
-# Local backups (do not commit)
-_backup_*
-_backup_finish_*
-_backup_mojibake_*
-
-# --- local backups (do not commit / do not compile) ---
-_backup*/
-_backup_*/
-*_backup*/
-.backup*/
-.backups*/
-
-
-# --- ignore local backup folders (do not build/deploy) ---
-/_backup
-/_backup_*
-/_backup_*
-/_backup*
-/_backup_report_fix_*
-/_backup_bgfix_*
-/_backup_mojibake_*
-tsconfig.tsbuildinfo
