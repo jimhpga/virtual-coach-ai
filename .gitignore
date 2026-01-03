@@ -53,3 +53,11 @@ tmp-payload.json
 *.BAK*
 .vercel
 .env*.local
+# --- Local-only outputs ---
+reports/demo/
+public/reports/
+reports/**/*.json
+
+# --- Next/Vercel build output ---
+.next/
+.vercel/
