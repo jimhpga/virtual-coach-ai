@@ -1,12 +1,19 @@
-﻿# Normalize line endings (good for mixed Windows/macOS teams)
-* text=auto
+# VCA: normalize line endings
+*        text=auto
 
 # Common file types
-*.ts  text eol=lf
-*.tsx text eol=lf
-*.js  text eol=lf
-*.jsx text eol=lf
-*.json text eol=lf
-*.css text eol=lf
-*.md  text eol=lf
-*.ps1 text eol=crlf
+*.ts     text eol=lf
+*.tsx    text eol=lf
+*.js     text eol=lf
+*.jsx    text eol=lf
+*.json   text eol=lf
+*.css    text eol=lf
+*.md     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.sh     text eol=lf
+
+# Windows scripts
+*.ps1    text eol=crlf
+*.cmd    text eol=crlf
+*.bat    text eol=crlf
