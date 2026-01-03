@@ -1,25 +1,12 @@
-﻿# Normalize line endings in repo (Windows users stop seeing CRLF/LF warnings)
+﻿# Normalize line endings (good for mixed Windows/macOS teams)
 * text=auto
 
-# Treat common code/text as text files
-*.ts   text
-*.tsx  text
-*.js   text
-*.jsx  text
-*.json text
-*.md   text
-*.css  text
-*.html text
-*.yml  text
-*.yaml text
-
-# Treat binaries as binary
-*.png binary
-*.jpg binary
-*.jpeg binary
-*.gif binary
-*.webp binary
-*.ico binary
-*.pdf binary
-*.mp4 binary
-*.mov binary
+# Common file types
+*.ts  text eol=lf
+*.tsx text eol=lf
+*.js  text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.md  text eol=lf
+*.ps1 text eol=crlf
