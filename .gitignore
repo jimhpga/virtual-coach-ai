@@ -51,3 +51,5 @@ public/test_clip.mp4
 tmp-payload.json
 *.bak
 *.BAK*
+.vercel
+.env*.local
