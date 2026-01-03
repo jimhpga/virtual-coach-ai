@@ -41,3 +41,13 @@ yarn-error.log*
 # --- Local artifacts ---
 LAST_PROD_URL.txt
 VERCEL_PROD_URL.txt
+# --- VCA: keep repo lean ---
+_backup/
+**/_backup/
+*.tar.gz
+*.zip
+public/uploads/
+public/test_clip.mp4
+tmp-payload.json
+*.bak
+*.BAK*
