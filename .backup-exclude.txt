@@ -1,0 +1,11 @@
+﻿.next
+node_modules
+**\node_modules
+.venv
+**\.venv
+.git
+public\uploads
+public\frames
+logs
+*.log
+*.tmp
