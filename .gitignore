@@ -1,6 +1,107 @@
-.vercel
+﻿# Local / temp
+.next/
 node_modules/
-dist/
-public/data/
-dist/
-public/data/
+*.log
+LAST_PROD_URL.txt
+VERCEL_PROD_URL.txt
+
+# Backups you made
+package.json.bak*
+package.json.bak2_*
+package.json.bak3_*
+
+# Disabled folders / temp renames
+_app_DISABLED_*/
+
+# OS
+.DS_Store
+Thumbs.db
+# --- Python / venv ---
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# --- Node / Next ---
+node_modules/
+.next/
+out/
+.vercel/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Logs / temp ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# --- Local artifacts ---
+LAST_PROD_URL.txt
+VERCEL_PROD_URL.txt
+# --- VCA: keep repo lean ---
+_backup/
+**/_backup/
+*.tar.gz
+*.zip
+public/uploads/
+public/test_clip.mp4
+tmp-payload.json
+*.bak
+*.BAK*
+.vercel
+.env*.local
+# --- Local-only outputs ---
+reports/demo/
+public/reports/
+reports/**/*.json
+
+# --- Next/Vercel build output ---
+.next/
+.vercel/
+# --- VCA local noise (added by ship script) ---
+# next/build
+.next
+.next_*
+.next_vca
+out
+dist
+build
+coverage
+
+# dependencies
+node_modules
+
+# vercel
+.vercel
+
+# local artifacts / reports / pdfs
+*.pdf
+*.zip
+*.log
+*.tmp
+*.bak
+*.old
+*.broken*
+*_crashlog*.txt
+_dev_crashlog.txt
+_tmp_*.json
+WORKING_*.txt
+BUILD_OK.txt
+NEXT-STEPS.txt
+NEXT_SESSION.md
+
+# scratch folders
+_debug/
+_tmp*/
+_ai-reports/
+upload/
+data/
+reports.old/
+reports.html.broken-*
+
+# OS junk
+.DS_Store
+Thumbs.db

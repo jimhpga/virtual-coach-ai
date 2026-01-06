@@ -1,0 +1,48 @@
+﻿{
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "incremental": true,
+    "module": "esnext",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "strictNullChecks": true,
+    "target": "ES2017"
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/dev/types/**/*.ts",
+    ".next/types/**/*.ts",
+    "next-env.d.ts",
+    ".next_vca/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "api_disabled",
+    "_backup",
+    "_backup_*",
+    "_backup_report_fix_*",
+    "_backup_bgfix_*",
+    "_backup_mojibake_*",
+    "_backup*",
+    "_legacy_root_static"
+  ]
+}
+

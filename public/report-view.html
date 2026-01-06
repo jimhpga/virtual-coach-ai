@@ -1,9 +1,9 @@
 <!doctype html>
 <html>
-<head>
-  <meta charset="utf-8"/>
+<head>`n<meta charset="UTF-8">
+  
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Virtual Coach AI — Report Viewer</title>
+  <title>Virtual Coach AI Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Report Viewer</title>
   <style>
     body{font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:900px;margin:40px auto;padding:0 16px;line-height:1.5}
     pre{background:#111;color:#eee;padding:12px;border-radius:8px;overflow:auto}
@@ -15,7 +15,7 @@
   <p class="muted">Pass <code>?statusKey=...</code> in the URL. Example:
   <code>report-view.html?statusKey=status/1757313922-trigger-check.json</code></p>
 
-  <pre id="output">Loading…</pre>
+  <pre id="output">LoadingÃ‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦</pre>
 
   <script>
     async function fetchReport() {
@@ -24,7 +24,7 @@
         const params = new URLSearchParams(window.location.search);
         const statusKey = params.get("statusKey");
         if (!statusKey) {
-          out.textContent = "❌ No statusKey provided in the URL.";
+          out.textContent = "Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒâ€¦Ã¢â‚¬â„¢ No statusKey provided in the URL.";
           return;
         }
         const res = await fetch("/api/report", {
@@ -35,10 +35,13 @@
         const data = await res.json();
         out.textContent = JSON.stringify(data, null, 2);
       } catch (e) {
-        out.textContent = "❌ " + (e?.message || String(e));
+        out.textContent = "Ã‚Â¢Ãƒâ€šÃ‚ÂÃƒâ€¦Ã¢â‚¬â„¢ " + (e?.message || String(e));
       }
     }
     fetchReport();
   </script>
 </body>
 </html>
+
+
+

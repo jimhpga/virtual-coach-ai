@@ -1,0 +1,190 @@
+﻿:root{
+  --ink:#e6edf6;
+  --muted:rgba(230,237,246,0.72);
+  --muted2:rgba(230,237,246,0.55);
+  --border:rgba(255,255,255,0.14);
+  --card:rgba(10,16,24,0.62);
+  --card2:rgba(10,16,24,0.48);
+}
+
+html, body { height:100%; margin:0; }
+
+body{
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+
+  /* Apple/private-club: background is felt, not noticed */
+  background:
+    radial-gradient(circle at 70% 18%, rgba(255,210,140,0.10), rgba(0,0,0,0.62) 48%),
+    linear-gradient(rgba(6,12,18,0.86), rgba(6,12,18,0.94)),
+    url("/images/golf-course.png") center/cover no-repeat fixed;
+}
+
+.vcaShell{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+.vcaMain{
+  flex:1;
+  padding: 96px 24px 64px;
+  display:flex;
+  justify-content:center;
+}
+
+.vcaCard{
+  width:min(1120px, 100%);
+  background: var(--card);
+  border:1px solid var(--border);
+  border-radius: 24px;
+  backdrop-filter: blur(22px);
+  box-shadow: 0 40px 120px rgba(0,0,0,0.68);
+  padding: 34px;
+}
+
+.vcaHero{
+  width:min(1120px, 100%);
+  border-radius: 28px;
+  border:1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  backdrop-filter: blur(26px);
+  box-shadow: 0 50px 140px rgba(0,0,0,0.72);
+  padding: 56px 46px;
+}
+
+.vcaKicker{
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.vcaH1{
+  font-size: 54px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin: 14px 0 10px 0;
+  line-height: 1.03;
+}
+
+.vcaSub{
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.55;
+  max-width: 70ch;
+}
+
+.vcaButtons{
+  display:flex;
+  gap: 12px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.vcaBtnPrimary,.vcaBtnSecondary{
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.16);
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.vcaBtnPrimary{
+  background: rgba(31,122,71,0.42);
+}
+
+.vcaBtnSecondary{
+  background: rgba(255,255,255,0.10);
+}
+
+.vcaWhisper{
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--muted2);
+}
+
+.vcaDivider{
+  margin: 28px 0;
+  height:1px;
+  background: rgba(255,255,255,0.10);
+}
+
+.vcaGrid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.vcaTile{
+  background: var(--card2);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.vcaTileTitle{
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.vcaTileText{
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+@media (max-width: 900px){
+  .vcaHero{ padding: 36px 22px; }
+  .vcaH1{ font-size: 40px; }
+  .vcaGrid{ grid-template-columns: 1fr; }
+}
+
+
+/* --- VCA Premium Chrome (hotfix) --- */
+:root{
+  --vcaMax: 1120px;
+  --glassBg: rgba(10,12,14,0.58);
+  --glassStroke: rgba(255,255,255,0.12);
+  --glassShadow: 0 18px 60px rgba(0,0,0,0.55);
+}
+
+/* Full-bleed environment background */
+.vcaEnv{
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 700px at 20% 10%, rgba(0,0,0,0.35), rgba(0,0,0,0.75)),
+    url("/images/golf-course.png") center / cover no-repeat fixed;
+}
+
+/* One true page container */
+.vcaShell{
+  max-width: var(--vcaMax);
+  margin: 0 auto;
+  padding: 26px 18px 54px;
+}
+
+/* Primary glass surface */
+.vcaGlass{
+  border-radius: 24px;
+  background: var(--glassBg);
+  border: 1px solid var(--glassStroke);
+  box-shadow: var(--glassShadow);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 28px;
+}
+
+/* Secondary inset glass (use sparingly) */
+.vcaGlassInset{
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  padding: 18px;
+}

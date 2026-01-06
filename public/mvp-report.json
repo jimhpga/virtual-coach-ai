@@ -1,0 +1,27 @@
+﻿{
+  "swingScore": "A-",
+  "speed": "B+",
+  "control": "B+",
+  "consistency": "B+",
+  "topFaults": [
+    "Early extension (hips toward the ball)",
+    "Face control (open/closed window too wide)",
+    "Low point drift (bottom moves behind ball)"
+  ],
+  "priorityFix": {
+    "title": "Impact Handle Forward (3-ball line)",
+    "how": "Place 3 balls in a line. Hit the middle ball while brushing the ground in front of it. Film from face-on. Keep chest over lead thigh at impact.",
+    "why": "Forces forward low point + stabilizes handle path and face."
+  },
+  "p1p9": [
+    {"p":"P1","note":"Athletic posture; neutral grip pressure"},
+    {"p":"P2","note":"Spine-Angle Match at shaft parallel"},
+    {"p":"P3","note":"Lead arm matches shoulder plane"},
+    {"p":"P4","note":"Top: loaded, not collapsed"},
+    {"p":"P5","note":"Lead side posts while hands fall"},
+    {"p":"P6","note":"Shaft shallows; chest stays down"},
+    {"p":"P7","note":"Impact: handle ahead; pressure left"},
+    {"p":"P8","note":"Spine-Angle Match; release continues"},
+    {"p":"P9","note":"Balanced finish; chest to target"}
+  ]
+}

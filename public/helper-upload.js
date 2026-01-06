@@ -1,4 +1,4 @@
-// helpers-upload.js
+﻿// helpers-upload.js
 // Small utilities used by upload.html and any page that needs /api/report + /api/analyze
 
 // Turn "uploads/1234-name.mov" into a stable jobId "1234-name"
@@ -61,7 +61,7 @@ export async function pollAnalyze({
       throw err;
     }
 
-    // pending → wait and backoff
+    // pending Ã¢â€ â€™ wait and backoff
     await new Promise(r => setTimeout(r, delay));
     delay = Math.min(Math.round(delay * 1.5), 8000);
     attempt++;
@@ -69,3 +69,6 @@ export async function pollAnalyze({
 
   throw new Error("pollAnalyze: timed out waiting for ready");
 }
+
+
+
