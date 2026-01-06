@@ -1,0 +1,170 @@
+﻿:root{
+  --bg0:#070a10;
+  --bg1:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.12);
+  --text:#e6edf6;
+  --muted:rgba(230,237,246,0.72);
+  --muted2:rgba(230,237,246,0.5);
+  --shadow:0 12px 32px rgba(0,0,0,0.55);
+  --r:16px;
+}
+
+.rbShell{
+  min-height:100vh;
+  background: radial-gradient(1200px 700px at 18% 10%, rgba(74, 130, 255, 0.22), transparent 60%),
+              radial-gradient(900px 600px at 78% 18%, rgba(255, 98, 98, 0.12), transparent 55%),
+              linear-gradient(180deg, #05070c 0%, #070a10 35%, #05070c 100%);
+  color:var(--text);
+  padding:24px;
+}
+
+.rbWrap{
+  max-width:1100px;
+  margin:0 auto;
+}
+
+.rbCard{
+  border:1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+
+.rbSectionHeader{
+  padding:18px 18px 14px;
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.rbTitle{
+  margin:0;
+  font-size:20px;
+  letter-spacing:0.2px;
+}
+
+.rbSub{
+  margin:4px 0 0;
+  font-size:13px;
+  color:var(--muted);
+}
+
+.rbBody{
+  padding:18px;
+}
+
+.rbRow{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+}
+
+@media (max-width: 900px){
+  .rbRow{ grid-template-columns: 1fr; }
+  .rbShell{ padding:16px; }
+}
+
+.rbPanel{
+  border:1px solid var(--border);
+  background:rgba(0,0,0,0.25);
+  border-radius: 14px;
+  padding:14px;
+}
+
+.rbPanel h2{
+  margin:0 0 10px;
+  font-size:14px;
+  letter-spacing:0.2px;
+}
+
+.rbMuted{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.rbDivider{
+  height:1px;
+  background:var(--border);
+  margin:16px 0;
+}
+
+.rbBtn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  height:40px;
+  padding:0 14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,0.08);
+  color:var(--text);
+  font-weight:700;
+  cursor:pointer;
+  user-select:none;
+}
+
+.rbBtn:hover{
+  background:rgba(255,255,255,0.12);
+}
+
+.rbNote{
+  font-size:12px;
+  color:var(--muted2);
+}
+
+
+
+/* --- Make report header feel like content, not a second navbar --- */
+.rbSectionHeader{
+  margin: 0 0 18px 0;
+  padding: 0 0 16px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  background: transparent !important;
+  position: static !important;
+  top: auto !important;
+}
+
+.rbSectionHeader h1,
+.rbSectionHeader .title{
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.rbSectionHeader .sub,
+.rbSectionHeader p{
+  margin: 8px 0 0 0;
+  color: rgba(230,237,246,0.72);
+  line-height: 1.45;
+}
+
+
+/* --- Make report header feel like content, not a second navbar --- */
+.rbSectionHeader{
+  margin: 0 0 18px 0;
+  padding: 0 0 16px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  background: transparent !important;
+  position: static !important;
+  top: auto !important;
+}
+
+.rbSectionHeader h1,
+.rbSectionHeader .title{
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.rbSectionHeader .sub,
+.rbSectionHeader p{
+  margin: 8px 0 0 0;
+  color: rgba(230,237,246,0.72);
+  line-height: 1.45;
+}

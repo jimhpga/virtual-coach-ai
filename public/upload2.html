@@ -1,0 +1,76 @@
+<!doctype html>
+
+<title>Upload2 Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ Virtual Coach AI</title>
+<body style="font-family:system-ui;margin:2rem;max-width:820px">
+  <h1>Upload2 Test</h1>
+  <form>
+    <input id="file" type="file" accept="video/*" />
+    <button id="uploadBtn" type="button">Upload & Analyze</button>
+  </form>
+  <pre id="log" style="margin-top:1rem;color:#555;white-space:pre-wrap"></pre>
+
+  <script>
+  // [upload mux TEST fixed] Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Mux only, robust error reporting
+  (function () {
+    console.log("[upload mux TEST fixed] client JS loaded");
+    const $ = s => document.querySelector(s);
+    const file = $("#file");
+    const btn  = $("#uploadBtn");
+    const logEl = $("#log");
+    const log = m => { logEl.textContent += (logEl.textContent ? "\n" : "") + m; };
+
+    btn.addEventListener("click", async (e) => {
+      e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+      const f = file.files?.[0];
+      if (!f) return log("Pick a video first.");
+
+      try {
+        log("Requesting Mux upload URLÃ‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦");
+        const r1 = await fetch("/api/mux-direct-upload", { method: "POST" });
+        const j1 = await r1.json().catch(() => ({}));
+        const up = j1?.upload;
+        if (!r1.ok || !up?.url) throw new Error(`Mux upload URL missing (${r1.status})`);
+
+        log("Uploading to MuxÃ‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦");
+        const r2 = await fetch(up.url, { method: "PUT", body: f });
+        if (!r2.ok) throw new Error(`Mux upload failed (${r2.status})`);
+
+        log("Saving report JSONÃ‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦");
+        const r3 = await fetch("/api/save-report", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            status: "ready",
+            swingScore: 80,
+            muxPlaybackId: null,
+            muxUploadId: up.id,
+            p1p9: [],
+            faults: [],
+            note: `uploaded ${f.name}`
+          })
+        });
+
+        // Parse JSON only if it's actually JSON; otherwise show the first 200 chars.
+        let rep;
+        const ct = (r3.headers.get("content-type") || "").toLowerCase();
+        if (ct.includes("application/json")) {
+          rep = await r3.json();
+        } else {
+          const txt = await r3.text();
+          throw new Error(`save-report returned non-JSON (${r3.status})\n${txt.slice(0,200)}Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦`);
+        }
+
+        if (!r3.ok || !rep?.id) throw new Error(`Report save failed (${r3.status})`);
+        // Use explicit file path so it works without pretty routes
+        location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
+      } catch (err) {
+        log("Error: " + (err?.message || err));
+      }
+    });
+  })();
+  </script>
+</body>
+
+
+
+

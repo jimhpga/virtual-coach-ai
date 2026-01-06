@@ -1,7 +1,0 @@
-<div id="site-header"></div>
-<script>
-fetch('/partials/header.html?v=20250915')
-  .then(r => r.text())
-  .then(h => { document.getElementById('site-header').innerHTML = h; })
-  .catch(() => { /* optional: show a tiny fallback */ });
-</script>

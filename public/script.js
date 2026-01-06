@@ -1,4 +1,4 @@
-// script.js — S3 presign + direct upload + preview + redirect
+﻿// script.js Ã¢â‚¬â€ S3 presign + direct upload + preview + redirect
 
 function setStatus(text, isError = false) {
   const box = document.getElementById('status');
@@ -34,7 +34,7 @@ export async function uploadVideo() {
 
   // 1) ask backend for a presigned POST
   const contentType = guessContentType(file);
-  setStatus(`Requesting upload link… (${contentType})`);
+  setStatus(`Requesting upload linkÃ¢â‚¬Â¦ (${contentType})`);
 
   let presign;
   try {
@@ -61,7 +61,7 @@ export async function uploadVideo() {
   }
 
   // 2) upload the big file directly to S3
-  setStatus('Uploading to cloud…');
+  setStatus('Uploading to cloudÃ¢â‚¬Â¦');
   const formData = new FormData();
   Object.entries(fields).forEach(([k, v]) => formData.append(k, v));
   formData.append('file', file);
@@ -84,7 +84,7 @@ export async function uploadVideo() {
 
   // 3) hand off to report page
   try { sessionStorage.setItem('uploadedVideoUrl', publicUrl); } catch {}
-  setStatus('Upload complete. Redirecting…');
+  setStatus('Upload complete. RedirectingÃ¢â‚¬Â¦');
   window.location.href = 'report.html';
 }
 
@@ -96,3 +96,6 @@ export async function uploadVideo() {
     btn.dataset._bound = '1';
   }
 })();
+
+
+

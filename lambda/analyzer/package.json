@@ -1,5 +1,0 @@
-﻿{
-  "name": "vcai-analyzer",
-  "type": "module",
-  "dependencies": { "@aws-sdk/client-s3": "^3.632.0" }
-}

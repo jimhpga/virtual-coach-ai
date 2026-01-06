@@ -1,0 +1,48 @@
+﻿:root{
+  --scrim: rgba(0,0,0,.06);
+  --panel: rgba(10,18,24,.24);
+  --line:  rgba(255,255,255,.10);
+  --text:  #ecf3f7; 
+  --muted: #cfe0e6;
+  --radius:16px; 
+  --shadow:0 8px 24px rgba(0,0,0,.20);
+  --nav:#0b2b12;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;color:var(--text);
+  background:url('/homepage-background.png') center/cover fixed no-repeat;
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
+}
+.scrim{min-height:100vh;background:var(--scrim)}
+.wrap{width:min(1080px,92%);margin:0 auto;padding:22px 0 52px}
+
+/* nav */
+header{position:sticky;top:0;z-index:20;background:var(--nav);
+  border-bottom:1px solid rgba(255,255,255,.1)}
+.navwrap{width:min(1080px,94%);margin:0 auto;padding:10px 0;
+  display:flex;gap:16px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;
+  text-decoration:none;font-weight:800;letter-spacing:.2px}
+.brand img{height:30px}
+nav a{color:#fff;text-decoration:none;padding:8px 10px;border-radius:10px;
+  border:1px solid transparent}
+nav a:hover{background:rgba(255,255,255,.08)}
+nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);
+  background:rgba(255,255,255,.10)}
+
+.card{background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(1.5px);
+  padding:16px}
+.badge{background:rgba(255,255,255,.06);border:1px solid var(--line);
+  color:#dff3ff;padding:6px 10px;border-radius:999px;font-size:12px}
+.btn{display:inline-block;border:1px solid var(--line);
+  background:rgba(255,255,255,.10);color:#fff;text-decoration:none;
+  border-radius:12px;padding:10px 14px}
+.btn:hover{background:rgba(255,255,255,.16)}
+.muted{color:var(--muted)}
+pre{white-space:pre-wrap;word-break:break-word}
+
+
+

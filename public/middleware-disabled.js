@@ -1,4 +1,4 @@
-// middleware.js
+﻿// middleware.js
 import { NextResponse } from 'next/server';
 
 const PROTECT_PATHS = [
@@ -7,7 +7,7 @@ const PROTECT_PATHS = [
   // add others if you like
 ];
 
-// Don’t block these (debug/health)
+// DonÃ¢â‚¬â„¢t block these (debug/health)
 const OPEN_PATHS = ['/api/health', '/api/env-check', '/api/frames', '/api/frames-zip', '/api/healthz'];
 
 export function middleware(req) {
@@ -43,3 +43,6 @@ export const config = {
     // add more paths if needed, e.g. '/index.html'
   ]
 };
+
+
+
