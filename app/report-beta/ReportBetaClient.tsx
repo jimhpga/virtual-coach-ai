@@ -71,7 +71,15 @@ function Bar({ label, value }: { label: string; value: number }) {
 
 <div style={{ marginBottom: 10 }}>
 {/* VCA_SWING_FACTS_CARD */}
-<SwingFactsCard url="/pose-demo/swing_facts.json" />
+{/* VCA_HIDE_FACTS >> {(() => {
+  const showFacts =
+    typeof window !== "undefined" &&
+    (new URLSearchParams(window.location.search).get("facts") === "1" ||
+      (window.localStorage?.getItem("__VCA_DEBUG_FACTS") === "1") ||
+      (window as any).__VCA_DEBUG_FACTS === true);
+
+  return showFacts ? <SwingFactsCard url="/pose-demo/swing_facts.json" /> : null;
+})()} */}
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, opacity: 0.9 }}>
         <div style={{ fontWeight: 700 }}>{label}</div>
         <div style={{ fontVariantNumeric: "tabular-nums", opacity: 0.75 }}>{v}</div>
@@ -1354,6 +1362,9 @@ const f = sortedFrames.find((x) => x.p === p);
     </div>
   );
 }
+
+
+
 
 
 
