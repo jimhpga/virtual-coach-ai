@@ -78,7 +78,7 @@ function Bar({ label, value }: { label: string; value: number }) {
       (window.localStorage?.getItem("__VCA_DEBUG_FACTS") === "1") ||
       (window as any).__VCA_DEBUG_FACTS === true);
 
-  return showFacts ? <SwingFactsCard url="/pose-demo/swing_facts.json" /> : null;
+  return showFacts ? {process.env.NEXT_PUBLIC_VCA_DEBUG_FACTS === "1" ? (<SwingFactsCard url="/pose-demo/swing_facts.json" />) : null} : null;
 })()} */}
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, opacity: 0.9 }}>
         <div style={{ fontWeight: 700 }}>{label}</div>
@@ -319,8 +319,7 @@ export default function ReportBetaClient() {
     try {
       const raw = sessionStorage.getItem("vca_intake");
       if (raw) setIntake(JSON.parse(raw));
-    } catch {}
-  }, []);
+    } catch {}, []);
 
   // Confidence = dip -> exit -> climb (simple demo model for now)
   // We tie it to sequencing: if faults include late hips / arms start down => dip.
@@ -377,8 +376,7 @@ export default function ReportBetaClient() {
         const r = await fetch("/api/demo-video", { cache: "no-store" });
         const j = await r.json();
         if (j?.url) setVideoUrl(j.url);
-      } catch {}
-    })();
+      } catch {})();
   }, []);
 // Auto-load demo video (newest mp4 in /public/uploads)
   useEffect(() => {
@@ -387,10 +385,22 @@ export default function ReportBetaClient() {
         const r = await fetch("/api/demo-video", { cache: "no-store" });
         const j = await r.json();
         if (j?.url) setVideoUrl(j.url);
-      } catch {}
-    })();
+      } catch {})();
   }, []);
 const [runStatus, setRunStatus] = useState<string>("");
+
+  // === MVP Demo Hardening: simple run-state machine ===
+  type RunState = "idle" | "analyzing" | "frames" | "report" | "error";
+  const [runState, setRunState] = useState<RunState>("idle");
+  const [runErr, setRunErr] = useState<string>("");
+
+  function stepName(s: RunState){
+    if(s==="idle") return "Upload";
+    if(s==="analyzing") return "Analyze";
+    if(s==="report") return "Report";
+    if(s==="error") return "Error";
+    return "Upload";
+  }
   const [videoUrl, setVideoUrl] = useState<string>("");
 const [impactFrame, setImpactFrame] = useState<number>(62);
   const [level, setLevel] = useState<"beginner" | "intermediate" | "advanced" | "teacher">("beginner");
@@ -624,14 +634,24 @@ const [error, setError] = useState<string | null>(null);
 
   const frames = data?.media?.frames ?? [];
   const sortedFrames = useMemo(() => [...frames].sort((a, b) => a.p - b.p), [frames]);
-  function resetDemo() {
-    try {
-      setData(null);
-      setError(null);
-      setRunStatus("Ready");
-      setActiveP(undefined);
-      setClickTest(0);
-    } catch {}}
+    function resetDemo() {
+    // Bulletproof reset: clears UI state without waiting on network
+    try { setData(null); } catch {}
+    try { setError(null); } catch {}
+    try { setRunStatus(""); } catch {}
+    try { setRunErr(""); } catch {}
+    try { setRunState("idle"); } catch {}
+
+    // common UI state (safe if these exist)
+    try { setActiveP(1); } catch {}
+    try { setCurTime(0); } catch {}
+    try { setLoading(false); } catch {}
+
+    // if you track click tests or other debug counters
+    try { setClickTest(0 as any); } catch {}
+
+    // scroll back up so the user sees a clean slate
+    try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch {}
 
   async function analyze() {
     // CLICK TEST — if this number bumps, the button is NOT “dead”
@@ -717,21 +737,21 @@ const f = sortedFrames.find((x) => x.p === p);
     return {
       good:
         n?.good ?? [
-          "Good balance and posture through the motion.",
-          "Solid rhythm—nothing looks rushed.",
-          "Nice intent to swing through the target.",
+          "Solid balance through the motion - that's your foundation",
+          "Tempo is consistent; keep that and you'll keep the strike",
+          "Impact looks organized: hands and body arriving together",
         ],
       improve:
         n?.improve ?? [
-          "Clean up the transition so the hands don’t ‘throw’ early.",
-          "Keep your chest over the ball longer through impact.",
-          "Stay in your safe hallway on the way down.",
+          "Pick ONE priority today and win it (face control OR low point)",
+          "Give me 5 clean reps before you speed up - clean beats fast",
+          "Film 2 swings after the drill: if the picture improves, keep it",
         ],
       powerLeaks:
         n?.powerLeaks ?? [
-          "Arms outrun the body into impact (costs strike + speed).",
-          "Standing up through impact (creates thin/fat misses).",
-          "Club drifts outside the safe hallway coming down (requires saving it late).",
+          "If the chest stalls, the hands flip - keep rotating through",
+          "Pressure must shift THEN you rotate (don't spin in place)",
+          "Finish tall and posted; if you're falling back, you're leaking power",
         ],
     };
   }, [data]);
@@ -861,6 +881,18 @@ const f = sortedFrames.find((x) => x.p === p);
 <div style={{ display: "grid", gap: 12 }}>
     {/* Row 1: primary actions */}
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        {/* MVP breadcrumb */}
+        <div style={{ gridColumn: "1 / -1", fontSize: 12, opacity: 0.8, margin: "8px 0 10px" }}>
+          <span style={{ fontWeight: stepName(runState)==="Upload" ? 800 : 400 }}>Upload</span>
+          {"  →  "}
+          <span style={{ fontWeight: stepName(runState)==="Analyze" ? 800 : 400 }}>Analyze</span>
+          {"  →  "}
+          <span style={{ fontWeight: stepName(runState)==="Report" ? 800 : 400 }}>Report</span>
+          {runState==="error" && runErr ? (
+            <span style={{ marginLeft: 10, fontWeight: 800 }}>⚠ {runErr}</span>
+          ) : null}
+        </div>
+
       <button
         type="button"
         onClick={analyze}
@@ -1362,6 +1394,21 @@ const f = sortedFrames.find((x) => x.p === p);
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
