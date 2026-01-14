@@ -15,7 +15,8 @@ body{
   background:url('/homepage-background.png') center/cover fixed no-repeat;
   font:16px/1.5 system-ui,-apple-system,Segoe UI,Inter,Roboto,Arial
 }
-.scrim{min-height:100vh;background:var(--scrim)}
+.scrim{
+  pointer-events: none;min-height:100vh;background:var(--scrim)}
 .wrap{width:min(1080px,92%);margin:0 auto;padding:22px 0 52px}
 
 /* nav */
@@ -43,6 +44,7 @@ nav a[aria-current="page"]{border-color:rgba(255,255,255,.18);
 .btn:hover{background:rgba(255,255,255,.16)}
 .muted{color:var(--muted)}
 pre{white-space:pre-wrap;word-break:break-word}
+
 
 
 

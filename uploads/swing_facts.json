@@ -1,0 +1,29 @@
+﻿{
+    "generatedAt":  "2026-01-13T14:40:32",
+    "fps":  30,
+    "frames":  171,
+    "detectedFrames":  101,
+    "detectedRatePct":  59.1,
+    "confidence":  "Low",
+    "tempo":  {
+                  "downswingSec":  1.5,
+                  "backswingSec":  0.27,
+                  "ratio":  0.18
+              },
+    "p":  {
+              "P9":  171,
+              "P4":  9,
+              "P1":  1,
+              "P2":  4,
+              "P7":  54,
+              "P8":  112,
+              "P5":  24,
+              "P6":  39,
+              "P3":  6
+          },
+    "notes":  [
+                  "P4 is estimated as the highest lead-wrist frame (minimum wrist Y).",
+                  "P7 is estimated as the frame where lead wrist is closest to hip height after P4.",
+                  "These are demo-grade checkpoints until we add clubhead + face-on/down-the-line detection."
+              ]
+}

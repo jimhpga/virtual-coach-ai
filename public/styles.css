@@ -22,7 +22,8 @@ body::before{
   filter:saturate(105%) brightness(95%);
   z-index:-2;
 }
-.scrim{min-height:100vh; background:var(--scrim)}
+.scrim{
+  pointer-events: none;min-height:100vh; background:var(--scrim)}
 .wrap{width:min(1120px,92%); margin:0 auto; padding:22px 0 64px}
 
 /* Navbar */
@@ -60,6 +61,7 @@ h2{font-size:26px; margin:6px 0 12px}
 @media(max-width:960px){.grid2{grid-template-columns:1fr}}
 ul.tight{margin:6px 0 0 18px}
 .hero-pad{padding:10px 14px}
+
 
 
 

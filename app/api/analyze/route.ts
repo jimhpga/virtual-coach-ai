@@ -20,7 +20,10 @@ export async function POST(req: Request) {
     const v = videoUrl || (uploadId ? `/uploads/${uploadId}` : "");
 
     if (!v || !v.startsWith("/uploads/")) {
-      return NextResponse.json(
+          // FINAL_NORMALIZE_REPORT (do not remove)
+    report.headline = String(report.headline || "P1-P9 frames ready.").replace(/P1[–â]P9/g, "P1-P9");
+    if (!Array.isArray((report as any).topFaults)) (report as any).topFaults = [];
+    return NextResponse.json(
         { ok: false, error: "videoUrl must start with /uploads/" },
         { status: 400 }
       );
@@ -38,7 +41,10 @@ export async function POST(req: Request) {
     const data = (await r.json().catch(() => null)) as ExtractResp | null;
 
     if (!r.ok || !data || !data.ok) {
-      return NextResponse.json(
+          // FINAL_NORMALIZE_REPORT (do not remove)
+    report.headline = String(report.headline || "P1-P9 frames ready.").replace(/P1[–â]P9/g, "P1-P9");
+    if (!Array.isArray((report as any).topFaults)) (report as any).topFaults = [];
+    return NextResponse.json(
         { ok: false, error: data?.error || `extract-pframes failed (${r.status})` },
         { status: 500 }
       );
@@ -47,7 +53,7 @@ export async function POST(req: Request) {
     const framesDir = data.framesDir || "";
     const frames = Array.isArray(data.frames) ? data.frames : [];
 
-    // Build a clean P1–P9 array your UI can use right now
+    // Build a clean P1-P9 array your UI can use right now
     const pframes = frames
       .slice()
       .sort((a, b) => (a.p || 0) - (b.p || 0))
@@ -62,7 +68,7 @@ export async function POST(req: Request) {
     const report = {
       id: `rpt_${Date.now()}`,
       createdAt: new Date().toISOString(),
-      headline: "P1–P9 frames ready.",
+      headline: "P1-P9 frames ready.",
       swingScore: 72,
       topFaults: [],
       checkpoints: pframes.map((pf) => ({ p: pf.p, label: pf.label, note: "-" })),
@@ -70,6 +76,9 @@ export async function POST(req: Request) {
       framesDir,                // handy for debugging + direct viewing
     };
 
+        // FINAL_NORMALIZE_REPORT (do not remove)
+    report.headline = String(report.headline || "P1-P9 frames ready.").replace(/P1[–â]P9/g, "P1-P9");
+    if (!Array.isArray((report as any).topFaults)) (report as any).topFaults = [];
     return NextResponse.json({
       ok: true,
       videoUrl: v,
@@ -78,9 +87,15 @@ export async function POST(req: Request) {
       report,
     });
   } catch (e: any) {
+        // FINAL_NORMALIZE_REPORT (do not remove)
+    report.headline = String(report.headline || "P1-P9 frames ready.").replace(/P1[–â]P9/g, "P1-P9");
+    if (!Array.isArray((report as any).topFaults)) (report as any).topFaults = [];
     return NextResponse.json(
       { ok: false, error: e?.message || "Analyze failed" },
       { status: 500 }
     );
   }
 }
+
+
+

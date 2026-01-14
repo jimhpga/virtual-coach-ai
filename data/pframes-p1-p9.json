@@ -1,0 +1,79 @@
+﻿{
+    "ok":  true,
+    "level":  "beginner",
+    "framesDir":  "/frames/1767655389489",
+    "frames":  [
+                   {
+                       "p":  1,
+                       "label":  "P1",
+                       "frame":  32,
+                       "file":  "p1.jpg",
+                       "imageUrl":  "/frames/1767655389489/p1.jpg",
+                       "thumbUrl":  "/frames/1767655389489/p1.jpg"
+                   },
+                   {
+                       "p":  2,
+                       "label":  "P2",
+                       "frame":  38,
+                       "file":  "p2.jpg",
+                       "imageUrl":  "/frames/1767655389489/p2.jpg",
+                       "thumbUrl":  "/frames/1767655389489/p2.jpg"
+                   },
+                   {
+                       "p":  3,
+                       "label":  "P3",
+                       "frame":  44,
+                       "file":  "p3.jpg",
+                       "imageUrl":  "/frames/1767655389489/p3.jpg",
+                       "thumbUrl":  "/frames/1767655389489/p3.jpg"
+                   },
+                   {
+                       "p":  4,
+                       "label":  "P4",
+                       "frame":  49,
+                       "file":  "p4.jpg",
+                       "imageUrl":  "/frames/1767655389489/p4.jpg",
+                       "thumbUrl":  "/frames/1767655389489/p4.jpg"
+                   },
+                   {
+                       "p":  5,
+                       "label":  "P5",
+                       "frame":  55,
+                       "file":  "p5.jpg",
+                       "imageUrl":  "/frames/1767655389489/p5.jpg",
+                       "thumbUrl":  "/frames/1767655389489/p5.jpg"
+                   },
+                   {
+                       "p":  6,
+                       "label":  "P6",
+                       "frame":  61,
+                       "file":  "p6.jpg",
+                       "imageUrl":  "/frames/1767655389489/p6.jpg",
+                       "thumbUrl":  "/frames/1767655389489/p6.jpg"
+                   },
+                   {
+                       "p":  7,
+                       "label":  "P7",
+                       "frame":  62,
+                       "file":  "p7.jpg",
+                       "imageUrl":  "/frames/1767655389489/p7.jpg",
+                       "thumbUrl":  "/frames/1767655389489/p7.jpg"
+                   },
+                   {
+                       "p":  8,
+                       "label":  "P8",
+                       "frame":  68,
+                       "file":  "p8.jpg",
+                       "imageUrl":  "/frames/1767655389489/p8.jpg",
+                       "thumbUrl":  "/frames/1767655389489/p8.jpg"
+                   },
+                   {
+                       "p":  9,
+                       "label":  "P9",
+                       "frame":  74,
+                       "file":  "p9.jpg",
+                       "imageUrl":  "/frames/1767655389489/p9.jpg",
+                       "thumbUrl":  "/frames/1767655389489/p9.jpg"
+                   }
+               ]
+}
