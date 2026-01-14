@@ -49,6 +49,13 @@ export async function uploadVideo() {
       return;
     }
     presign = await res.json();
+            // ===== VCA_INTAKE_WRITE_START =====
+            try {
+              sessionStorage.setItem("vca_intake", JSON.stringify(intake ?? {}));
+              const n = parseInt(localStorage.getItem("vca_sessions") || "0", 10) || 0;
+              localStorage.setItem("vca_sessions", String(n + 1));
+            } catch {}
+            // ===== VCA_INTAKE_WRITE_END =====
   } catch (e) {
     setStatus(`Network error contacting /api/s3-presign: ${e.message}`, true);
     return;
@@ -96,6 +103,7 @@ export async function uploadVideo() {
     btn.dataset._bound = '1';
   }
 })();
+
 
 
 

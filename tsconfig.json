@@ -31,7 +31,7 @@
                     "**/*.tsx",
                     ".next/dev/types/**/*.ts"
                 ],
-    "exclude":  [
+    "exclude": ["_snapshots","_snapshots_OFF",
                     "node_modules",
                     ".next",
                     "api_disabled",
@@ -44,3 +44,4 @@
                     "_legacy_root_static"
                 ]
 }
+

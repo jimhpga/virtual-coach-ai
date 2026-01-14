@@ -1,188 +1,171 @@
-﻿import { NextResponse } from "next/server";
-import path from "path";
-import fs from "fs/promises";
-import { existsSync } from "fs";
-import { spawn } from "child_process";
+﻿"use client";
 
-type AutoPFramesResult = {
-  ok: boolean;
-  signature?: string;
-  videoPath: string;
-  fps: number;
-  nbFrames: number;
-  impactFrame: number;
-  window: { startFrame: number; endFrame: number; preSec: number; postSec: number };
-  frames: Array<{ p: number; label: string; frame: number; file: string; path: string }>;
-  error?: string;
+import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
+import os from "os";
+import { execFile } from "child_process";
+
+type Body = {
+  localPath?: string;
+  videoUrl?: string;
+  pathname?: string;
+  impactSec?: number;
 };
 
-function safeJson<T>(s: string): T {
-  return JSON.parse(s) as T;
-}
-
-function pickPwshExe(): string {
-  // Prefer PowerShell 7 if available, otherwise Windows PowerShell.
-  // On Windows, "pwsh" is PS7, "powershell" is Windows PS5.x.
-  return "pwsh";
-}
-
-async function runAutoPFrames(opts: {
-  videoAbsPath: string;
-  outDirAbsPath: string;
-  impactFrame?: number;
-}): Promise<AutoPFramesResult> {
-  const scriptAbs = path.join(process.cwd(), "scripts", "AutoPFrames.ps1");
-
-  if (!existsSync(scriptAbs)) {
-    return {
-      ok: false,
-      videoPath: opts.videoAbsPath,
-      fps: 0,
-      nbFrames: 0,
-      impactFrame: 0,
-      window: { startFrame: 0, endFrame: 0, preSec: 0, postSec: 0 },
-      frames: [],
-      error: `AutoPFrames.ps1 not found at ${scriptAbs}`,
-    };
-  }
-
-  // Try pwsh first, fall back to powershell if pwsh isn't present.
-  const candidates = [pickPwshExe(), "powershell"];
-  let lastErr = "";
-
-  for (const exe of candidates) {
-    const args: string[] = [
-      "-ExecutionPolicy",
-      "Bypass",
-      "-File",
-      scriptAbs,
-      "-VideoPath",
-      opts.videoAbsPath,
-      "-OutDir",
-      opts.outDirAbsPath,
-    ];
-    if (typeof opts.impactFrame === "number" && opts.impactFrame > 0) {
-      args.push("-ImpactFrame", String(opts.impactFrame));
-    }
-
-    const out = await new Promise<{ code: number; stdout: string; stderr: string }>((resolve) => {
-      const p = spawn(exe, args, { windowsHide: true });
-
-      let stdout = "";
-      let stderr = "";
-
-      p.stdout.on("data", (d) => (stdout += d.toString()));
-      p.stderr.on("data", (d) => (stderr += d.toString()));
-
-      p.on("close", (code) => resolve({ code: code ?? 1, stdout, stderr }));
+function run(cmd: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    execFile(cmd, args, { windowsHide: true }, (err, stdout, stderr) => {
+      if (err) return reject(new Error((stderr || stdout || err.message).toString()));
+      resolve({ stdout: (stdout || "").toString(), stderr: (stderr || "").toString() });
     });
+  });
+}
 
-    if (out.code === 0 && out.stdout.trim().startsWith("{")) {
-      try {
-        const parsed = safeJson<AutoPFramesResult>(out.stdout);
-        return parsed;
-      } catch (e: any) {
-        lastErr = `Failed to parse JSON from ${exe}. Error: ${e?.message || e}. STDERR: ${out.stderr}`;
-        continue;
-      }
-    } else {
-      lastErr = `AutoPFrames failed via ${exe}. CODE=${out.code}. STDERR=${out.stderr}. STDOUT=${out.stdout}`;
-      continue;
-    }
-  }
+async function downloadToFile(url: string, outPath: string) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Download failed (${res.status})`);
+  const arr = new Uint8Array(await res.arrayBuffer());
+  await fs.promises.writeFile(outPath, arr);
+}
 
-  return {
-    ok: false,
-    videoPath: opts.videoAbsPath,
-    fps: 0,
-    nbFrames: 0,
-    impactFrame: 0,
-    window: { startFrame: 0, endFrame: 0, preSec: 0, postSec: 0 },
-    frames: [],
-    error: lastErr || "AutoPFrames failed.",
-  };
+async function ffprobeDurationSeconds(inputPath: string): Promise<number> {
+  const { stdout } = await run("ffprobe", [
+    "-v", "error",
+    "-show_entries", "format=duration",
+    "-of", "json",
+    inputPath,
+  ]);
+  const j = JSON.parse(stdout);
+  const d = Number(j?.format?.duration || 0) || 0;
+  return d;
+}
+
+function clamp(n: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, n));
+}
+
+function linspace(a: number, b: number, n: number) {
+  if (n <= 1) return [a];
+  const out: number[] = [];
+  const step = (b - a) / (n - 1);
+  for (let i = 0; i < n; i++) out.push(a + step * i);
+  return out;
 }
 
 export async function POST(req: Request) {
+  let tmpDir: string | null = null;
+  let tempInput: string | null = null;
+
   try {
-    const body = await req.json().catch(() => ({} as any));
+    const body = (await req.json()) as Body;
 
-    // Expected payload: { videoUrl: "/uploads/<file>.mp4", impactFrame?: number }
-    const videoUrl = String(body?.videoUrl || "");
-    const impactFrame = typeof body?.impactFrame === "number" ? body.impactFrame : undefined;
+    const localPath = typeof body.localPath === "string" ? body.localPath : null;
+    const videoUrl  = typeof body.videoUrl === "string" ? body.videoUrl : null;
+    const pathname  = typeof body.pathname === "string" ? body.pathname : null;
+    const impactSec = typeof body.impactSec === "number" ? body.impactSec : null;
 
-    if (!videoUrl.startsWith("/uploads/")) {
-      return NextResponse.json(
-        { ok: false, error: `Invalid videoUrl. Expected "/uploads/...". Got: ${videoUrl}` },
-        { status: 400 }
-      );
+    if (!impactSec || impactSec <= 0) {
+      return NextResponse.json({ ok: false, error: "impactSec missing." }, { status: 400 });
+    }
+    if (!localPath && !videoUrl) {
+      return NextResponse.json({ ok: false, error: "Provide localPath or videoUrl." }, { status: 400 });
     }
 
-    // Resolve to absolute path under public/
-    const publicDir = path.join(process.cwd(), "public");
-    const videoAbsPath = path.join(publicDir, videoUrl.replace(/\//g, path.sep));
+    // Decide input file path
+    let inputPath = localPath || "";
 
-    if (!existsSync(videoAbsPath)) {
-      return NextResponse.json(
-        { ok: false, error: `Video not found on disk: ${videoAbsPath}` },
-        { status: 404 }
-      );
+    if (!inputPath && videoUrl) {
+      // download URL to tmp
+      tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "vca-pframes-"));
+      const safeName =
+        (pathname && pathname.trim()) ||
+        `upload-${Date.now()}.mp4`;
+
+      const fileName = safeName.replace(/[^\w.\-]+/g, "_");
+      tempInput = path.join(tmpDir, fileName);
+      await downloadToFile(videoUrl, tempInput);
+      inputPath = tempInput;
     }
 
-    // jobId folder: timestamp-based
-    const jobId = `${Date.now()}`;
-    const framesDir = `/frames/${jobId}`;
-    const outDirAbsPath = path.join(publicDir, "frames", jobId);
-    await fs.mkdir(outDirAbsPath, { recursive: true });
-
-    // Run AutoPFrames (P7 == impact)
-    const result = await runAutoPFrames({ videoAbsPath, outDirAbsPath, impactFrame });
-
-    if (!result.ok) {
-      return NextResponse.json(
-        { ok: false, error: result.error || "AutoPFrames failed.", debug: { framesDir, outDirAbsPath } },
-        { status: 500 }
-      );
+    if (!fs.existsSync(inputPath)) {
+      return NextResponse.json({ ok: false, error: `Input file not found: ${inputPath}` }, { status: 400 });
     }
 
-    // Convert to urls
-    const frames = result.frames || [];
-    const pframes = frames.map((f) => ({
-      p: f.p,
-      label: f.label,
-      frame: f.frame,
-      imageUrl: `${framesDir}/${f.file}`,
-      thumbUrl: `${framesDir}/${f.file}`,
-    }));
-
-    // HARD GUARANTEE
-    const p7 = pframes.find((x) => x.p === 7);
-    if (!p7 || p7.frame !== result.impactFrame) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: "P7 sanity check failed: P7.frame did not equal impactFrame.",
-          debug: { impactFrame: result.impactFrame, p7 },
-        },
-        { status: 500 }
-      );
+    const durationSec = await ffprobeDurationSeconds(inputPath);
+    if (!durationSec || durationSec <= 0) {
+      return NextResponse.json({ ok: false, error: "Could not read duration (ffprobe)." }, { status: 500 });
     }
+
+    // Build a simple P1-P9 timeline around impact
+    // Window: ~2.5s before impact to ~1.5s after (clamped to video)
+    const start = clamp(impactSec - 2.5, 0.0, durationSec);
+    const end   = clamp(impactSec + 1.5, 0.0, durationSec);
+
+    const preEnd = clamp(impactSec - 0.10, 0.0, durationSec);
+    const postStart = clamp(impactSec + 0.10, 0.0, durationSec);
+
+    // P1..P6 spread from start..preEnd, P7 = impact, P8..P9 from postStart..end
+    const pre = linspace(start, preEnd, 6);
+    const post = linspace(postStart, end, 2);
+    const times = [...pre, impactSec, ...post]; // total 9
+
+    const outId = `frames_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    const framesDir = `/frames/${outId}`;
+    const framesAbs = path.join(process.cwd(), "public", "frames", outId);
+    await fs.promises.mkdir(framesAbs, { recursive: true });
+
+    // Extract frames
+    for (let i = 0; i < 9; i++) {
+      const p = i + 1;
+      const t = clamp(times[i], 0.0, durationSec);
+
+      const outJpg = path.join(framesAbs, `p${p}.jpg`);
+
+      // -ss before -i is faster for keyframe-ish seeks; good enough here
+      await run("ffmpeg", [
+        "-y",
+        "-ss", t.toFixed(3),
+        "-i", inputPath,
+        "-an",
+        "-frames:v", "1",
+        "-vf", "format=yuvj420p",
+        "-q:v", "2",
+        "-strict", "-2",
+        outJpg,
+      ]);
+    }
+
+    const pframes = Array.from({ length: 9 }).map((_, i) => {
+      const p = i + 1;
+      const img = `${framesDir}/p${p}.jpg`;
+      return { p, label: `P${p}`, imageUrl: img, thumbUrl: img };
+    });
+
+    const checkpoints = Array.from({ length: 9 }).map((_, i) => {
+      const p = i + 1;
+      return { p, label: `P${p}`, note: "-" };
+    });
 
     return NextResponse.json({
       ok: true,
-      jobId,
-      videoUrl,
       framesDir,
-      signature: result.signature || "",
-      impactFrame: result.impactFrame,
-      window: result.window,
-      frames: pframes, // backward compat
-      pframes, // explicit
+      pframes,
+      checkpoints,
+      topFaults: [],
+      meta: {
+        durationSec,
+        impactSec,
+        source: { localPath, videoUrl, pathname },
+      },
     });
-  } catch (err: any) {
-    return NextResponse.json(
-      { ok: false, error: err?.message || "extract-pframes error" },
-      { status: 500 }
-    );
+  } catch (e: any) {
+    return NextResponse.json({ ok: false, error: e?.message || "extract-pframes failed" }, { status: 500 });
+  } finally {
+    // cleanup downloaded temp file
+    try { if (tempInput) await fs.promises.unlink(tempInput); } catch {}
+    try { if (tmpDir) await fs.promises.rm(tmpDir, { recursive: true, force: true }); } catch {}
   }
 }
+
+
