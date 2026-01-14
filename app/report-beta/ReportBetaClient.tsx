@@ -319,7 +319,10 @@ export default function ReportBetaClient() {
     try {
       const raw = sessionStorage.getItem("vca_intake");
       if (raw) setIntake(JSON.parse(raw));
-    } catch {}, []);
+    } catch (e) {
+      // ignore bad JSON / missing storage
+    }
+  }, []);
 
   // Confidence = dip -> exit -> climb (simple demo model for now)
   // We tie it to sequencing: if faults include late hips / arms start down => dip.
@@ -1394,6 +1397,7 @@ const f = sortedFrames.find((x) => x.p === p);
     </div>
   );
 }
+
 
 
 
