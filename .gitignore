@@ -22,3 +22,10 @@ Thumbs.db
 
 # local artifacts
 _snapshots/
+.next/
+node_modules/
+out/
+dist/
+_snapshots/
+.venv/
+reports/
