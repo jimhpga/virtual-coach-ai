@@ -1,63 +1,24 @@
-﻿# Local / temp
+﻿# Next.js
 .next/
+out/
+dist/
+
+# deps
 node_modules/
-*.log
-LAST_PROD_URL.txt
-VERCEL_PROD_URL.txt
 
-# Backups you made
-package.json.bak*
-package.json.bak2_*
-package.json.bak3_*
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Disabled folders / temp renames
-_app_DISABLED_*/
+# env
+.env*
+!.env.example
 
 # OS
 .DS_Store
 Thumbs.db
-# --- Python / venv ---
-.venv/
-venv/
-__pycache__/
-*.pyc
 
-# --- Node / Next ---
-node_modules/
-.next/
-out/
-.vercel/
-
-# --- OS ---
-.DS_Store
-Thumbs.db
-
-# --- Logs / temp ---
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-*.log
-
-# --- Local artifacts ---
-LAST_PROD_URL.txt
-VERCEL_PROD_URL.txt
-# --- VCA: keep repo lean ---
-_backup/
-**/_backup/
-*.tar.gz
-*.zip
-public/uploads/
-public/test_clip.mp4
-tmp-payload.json
-*.bak
-*.BAK*
-.vercel
-.env*.local
-# --- Local-only outputs ---
-reports/demo/
-public/reports/
-reports/**/*.json
-
-# --- Next/Vercel build output ---
-.next/
-.vercel/
+# local artifacts
+_snapshots/
