@@ -373,23 +373,29 @@ export default function ReportBetaClient() {
   
   
   // Auto-load demo video (newest mp4 in /public/uploads)
-  useEffect(() => {
-    (async () => {
-      try {
-        const r = await fetch("/api/demo-video", { cache: "no-store" });
-        const j = await r.json();
-        if (j?.url) setVideoUrl(j.url);
-      } catch {})();
-  }, []);
+useEffect(() => {
+  (async () => {
+    try {
+      const r = await fetch("/api/demo-video", { cache: "no-store" });
+      const j = await r.json();
+      if (j?.url) setVideoUrl(j.url);
+    } catch (e) {
+      // ignore demo load failures
+    }
+  })();
+}, []);
 // Auto-load demo video (newest mp4 in /public/uploads)
-  useEffect(() => {
-    (async () => {
-      try {
-        const r = await fetch("/api/demo-video", { cache: "no-store" });
-        const j = await r.json();
-        if (j?.url) setVideoUrl(j.url);
-      } catch {})();
-  }, []);
+useEffect(() => {
+  (async () => {
+    try {
+      const r = await fetch("/api/demo-video", { cache: "no-store" });
+      const j = await r.json();
+      if (j?.url) setVideoUrl(j.url);
+    } catch (e) {
+      // ignore demo load failures
+    }
+  })();
+}, []);
 const [runStatus, setRunStatus] = useState<string>("");
 
   // === MVP Demo Hardening: simple run-state machine ===
@@ -1397,6 +1403,7 @@ const f = sortedFrames.find((x) => x.p === p);
     </div>
   );
 }
+
 
 
 
