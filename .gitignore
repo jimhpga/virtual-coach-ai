@@ -14,3 +14,7 @@ _snapshots/
 *.bak_*
 *.BROKEN_*
 
+
+# local tools
+_tools_findUnclosedBrace.jsscripts/smoke.ps1
+
