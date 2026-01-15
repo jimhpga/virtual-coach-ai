@@ -5,3 +5,12 @@ out/
 _snapshots/
 .venv/
 *.log
+
+# local env
+.env.local
+
+
+# local backups
+*.bak_*
+*.BROKEN_*
+
