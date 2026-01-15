@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import PStrip from "./PStrip";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
@@ -68,22 +68,12 @@ function clamp(n: number, a: number, b: number) {
 function Bar({ label, value }: { label: string; value: number }) {
   const v = clamp(Math.round(value), 0, 100);
   return (
-
-<div style={{ marginBottom: 10 }}>
-{/* VCA_SWING_FACTS_CARD */}
-{/* VCA_HIDE_FACTS >> {(() => {
-  const showFacts =
-    typeof window !== "undefined" &&
-    (new URLSearchParams(window.location.search).get("facts") === "1" ||
-      (window.localStorage?.getItem("__VCA_DEBUG_FACTS") === "1") ||
-      (window as any).__VCA_DEBUG_FACTS === true);
-
-  return showFacts ? {process.env.NEXT_PUBLIC_VCA_DEBUG_FACTS === "1" ? (<SwingFactsCard url="/pose-demo/swing_facts.json" />) : null} : null;
-})()} */}
+    <div style={{ marginBottom: 10 }}>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, opacity: 0.9 }}>
         <div style={{ fontWeight: 700 }}>{label}</div>
         <div style={{ fontVariantNumeric: "tabular-nums", opacity: 0.75 }}>{v}</div>
       </div>
+
       <div
         style={{
           height: 10,
@@ -95,7 +85,7 @@ function Bar({ label, value }: { label: string; value: number }) {
       >
         <div
           style={{
-            width: `${v}%`,
+            width: v + "%",
             height: "100%",
             background: "linear-gradient(90deg, rgba(66,140,255,0.9), rgba(44,220,170,0.9))",
           }}
@@ -104,7 +94,6 @@ function Bar({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
-
 function PillButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
 
@@ -384,18 +373,6 @@ useEffect(() => {
     }
   })();
 }, []);
-// Auto-load demo video (newest mp4 in /public/uploads)
-useEffect(() => {
-  (async () => {
-    try {
-      const r = await fetch("/api/demo-video", { cache: "no-store" });
-      const j = await r.json();
-      if (j?.url) setVideoUrl(j.url);
-    } catch (e) {
-      // ignore demo load failures
-    }
-  })();
-}, []);
 const [runStatus, setRunStatus] = useState<string>("");
 
   // === MVP Demo Hardening: simple run-state machine ===
@@ -643,7 +620,7 @@ const [error, setError] = useState<string | null>(null);
 
   const frames = data?.media?.frames ?? [];
   const sortedFrames = useMemo(() => [...frames].sort((a, b) => a.p - b.p), [frames]);
-    function resetDemo() {
+  function resetDemo() {
     // Bulletproof reset: clears UI state without waiting on network
     try { setData(null); } catch {}
     try { setError(null); } catch {}
@@ -661,6 +638,7 @@ const [error, setError] = useState<string | null>(null);
 
     // scroll back up so the user sees a clean slate
     try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch {}
+  }
 
   async function analyze() {
     // CLICK TEST — if this number bumps, the button is NOT “dead”
@@ -678,23 +656,34 @@ const [error, setError] = useState<string | null>(null);
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ videoUrl, impactFrame, level }),
-      });setRunStatus("Response: " + res.status + " " + res.statusText);const text = await res.text();
+      });
+
+      setRunStatus("Response: " + res.status + " " + res.statusText);
+
+      const text = await res.text();
+
       let json: AnalyzeResponse | null = null;
       if (text) {
-        try { json = JSON.parse(text) as AnalyzeResponse; }
-        catch (e) { throw new Error("Invalid JSON from server"); }}
+        try {
+          json = JSON.parse(text) as AnalyzeResponse;
+        } catch {
+          throw new Error("Invalid JSON from server");
+        }
+      }
 
       if (!res.ok || !json?.ok) {
         throw new Error(json?.error || `Analyze failed (${res.status})`);
       }
 
-      {
-        const frames = (json as any)?.media?.frames ?? (json as any)?.frames ?? [];
-        const framesDir = (json as any)?.media?.framesDir ?? (json as any)?.framesDir ?? "";
-        setData({ ...(json as any), media: { ...((json as any)?.media ?? {}), framesDir, frames }} as any);
-      }
-      setRunStatus("Done. Frames + report loaded ✅");
+      const frames = (json as any)?.media?.frames ?? (json as any)?.frames ?? [];
+      const framesDir = (json as any)?.media?.framesDir ?? (json as any)?.framesDir ?? "";
 
+      setData({
+        ...(json as any),
+        media: { ...((json as any)?.media ?? {}), framesDir, frames },
+      } as any);
+
+      setRunStatus("Done. Frames + report loaded ✅");
       setTimeout(() => document.getElementById("results")?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch (e: any) {
       setRunStatus("❌ Analyze error");
@@ -702,8 +691,8 @@ const [error, setError] = useState<string | null>(null);
       console.error("❌ analyze() failed:", e);
     } finally {
       setLoading(false);
-    }}
-
+    }
+  }
   function jumpToP(p: number) {
     
     try { setActiveP(p); } catch {}
@@ -1403,74 +1392,6 @@ const f = sortedFrames.find((x) => x.p === p);
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
