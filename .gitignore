@@ -28,3 +28,7 @@ scripts/smoke.ps1
 _tools_findUnclosedBrace.js
 scripts/smoke.ps1
 
+
+# runtime data
+.data/
+
