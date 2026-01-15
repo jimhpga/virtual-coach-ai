@@ -18,3 +18,8 @@ _snapshots/
 # local tools
 _tools_findUnclosedBrace.jsscripts/smoke.ps1
 
+
+# local tools
+_tools_findUnclosedBrace.js
+scripts/smoke.ps1
+
