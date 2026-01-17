@@ -31,29 +31,29 @@ type AnalyzeResponse = {
   error?: string;
 };
 const LEVEL_HELP: Record<string, string> = {
-  beginner: "Beginner = normal words. Advanced = more detail (donâ€™t go down the rabbit hole).",
+  beginner: "Beginner = normal words. Advanced = more detail (don’t go down the rabbit hole).",
   intermediate: "Intermediate = simple + a bit more detail.",
   advanced: "Advanced = deeper detail (optional).",
   teacher: "Teacher = technical detail for coaches and better players.",
 };
 const DICTIONARY: Record<string, { title: string; body: string }> = {
   "safe hallway": {
-    title: "Safe hallway (your â€˜laneâ€™)",
+    title: "Safe hallway (your ‘lane’)",
     body:
-      "Itâ€™s the lane where your hands and the club travel so you donâ€™t have to save the swing at the bottom. " +
+      "It’s the lane where your hands and the club travel so you don’t have to save the swing at the bottom. " +
       "Stay in the lane going back and coming down = solid contact with less guessing.",
   },
   "hand path": {
     title: "Hand path",
     body:
-      "Itâ€™s simply where your hands travel as you swing. Great ball strikers bring the hands up and down in a similar lane â€” " +
-      "that keeps the clubface from being â€˜savedâ€™ late.",
+      "It’s simply where your hands travel as you swing. Great ball strikers bring the hands up and down in a similar lane — " +
+      "that keeps the clubface from being ‘saved’ late.",
   },
   "lead arm": {
     title: "Lead arm stability",
     body:
-      "Itâ€™s how stable your front arm stays. If it collapses early going back, or breaks down too soon after impact, " +
-      "youâ€™ll lose both power and control.",
+      "It’s how stable your front arm stays. If it collapses early going back, or breaks down too soon after impact, " +
+      "you’ll lose both power and control.",
   },
 };
 function clamp(n: number, a: number, b: number) {
@@ -175,7 +175,7 @@ function Collapsible(props: {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ opacity: 0.75, fontWeight: 900 }}>
-            {open ? "â–¾" : "â–¸"}
+            {open ? "▾" : "▸"}
           </span>
           <span>{title}</span>
         </div>
@@ -254,7 +254,7 @@ function CollapsibleCard({
               transition: "transform 180ms ease",
             }}
           >
-            â–¶
+            ▶
           </span>
           <div style={{ fontWeight: 900, letterSpacing: 0.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
             {title}
@@ -338,7 +338,7 @@ React.useEffect(() => {
       score = base - 8 + (s * 2);
       trend = "dip";
       phase = "Dip (normal)";
-      note = "Youâ€™re in the awkward stage. Results can be noisy. Keep reps clean and slow.";
+      note = "You’re in the awkward stage. Results can be noisy. Keep reps clean and slow.";
     } else if (s <= 6) {
       score = base + 5 + (s - 3) * 4;
       trend = "exit";
@@ -348,16 +348,16 @@ React.useEffect(() => {
       score = base + 25 + (s - 7) * 3;
       trend = "climb";
       phase = "Climb";
-      note = "Now itâ€™s getting installed. Your â€˜feelâ€™ starts matching the truth. Keep stacking reps.";
+      note = "Now it’s getting installed. Your ‘feel’ starts matching the truth. Keep stacking reps.";
     }
 
     return { score: Math.max(10, Math.min(98, score)), phase, trend, note };
   }
   // ===== VCA_INTAKE_READ_END =====
-// âœ… Hydration proof + sanity
+// ✅ Hydration proof + sanity
   React.useEffect(() => {
     (window as any).__VCA_HYDRATED__ = true;
-    console.log("âœ… ReportBetaClient hydrated");
+    console.log("✅ ReportBetaClient hydrated");
   }, []);
 
   
@@ -433,7 +433,7 @@ const [impactFrame, setImpactFrame] = React.useState<number>(62);
   // ðŸŽ™ï¸ Ask Coach (voice + typed)
   const [coachQ, setCoachQ] = React.useState<string>("");
   const focusOptions2 = [
-    "Not sure â€” tell me my #1 priority",
+    "Not sure — tell me my #1 priority",
     "Early extension (coming up & out)",
     "Right elbow / trail arm (slotting)",
     "Over the top / steep downswing",
@@ -459,7 +459,7 @@ const [impactFrame, setImpactFrame] = React.useState<number>(62);
     const p = (pick || "").trim();
     if (!p) return;
     if (p.startsWith("Not sure")) {
-      setCoachQ("Iâ€™m not sure what to work on. Based on my report, what is my #1 priority and what drill should I do?");
+      setCoachQ("I’m not sure what to work on. Based on my report, what is my #1 priority and what drill should I do?");
       return;
     }
     setCoachQ(`I want to work on: ${p}. What should I look for in my swing and what drill fixes it?`);
@@ -472,9 +472,9 @@ const [impactFrame, setImpactFrame] = React.useState<number>(62);
     if (s.includes("right elbow") || s.includes("trail elbow") || s.includes("elbow")) {
       return [
         "Right elbow checkpoint:",
-        "â€¢ Backswing: elbow points more down than behind you (donâ€™t let it fly).",
-        "â€¢ Transition: elbow works in front of your right hipâ€”feel it â€˜slotâ€™ while chest stays down.",
-        "â€¢ Downswing: keep the elbow connected to the ribcage; hands donâ€™t throw early.",
+        "• Backswing: elbow points more down than behind you (don’t let it fly).",
+        "• Transition: elbow works in front of your right hip—feel it ‘slot’ while chest stays down.",
+        "• Downswing: keep the elbow connected to the ribcage; hands don’t throw early.",
         "Drill: towel-under-trail-arm half swings + pause at lead-arm-parallel down (P5)."
       ].join("\n");
     }
@@ -485,33 +485,33 @@ const [impactFrame, setImpactFrame] = React.useState<number>(62);
     ) {
       return [
         "Coming up & out (early extension) checkpoint:",
-        "â€¢ Keep chest over the ball longer; pressure shifts lead before you rotate.",
-        "â€¢ Feel hips â€˜backâ€™ as you start down (left hip back, not toward the ball).",
-        "â€¢ Keep trail heel heavier a fraction longer; rotate around your lead hip.",
-        "Drill: chair/hip-bump drill + slow â€˜pumpâ€™ to P5 while keeping belt buckle back."
+        "• Keep chest over the ball longer; pressure shifts lead before you rotate.",
+        "• Feel hips ‘back’ as you start down (left hip back, not toward the ball).",
+        "• Keep trail heel heavier a fraction longer; rotate around your lead hip.",
+        "Drill: chair/hip-bump drill + slow ‘pump’ to P5 while keeping belt buckle back."
       ].join("\n");
     }
 
     if (s.includes("shallow") || s.includes("steep") || s.includes("over the top") || s.includes("hand path")) {
       return [
         "Hand path / steepness checkpoint:",
-        "â€¢ Start down with pressure shiftâ€”hands follow.",
-        "â€¢ Feel trail elbow in front of right hip and club â€˜fallâ€™ behind you.",
+        "• Start down with pressure shift—hands follow.",
+        "• Feel trail elbow in front of right hip and club ‘fall’ behind you.",
         "Drill: split-grip pump + step-through swings."
       ].join("\n");
     }
 
     return [
       "Tell me what you want to work on specifically (example: right elbow, early extension, face control, hand path).",
-      "If youâ€™re not sure: say what your miss is (push/slice/pull/hook/thin/fat) and Iâ€™ll pick the priority."
+      "If you’re not sure: say what your miss is (push/slice/pull/hook/thin/fat) and I’ll pick the priority."
     ].join("\n");
   };
   const askCoach = async (q: string) => {
     const text = (q || "").trim();
     if (!text) return;
-    setCoachA("Thinkingâ€¦");
+    setCoachA("Thinking…");
 
-    // âœ… MVP: local answer now. Later swap to an API call.
+    // ✅ MVP: local answer now. Later swap to an API call.
     // Example future:
     // const r = await fetch("/api/coach", { method:"POST", headers:{ "content-type":"application/json" }, body: JSON.stringify({ 
         // focus: focusTopic,
@@ -542,7 +542,7 @@ const [impactFrame, setImpactFrame] = React.useState<number>(62);
       rec.start();
     } catch {
       setListening(false);
-      setCoachA("Voice couldnâ€™t start. Type your question below.");
+      setCoachA("Voice couldn’t start. Type your question below.");
     }
   };
 
@@ -570,7 +570,7 @@ const [impactFrame, setImpactFrame] = React.useState<number>(62);
     summary:
       "Solid fundamentally sound mid-iron swing with small opportunities to clean up transition and low point control.",
     meta:
-      "Player: Player â€¢ Hand: Right â€¢ Eye: Right â€¢ Hcp 1 â€¢ Generated: 6/13/2024, 5:00 AM",
+      "Player: Player • Hand: Right • Eye: Right • Hcp 1 • Generated: 6/13/2024, 5:00 AM",
     body:
       "Hi Player, thanks for sending in your swing. Solid fundamentals overall. Your biggest strengths are an athletic setup with clean spine tilt and balance, solid arm-body connection in the takeaway, and good wrist hinge creating width and leverage. The main things to clean up over the next few weeks are transition timing, shallowing the downswing slightly, and keeping the pivot centered through impact. Use the checkpoints and practice plan below to work through this step-by-step.",
     highlights: [
@@ -591,7 +591,7 @@ const [impactFrame, setImpactFrame] = React.useState<number>(62);
       summary:
         "Solid fundamentally sound mid-iron swing with small opportunities to clean up transition and low point control.",
       meta:
-        "Player: Player â€¢ Hand: Right â€¢ Eye: Right â€¢ Hcp 1 â€¢ Generated: 6/13/2024, 5:00 AM",
+        "Player: Player • Hand: Right • Eye: Right • Hcp 1 • Generated: 6/13/2024, 5:00 AM",
       body:
         "Hi Player, thanks for sending in your swing. Solid fundamentals overall. Your biggest strengths are an athletic setup with clean spine tilt and balance, solid arm-body connection in the takeaway, and good wrist hinge creating width and leverage. The main things to clean up over the next few weeks are transition timing, shallowing the downswing slightly, and keeping the pivot centered through impact. Use the checkpoints and practice plan below to work through this step-by-step.",
       highlights: [
@@ -613,7 +613,7 @@ const [impactFrame, setImpactFrame] = React.useState<number>(62);
 const [error, setError] = React.useState<string | null>(null);
   const [dictKey, setDictKey] = React.useState<keyof typeof DICTIONARY | null>(null);
 
-  // âœ… click test so you KNOW the handler is firing
+  // ✅ click test so you KNOW the handler is firing
   const [clickTest, setClickTest] = React.useState<number>(0);
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const [duration, setDuration] = React.useState<number>(0);
@@ -642,7 +642,7 @@ const [error, setError] = React.useState<string | null>(null);
   }
 
   async function analyze() {
-    // CLICK TEST â€” if this number bumps, the button is NOT â€œdeadâ€
+    // CLICK TEST — if this number bumps, the button is NOT “dead”
     setClickTest((n) => n + 1);
 
     console.log("ðŸŸ¦ Analyze clicked", { videoUrl, impactFrame, level, t: Date.now() });
@@ -650,7 +650,7 @@ const [error, setError] = React.useState<string | null>(null);
     setLoading(true);
     setError(null);
     setData(null);
-    setRunStatus("Starting analysisâ€¦");
+    setRunStatus("Starting analysis…");
 
     try {
       const res = await fetch("/api/analyze", {
@@ -679,12 +679,12 @@ const [error, setError] = React.useState<string | null>(null);
         media: { ...((json as any)?.media ?? {}), framesDir, frames },
       } as any);
 
-      setRunStatus("Done. Frames + report loaded âœ…");
+      setRunStatus("Done. Frames + report loaded ✅");
       setTimeout(() => document.getElementById("results")?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch (e: any) {
-      setRunStatus("âŒ Analyze error");
+      setRunStatus("❌ Analyze error");
       setError(e?.message || "Analyze failed");
-      console.error("âŒ analyze() failed:", e);
+      console.error("❌ analyze() failed:", e);
     } finally {
       setLoading(false);
     }
@@ -764,7 +764,7 @@ const f = sortedFrames.find((x) => x.p === p);
             </div>
           </div>
           <a href="/" style={{ color: "#b9cff6", textDecoration: "none", fontWeight: 700 }}>
-            â† Home
+            → Home
           </a>
         </div>
 
@@ -791,7 +791,7 @@ const f = sortedFrames.find((x) => x.p === p);
   </div>
 </Card>
 
-<Card title="Swing Report â€” Beta">
+<Card title="Swing Report — Beta">
   
           {/* ===== VCA_CONF_UI_START ===== */}
           {(() => {
@@ -843,7 +843,7 @@ const f = sortedFrames.find((x) => x.p === p);
 
                 <TinyCard title="Automatic Drill Prescription">
                   <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 10 }}>
-                    Based on your focus + swing profile, hereâ€™s the fastest way out of the gap.
+                    Based on your focus + swing profile, here’s the fastest way out of the gap.
                   </div>
 
                   {rx.map((p) => (
@@ -861,7 +861,7 @@ const f = sortedFrames.find((x) => x.p === p);
                         <b>Reps:</b> {p.drill.reps}
                       </div>
                       <div style={{ fontSize: 12, opacity: 0.85, marginTop: 6 }}>
-                        <b>On-course cue:</b> â€œ{p.drill.onCourseCue}â€
+                        <b>On-course cue:</b> “{p.drill.onCourseCue}”
                       </div>
                     </div>
                   ))}
@@ -876,12 +876,12 @@ const f = sortedFrames.find((x) => x.p === p);
         {/* MVP breadcrumb */}
         <div style={{ gridColumn: "1 / -1", fontSize: 12, opacity: 0.8, margin: "8px 0 10px" }}>
           <span style={{ fontWeight: stepName(runState)==="Upload" ? 800 : 400 }}>Upload</span>
-          {"  â†’  "}
+          {"  →  "}
           <span style={{ fontWeight: stepName(runState)==="Analyze" ? 800 : 400 }}>Analyze</span>
-          {"  â†’  "}
+          {"  →  "}
           <span style={{ fontWeight: stepName(runState)==="Report" ? 800 : 400 }}>Report</span>
           {runState==="error" && runErr ? (
-            <span style={{ marginLeft: 10, fontWeight: 800 }}>âš  {runErr}</span>
+            <span style={{ marginLeft: 10, fontWeight: 800 }}>⚠️  {runErr}</span>
           ) : null}
         </div>
 
@@ -899,7 +899,7 @@ const f = sortedFrames.find((x) => x.p === p);
           cursor: loading ? "not-allowed" : "pointer",
         }}
       >
-        {loading ? "Analyzingâ€¦" : "Analyze"}
+        {loading ? "Analyzing…" : "Analyze"}
       </button>
 
       <button
@@ -1103,7 +1103,7 @@ const f = sortedFrames.find((x) => x.p === p);
         </div>
       ) : null}
 
-      {/* P1â€“P9 descriptions (collapsed) */}
+      {/* P1–P9 descriptions (collapsed) */}
       <PDescriptionsCollapsed onJumpToP={jumpToP} activeP={activeP} />
 
       {error && (
@@ -1156,10 +1156,10 @@ const f = sortedFrames.find((x) => x.p === p);
             <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 10, alignItems: "center" }}>
               <div style={{ display: "flex", gap: 8 }}>
                 <PillButton onClick={() => stepFrames(-1)} disabled={!duration}>
-                  â—€ï¸Ž 1 frame
+                  ⏮ 1 frame
                 </PillButton>
                 <PillButton onClick={() => stepFrames(+1)} disabled={!duration}>
-                  1 frame â–¶ï¸Ž
+                  1 frame ▶
                 </PillButton>
               </div>
 
@@ -1181,18 +1181,18 @@ const f = sortedFrames.find((x) => x.p === p);
               />
 
               <div style={{ fontSize: 12, opacity: 0.75, fontVariantNumeric: "tabular-nums" }}>
-                {curTime.toFixed(2)}s / {duration ? duration.toFixed(2) : "â€”"}s
+                {curTime.toFixed(2)}s / {duration ? duration.toFixed(2) : "—"}s
               </div>
             </div>
 
-            <div style={{ marginTop: 12, fontWeight: 900, opacity: 0.92 }}>P1â€“P9 frames</div>
+            <div style={{ marginTop: 12, fontWeight: 900, opacity: 0.92 }}>P1–P9 frames</div>
 
             {!sortedFrames.length ? (
               <div style={{ opacity: 0.75, marginTop: 6 }}>Run Analyze to populate frames.</div>
             ) : (
               <>
                 <div style={{ marginTop: 10 }}>
-                  {/* P1â€“P9 frame thumbnails hidden (optional feature) */}
+                  {/* P1–P9 frame thumbnails hidden (optional feature) */}
                 </div>
 
                 <div style={{ marginTop: 8, display: "grid", gridTemplateColumns: "repeat(9, minmax(0, 1fr))", gap: 8 }}>
@@ -1268,7 +1268,7 @@ const f = sortedFrames.find((x) => x.p === p);
 
 <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
   <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.75, marginBottom: 6 }}>
-  </div>
+  Top 3 fixes</div>
       <div style={{ marginTop: 14 }}>
         <div style={{ fontWeight: 900, marginBottom: 8 }}>
         </div>
@@ -1308,7 +1308,7 @@ const f = sortedFrames.find((x) => x.p === p);
 
 <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
   <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.75, marginBottom: 6 }}>
-  </div>
+  Top 3 fixes</div>
   <ol style={{ paddingLeft: 18, margin: 0 }}>
     {(data?.narrative?.playerOverview?.recommendations ?? []).slice(0,2).map((r, i) => (
       <li key={i} style={{ marginBottom: 10 }}>
@@ -1333,7 +1333,7 @@ const f = sortedFrames.find((x) => x.p === p);
 
 <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
   <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.75, marginBottom: 6 }}>
-  </div>
+  Top 3 fixes</div>
   <ol style={{ paddingLeft: 18, margin: 0 }}>
     {(data?.narrative?.playerOverview?.recommendations ?? []).slice(0,2).map((r, i) => (
       <li key={i} style={{ marginBottom: 10 }}>
@@ -1408,6 +1408,7 @@ const f = sortedFrames.find((x) => x.p === p);
     </div>
   );
 }
+
 
 
 
