@@ -59,7 +59,7 @@ if(-not (Wait-For "$base/upload" 25)){
 $urls = @(
   "$base/",
   "$base/upload",
-  "$base/report-beta?golden=1",
+  "$base/report-beta/full?golden=1",
   "$base/health"
 )
 
@@ -82,3 +82,4 @@ foreach($u in $urls){
 
 Write-Host ""
 Write-Host ("Tip: open {0}/upload then click 'Try Golden Demo →'." -f $base) -ForegroundColor Yellow
+
