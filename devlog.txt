@@ -1,0 +1,17 @@
+
+> dev
+> next dev
+
+   ▲ Next.js 15.4.10
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.145:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1495ms
+ ✓ Compiled /middleware in 156ms
+ ✓ Compiled (108 modules)
+ ○ Compiling /report-beta ...
+ ✓ Compiled /report-beta in 2.3s (547 modules)
+ GET /report-beta?golden=1 200 in 2632ms
+ GET /report-beta?golden=1 200 in 89ms

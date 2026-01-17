@@ -276,15 +276,10 @@ function CollapsibleCard({
         }}
       >
         <div style={{ overflow: "hidden" }}>
-        {/* ===== AI_SUMMARY_START ===== */}
-        <AISummaryCard post={post} />
-        {/* ===== AI_SUMMARY_END ===== */}
-          <div style={{ padding: 14 }}>
-  {children}
-</div>
+          <div style={{ padding: 14 }}>{children}</div>
+        </div>
       </div>
     </div>
-  </div>
   );
 }
 export default function ReportBetaClient() {
@@ -918,28 +913,6 @@ const f = sortedFrames.find((x) => x.p === p);
       >
         Reset Demo
       </button>
-          <button
-            type="button"
-            onClick={() => {
-              try { sessionStorage.setItem("vca_card_src", "/data/card-demo.json"); } catch {}
-              window.location.href = "/report-beta/full?golden=1";
-            }}
-            style={{
-              height: 38,
-              padding: "0 16px",
-              borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.18)",
-              background: "rgba(120,180,255,0.22)",
-              color: "#eaf1ff",
-              fontSize: 13,
-              fontWeight: 900,
-              cursor: "pointer",
-              marginLeft: 10,
-              whiteSpace: "nowrap",
-            }}
-          >
-            View Full Report →
-          </button>
     </div>
 
     {/* Row 2: key options */}
@@ -1408,10 +1381,6 @@ const f = sortedFrames.find((x) => x.p === p);
     </div>
   );
 }
-
-
-
-
 
 
 
