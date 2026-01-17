@@ -14,3 +14,16 @@ _safety/
 *.bak
 *.bak*
 *.KNOWN_GOOD_*
+
+# local env / secrets
+.env.local
+
+# Next/Node build + deps
+.next/
+node_modules/
+
+# local scratch / tooling
+.data/
+_snapshots/
+_tools_*.js
+scripts/smoke.ps1
