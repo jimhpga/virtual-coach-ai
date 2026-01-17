@@ -86,7 +86,7 @@ export default function UploadLivePage() {
 
           <button
             type="button"
-            onClick={() => (window.location.href = "/report-beta?golden=1")}
+            onClick={() => (window.location.href = "/report-beta/full?golden=1")}
             style={{
               height: 44,
               borderRadius: 999,
@@ -111,3 +111,4 @@ export default function UploadLivePage() {
     </div>
   );
 }
+
