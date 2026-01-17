@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 
@@ -83,6 +83,27 @@ export default function UploadLivePage() {
           >
             {busy ? "Analyzing…" : "Analyze swing →"}
           </button>
+
+          <button
+            type="button"
+            onClick={() => (window.location.href = "/report-beta?golden=1")}
+            style={{
+              height: 44,
+              borderRadius: 999,
+              border: "1px solid rgba(255,255,255,0.16)",
+              background: "rgba(255,255,255,0.06)",
+              color: "#eaf1ff",
+              fontWeight: 900,
+              cursor: "pointer"
+            }}
+          >
+            Try Golden Demo →
+          </button>
+
+          <div style={{ fontSize: 12, opacity: 0.75, marginTop: -4 }}>
+            No upload needed.
+          </div>
+
 
           {err ? <div style={{ fontSize: 13, color: "#ffd2d2" }}>{err}</div> : null}
         </div>
