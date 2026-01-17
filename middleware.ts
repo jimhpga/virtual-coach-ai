@@ -81,6 +81,9 @@ export function middleware(req: NextRequest) {
   // OK Never touch API routes (preserve Range/streaming headers)
   if (path.startsWith("/api/")) return NextResponse.next();
 
+  // Public health check
+  if (path === "/health" || path === "/health/") return NextResponse.next();
+
   // OK Allow public exact routes
   if (PUBLIC_EXACT.has(path)) return NextResponse.next();
 
@@ -111,6 +114,7 @@ export const config = {
   // Only non-API routes (API is handled above too)
   matcher: ["/((?!api).*)"],
 };
+
 
 
 
