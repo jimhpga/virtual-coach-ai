@@ -1,5 +1,4 @@
 ﻿"use client";
-import { postAssess } from "../lib/postAssess";
 import * as React from "react";
 import PStrip from "./PStrip";
 import { SwingFactsCard } from "../components/SwingFactsCard";
@@ -276,15 +275,10 @@ function CollapsibleCard({
         }}
       >
         <div style={{ overflow: "hidden" }}>
-        {/* ===== AI_SUMMARY_START ===== */}
-        <AISummaryCard post={post} />
-        {/* ===== AI_SUMMARY_END ===== */}
-          <div style={{ padding: 14 }}>
-  {children}
-</div>
+          <div style={{ padding: 14 }}>{children}</div>
+        </div>
       </div>
     </div>
-  </div>
   );
 }
 export default function ReportBetaClient() {
@@ -304,7 +298,6 @@ const [activeP, setActiveP] = React.useState<number | undefined>(undefined);
   const reportData = React.useMemo(() => {
     return analyzeSwing({ mode: isGolden ? "golden" : "upload", intake });
   }, [isGolden, intake]);
-  const post = React.useMemo(() => postAssess(reportData as any), [reportData]);
 // --- Demo analysis pipeline (golden mode uses fixture + personalization)
 React.useEffect(() => {
     try {
@@ -777,15 +770,7 @@ const f = sortedFrames.find((x) => x.p === p);
     PLAYER OVERVIEW
   </div>
 
-          <div style={{ marginTop: 10, padding: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.10)" }}>
-          <div style={{ fontWeight: 800, fontSize: 13, opacity: 0.9 }}>Post-Assessment</div>
-          <div style={{ marginTop: 6, fontSize: 13 }}>
-            <b>Today’s ONE priority:</b> {post.priorityLabel}
-          </div>
-          <div style={{ marginTop: 6, fontSize: 13, opacity: 0.9 }}>{post.avoidList}</div>
-          <div style={{ marginTop: 6, fontSize: 13, opacity: 0.9 }}>{post.confidenceCue}</div>
-        </div>
-<div style={{ fontSize: 15, lineHeight: 1.6 }}>
+  <div style={{ fontSize: 15, lineHeight: 1.6 }}>
     {narrative?.summary ??
       "This swing shows solid fundamentals with good intent through impact. The priority is improving the transition so power and consistency improve together."}
   </div>
@@ -918,28 +903,6 @@ const f = sortedFrames.find((x) => x.p === p);
       >
         Reset Demo
       </button>
-          <button
-            type="button"
-            onClick={() => {
-              try { sessionStorage.setItem("vca_card_src", "/data/card-demo.json"); } catch {}
-              window.location.href = "/report-beta/full?golden=1";
-            }}
-            style={{
-              height: 38,
-              padding: "0 16px",
-              borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.18)",
-              background: "rgba(120,180,255,0.22)",
-              color: "#eaf1ff",
-              fontSize: 13,
-              fontWeight: 900,
-              cursor: "pointer",
-              marginLeft: 10,
-              whiteSpace: "nowrap",
-            }}
-          >
-            View Full Report →
-          </button>
     </div>
 
     {/* Row 2: key options */}
@@ -1408,13 +1371,6 @@ const f = sortedFrames.find((x) => x.p === p);
     </div>
   );
 }
-
-
-
-
-
-
-
 
 
 

@@ -1,0 +1,112 @@
+﻿/* Upload page polish — quick win pass (no redesign, just better) */
+
+:root{
+  --vca-bg0:#061018;
+  --vca-bg1:#071826;
+  --vca-card:rgba(10,22,34,.55);
+  --vca-line:rgba(255,255,255,.10);
+  --vca-text:rgba(255,255,255,.92);
+  --vca-sub:rgba(255,255,255,.70);
+  --vca-blue:#6ea8ff;
+  --vca-blue2:#86b7ff;
+}
+
+main, body{
+  color: var(--vca-text);
+}
+
+h1{
+  letter-spacing:.2px;
+}
+
+p, label{
+  color: var(--vca-sub);
+}
+
+a{
+  color: var(--vca-blue2);
+  text-decoration: none;
+}
+a:hover{ text-decoration: underline; }
+
+/* Make the form feel like a modern app */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+select,
+textarea{
+  width:100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--vca-line);
+  background: rgba(0,0,0,.35);
+  color: var(--vca-text);
+  outline: none;
+  transition: border-color .12s ease, box-shadow .12s ease, transform .05s ease;
+}
+
+input::placeholder, textarea::placeholder{
+  color: rgba(255,255,255,.35);
+}
+
+input:focus, select:focus, textarea:focus{
+  border-color: rgba(110,168,255,.55);
+  box-shadow: 0 0 0 3px rgba(110,168,255,.15);
+}
+
+/* File input: keep it from looking like a Windows 98 relic */
+input[type="file"]{
+  width:100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px dashed rgba(255,255,255,.18);
+  background: rgba(0,0,0,.22);
+  color: rgba(255,255,255,.80);
+}
+
+/* Buttons */
+button{
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.14);
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .05s ease, box-shadow .12s ease, filter .12s ease;
+}
+
+button:active{ transform: translateY(1px); }
+
+button[type="submit"], .primaryButton{
+  background: linear-gradient(180deg, rgba(110,168,255,.95), rgba(70,130,255,.90));
+  border-color: rgba(110,168,255,.45);
+  color: #081320;
+  box-shadow: 0 10px 30px rgba(110,168,255,.10);
+}
+
+button[type="submit"]:hover, .primaryButton:hover{
+  filter: brightness(1.05);
+}
+
+button[disabled], button:disabled{
+  opacity: .50;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Make the big CTA not look like a sad gray runway */
+button[type="submit"]{
+  width: 100%;
+  max-width: 540px;
+  margin: 10px auto 0;
+  display:block;
+}
+
+/* Tighten spacing a bit so it feels deliberate */
+textarea{ min-height: 96px; }
+
+/* Optional: reduce “giant empty void” feel on large screens */
+@media (min-width: 1100px){
+  main{
+    padding-bottom: 48px;
+  }
+}

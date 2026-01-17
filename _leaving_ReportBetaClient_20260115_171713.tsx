@@ -61,8 +61,19 @@ function clamp(n: number, a: number, b: number) {
 }
 function Bar({ label, value }: { label: string; value: number }) {
   const v = clamp(Math.round(value), 0, 100);
-  return (
-    <div style={{ marginBottom: 10 }}><div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, opacity: 0.9 }}>
+  return (<div style={{ marginBottom: 10 }}>
+{/* ===== AI_SUMMARY_START ===== */}
+{(() => {
+  try {
+    // post is computed above via React.useMemo(() => postAssess(reportData), [reportData])
+    if (typeof post === "undefined" || !post) return null;
+    return <AISummaryCard post={post as any} />;
+  } catch (e) {
+    return null;
+  }
+})()}
+{/* ===== AI_SUMMARY_END ===== */}
+<div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, opacity: 0.9 }}>
         <div style={{ fontWeight: 700 }}>{label}</div>
         <div style={{ fontVariantNumeric: "tabular-nums", opacity: 0.75 }}>{v}</div>
       </div>
@@ -88,9 +99,7 @@ function Bar({ label, value }: { label: string; value: number }) {
   );
 }
 function PillButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return (
-
-<button
+  return (<button
       type="button"
       {...props}
       style={{
@@ -117,9 +126,7 @@ function Card({
   children: React.ReactNode;
   right?: React.ReactNode;
 }) {
-  return (
-
-<div
+  return (<div
       style={{
         borderRadius: 18,
         border: "1px solid rgba(255,255,255,0.12)",
@@ -127,7 +134,19 @@ function Card({
         boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
         overflow: "hidden",
       }}
-    >{/* VCA_SWING_FACTS_CARD */}
+    >
+{/* ===== AI_SUMMARY_START ===== */}
+{(() => {
+  try {
+    // post is computed above via React.useMemo(() => postAssess(reportData), [reportData])
+    if (typeof post === "undefined" || !post) return null;
+    return <AISummaryCard post={post as any} />;
+  } catch (e) {
+    return null;
+  }
+})()}
+{/* ===== AI_SUMMARY_END ===== */}
+{/* VCA_SWING_FACTS_CARD */}
       {(title || right) && (
         <div
           style={{
@@ -155,8 +174,19 @@ function Collapsible(props: {
   const { title, defaultOpen = true, right, children } = props;
   const [open, setOpen] = React.useState(defaultOpen);
 
-  return (
-    <div>{/* VCA_SWING_FACTS_CARD */}
+  return (<div>
+{/* ===== AI_SUMMARY_START ===== */}
+{(() => {
+  try {
+    // post is computed above via React.useMemo(() => postAssess(reportData), [reportData])
+    if (typeof post === "undefined" || !post) return null;
+    return <AISummaryCard post={post as any} />;
+  } catch (e) {
+    return null;
+  }
+})()}
+{/* ===== AI_SUMMARY_END ===== */}
+{/* VCA_SWING_FACTS_CARD */}
       <div
         style={{
           display: "flex",
@@ -187,8 +217,7 @@ function Collapsible(props: {
   );
 }
 function CountPill({ n }: { n: number }) {
-  return (
-    <span
+  return (<span
       style={{
         fontSize: 12,
         fontWeight: 900,
@@ -216,8 +245,7 @@ function CollapsibleCard({
   onToggle: () => void;
   children: React.ReactNode;
 }) {
-  return (
-    <div
+  return (<div
       style={{
         border: "1px solid rgba(255,255,255,0.10)",
         background: "rgba(0,0,0,0.22)",
@@ -225,7 +253,19 @@ function CollapsibleCard({
         overflow: "hidden",
         boxShadow: "0 10px 30px rgba(0,0,0,0.28)",
       }}
-    >{/* VCA_SWING_FACTS_CARD */}
+    >
+{/* ===== AI_SUMMARY_START ===== */}
+{(() => {
+  try {
+    // post is computed above via React.useMemo(() => postAssess(reportData), [reportData])
+    if (typeof post === "undefined" || !post) return null;
+    return <AISummaryCard post={post as any} />;
+  } catch (e) {
+    return null;
+  }
+})()}
+{/* ===== AI_SUMMARY_END ===== */}
+{/* VCA_SWING_FACTS_CARD */}
       <button
         type="button"
         onClick={onToggle}
@@ -276,16 +316,40 @@ function CollapsibleCard({
         }}
       >
         <div style={{ overflow: "hidden" }}>
-        {/* ===== AI_SUMMARY_START ===== */}
-        <AISummaryCard post={post} />
-        {/* ===== AI_SUMMARY_END ===== */}
-          <div style={{ padding: 14 }}>
-  {children}
-</div>
+          <div style={{ padding: 14 }}>{children}</div>
+        </div>
       </div>
     </div>
-  </div>
   );
+}
+function AISummaryCard({ post }: { post: any }) {
+  try {
+    if (!post) return null;
+    const priority = post?.priorityLabel || post?.priorityKey || "Priority";
+    return (
+      <div style={{ marginTop: 14, borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(0,0,0,0.22)", padding: 14 }}>
+        
+{/* ===== AI_SUMMARY_START ===== */}
+{(() => {
+  try {
+    // post is computed above via React.useMemo(() => postAssess(reportData), [reportData])
+    if (typeof post === "undefined" || !post) return null;
+    return <AISummaryCard post={post as any} />;
+  } catch (e) {
+    return null;
+  }
+})()}
+{/* ===== AI_SUMMARY_END ===== */}
+<div style={{ fontSize: 12, letterSpacing: 0.6, opacity: 0.8, fontWeight: 800 }}>AI SUMMARY</div>
+        <div style={{ marginTop: 8, fontSize: 18, fontWeight: 900 }}>{priority}</div>
+        {post?.whyNow ? <div style={{ marginTop: 8, lineHeight: 1.35, opacity: 0.92 }}>{post.whyNow}</div> : null}
+        {post?.avoidList ? <div style={{ marginTop: 10, opacity: 0.9 }}><b>Avoid:</b> {post.avoidList}</div> : null}
+        {post?.confidenceCue ? <div style={{ marginTop: 10, opacity: 0.9 }}><b>Confidence:</b> {post.confidenceCue}</div> : null}
+      </div>
+    );
+  } catch {
+    return null;
+  }
 }
 export default function ReportBetaClient() {
 const [activeP, setActiveP] = React.useState<number | undefined>(undefined);
@@ -752,9 +816,19 @@ const f = sortedFrames.find((x) => x.p === p);
       "radial-gradient(1200px 700px at 20% 0%, rgba(66,140,255,0.22), transparent 55%), radial-gradient(900px 600px at 80% 0%, rgba(44,220,170,0.16), transparent 55%), linear-gradient(180deg, #08101a 0%, #050a10 70%, #05070b 100%)",
   };
 
-  return (
-
-<div style={pageShell}>{/* VCA_SWING_FACTS_CARD */}
+  return (<div style={pageShell}>
+{/* ===== AI_SUMMARY_START ===== */}
+{(() => {
+  try {
+    // post is computed above via React.useMemo(() => postAssess(reportData), [reportData])
+    if (typeof post === "undefined" || !post) return null;
+    return <AISummaryCard post={post as any} />;
+  } catch (e) {
+    return null;
+  }
+})()}
+{/* ===== AI_SUMMARY_END ===== */}
+{/* VCA_SWING_FACTS_CARD */}
       <div style={{ maxWidth: 1180, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
           <div>
@@ -803,8 +877,19 @@ const f = sortedFrames.find((x) => x.p === p);
             const sessions = (typeof window !== "undefined" && (window as any).__vca_sessions) ? (window as any).__vca_sessions : 0;
             const conf = computeConfidence({ faults, sessions });
             const rx = prescribe({ faults, level: (level as any) ?? "intermediate", junior: intake?.audience === "junior" });
-            return (
-              <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>{/* VCA_SWING_FACTS_CARD */}
+            return (<div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+{/* ===== AI_SUMMARY_START ===== */}
+{(() => {
+  try {
+    // post is computed above via React.useMemo(() => postAssess(reportData), [reportData])
+    if (typeof post === "undefined" || !post) return null;
+    return <AISummaryCard post={post as any} />;
+  } catch (e) {
+    return null;
+  }
+})()}
+{/* ===== AI_SUMMARY_END ===== */}
+{/* VCA_SWING_FACTS_CARD */}
                 <TinyCard title="Confidence Progress Meter">
                   <ConfidenceMeter
                     label="Confidence Graph Over Time"
@@ -918,28 +1003,6 @@ const f = sortedFrames.find((x) => x.p === p);
       >
         Reset Demo
       </button>
-          <button
-            type="button"
-            onClick={() => {
-              try { sessionStorage.setItem("vca_card_src", "/data/card-demo.json"); } catch {}
-              window.location.href = "/report-beta/full?golden=1";
-            }}
-            style={{
-              height: 38,
-              padding: "0 16px",
-              borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.18)",
-              background: "rgba(120,180,255,0.22)",
-              color: "#eaf1ff",
-              fontSize: 13,
-              fontWeight: 900,
-              cursor: "pointer",
-              marginLeft: 10,
-              whiteSpace: "nowrap",
-            }}
-          >
-            View Full Report →
-          </button>
     </div>
 
     {/* Row 2: key options */}
@@ -1408,6 +1471,7 @@ const f = sortedFrames.find((x) => x.p === p);
     </div>
   );
 }
+
 
 
 

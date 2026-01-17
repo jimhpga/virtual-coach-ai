@@ -14,9 +14,7 @@ export async function POST(req: Request) {
             "video/mp4",
             "video/quicktime",
             "video/x-m4v",
-            "video/webm",
-            "video/x-matroska",
-          ],
+                                  ],
           maximumSizeInBytes: 500 * 1024 * 1024, // 500MB
           addRandomSuffix: true, // ✅ unique filenames
         };
@@ -34,6 +32,8 @@ export async function POST(req: Request) {
     );
   }
 }
+
+
 
 
 
