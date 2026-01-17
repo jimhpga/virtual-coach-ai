@@ -1,34 +1,16 @@
-﻿.next/
-node_modules/
-dist/
-out/
-_snapshots/
-.venv/
+﻿# runtime uploads / generated artifacts
+/public/uploads/
+/public/impact/
+/data/uploads/
+/aws-snapshots/
+
+# local logs / notes
 *.log
+devlog.txt
 
-# local env
-.env.local
-
-
-# local backups
-*.bak_*
-*.BROKEN_*
-
-
-# local tools
-_tools_findUnclosedBrace.jsscripts/smoke.ps1
-
-
-# local tools
-_tools_findUnclosedBrace.js
-scripts/smoke.ps1
-
-
-# local tools
-_tools_findUnclosedBrace.js
-scripts/smoke.ps1
-
-
-# runtime data
-.data/
-
+# backups / safety copies
+*_leaving_*
+_safety/
+*.bak
+*.bak*
+*.KNOWN_GOOD_*

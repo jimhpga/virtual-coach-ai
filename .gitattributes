@@ -1,7 +1,4 @@
-# Normalize line endings (Windows dev)
 * text=auto
-
-# Source files -> LF
 *.ts  text eol=lf
 *.tsx text eol=lf
 *.js  text eol=lf
@@ -13,8 +10,6 @@
 *.yml text eol=lf
 *.yaml text eol=lf
 *.ps1 text eol=crlf
-
-# Images/binaries
 *.png binary
 *.jpg binary
 *.jpeg binary
@@ -26,3 +21,4 @@
 *.mov binary
 *.zip binary
 *.pdf binary
+*.task binary
