@@ -19,10 +19,27 @@ export default function UploadLivePage() {
       const j = await r.json();
       if (!j?.ok) throw new Error(j?.error || "Upload failed");
 
-      const id = j.id as string;
-      const src = `/api/job/${id}`;
-      try { sessionStorage.setItem("vca_card_src", src); } catch {}
-      window.location.href = `/report-beta/full?src=${encodeURIComponent(src)}`;
+            const uploadId = String(j.uploadId || j.id || "");
+      if (!uploadId) throw new Error("Upload did not return uploadId");
+
+      const ar = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ uploadId }),
+      });
+      const aj = await ar.json().catch(() => null);
+      if (!ar.ok || !aj?.ok) throw new Error(aj?.error || `Analyze failed (${ar.status})`);
+
+      const jobId = String(aj.jobId || aj.id || "");
+      const src = jobId ? `/api/job/${jobId}` : "";
+      try { if(src) sessionStorage.setItem("vca_card_src", src); } catch {}
+
+      // Prefer the job endpoint if we have it; otherwise fall back to golden/full render using response payload
+      if (src) {
+        window.location.href = `/report-beta/full?src=${encodeURIComponent(src)}`;
+      } else {
+        window.location.href = `/report-beta/full?golden=1`;
+      }
     } catch (e: any) {
       setErr(e?.message || "Upload failed");
     } finally {
@@ -111,4 +128,5 @@ export default function UploadLivePage() {
     </div>
   );
 }
+
 

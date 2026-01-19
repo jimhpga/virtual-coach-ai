@@ -1,4 +1,4 @@
-Set-Location C:\Sites\virtual-coach-ai
+﻿Set-Location C:\Sites\virtual-coach-ai
 
 function Write-Utf8NoBom($path, $content){
   $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
@@ -27,15 +27,15 @@ $files = Get-ChildItem -Recurse -File -Include *.ts,*.tsx |
 $changed = @()
 
 foreach($f in $files){
-  $raw = Get-Content $f.FullName -Raw
+  $raw = [System.IO.File]::ReadAllText($f.FullName, [System.Text.Encoding]::UTF8)
 
   # Only attempt fix if it looks suspicious
-  if($raw -match "Ã|Â"){
+  if($raw -match "Ãƒ|Ã‚"){
     $fixed = Fix-Moji $raw
 
     # Apply only if it reduces the suspicious markers
-    $before = ([regex]::Matches($raw,   "Ã|Â")).Count
-    $after  = ([regex]::Matches($fixed, "Ã|Â")).Count
+    $before = ([regex]::Matches($raw,   "Ãƒ|Ã‚")).Count
+    $after  = ([regex]::Matches($fixed, "Ãƒ|Ã‚")).Count
 
     if($after -lt $before){
       Copy-Item $f.FullName (Join-Path $bkdir $f.Name) -Force
@@ -52,5 +52,5 @@ if($changed.Count -gt 0){ $changed | ForEach-Object { " - $_" } }
 "`nRemaining suspicious hits (first 80):"
 Get-ChildItem -Recurse -File -Include *.ts,*.tsx |
   Where-Object { $_.FullName -notmatch '\\node_modules\\' -and $_.FullName -notmatch '\\.next\\' -and $_.FullName -notmatch '\\_backup' } |
-  Select-String -Pattern "Ã|Â" |
+  Select-String -Pattern "Ãƒ|Ã‚" |
   Select-Object -First 80

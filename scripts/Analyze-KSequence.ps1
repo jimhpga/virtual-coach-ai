@@ -1,0 +1,263 @@
+﻿[CmdletBinding()]
+param(
+  [Parameter(Mandatory=$true)][string]$InDir,
+  [Parameter(Mandatory=$true)][string]$OutDir,
+  [double]$Fps = 60,
+  [ValidateSet("right","left")][string]$Handedness = "right",
+  [ValidateSet("right","left")][string]$EyeDominance = "left"
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
+
+Add-Type -AssemblyName System.Web.Extensions | Out-Null
+function Read-JsonDeep([string]$path){
+  $raw = Get-Content -Raw -LiteralPath $path
+  $ser = New-Object System.Web.Script.Serialization.JavaScriptSerializer
+  $ser.MaxJsonLength  = 200000000
+  $ser.RecursionLimit = 200000
+  return $ser.DeserializeObject($raw)
+}
+
+function ToD([double]$r){ return ($r * 180.0 / [math]::PI) }
+
+function Unwrap-DegList([double[]]$a){
+  if(-not $a -or $a.Count -lt 2){ return $a }
+  $o = New-Object double[] $a.Count
+  $o[0] = $a[0]
+  for($i=1;$i -lt $a.Count;$i++){
+    $d = $a[$i] - $o[$i-1]
+    if($d -gt 180){ $d -= 360 }
+    elseif($d -lt -180){ $d += 360 }
+    $o[$i] = $o[$i-1] + $d
+  }
+  return $o
+}
+
+function DeltaDegShortest([double]$a, [double]$b){
+  # returns b-a wrapped to [-180,180]
+  $d = $b - $a
+  while($d -gt 180){ $d -= 360 }
+  while($d -lt -180){ $d += 360 }
+  return $d
+}
+
+function DerivDegPerSec([double[]]$ang, [double]$fps, [double]$cap = 1200){
+  if(-not $ang -or $ang.Count -lt 2){ return @() }
+  $v = New-Object double[] $ang.Count
+  $v[0] = 0
+  for($i=1;$i -lt $ang.Count;$i++){
+    $a0 = $ang[$i-1]
+    $a1 = $ang[$i]
+    if([double]::IsNaN($a0) -or [double]::IsNaN($a1)){
+      $v[$i] = [double]::NaN
+      continue
+    }
+    $dv = (DeltaDegShortest $a0 $a1) * $fps
+    if([math]::Abs($dv) -gt $cap){ $v[$i] = [double]::NaN } else { $v[$i] = $dv }
+  }
+  return $v
+}
+
+function Smooth3([double[]]$a){
+  if(-not $a -or $a.Count -lt 3){ return $a }
+  $o = New-Object double[] $a.Count
+  $o[0] = $a[0]
+  for($i=1;$i -lt ($a.Count-1);$i++){
+    $o[$i] = ($a[$i-1] + $a[$i] + $a[$i+1]) / 3.0
+  }
+  $o[$a.Count-1] = $a[$a.Count-1]
+  return $o
+}
+
+# MediaPipe Pose landmark indices (BlazePose)
+$L_SHOULDER = 11; $R_SHOULDER = 12
+$L_ELBOW    = 13; $R_ELBOW    = 14
+$L_WRIST    = 15; $R_WRIST    = 16
+$L_HIP      = 23; $R_HIP      = 24
+
+function GetLM([object[]]$lms, [int]$idx){
+  if(-not $lms){ return $null }
+  if($idx -lt 0 -or $idx -ge $lms.Count){ return $null }
+  $p = $lms[$idx]
+  if($p -is [System.Collections.IDictionary]){ return $p }
+  return $null
+}
+
+function GetXY([object[]]$lms, [int]$idx){
+  $p = GetLM $lms $idx
+  if(-not $p){ return $null }
+  # expects keys: x,y,z,v
+  $x = [double]$p["x"]
+  $y = [double]$p["y"]
+  return @($x,$y)
+}
+
+function Mid([double[]]$a, [double[]]$b){
+  return @((($a[0]+$b[0])/2.0), (($a[1]+$b[1])/2.0))
+}
+
+function AngleLineDeg([double[]]$a, [double[]]$b){
+  # angle of line a->b in image plane
+  $dx = $b[0] - $a[0]
+  $dy = $b[1] - $a[1]
+  if([math]::Abs($dx) -lt 1e-9 -and [math]::Abs($dy) -lt 1e-9){ return [double]::NaN }
+  return ToD([math]::Atan2($dy,$dx))
+}
+
+function SlicePeak([double[]]$arr, [int]$start, [int]$end){
+  if(-not $arr){ return $null }
+  $n = $arr.Count
+  if($n -eq 0){ return $null }
+  $s = [math]::Max(0,$start)
+  $e = [math]::Min($n,$end)
+  if($e -le $s){ return $null }
+  $best = $null
+  for($i=$s;$i -lt $e;$i++){
+    $v = $arr[$i]
+    if($null -eq $best -or [math]::Abs($v) -gt [math]::Abs($best)){ $best = $v }
+  }
+  return $best
+}
+
+function SlicePeakIndex([double[]]$arr, [int]$start, [int]$end){
+  if(-not $arr){ return $null }
+  $n = $arr.Count
+  if($n -eq 0){ return $null }
+  $s = [math]::Max(0,$start)
+  $e = [math]::Min($n,$end)
+  if($e -le $s){ return $null }
+  $bestI = $s
+  $bestV = $arr[$s]
+  for($i=$s;$i -lt $e;$i++){
+    $v = $arr[$i]
+    if([math]::Abs($v) -gt [math]::Abs($bestV)){
+      $bestV = $v; $bestI = $i
+    }
+  }
+  return $bestI
+}
+
+$files = Get-ChildItem -LiteralPath $InDir -Filter *.json | Sort-Object Name
+
+$rows = @()
+
+foreach($file in $files){
+  try{
+    $j = Read-JsonDeep $file.FullName
+    if(-not $j.ContainsKey("frames")){ throw "No 'frames' key in JSON." }
+    $frames = $j["frames"]
+    if(-not ($frames -is [System.Collections.IList]) -or $frames.Count -lt 3){ throw "frames missing/too short" }
+
+    $pel = New-Object System.Collections.Generic.List[double]
+    $tho = New-Object System.Collections.Generic.List[double]
+    $arm = New-Object System.Collections.Generic.List[double]
+
+    for($i=0;$i -lt $frames.Count;$i++){
+      $fr = $frames[$i]
+      if(-not ($fr -is [System.Collections.IDictionary])){ continue }
+      if(-not $fr.ContainsKey("landmarks")){ continue }
+      $lms = $fr["landmarks"]
+      if(-not ($lms -is [System.Collections.IList])){ continue }
+      $lms = [object[]]$lms
+
+      $lHip = GetXY $lms $L_HIP
+      $rHip = GetXY $lms $R_HIP
+      $lSh  = GetXY $lms $L_SHOULDER
+      $rSh  = GetXY $lms $R_SHOULDER
+      $lEl  = GetXY $lms $L_ELBOW
+      $rEl  = GetXY $lms $R_ELBOW
+      $lWr  = GetXY $lms $L_WRIST
+      $rWr  = GetXY $lms $R_WRIST
+
+      if(-not $lHip -or -not $rHip -or -not $lSh -or -not $rSh){
+        $pel.Add([double]::NaN); $tho.Add([double]::NaN); $arm.Add([double]::NaN); continue
+      }
+
+      # Pelvis proxy: hip-line angle
+      $pelAng = AngleLineDeg $rHip $lHip   # right->left
+      # Thorax proxy: shoulder-line angle
+      $thoAng = AngleLineDeg $rSh  $lSh
+
+      # Lead arm proxy (handedness-aware): shoulder->wrist angle
+      if($Handedness -eq "right"){
+        # lead = left arm
+        if($lSh -and $lWr){ $armAng = AngleLineDeg $lSh $lWr } else { $armAng = [double]::NaN }
+      } else {
+        # lead = right arm
+        if($rSh -and $rWr){ $armAng = AngleLineDeg $rSh $rWr } else { $armAng = [double]::NaN }
+      }
+
+      $pel.Add($pelAng); $tho.Add($thoAng); $arm.Add($armAng)
+    }
+
+    $pelA = ($pel.ToArray())
+    $thoA = ($tho.ToArray())
+    $armA = ($arm.ToArray())
+
+    # find "top" as max abs thorax angle (simple but works)
+    $topIdx = 0
+    $bestAbs = -1
+    for($i=0;$i -lt $thoA.Count;$i++){
+      $v = $thoA[$i]
+      if(-not [double]::IsNaN($v)){
+        $av = [math]::Abs($v)
+        if($av -gt $bestAbs){ $bestAbs = $av; $topIdx = $i }
+      }
+    }
+    $impactIdx = $thoA.Count - 1
+
+    $pelV = Smooth3 (DerivDegPerSec $pelA $Fps)
+    $thoV = Smooth3 (DerivDegPerSec $thoA $Fps)
+    $armV = Smooth3 (DerivDegPerSec $armA $Fps)
+
+    # downswing window = [topIdx .. end]
+    $pelPeak = SlicePeak $pelV $topIdx $impactIdx
+    $thoPeak = SlicePeak $thoV $topIdx $impactIdx
+    $armPeak = SlicePeak $armV $topIdx $impactIdx
+
+    $pelPeakI = SlicePeakIndex $pelV $topIdx $impactIdx
+    $thoPeakI = SlicePeakIndex $thoV $topIdx $impactIdx
+    $armPeakI = SlicePeakIndex $armV $topIdx $impactIdx
+
+    # sequence order by peak time (frame index)
+    $seq = @(
+      @{name="pelvis"; idx=$pelPeakI},
+      @{name="thorax"; idx=$thoPeakI},
+      @{name="arm";    idx=$armPeakI}
+    ) | Where-Object { $_.idx -ne $null } | Sort-Object idx | ForEach-Object { $_.name }
+
+    $rows += [pscustomobject]@{
+      clip                 = $file.Name
+      fps                  = [math]::Round($Fps,2)
+      frameCount           = $frames.Count
+      topFrame             = $topIdx
+      pelvisPeakVelDegPerS = if($pelPeak -eq $null -or [double]::IsNaN($pelPeak)) { $null } else { [math]::Round($pelPeak,2) }
+      thoraxPeakVelDegPerS = if($thoPeak -eq $null -or [double]::IsNaN($thoPeak)) { $null } else { [math]::Round($thoPeak,2) }
+      leadArmPeakVelDegPerS= if($armPeak -eq $null -or [double]::IsNaN($armPeak)) { $null } else { [math]::Round($armPeak,2) }
+      pelvisPeakFrame      = $pelPeakI
+      thoraxPeakFrame      = $thoPeakI
+      leadArmPeakFrame     = $armPeakI
+      seqOrder             = ($seq -join " > ")
+      handedness           = $Handedness
+      eyeDominance         = $EyeDominance
+    }
+    Write-Host "✅ $($file.Name)" -ForegroundColor Green
+  } catch {
+    Write-Host ("❌ " + $file.Name + " :: " + $_.Exception.Message) -ForegroundColor Red
+  }
+}
+
+$csv = Join-Path $OutDir "kseq_metrics.csv"
+$json= Join-Path $OutDir "kseq_metrics.json"
+
+$rows | Export-Csv -NoTypeInformation -Encoding UTF8 -Path $csv
+($rows | ConvertTo-Json -Depth 6) | Set-Content -Encoding UTF8 -Path $json
+
+Write-Host "`n=== OUTPUT ===" -ForegroundColor Cyan
+Write-Host $csv
+Write-Host $json
+
+

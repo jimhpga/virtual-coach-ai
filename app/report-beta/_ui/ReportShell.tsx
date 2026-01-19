@@ -10,7 +10,7 @@ export function pill(text: string) {
         padding: "6px 10px",
         borderRadius: 999,
         border: "1px solid rgba(255,255,255,0.14)",
-        background: "rgba(0,0,0,0.25)",
+        background: "rgba(0,0,0,0.25)", backgroundSize: "cover", backgroundPosition: "center",
         fontSize: 12,
         letterSpacing: 0.2,
       }}
@@ -33,8 +33,7 @@ export default function ReportShell(props: {
       style={{
         minHeight: "100vh",
         padding: 20,
-        background:
-          "radial-gradient(1200px 600px at 20% 0%, rgba(120,180,255,0.18), rgba(0,0,0,0)), linear-gradient(180deg, #071018, #04070a)",
+        background: "linear-gradient(180deg, rgba(2,12,28,0.88) 0%, rgba(2,10,22,0.76) 55%, rgba(1,6,14,0.92) 100%), radial-gradient(1200px 700px at 18% 0%, rgba(45,140,255,0.26), rgba(0,0,0,0)), linear-gradient(90deg, rgba(0,70,160,0.20) 0%, rgba(0,0,0,0) 55%), url(/bg/home-bg.png)", backgroundSize: "cover", backgroundRepeat: "no-repeat", backgroundPosition: "center",
         color: "#eaf1ff",
         fontFamily:
           "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial",
@@ -46,7 +45,7 @@ export default function ReportShell(props: {
           margin: "0 auto",
           borderRadius: 18,
           border: "1px solid rgba(255,255,255,0.12)",
-          background: "rgba(255,255,255,0.06)",
+          background: "rgba(255,255,255,0.06)", backgroundSize: "cover", backgroundPosition: "center",
           boxShadow: "0 20px 60px rgba(0,0,0,0.45)",
           overflow: "hidden",
         }}
@@ -79,3 +78,8 @@ export default function ReportShell(props: {
     </div>
   );
 }
+
+
+
+
+

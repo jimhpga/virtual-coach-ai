@@ -5,6 +5,37 @@ import { existsSync } from "fs";
 import { randomUUID } from "crypto";
 import { spawn } from "child_process";
 
+
+async function __vcaDump(tag: string, payload: any) {
+  try {
+    if (process.env.NODE_ENV === "production") return;
+
+    const jobId =
+      payload?.id ??
+      payload?.jobId ??
+      payload?.job?.id ??
+      payload?.data?.id ??
+      `dev_${Date.now()}`;
+
+    const dir = path.join(process.cwd(), ".data", "jobs", String(jobId));
+    await mkdir(dir, { recursive: true });
+
+    const write = async (name: string, obj: any) => {
+      if (obj === undefined) return;
+      const p = path.join(dir, name);
+      await writeFile(p, JSON.stringify(obj, null, 2), "utf8");
+    };
+
+    await write("response.json", payload);
+    await write(`${tag}.json`, payload);
+
+    // Optional common keys (if present)
+    await write("ai_raw.json", payload?.ai_raw ?? payload?.aiRaw ?? payload?.raw ?? payload?.model_raw);
+    await write("ai_parsed.json", payload?.ai_parsed ?? payload?.aiParsed ?? payload?.parsed ?? payload?.model_parsed);
+    await write("ai_summary.json", payload?.ai_summary ?? payload?.aiSummary ?? payload?.summary ?? payload?.report);
+  } catch {}
+}
+
 export const runtime = "nodejs";
 
 type Body = {
@@ -182,5 +213,6 @@ export async function POST(req: NextRequest) {
   shapeResponse({ level, framesDirUrl, frames })
 );}
 }
+
 
 

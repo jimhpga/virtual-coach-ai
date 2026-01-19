@@ -1,12 +1,13 @@
 ﻿"use client";
+import React, { useEffect, useRef, useState } from "react";
+import { analyzeSwing } from "../lib/analyze/index";
 import { postAssess } from "../lib/postAssess";
-import * as React from "react";
 import PStrip from "./PStrip";
 import { SwingFactsCard } from "../components/SwingFactsCard";
 import { PDescriptionsCollapsed } from "../../components/PDescriptionsCollapsed";
 import { TinyCard, ConfidenceMeter } from "../_components/UI";
 import { prescribe, type FaultKey } from "../_logic/drills";
-import { analyzeSwing } from "../lib/analyze/index";
+import { PoseOverlay2D } from "./PoseOverlay2D";
 type PFrame = {
   p: number;
   label: string;
@@ -62,35 +63,37 @@ function clamp(n: number, a: number, b: number) {
 function Bar({ label, value }: { label: string; value: number }) {
   const v = clamp(Math.round(value), 0, 100);
   return (
-    <div style={{ marginBottom: 10 }}><div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, opacity: 0.9 }}>
-        <div style={{ fontWeight: 700 }}>{label}</div>
-        <div style={{ fontVariantNumeric: "tabular-nums", opacity: 0.75 }}>{v}</div>
-      </div>
+    <>
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, opacity: 0.9 }}>
+          <div style={{ fontWeight: 700 }}>{label}</div>
+          <div style={{ fontVariantNumeric: "tabular-nums", opacity: 0.75 }}>{v}</div>
+        </div>
 
-      <div
-        style={{
-          height: 10,
-          borderRadius: 999,
-          background: "rgba(255,255,255,0.10)",
-          overflow: "hidden",
-          border: "1px solid rgba(255,255,255,0.12)",
-        }}
-      >
         <div
           style={{
-            width: v + "%",
-            height: "100%",
-            background: "linear-gradient(90deg, rgba(66,140,255,0.9), rgba(44,220,170,0.9))",
+            height: 10,
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.10)",
+            overflow: "hidden",
+            border: "1px solid rgba(255,255,255,0.12)",
           }}
-        />
+        >
+          <div
+            style={{
+              width: v + "%",
+              height: "100%",
+              background: "linear-gradient(90deg, rgba(66,140,255,0.9), rgba(44,220,170,0.9))",
+            }}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 function PillButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-
-<button
+    <button
       type="button"
       {...props}
       style={{
@@ -118,8 +121,7 @@ function Card({
   right?: React.ReactNode;
 }) {
   return (
-
-<div
+    <div
       style={{
         borderRadius: 18,
         border: "1px solid rgba(255,255,255,0.12)",
@@ -288,6 +290,22 @@ function CollapsibleCard({
   );
 }
 export default function ReportBetaClient() {
+
+  const overlayVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [stickOn, setStickOn] = useState(true);
+  const [pose, setPose] = useState<any>(null);
+  const [activeAngle, setActiveAngle] = useState<"dtl" | "face">("dtl");
+  const poseUrl =
+    activeAngle === "face"
+      ? "/pose/adam_face_clean.pose.json"
+      : "/pose/adam_dtl_clean.pose.json";
+
+  useEffect(() => {
+    fetch(poseUrl)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => setPose(j))
+      .catch(() => setPose(null));
+  }, [poseUrl]);
 const [activeP, setActiveP] = React.useState<number | undefined>(undefined);
 
   // ===== VCA_INTAKE_READ_START =====
@@ -744,17 +762,29 @@ const f = sortedFrames.find((x) => x.p === p);
         ],
     };
   }, [data]);
-  const pageShell: React.CSSProperties = {
+  const bgUrl = "/bg/home-bg.png";
+const bgWrap: React.CSSProperties = {
+  minHeight: "100vh",
+  border: "8px solid magenta",
+  background: "rgba(255,0,255,0.18)",
+  backgroundImage: `url(${bgUrl})`,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
+};const scrim: React.CSSProperties = {
+  minHeight: "100vh",
+  background: "rgba(0,0,0,0.05)",
+};const pageShell: React.CSSProperties = {
     minHeight: "100vh",
     padding: "26px 18px 60px",
     color: "#e6edf6",
-    background:
-      "radial-gradient(1200px 700px at 20% 0%, rgba(66,140,255,0.22), transparent 55%), radial-gradient(900px 600px at 80% 0%, rgba(44,220,170,0.16), transparent 55%), linear-gradient(180deg, #08101a 0%, #050a10 70%, #05070b 100%)",
+    background: "transparent",
   };
 
   return (
-
-<div style={pageShell}>{/* VCA_SWING_FACTS_CARD */}
+    <div style={bgWrap}>
+    <div style={scrim}>
+      <div style={pageShell}>{/* VCA_SWING_FACTS_CARD */}
       <div style={{ maxWidth: 1180, margin: "0 auto" }}>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
           <div>
@@ -804,7 +834,7 @@ const f = sortedFrames.find((x) => x.p === p);
             const conf = computeConfidence({ faults, sessions });
             const rx = prescribe({ faults, level: (level as any) ?? "intermediate", junior: intake?.audience === "junior" });
             return (
-              <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>{/* VCA_SWING_FACTS_CARD */}
+    <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>{/* VCA_SWING_FACTS_CARD */}
                 <TinyCard title="Confidence Progress Meter">
                   <ConfidenceMeter
                     label="Confidence Graph Over Time"
@@ -1075,7 +1105,25 @@ const f = sortedFrames.find((x) => x.p === p);
       </Collapsible>
 
       <Collapsible title="Advanced" defaultOpen={false}>
-        <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
+        <div style={{ marginTop: 10, display: "flex", gap: 10, alignItems: "center" }}>
+  <button
+    type="button"
+    onClick={() => setStickOn(v => !v)}
+    style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(0,0,0,0.25)", color: "#e6edf6", cursor: "pointer" }}
+  >
+    Stick Figure: {stickOn ? "On" : "Off"}{"  "}
+<span style={{ opacity: 0.55, marginLeft: 10, marginRight: 6 }}>|</span>
+{"  "}
+<span style={{ opacity: 0.85, marginRight: 8 }}>Angle:</span>
+<PillButton
+  onClick={() => setActiveAngle(activeAngle === "dtl" ? "face" : "dtl")}
+  title="Toggle camera angle (DTL / Face)"
+>
+  {activeAngle === "dtl" ? "DTL" : "FACE"}
+</PillButton>
+  </button>
+</div>
+<div style={{ marginTop: 10, display: "grid", gap: 10 }}>
           <div>
             <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 900, marginBottom: 6 }}>Video URL</div>
             <input
@@ -1137,8 +1185,9 @@ const f = sortedFrames.find((x) => x.p === p);
               </div>
             }
           >
-            <video
-              ref={(el) => (videoRef.current = el)}
+            <div style={{ position: "relative", width: "100%" }}>
+<video
+              ref={(el) => { videoRef.current = el; overlayVideoRef.current = el; }}
               src={videoUrl || undefined}
               controls
               playsInline
@@ -1152,8 +1201,28 @@ const f = sortedFrames.find((x) => x.p === p);
               onLoadedMetadata={(e) => setDuration((e.currentTarget as HTMLVideoElement).duration || 0)}
               onTimeUpdate={(e) => setCurTime((e.currentTarget as HTMLVideoElement).currentTime || 0)}
             />
+<PoseOverlay2D videoRef={overlayVideoRef} pose={pose} enabled={stickOn} />
+</div>
 
-            <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 10, alignItems: "center" }}>
+            <div style={{ marginTop: 10, display: "flex", gap: 10, alignItems: "center" }}>
+  <button
+    type="button"
+    onClick={() => setStickOn(v => !v)}
+    style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(0,0,0,0.25)", color: "#e6edf6", cursor: "pointer" }}
+  >
+    Stick Figure: {stickOn ? "On" : "Off"}{"  "}
+<span style={{ opacity: 0.55, marginLeft: 10, marginRight: 6 }}>|</span>
+{"  "}
+<span style={{ opacity: 0.85, marginRight: 8 }}>Angle:</span>
+<PillButton
+  onClick={() => setActiveAngle(activeAngle === "dtl" ? "face" : "dtl")}
+  title="Toggle camera angle (DTL / Face)"
+>
+  {activeAngle === "dtl" ? "DTL" : "FACE"}
+</PillButton>
+  </button>
+</div>
+<div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "auto 1fr auto", gap: 10, alignItems: "center" }}>
               <div style={{ display: "flex", gap: 8 }}>
                 <PillButton onClick={() => stepFrames(-1)} disabled={!duration}>
                   ⏮ 1 frame
@@ -1406,38 +1475,11 @@ const f = sortedFrames.find((x) => x.p === p);
         )}
       </div>
     </div>
+    </div>
+  </div>
+
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

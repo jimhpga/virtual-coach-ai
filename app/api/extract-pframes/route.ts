@@ -1,7 +1,8 @@
-﻿"use client";
+﻿export const runtime = "nodejs";
+"use client";
 
 import { NextResponse } from "next/server";
-import fs from "fs";
+import { mkdir, writeFile, readFile, access } from "fs/promises";
 import path from "path";
 import os from "os";
 import { execFile } from "child_process";
@@ -167,5 +168,8 @@ export async function POST(req: Request) {
     try { if (tmpDir) await fs.promises.rm(tmpDir, { recursive: true, force: true }); } catch {}
   }
 }
+
+
+
 
 
