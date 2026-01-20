@@ -1,0 +1,4 @@
+      throw er; // Unhandled 'error' event
+Error: EPERM: operation not permitted, open 'C:\Sites\virtual-coach-ai\.next\trace'
+      throw er; // Unhandled 'error' event
+Error: EPERM: operation not permitted, open 'C:\Sites\virtual-coach-ai\.next\trace'

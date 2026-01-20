@@ -1,6 +1,77 @@
 ﻿"use client";
 
-import React, { useEffect, useMemo, useRef } from "react";
+
+function drawDot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawSegment(ctx: CanvasRenderingContext2D, a: {x:number;y:number} | null, b: {x:number;y:number} | null) {
+  if (!a || !b) return;
+
+  // outline pass (black under-stroke)
+  const prevW = ctx.lineWidth;
+  const prevS = ctx.strokeStyle as any;
+  const prevA = ctx.globalAlpha;
+
+  ctx.globalAlpha = Math.min(1, (prevA ?? 1) + 0.15);
+  ctx.strokeStyle = "rgba(0,0,0,0.75)";
+  ctx.lineWidth = prevW + 2.0;
+
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y);
+  ctx.lineTo(b.x, b.y);
+  ctx.stroke();
+
+  // restore + normal pass (current style)
+  ctx.globalAlpha = prevA;
+  ctx.strokeStyle = prevS;
+  ctx.lineWidth = prevW;
+
+  ctx.beginPath();
+  ctx.moveTo(a.x, a.y);
+  ctx.lineTo(b.x, b.y);
+  ctx.stroke();
+}
+
+function drawBar(
+  ctx: CanvasRenderingContext2D,
+  a: {x:number;y:number} | null,
+  b: {x:number;y:number} | null,
+  style?: { stroke?: string; width?: number; dash?: number[] }
+) {
+  if (!a || !b) return;
+  
+  // --- VCA: temporary style override (bars only)
+  const __prevStroke = ctx.strokeStyle;
+  const __prevWidth  = ctx.lineWidth;
+  const __prevDash   = (ctx.getLineDash ? ctx.getLineDash() : []) as any;
+  if (style) {
+    if (style.stroke) (ctx.strokeStyle as any) = style.stroke;
+    if (typeof style.width === "number") ctx.lineWidth = style.width;
+    if (style.dash && ctx.setLineDash) ctx.setLineDash(style.dash);
+  }// mid-point and perpendicular normal for a short "bar"
+  const mx = (a.x + b.x) * 0.5;
+  const my = (a.y + b.y) * 0.5;
+  const dx = (b.x - a.x);
+  const dy = (b.y - a.y);
+  const len = Math.max(1, Math.hypot(dx, dy));
+  const nx = -dy / len;
+  const ny =  dx / len;
+  const half = Math.min(18, Math.max(10, len * 0.18)); // 10..18 px
+  const p1 = { x: mx - nx * half, y: my - ny * half };
+  const p2 = { x: mx + nx * half, y: my + ny * half };
+  ctx.beginPath();
+  ctx.moveTo(p1.x, p1.y);
+  ctx.lineTo(p2.x, p2.y);  // --- VCA: restore bar style
+  if (style) {
+    (ctx.strokeStyle as any) = __prevStroke as any;
+    ctx.lineWidth = __prevWidth as any;
+    if (ctx.setLineDash) ctx.setLineDash(__prevDash as any);
+  }
+
+}import React, { useEffect, useMemo, useRef } from "react";
 
 type Joint = { x: number; y: number; c: number };
 type PoseFrame = { frame: number; t_ms: number | null; joints: Record<string, Joint> };
@@ -106,7 +177,7 @@ export function PoseOverlay2D({
       const pf = findPoseFrameAt(tMs);
       if (!pf) return;
 
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.5;
       ctx.globalAlpha = 0.9; ctx.strokeStyle = "rgba(255,255,255,0.95)"; ctx.fillStyle = "rgba(255,255,255,0.95)"; const getPt = (name: string) => {
         const j = pf.joints?.[name];
         if (!j) return null;
@@ -119,7 +190,14 @@ export function PoseOverlay2D({
         const pa = getPt(a);
         const pb = getPt(b);
         if (!pa || !pb) continue;
+        // thickness: torso > limbs (best-effort)
+
+        // if you have names available, swap this for a real segment-name check later
+
+        ctx.lineWidth = 2.5;
+
         ctx.moveTo(pa.x, pa.y);
+
         ctx.lineTo(pb.x, pb.y);
       }
       ctx.stroke();
@@ -128,7 +206,7 @@ export function PoseOverlay2D({
         const p = getPt(k);
         if (!p) continue;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 3.25, 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -155,5 +233,13 @@ export function PoseOverlay2D({
     />
   );
 }
+
+
+
+
+
+
+
+
 
 

@@ -121,7 +121,7 @@ function Card({
   right?: React.ReactNode;
 }) {
   return (
-    <div
+    <div className="vca-bg"
       style={{
         borderRadius: 18,
         border: "1px solid rgba(255,255,255,0.12)",
@@ -158,7 +158,7 @@ function Collapsible(props: {
   const [open, setOpen] = React.useState(defaultOpen);
 
   return (
-    <div>{/* VCA_SWING_FACTS_CARD */}
+    <div className="vca-bg">{/* VCA_SWING_FACTS_CARD */}
       <div
         style={{
           display: "flex",
@@ -219,7 +219,7 @@ function CollapsibleCard({
   children: React.ReactNode;
 }) {
   return (
-    <div
+    <div className="vca-bg"
       style={{
         border: "1px solid rgba(255,255,255,0.10)",
         background: "rgba(0,0,0,0.22)",
@@ -782,7 +782,7 @@ const bgWrap: React.CSSProperties = {
   };
 
   return (
-    <div style={bgWrap}>
+    <div className="vca-bg" style={bgWrap}>
     <div style={scrim}>
       <div style={pageShell}>{/* VCA_SWING_FACTS_CARD */}
       <div style={{ maxWidth: 1180, margin: "0 auto" }}>
@@ -834,7 +834,7 @@ const bgWrap: React.CSSProperties = {
             const conf = computeConfidence({ faults, sessions });
             const rx = prescribe({ faults, level: (level as any) ?? "intermediate", junior: intake?.audience === "junior" });
             return (
-    <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>{/* VCA_SWING_FACTS_CARD */}
+    <div className="vca-bg" style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>{/* VCA_SWING_FACTS_CARD */}
                 <TinyCard title="Confidence Progress Meter">
                   <ConfidenceMeter
                     label="Confidence Graph Over Time"
@@ -1480,6 +1480,7 @@ const bgWrap: React.CSSProperties = {
 
   );
 }
+
 
 
 
