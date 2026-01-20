@@ -1,29 +1,45 @@
-﻿# runtime uploads / generated artifacts
-/public/uploads/
-/public/impact/
-/data/uploads/
-/aws-snapshots/
+﻿# ===== VCA ignores =====
 
-# local logs / notes
-*.log
-devlog.txt
-
-# backups / safety copies
-*_leaving_*
-_safety/
-*.bak
-*.bak*
-*.KNOWN_GOOD_*
-
-# local env / secrets
-.env.local
-
-# Next/Node build + deps
-.next/
+# Node / Next
 node_modules/
+.next/
+out/
+dist/
 
-# local scratch / tooling
-.data/
-_snapshots/
-_tools_*.js
-scripts/smoke.ps1
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.dll
+*.so
+*.dylib
+
+# Virtual envs (NEVER commit)
+.venv/
+venv/
+**/.venv/
+tools/pose/.venv/
+
+# Media / large assets
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.wav
+*.mp3
+*.zip
+*.7z
+*.tar
+*.gz
+
+# Local data
+pose/in/
+pose/out/
+data/
+tmp/
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
