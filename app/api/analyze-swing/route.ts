@@ -6,6 +6,124 @@ import { existsSync } from "fs";
 import { randomUUID } from "crypto";
 import { spawn } from "child_process";
 
+function vcaComputeEfficiency(json:any) {
+  const frames: any[] =
+    Array.isArray(json?.frames) ? json.frames :
+    Array.isArray(json?.pose)   ? json.pose   :
+    Array.isArray(json?.data?.frames) ? json.data.frames :
+    [];
+
+  const n = frames.length || 0;
+  if (!n) return { efficiencyProxy: null, efficiencyScore: 72, seqLeadFrames: null };
+
+  const impact =
+    (typeof json?.debug?.impactFrame === "number" ? json.debug.impactFrame : null) ??
+    (typeof json?.impactFrame === "number" ? json.impactFrame : null) ??
+    Math.floor(n * 0.5);
+
+  const clamp = (x:number, lo:number, hi:number) => Math.max(lo, Math.min(hi, x));
+
+  // Use same downswing window as Power: impact-60..impact-5
+  const d0 = clamp(impact - 60, 0, n-1);
+  const d1 = clamp(impact - 5, 0, n-1);
+
+  // Landmarks (MediaPipe Pose)
+  const L_SH = 11, R_SH = 12;
+  const L_HIP = 23, R_HIP = 24;
+
+  // Pull already-computed proxies if present
+  const powerProxy = (typeof json?.debug?.powerProxy === "number") ? json.debug.powerProxy : null;
+  const handSpeedPeak = (typeof json?.debug?.handSpeedPeak === "number") ? json.debug.handSpeedPeak : null;
+  const consistencyProxy = (typeof json?.debug?.consistencyProxy === "number") ? json.debug.consistencyProxy : null;
+
+  // Sequencing proxy:
+  // - compute shoulder line angle & hip line angle per frame
+  // - compute absolute angular velocity (delta angle) per frame
+  // - find peak hip vel frame and peak shoulder vel frame
+  // - seqLeadFrames = shoulderPeakIdx - hipPeakIdx (positive => hips lead)
+  function lineAngleDeg(ax:number, ay:number, bx:number, by:number) {
+    return Math.atan2(by - ay, bx - ax) * (180 / Math.PI);
+  }
+  function wrapDeg(a:number) {
+    let x = a;
+    while (x > 180) x -= 360;
+    while (x < -180) x += 360;
+    return x;
+  }
+
+  const hipAng: number[] = [];
+  const shAng: number[] = [];
+  const idxs: number[] = [];
+
+  for (let i=d0; i<=d1; i++) {
+    const lms = frames[i]?.landmarks;
+    if (!Array.isArray(lms) || lms.length <= R_HIP) continue;
+    const LS = lms[L_SH], RS = lms[R_SH], LH = lms[L_HIP], RH = lms[R_HIP];
+    if (!LS || !RS || !LH || !RH) continue;
+    if (![LS,RS,LH,RH].every(p => typeof p.x==="number" && typeof p.y==="number")) continue;
+
+    shAng.push(lineAngleDeg(LS.x, LS.y, RS.x, RS.y));
+    hipAng.push(lineAngleDeg(LH.x, LH.y, RH.x, RH.y));
+    idxs.push(i);
+  }
+
+  function peakVelIndex(ang:number[]) {
+    if (ang.length < 3) return null;
+    let best = -1;
+    let bestV = -1;
+    for (let k=1; k<ang.length; k++) {
+      const da = Math.abs(wrapDeg(ang[k] - ang[k-1]));
+      if (da > bestV) { bestV = da; best = k; }
+    }
+    return best >= 0 ? best : null;
+  }
+
+  const hipPeakK = peakVelIndex(hipAng);
+  const shPeakK = peakVelIndex(shAng);
+
+  let seqLeadFrames: number | null = null;
+  if (hipPeakK !== null && shPeakK !== null) {
+    // in frame units, positive means hip peak happens earlier
+    seqLeadFrames = (idxs[shPeakK] - idxs[hipPeakK]);
+  }
+
+  // Convert sequencing into 0..1
+  // Ideal: hips lead shoulders by ~3..12 frames at 60fps (~0.05..0.2s)
+  let seqScore = 0.5;
+  if (seqLeadFrames !== null) {
+    seqScore = Math.max(0, Math.min(1, (seqLeadFrames - 0) / 12)); // 0 lead => 0, 12 lead => 1
+  }
+
+  // Stability penalty from consistencyProxy (lower is better)
+  // Typical good: 0.002..0.006
+  let stabScore = 0.6;
+  if (typeof consistencyProxy === "number") {
+    // 0.002 -> ~1.0, 0.010 -> ~0.0
+    stabScore = Math.max(0, Math.min(1, 1 - ((consistencyProxy - 0.002) / 0.008)));
+  }
+
+  // Power base (0..1) from existing powerProxy if present, else fallback from handSpeedPeak
+  let pScore = 0.55;
+  if (typeof powerProxy === "number") {
+    pScore = Math.max(0, Math.min(1, powerProxy)); // powerProxy already 0..1-ish
+  } else if (typeof handSpeedPeak === "number") {
+    pScore = Math.max(0, Math.min(1, (handSpeedPeak - 0.008) / 0.020));
+  }
+
+  // Efficiency proxy: weighted "clean power"
+  const efficiencyProxy = (pScore * 0.55) + (stabScore * 0.25) + (seqScore * 0.20);
+
+  // Score 55..95
+  const efficiencyScore = Math.max(55, Math.min(95, Math.round(55 + efficiencyProxy * 40)));
+
+  return {
+    efficiencyProxy: Math.round(efficiencyProxy * 1000) / 1000,
+    efficiencyScore,
+    seqLeadFrames,
+    efficiencyWindow: [d0, d1],
+  };
+}
+
 function vcaLineAngleDeg(ax:number, ay:number, bx:number, by:number) {
   // angle of line AB relative to +x axis, in degrees
   const ang = Math.atan2(by - ay, bx - ax) * (180 / Math.PI);
@@ -408,6 +526,16 @@ try {
     (json as any).scores = { power: p.powerScore };
   }
 } catch {}
+/* VCA: data-driven Efficiency score (clean power + sequencing lead) */
+try {
+  const e = vcaComputeEfficiency(json);
+  (json as any).debug = { ...(json as any).debug, ...e };
+  if ((json as any).scores && typeof (json as any).scores === "object") {
+    (json as any).scores.efficiency = e.efficiencyScore;
+  } else {
+    (json as any).scores = { efficiency: e.efficiencyScore };
+  }
+} catch {}
 resolve(json);
       } catch {
         reject(new Error(`pose_engine.py returned non-JSON output:\n${out}\n\nstderr:\n${err}`));
@@ -505,6 +633,7 @@ pose = smoothPoseJson(pose, 0.45, 2, 0.0, 0.0); // VCA: smooth pose to reduce ji
   shapeResponse({ level, framesDirUrl, frames })
 );}
 }
+
 
 
 
