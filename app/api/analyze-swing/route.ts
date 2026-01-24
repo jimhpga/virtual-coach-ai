@@ -1,3 +1,4 @@
+import { smoothPoseJson } from "./lib/pose_smooth";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
@@ -116,7 +117,8 @@ function runPythonPoseStdin(videoPath: string, impactFrame: number, outDir: stri
     ps.on("close", (code) => {
       if (code !== 0) return reject(new Error(`pose_engine.py failed (code=${code}).\n${err || out}`));
       try {
-        const json = JSON.parse(out.trim());
+      const json0 = JSON.parse(out.trim());
+      const json = smoothPoseJson(json0, 0.45, 2, 0.0, 0.0); // VCA: smooth pose to reduce jitter
         resolve(json);
       } catch {
         reject(new Error(`pose_engine.py returned non-JSON output:\n${out}\n\nstderr:\n${err}`));
@@ -175,6 +177,7 @@ export async function POST(req: NextRequest) {
 
     // Run python -> writes JPGs into framesOut
     const pose = await runPythonPoseStdin(localVideoPath, impactFrame, framesOut);
+pose = smoothPoseJson(pose, 0.45, 2, 0.0, 0.0); // VCA: smooth pose to reduce jitter
     if (!pose?.ok) return NextResponse.json(
   shapeResponse({ level, framesDirUrl, frames })
 );// Copy generated frames into public so browser can load them
@@ -213,6 +216,8 @@ export async function POST(req: NextRequest) {
   shapeResponse({ level, framesDirUrl, frames })
 );}
 }
+
+
 
 
 
