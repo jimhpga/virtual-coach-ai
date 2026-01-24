@@ -52,7 +52,7 @@ def main():
 
     frames = []
     for fi in idxs:
-        cap.set(cv2.CAP_PROP_POS_FRAMES, fi)
+# (removed) no frame seeking
         ok, frame = cap.read()
         if not ok:
             break
@@ -115,3 +115,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
