@@ -6,6 +6,18 @@ import { existsSync } from "fs";
 import { randomUUID } from "crypto";
 import { spawn } from "child_process";
 
+function vcaClamp(x: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, x));
+}
+function vcaReliabilityFromDebug(dbg: any) {
+  // Prefer QC jitter proxy if present; fallback to 0.008 (typical raw) if unknown
+  const jitter = typeof dbg?.jitterProxy === "number" ? dbg.jitterProxy : 0.008;
+  const missingPct = typeof dbg?.missingPct === "number" ? dbg.missingPct : 0;
+  // Convert jitter (0.003–0.015 typical) into a 55–95 score range
+  const score = 100 - (jitter * 4000) - (missingPct * 0.8);
+  return vcaClamp(Math.round(score), 55, 95);
+}
+
 
 async function __vcaDump(tag: string, payload: any) {
   try {
@@ -119,7 +131,17 @@ function runPythonPoseStdin(videoPath: string, impactFrame: number, outDir: stri
       try {
       const json0 = JSON.parse(out.trim());
       const json = smoothPoseJson(json0, 0.45, 2, 0.0, 0.0); // VCA: smooth pose to reduce jitter
-        (json as any).debug = { ...(json as any).debug, smoothed: true, alpha: 0.45, maxGap: 2 };
+        /* VCA: make reliability score data-driven (jitter + missing frames) */
+try {
+  const dbg = (json as any).debug;
+  const rel = vcaReliabilityFromDebug(dbg);
+  if ((json as any).scores && typeof (json as any).scores === "object") {
+    (json as any).scores.reliability = rel;
+  } else {
+    (json as any).scores = { reliability: rel };
+  }
+} catch {}
+(json as any).debug = { ...(json as any).debug, smoothed: true, alpha: 0.45, maxGap: 2 };
 resolve(json);
       } catch {
         reject(new Error(`pose_engine.py returned non-JSON output:\n${out}\n\nstderr:\n${err}`));
@@ -217,6 +239,7 @@ pose = smoothPoseJson(pose, 0.45, 2, 0.0, 0.0); // VCA: smooth pose to reduce ji
   shapeResponse({ level, framesDirUrl, frames })
 );}
 }
+
 
 
 
