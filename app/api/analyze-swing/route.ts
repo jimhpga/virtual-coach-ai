@@ -19,6 +19,59 @@ function vcaReliabilityFromDebug(dbg: any) {
 }
 
 
+
+function vcaComputePoseDiagnostics(json: any) {
+  const frames: any[] =
+    Array.isArray(json?.frames) ? json.frames :
+    Array.isArray(json?.pose)   ? json.pose   :
+    Array.isArray(json?.data?.frames) ? json.data.frames :
+    [];
+
+  const n = frames.length || 0;
+  let missing = 0;
+
+  // Mean delta across wrists/hips/ankles (same idea as pose_qc.py)
+  const keyIdx = [15, 16, 23, 24, 27, 28]; // wrists, hips, ankles
+  let prev: Array<[number, number]> | null = null;
+  const deltas: number[] = [];
+
+  for (const fr of frames) {
+    const lms = fr?.landmarks;
+    if (!Array.isArray(lms) || lms.length < 10) {
+      missing++;
+      prev = null;
+      continue;
+    }
+
+    // Build current keypoints
+    const cur: Array<[number, number]> = [];
+    let ok = true;
+    for (const i of keyIdx) {
+      const lm = lms[i];
+      if (!lm || typeof lm.x !== "number" || typeof lm.y !== "number") { ok = false; break; }
+      cur.push([lm.x, lm.y]);
+    }
+    if (!ok) { prev = null; continue; }
+
+    if (prev) {
+      let d = 0;
+      for (let k = 0; k < cur.length; k++) {
+        const [x0, y0] = prev[k];
+        const [x1, y1] = cur[k];
+        const dx = x1 - x0;
+        const dy = y1 - y0;
+        d += Math.hypot(dx, dy);
+      }
+      deltas.push(d);
+    }
+    prev = cur;
+  }
+
+  const missingPct = n ? (missing / n) * 100 : 0;
+  const jitterProxy = deltas.length ? (deltas.reduce((a,b)=>a+b,0) / deltas.length) : null;
+
+  return { frames: n, missing, missingPct: Math.round(missingPct * 100) / 100, jitterProxy };
+}
 async function __vcaDump(tag: string, payload: any) {
   try {
     if (process.env.NODE_ENV === "production") return;
@@ -249,6 +302,7 @@ pose = smoothPoseJson(pose, 0.45, 2, 0.0, 0.0); // VCA: smooth pose to reduce ji
   shapeResponse({ level, framesDirUrl, frames })
 );}
 }
+
 
 
 
