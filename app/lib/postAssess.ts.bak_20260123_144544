@@ -1,0 +1,402 @@
+﻿// app/lib/postAssess.ts
+// Deterministic post-assessment layer (safe to call in client).
+// No fetch. No randomness. No model calls.
+// Input: the post-estimate "out" object (which includes narrative.metrics)
+// Output: priority + top faults + drill picks + coaching copy.
+
+export type FaultKey =
+  | "foundation"
+  | "low_turn"
+  | "late_hips"
+  | "arms_start_down"
+  | "over_the_top"
+  | "early_extend"
+  | "sway"
+  | "reverse_pivot"
+  | "face_open"
+  | "face_closed"
+  | "flip";
+
+export type Scores = { swing?: number; power?: number; reliability?: number };
+
+export type AnalyzeResponse = {
+  faults?: FaultKey[];
+  faultKeys?: FaultKey[];
+  scores?: Scores;
+  narrative?: any; // we keep it flexible for now
+  drills?: any;
+  media?: any;
+  meta?: any;
+};
+
+type Metrics = {
+  framesUsed?: number;
+  okRate?: number;
+  setupFrame?: number;
+  topFrame?: number;
+  impactFrame?: number;
+
+  // already present from your v2
+  sepMed?: number;   // separation proxy
+  shTurn?: number;   // shoulder turn proxy
+  hipTurn?: number;  // hip turn proxy
+  sway?: boolean;
+  pelRange?: number; // proxy for pelvis stability / drift
+};
+
+type FaultHit = { key: FaultKey; score: number; why: string };
+
+const LABEL: Record<FaultKey, string> = {
+  foundation: "Foundation (setup + contact)",
+  low_turn: "Sequence (low turn / low separation)",
+  late_hips: "Sequence (hips late)",
+  arms_start_down: "Sequence (arms start down first)",
+  over_the_top: "Path (over the top)",
+  early_extend: "Posture (early extension)",
+  sway: "Pressure shift (sway)",
+  reverse_pivot: "Pressure shift (reverse pivot)",
+  face_open: "Clubface control (open)",
+  face_closed: "Clubface control (closed)",
+  flip: "Impact (handle stalls / flip)",
+};
+
+const WHY_NOW: Record<FaultKey, string> = {
+  foundation:
+    "Lock in predictable contact first. Everything else gets easier once strike is stable.",
+  low_turn:
+    "Your body isn’t creating enough separation/turn, so the swing has to “find” speed with arms and timing. Fix the engine, reduce chaos.",
+  late_hips:
+    "When hips are late, the arms take over. That’s the highway to wipes, blocks, and timing swings.",
+  arms_start_down:
+    "If the arms fire first, the club gets steep and the face has to save it late. Sequence first, then speed.",
+  over_the_top:
+    "Over-the-top is usually a sequence + face issue in disguise. Clean transition and you’ll stop chasing the ball left/right.",
+  early_extend:
+    "Early extension is a contact killer. Fix posture and rotation, and the low point becomes predictable.",
+  sway:
+    "Sway creates inconsistent low point and face delivery. Stable pivot = stable strike.",
+  reverse_pivot:
+    "Reverse pivot robs power and makes contact unpredictable. Pressure direction is the fix.",
+  face_open:
+    "Face control is the steering wheel. Handle it first, then path becomes easy to train.",
+  face_closed:
+    "Closed face is the hook machine. Stabilize face early and the rest of the motion can relax.",
+  flip:
+    "Flip happens when the body stalls or the handle slows. Keep rotating and the face stops passing you.",
+};
+
+const AVOID: Record<FaultKey, string> = {
+  foundation: "Avoid chasing more speed today. Clean contact first.",
+  low_turn: "Avoid chasing more speed today. Earn rotation first, then add speed.",
+  late_hips: "Avoid over-swinging. Smooth transition and sequence beats effort.",
+  arms_start_down: "Avoid 'hit' thoughts. Feel the body start down first.",
+  over_the_top: "Avoid aiming fixes. Change motion, don’t just change target.",
+  early_extend: "Avoid standing up through impact. Keep chest down and rotate.",
+  sway: "Avoid sliding off the ball. Pressure shift without drifting.",
+  reverse_pivot: "Avoid hanging back. Pressure forward before you rotate.",
+  face_open: "Avoid chasing path today. Face first, path second.",
+  face_closed: "Avoid flipping harder. Stabilize face and rotate.",
+  flip: "Avoid 'save it' hands. Keep turning through.",
+};
+
+const CONFIDENCE_CUE =
+  "Expect a small confidence dip while you change the pattern. That’s normal—stay calm, take slower reps, and measure progress by contact + start line.";
+
+const DRILLS: Record<FaultKey, { title: string; steps: string[] }[]> = {
+  foundation: [
+    {
+      title: "9-to-3 contact ladder",
+      steps: [
+        "Half swings: left arm to parallel (P3) to finish (P8).",
+        "Ball first, turf after. Keep tempo slow.",
+        "Do 10 reps: count solid contact only.",
+      ],
+    },
+    {
+      title: "Brush-the-line",
+      steps: [
+        "Draw a line on turf or use alignment stick as reference.",
+        "Make mini swings trying to brush the line after the ball.",
+        "If low point is behind, shorten backswing and rotate through.",
+      ],
+    },
+  ],
+  low_turn: [
+    {
+      title: "Step-turn drill (rotation first)",
+      steps: [
+        "Feet together at setup. Small backswing.",
+        "Step lead foot toward target as you start down.",
+        "Feel torso/hips turn through before the arms 'throw'.",
+      ],
+    },
+    {
+      title: "Chair/hip-hinge rotation",
+      steps: [
+        "Stand with hips lightly touching a chair behind you.",
+        "Turn back without losing hip hinge.",
+        "Rotate through keeping hips back—not standing up.",
+      ],
+    },
+  ],
+  late_hips: [
+    {
+      title: "Pump to P5 (body starts down)",
+      steps: [
+        "Backswing to top.",
+        "Start down: bump/turn hips a touch, pause at lead arm parallel down (P5).",
+        "Then swing through. Repeat 8–10 reps.",
+      ],
+    },
+  ],
+  arms_start_down: [
+    {
+      title: "Pause-at-top (transition control)",
+      steps: [
+        "Go to the top and hold 1 full second.",
+        "Start down with lower body (pressure + turn), not hands.",
+        "Hit soft shots until start line stabilizes.",
+      ],
+    },
+  ],
+  over_the_top: [
+    {
+      title: "Split-hands shallow feel",
+      steps: [
+        "Split hands on the grip by 2–3 inches.",
+        "Make slow swings feeling trail elbow “under” and down.",
+        "Ball starts straighter when path improves—don’t force speed.",
+      ],
+    },
+  ],
+  early_extend: [
+    {
+      title: "Wall-butt drill",
+      steps: [
+        "Stand with glutes lightly touching a wall at setup.",
+        "Turn back keeping contact.",
+        "Rotate through keeping glutes back (don’t thrust toward ball).",
+      ],
+    },
+  ],
+  sway: [
+    {
+      title: "Head-still pressure shift",
+      steps: [
+        "Keep head steady while shifting pressure (not mass) to trail side.",
+        "Start down: pressure to lead, then rotate.",
+        "If head drifts, shorten backswing and slow tempo.",
+      ],
+    },
+  ],
+  reverse_pivot: [
+    {
+      title: "Lead-side early (get left then turn)",
+      steps: [
+        "Mini backswing.",
+        "Feel pressure move to lead foot BEFORE you rotate through.",
+        "Finish tall and posted on lead leg.",
+      ],
+    },
+  ],
+  face_open: [
+    {
+      title: "Knuckles-down / face square check",
+      steps: [
+        "Half swings only.",
+        "Feel lead wrist flatter and clubface more 'down' through impact.",
+        "Ball starts less right = progress. Don’t chase distance.",
+      ],
+    },
+  ],
+  face_closed: [
+    {
+      title: "Hold-off finish",
+      steps: [
+        "Hit 50–70% shots.",
+        "Finish with chest turning but hands not rolling hard.",
+        "If it still hooks, weaken grip 1 notch and repeat.",
+      ],
+    },
+  ],
+  flip: [
+    {
+      title: "Continue-turn drill",
+      steps: [
+        "Hit 70% shots focusing on chest turning through impact.",
+        "Feel hands 'ride' the turn instead of passing it.",
+        "If contact improves, speed up last—not first.",
+      ],
+    },
+  ],
+};
+
+function clamp(n: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, n));
+}
+
+function getMetrics(report: AnalyzeResponse): Metrics {
+  const m = report?.narrative?.metrics ?? report?.metrics ?? {};
+  return {
+    framesUsed: Number(m.framesUsed ?? 0) || undefined,
+    okRate: typeof m.okRate === "number" ? m.okRate : undefined,
+    setupFrame: typeof m.setupFrame === "number" ? m.setupFrame : undefined,
+    topFrame: typeof m.topFrame === "number" ? m.topFrame : undefined,
+    impactFrame: typeof m.impactFrame === "number" ? m.impactFrame : undefined,
+    sepMed: typeof m.sepMed === "number" ? m.sepMed : undefined,
+    shTurn: typeof m.shTurn === "number" ? m.shTurn : undefined,
+    hipTurn: typeof m.hipTurn === "number" ? m.hipTurn : undefined,
+    sway: typeof m.sway === "boolean" ? m.sway : undefined,
+    pelRange: typeof m.pelRange === "number" ? m.pelRange : undefined,
+  };
+}
+
+function scoreFaults(m: Metrics): FaultHit[] {
+  const hits: FaultHit[] = [];
+
+  const sep = m.sepMed ?? 0;
+  const sh = m.shTurn ?? 0;
+  const hip = m.hipTurn ?? 0;
+
+  // ---- Core deterministic rules ----
+  // Low separation/turn => low_turn (primary)
+  if (sep > 0 && sep < 0.035) {
+    const s = clamp((0.035 - sep) / 0.02, 0, 1); // higher when sep is smaller
+    hits.push({
+      key: "low_turn",
+      score: 70 + 30 * s,
+      why: `Low separation (sepMed=${sep.toFixed(3)})`,
+    });
+  }
+
+  // Hips late proxy: shoulders turning but hips not enough OR sep small while shoulders high
+  if (sh > 0.70 && hip > 0 && hip < 0.60) {
+    const s = clamp((0.60 - hip) / 0.20, 0, 1);
+    hits.push({
+      key: "late_hips",
+      score: 60 + 25 * s,
+      why: `Hip turn lag (sh=${sh.toFixed(2)}, hip=${hip.toFixed(2)})`,
+    });
+  }
+
+  // Sway (from your metric)
+  if (m.sway === true) {
+    hits.push({
+      key: "sway",
+      score: 75,
+      why: "Sway detected",
+    });
+  }
+
+  // Pelvis instability proxy (very conservative; can tune)
+  // If pelRange is large, it implies drift/instability.
+  if (typeof m.pelRange === "number" && m.pelRange > 0.010) {
+    hits.push({
+      key: "sway",
+      score: Math.max(65, Math.min(85, 65 + (m.pelRange - 0.010) * 1500)),
+      why: `Pelvis drift (pelRange=${m.pelRange.toFixed(4)})`,
+    });
+  }
+
+  // Reliability gate: if okRate is low, we downgrade everything and fallback to foundation
+  const okRate = m.okRate ?? 1;
+  if (okRate < 0.75) {
+    // keep any hits but add foundation strongly
+    hits.push({
+      key: "foundation",
+      score: 90,
+      why: `Pose confidence low (okRate=${okRate.toFixed(2)})`,
+    });
+  }
+
+  if (hits.length === 0) {
+    hits.push({
+      key: "foundation",
+      score: 80,
+      why: "No strong signals",
+    });
+  }
+
+  // Deduplicate by keeping highest score per key
+  const best = new Map<FaultKey, FaultHit>();
+  for (const h of hits) {
+    const cur = best.get(h.key);
+    if (!cur || h.score > cur.score) best.set(h.key, h);
+  }
+  return Array.from(best.values()).sort((a, b) => b.score - a.score);
+}
+
+function pickTopFaults(sorted: FaultHit[], max = 3): FaultKey[] {
+  const out: FaultKey[] = [];
+  for (const h of sorted) {
+    if (!out.includes(h.key)) out.push(h.key);
+    if (out.length >= max) break;
+  }
+  // Always ensure foundation is present if nothing else meaningful
+  if (out.length === 0) out.push("foundation");
+  return out;
+}
+
+function pickPriority(faults: FaultKey[]): FaultKey {
+  // Priority order (tight + intentional)
+  const order: FaultKey[] = [
+    "face_open",
+    "face_closed",
+    "low_turn",
+    "late_hips",
+    "arms_start_down",
+    "over_the_top",
+    "early_extend",
+    "sway",
+    "reverse_pivot",
+    "flip",
+    "foundation",
+  ];
+  for (const k of order) if (faults.includes(k)) return k;
+  return faults[0] || "foundation";
+}
+
+function label(k: FaultKey) {
+  return LABEL[k] || (k ? String(k).replace(/_/g, " ") : "");
+}
+
+function drillsForFaults(faults: FaultKey[]) {
+  const out: Record<string, any> = {};
+  for (const k of faults) {
+    const list = DRILLS[k] ?? DRILLS.foundation;
+    out[k] = list.slice(0, 2);
+  }
+  return out;
+}
+
+export function postAssess(report: AnalyzeResponse) {
+  const m = getMetrics(report);
+  const ranked = scoreFaults(m);
+  const topFaults = pickTopFaults(ranked, 3);
+  const priority = pickPriority(topFaults);
+
+  const whyNow = WHY_NOW[priority] || WHY_NOW.foundation;
+  const avoidList = AVOID[priority] || AVOID.foundation;
+
+  const drills = drillsForFaults(topFaults);
+
+  // Return a clean object your post-estimate runner can merge into output.
+  return {
+    inferredFromPose: true,
+    metrics: m,
+    rankedFaults: ranked.map((h) => ({ key: h.key, score: Math.round(h.score), why: h.why })),
+
+    faults: topFaults,
+    faultKeys: topFaults,
+    topFaults,
+
+    priorityKey: priority,
+    priorityLabel: label(priority),
+
+    whyNow,
+    avoidList,
+    confidenceCue: CONFIDENCE_CUE,
+
+    drills,
+  };
+}

@@ -1,33 +1,65 @@
-﻿// app/lib/postAssess.ts
-// Pure, deterministic post-assessment layer (safe to call in client).
-// Keep it simple. No fetch. No randomness.
+// app/lib/postAssess.ts
+// Deterministic post-assessment layer.
+// Input: pose frames + base rep (optional).
+// Output: faults, scores, rankedFaults, topFaults, confidence, evidence, narrative.
+//
+// NOTE: Keep this pure + deterministic: no fetch, no randomness.
 
 export type FaultKey = string;
 
-export type AnalyzeResponse = {
-  faults?: FaultKey[];
-  scores?: { swing?: number; power?: number; reliability?: number };
-  narrative?: any;
-  drills?: any;
-  media?: any;
+type PoseLm = { x: number; y: number; z?: number; v?: number };
+type PoseFrame = { frame: number; t: number; ok: boolean; w?: number; h?: number; landmarks: PoseLm[] };
+type PoseJson = { version?: any; fps?: number; width?: number; height?: number; frames: PoseFrame[] };
+
+type AnalyzeBase = any;
+
+export type RankedFault = {
+  key: FaultKey;
+  label: string;
+  confidence: number; // 0..1
+  evidence: Record<string, any>;
+};
+
+export type PostAssessOut = {
+  faults: FaultKey[];
+  faultKeys: FaultKey[];
+  topFaults: FaultKey[];
+  rankedFaults: RankedFault[];
+  scores: { swing: number; power: number; reliability: number };
+  confidence: { overall: number; level: "low" | "medium" | "high"; notes: string[] };
+  evidence: Record<string, any>;
+  narrative: {
+    priorityKey: FaultKey;
+    priorityLabel: string;
+    whyNow: string;
+    avoidList: string;
+    confidenceCue: string;
+    inferredFromPose: boolean;
+    metrics: Record<string, any>;
+    rankedFaults: RankedFault[];
+  };
+  priorityKey: FaultKey;
+  priorityLabel: string;
+  whyNow: string;
+  avoidList: string;
+  confidenceCue: string;
 };
 
 const PRIORITY_ORDER: FaultKey[] = [
   "face_open",
   "face_closed",
-  "early_extend",
   "over_the_top",
+  "early_extend",
+  "low_turn",
   "late_hips",
   "arms_start_down",
   "flip",
   "sway",
   "reverse_pivot",
+  "foundation",
 ];
 
-function pickOne(faults: FaultKey[] = []) {
-  for (const k of PRIORITY_ORDER) if (faults.includes(k)) return k;
-  return faults[0] || "foundation";
-}
+function clamp01(n: number){ return Math.max(0, Math.min(1, n)); }
 
 function humanLabel(key: string) {
   const map: Record<string, string> = {
@@ -35,7 +67,8 @@ function humanLabel(key: string) {
     face_closed: "Clubface control (closed)",
     over_the_top: "Path (over the top)",
     early_extend: "Posture (early extension)",
-    late_hips: "Sequence (hips late)",
+    low_turn: "Rotation (low turn / stalled pivot)",
+    late_hips: "Sequence (hips late / low separation)",
     arms_start_down: "Sequence (arms start down first)",
     flip: "Impact (handle stalls / flip)",
     sway: "Pressure shift (sway)",
@@ -43,17 +76,256 @@ function humanLabel(key: string) {
     foundation: "Foundation (setup + contact)",
   };
   const k = (typeof key === "string") ? key : "";
-  return (map as any)[k] || (k ? k.replace(/_/g, " ") : "");
+  return map[k] || (k ? k.replace(/_/g, " ") : "");
 }
 
-export function postAssess(report: AnalyzeResponse) {
-  const faults = report?.faults ?? [];
-  const priority = pickOne(faults);
+function pickPriority(faults: FaultKey[] = []) {
+  for (const k of PRIORITY_ORDER) if (faults.includes(k)) return k;
+  return faults[0] || "foundation";
+}
+
+// ---- Pose-derived metrics (simple + stable) ----
+// We intentionally keep these "proxy" metrics crude-but-repeatable.
+// Better to be consistently right-ish than precisely wrong.
+
+function okRate(frames: PoseFrame[]) {
+  if (!frames?.length) return 0;
+  const ok = frames.filter(f => !!f.ok).length;
+  return ok / frames.length;
+}
+
+function safeLm(frame: PoseFrame | undefined, idx: number): PoseLm | null {
+  const lm = frame?.landmarks?.[idx];
+  if (!lm || typeof lm.x !== "number" || typeof lm.y !== "number") return null;
+  return lm;
+}
+
+// MediaPipe Pose landmark indices (BlazePose)
+// 11 L shoulder, 12 R shoulder, 23 L hip, 24 R hip
+const L_SH = 11, R_SH = 12, L_HIP = 23, R_HIP = 24;
+
+function mid(a: PoseLm, b: PoseLm){ return { x:(a.x+b.x)/2, y:(a.y+b.y)/2, z:((a.z??0)+(b.z??0))/2 }; }
+function dx(a: PoseLm, b: PoseLm){ return (a.x - b.x); }
+function dy(a: PoseLm, b: PoseLm){ return (a.y - b.y); }
+
+function turnProxy(frame: PoseFrame | undefined, aIdx: number, bIdx: number){
+  const a = safeLm(frame, aIdx);
+  const b = safeLm(frame, bIdx);
+  if (!a || !b) return null;
+  // "Turn" proxy: abs horizontal separation of left/right points (bigger = more "open" to camera).
+  // This is NOT degrees; it's a normalized image-space proxy.
+  return Math.abs(dx(a,b));
+}
+
+function pelvisRange(frames: PoseFrame[]){
+  // Proxy for sway: range of pelvis-mid X across time.
+  const xs: number[] = [];
+  for (const f of frames){
+    const lh = safeLm(f, L_HIP);
+    const rh = safeLm(f, R_HIP);
+    if (!lh || !rh) continue;
+    xs.push(mid(lh,rh).x);
+  }
+  if (xs.length < 5) return null;
+  const mn = Math.min(...xs), mx = Math.max(...xs);
+  return mx - mn;
+}
+
+function inferKeyFrames(frames: PoseFrame[]){
+  // Super simple: setup = first ok frame; "top" = max lead-shoulder height delta; impact = near end (or top+5)
+  const okIdx = frames.findIndex(f => !!f.ok);
+  const setup = Math.max(0, okIdx >= 0 ? okIdx : 0);
+
+  // crude top: max (shoulder-mid y) drop from setup (bigger drop means arms up) - depends on camera, but stable.
+  let top = Math.min(frames.length-1, Math.max(setup, Math.floor(frames.length*0.7)));
+  const base = frames[setup];
+  const baseSh = (() => {
+    const ls = safeLm(base, L_SH); const rs = safeLm(base, R_SH);
+    return (ls && rs) ? mid(ls,rs) : null;
+  })();
+  if (baseSh){
+    let best = -1;
+    for (let i=setup; i<frames.length; i++){
+      const ls = safeLm(frames[i], L_SH); const rs = safeLm(frames[i], R_SH);
+      if (!ls || !rs) continue;
+      const sh = mid(ls,rs);
+      const delta = (baseSh.y - sh.y); // positive when shoulders moved up in frame
+      if (delta > best){
+        best = delta;
+        top = i;
+      }
+    }
+  }
+
+  const impact = Math.min(frames.length-1, Math.max(top+5, Math.floor(frames.length*0.75)));
+  return { setupFrame: setup, topFrame: top, impactFrame: impact };
+}
+
+// ---- Fault inference (lightweight + explainable) ----
+function inferFaultsFromMetrics(m: any): FaultKey[] {
+  const faults: FaultKey[] = [];
+
+  // Sway proxy
+  if (typeof m.pelRange === "number" && m.pelRange > 0.02) faults.push("sway"); // threshold is normalized; tune later
+
+  // Low turn proxy (your big one right now)
+  // sepMed is "separation proxy" - smaller means hips/chest move together (no stretch).
+  if (typeof m.sepMed === "number" && m.sepMed < 0.045) faults.push("low_turn");
+
+  // Late hips (only if not already low_turn)
+  if (!faults.includes("low_turn") && typeof m.sepMed === "number" && m.sepMed < 0.06) faults.push("late_hips");
+
+  // Foundation fallback
+  if (!faults.length) faults.push("foundation");
+
+  return faults;
+}
+
+function scoreModel(m: any){
+  // Reliability: based on okRate and frames used
+  const ok = (typeof m.okRate === "number") ? m.okRate : 0;
+  const framesUsed = (typeof m.framesUsed === "number") ? m.framesUsed : 0;
+  const rel = clamp01( (ok*0.8) + clamp01(framesUsed/90)*0.2 );
+
+  // Power: tied to "turn proxies" and separation
+  const sh = (typeof m.shTurn === "number") ? m.shTurn : 0;
+  const hip = (typeof m.hipTurn === "number") ? m.hipTurn : 0;
+  const sep = (typeof m.sepMed === "number") ? m.sepMed : 0;
+  const p = clamp01( (sh*0.35) + (hip*0.35) + clamp01(sep/0.12)*0.30 );
+
+  // Swing: blend + small penalty for sway
+  const swayPenalty = m.sway ? 0.08 : 0;
+  const s = clamp01( (rel*0.45) + (p*0.55) - swayPenalty );
+
+  return {
+    swing: Math.round(60 + s*40),          // 60..100
+    power: Math.round(40 + p*60),          // 40..100
+    reliability: Math.round(60 + rel*40),  // 60..100
+  };
+}
+
+function faultConfidence(key: FaultKey, m: any){
+  // 0..1 confidence per fault, derived from how far past threshold we are.
+  if (key === "low_turn"){
+    const sep = (typeof m.sepMed === "number") ? m.sepMed : 1;
+    // below 0.045 triggers; below 0.03 is "strong"
+    const c = clamp01((0.045 - sep) / (0.045 - 0.03));
+    return 0.55 + 0.45*c;
+  }
+  if (key === "sway"){
+    const pr = (typeof m.pelRange === "number") ? m.pelRange : 0;
+    // above 0.02 triggers; above 0.05 is strong
+    const c = clamp01((pr - 0.02) / (0.05 - 0.02));
+    return 0.55 + 0.45*c;
+  }
+  if (key === "late_hips"){
+    const sep = (typeof m.sepMed === "number") ? m.sepMed : 1;
+    const c = clamp01((0.06 - sep) / (0.06 - 0.045));
+    return 0.50 + 0.40*c;
+  }
+  if (key === "foundation"){
+    return 0.50;
+  }
+  return 0.55;
+}
+
+function buildEvidence(key: FaultKey, m: any){
+  if (key === "low_turn"){
+    return {
+      sepMed: m.sepMed,
+      shTurn: m.shTurn,
+      hipTurn: m.hipTurn,
+      note: "Low separation proxy suggests hips/chest are moving together (stalled pivot / no stretch).",
+    };
+  }
+  if (key === "late_hips"){
+    return {
+      sepMed: m.sepMed,
+      shTurn: m.shTurn,
+      hipTurn: m.hipTurn,
+      note: "Separation proxy is modest; hips may be arriving late relative to torso.",
+    };
+  }
+  if (key === "sway"){
+    return {
+      pelRange: m.pelRange,
+      note: "Pelvis-mid X range suggests lateral motion (sway).",
+    };
+  }
+  return { note: "Insufficient signal; using conservative default." };
+}
+
+function summarizeConfidence(faults: FaultKey[], ranked: RankedFault[], m: any){
+  const ok = (typeof m.okRate === "number") ? m.okRate : 0;
+  const top = ranked?.[0]?.confidence ?? 0.5;
+  const overall = clamp01( (ok*0.45) + (top*0.55) );
+
+  let level: "low"|"medium"|"high" = "medium";
+  if (overall >= 0.78) level = "high";
+  if (overall < 0.62) level = "low";
+
+  const notes: string[] = [];
+  if (ok < 0.75) notes.push("Pose tracking quality is limited in this clip (lower OK rate).");
+  if ((m.framesUsed ?? 0) < 40) notes.push("Few frames used - confidence reduced.");
+  if (faults.includes("foundation")) notes.push("No strong fault signals - defaulting to foundation.");
+
+  return { overall, level, notes };
+}
+
+export function postAssess(opts: { pose: PoseJson; base?: AnalyzeBase }): PostAssessOut {
+  const pose = opts?.pose;
+  const frames = (pose?.frames || []).filter(f => f && Array.isArray(f.landmarks));
+  const framesUsed = frames.length;
+
+  const ok = okRate(frames);
+  const kf = inferKeyFrames(frames);
+
+  const setupF = frames[kf.setupFrame];
+  const topF = frames[kf.topFrame];
+
+  const shTurn = turnProxy(topF, L_SH, R_SH) ?? 0;
+  const hipTurn = turnProxy(topF, L_HIP, R_HIP) ?? 0;
+
+  // Separation proxy: abs difference between shoulder-turn proxy and hip-turn proxy
+  const sepMed = Math.abs(shTurn - hipTurn);
+
+  const pr = pelvisRange(frames);
+  const sway = (typeof pr === "number") ? (pr > 0.02) : false;
+
+  const m = {
+    framesUsed,
+    pelRange: pr ?? 0,
+    sway,
+    setupFrame: kf.setupFrame,
+    topFrame: kf.topFrame,
+    impactFrame: kf.impactFrame,
+    okRate: ok,
+    sepMed,
+    shTurn,
+    hipTurn,
+  };
+
+  const faults = inferFaultsFromMetrics(m);
+  const priority = pickPriority(faults);
+
+  // ranked faults (highest confidence first)
+  const rankedFaults: RankedFault[] = faults
+    .map((k) => ({
+      key: k,
+      label: humanLabel(k),
+      confidence: faultConfidence(k, m),
+      evidence: buildEvidence(k, m),
+    }))
+    .sort((a,b) => (b.confidence - a.confidence));
+
+  const topFaults = rankedFaults.slice(0,3).map(r => r.key);
+
+  const scores = scoreModel(m);
 
   const whyNow =
     priority === "foundation"
       ? "Lock in predictable contact first. Everything else gets easier once strike is stable."
-      : `Fixing ${humanLabel(priority)} gives you the biggest “one move” gain right now—better starts, better strike, less chaos.`;
+      : `Fixing ${humanLabel(priority)} gives you the biggest “one move” gain right now-better starts, better strike, less chaos.`;
 
   const avoidList =
     priority === "face_open" || priority === "face_closed"
@@ -61,9 +333,43 @@ export function postAssess(report: AnalyzeResponse) {
       : "Avoid chasing more speed today. Clean contact and sequence first.";
 
   const confidenceCue =
-    "Expect a small confidence dip while you change the pattern. That’s normal—stay calm, take slower reps, and measure progress by contact + start line.";
+    "Expect a small confidence dip while you change the pattern. That's normal-stay calm, take slower reps, and measure progress by contact + start line.";
+
+  const confidence = summarizeConfidence(faults, rankedFaults, m);
+
+  const evidence = {
+    primary: rankedFaults[0]?.evidence ?? {},
+    metrics: {
+      okRate: m.okRate,
+      framesUsed: m.framesUsed,
+      sepMed: m.sepMed,
+      shTurn: m.shTurn,
+      hipTurn: m.hipTurn,
+      pelRange: m.pelRange,
+    },
+  };
 
   return {
+    faults,
+    faultKeys: faults,
+    topFaults,
+    rankedFaults,
+    scores,
+    confidence,
+    evidence,
+    narrative: {
+      priorityKey: priority,
+      priorityLabel: humanLabel(priority),
+      whyNow,
+      avoidList,
+      confidenceCue,
+      inferredFromPose: true,
+      metrics: {
+        ...m,
+        scores,
+      },
+      rankedFaults,
+    },
     priorityKey: priority,
     priorityLabel: humanLabel(priority),
     whyNow,
@@ -71,4 +377,3 @@ export function postAssess(report: AnalyzeResponse) {
     confidenceCue,
   };
 }
-

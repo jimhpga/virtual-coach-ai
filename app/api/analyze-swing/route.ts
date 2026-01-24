@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
 import { existsSync } from "fs";
@@ -58,11 +58,11 @@ function shapeResponse(args: {
     narrative: {
       good: [
         "Good balance and posture through the motion.",
-        "Solid rhythm—nothing looks rushed.",
+        "Solid rhythm-nothing looks rushed.",
         "Nice intent to swing through the target.",
       ],
       improve: [
-        "Clean up the transition so the hands don’t ‘throw’ early.",
+        "Clean up the transition so the hands don't ‘throw' early.",
         "Keep your chest over the ball longer through impact.",
         "Stay in your safe hallway on the way down.",
       ],

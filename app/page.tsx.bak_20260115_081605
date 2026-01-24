@@ -1,0 +1,69 @@
+﻿export default function Landing() {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background:
+          "radial-gradient(1200px 600px at 20% 0%, #0e2a3a 0%, #06090d 60%)",
+        color: "#eaeaea",
+        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont",
+      }}
+    >
+      <div style={{ maxWidth: 680, padding: 40 }}>
+        <h1
+          style={{
+            fontSize: 44,
+            lineHeight: 1.05,
+            marginBottom: 16,
+            letterSpacing: "-0.02em",
+          }}
+        >
+          Upload one swing.
+          <br />
+          Get one clear priority.
+        </h1>
+
+        <p style={{ fontSize: 18, opacity: 0.85, marginBottom: 28 }}>
+          Virtual Coach AI turns a swing video into a focused plan —
+          score, priority, and one drill.
+        </p>
+
+        <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <a
+            href="/upload"
+            style={{
+              padding: "12px 18px",
+              borderRadius: 12,
+              background: "#ffffff",
+              color: "#000",
+              fontWeight: 600,
+              textDecoration: "none",
+            }}
+          >
+            Upload a swing
+          </a>
+
+          <a
+            href="/report-beta?golden=1"
+            style={{
+              padding: "12px 18px",
+              borderRadius: 12,
+              border: "1px solid #2a2f36",
+              color: "#eaeaea",
+              textDecoration: "none",
+            }}
+          >
+            See a sample report
+          </a>
+        </div>
+
+        <p style={{ marginTop: 28, fontSize: 14, opacity: 0.6 }}>
+          No sign-up required for the demo.
+        </p>
+      </div>
+    </main>
+  );
+}

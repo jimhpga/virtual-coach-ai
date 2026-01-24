@@ -1,0 +1,1499 @@
+﻿"use client";
+import React, { useEffect, useRef, useState } from "react";
+import { analyzeSwing } from "../lib/analyze/index";
+import { postAssess } from "../lib/postAssess";
+import PStrip from "./PStrip";
+import { SwingFactsCard } from "../components/SwingFactsCard";
+import { PDescriptionsCollapsed } from "../../components/PDescriptionsCollapsed";
+import { TinyCard, ConfidenceMeter } from "../_components/UI";
+import { prescribe, type FaultKey } from "../_logic/drills";
+import { PoseOverlay2D } from "./PoseOverlay2D";
+
+
+function capList<T>(arr: T[] | undefined | null, n: number): T[] {
+  return Array.isArray(arr) ? arr.slice(0, n) : [];
+}
+type PFrame = {
+  p: number;
+  label: string;
+  frame: number;
+  file: string;
+  imageUrl: string;
+  thumbUrl: string;
+};
+type AnalyzeResponse = {
+  ok: boolean;
+  level?: string;
+  media?: { framesDir: string; frames: PFrame[] };
+  scores?: {
+    swing?: number;
+    power?: number;
+    reliability?: number;
+    speed?: number;
+    efficiency?: number;
+    consistency?: number;
+  };
+  narrative?: { good?: string[]; improve?: string[]; powerLeaks?: string[] };
+  error?: string;
+};
+const LEVEL_HELP: Record<string, string> = {
+  beginner: "Beginner = normal words. Advanced = more detail (donâ€™t go down the rabbit hole).",
+  intermediate: "Intermediate = simple + a bit more detail.",
+  advanced: "Advanced = deeper detail (optional).",
+  teacher: "Teacher = technical detail for coaches and better players.",
+};
+const DICTIONARY: Record<string, { title: string; body: string }> = {
+  "safe hallway": {
+    title: "Safe hallway (your â€˜laneâ€™)",
+    body:
+      "Itâ€™s the lane where your hands and the club travel so you donâ€™t have to save the swing at the bottom. " +
+      "Stay in the lane going back and coming down = solid contact with less guessing.",
+  },
+  "hand path": {
+    title: "Hand path",
+    body:
+      "Itâ€™s simply where your hands travel as you swing. Great ball strikers bring the hands up and down in a similar lane â€” " +
+      "that keeps the clubface from being â€˜savedâ€™ late.",
+  },
+  "lead arm": {
+    title: "Lead arm stability",
+    body:
+      "Itâ€™s how stable your front arm stays. If it collapses early going back, or breaks down too soon after impact, " +
+      "youâ€™ll lose both power and control.",
+  },
+};
+function clamp(n: number, a: number, b: number) {
+  return Math.max(a, Math.min(b, n));
+}
+function Bar({ label, value }: { label: string; value: number }) {
+  const v = clamp(Math.round(value), 0, 100);
+  return (
+    <>
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, opacity: 0.9 }}>
+          <div style={{ fontWeight: 700 }}>{label}</div>
+          <div style={{ fontVariantNumeric: "tabular-nums", opacity: 0.75 }}>{v}</div>
+        </div>
+
+        <div
+          style={{
+            height: 10,
+            borderRadius: 999,
+            background: "rgba(255,255,255,0.10)",
+            overflow: "hidden",
+            border: "1px solid rgba(255,255,255,0.12)",
+          }}
+        >
+          <div
+            style={{
+              width: v + "%",
+              height: "100%",
+              background: "linear-gradient(90deg, rgba(66,140,255,0.9), rgba(44,220,170,0.9))",
+            }}
+          />
+        </div>
+      </div>
+    </>
+  );
+}
+function PillButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button
+      type="button"
+      {...props}
+      style={{
+        borderRadius: 999,
+        padding: "10px 14px",
+        border: "1px solid rgba(255,255,255,0.14)",
+        background: "rgba(0,0,0,0.25)",
+        color: "#e6edf6",
+        cursor: props.disabled ? "not-allowed" : "pointer",
+        fontWeight: 700,
+        fontSize: 13,
+        opacity: props.disabled ? 0.6 : 1,
+        ...props.style,
+      }}
+    />
+  );
+}
+function Card({
+  title,
+  children,
+  right,
+}: {
+  title?: string;
+  children: React.ReactNode;
+  right?: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        borderRadius: 18,
+        border: "1px solid rgba(255,255,255,0.12)",
+        background: "rgba(0,0,0,0.25)",
+        boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
+        overflow: "hidden",
+      }}
+    >{/* VCA_SWING_FACTS_CARD */}
+      {(title || right) && (
+        <div
+          style={{
+            padding: "14px 16px",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ fontWeight: 900, letterSpacing: 0.2 }}>{title}</div>
+          {right}
+        </div>
+      )}
+      <div style={{ padding: 16 }}>{children}</div>
+    </div>
+  );
+}
+function Collapsible(props: {
+  title: string;
+  defaultOpen?: boolean;
+  right?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const { title, defaultOpen = true, right, children } = props;
+  const [open, setOpen] = React.useState(defaultOpen);
+
+  return (
+    <div>{/* VCA_SWING_FACTS_CARD */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 10,
+          cursor: "pointer",
+          userSelect: "none",
+          fontWeight: 900,
+          letterSpacing: 0.2,
+          padding: "2px 0 8px",
+        }}
+        onClick={() => setOpen(!open)}
+        role="button"
+        aria-expanded={open}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <span style={{ opacity: 0.75, fontWeight: 900 }}>
+            {open ? "â–¾" : "â–¸"}
+          </span>
+          <span>{title}</span>
+        </div>
+        <div>{right}</div>
+      </div>
+
+      {open ? <div>{children}</div> : null}
+    </div>
+  );
+}
+function CountPill({ n }: { n: number }) {
+  return (
+    <span
+      style={{
+        fontSize: 12,
+        fontWeight: 900,
+        padding: "5px 10px",
+        borderRadius: 999,
+        border: "1px solid rgba(255,255,255,0.14)",
+        background: "rgba(255,255,255,0.06)",
+        opacity: 0.92,
+      }}
+    >
+      {n}
+    </span>
+  );
+}
+function CollapsibleCard({
+  title,
+  badge,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string;
+  badge?: React.ReactNode;
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        border: "1px solid rgba(255,255,255,0.10)",
+        background: "rgba(0,0,0,0.22)",
+        borderRadius: 18,
+        overflow: "hidden",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.28)",
+      }}
+    >{/* VCA_SWING_FACTS_CARD */}
+      <button
+        type="button"
+        onClick={onToggle}
+        style={{
+          width: "100%",
+          cursor: "pointer",
+          background: "transparent",
+          border: "none",
+          color: "inherit",
+          padding: "12px 14px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottom: open ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(255,255,255,0.00)",
+          transition: "border-bottom-color 180ms ease",
+        }}
+        aria-expanded={open}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+          <span
+            style={{
+              display: "inline-block",
+              width: 18,
+              opacity: 0.9,
+              transform: open ? "rotate(90deg)" : "rotate(0deg)",
+              transition: "transform 180ms ease",
+            }}
+          >
+            â–¶
+          </span>
+          <div style={{ fontWeight: 900, letterSpacing: 0.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {title}
+          </div>
+        </div>
+
+        {badge ? (
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 10, flexShrink: 0 }}>
+            {badge}
+          </div>
+        ) : null}
+      </button>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateRows: open ? "1fr" : "0fr",
+          transition: "grid-template-rows 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+        }}
+      >
+        <div style={{ overflow: "hidden" }}>
+        {/* ===== AI_SUMMARY_START ===== */}
+        <AISummaryCard post={post} />
+        {/* ===== AI_SUMMARY_END ===== */}
+          <div style={{ padding: 14 }}>
+  {children}
+</div>
+      </div>
+    </div>
+  </div>
+  );
+}
+export default function ReportBetaClient() {
+
+  const overlayVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [stickOn, setStickOn] = useState(true);
+  
+  // ---- UI state (collapsible P1–P9 + expanded lesson) ----
+  const [openP, setOpenP] = useState<number | null>(null);
+  const [lessonOpen, setLessonOpen] = useState(false);
+  const [expandAllP, setExpandAllP] = useState(false);
+  // --------------------------------------------
+const [pose, setPose] = useState<any>(null);
+  const [activeAngle, setActiveAngle] = useState<"dtl" | "face">("dtl");
+  const poseUrl =
+    activeAngle === "face"
+      ? "/pose/adam_face_clean.pose.json"
+      : "/pose/adam_dtl_clean.pose.json";
+
+  useEffect(() => {
+    fetch(poseUrl)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => setPose(j))
+      .catch(() => setPose(null));
+  }, [poseUrl]);
+const [activeP, setActiveP] = React.useState<number | undefined>(undefined);
+
+  // auto-open priority checkpoint (first needs-attention) once
+  const [didAutoOpenP, setDidAutoOpenP] = React.useState(false);
+  React.useEffect(() => {
+    if (didAutoOpenP) return;
+    if (typeof priorityP === "number" && priorityP > 0) {
+      setActiveP(priorityP);
+      setDidAutoOpenP(true);
+    }
+  }, [priorityP, didAutoOpenP]);
+  // ===== VCA_INTAKE_READ_START =====
+  type Intake = { audience?: "adult" | "junior"; focus?: string; fileName?: string | null; createdAt?: string };
+  const [intake, setIntake] = React.useState<Intake | null>(null);
+
+  
+  
+  // --- Demo analysis pipeline (golden mode uses fixture + personalization)
+  const isGolden =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("golden") === "1";
+
+  const reportData = React.useMemo(() => {
+    return analyzeSwing({ mode: isGolden ? "golden" : "upload", intake });
+  }, [isGolden, intake]);
+  const post = React.useMemo(() => postAssess(reportData as any), [reportData]);
+// --- Demo analysis pipeline (golden mode uses fixture + personalization)
+React.useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("vca_intake");
+      if (raw) setIntake(JSON.parse(raw));
+    } catch (e) {
+      // ignore bad JSON / missing storage
+    }
+  }, []);
+
+  // Confidence = dip -> exit -> climb (simple demo model for now)
+  // We tie it to sequencing: if faults include late hips / arms start down => dip.
+  // When drills are prescribed + user repeats sessions, score climbs.
+  function computeConfidence(args: { faults: FaultKey[]; sessions: number }): { score: number; phase: string; trend: "dip" | "exit" | "climb"; note: string } {
+    const hasSeq = args.faults.includes("late_hips") || args.faults.includes("arms_start_down");
+    const s = Math.max(0, args.sessions || 0);
+    // baseline: confidence dips when you start changing motor pattern (gap/purgatory)
+    let base = hasSeq ? 42 : 55;
+
+    // "time in gap" penalty early, then exit bonus
+    // sessions 0-2: dip
+    // sessions 3-6: exit
+    // sessions 7+: climb
+    let score = base;
+    let trend: "dip" | "exit" | "climb" = "dip";
+    let phase = "Motor Pattern Gap";
+    let note =
+      "If this feels worse before it feels betterâ€”good. That means you stopped running the old program and you haven't installed the new one yet.";
+
+    if (s <= 2) {
+      score = base - 8 + (s * 2);
+      trend = "dip";
+      phase = "Dip (normal)";
+      note = "Youâ€™re in the awkward stage. Results can be noisy. Keep reps clean and slow.";
+    } else if (s <= 6) {
+      score = base + 5 + (s - 3) * 4;
+      trend = "exit";
+      phase = "Gap Exit";
+      note = "You're exiting the gap. Keep the arms late ~0.08s so the body leads the race.";
+    } else {
+      score = base + 25 + (s - 7) * 3;
+      trend = "climb";
+      phase = "Climb";
+      note = "Now itâ€™s getting installed. Your â€˜feelâ€™ starts matching the truth. Keep stacking reps.";
+    }
+
+    return { score: Math.max(10, Math.min(98, score)), phase, trend, note };
+  }
+  // ===== VCA_INTAKE_READ_END =====
+// âœ… Hydration proof + sanity
+  React.useEffect(() => {
+    (window as any).__VCA_HYDRATED__ = true;
+    console.log("âœ… ReportBetaClient hydrated");
+  }, []);
+
+  
+  
+  // Auto-load demo video (newest mp4 in /public/uploads)
+React.useEffect(() => {
+  (async () => {
+    try {
+      const r = await fetch("/api/demo-video", { cache: "no-store" });
+      const j = await r.json();
+      if (!videoUrl && j?.url) setVideoUrl(j.url);
+    } catch (e) {
+      // ignore demo load failures
+    }
+  })();
+}, []);
+const [runStatus, setRunStatus] = React.useState<string>("");
+
+  // === MVP Demo Hardening: simple run-state machine ===
+  type RunState = "idle" | "analyzing" | "frames" | "report" | "error";
+  const [runState, setRunState] = React.useState<RunState>("idle");
+  const [runErr, setRunErr] = React.useState<string>("");
+  function stepName(s: RunState){
+    if(s==="idle") return "Upload";
+    if(s==="analyzing") return "Analyze";
+    if(s==="report") return "Report";
+    if(s==="error") return "Error";
+    return "Upload";
+  }
+  const [videoUrl, setVideoUrl] = React.useState<string>("");
+
+  // Demo default: if nothing set yet, use HERO swing
+  React.useEffect(() => {
+    if (!videoUrl) setVideoUrl("/uploads/HERO_SWING.mkv");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const canAnalyzeHere = !!videoUrl && videoUrl.startsWith("/uploads/");
+
+  // âœ… If /upload-live sent us an uploaded video URL, use it (real-product behavior).
+  React.useEffect(() => {
+    try {
+      const u = new URLSearchParams(window.location.search).get("video") || new URLSearchParams(window.location.search).get("video") || new URLSearchParams(window.location.search).get("uploaded");
+      if (u && typeof u === "string") {
+        setVideoUrl(u);
+      }
+    } catch {}
+  }, []);
+const [impactFrame, setImpactFrame] = React.useState<number>(62);
+  const [level, setLevel] = React.useState<"beginner" | "intermediate" | "advanced" | "teacher">("beginner");
+
+
+  // Ã°Å¸Å½Â¯ Focus + Coach prompt (MVP)
+  const focusOptions = [
+    "General checkup (full swing)",
+    "Coming up / early extension",
+    "Right elbow / trail arm",
+    "Left arm structure",
+    "Hand path (too inside / too out)",
+    "Clubface (open / closed)",
+    "Over-the-top / steep downswing",
+    "Shallowing / getting the club behind me",
+    "Casting / early release",
+    "Sway / slide",
+    "Reverse pivot",
+    "Hip rotation / stall",
+    "Posture / spine angle",
+    "Balance / falling to toes/heels",
+    "Low point / fat & thin",
+    "Impact (shaft lean / handle position)",
+    "Tempo / rushing transition",
+    "Arms outrunning pivot",
+    "Pressure shift (getting left)",
+    "Finish / full release"
+  ];
+  const [focusTopic, setFocusTopic] = React.useState<string>(focusOptions[0]);
+  const [coachQuestion, setCoachQuestion] = React.useState<string>("");
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const [data, setData] = React.useState<AnalyzeResponse | null>(null);
+
+  // Ã°Å¸Å½â„¢Ã¯Â¸Â Ask Coach (voice + typed)
+  const [coachQ, setCoachQ] = React.useState<string>("");
+  const focusOptions2 = [
+    "Not sure â€” tell me my #1 priority",
+    "Early extension (coming up & out)",
+    "Right elbow / trail arm (slotting)",
+    "Over the top / steep downswing",
+    "Hand path too far outside",
+    "Shallowing / dropping the club",
+    "Casting / losing lag",
+    "Flip / handle stall at impact",
+    "Open clubface (slice)",
+    "Closed clubface (hook)",
+    "Poor low point (fat/thin)",
+    "Weight shift / pressure to lead side",
+    "Rotation timing (hips vs chest)",
+    "Chicken wing / lead arm",
+    "Head movement / posture loss",
+    "Swing plane / shaft pitch",
+    "Tempo too fast",
+    "Balance / falling toward toes/heels",
+    "Release / rate of closure",
+    "Finish position / extension through target"
+  ];
+  const [focusPick, setFocusPick] = React.useState<string>(focusOptions2[0]);
+  const applyFocusToQuestion = (pick: string) => {
+    const p = (pick || "").trim();
+    if (!p) return;
+    if (p.startsWith("Not sure")) {
+      setCoachQ("Iâ€™m not sure what to work on. Based on my report, what is my #1 priority and what drill should I do?");
+      return;
+    }
+    setCoachQ(`I want to work on: ${p}. What should I look for in my swing and what drill fixes it?`);
+  };
+  const [coachA, setCoachA] = React.useState<string>("");
+  const [listening, setListening] = React.useState<boolean>(false);
+  const localCoachAnswer = (q: string) => {
+    const s = (q || "").toLowerCase();
+    // Quick intent routing for MVP (replace with /api/coach later)
+    if (s.includes("right elbow") || s.includes("trail elbow") || s.includes("elbow")) {
+      return [
+        "Right elbow checkpoint:",
+        "â€¢ Backswing: elbow points more down than behind you (donâ€™t let it fly).",
+        "â€¢ Transition: elbow works in front of your right hipâ€”feel it â€˜slotâ€™ while chest stays down.",
+        "â€¢ Downswing: keep the elbow connected to the ribcage; hands donâ€™t throw early.",
+        "Drill: towel-under-trail-arm half swings + pause at lead-arm-parallel down (P5)."
+      ].join("\n");
+    }
+
+    if (
+      s.includes("coming up") || s.includes("up and out") || s.includes("stand up") ||
+      s.includes("early extend") || s.includes("early extension") || s.includes("humping")
+    ) {
+      return [
+        "Coming up & out (early extension) checkpoint:",
+        "â€¢ Keep chest over the ball longer; pressure shifts lead before you rotate.",
+        "â€¢ Feel hips â€˜backâ€™ as you start down (left hip back, not toward the ball).",
+        "â€¢ Keep trail heel heavier a fraction longer; rotate around your lead hip.",
+        "Drill: chair/hip-bump drill + slow â€˜pumpâ€™ to P5 while keeping belt buckle back."
+      ].join("\n");
+    }
+
+    if (s.includes("shallow") || s.includes("steep") || s.includes("over the top") || s.includes("hand path")) {
+      return [
+        "Hand path / steepness checkpoint:",
+        "â€¢ Start down with pressure shiftâ€”hands follow.",
+        "â€¢ Feel trail elbow in front of right hip and club â€˜fallâ€™ behind you.",
+        "Drill: split-grip pump + step-through swings."
+      ].join("\n");
+    }
+
+    return [
+      "Tell me what you want to work on specifically (example: right elbow, early extension, face control, hand path).",
+      "If youâ€™re not sure: say what your miss is (push/slice/pull/hook/thin/fat) and Iâ€™ll pick the priority."
+    ].join("\n");
+  };
+  const askCoach = async (q: string) => {
+    const text = (q || "").trim();
+    if (!text) return;
+    setCoachA("Thinkingâ€¦");
+
+    // âœ… MVP: local answer now. Later swap to an API call.
+    // Example future:
+    // const r = await fetch("/api/coach", { method:"POST", headers:{ "content-type":"application/json" }, body: JSON.stringify({ 
+        // focus: focusTopic,
+        //         question: coachQuestion,q:text, data }) });
+    // const j = await r.json(); setCoachA(j.answer || "");
+    setCoachA(localCoachAnswer(text));
+  };
+  const startVoice = () => {
+    try {
+      const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!SR) { setCoachA("Voice not supported in this browser. Type your question below."); return; }
+      const rec = new SR();
+      rec.lang = "en-US";
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+
+      rec.onstart = () => setListening(true);
+      rec.onend = () => setListening(false);
+      rec.onerror = () => setListening(false);
+
+      rec.onresult = (e: any) => {
+        const said = e?.results?.[0]?.[0]?.transcript || "";
+        const cleaned = (said || "").trim();
+        setCoachQ(cleaned);
+        if (cleaned) askCoach(cleaned);
+      };
+
+      rec.start();
+    } catch {
+      setListening(false);
+      setCoachA("Voice couldnâ€™t start. Type your question below.");
+    }
+  };
+
+  // Right-rail collapsibles (collapsed by default)
+  const [openGood, setOpenGood] = React.useState<boolean>(false);
+  const [openImprove, setOpenImprove] = React.useState<boolean>(false);
+  const [openLeaks, setOpenLeaks] = React.useState<boolean>(false);
+  const expandAll = () => { setOpenGood(true); setOpenImprove(true); setOpenLeaks(true); };
+  const collapseAll = () => { setOpenGood(false); setOpenImprove(false); setOpenLeaks(false); };
+  const recommendations = (
+    data?.narrative?.recommendations ??
+    [
+      {
+        title: "Transition timing",
+        how: "Start the downswing by shifting pressure into your lead foot before the hands move. Let the body lead and the arms respond."
+      },
+      {
+        title: "Low point control",
+        how: "Keep your chest over the ball through impact and practice brushing the turf just in front of the ball."
+      }
+    ]
+  ).slice(0, 2);
+/* ---- AUTO-COMMENTED BROKEN BLOCK (was causing parser error) ----
+
+    summary:
+      "Solid fundamentally sound mid-iron swing with small opportunities to clean up transition and low point control.",
+    meta:
+      "Player: Player â€¢ Hand: Right â€¢ Eye: Right â€¢ Hcp 1 â€¢ Generated: 6/13/2024, 5:00 AM",
+    body:
+      "Hi Player, thanks for sending in your swing. Solid fundamentals overall. Your biggest strengths are an athletic setup with clean spine tilt and balance, solid arm-body connection in the takeaway, and good wrist hinge creating width and leverage. The main things to clean up over the next few weeks are transition timing, shallowing the downswing slightly, and keeping the pivot centered through impact. Use the checkpoints and practice plan below to work through this step-by-step.",
+    highlights: [
+      "Athletic, balanced setup that supports a powerful coil.",
+      "Good wrist hinge and width in the backswing.",
+      "Clubface control is generally very good through impact.",
+      "Transition timing can get a touch upper-body dominant.",
+      "Low point control can tighten up for more compression."
+    ]
+  };
+
+---- END AUTO-COMMENT ---- */
+  // Player overview (API-first, fallback)
+  const playerOverview =
+    (data as any)?.narrative?.playerOverview ??
+    (data as any)?.narrative?.player_overview ??
+    {
+      summary:
+        "Solid fundamentally sound mid-iron swing with small opportunities to clean up transition and low point control.",
+      meta:
+        "Player: Player â€¢ Hand: Right â€¢ Eye: Right â€¢ Hcp 1 â€¢ Generated: 6/13/2024, 5:00 AM",
+      body:
+        "Hi Player, thanks for sending in your swing. Solid fundamentals overall. Your biggest strengths are an athletic setup with clean spine tilt and balance, solid arm-body connection in the takeaway, and good wrist hinge creating width and leverage. The main things to clean up over the next few weeks are transition timing, shallowing the downswing slightly, and keeping the pivot centered through impact. Use the checkpoints and practice plan below to work through this step-by-step.",
+      highlights: [
+        "Athletic, balanced setup that supports a powerful coil.",
+        "Good wrist hinge and width in the backswing.",
+        "Clubface control is generally very good through impact.",
+        "Transition timing can get a touch upper-body dominant.",
+        "Low point control can tighten up for more compression."
+      ],
+      tags: ["Right hand", "Right eye", "Hcp 1", "6'0\"", "Generated by Virtual Coach AI"],
+
+  <div style={{ marginTop: 10, padding: 14, borderRadius: 14, border: "1px solid rgba(255,255,255,0.10)", background: "rgba(0,0,0,0.18)" }}>
+    <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap: 10 }}>
+      <div style={{ fontSize: 13, fontWeight: 900, opacity: 0.9 }}>Coach’s Lesson — This Swing</div>
+      <button
+        type="button"
+        onClick={() => setLessonOpen(v => !v)}
+        style={{
+          height: 30,
+          padding: "0 10px",
+          borderRadius: 999,
+          border: "1px solid rgba(255,255,255,0.14)",
+          background: "rgba(0,0,0,0.25)",
+          color: "#e6edf6",
+          fontSize: 12,
+          fontWeight: 900,
+          cursor: "pointer"
+        }}
+      >
+        {lessonOpen ? "Hide full lesson" : "Read full lesson"}
+      </button>
+    </div>
+
+    <div style={{ marginTop: 10, fontSize: 13, lineHeight: 1.6, opacity: 0.92 }}>
+      Solid fundamentals with real upside. The swing structure is good — the biggest leak happens during the transition into impact,
+      where face control and pressure timing drift under speed. <span style={{ opacity: 0.85 }}>Today we fix the pattern, not your entire swing.</span>
+    </div>
+
+    {lessonOpen && (
+      <div style={{ marginTop: 12, display: "grid", gap: 12 }}>
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.8, marginBottom: 6 }}>What you do well</div>
+          <div style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.92 }}>
+            You set up athletic and balanced — that’s a major foundation. The backswing stays organized and the face doesn’t get wildly unstable.
+            You also finish tall and balanced, which tells me you’re not fighting your swing — you’re just leaking efficiency at the wrong moment.
+          </div>
+        </div>
+
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.8, marginBottom: 6 }}>Coach’s observations</div>
+          <div style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.92 }}>
+            The transition is the separator here. Pressure and rotation are a half-beat late, so the hands and club have to “save it” near impact.
+            Under speed, that shows up as face-control volatility and low-point inconsistency.
+          </div>
+        </div>
+
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.8, marginBottom: 6 }}>The pattern (why multiple faults happen)</div>
+          <div style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.92 }}>
+            When pressure doesn’t shift early enough, the chest can stall and the handle tries to pass the body late. That’s where flips and hang-backs live.
+            Fix the pressure shift and keep rotating — and several downstream issues clean themselves up.
+          </div>
+        </div>
+
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.8, marginBottom: 6 }}>Today’s focus</div>
+          <div style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.92 }}>
+            We’re prioritizing <b>pressure shift + continuing rotation</b>. No 12 swing thoughts. Execute the two drills below with clean tempo, then film 2 swings after.
+            If the picture improves, keep it. If not, we adjust — like real coaching.
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+      footer:
+        "High level amateur right-handed golfer with right eye dominance and good athletic build, swinging a mid-iron.",
+      recommendations: ["Transition timing", "Low point control"],
+      recHowto: [
+        "Start the downswing by shifting pressure into your lead foot before the hands move. Let the body lead and the arms respond.",
+        "Keep your chest over the ball through impact and practice brushing the turf just in front of the ball."
+      ]
+    };
+const [error, setError] = React.useState<string | null>(null);
+  const [dictKey, setDictKey] = React.useState<keyof typeof DICTIONARY | null>(null);
+
+  // âœ… click test so you KNOW the handler is firing
+  const [clickTest, setClickTest] = React.useState<number>(0);
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const [duration, setDuration] = React.useState<number>(0);
+  const [curTime, setCurTime] = React.useState<number>(0);
+  const fps = 30;
+  const frames = data?.media?.frames ?? [];
+  const sortedFrames = React.useMemo(() => [...frames].sort((a, b) => a.p - b.p), [frames]);
+  function resetDemo() {
+    // Bulletproof reset: clears UI state without waiting on network
+    try { setData(null); } catch {}
+    try { setError(null); } catch {}
+    try { setRunStatus(""); } catch {}
+    try { setRunErr(""); } catch {}
+    try { setRunState("idle"); } catch {}
+
+    // common UI state (safe if these exist)
+    try { setActiveP(1); } catch {}
+    try { setCurTime(0); } catch {}
+    try { setLoading(false); } catch {}
+
+    // if you track click tests or other debug counters
+    try { setClickTest(0 as any); } catch {}
+
+    // scroll back up so the user sees a clean slate
+    try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch {}
+  }
+
+  async function analyze() {
+    // CLICK TEST â€” if this number bumps, the button is NOT â€œdeadâ€
+    setClickTest((n) => n + 1);
+
+    console.log("Ã°Å¸Å¸Â¦ Analyze clicked", { videoUrl, impactFrame, level, t: Date.now() });
+
+    setLoading(true);
+    setError(null);
+    setData(null);
+    setRunStatus("Starting analysisâ€¦");
+
+    try {
+      const res = await fetch("$1
+
+    // âœ… Always load report from the persisted job payload
+    if (data?.jobId) {
+      window.location.assign("/report-beta/full?src=" + encodeURIComponent("/api/job/" + String(data.jobId)));
+      return;
+    }
+/api/analyze", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ videoUrl, impactFrame, level }),
+      });
+      setRunStatus("Response: " + res.status + " " + res.statusText);
+      const text = await res.text();
+      let json: AnalyzeResponse | null = null;
+      if (text) {
+        try {
+          json = JSON.parse(text) as AnalyzeResponse;
+        } catch {
+          throw new Error("Invalid JSON from server");
+        }
+      }
+
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.error || `Analyze failed (${res.status})`);
+      }
+      const frames = (json as any)?.media?.frames ?? (json as any)?.frames ?? [];
+      const framesDir = (json as any)?.media?.framesDir ?? (json as any)?.framesDir ?? "";
+      setData({
+        ...(json as any),
+        media: { ...((json as any)?.media ?? {}), framesDir, frames },
+      } as any);
+
+      setRunStatus("Done. Frames + report loaded âœ…");
+      setTimeout(() => document.getElementById("results")?.scrollIntoView({ behavior: "smooth" }), 50);
+    } catch (e: any) {
+      setRunStatus("âŒ Analyze error");
+      setError(e?.message || "Analyze failed");
+      console.error("âŒ analyze() failed:", e);
+    } finally {
+      setLoading(false);
+    }
+  }
+  function jumpToP(p: number) {
+    
+    try { setActiveP(p); } catch {}
+const f = sortedFrames.find((x) => x.p === p);
+    if (!f) return;
+    const t = f.frame / fps;
+    const v = videoRef.current;
+    if (!v) return;
+
+    v.currentTime = t;
+    v.pause();
+    setCurTime(t);
+  }
+  function stepFrames(delta: number) {
+    const v = videoRef.current;
+    if (!v) return;
+    const next = clamp(v.currentTime + delta / fps, 0, Math.max(0, duration - 0.01));
+    v.currentTime = next;
+    v.pause();
+    setCurTime(next);
+  }
+  const scores = React.useMemo(() => {
+    const s = data?.scores;
+    return {
+      swing: s?.swing ?? 82,
+      power: s?.power ?? 78,
+      reliability: s?.reliability ?? 74,
+      speed: s?.speed ?? 77,
+      efficiency: s?.efficiency ?? 73,
+      consistency: s?.consistency ?? 72,
+    };
+  }, [data]);
+
+  // Show ONLY the first checkpoint that needs attention (finish-line behavior)
+  const checkpointsAll = (Array.isArray((n as any)?.checkpoints) ? (n as any).checkpoints : []);
+  const attentionOnly = (() => {
+    const hits = checkpointsAll.filter((c: any) => {
+      const note = String(c?.note ?? "").toLowerCase();
+      const sev  = String(c?.severity ?? "").toLowerCase();
+      return note.includes("needs") || note.includes("attention") || sev.includes("needs_attention");
+    });
+    return hits.length > 0 ? [hits[0]] : [];
+  })();
+
+  const checkpointsToShow = (attentionOnly.length > 0) ? [attentionOnly[0]] : checkpointsAll;
+    const pframesAll = (Array.isArray((n as any)?.pframes) ? (n as any).pframes : []);
+  const pframesToShow = pframesAll;
+
+  const narrative = React.useMemo(() => {
+    const n = data?.narrative;
+    return {
+      good:
+        n?.good ?? [
+          "Solid balance through the motion - that's your foundation",
+          "Tempo is consistent; keep that and you'll keep the strike",
+          "Impact looks organized: hands and body arriving together",
+        ],
+      improve:
+        n?.improve ?? [
+          "Pick ONE priority today and win it (face control OR low point)",
+          "Give me 5 clean reps before you speed up - clean beats fast",
+          "Film 2 swings after the drill: if the picture improves, keep it",
+        ],
+      powerLeaks:
+        n?.powerLeaks ?? [
+          "If the chest stalls, the hands flip - keep rotating through",
+          "Pressure must shift THEN you rotate (don't spin in place)",
+          "Finish tall and posted; if you're falling back, you're leaking power",
+        ],
+
+      topFixes:
+        (Array.isArray((data as any)?.report?.topFixes) ? (data as any).report.topFixes : []) ?? [
+          { key: "late_pressure_shift", title: "Shift earlier", cue: "Get to lead side by P5â€“P6, then rotate.", drills: [] },
+          { key: "flip_risk", title: "Hold rotation through impact", cue: "If the chest stalls, the hands flipâ€”keep turning.", drills: [] },
+          { key: "early_extension", title: "Stay in posture", cue: "Keep hips back and chest down through P6â€“P7.", drills: [] },
+        ],
+
+      practicePlan:
+        (Array.isArray((data as any)?.report?.practicePlan) ? (data as any).report.practicePlan : []) ?? [
+          "Day 1: 10 min mirror P1â€“P4, 10 min slow-motion P5â€“P7",
+          "Day 2: 15 min pressure-shift reps, 10 min finish holds",
+          "Day 3: 20 balls at 50% speed â€” keep same impact picture",
+          "Day 4: 10 min posture maintenance + 10 min rotation-through drills",
+          "Day 5: 20 balls â€” film 2 swings, compare P6 + impact",
+          "Day 6: 15 min tempo control + 10 min strike location",
+          "Day 7: Test day â€” 10 swings, keep your ONE priority",
+          "Day 8: Rebuild day â€” slow reps + checkpoints",
+          "Day 9: 20 balls â€” prioritize face/low point control",
+          "Day 10: 15 min rotation drill + 10 min contact ladder",
+          "Day 11: 20 balls â€” hold finish, no falling back",
+          "Day 12: Film day â€” 3 swings, compare P4/P6/impact",
+          "Day 13: Speed day â€” only after 5 clean reps",
+          "Day 14: Retest â€” 10 swings, score consistency",
+        ],
+    };
+  }, [data]);
+
+  // Show ONLY the first checkpoint that needs attention (finish-line behavior)
+  const bgUrl = "/bg/home-bg.png";
+const bgWrap: React.CSSProperties = {
+  minHeight: "100vh",
+  backgroundImage: `url(${bgUrl})`,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
+};
+
+const scrim: React.CSSProperties = {
+  minHeight: "100vh",
+  background: "rgba(0,0,0,0.35)",
+};
+
+const pageShell: React.CSSProperties = {
+const pageShell: React.CSSProperties = {
+    minHeight: "100vh",
+    padding: "26px 18px 60px",
+    color: "#e6edf6",
+    background: "transparent",
+  };
+
+  return (
+    <div style={bgWrap}>
+    <div style={scrim}>
+      <div style={pageShell}>{/* VCA_SWING_FACTS_CARD */}
+      <div style={{ maxWidth: 1180, margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
+          <div>
+            <div style={{ fontSize: 32, fontWeight: 900 }}>Virtual Coach AI</div>
+            <div style={{ opacity: 0.75, marginTop: 4 }}>
+              Upload once. Get frames, scores, and coaching that makes sense.
+            </div>
+          </div>
+          <a href="/" style={{ color: "#b9cff6", textDecoration: "none", fontWeight: 700 }}>
+            â†’Â Home
+          </a>
+        </div>
+
+        
+
+
+
+<Card>
+  <div style={{ fontSize: 12, letterSpacing: 1, opacity: 0.7, marginBottom: 6 }}>
+    PLAYER OVERVIEW
+  </div>
+
+          <div style={{ marginTop: 10, padding: 12, borderRadius: 12, border: "1px solid rgba(255,255,255,0.10)" }}>
+          <div style={{ fontWeight: 800, fontSize: 13, opacity: 0.9 }}>Post-Assessment</div>
+          <div style={{ marginTop: 6, fontSize: 13 }}>
+            <b>Todayâ€™s ONE priority:</b> {post.priorityLabel}
+          </div>
+          <div style={{ marginTop: 6, fontSize: 13, opacity: 0.9 }}>{post.avoidList}</div>
+          <div style={{ marginTop: 6, fontSize: 13, opacity: 0.9 }}>{post.confidenceCue}</div>
+        </div>
+<div style={{ fontSize: 15, lineHeight: 1.6 }}>
+    {narrative?.summary ??
+      "This swing shows solid fundamentals with good intent through impact. The priority is improving the transition so power and consistency improve together."}
+  </div>
+</Card>
+
+<Card title="Swing Report â€” Beta">
+  
+          {/* ===== VCA_CONF_UI_START ===== */}
+          {(() => {
+            const focus = intake?.focus || "";
+            // Use intake focus if present; fall back to focusTopic state if you already have it.
+            const faults = (typeof inferFaultsFromFocus === "function"
+              ? (inferFaultsFromFocus(focus || (typeof focusTopic === "string" ? focusTopic : "")) as any)
+              : []) as FaultKey[];
+            const sessions = (typeof window !== "undefined" && (window as any).__vca_sessions) ? (window as any).__vca_sessions : 0;
+            const conf = computeConfidence({ faults, sessions });
+            const rx = prescribe({ faults, level: (level as any) ?? "intermediate", junior: intake?.audience === "junior" });
+            return (
+    <div style={{ marginTop: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>{/* VCA_SWING_FACTS_CARD */}
+                <TinyCard title="Confidence Progress Meter">
+                  <ConfidenceMeter
+                    label="Confidence Graph Over Time"
+                    phase={conf.phase}
+                    trend={conf.trend}
+                    score={conf.score}
+                    note={conf.note}
+                  />
+                  <div style={{ marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap" }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        (window as any).__vca_sessions = ((window as any).__vca_sessions || 0) + 1;
+                        // quick refresh without state surgery
+                        location.reload();
+                      }}
+                      style={{
+                        height: 40,
+                        padding: "0 12px",
+                        borderRadius: 12,
+                        border: "1px solid rgba(255,255,255,0.14)",
+                        background: "rgba(255,255,255,0.06)",
+                        color: "rgba(230,237,246,0.90)",
+                        cursor: "pointer",
+                        fontWeight: 900,
+                      }}
+                      title="Demo: simulates another practice session"
+                    >
+                      +1 Session (demo)
+                    </button>
+                    <div style={{ fontSize: 12, opacity: 0.75, alignSelf: "center" }}>
+                      Sessions: {sessions}
+                    </div>
+                  </div>
+                </TinyCard>
+
+                <TinyCard title="Automatic Drill Prescription">
+                  <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 10 }}>
+                    Based on your focus + swing profile, hereâ€™s the fastest way out of the gap.
+                  </div>
+
+                  {(Array.isArray(rx) ? rx : []).map((p) => (
+                    <div key={p.fault} style={{ marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                      <div style={{ fontWeight: 900 }}>{p.drill.title}</div>
+                      <div style={{ fontSize: 12, opacity: 0.85, marginTop: 4 }}>
+                        <b>Body requirement:</b> {p.bodyRequirement}
+                      </div>
+                      <ul style={{ margin: "8px 0 0 18px", padding: 0, lineHeight: 1.55, fontSize: 12, opacity: 0.9 }}>
+                        {(Array.isArray(p?.drill?.how) ? p.drill.how : []).slice(0, 3).map((x, i) => (
+                          <li key={i}>{x}</li>
+                        ))}
+                      </ul>
+                      <div style={{ fontSize: 12, opacity: 0.85, marginTop: 6 }}>
+                        <b>Reps:</b> {p.drill.reps}
+                      </div>
+                      <div style={{ fontSize: 12, opacity: 0.85, marginTop: 6 }}>
+                        <b>On-course cue:</b> â€œ{p.drill.onCourseCue}â€
+                      </div>
+                    </div>
+                  ))}
+                </TinyCard>
+              </div>
+            );
+          })()}
+          {/* ===== VCA_CONF_UI_END ===== */}
+<div style={{ display: "grid", gap: 12 }}>
+    {/* Row 1: primary actions */}
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        {/* MVP breadcrumb */}
+        <div style={{ gridColumn: "1 / -1", fontSize: 12, opacity: 0.8, margin: "8px 0 10px" }}>
+          <span style={{ fontWeight: stepName(runState)==="Upload" ? 800 : 400 }}>Upload</span>
+          {"  â†’  "}
+          <span style={{ fontWeight: stepName(runState)==="Analyze" ? 800 : 400 }}>Analyze</span>
+          {"  â†’  "}
+          <span style={{ fontWeight: stepName(runState)==="Report" ? 800 : 400 }}>Report</span>
+          {runState==="error" && runErr ? (
+            <span style={{ marginLeft: 10, fontWeight: 800 }}>âš ï¸Â  {runErr}</span>
+          ) : null}
+        </div>
+
+      {canAnalyzeHere ? (
+      <>
+        <button
+          onClick={analyze}
+          disabled={loading || runState === "analyzing" || runState === "frames" || runState === "report"}
+          style={{
+            height: 46,
+            borderRadius: 14,
+            border: "1px solid rgba(66,140,255,0.55)",
+            background: runState === "idle" ? "rgba(66,140,255,0.85)" : "rgba(66,140,255,0.30)",
+            color: "#04111f",
+            fontWeight: 900,
+            cursor: runState === "idle" ? "pointer" : "not-allowed",
+          }}
+        >
+          {runState === "idle" && "Analyze"}
+          {runState === "analyzing" && "Analyzingâ€¦"}
+          {runState === "frames" && "Processing framesâ€¦"}
+          {runState === "report" && "Building reportâ€¦"}
+          {runState === "error" && "Try again"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => (window.location.href = "/upload")}
+          disabled={runState === "analyzing" || runState === "frames" || runState === "report"}
+          style={{
+            height: 46,
+            marginTop: 10,
+            borderRadius: 14,
+            border: "1px solid rgba(255,255,255,0.14)",
+            background: "rgba(255,255,255,0.06)",
+            color: "rgba(255,255,255,0.92)",
+            fontWeight: 800,
+            cursor: (runState === "analyzing" || runState === "frames" || runState === "report") ? "not-allowed" : "pointer",
+          }}
+          title="Start a new upload"
+        >
+          Upload another swing â†’
+        </button>
+
+        {runState !== "idle" && (
+          <div style={{ fontSize: 12, opacity: 0.75, marginTop: 6 }}>
+            {runState === "analyzing" && "Running swing analysisâ€¦"}
+            {runState === "frames" && "Extracting key positions (P1â€“P9)â€¦"}
+            {runState === "report" && "Generating your reportâ€¦"}
+            {runState === "error" && runErr}
+          </div>
+        )}
+      </>
+    ) : (
+      <div>
+        <button
+          type="button"
+          onClick={() => (window.location.href = "/upload")}
+          style={{
+            height: 46,
+            width: "100%",
+            borderRadius: 14,
+            border: "1px solid rgba(66,140,255,0.35)",
+            background: "rgba(255,255,255,0.06)",
+            color: "rgba(230,237,246,0.92)",
+            fontWeight: 900,
+            cursor: "pointer",
+          }}
+          title="Upload a swing to run full analysis"
+        >
+          Upload a swing â†’
+        </button>
+        <div style={{ fontSize: 12, opacity: 0.75, marginTop: 6 }}>
+          This page is view-only. Upload a swing to generate a new report.
+        </div>
+      </div>
+    )}
+
+      
+
+      <button
+        type="button"
+        onClick={resetDemo}
+        disabled={loading}
+        style={{
+          height: 46,
+          borderRadius: 14,
+          border: "1px solid rgba(255,255,255,0.14)",
+          background: "rgba(255,255,255,0.06)",
+          color: "rgba(255,255,255,0.92)",
+          fontWeight: 700,
+          cursor: loading ? "not-allowed" : "pointer",
+        }}
+      >
+        Reset Demo
+      </button>
+          <button
+            type="button"
+            onClick={() => {
+              try { sessionStorage.setItem("vca_card_src", "/data/card-demo.json"); } catch {}
+              window.location.href = "/report-beta/full?golden=1";
+            }}
+            style={{
+              height: 38,
+              padding: "0 16px",
+              borderRadius: 999,
+              border: "1px solid rgba(255,255,255,0.18)",
+              background: "rgba(120,180,255,0.22)",
+              color: "#eaf1ff",
+              fontSize: 13,
+              fontWeight: 900,
+              cursor: "pointer",
+              marginLeft: 10,
+              whiteSpace: "nowrap",
+            }}
+          >
+            View Full Report â†’
+          </button>
+    </div>
+
+    {/* Row 2: key options */}
+    <div style={{
+  display: "grid",
+  gridTemplateColumns: "1.2fr 0.8fr 1fr",
+  gap: 12,
+  alignItems: "end",
+  padding: 12,
+  borderRadius: 14,
+  background: "rgba(255,255,255,0.03)",
+  border: "1px solid rgba(255,255,255,0.06)"
+}}>
+      <div>
+        <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 900, marginBottom: 6 }}>Level</div>
+        <select
+          value={level}
+          onChange={(e) => setLevel(e.target.value as any)}
+          style={{
+            width: "100%",
+            height: 42,
+            borderRadius: 12,
+            border: "1px solid rgba(255,255,255,0.14)",
+            background: "rgba(0,0,0,0.18)",
+            color: "#e6edf6",
+            padding: "0 12px",
+            outline: "none",
+            fontWeight: 700,
+          }}
+        >
+          <option value="beginner">Beginner (simple)</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+          <option value="teacher">Teacher (technical)</option>
+        </select>
+        <div style={{ fontSize: 12, opacity: 0.65, marginTop: 6 }}>{LEVEL_HELP[level]}</div>
+      </div>
+
+      <div>
+        <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 900, marginBottom: 6 }}>Impact</div>
+        <input
+          type="number"
+          value={impactFrame}
+          onChange={(e) => setImpactFrame(parseInt(e.target.value || "0", 10))}
+          style={{
+            width: "100%",
+            height: 42,
+            borderRadius: 12,
+            border: "1px solid rgba(255,255,255,0.14)",
+            background: "rgba(0,0,0,0.18)",
+            color: "#e6edf6",
+            padding: "0 12px",
+            outline: "none",
+          }}
+        />
+      </div>
+
+      <div>
+        <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 900, marginBottom: 6 }}>Focus (optional)</div>
+        <select
+          value={focusTopic}
+          onChange={(e) => setFocusTopic(e.target.value)}
+          style={{
+            width: "100%",
+            height: 42,
+            borderRadius: 12,
+            border: "1px solid rgba(255,255,255,0.12)",
+            background: "rgba(0,0,0,0.22)",
+            color: "#e6edf6",
+            padding: "0 12px",
+            outline: "none",
+          }}
+        >
+          {}
+              </div>
+
+              <div style={{ marginTop: 14 }}>
+                <div style={{ fontWeight: 900, marginBottom: 8, opacity: 0.92 }}>Power + Reliability (estimated)</div>
+                <Bar label="Speed" value={scores.speed} />
+                <Bar label="Impact efficiency" value={scores.efficiency} />
+                <Bar label="Consistency" value={scores.consistency} />
+                <div style={{ fontSize: 12, opacity: 0.75, marginTop: 10 }}>
+                  AI explanation: Power = speed delivered into solid strike. Reliability = how repeatable contact and start-line are.
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+  <Collapsible title="3 things you do well" defaultOpen={true}>
+<ul style={{ margin: 0, paddingLeft: 18, opacity: 0.9, lineHeight: 1.6 }}>
+                {(Array.isArray(narrative?.good) ? narrative.good : []).slice(0, 3).map((x, i) => (
+                  <li key={i}>{x}</li>
+                ))}
+              </ul>
+
+<div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+  <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.75, marginBottom: 6 }}>
+  Top 3 fixes</div>
+      <div style={{ marginTop: 14 }}>
+        <div style={{ fontWeight: 900, marginBottom: 8 }}>
+        </div>
+
+        <ol style={{ paddingLeft: 18, margin: 0 }}>
+          {(Array.isArray(recommendations) ? recommendations : []).map((r, i) => (
+            <li key={i} style={{ marginBottom: 10 }}>
+              <div style={{ fontWeight: 700 }}>{r.title}</div>
+              <div style={{ opacity: 0.8, fontSize: 12, marginTop: 3, lineHeight: 1.35 }}>
+                {r.how}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+  <ol style={{ paddingLeft: 18, margin: 0 }}>
+    {(data?.narrative?.playerOverview?.recommendations ?? []).slice(0,2).map((r, i) => (
+      <li key={i} style={{ marginBottom: 10 }}>
+        <div style={{ fontWeight: 700 }}>{r}</div>
+        <div style={{ opacity: 0.8, fontSize: 12, marginTop: 3, lineHeight: 1.35 }}>
+          {(data?.narrative?.playerOverview?.recHowto?.[i]) ?? "Work this in slow reps first, then blend it into full speed."}
+        </div>
+      </li>
+    ))}
+  </ol>
+</div>
+</Collapsible>
+</Card>
+
+            <Card>
+  <Collapsible title="3 things to improve next" defaultOpen={true}>
+<ul style={{ margin: 0, paddingLeft: 18, opacity: 0.9, lineHeight: 1.6 }}>
+                {(Array.isArray(narrative?.improve) ? narrative.improve : []).slice(0, 3).map((x, i) => (
+                  <li key={i}>{x}</li>
+                ))}
+              </ul>
+
+<div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+  <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.75, marginBottom: 6 }}>
+  Top 3 fixes</div>
+  
+  <ol style={{ paddingLeft: 18, margin: 0 }}>
+    {(Array.isArray((n as any)?.topFixes) ? (n as any).topFixes : []).slice(0,3).map((fx: any, i: number) => (
+      <li key={fx?.key ?? i} style={{ marginBottom: 10 }}>
+        <div style={{ fontWeight: 800 }}>{fx?.title ?? fx?.key ?? `Fix ${i+1}`}</div>
+        <div style={{ opacity: 0.82, fontSize: 12, marginTop: 3, lineHeight: 1.35 }}>
+          {fx?.cue ?? fx?.how ?? "Work this in slow reps first, then blend it into full speed."}
+        </div>
+
+        {(Array.isArray(fx?.drills) && fx.drills.length > 0) && (
+          <ul style={{ margin: "8px 0 0", paddingLeft: 18, opacity: 0.9, lineHeight: 1.55 }}>
+            {fx.drills.slice(0,2).map((d: any, di: number) => (
+              <li key={d?.title ?? di}>
+                <span style={{ fontWeight: 700 }}>{d?.title ?? "Drill"}</span>
+                {d?.how ? <span style={{ opacity: 0.85 }}> â€” {d.how}</span> : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </li>
+    ))}
+  </ol>
+</div>
+</Collapsible>
+</Card>
+
+            <Card>
+  <Collapsible title="3 possible power leaks" defaultOpen={false}>
+<ul style={{ margin: 0, paddingLeft: 18, opacity: 0.9, lineHeight: 1.6 }}>
+                {(Array.isArray(narrative?.powerLeaks) ? narrative.powerLeaks : []).slice(0, 3).map((x, i) => (
+                  <li key={i}>{x}</li>
+                ))}
+              </ul>
+
+<div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+  <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.75, marginBottom: 6 }}>
+  Top 3 fixes</div>
+  
+  <ol style={{ paddingLeft: 18, margin: 0 }}>
+    {(Array.isArray((n as any)?.topFixes) ? (n as any).topFixes : []).slice(0,3).map((fx: any, i: number) => (
+      <li key={fx?.key ?? i} style={{ marginBottom: 10 }}>
+        <div style={{ fontWeight: 800 }}>{fx?.title ?? fx?.key ?? `Fix ${i+1}`}</div>
+        <div style={{ opacity: 0.82, fontSize: 12, marginTop: 3, lineHeight: 1.35 }}>
+          {fx?.cue ?? fx?.how ?? "Work this in slow reps first, then blend it into full speed."}
+        </div>
+
+        {(Array.isArray(fx?.drills) && fx.drills.length > 0) && (
+          <ul style={{ margin: "8px 0 0", paddingLeft: 18, opacity: 0.9, lineHeight: 1.55 }}>
+            {fx.drills.slice(0,2).map((d: any, di: number) => (
+              <li key={d?.title ?? di}>
+                <span style={{ fontWeight: 700 }}>{d?.title ?? "Drill"}</span>
+                {d?.how ? <span style={{ opacity: 0.85 }}> â€” {d.how}</span> : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </li>
+    ))}
+  </ol>
+</div>
+</Collapsible>
+</Card>
+            <Card>
+              <Collapsible title="14-Day Practice Plan" defaultOpen={false}>
+                <div style={{ opacity: 0.9, lineHeight: 1.55 }}>
+                  <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 0.6, opacity: 0.75, marginBottom: 8 }}>
+                    Your plan (do the boring stuffâ€¦ thatâ€™s where the gains live)
+                  </div>
+
+                  <ol style={{ margin: 0, paddingLeft: 18 }}>
+                    {(Array.isArray((n as any)?.practicePlan) ? (n as any).practicePlan : []).slice(0,14).map((x: any, i: number) => (
+                      <li key={i} style={{ marginBottom: 8 }}>
+                        <span style={{ fontWeight: 700 }}>Day {i+1}:</span>{" "}
+                        <span style={{ opacity: 0.88 }}>{String(x).replace(/^Day\s*\d+\s*:\s*/i, "")}</span>
+                      </li>
+                    ))}
+                  </ol>
+
+                  {(!Array.isArray((n as any)?.practicePlan) || (n as any).practicePlan.length === 0) && (
+                    <div style={{ opacity: 0.75 }}>
+                      No plan loaded yet. Run Analyze and this section will populate automatically.
+                    </div>
+                  )}
+                </div>
+              </Collapsible>
+            </Card>
+
+          </div>
+        </div>
+
+        {dictKey && (
+          <div
+            onClick={() => setDictKey(null)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.62)",
+              display: "grid",
+              placeItems: "center",
+              padding: 16,
+              zIndex: 50,
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: "min(720px, 96vw)",
+                borderRadius: 18,
+                border: "1px solid rgba(255,255,255,0.14)",
+                background: "rgba(6,10,16,0.95)",
+                boxShadow: "0 20px 70px rgba(0,0,0,0.6)",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  padding: "14px 16px",
+                  borderBottom: "1px solid rgba(255,255,255,0.10)",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ fontWeight: 900 }}>{DICTIONARY[dictKey].title}</div>
+                <button
+                  type="button"
+                  onClick={() => setDictKey(null)}
+                  style={{
+                    borderRadius: 10,
+                    border: "1px solid rgba(255,255,255,0.14)",
+                    background: "rgba(0,0,0,0.25)",
+                    color: "#e6edf6",
+                    padding: "8px 10px",
+                    cursor: "pointer",
+                    fontWeight: 900,
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+              <div style={{ padding: 16, lineHeight: 1.65, opacity: 0.92 }}>{DICTIONARY[dictKey].body}</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+    </div>
+  </div>
+
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

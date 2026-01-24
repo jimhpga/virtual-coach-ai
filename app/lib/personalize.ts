@@ -1,4 +1,4 @@
-﻿import type { ReportData } from "./reportTypes";
+import type { ReportData } from "./reportTypes";
 
 function textify(x: any) {
   if (!x) return "";
@@ -26,11 +26,11 @@ export function personalize(base: ReportData, intake: any): ReportData {
 
   const inserts: string[] = [];
   if (out.player.eye === "right") {
-    inserts.push("Based on your screening (right-eye dominant): don’t over-turn your shoulders, and allow the head to release through the strike.");
+    inserts.push("Based on your screening (right-eye dominant): don't over-turn your shoulders, and allow the head to release through the strike.");
   }
 
   if (limText.includes("touch toes") || limText.includes("hamstring")) {
-    inserts.push("Mobility note: limited hinge/flexibility — we’ll prioritize setup, pressure shift, and a simpler backswing over extra depth.");
+    inserts.push("Mobility note: limited hinge/flexibility - we'll prioritize setup, pressure shift, and a simpler backswing over extra depth.");
     out.narrative.topFixes = [
       "Clean up setup posture and ball position to reduce compensations",
       ...out.narrative.topFixes
@@ -38,11 +38,11 @@ export function personalize(base: ReportData, intake: any): ReportData {
   }
 
   if (limText.includes("neck")) {
-    inserts.push("Mobility note: tight neck — keep the backswing shorter and rotate through instead of forcing extra turn.");
+    inserts.push("Mobility note: tight neck - keep the backswing shorter and rotate through instead of forcing extra turn.");
   }
 
   if (limText.includes("glute")) {
-    inserts.push("Strength note: weak glutes — add a 2-minute glute activation warmup to stabilize the pelvis and improve pressure shift.");
+    inserts.push("Strength note: weak glutes - add a 2-minute glute activation warmup to stabilize the pelvis and improve pressure shift.");
     out.practicePlan.headline = out.practicePlan.headline + " Add 2 minutes of glute activation before swings.";
   }
 

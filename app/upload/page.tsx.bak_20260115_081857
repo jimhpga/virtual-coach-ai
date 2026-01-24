@@ -1,0 +1,9 @@
+﻿export default function Upload() {
+  return (
+    <main style={{ padding: 40 }}>
+      <h1>Upload your swing</h1>
+      <p>One clip. We’ll handle the rest.</p>
+      {/* existing upload component lives here */}
+    </main>
+  );
+}

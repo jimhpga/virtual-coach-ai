@@ -1,4 +1,4 @@
-﻿import type { ReportData } from "../reportTypes";
+import type { ReportData } from "../reportTypes";
 
 export function goldenFixture(): ReportData {
   const now = new Date().toISOString();
@@ -15,7 +15,7 @@ export function goldenFixture(): ReportData {
       ],
       topFixes: [
         "Get to your left side before you rotate",
-        "Clean the hips up first, then let the arms fall (don’t rush from the top)",
+        "Clean the hips up first, then let the arms fall (don't rush from the top)",
         "Shallow slightly in downswing to improve compression"
       ],
       powerLeaks: [

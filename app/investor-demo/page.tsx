@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Shell } from "../_components/Shell";
@@ -52,7 +52,7 @@ export default function InvestorDemo() {
             phase={step < 3 ? "Dip" : step < 4 ? "Exit" : "Climb"}
             trend={step < 3 ? "dip" : step < 4 ? "exit" : "climb"}
             score={step < 3 ? 38 : step < 4 ? 55 : 72}
-            note={mode === "junior" ? "It feels weird… that means it’s working." : "Gap is normal. Keep the reps clean."}
+            note={mode === "junior" ? "It feels weird… that means it's working." : "Gap is normal. Keep the reps clean."}
           />
         </TinyCard>
       </div>

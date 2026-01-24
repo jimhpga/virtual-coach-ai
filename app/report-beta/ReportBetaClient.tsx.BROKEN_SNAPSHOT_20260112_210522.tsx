@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import PStrip from "./PStrip";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
@@ -1132,7 +1132,7 @@ const f = sortedFrames.find((x) => x.p === p);
             onClick={() => setDictKey(null)}
             style={{
               position: "fixed",
-              inset: 0,
+              inset: 0, pointerEvents: "none",
               background: "rgba(0,0,0,0.62)",
               display: "grid",
               placeItems: "center",

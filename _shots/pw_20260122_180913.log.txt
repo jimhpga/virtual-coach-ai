@@ -1,0 +1,6 @@
+URL=http://localhost:3000/report-beta/full?src=http%3A%2F%2Flocalhost%3A3000%2Freports%2Frep_pose_20260122_161929.json
+PNG=C:/Sites/virtual-coach-ai/_shots/pw_20260122_180913.png
+GOTO_STATUS=200
+PAGE_CONSOLE info: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+TITLE=Next.js
+SHOT_OK

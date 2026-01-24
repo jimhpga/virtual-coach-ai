@@ -1,0 +1,56 @@
+{
+  "id": "dev_1769040689875",
+  "ok": true,
+  "error": null,
+  "payload": {
+    "ok": true,
+    "jobId": "dev_1769040689876",
+    "videoUrl": "/uploads/a5c7bbed2b260c3d",
+    "framesDir": "/frames/frames_1769040690100_3fb455b6fa4c9",
+    "frames": [],
+    "report": {
+      "id": "dev_1769040689876",
+      "createdAt": "2026-01-22T00:11:31.068Z",
+      "headline": "P1-P9 frames ready.",
+      "swingScore": 72,
+      "topFaults": [
+        {
+          "rank": 1,
+          "tag": "late_pressure_shift",
+          "title": "Pressure shift late",
+          "why": "Low point drifts back.",
+          "fix": "Get to lead side by P5–P6, then rotate.",
+          "severity": "NEEDS_ATTENTION"
+        },
+        {
+          "rank": 2,
+          "tag": "flip_risk",
+          "title": "Flip risk",
+          "why": "Handle stalls, hands flip.",
+          "fix": "Keep rotating through; handle forward.",
+          "severity": "NEEDS_ATTENTION"
+        }
+      ],
+      "checkpoints": [],
+      "pframes": [],
+      "framesDir": "/frames/frames_1769040690100_3fb455b6fa4c9",
+      "powerLeaks": [
+        {
+          "key": "sequence",
+          "title": "Sequence stalls (pressure then turn)",
+          "fix": "Step-through pressure shift"
+        },
+        {
+          "key": "handle",
+          "title": "Handle slows through impact",
+          "fix": "P6 check + turn-through"
+        },
+        {
+          "key": "trail_arm",
+          "title": "Trail arm spills early",
+          "fix": "Trail-arm wall drill"
+        }
+      ]
+    }
+  }
+}

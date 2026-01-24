@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 
@@ -59,8 +59,8 @@ export function SwingFactsCard({ url = "/pose-demo/swing_facts.json" }: { url?: 
     return () => { alive = false; };
   }, [url]);
 
-  const conf = facts?.confidence ?? "—";
-  const tempo = facts?.tempo ?? facts?.tempoBpm ?? facts?.tempoRatio ?? "—";
+  const conf = facts?.confidence ?? "-";
+  const tempo = facts?.tempo ?? facts?.tempoBpm ?? facts?.tempoRatio ?? "-";
 
   const pObj =
     normalizePFrames(facts?.pFrames) ||
@@ -122,7 +122,7 @@ export function SwingFactsCard({ url = "/pose-demo/swing_facts.json" }: { url?: 
                   }}
                 >
                   <span style={{ fontWeight: 800 }}>{p}</span>
-                  <span style={{ opacity: 0.85 }}>{v != null && !Number.isNaN(v) ? v : "—"}</span>
+                  <span style={{ opacity: 0.85 }}>{v != null && !Number.isNaN(v) ? v : "-"}</span>
                 </div>
               );
             })}

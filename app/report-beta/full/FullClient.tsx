@@ -1,6 +1,5 @@
-﻿"use client";
-
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import ReportShell from "../_ui/ReportShell";
 
 type Fault = { title: string; why: string; fix: string; severity?: "ontrack" | "needs" | "priority" };
@@ -55,7 +54,7 @@ const FALLBACK: FullData = {
   ],
   topFixes: [
     "Get lead-side pressure earlier (by P5)",
-    "Keep pivot moving through P6–P8",
+    "Keep pivot moving through P6-P8",
     "Maintain trail hip depth to protect low point",
   ],
   faults: [
@@ -68,7 +67,7 @@ const FALLBACK: FullData = {
     {
       title: "Arms outrun pivot",
       why: "Face timing gets flippy late.",
-      fix: "Rotate through; keep hands passive P6–P8.",
+      fix: "Rotate through; keep hands passive P6-P8.",
       severity: "priority",
     },
   ],
@@ -87,7 +86,7 @@ const FALLBACK: FullData = {
       steps: [
         "Place towel under both armpits.",
         "Half swings keeping towel in place.",
-        "Rotate chest through; don’t throw arms.",
+        "Rotate chest through; don't throw arms.",
       ],
       reps: "2x10 half swings",
     },
@@ -122,7 +121,7 @@ const FALLBACK: FullData = {
       title: "Top of swing",
       coachNotes: ["Playable club position at the top."],
       commonMisses: ["Across-the-line when rushing backswing."],
-      keyDrills: ["Three-count backswing (1–2–3) to control length."],
+      keyDrills: ["Three-count backswing (1-2-3) to control length."],
       status: "ontrack",
     },
     {
@@ -154,7 +153,7 @@ const FALLBACK: FullData = {
       title: "Trail arm parallel follow-through",
       coachNotes: ["Extension is improving; keep rotation continuous."],
       commonMisses: ["Arms outracing the body and flipping."],
-      keyDrills: ["Hold P8 for 2 seconds—feel balanced extension."],
+      keyDrills: ["Hold P8 for 2 seconds-feel balanced extension."],
       status: "ontrack",
     },
     {
@@ -171,10 +170,10 @@ const FALLBACK: FullData = {
     subtitle:
       "Next 14 days: lock in pressure shift timing + keep pivot moving through impact.",
     bullets: [
-      "Days 1–3: Step-through shift + Wall-Butt drill (slow reps only)",
-      "Days 4–7: Add P6 checkpoint + turn-through; 10 filmed reps",
-      "Days 8–10: Blend drills into full swings; prioritize start line",
-      "Days 11–14: Random practice (targets, clubs); keep one priority only",
+      "Days 1-3: Step-through shift + Wall-Butt drill (slow reps only)",
+      "Days 4-7: Add P6 checkpoint + turn-through; 10 filmed reps",
+      "Days 8-10: Blend drills into full swings; prioritize start line",
+      "Days 11-14: Random practice (targets, clubs); keep one priority only",
     ],
   },
 };
@@ -259,7 +258,16 @@ function BarRow(props: { label: string; grade: string }) {
 }
 
 export default function FullClient() {
-  const [data, setData] = React.useState<FullData>(FALLBACK);
+
+  // ---- P1-P9 collapse state ----
+  const [openP, setOpenP] = useState<number | null>(7); // default open = P7 (impact sells)
+  const [expandAllP, setExpandAllP] = useState(false);
+
+  function toggleP(p: number) {
+    if (expandAllP) return; // when expanded, ignore single toggles
+    setOpenP((cur) => (cur === p ? null : p));
+  }
+const [data, setData] = React.useState<FullData>(FALLBACK);
 
   React.useEffect(() => {
     // Same source logic as card: ?src=, sessionStorage, fallback demo json
@@ -271,7 +279,16 @@ export default function FullClient() {
       const ss = window.sessionStorage.getItem("vca_card_src");
       if (!q && ss && ss.startsWith("/")) src = ss;
     } catch {}
-    fetch(src, { cache: "no-store" })
+// ---- Source routing (src preferred; jobId fallback) ----
+  const qs2 = (typeof window !== "undefined") ? new URLSearchParams(window.location.search) : null;
+  const srcQ2 = qs2?.get("src") || "";
+  const jobIdQ2 = qs2?.get("jobId") || "";
+  // Primary: direct JSON URL (rep.url). Fallback: try local API by jobId if present.
+  const resolvedSrc = srcQ2 || (jobIdQ2 ? (`/api/report?id=${encodeURIComponent(jobIdQ2)}`) : "");
+  const srcFromQuery = resolvedSrc;
+  
+if (!src) return;
+fetch(src, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => {
         // If someone passes card JSON (score/tourDna/faults/drills), keep full fallback but inject what exists
@@ -290,10 +307,25 @@ export default function FullClient() {
 
   return (
     <ReportShell
-      titleTop="Virtual Coach AI — Full Report (Demo)"
-      titleMain="Player Overview + P1–P9 Checkpoints"
+      titleTop="Virtual Coach AI - Full Report (Demo)"
       rightPills={["Back to home", "Upload another swing", "Print report"]}
     >
+<div style={{ display:"flex", gap:8, margin:"10px 0 14px" }}>
+  <button
+    type="button"
+    onClick={() => { setExpandAllP(true); setOpenP(null); }}
+    style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: expandAllP ? 0.7 : 1 }}
+  >
+    Expand all
+  </button>
+  <button
+    type="button"
+    onClick={() => { setExpandAllP(false); setOpenP(7); }}
+    style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: !expandAllP ? 0.85 : 1 }}
+  >
+    Collapse all
+  </button>
+</div>
       <div style={{
         marginTop: 0,
         marginBottom: 14,
@@ -388,7 +420,7 @@ export default function FullClient() {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 12 }}>
             <SoftCard>
-              <div style={{ fontSize: 12, fontWeight: 900, marginBottom: 6 }}>What you’re doing well</div>
+              <div style={{ fontSize: 12, fontWeight: 900, marginBottom: 6 }}>What you're doing well</div>
               <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.9, lineHeight: 1.55 }}>
                 {data.doingWell.map((x, i) => <li key={i}>{x}</li>)}
               </ul>
@@ -420,7 +452,7 @@ export default function FullClient() {
           </div>
 
           <div style={{ marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.10)", paddingTop: 12 }}>
-            <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 8 }}>Today’s priority</div>
+            <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 8 }}>Today's priority</div>
             <SoftCard>
               <div style={{ fontWeight: 900 }}>{data.priority}</div>
               <div style={{ marginTop: 6, fontSize: 13, opacity: 0.9 }}>
@@ -462,83 +494,97 @@ export default function FullClient() {
         </div>
       </div>
 
-      {/* P1–P9 CHECKPOINTS */}
+      {/* P1-P9 CHECKPOINTS (tiles, collapsible) */}
+      {/* P1-P9 CHECKPOINTS (tiles, collapsible) */}
       <Panel
-        title="P1–P9 Checkpoints"
+        title="P1-P9 Checkpoints"
         right={
-          <div style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 12, opacity: 0.85 }}>
+          <div style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 12, opacity: 0.85, flexWrap: "wrap" }}>
             <span style={{ opacity: 0.7 }}>Legend:</span>
             {pill("ontrack")} {pill("needs")} {pill("priority")}
           </div>
         }
       >
-        <div style={{ display: "grid", gap: 10 }}>
-          {data.pchecks.map((pc) => (
-            <div
-              key={pc.p}
-              style={{
-                borderRadius: 16,
-                border: "1px solid rgba(255,255,255,0.12)",
-                background: "rgba(0,0,0,0.18)",
-                padding: 14,
-              }}
-            >
-              <div style={{ display: "grid", gridTemplateColumns: "70px 1fr auto", gap: 10, alignItems: "center" }}>
-                <div
+        <div style={{ display:"flex", gap:8, margin:"2px 0 12px", flexWrap:"wrap" }}>
+          <button
+            type="button"
+            onClick={() => { setExpandAllP(true); setOpenP(null); }}
+            style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: expandAllP ? 0.7 : 1 }}
+          >
+            Expand all
+          </button>
+          <button
+            type="button"
+            onClick={() => { setExpandAllP(false); setOpenP(7); }}
+            style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: !expandAllP ? 0.85 : 1 }}
+          >
+            Collapse all
+          </button>
+          <span style={{ fontSize:12, opacity:0.72, alignSelf:"center" }}>Default open: P7 (impact)</span>
+        </div>
+
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3, minmax(0, 1fr))", gap: 12 }}>
+          {data.pchecks.map((c) => {
+            const isOpen = expandAllP || openP === c.p;
+            return (
+              <div key={c.p} style={{ borderRadius: 16, border: "1px solid rgba(255,255,255,0.10)", background: "rgba(0,0,0,0.14)", overflow:"hidden" }}>
+                <button
+                  type="button"
+                  onClick={() => { if (!expandAllP) setOpenP((cur) => (cur === c.p ? null : c.p)); }}
                   style={{
-                    width: 54,
-                    height: 54,
-                    borderRadius: 16,
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    background: "rgba(255,255,255,0.06)",
-                    display: "grid",
-                    placeItems: "center",
-                    fontWeight: 950,
+                    width:"100%",
+                    textAlign:"left",
+                    padding:"10px 12px",
+                    display:"flex",
+                    justifyContent:"space-between",
+                    alignItems:"center",
+                    gap:10,
+                    cursor: expandAllP ? "default" : "pointer",
+                    background:"transparent",
+                    border:"none",
+                    color:"#eaf1ff"
                   }}
+                  title={expandAllP ? "Expanded" : "Tap to expand / collapse"}
                 >
-                  P{pc.p}
-                </div>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 950 }}>{pc.title}</div>
-                  <div style={{ fontSize: 12, opacity: 0.75, marginTop: 2 }}>
-                    Coach notes, common misses, and key drills for this phase.
+                  <div style={{ display:"flex", gap:10, alignItems:"baseline" }}>
+                    <div style={{ fontWeight: 950 }}>P{c.p}</div>
+                    <div style={{ fontSize: 13, opacity: 0.92, fontWeight: 850 }}>{c.title}</div>
                   </div>
-                </div>
-                {pill(pc.status)}
+                  <div style={{ display:"flex", gap:10, alignItems:"center" }}>
+                    {pill((c as any).status ?? (c.p === 7 ? "priority" : "needs"))}
+                    <span style={{ fontSize: 12, opacity: 0.75 }}>{isOpen ? "−" : "+"}</span>
+                  </div>
+                </button>
+
+                {isOpen && (
+                  <div style={{ padding:"0 12px 12px" }}>
+                    <div style={{ display:"grid", gap:10 }}>
+                      <SoftCard>
+                        <div style={{ fontSize: 12, fontWeight: 900, marginBottom: 6 }}>Coach Notes</div>
+                        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.92, lineHeight: 1.55 }}>
+                          {(c.coachNotes ?? []).map((x, i) => <li key={i}>{x}</li>)}
+                        </ul>
+                      </SoftCard>
+
+                      <SoftCard>
+                        <div style={{ fontSize: 12, fontWeight: 900, marginBottom: 6 }}>Common Misses</div>
+                        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.92, lineHeight: 1.55 }}>
+                          {(c.commonMisses ?? []).map((x, i) => <li key={i}>{x}</li>)}
+                        </ul>
+                      </SoftCard>
+
+                      <SoftCard>
+                        <div style={{ fontSize: 12, fontWeight: 900, marginBottom: 6 }}>Key Drills</div>
+                        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.92, lineHeight: 1.55 }}>
+                          {(c.drills ?? []).map((x, i) => <li key={i}>{x}</li>)}
+                        </ul>
+                      </SoftCard>
+                    </div>
+                  </div>
+                )}
               </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1.15fr 1fr 1fr", gap: 10, marginTop: 12 }}>
-                <SoftCard>
-                  <div style={{ fontSize: 12, fontWeight: 900, marginBottom: 6 }}>Coach Notes</div>
-                  <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.92, lineHeight: 1.55 }}>
-                    {pc.coachNotes.map((x, i) => <li key={i}>{x}</li>)}
-                  </ul>
-                  <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
-                    <span style={{ padding: "4px 8px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.05)", fontSize: 11 }}>AI notes</span>
-                    <span style={{ padding: "4px 8px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.05)", fontSize: 11 }}>Need more info</span>
-                    <span style={{ padding: "4px 8px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.05)", fontSize: 11 }}>YouTube</span>
-                  </div>
-                </SoftCard>
-
-                <SoftCard>
-                  <div style={{ fontSize: 12, fontWeight: 900, marginBottom: 6 }}>Common Misses</div>
-                  <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.92, lineHeight: 1.55 }}>
-                    {pc.commonMisses.map((x, i) => <li key={i}>{x}</li>)}
-                  </ul>
-                </SoftCard>
-
-                <SoftCard>
-                  <div style={{ fontSize: 12, fontWeight: 900, marginBottom: 6 }}>Key Drills</div>
-                  <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.92, lineHeight: 1.55 }}>
-                    {pc.keyDrills.map((x, i) => <li key={i}>{x}</li>)}
-                  </ul>
-                  <div style={{ marginTop: 10, fontSize: 11, opacity: 0.7 }}>
-                    Powered by AI wording · Keep one priority at a time.
-                  </div>
-                </SoftCard>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Panel>
 
@@ -553,8 +599,29 @@ export default function FullClient() {
       </div>
 
       <div style={{ marginTop: 10, fontSize: 11, opacity: 0.55, textAlign: "center" }}>
-        Virtual Coach AI — demo report. If something doesn’t fit, it may be your swing… or your feel and your hand.
+        Virtual Coach AI - demo report. If something doesn't fit, it may be your swing… or your feel and your hand.
       </div>
     </ReportShell>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

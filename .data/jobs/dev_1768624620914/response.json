@@ -1,0 +1,129 @@
+{
+  "ok": true,
+  "jobId": "dev_1768624620914",
+  "videoUrl": "/golden",
+  "framesDir": "/golden",
+  "frames": [],
+  "report": {
+    "id": "dev_1768624620914",
+    "createdAt": "2026-01-17T04:37:00.914Z",
+    "headline": "Golden demo report (no upload).",
+    "swingScore": 78,
+    "topFaults": [
+      {
+        "key": "face_open",
+        "title": "Face slightly open",
+        "severity": "medium"
+      },
+      {
+        "key": "early_ext",
+        "title": "Early extension",
+        "severity": "low"
+      }
+    ],
+    "checkpoints": [
+      {
+        "p": 1,
+        "label": "P1",
+        "note": "-"
+      },
+      {
+        "p": 2,
+        "label": "P2",
+        "note": "-"
+      },
+      {
+        "p": 3,
+        "label": "P3",
+        "note": "-"
+      },
+      {
+        "p": 4,
+        "label": "P4",
+        "note": "-"
+      },
+      {
+        "p": 5,
+        "label": "P5",
+        "note": "-"
+      },
+      {
+        "p": 6,
+        "label": "P6",
+        "note": "-"
+      },
+      {
+        "p": 7,
+        "label": "P7",
+        "note": "-"
+      },
+      {
+        "p": 8,
+        "label": "P8",
+        "note": "-"
+      },
+      {
+        "p": 9,
+        "label": "P9",
+        "note": "-"
+      }
+    ],
+    "pframes": [
+      {
+        "p": 1,
+        "label": "P1",
+        "imageUrl": "/golden/p1.jpg",
+        "thumbUrl": "/golden/p1.jpg"
+      },
+      {
+        "p": 2,
+        "label": "P2",
+        "imageUrl": "/golden/p2.jpg",
+        "thumbUrl": "/golden/p2.jpg"
+      },
+      {
+        "p": 3,
+        "label": "P3",
+        "imageUrl": "/golden/p3.jpg",
+        "thumbUrl": "/golden/p3.jpg"
+      },
+      {
+        "p": 4,
+        "label": "P4",
+        "imageUrl": "/golden/p4.jpg",
+        "thumbUrl": "/golden/p4.jpg"
+      },
+      {
+        "p": 5,
+        "label": "P5",
+        "imageUrl": "/golden/p5.jpg",
+        "thumbUrl": "/golden/p5.jpg"
+      },
+      {
+        "p": 6,
+        "label": "P6",
+        "imageUrl": "/golden/p6.jpg",
+        "thumbUrl": "/golden/p6.jpg"
+      },
+      {
+        "p": 7,
+        "label": "P7",
+        "imageUrl": "/golden/p7.jpg",
+        "thumbUrl": "/golden/p7.jpg"
+      },
+      {
+        "p": 8,
+        "label": "P8",
+        "imageUrl": "/golden/p8.jpg",
+        "thumbUrl": "/golden/p8.jpg"
+      },
+      {
+        "p": 9,
+        "label": "P9",
+        "imageUrl": "/golden/p9.jpg",
+        "thumbUrl": "/golden/p9.jpg"
+      }
+    ],
+    "framesDir": "/golden"
+  }
+}

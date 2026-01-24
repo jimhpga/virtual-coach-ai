@@ -1,9 +1,7 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import fs from "fs";
-import path from "path";
-
 
 async function __vcaDump(tag: string, payload: any) {
   try {
@@ -88,7 +86,7 @@ export async function POST(req: Request) {
       id: `rpt_${Date.now()}`,
       createdAt: new Date().toISOString(),
       headline: String(extractJson?.headline || "P1-P9 frames ready.").replace(
-        /P1[–â]P9/g,
+        /P1[-â]P9/g,
         "P1-P9"
       ),
       swingScore: Number(extractJson?.swingScore || 72),
@@ -127,4 +125,5 @@ export async function POST(req: Request) {
     );
   }
 }
+
 

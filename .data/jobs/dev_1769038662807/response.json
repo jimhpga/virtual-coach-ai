@@ -1,0 +1,10 @@
+{
+  "id": "dev_1769038662807",
+  "ok": false,
+  "error": null,
+  "payload": {
+    "ok": false,
+    "jobId": "2f3d5855f1f25915",
+    "error": "Input file not found: C:\\Sites\\virtual-coach-ai\\public\\uploads\\2f3d5855f1f25915"
+  }
+}

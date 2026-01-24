@@ -1,13 +1,13 @@
-﻿{
+{
   "swingScore": 91,
   "tourDna": "Tour DNA Match: Player S (demo)",
   "priority": "Low point control",
   "faults": [
     { "title": "Early extension (hips toward ball)", "why": "Handle lifts, contact gets heel-y.", "fix": "Keep trail hip back; chest stays down through impact." },
-    { "title": "Arms outrun pivot", "why": "Face timing gets flippy.", "fix": "Rotate through; keep hands passive through P6–P8." }
+    { "title": "Arms outrun pivot", "why": "Face timing gets flippy.", "fix": "Rotate through; keep hands passive through P6-P8." }
   ],
   "drills": [
     { "name": "Wall-Butt Drill", "steps": ["Stand 6 inches from a wall behind you.", "Backswing without losing glute contact.", "Downswing: keep trail hip back longer."], "reps": "2x8 slow, then 5 swings" },
-    { "name": "Towel Under Arms", "steps": ["Place towel under both armpits.", "Make half swings keeping towel in place.", "Rotate chest through; don’t throw arms."], "reps": "2x10 half swings" }
+    { "name": "Towel Under Arms", "steps": ["Place towel under both armpits.", "Make half swings keeping towel in place.", "Rotate chest through; don't throw arms."], "reps": "2x10 half swings" }
   ]
 }

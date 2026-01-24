@@ -1,0 +1,10 @@
+{
+  "id": "dev_1768624661532",
+  "ok": false,
+  "error": null,
+  "payload": {
+    "ok": false,
+    "jobId": "ac7e119e4e6e562e",
+    "error": "extract-pframes failed (500)"
+  }
+}

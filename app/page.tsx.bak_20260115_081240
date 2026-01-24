@@ -1,0 +1,9 @@
+﻿export default function Landing() {
+  return (
+    <main style={{ padding: 40 }}>
+      <h1>Upload one swing. Get one clear priority.</h1>
+      <p>Virtual Coach AI turns a swing video into a focused plan.</p>
+      <a href="/upload">Upload a swing</a> · <a href="/report-beta?golden=1">See a sample report</a>
+    </main>
+  );
+}

@@ -1,0 +1,183 @@
+﻿"use client";
+
+import React from "react";
+
+type Phase = "idle" | "uploading" | "analyzing" | "rendering";
+
+function prettyBytes(n: number) {
+  if (!Number.isFinite(n) || n <= 0) return "";
+  const units = ["B", "KB", "MB", "GB"];
+  let i = 0;
+  let v = n;
+  while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+  return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+export default function UploadLivePage() {
+  const [file, setFile] = React.useState<File | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [phase, setPhase] = React.useState<Phase>("idle");
+  const [err, setErr] = React.useState<string | null>(null);
+
+  async function readJsonSafe(r: Response) {
+    try { return await r.json(); } catch { return null; }
+  }
+
+  async function onSubmit() {
+    setErr(null);
+    if (!file) return setErr("Pick a swing video first.");
+    if (busy) return;
+
+    setBusy(true);
+    setPhase("uploading");
+
+    try {
+      // 1) Upload
+      const fd = new FormData();
+      fd.append("file", file);
+
+      const r = await fetch("/api/upload", { method: "POST", body: fd });
+      const j = await readJsonSafe(r);
+      if (!r.ok || !j?.ok) throw new Error(j?.error || `Upload failed (${r.status})`);
+
+      const uploadId = String(j.uploadId || j.id || "");
+      if (!uploadId) throw new Error("Upload did not return uploadId");
+
+      // 2) Analyze
+      setPhase("analyzing");
+      const ar = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ uploadId }),
+      });
+      const aj = await readJsonSafe(ar);
+      if (!ar.ok || !aj?.ok) throw new Error(aj?.error || `Analyze failed (${ar.status})`);
+
+      const jobId = String(aj.jobId || aj.id || "");
+      const src = jobId ? `/api/job/${jobId}` : "";
+
+      // 3) Render report (navigation)
+      setPhase("rendering");
+      try { if (src) sessionStorage.setItem("vca_card_src", src); } catch {}
+
+      if (src) {
+        window.location.href = `/report-beta/full?src=${encodeURIComponent(src)}`;
+      } else {
+        window.location.href = `/report-beta/full?golden=1`;
+      }
+    } catch (e: any) {
+      setErr(e?.message || "Upload failed");
+      setPhase("idle");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const phaseLabel =
+    phase === "uploading" ? "Uploading…" :
+    phase === "analyzing"  ? "Analyzing…" :
+    phase === "rendering"  ? "Building report…" :
+    "Analyze swing →";
+
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        background:
+          "radial-gradient(1200px 600px at 20% 0%, rgba(70,140,255,0.22), transparent 55%), #05070b",
+        color: "#eaf1ff",
+        padding: 24,
+      }}
+    >
+      <div
+        style={{
+          width: "min(860px, 100%)",
+          borderRadius: 18,
+          border: "1px solid rgba(255,255,255,0.12)",
+          background: "rgba(0,0,0,0.45)",
+          boxShadow: "0 18px 60px rgba(0,0,0,0.55)",
+          padding: 18,
+        }}
+      >
+        <div style={{ fontSize: 12, opacity: 0.7, fontWeight: 900 }}>VIRTUAL COACH AI</div>
+        <div style={{ fontSize: 22, fontWeight: 1000, marginTop: 6 }}>Upload a swing (Live MVP)</div>
+        <div style={{ fontSize: 13, opacity: 0.85, marginTop: 6, lineHeight: 1.45 }}>
+          Upload → Analyze → Report. If you see “Building report…”, you’re winning.
+        </div>
+
+        <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
+          <input
+            type="file"
+            accept="video/*"
+            onChange={(e) => {
+              setErr(null);
+              setPhase("idle");
+              setFile(e.target.files?.[0] ?? null);
+            }}
+            style={{
+              width: "100%",
+              padding: 12,
+              borderRadius: 14,
+              border: "1px solid rgba(255,255,255,0.14)",
+              background: "rgba(0,0,0,0.35)",
+              color: "#eaf1ff",
+            }}
+          />
+
+          {file ? (
+            <div style={{ fontSize: 12, opacity: 0.8 }}>
+              Selected: <span style={{ fontWeight: 800 }}>{file.name}</span>
+              {file.size ? <span style={{ opacity: 0.75 }}> · {prettyBytes(file.size)}</span> : null}
+            </div>
+          ) : (
+            <div style={{ fontSize: 12, opacity: 0.7 }}>
+              Tip: pick a slow-mo swing video. Keep it short (10s is plenty).
+            </div>
+          )}
+
+          <button
+            onClick={onSubmit}
+            disabled={!file || busy}
+            style={{
+              height: 44,
+              borderRadius: 999,
+              border: "1px solid rgba(255,255,255,0.18)",
+              background: busy ? "rgba(120,120,120,0.25)" : "rgba(120,180,255,0.22)",
+              color: "#eaf1ff",
+              fontWeight: 1000,
+              cursor: (!file || busy) ? "not-allowed" : "pointer",
+            }}
+          >
+            {phaseLabel}
+          </button>
+
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => (window.location.href = "/report-beta/full?golden=1")}
+            style={{
+              height: 44,
+              borderRadius: 999,
+              border: "1px solid rgba(255,255,255,0.16)",
+              background: "rgba(255,255,255,0.06)",
+              color: "#eaf1ff",
+              fontWeight: 900,
+              cursor: busy ? "not-allowed" : "pointer",
+              opacity: busy ? 0.6 : 1,
+            }}
+          >
+            Try Golden Demo →
+          </button>
+
+          <div style={{ fontSize: 12, opacity: 0.75, marginTop: -4 }}>
+            No upload needed.
+          </div>
+
+          {err ? <div style={{ fontSize: 13, color: "#ffd2d2" }}>{err}</div> : null}
+        </div>
+      </div>
+    </div>
+  );
+}

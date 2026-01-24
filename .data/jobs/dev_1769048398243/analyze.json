@@ -1,0 +1,221 @@
+{
+  "id": "dev_1769048398243",
+  "ok": true,
+  "error": null,
+  "payload": {
+    "ok": true,
+    "jobId": "dev_1769048398245",
+    "videoUrl": "/uploads/HERO_SWING.mkv",
+    "framesDir": "/frames/v1_HERO_SWING.mkv_imp2p50",
+    "frames": [],
+    "report": {
+      "id": "dev_1769048398245",
+      "createdAt": "2026-01-22T02:19:58.454Z",
+      "headline": "P1-P9 frames ready.",
+      "swingScore": 72,
+      "topFaults": [
+        {
+          "rank": 1,
+          "tag": "late_pressure_shift",
+          "key": "late_pressure_shift",
+          "title": "Pressure shift late",
+          "why": "Low point drifts back and contact gets inconsistent.",
+          "fix": "Get to lead side by P5–P6, then rotate.",
+          "severity": "NEEDS_ATTENTION"
+        },
+        {
+          "rank": 2,
+          "tag": "flip_risk",
+          "key": "flip_risk",
+          "title": "Flip risk",
+          "why": "Handle stalls and the hands try to save the face.",
+          "fix": "Keep the chest turning; handle forward through impact.",
+          "severity": "NEEDS_ATTENTION"
+        },
+        {
+          "rank": 3,
+          "tag": "early_extension",
+          "key": "early_extension",
+          "title": "Early extension",
+          "why": "Hips move toward the ball and you lose space.",
+          "fix": "Keep pelvis depth; rotate around your posture.",
+          "severity": "WATCH"
+        }
+      ],
+      "checkpoints": [],
+      "pframes": [],
+      "framesDir": "/frames/v1_HERO_SWING.mkv_imp2p50",
+      "powerLeaks": [
+        {
+          "key": "late_pressure_shift",
+          "title": "Pressure shift late",
+          "why": "If pressure stays back, you can’t post and rotate hard through impact.",
+          "drills": [
+            {
+              "id": "step_to_lead_side",
+              "title": "Step-to-Lead-Side (timing)",
+              "how": "Make slow swings. As the club reaches the top, step into your lead foot before starting down. Then rotate through.",
+              "why": "Forces pressure shift before rotation so low point moves forward."
+            },
+            {
+              "id": "brush_forward_line",
+              "title": "Brush the Line (low point)",
+              "how": "Draw a line on turf. Make swings brushing the ground *in front* of the line, not behind it.",
+              "why": "Moves low point forward and improves compression."
+            }
+          ]
+        },
+        {
+          "key": "flip_risk",
+          "title": "Flip risk",
+          "why": "A flip bleeds speed and makes strike/face unpredictable.",
+          "drills": [
+            {
+              "id": "impact_bag",
+              "title": "Impact Bag (handle forward)",
+              "how": "Hit an impact bag with half-swings: hands ahead, chest turning, lead wrist flat. Freeze for 2 seconds.",
+              "why": "Trains forward shaft lean and stops the flip."
+            },
+            {
+              "id": "split_grip",
+              "title": "Split-Grip Swings",
+              "how": "Split your hands on the grip by 3–4 inches and make 8 smooth swings focusing on body rotation through.",
+              "why": "Reduces hand flip and teaches rotation-driven speed."
+            }
+          ]
+        }
+      ],
+      "topFixes": [
+        {
+          "key": "late_pressure_shift",
+          "title": "Pressure shift late",
+          "cue": "Get to lead side by P5–P6, then rotate.",
+          "drills": [
+            {
+              "id": "step_to_lead_side",
+              "title": "Step-to-Lead-Side (timing)",
+              "how": "Make slow swings. As the club reaches the top, step into your lead foot before starting down. Then rotate through.",
+              "why": "Forces pressure shift before rotation so low point moves forward."
+            },
+            {
+              "id": "brush_forward_line",
+              "title": "Brush the Line (low point)",
+              "how": "Draw a line on turf. Make swings brushing the ground *in front* of the line, not behind it.",
+              "why": "Moves low point forward and improves compression."
+            }
+          ]
+        },
+        {
+          "key": "flip_risk",
+          "title": "Flip risk",
+          "cue": "Keep the chest turning; handle forward through impact.",
+          "drills": [
+            {
+              "id": "impact_bag",
+              "title": "Impact Bag (handle forward)",
+              "how": "Hit an impact bag with half-swings: hands ahead, chest turning, lead wrist flat. Freeze for 2 seconds.",
+              "why": "Trains forward shaft lean and stops the flip."
+            },
+            {
+              "id": "split_grip",
+              "title": "Split-Grip Swings",
+              "how": "Split your hands on the grip by 3–4 inches and make 8 smooth swings focusing on body rotation through.",
+              "why": "Reduces hand flip and teaches rotation-driven speed."
+            }
+          ]
+        },
+        {
+          "key": "early_extension",
+          "title": "Early extension",
+          "cue": "Keep pelvis depth; rotate around your posture.",
+          "drills": [
+            {
+              "id": "chair_butt_line",
+              "title": "Chair Butt-Line (early extension)",
+              "how": "Set a chair lightly behind your hips at setup. Make slow swings keeping your hips from moving into the chair early.",
+              "why": "Trains pelvis depth so you don’t stand up and lose space."
+            },
+            {
+              "id": "wall_hip_depth",
+              "title": "Wall Hip-Depth Rehearsal",
+              "how": "Stand with rear end near a wall. Turn back and through without letting hips drift toward the ball.",
+              "why": "Teaches depth + rotation instead of thrust."
+            }
+          ]
+        }
+      ],
+      "practicePlan": [
+        {
+          "day": 1,
+          "focus": "Primary: Pressure shift late",
+          "reps": "10 reps drill A + 10 reps drill B + 8 balls"
+        },
+        {
+          "day": 2,
+          "focus": "Primary: Pressure shift late",
+          "reps": "10 reps drill A + 10 reps drill B + 8 balls"
+        },
+        {
+          "day": 3,
+          "focus": "Primary: Pressure shift late",
+          "reps": "10 reps drill A + 10 reps drill B + 8 balls"
+        },
+        {
+          "day": 4,
+          "focus": "Primary: Pressure shift late",
+          "reps": "10 reps drill A + 10 reps drill B + 8 balls"
+        },
+        {
+          "day": 5,
+          "focus": "Primary: Pressure shift late",
+          "reps": "10 reps drill A + 10 reps drill B + 8 balls"
+        },
+        {
+          "day": 6,
+          "focus": "Blend: Pressure shift late + Flip risk",
+          "reps": "8 reps each drill + 12 balls"
+        },
+        {
+          "day": 7,
+          "focus": "Test Day (film 2 swings + 10 balls)",
+          "reps": "2 filmed swings, then 10 balls at 70% speed"
+        },
+        {
+          "day": 8,
+          "focus": "Blend: Pressure shift late + Flip risk",
+          "reps": "8 reps each drill + 12 balls"
+        },
+        {
+          "day": 9,
+          "focus": "Blend: Pressure shift late + Flip risk",
+          "reps": "8 reps each drill + 12 balls"
+        },
+        {
+          "day": 10,
+          "focus": "Blend: Pressure shift late + Flip risk",
+          "reps": "8 reps each drill + 12 balls"
+        },
+        {
+          "day": 11,
+          "focus": "Performance: tempo + finish",
+          "reps": "3–2–1 tempo for 8 balls + hold finish for 8 balls"
+        },
+        {
+          "day": 12,
+          "focus": "Performance: tempo + finish",
+          "reps": "3–2–1 tempo for 8 balls + hold finish for 8 balls"
+        },
+        {
+          "day": 13,
+          "focus": "Performance: tempo + finish",
+          "reps": "3–2–1 tempo for 8 balls + hold finish for 8 balls"
+        },
+        {
+          "day": 14,
+          "focus": "Test Day (film 2 swings + 10 balls)",
+          "reps": "2 filmed swings, then 10 balls at 70% speed"
+        }
+      ]
+    }
+  }
+}

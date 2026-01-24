@@ -1,4 +1,5 @@
-﻿"use client";
+﻿import React, { useState, useEffect } from "react";
+"use client";
 
 import * as React from "react";
 
@@ -56,54 +57,115 @@ const P_DESCS: Array<{ p: number; title: string; bullets: string[] }> = [
 ];
 
 export function PDescriptionsCollapsed({ onJumpToP, activeP }: Props) {
-  return (
-    <details style={{
-      border: "1px solid rgba(255,255,255,0.12)",
-      borderRadius: 14,
-      padding: "10px 12px",
-      background: "rgba(0,0,0,0.18)",
-      marginBottom: 10
-    }}>
-      <summary style={{
-        cursor: "pointer",
-        listStyle: "none",
-        fontWeight: 900,
-        opacity: 0.95,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12
-      }}>
-        <span>P1–P9 Descriptions</span>
-        <span style={{ fontSize: 12, opacity: 0.75 }}>Tap to expand</span>
-      </summary>
+  
+  // --- Collapsible per-checkpoint UI state ---
+  const [openP, setOpenP] = useState<number | null>(null);
+const [expandAll, setExpandAll] = useState(false);
 
-      <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
+  useEffect(() => {
+    if (typeof activeP === "number" && !expandAll) setOpenP(activeP);
+  }, [activeP, expandAll]);
+  // ------------------------------------------
+
+return (
+    <div
+      style={{
+        border: "1px solid rgba(255,255,255,0.10)",
+        background: "rgba(0,0,0,0.18)",
+        borderRadius: 16,
+        padding: 12,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+        <div style={{ fontWeight: 900, letterSpacing: 0.2 }}>P1–P9 Descriptions</div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            type="button"
+            onClick={() => { setExpandAll(true); setOpenP(null); }}
+            style={{
+              height: 30, padding: "0 10px", borderRadius: 999,
+              border: "1px solid rgba(255,255,255,0.14)",
+              background: "rgba(0,0,0,0.25)", color: "#e6edf6",
+              fontSize: 12, fontWeight: 900, cursor: "pointer",
+              opacity: expandAll ? 0.65 : 1
+            }}
+          >
+            Expand all
+          </button>
+          <button
+            type="button"
+            onClick={() => { setExpandAll(false); setOpenP(typeof activeP === "number" ? activeP : null); }}
+            style={{
+              height: 30, padding: "0 10px", borderRadius: 999,
+              border: "1px solid rgba(255,255,255,0.14)",
+              background: "rgba(0,0,0,0.25)", color: "#e6edf6",
+              fontSize: 12, fontWeight: 900, cursor: "pointer",
+              opacity: !expandAll ? 0.75 : 1
+            }}
+          >
+            Collapse all
+          </button>
+        </div>
+      </div>
+
+      <div style={{ fontSize: 12, opacity: 0.75, marginTop: 4 }}>
+        Click a checkpoint to expand it. Active checkpoint highlights automatically.
+      </div>
+
+      <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
         {P_DESCS.map((row) => {
           const isActive = typeof activeP === "number" && row.p === activeP;
+          const isOpen = expandAll || (typeof openP === "number" && row.p === openP);
           return (
-            <button
+            <div
               key={row.p}
-              type="button"
-              onClick={() => onJumpToP?.(row.p)}
               style={{
-                textAlign: "left",
-                width: "100%",
                 border: "1px solid rgba(255,255,255,0.10)",
-                borderRadius: 12,
-                padding: "10px 12px",
-                background: isActive ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.16)",
-                cursor: onJumpToP ? "pointer" : "default"
+                background: isActive ? "rgba(66,140,255,0.14)" : "rgba(0,0,0,0.16)",
+                borderRadius: 14, overflow: "hidden",
               }}
             >
-              <div style={{ fontWeight: 900, marginBottom: 6 }}>{row.title}</div>
-              <ul style={{ margin: 0, paddingLeft: 18, opacity: 0.9 }}>
-                {row.bullets.map((b, i) => <li key={i} style={{ margin: "2px 0" }}>{b}</li>)}
-              </ul>
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  try { onJumpToP?.(row.p); } catch {}
+                  if (expandAll) return;
+                  setOpenP((cur) => (cur === row.p ? null : row.p));
+                }}
+                style={{
+                  width: "100%", textAlign: "left", padding: "10px 12px",
+                  background: "transparent", border: "none", color: "#e6edf6",
+                  cursor: "pointer", display: "flex", alignItems: "center",
+                  justifyContent: "space-between", gap: 10,
+                }}
+                aria-expanded={isOpen}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontWeight: 900, opacity: 0.9 }}>{row.title}</span>
+                  {isActive ? (
+                    <span style={{ fontSize: 11, fontWeight: 900, padding: "3px 8px", borderRadius: 999, border: "1px solid rgba(255,255,255,0.14)", background: "rgba(255,255,255,0.06)", opacity: 0.95 }}>Active</span>
+                  ) : null}
+                </div>
+                <span style={{ fontWeight: 900, opacity: 0.7 }}>{isOpen ? "▾" : "▸"}</span>
+              </button>
+
+              {isOpen ? (
+                <div style={{ padding: "0 12px 12px 12px" }}>
+                  <ul style={{ margin: "6px 0 0 18px", padding: 0, opacity: 0.9, lineHeight: 1.55 }}>
+                    {row.bullets.map((b, i) => (
+                      <li key={i} style={{ margin: "2px 0" }}>{b}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+            </div>
           );
         })}
       </div>
-    </details>
+    </div>
   );
 }
+
+
+
+

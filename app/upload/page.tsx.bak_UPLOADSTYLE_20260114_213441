@@ -1,0 +1,227 @@
+﻿"use client";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Shell } from "../_components/Shell";
+
+type Audience = "adult" | "junior";
+type Level = "beginner" | "intermediate" | "advanced" | "elite";
+type EyeDom = "right" | "left" | "both" | "unsure";
+type Handed = "right" | "left";
+type Goal = "fix_slice" | "fix_hook" | "more_distance" | "better_contact" | "short_game" | "putting" | "tournament" | "general";
+
+function clampStr(s: string, max = 120) {
+  return (s ?? "").toString().trim().slice(0, max);
+}
+
+export default function Upload() {
+  const router = useRouter();
+
+  const [file, setFile] = useState<File | null>(null);
+
+  // === Intake fields ===
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState(""); // optional
+  const [handicap, setHandicap] = useState<string>(""); // keep as string; validate lightly
+  const [audience, setAudience] = useState<Audience>("adult");
+  const [level, setLevel] = useState<Level>("intermediate");
+  const [handed, setHanded] = useState<Handed>("right");
+  const [eyeDom, setEyeDom] = useState<EyeDom>("unsure");
+  const [goal, setGoal] = useState<Goal>("general");
+  const [focus, setFocus] = useState("General checkup (full swing)");
+  const [notes, setNotes] = useState("");
+
+  const canContinue = useMemo(() => {
+    // Name not strictly required, but recommended; file not strictly required in current flow.
+    // We'll keep it flexible: allow Continue even without file (demo mode), but encourage it via UI.
+    return true;
+  }, []);
+
+  function go() {
+    const payload = {
+      createdAt: new Date().toISOString(),
+      // clip
+      fileName: file?.name || null,
+
+      // intake
+      name: clampStr(name, 80) || null,
+      email: clampStr(email, 120) || null,
+      handicap: clampStr(handicap, 10) || null,
+      audience,
+      level,
+      handed,
+      eyeDom,
+      goal,
+      focus: clampStr(focus, 120),
+      notes: clampStr(notes, 500) || null,
+    };
+
+    sessionStorage.setItem("vca_intake", JSON.stringify(payload));
+    router.push("/report");
+  }
+
+  return (
+    <Shell
+      title="Upload"
+      subtitle="One clip. One report. One drill."
+      right={
+        <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+          <Link href="/sequencing-truth" style={{ color: "#b9cff6", fontWeight: 900 }}>
+            Sequencing Truth
+          </Link>
+          <Link href="/" style={{ color: "#b9cff6", fontWeight: 900 }}>
+            ← Home
+          </Link>
+        </div>
+      }
+    >
+      <div style={{ display: "grid", gap: 14 }}>
+        {/* Identity */}
+        <div style={{ display: "grid", gap: 10, gridTemplateColumns: "1fr 1fr" }}>
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 900, marginBottom: 6 }}>Name (recommended)</div>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Jim Hartnett"
+              style={{ width: "100%" }}
+            />
+          </div>
+
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 900, marginBottom: 6 }}>Email (optional)</div>
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              inputMode="email"
+              style={{ width: "100%" }}
+            />
+            <div style={{ fontSize: 11, opacity: 0.7, marginTop: 12, height: 48, fontWeight: 900 }}>
+              Optional — used for delivery/receipt later. Leave blank if you don’t want it.
+            </div>
+          </div>
+        </div>
+
+        {/* Player profile */}
+        <div style={{ display: "grid", gap: 10, gridTemplateColumns: "1fr 1fr 1fr 1fr" }}>
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 900, marginBottom: 6 }}>Audience</div>
+            <select value={audience} onChange={(e) => setAudience(e.target.value as Audience)}>
+              <option value="adult">Adult</option>
+              <option value="junior">Junior</option>
+            </select>
+          </div>
+
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 900, marginBottom: 6 }}>Level</div>
+            <select value={level} onChange={(e) => setLevel(e.target.value as Level)}>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+              <option value="elite">Excellent / Elite</option>
+            </select>
+          </div>
+
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 900, marginBottom: 6 }}>Handed</div>
+            <select value={handed} onChange={(e) => setHanded(e.target.value as Handed)}>
+              <option value="right">Right-handed</option>
+              <option value="left">Left-handed</option>
+            </select>
+          </div>
+
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 900, marginBottom: 6 }}>Eye dominance</div>
+            <select value={eyeDom} onChange={(e) => setEyeDom(e.target.value as EyeDom)}>
+              <option value="right">Right-eye dominant</option>
+              <option value="left">Left-eye dominant</option>
+              <option value="both">Mixed / Both</option>
+              <option value="unsure">Not sure</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Handicap + goals */}
+        <div style={{ display: "grid", gap: 10, gridTemplateColumns: "1fr 1fr" }}>
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 900, marginBottom: 6 }}>Handicap (optional)</div>
+            <input
+              value={handicap}
+              onChange={(e) => setHandicap(e.target.value)}
+              placeholder="e.g. 8.2 (or leave blank)"
+              style={{ width: "100%" }}
+            />
+          </div>
+
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 900, marginBottom: 6 }}>Primary goal</div>
+            <select value={goal} onChange={(e) => setGoal(e.target.value as Goal)}>
+              <option value="general">General checkup</option>
+              <option value="better_contact">Better contact</option>
+              <option value="more_distance">More distance</option>
+              <option value="fix_slice">Fix slice</option>
+              <option value="fix_hook">Fix hook</option>
+              <option value="short_game">Short game</option>
+              <option value="putting">Putting</option>
+              <option value="tournament">Tournament prep</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Focus + file */}
+        <div style={{ display: "grid", gap: 12 }}>
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 900, marginBottom: 6 }}>Focus</div>
+            <input
+              value={focus}
+              onChange={(e) => setFocus(e.target.value)}
+              placeholder="General checkup (full swing)"
+              style={{ width: "100%" }}
+            />
+          </div>
+
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 900, marginBottom: 6 }}>Video</div>
+            <input
+              type="file"
+              accept="video/*"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            />
+            <div style={{ fontSize: 11, opacity: 0.7, marginTop: 12, height: 48, fontWeight: 900 }}>
+              Tip: slow motion can be up to ~10 seconds. Keep it impact-centered.
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontSize: 12, opacity: 0.8, fontWeight: 900, marginBottom: 6 }}>Notes (optional)</div>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Anything you want the coach to know…"
+              rows={3}
+              style={{ width: "100%" }}
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={go}
+          disabled={!canContinue}
+          style={{
+            opacity: canContinue ? 1 : 0.5,
+            cursor: canContinue ? "pointer" : "not-allowed",
+            marginTop: 12, height: 48, fontWeight: 900
+          }}
+        >
+          🚀 Continue → Report
+        </button>
+
+        <div style={{ fontSize: 12, opacity: 0.8 }}>
+          Investor shortcut: <Link href="/investor-demo">Investor Demo</Link>
+        </div>
+      </div>
+    </Shell>
+  );
+}
+

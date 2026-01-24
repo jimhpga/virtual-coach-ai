@@ -1,0 +1,74 @@
+{
+  "version": "pose_tasks_v1",
+  "input": "VCA_Impact_Hero_candidate3.mp4",
+  "fps": 30,
+  "frameCount": 123,
+  "sampled": 90,
+  "model": "pose_landmarker_lite.task",
+  "meta": {
+    "builtAt": "2026-01-24T01:02:19.606Z",
+    "pipeline": "post-estimation-pass-through-v1",
+    "source": ".\\public\\reports\\rep_pose_20260122_161929.json"
+  },
+  "topFaults": [
+    "clubface_control",
+    "low_point_control",
+    "sequence_timing"
+  ],
+  "rankedFaults": [
+    {
+      "key": "clubface_control",
+      "score": 60,
+      "label": "Clubface control (impact)",
+      "note": "Demo fallback",
+      "meaning": "Face-to-path is drifting - start line control suffers.",
+      "drills": [
+        "9-to-3 punch shots: half swings, hold the face square through impact.",
+        "Alignment stick gate: start the ball through a narrow start-line window."
+      ]
+    },
+    {
+      "key": "low_point_control",
+      "score": 55,
+      "label": "Low point control (strike)",
+      "note": "Demo fallback",
+      "meaning": "Bottom of arc is inconsistent - contact and compression vary.",
+      "drills": [
+        "Towel drill: place towel 4-6\" behind ball; miss towel, hit ball first.",
+        "Line drill: draw a line, ball just ahead; strike the line in front every rep."
+      ]
+    },
+    {
+      "key": "sequence_timing",
+      "score": 50,
+      "label": "Sequence timing (transition)",
+      "note": "Demo fallback",
+      "meaning": "Body/arms aren't syncing - speed leaks and face gets flippy.",
+      "drills": [
+        "Step-through drill: small step toward target to trigger pressure shift then turn.",
+        "Pump drill (3 pumps): rehearse P5 slot, then swing through without flipping."
+      ]
+    }
+  ],
+  "confidence": {
+    "value": 0.55,
+    "sep": 0
+  },
+  "evidence": [
+    {
+      "faultKey": "clubface_control",
+      "why": "Face-to-path is drifting - start line control suffers.",
+      "source": "fallback"
+    },
+    {
+      "faultKey": "low_point_control",
+      "why": "Bottom of arc is inconsistent - contact and compression vary.",
+      "source": "fallback"
+    },
+    {
+      "faultKey": "sequence_timing",
+      "why": "Body/arms aren't syncing - speed leaks and face gets flippy.",
+      "source": "fallback"
+    }
+  ]
+}

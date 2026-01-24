@@ -81,3 +81,13 @@ details[open] .caret{transform:rotate(180deg)}
 
 
 
+
+
+
+
+/* ===========================
+   VIDEO REPLAY DISABLED
+   =========================== */
+.video-mount, .video, video {
+  display: none !important;
+}

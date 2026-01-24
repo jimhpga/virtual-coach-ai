@@ -143,9 +143,9 @@
       // 4) Open the report Ã¢â‚¬â€ prefer the direct Blob URL, fall back to id
       log("Opening report viewÃ¢â‚¬Â¦");
       if (rep.url) {
-        location.assign(`/report.html?url=${encodeURIComponent(rep.url)}`);
+        location.assign(`/report-beta/full?src=${encodeURIComponent(rep.url)}`);
       } else if (rep.id) {
-        location.assign(`/report.html?id=${encodeURIComponent(rep.id)}`);
+        location.assign(`/report-beta/full?jobId=${encodeURIComponent(rep.id)}`);
       } else {
         throw new Error("Report response missing url/id");
       }
@@ -156,6 +156,7 @@
     }
   });
 })();
+
 
 
 

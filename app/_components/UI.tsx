@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 
 export function TinyCard(props: { title?: string; children: React.ReactNode }) {
   return (
@@ -35,7 +35,7 @@ export function ConfidenceMeter(props: {
   label: string;
   phase: string;
   trend: "dip" | "exit" | "climb";
-  score: number; // 0–100
+  score: number; // 0-100
   note?: string;
 }) {
   const s = Math.max(0, Math.min(100, props.score || 0));

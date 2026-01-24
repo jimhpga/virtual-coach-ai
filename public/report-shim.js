@@ -1,7 +1,7 @@
-﻿(() => {
+(() => {
   // ===== CONFIG =====
   const BUCKET = "virtualcoachai-prod";
-  const REGION = "us-west-2"; // use "us-east-1" if thatâ€™s your bucket
+  const REGION = "us-west-2"; // use "us-east-1" if that's your bucket
   // ==================
 
   const $ = (s) => document.querySelector(s);
@@ -11,7 +11,7 @@
 
   $("#copyLink").onclick = async () => {
     await navigator.clipboard.writeText(location.href);
-    status.textContent = "ðŸ”— Link copied.";
+    status.textContent = "ðŸ”- Link copied.";
   };
   $("#refresh").onclick = () => location.reload();
 
@@ -60,7 +60,7 @@
         title: dr.name || dr.code || "Drill",
         short: dr.why || "",
         long: dr.how || "",
-        ref: dr.url || dr.video_url || ""
+        ref: ""
       }));
     }
     if (!Array.isArray(out.coaching.priority_fixes)) out.coaching.priority_fixes = [];
@@ -69,7 +69,7 @@
     // safe defaults
     if (!Array.isArray(out.position_metrics)) out.position_metrics = [];
     if (!Array.isArray(out.swing_metrics)) out.swing_metrics = [];
-    if (!out.power) out.power = { score: 0, tempo: "â€”", release_timing: 0 };
+    if (!out.power) out.power = { score: 0, tempo: "-", release_timing: 0 };
 
     return out;
   }
@@ -77,31 +77,31 @@
   function render(dataRaw) {
     const data = normalizeReport(dataRaw);
     status.textContent = "âœ… Report loaded.";
-    const phases = data.phases.map(p => `<li><b>${p.id} ${p.name}:</b> ${p.short}</li>`).join("") || "<li>â€”</li>";
-    const prio = data.coaching.priority_fixes.map(x => `<li>${x.title}</li>`).join("") || "<li>â€”</li>";
-    const powr = data.coaching.power_fixes.map(x => `<li><b>${x.title}:</b> ${x.short || x.long}</li>`).join("") || "<li>â€”</li>";
+    const phases = data.phases.map(p => `<li><b>${p.id} ${p.name}:</b> ${p.short}</li>`).join("") || "<li>-</li>";
+    const prio = data.coaching.priority_fixes.map(x => `<li>${x.title}</li>`).join("") || "<li>-</li>";
+    const powr = data.coaching.power_fixes.map(x => `<li><b>${x.title}:</b> ${x.short || x.long}</li>`).join("") || "<li>-</li>";
 
     view.innerHTML = `
-      <div><b>Client:</b> ${data.client.id} â€¢ <b>Mode:</b> ${data.discipline || "â€”"} â€¢ <b>Swings:</b> ${data.swings ?? "â€”"}</div>
+      <div><b>Client:</b> ${data.client.id} â€¢ <b>Mode:</b> ${data.discipline || "-"} â€¢ <b>Swings:</b> ${data.swings ?? "-"}</div>
       <div class="card">
-        <h3>P1â€“P9</h3>
+        <h3>P1-P9</h3>
         <ol>${phases}</ol>
       </div>
       <div class="card">
         <h3>Highlights</h3>
-        <ul>${(data.highlights||[]).map(h=>`<li>${h}</li>`).join("") || "<li>â€”</li>"}</ul>
+        <ul>${(data.highlights||[]).map(h=>`<li>${h}</li>`).join("") || "<li>-</li>"}</ul>
       </div>
       <div class="card">
-        <h3>Coaching â€” Priority Fixes</h3>
+        <h3>Coaching - Priority Fixes</h3>
         <ul>${prio}</ul>
       </div>
       <div class="card">
-        <h3>Coaching â€” Power Fixes</h3>
+        <h3>Coaching - Power Fixes</h3>
         <ul>${powr}</ul>
       </div>
       <div class="card">
         <h3>Power Summary</h3>
-        <div>Score: ${data.power.score ?? 0}% â€¢ Tempo: ${data.power.tempo || "â€”"} â€¢ Release: ${data.power.release_timing ?? 0}%</div>
+        <div>Score: ${data.power.score ?? 0}% â€¢ Tempo: ${data.power.tempo || "-"} â€¢ Release: ${data.power.release_timing ?? 0}%</div>
       </div>
     `;
   }
@@ -132,6 +132,7 @@
 
   boot();
 })();
+
 
 
 

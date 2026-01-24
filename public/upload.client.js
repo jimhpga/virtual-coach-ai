@@ -1,4 +1,4 @@
-﻿(() => {
+(() => {
   const $ = (id) => document.getElementById(id);
 
   const form = $("uploadForm");
@@ -76,7 +76,7 @@
 
       const up = await postForm("/api/upload", fd);
 
-      showStatus(`Uploaded (${up.durationSec.toFixed(1)}s). Auto-detecting impact + extracting P1–P9…`);
+      showStatus(`Uploaded (${up.durationSec.toFixed(1)}s). Auto-detecting impact + extracting P1-P9…`);
 
       const ex = await postJson("/api/extract-pframes", { videoUrl: up.videoUrl, jobId: up.jobId });
 

@@ -1,0 +1,254 @@
+﻿param(
+  [Parameter(Mandatory=$true)
+function Coerce-Idx($idx){
+  if($idx -is [int]){ return $idx }
+  if($idx -is [double]){ return [int]$idx }
+  if($idx -is [string]){ return [int]$idx }
+  if($idx -is [System.Collections.IList] -and $idx.Count -gt 0){
+    return (Coerce-Idx $idx[0])
+  }
+  throw ("Bad idx type: " + ($idx.GetType().FullName))
+}
+][string]$InDir,
+  [Parameter(Mandatory=$true)][string]$OutDir,
+  [double]$Fps = 60,
+  [string]$Handedness = "right",
+  [string]$EyeDominance = "left"
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+Add-Type -AssemblyName System.Web.Extensions | Out-Null
+function Read-JsonDeep([string]$path){
+  $raw = Get-Content -Raw -LiteralPath $path
+  $ser = New-Object System.Web.Script.Serialization.JavaScriptSerializer
+  $ser.MaxJsonLength  = 200000000
+  $ser.RecursionLimit = 200000
+  return $ser.DeserializeObject($raw)
+}
+
+function Deg($rad){ return ($rad * 180.0 / [math]::PI) }
+
+function Unwrap-DegList([double[]]$a){
+  if(-not $a -or $a.Count -lt 2){ return $a }
+  $out = New-Object double[] $a.Count
+  $out[0] = $a[0]
+  for($i=1;$i -lt $a.Count;$i++){
+    $d = $a[$i] - $out[$i-1]
+    if($d -gt 180){ $d -= 360 }
+    elseif($d -lt -180){ $d += 360 }
+    $out[$i] = $out[$i-1] + $d
+  }
+  return $out
+}
+
+function PeakAbs([double[]]$arr){
+  if(-not $arr -or $arr.Count -eq 0){ return $null }
+  $best = $null; $bestIdx = 0
+  for($i=0;$i -lt $arr.Count;$i++){
+    $v = $arr[$i]
+    if([double]::IsNaN($v)){ continue }
+    if($best -eq $null -or [math]::Abs($v) -gt [math]::Abs($best)){
+      $best = $v; $bestIdx = $i
+    }
+  }
+  return @{ v=$best; i=$bestIdx }
+}
+
+function RangeDeg([double[]]$arr){
+  if(-not $arr -or $arr.Count -eq 0){ return $null }
+  $min = [double]::PositiveInfinity
+  $max = [double]::NegativeInfinity
+  foreach($v in $arr){
+    if([double]::IsNaN($v)){ continue }
+    if($v -lt $min){ $min = $v }
+    if($v -gt $max){ $max = $v }
+  }
+  if($min -eq [double]::PositiveInfinity){ return $null }
+  return ($max - $min)
+}
+
+function VelDegPerSec([double[]]$a, [double]$fps){
+  if(-not $a -or $a.Count -lt 2){ return @() }
+  $dt = 1.0 / $fps
+  $v = New-Object double[] ($a.Count)
+  $v[0] = 0
+  for($i=1;$i -lt $a.Count;$i++){
+    $v[$i] = ($a[$i] - $a[$i-1]) / $dt
+  }
+  return $v
+}
+
+# --------- KEY FIX: normalize landmarks to numeric XYZ ---------
+function Get-Landmarks($frame){
+  if($frame -is [System.Collections.IDictionary]){
+    foreach($k in @("landmarks","pose_landmarks","poseLandmarks")){
+      if($frame.ContainsKey($k) -and $frame[$k]){ return $frame[$k] }
+    }
+  }
+  return $null
+}
+
+function Get-PointXYZ($lm, $idx){
+  if($null -eq $lm){ return $null }
+
+  $p = $null
+
+  # lm could be array OR dictionary keyed by "0","1",...
+  if($lm -is [System.Collections.IDictionary]){
+    if($lm.ContainsKey($idx)){ $p = $lm[$idx] }
+    elseif($lm.ContainsKey([string]$idx)){ $p = $lm[[string]$idx] }
+  } else {
+    # assume list/array
+    if($idx -ge 0 -and $idx -lt $lm.Count){ $p = $lm[$idx] }
+  }
+
+  if($null -eq $p){ return $null }
+
+  # case 1: p is dict with x/y/z
+  if($p -is [System.Collections.IDictionary]){
+    if($p.ContainsKey("x") -and $p.ContainsKey("y") -and $p.ContainsKey("z")){
+      return ,@([double]$p["x"], [double]$p["y"], [double]$p["z"])
+    }
+  }
+
+  # case 2: p is array-like [x,y,z,(vis)]
+  if($p -is [System.Collections.IList] -and $p.Count -ge 3){
+    return ,@([double]$p[0], [double]$p[1], [double]$p[2])
+  }
+
+  return $null
+}
+
+function YawFromLRXZ($Lxyz, $Rxyz){
+  if($null -eq $Lxyz -or $null -eq $Rxyz){ return [double]::NaN }
+  $vx = [double]$Rxyz[0] - [double]$Lxyz[0]
+  $vz = [double]$Rxyz[2] - [double]$Lxyz[2]
+  if([math]::Abs($vx) + [math]::Abs($vz) -lt 1e-9){ return [double]::NaN }
+  return (Deg([math]::Atan2($vz, $vx)))
+}
+
+function HeadYawProxy($nose, $lEar, $rEar){
+  if($null -eq $nose -or $null -eq $lEar -or $null -eq $rEar){ return [double]::NaN }
+  $mx = ([double]$lEar[0] + [double]$rEar[0]) / 2.0
+  $mz = ([double]$lEar[2] + [double]$rEar[2]) / 2.0
+  $vx = [double]$nose[0] - $mx
+  $vz = [double]$nose[2] - $mz
+  if([math]::Abs($vx) + [math]::Abs($vz) -lt 1e-9){ return [double]::NaN }
+  return (Deg([math]::Atan2($vz, $vx)))
+}
+
+New-Item -ItemType Directory -Force $OutDir | Out-Null
+
+$files = Get-ChildItem -LiteralPath $InDir -Filter *.json | Sort-Object Name
+if(-not $files){ throw "No JSON files found in $InDir" }
+
+$rows = @()
+
+# MediaPipe Pose indices
+$NOSE=0; $L_EAR=7; $R_EAR=8
+$L_SH=11; $R_SH=12
+$L_HIP=23; $R_HIP=24
+
+foreach($f in $files){
+  try{
+    $obj = Read-JsonDeep $f.FullName
+
+    # find frames array in a few likely spots
+    $frames = $null
+    if(($obj -is [System.Collections.IDictionary]) -and $obj.ContainsKey("frames")){ $frames = $obj["frames"] }
+    elseif(($obj -is [System.Collections.IDictionary]) -and $obj.ContainsKey("pose")){ $frames = $obj["pose"] }
+    elseif(($obj -is [System.Collections.IDictionary]) -and $obj.ContainsKey("results")){ $frames = $obj["results"] }
+
+    if($null -eq $frames){ throw "No frames key found (expected frames/pose/results)" }
+
+    $pel = New-Object System.Collections.Generic.List[double]
+    $tho = New-Object System.Collections.Generic.List[double]
+    $hed = New-Object System.Collections.Generic.List[double]
+
+    foreach($fr in $frames){
+      $lm = Get-Landmarks $fr
+      if($null -eq $lm){ continue }
+
+      $nose = Get-PointXYZ $lm $NOSE
+      $lEar = Get-PointXYZ $lm $L_EAR
+      $rEar = Get-PointXYZ $lm $R_EAR
+      $lSh  = Get-PointXYZ $lm $L_SH
+      $rSh  = Get-PointXYZ $lm $R_SH
+      $lHip = Get-PointXYZ $lm $L_HIP
+      $rHip = Get-PointXYZ $lm $R_HIP
+
+      $pel.Add( (YawFromLRXZ $lHip $rHip) ) | Out-Null
+      $tho.Add( (YawFromLRXZ $lSh  $rSh ) ) | Out-Null
+      $hed.Add( (HeadYawProxy $nose $lEar $rEar) ) | Out-Null
+    }
+
+    $pelU = Unwrap-DegList ($pel.ToArray())
+    $thoU = Unwrap-DegList ($tho.ToArray())
+    $hedU = Unwrap-DegList ($hed.ToArray())
+
+    $pelV = VelDegPerSec $pelU $Fps
+    $thoV = VelDegPerSec $thoU $Fps
+    $hedV = VelDegPerSec $hedU $Fps
+
+    $pelPeak = PeakAbs $pelV
+    $thoPeak = PeakAbs $thoV
+    $hedPeak = PeakAbs $hedV
+
+    if($pelPeak -eq $null -or $pelPeak.v -eq $null){
+      throw "Pelvis velocity peak not found (too few usable frames?)"
+    }
+
+    $pelPeakIdx = [int]$pelPeak.i
+    $pelPeakMs  = [math]::Round( (1000.0 * $pelPeakIdx / $Fps), 1 )
+
+    $thoPeakMs = if($thoPeak -and $thoPeak.v -ne $null){ [math]::Round( (1000.0 * [int]$thoPeak.i / $Fps), 1 ) } else { $null }
+    $hedPeakMs = if($hedPeak -and $hedPeak.v -ne $null){ [math]::Round( (1000.0 * [int]$hedPeak.i / $Fps), 1 ) } else { $null }
+
+    $rows += [pscustomobject]@{
+      clip = $f.Name
+      handedness = $Handedness
+      eyeDominance = $EyeDominance
+      fps = $Fps
+
+      pelvisRangeDeg   = if($pelU){ [math]::Round((RangeDeg $pelU),2) } else { $null }
+      thoraxRangeDeg   = if($thoU){ [math]::Round((RangeDeg $thoU),2) } else { $null }
+      headYawRangeDeg  = if($hedU){ [math]::Round((RangeDeg $hedU),2) } else { $null }
+
+      pelvisPeakVelDegPerSec = [math]::Round([double]$pelPeak.v,2)
+      thoraxPeakVelDegPerSec = if($thoPeak -and $thoPeak.v -ne $null){ [math]::Round([double]$thoPeak.v,2) } else { $null }
+      headPeakVelDegPerSec   = if($hedPeak -and $hedPeak.v -ne $null){ [math]::Round([double]$hedPeak.v,2) } else { $null }
+
+      pelvisPeakVelTimeMs = $pelPeakMs
+      thoraxPeakVelTimeMs = $thoPeakMs
+      headPeakVelTimeMs   = $hedPeakMs
+
+      dT_Thorax_to_Pelvis_ms = if($thoPeakMs -ne $null){ [math]::Round(($thoPeakMs - $pelPeakMs),1) } else { $null }
+      dT_Head_to_Pelvis_ms   = if($hedPeakMs -ne $null){ [math]::Round(($hedPeakMs - $pelPeakMs),1) } else { $null }
+
+      xFactorRangeDeg = if($thoU -and $pelU -and $thoU.Count -eq $pelU.Count){
+        $xf = for($i=0;$i -lt $thoU.Count;$i++){ $thoU[$i] - $pelU[$i] }
+        [math]::Round((RangeDeg $xf),2)
+      } else { $null }
+    }
+
+  } catch {
+    Write-Host ("❌ {0} :: {1}" -f $f.Name, $_.Exception.Message) -ForegroundColor Red
+  }
+}
+
+$csv  = Join-Path $OutDir "kseq_metrics.csv"
+$json = Join-Path $OutDir "kseq_metrics.json"
+
+$rows | Export-Csv -NoTypeInformation -Encoding UTF8 $csv
+$rows | ConvertTo-Json -Depth 6 | Set-Content -Encoding UTF8 $json
+
+Write-Host "=== OUTPUT ===" -ForegroundColor Cyan
+Write-Host $csv
+Write-Host $json
+
+$rows | Sort-Object {[math]::Abs([double]$_.pelvisPeakVelDegPerSec)} -Descending |
+  Select-Object -First 12 clip,fps,pelvisPeakVelDegPerSec,thoraxPeakVelDegPerSec,headPeakVelDegPerSec,dT_Thorax_to_Pelvis_ms,dT_Head_to_Pelvis_ms,xFactorRangeDeg |
+  Format-Table -AutoSize
+

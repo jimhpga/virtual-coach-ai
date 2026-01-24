@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 
@@ -13,7 +13,7 @@ export default function CardClient() {
     {
       title: "Face control: slightly open at P6",
       why: "Ball starts right / weak fade pattern under speed.",
-      fix: "Keep lead wrist flatter through P5–P7; rotate, don’t flip."
+      fix: "Keep lead wrist flatter through P5-P7; rotate, don't flip."
     },
     {
       title: "Pressure shift late (hanging back)",
@@ -36,7 +36,7 @@ export default function CardClient() {
       name: "Step-Through Pressure Shift",
       steps: [
         "Start feet together, take club to P2.",
-        "Step lead foot to target as arms reach P3–P4.",
+        "Step lead foot to target as arms reach P3-P4.",
         "Swing through to a tall, balanced finish."
       ],
       reps: "2 sets of 8, then 5 normal swings"
@@ -81,11 +81,11 @@ export default function CardClient() {
           borderBottom: "1px solid rgba(255,255,255,0.10)"
         }}>
           <div style={{ display: "grid", gap: 6 }}>
-            <div style={{ fontSize: 14, opacity: 0.85 }}>Virtual Coach AI — Report Card (Demo)</div>
+            <div style={{ fontSize: 14, opacity: 0.85 }}>Virtual Coach AI - Report Card (Demo)</div>
             <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: 0.2 }}>Swing Snapshot</div>
           </div>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            {pill("P1–P9 Ready")}
+            {pill("P1-P9 Ready")}
             {pill("Golden=1")}
           </div>
         </div>
@@ -109,7 +109,7 @@ export default function CardClient() {
             </div>
 
             <div style={{ display: "grid", gap: 8 }}>
-              <div style={{ fontSize: 12, opacity: 0.75 }}>Today’s Priority</div>
+              <div style={{ fontSize: 12, opacity: 0.75 }}>Today's Priority</div>
               <div style={{
                 padding: 12,
                 borderRadius: 14,

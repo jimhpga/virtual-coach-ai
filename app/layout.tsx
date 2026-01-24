@@ -10,8 +10,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning={true}>{children}</body>
+      <body suppressHydrationWarning={true} className="vca-bg">{children}</body>
     </html>
   )
 }
+
 

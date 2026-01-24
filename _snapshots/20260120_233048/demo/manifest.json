@@ -1,0 +1,34 @@
+﻿{
+    "version":  1,
+    "video":  {
+                  "url":  "/demo/swing.mp4"
+              },
+    "poster":  {
+                   "url":  "/demo/poster.jpg"
+               },
+    "frames":  {
+                   "times":  [
+                                 1.001,
+                                 2.002,
+                                 3.003,
+                                 4.004,
+                                 5.005,
+                                 6.006,
+                                 7.007,
+                                 8.008,
+                                 9.009
+                             ],
+                   "dir":  "/demo/frames",
+                   "files":  [
+                                 "p1.jpg",
+                                 "p2.jpg",
+                                 "p3.jpg",
+                                 "p4.jpg",
+                                 "p5.jpg",
+                                 "p6.jpg",
+                                 "p7.jpg",
+                                 "p8.jpg",
+                                 "p9.jpg"
+                             ]
+               }
+}

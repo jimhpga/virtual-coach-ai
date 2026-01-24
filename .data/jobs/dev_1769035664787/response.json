@@ -1,0 +1,10 @@
+{
+  "id": "dev_1769035664787",
+  "ok": false,
+  "error": null,
+  "payload": {
+    "ok": false,
+    "jobId": "e1a14f04e7f7f6a6",
+    "error": "fs is not defined"
+  }
+}

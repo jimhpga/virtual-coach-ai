@@ -1,0 +1,8 @@
+﻿{
+  "meta": { "kind": "smoke", "created": "now" },
+  "player": { "name": "Smoke Test" },
+  "faults": [],
+  "fixes": [],
+  "drills": [],
+  "checkpoints": []
+}

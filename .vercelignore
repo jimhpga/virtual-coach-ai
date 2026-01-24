@@ -1,4 +1,38 @@
-public/_legacy
-public/upload
-public/report
-public/reports
+﻿# --- Never deploy local build artifacts / caches ---
+.next
+node_modules
+.vscode
+.DS_Store
+
+# --- Your local demo assets / recordings ---
+_shots
+**/_shots/**
+**/*.mp4
+**/*.mov
+**/*.webm
+**/*.mkv
+**/*.zip
+
+# --- Common large junk folders in Jim-land ---
+Backups
+backup
+backups
+archive
+archives
+tmp
+temp
+logs
+log
+**/*.log
+
+# --- If you have pose pipeline caches / data dumps ---
+pose/in
+pose/out
+pose/cache
+data
+datasets
+
+# --- Large images if you have a stash folder (keep public/bg + public/logo etc.) means: don't ignore /public globally ---
+public/_big
+public/videos
+public/tmp

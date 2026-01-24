@@ -1,0 +1,228 @@
+﻿// app/lib/postAssess.ts
+// Pure, deterministic post-assessment layer (safe to call in client).
+// Keep it simple. No fetch. No randomness.
+
+export type FaultKey = string;
+
+export type AnalyzeResponse = {
+  faults?: FaultKey[];
+  scores?: { swing?: number; power?: number; reliability?: number };
+  narrative?: any;
+  drills?: any;
+  media?: any;
+
+  // optional extra keys we may add
+  priorityKey?: string;
+  priorityLabel?: string;
+  whyNow?: string;
+  avoidList?: string;
+  confidenceCue?: string;
+};
+
+const PRIORITY_ORDER: FaultKey[] = [
+  "face_open",
+  "face_closed",
+  "early_extend",
+  "over_the_top",
+  "late_hips",
+  "arms_start_down",
+  "flip",
+  "sway",
+  "reverse_pivot",
+];
+
+function pickOne(faults: FaultKey[] = []) {
+  for (const k of PRIORITY_ORDER) if (faults.includes(k)) return k;
+  return faults[0] || "foundation";
+}
+
+function humanLabel(key: string) {
+  const map: Record<string, string> = {
+    face_open: "Clubface control (open)",
+    face_closed: "Clubface control (closed)",
+    over_the_top: "Path (over the top)",
+    early_extend: "Posture (early extension)",
+    late_hips: "Sequence (hips late)",
+    arms_start_down: "Sequence (arms start down first)",
+    flip: "Impact (handle stalls / flip)",
+    sway: "Pressure shift (sway)",
+    reverse_pivot: "Pressure shift (reverse pivot)",
+    foundation: "Foundation (setup + contact)",
+  };
+  const k = typeof key === "string" ? key : "";
+  return (map as any)[k] || (k ? k.replace(/_/g, " ") : "");
+}
+
+export function postAssess(report: AnalyzeResponse) {
+  const faults = report?.faults ?? [];
+  const priority = pickOne(faults);
+
+  const whyNow =
+    priority === "foundation"
+      ? "Lock in predictable contact first. Everything else gets easier once strike is stable."
+      : `Fixing ${humanLabel(priority)} gives you the biggest “one move” gain right now—better starts, better strike, less chaos.`;
+
+  const avoidList =
+    priority === "face_open" || priority === "face_closed"
+      ? "Avoid chasing swing path today. Face first, path second."
+      : "Avoid chasing more speed today. Clean contact and sequence first.";
+
+  const confidenceCue =
+    "Expect a small confidence dip while you change the pattern. That’s normal—stay calm, take slower reps, and measure progress by contact + start line.";
+
+  return {
+    priorityKey: priority,
+    priorityLabel: humanLabel(priority),
+    whyNow,
+    avoidList,
+    confidenceCue,
+  };
+}
+
+// ----------------------------
+// Pose-driven fault inference
+// ----------------------------
+
+type Lm = { x: number; y: number; z?: number; v?: number };
+type PoseFrame = { frame: number; t: number; ok: boolean; w: number; h: number; landmarks: Lm[] };
+type PoseLike = { fps?: number; frames?: PoseFrame[]; version?: number; input?: any; model?: any };
+
+// MediaPipe Pose indices (33 landmarks)
+const LM = {
+  L_SHOULDER: 11,
+  R_SHOULDER: 12,
+  L_HIP: 23,
+  R_HIP: 24,
+} as const;
+
+function lmOk(lm?: Lm, minV = 0.6) {
+  if (!lm) return false;
+  const v = lm.v ?? 1;
+  return v >= minV && Number.isFinite(lm.x) && Number.isFinite(lm.y);
+}
+
+function mid(a: Lm, b: Lm) {
+  return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, z: ((a.z ?? 0) + (b.z ?? 0)) / 2 };
+}
+
+function dist2D(a: Lm, b: Lm) {
+  const dx = a.x - b.x,
+    dy = a.y - b.y;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function pickAddrTopImpact(frames: PoseFrame[]) {
+  const good = frames.filter((f) => f?.ok && Array.isArray(f.landmarks) && f.landmarks.length >= 25);
+  const addr = good[0];
+  if (!addr) return { addr: null as any, top: null as any, impact: null as any, good };
+
+  // Top proxy: minimum shoulder-mid Y (higher in frame)
+  const searchTop = good.slice(0, Math.floor(good.length * 0.65));
+  let top = searchTop[0];
+  let bestY = 9;
+  for (const f of searchTop) {
+    const ls = f.landmarks[LM.L_SHOULDER];
+    const rs = f.landmarks[LM.R_SHOULDER];
+    if (!lmOk(ls) || !lmOk(rs)) continue;
+    const shy = (ls.y + rs.y) / 2;
+    if (shy < bestY) {
+      bestY = shy;
+      top = f;
+    }
+  }
+
+  // Impact proxy: after top, maximum shoulder-mid Y (lower in frame)
+  const idxTop = good.findIndex((x) => x.frame === top.frame);
+  const tail = good.slice(Math.max(0, idxTop + 3));
+  let impact = tail[0] ?? good[good.length - 1];
+  let bestImpY = -1;
+  for (const f of tail) {
+    const ls = f.landmarks[LM.L_SHOULDER];
+    const rs = f.landmarks[LM.R_SHOULDER];
+    if (!lmOk(ls) || !lmOk(rs)) continue;
+    const shy = (ls.y + rs.y) / 2;
+    if (shy > bestImpY) {
+      bestImpY = shy;
+      impact = f;
+    }
+  }
+
+  return { addr, top, impact, good };
+}
+
+/**
+ * Infer a SMALL but REAL set of faults from body-only pose frames.
+ * We start with faults we can support without club / face data:
+ * - sway
+ * - early_extend (proxy using hip depth z change)
+ * - reverse_pivot (proxy using sway magnitude; conservative)
+ *
+ * We do NOT guess face_open/face_closed/OTT without clubface/path signals.
+ */
+export function inferFaultsFromPose(pose: PoseLike, base?: AnalyzeResponse): AnalyzeResponse {
+  const frames = (pose?.frames ?? []).filter(Boolean) as PoseFrame[];
+  if (!frames.length) return { ...(base ?? {}), faults: base?.faults ?? [] };
+
+  const { addr, top, impact } = pickAddrTopImpact(frames);
+  if (!addr || !top || !impact) return { ...(base ?? {}), faults: base?.faults ?? [] };
+
+  const aLS = addr.landmarks[LM.L_SHOULDER],
+    aRS = addr.landmarks[LM.R_SHOULDER];
+  const aLH = addr.landmarks[LM.L_HIP],
+    aRH = addr.landmarks[LM.R_HIP];
+  const tLH = top.landmarks[LM.L_HIP],
+    tRH = top.landmarks[LM.R_HIP];
+  const iLH = impact.landmarks[LM.L_HIP],
+    iRH = impact.landmarks[LM.R_HIP];
+
+  if (![aLS, aRS, aLH, aRH, tLH, tRH, iLH, iRH].every((x) => lmOk(x))) {
+    return { ...(base ?? {}), faults: base?.faults ?? [] };
+  }
+
+  const shW = dist2D(aLS, aRS) || 1e-6;
+  const hipA = mid(aLH, aRH);
+  const hipT = mid(tLH, tRH);
+  const hipI = mid(iLH, iRH);
+
+  // normalized lateral shift of hip midpoint from address to top
+  const swayTop = (hipT.x - hipA.x) / shW;
+
+  // early extension proxy: hip depth change (z). If your z is inverted, we still take magnitude.
+  const earlyExtMag = Math.abs((hipI.z ?? 0) - (hipA.z ?? 0));
+
+  const faults = new Set<FaultKey>(base?.faults ?? []);
+
+  // Conservative thresholds (tune after 5–10 swings)
+  if (Math.abs(swayTop) > 0.18) faults.add("sway");
+  if (earlyExtMag > 0.06) faults.add("early_extend");
+
+  // Very conservative reverse pivot flag: only if sway is extreme
+  if (Math.abs(swayTop) > 0.26) faults.add("reverse_pivot");
+
+  // simple deterministic scores (placeholder but stable)
+  let swing = 92;
+  if (faults.has("early_extend")) swing -= 14;
+  if (faults.has("sway")) swing -= 12;
+  if (faults.has("reverse_pivot")) swing -= 10;
+  swing = Math.max(40, Math.min(97, swing));
+
+  const out: AnalyzeResponse = {
+    ...(base ?? {}),
+    faults: Array.from(faults),
+    scores: {
+      ...(base?.scores ?? {}),
+      swing: Math.round(swing),
+      power: Math.round(Math.max(40, Math.min(100, swing + 4))),
+      reliability: Math.round(Math.max(40, Math.min(100, swing - 4))),
+    },
+    narrative: {
+      ...(base?.narrative ?? {}),
+      poseMetrics: {
+        swayTop: Number(swayTop.toFixed(4)),
+        earlyExtMag: Number(earlyExtMag.toFixed(4)),
+      },
+    },
+  };
+
+  return out;
+}
