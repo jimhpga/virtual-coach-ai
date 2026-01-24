@@ -1,4 +1,4 @@
-﻿import argparse, json, os
+import argparse, json, os
 import cv2
 
 def main():
@@ -24,6 +24,7 @@ def main():
 
     cap = cv2.VideoCapture(inp)
     if not cap.isOpened():
+processed = 0  # heartbeat counter
         raise SystemExit("Could not open video")
 
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
@@ -66,6 +67,9 @@ def main():
 
         if not result.pose_landmarks or len(result.pose_landmarks) == 0:
             frames.append({
+            processed += 1
+            if processed % 150 == 0:
+                print(f"pose: processed {processed} frames")
                 "frame": int(fi),
                 "t": float(fi / fps),
                 "ok": False,
