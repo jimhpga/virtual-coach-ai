@@ -45,3 +45,25 @@ logs/
 Thumbs.db
 .vercel
 .env*.local
+
+# VCA: keep big artifacts OFF git
+_snapshots/
+uploads/
+pose/out/
+pose/cache/
+data/raw/
+data/tmp/
+.tmp/
+_shots/
+aws-snapshots/
+_ai-reports/
+.data/
+
+# Big video formats (do not track)
+*.mp4
+*.mov
+*.webm
+
+# Local logs
+*.log
+
