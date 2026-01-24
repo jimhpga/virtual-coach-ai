@@ -6,6 +6,109 @@ import { existsSync } from "fs";
 import { randomUUID } from "crypto";
 import { spawn } from "child_process";
 
+function vcaLineAngleDeg(ax:number, ay:number, bx:number, by:number) {
+  // angle of line AB relative to +x axis, in degrees
+  const ang = Math.atan2(by - ay, bx - ax) * (180 / Math.PI);
+  return ang;
+}
+
+function vcaAngleWrapDeg(a:number) {
+  // wrap to [-180, 180]
+  let x = a;
+  while (x > 180) x -= 360;
+  while (x < -180) x += 360;
+  return x;
+}
+
+function vcaComputePower(json:any) {
+  const frames: any[] =
+    Array.isArray(json?.frames) ? json.frames :
+    Array.isArray(json?.pose)   ? json.pose   :
+    Array.isArray(json?.data?.frames) ? json.data.frames :
+    [];
+  const n = frames.length || 0;
+  if (!n) return { powerProxy: null, handSpeedPeak: null, xFactorPeakDeg: null, powerScore: 75 };
+
+  const impact =
+    (typeof json?.debug?.impactFrame === "number" ? json.debug.impactFrame : null) ??
+    (typeof json?.impactFrame === "number" ? json.impactFrame : null) ??
+    Math.floor(n * 0.5);
+
+  const clamp = (x:number, lo:number, hi:number) => Math.max(lo, Math.min(hi, x));
+
+  // Windows: downswing = impact-60..impact-5 (avoid immediate impact noise)
+  const d0 = clamp(impact - 60, 0, n-1);
+  const d1 = clamp(impact - 5, 0, n-1);
+
+  // Landmark indices (MediaPipe Pose)
+  const L_SH = 11, R_SH = 12;
+  const L_HIP = 23, R_HIP = 24;
+  const L_WR = 15, R_WR = 16;
+
+  // 1) Hand speed proxy: midpoint of wrists, finite difference velocity
+  const speeds: number[] = [];
+  let prev: {x:number,y:number} | null = null;
+
+  for (let i = d0; i <= d1; i++) {
+    const lms = frames[i]?.landmarks;
+    if (!Array.isArray(lms) || lms.length <= R_WR) { prev = null; continue; }
+    const L = lms[L_WR], R = lms[R_WR];
+    if (!L || !R || typeof L.x !== "number" || typeof L.y !== "number" || typeof R.x !== "number" || typeof R.y !== "number") { prev = null; continue; }
+    const cur = { x: (L.x + R.x)/2, y: (L.y + R.y)/2 };
+    if (prev) {
+      const dx = cur.x - prev.x;
+      const dy = cur.y - prev.y;
+      speeds.push(Math.hypot(dx,dy));
+    }
+    prev = cur;
+  }
+
+  const handSpeedPeak = speeds.length ? Math.max(...speeds) : null;
+
+  // 2) XFactor proxy: shoulder line angle - hip line angle (absolute peak in downswing)
+  const xFactors: number[] = [];
+  for (let i = d0; i <= d1; i++) {
+    const lms = frames[i]?.landmarks;
+    if (!Array.isArray(lms) || lms.length <= R_HIP) continue;
+    const LS = lms[L_SH], RS = lms[R_SH], LH = lms[L_HIP], RH = lms[R_HIP];
+    if (!LS || !RS || !LH || !RH) continue;
+    if (![LS,RS,LH,RH].every(p => typeof p.x==="number" && typeof p.y==="number")) continue;
+
+    const shAng = vcaLineAngleDeg(LS.x, LS.y, RS.x, RS.y);
+    const hipAng = vcaLineAngleDeg(LH.x, LH.y, RH.x, RH.y);
+
+    // difference wrapped (we care magnitude)
+    const diff = Math.abs(vcaAngleWrapDeg(shAng - hipAng));
+    xFactors.push(diff);
+  }
+  const xFactorPeakDeg = xFactors.length ? Math.max(...xFactors) : null;
+
+  // Combine into a single proxy (normalized-ish)
+  // These are normalized coordinates; values are small.
+  // Typical good handSpeedPeak might be ~0.010-0.030 depending on frame rate/crop.
+  // Typical xFactorPeakDeg might be ~10-35 depending on 2D projection.
+  const hs = handSpeedPeak ?? 0;
+  const xf = xFactorPeakDeg ?? 0;
+
+  // Scale proxies into comparable ranges
+  const hsScore = Math.max(0, Math.min(1, (hs - 0.008) / 0.020));   // 0 at 0.008, 1 at 0.028
+  const xfScore = Math.max(0, Math.min(1, (xf - 8) / 25));          // 0 at 8deg, 1 at 33deg
+
+  const proxy = (hsScore * 0.65) + (xfScore * 0.35);
+
+  // Score 55–95
+  const rawScore = 55 + (proxy * 40);
+  const powerScore = Math.round(rawScore);
+
+  return {
+    powerProxy: Math.round(proxy * 1000) / 1000,
+    handSpeedPeak: handSpeedPeak !== null ? Math.round(handSpeedPeak * 100000) / 100000 : null,
+    xFactorPeakDeg: xFactorPeakDeg !== null ? Math.round(xFactorPeakDeg * 10) / 10 : null,
+    powerScore,
+    powerWindow: [d0, d1],
+  };
+}
+
 function vcaStdDev(xs: number[]) {
   if (!xs || xs.length < 2) return null;
   const m = xs.reduce((a,b)=>a+b,0) / xs.length;
@@ -295,6 +398,16 @@ try {
     (json as any).scores = { consistency: c.consistencyScore };
   }
 } catch {}
+/* VCA: data-driven Power score (hand-speed peak + XFactor proxy) */
+try {
+  const p = vcaComputePower(json);
+  (json as any).debug = { ...(json as any).debug, ...p };
+  if ((json as any).scores && typeof (json as any).scores === "object") {
+    (json as any).scores.power = p.powerScore;
+  } else {
+    (json as any).scores = { power: p.powerScore };
+  }
+} catch {}
 resolve(json);
       } catch {
         reject(new Error(`pose_engine.py returned non-JSON output:\n${out}\n\nstderr:\n${err}`));
@@ -392,6 +505,7 @@ pose = smoothPoseJson(pose, 0.45, 2, 0.0, 0.0); // VCA: smooth pose to reduce ji
   shapeResponse({ level, framesDirUrl, frames })
 );}
 }
+
 
 
 
