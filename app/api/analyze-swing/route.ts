@@ -119,7 +119,8 @@ function runPythonPoseStdin(videoPath: string, impactFrame: number, outDir: stri
       try {
       const json0 = JSON.parse(out.trim());
       const json = smoothPoseJson(json0, 0.45, 2, 0.0, 0.0); // VCA: smooth pose to reduce jitter
-        resolve(json);
+        (json as any).debug = { ...(json as any).debug, smoothed: true, alpha: 0.45, maxGap: 2 };
+resolve(json);
       } catch {
         reject(new Error(`pose_engine.py returned non-JSON output:\n${out}\n\nstderr:\n${err}`));
       }
@@ -216,6 +217,7 @@ pose = smoothPoseJson(pose, 0.45, 2, 0.0, 0.0); // VCA: smooth pose to reduce ji
   shapeResponse({ level, framesDirUrl, frames })
 );}
 }
+
 
 
 
