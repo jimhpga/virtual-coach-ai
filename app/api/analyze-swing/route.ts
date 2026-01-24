@@ -6,6 +6,86 @@ import { existsSync } from "fs";
 import { randomUUID } from "crypto";
 import { spawn } from "child_process";
 
+function vcaStdDev(xs: number[]) {
+  if (!xs || xs.length < 2) return null;
+  const m = xs.reduce((a,b)=>a+b,0) / xs.length;
+  const v = xs.reduce((a,b)=>a + (b-m)*(b-m), 0) / (xs.length - 1);
+  return Math.sqrt(v);
+}
+
+function vcaComputeConsistency(json: any) {
+  const frames: any[] =
+    Array.isArray(json?.frames) ? json.frames :
+    Array.isArray(json?.pose)   ? json.pose   :
+    Array.isArray(json?.data?.frames) ? json.data.frames :
+    [];
+
+  const n = frames.length || 0;
+  if (!n) return { consistencyProxy: null, consistencyScore: 72 };
+
+  // Try to find impact frame from debug or top-level; fallback to middle
+  const impact =
+    (typeof json?.debug?.impactFrame === "number" ? json.debug.impactFrame : null) ??
+    (typeof json?.impactFrame === "number" ? json.impactFrame : null) ??
+    Math.floor(n * 0.5);
+
+  const clamp = (x:number, lo:number, hi:number) => Math.max(lo, Math.min(hi, x));
+  const idxL = 15; // left wrist
+  const idxR = 16; // right wrist
+
+  // Window around impact: +/- 12 frames (~0.2s at 60fps)
+  const w0 = clamp(impact - 12, 0, n-1);
+  const w1 = clamp(impact + 12, 0, n-1);
+
+  // Downswing-ish window: impact - 60 to impact - 10 (about 0.8s to 0.17s pre-impact at 60fps)
+  const d0 = clamp(impact - 60, 0, n-1);
+  const d1 = clamp(impact - 10, 0, n-1);
+
+  function collectMidpoints(a:number, b:number) {
+    const xs: number[] = [];
+    const ys: number[] = [];
+    let used = 0;
+    for (let i=a; i<=b; i++) {
+      const lms = frames[i]?.landmarks;
+      if (!Array.isArray(lms) || lms.length <= idxR) continue;
+      const L = lms[idxL], R = lms[idxR];
+      if (!L || !R || typeof L.x !== "number" || typeof L.y !== "number" || typeof R.x !== "number" || typeof R.y !== "number") continue;
+      xs.push((L.x + R.x) / 2);
+      ys.push((L.y + R.y) / 2);
+      used++;
+    }
+    return { xs, ys, used };
+  }
+
+  const imp = collectMidpoints(w0, w1);
+  const down = collectMidpoints(d0, d1);
+
+  // Std dev of midpoint x/y in each window
+  const impX = vcaStdDev(imp.xs) ?? 0.0;
+  const impY = vcaStdDev(imp.ys) ?? 0.0;
+  const downX = vcaStdDev(down.xs) ?? 0.0;
+  const downY = vcaStdDev(down.ys) ?? 0.0;
+
+  // Proxy: weighted (impact stability matters more)
+  // Typical good values: ~0.001–0.006 (depends on normalization)
+  const proxy = (impX + impY) * 1.3 + (downX + downY) * 0.7;
+
+  // Convert proxy into a 55–95 score (higher better)
+  // proxy 0.002 => ~90, proxy 0.006 => ~74, proxy 0.010 => ~60
+  const rawScore = 96 - (proxy * 3500);
+  const consistencyScore = Math.max(55, Math.min(95, Math.round(rawScore)));
+
+  return {
+    consistencyProxy: Math.round(proxy * 100000) / 100000,
+    consistencyScore,
+    impactFrameUsed: impact,
+    impactWindow: [w0, w1],
+    downswingWindow: [d0, d1],
+    usedImpactPoints: imp.used,
+    usedDownswingPoints: down.used,
+  };
+}
+
 function vcaClamp(x: number, lo: number, hi: number) {
   return Math.max(lo, Math.min(hi, x));
 }
@@ -205,6 +285,16 @@ try {
   }
 } catch {}
 (json as any).debug = { ...(json as any).debug, smoothed: true, alpha: 0.45, maxGap: 2 };
+/* VCA: data-driven Consistency score (hand-midpoint stability around impact + downswing) */
+try {
+  const c = vcaComputeConsistency(json);
+  (json as any).debug = { ...(json as any).debug, ...c };
+  if ((json as any).scores && typeof (json as any).scores === "object") {
+    (json as any).scores.consistency = c.consistencyScore;
+  } else {
+    (json as any).scores = { consistency: c.consistencyScore };
+  }
+} catch {}
 resolve(json);
       } catch {
         reject(new Error(`pose_engine.py returned non-JSON output:\n${out}\n\nstderr:\n${err}`));
@@ -302,6 +392,7 @@ pose = smoothPoseJson(pose, 0.45, 2, 0.0, 0.0); // VCA: smooth pose to reduce ji
   shapeResponse({ level, framesDirUrl, frames })
 );}
 }
+
 
 
 
