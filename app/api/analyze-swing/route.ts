@@ -141,6 +141,16 @@ try {
     (json as any).scores = { reliability: rel };
   }
 } catch {}
+/* VCA: make reliability score data-driven (jitter + missing frames) */
+try {
+  const dbg = (json as any).debug;
+  const rel = vcaReliabilityFromDebug(dbg);
+  if ((json as any).scores && typeof (json as any).scores === "object") {
+    (json as any).scores.reliability = rel;
+  } else {
+    (json as any).scores = { reliability: rel };
+  }
+} catch {}
 (json as any).debug = { ...(json as any).debug, smoothed: true, alpha: 0.45, maxGap: 2 };
 resolve(json);
       } catch {
@@ -239,6 +249,7 @@ pose = smoothPoseJson(pose, 0.45, 2, 0.0, 0.0); // VCA: smooth pose to reduce ji
   shapeResponse({ level, framesDirUrl, frames })
 );}
 }
+
 
 
 
