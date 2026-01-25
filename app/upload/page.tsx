@@ -1,185 +1,181 @@
 "use client";
 
-import React from "react";
+import React, { useMemo, useState } from "react";
 
-type Phase = "idle" | "uploading" | "analyzing" | "rendering";
+type ApiResp = {
+  ok: boolean;
+  jobId?: string;
+  report?: any;
+  scores?: any;
+  debug?: any;
+  message?: string;
+};
 
-function prettyBytes(n: number) {
-  if (!Number.isFinite(n) || n <= 0) return "";
-  const units = ["B", "KB", "MB", "GB"];
-  let i = 0;
-  let v = n;
-  while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
-  return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
-}
+export default function UploadPage() {
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState<string>("");
+  const [err, setErr] = useState<string>("");
 
-export default function UploadLivePage() {
-  const [file, setFile] = React.useState<File | null>(null);
-  const [busy, setBusy] = React.useState(false);
-  const [phase, setPhase] = React.useState<Phase>("idle");
-  const [err, setErr] = React.useState<string | null>(null);
+  const fileLabel = useMemo(() => {
+    if (!file) return "No file selected";
+    const mb = (file.size / (1024 * 1024)).toFixed(2);
+    return `${file.name} — ${mb} MB`;
+  }, [file]);
+  function saveAndGoToReport(j: ApiResp) {
+  // Always clear UI FIRST (prevents ghost state if Next dev keeps component alive briefly)
+  try { setBusy(false); } catch {}
+  try { setStatus("Opening report…"); } catch {}
+  try { setErr(""); } catch {}
 
-  async function readJsonSafe(r: Response) {
-    try { return await r.json(); } catch { return null; }
+  // Persist
+  try {
+    const payload = {
+      at: new Date().toISOString(),
+      jobId: j?.jobId || "",
+      report: j?.report || null,
+      scores: j?.scores || null,
+      debug: j?.debug || null,
+    };
+    localStorage.setItem("vca_last_report", JSON.stringify(payload));
+  } catch {}
+
+  // Hard navigation (avoids SPA weirdness)
+  try {
+    window.location.replace("/report");
+  } catch {
+    try { window.location.href = "/report"; } catch {}
   }
-
-  async function onSubmit() {
-    setErr(null);
-    if (!file) return setErr("Pick a swing video first.");
-    if (busy) return;
-
+};
+  async function callDemo() {
+    setErr("");
+    setStatus("Building demo report…");
     setBusy(true);
-    setPhase("uploading");
-
     try {
-      // 1) Upload
-      const fd = new FormData();
-      fd.append("file", file);
-
-      const r = await fetch("/api/upload", { method: "POST", body: fd });
-      const j = await readJsonSafe(r);
-      if (!r.ok || !j?.ok) throw new Error(j?.error || `Upload failed (${r.status})`);
-
-      const uploadId = String(j.uploadId || j.id || "");
-      if (!uploadId) throw new Error("Upload did not return uploadId");
-
-      // 2) Analyze
-      setPhase("analyzing");
-      const ar = await fetch("/api/analyze", {
+      const r = await fetch("/api/analyze-swing", {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ uploadId }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ demo: true }),
       });
-      
-      // Persist report for /report-beta
-      // (If you already have JSON parsed below, prefer injection near res.json().)const aj = await readJsonSafe(ar);
-      if (!ar.ok || !aj?.ok) throw new Error(aj?.error || `Analyze failed (${ar.status})`);
-
-      const jobId = String(aj.jobId || aj.id || "");
-      const src = jobId ? `/api/job/${jobId}` : "";
-
-      // 3) Render report (navigation)
-      setPhase("rendering");
-      try { if (src) sessionStorage.setItem("vca_card_src", src); } catch {}
-
-      if (src) {
-        window.location.href = `/report-beta/full?src=${encodeURIComponent(src)}`;
-      } else {
-        window.location.href = `/report-beta/full?golden=1`;
-      }
+      const j: ApiResp = await r.json();
+      if (!j?.ok) throw new Error(j?.message || "Demo failed");
+      saveAndGoToReport(j);
     } catch (e: any) {
-      setErr(e?.message || "Upload failed");
-      setPhase("idle");
+      setErr(e?.message ? String(e.message) : "Demo failed");
+      setStatus("");
     } finally {
       setBusy(false);
     }
   }
 
-  const phaseLabel =
-    phase === "uploading" ? "Uploading…" :
-    phase === "analyzing"  ? "Analyzing…" :
-    phase === "rendering"  ? "Building report…" :
-    "Analyze swing →";
+  async function analyze() {
+    setErr("");
+    if (!file) {
+      setErr("Pick a video first.");
+      return;
+    }
+
+    setStatus("Uploading…");
+    setBusy(true);
+
+    try {
+      // Minimal: call demo for now (swap to real upload pipeline next)
+      setStatus("Analyzing…");
+      const r = await fetch("/api/analyze-swing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ demo: true }),
+      });
+      const j: ApiResp = await r.json();
+      if (!j?.ok) throw new Error(j?.message || "Analyze failed");
+      saveAndGoToReport(j);
+    } catch (e: any) {
+      setErr(e?.message ? String(e.message) : "Analyze failed");
+      setStatus("");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        placeItems: "center",
-        background:
-          "radial-gradient(1200px 600px at 20% 0%, rgba(70,140,255,0.22), transparent 55%), #05070b",
-        color: "#eaf1ff",
-        padding: 24,
-      }}
-    >
+    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
       <div
         style={{
-          width: "min(860px, 100%)",
+          width: "min(920px, 92vw)",
           borderRadius: 18,
-          border: "1px solid rgba(255,255,255,0.12)",
-          background: "rgba(0,0,0,0.45)",
-          boxShadow: "0 18px 60px rgba(0,0,0,0.55)",
-          padding: 18,
+          border: "1px solid rgba(255,255,255,0.10)",
+          background: "rgba(0,0,0,0.28)",
+          boxShadow: "0 30px 120px rgba(0,0,0,0.45)",
+          padding: 22,
+          color: "#e8eef7",
         }}
       >
-        <div style={{ fontSize: 12, opacity: 0.7, fontWeight: 900 }}>VIRTUAL COACH AI</div>
-        <div style={{ fontSize: 22, fontWeight: 1000, marginTop: 6 }}>Upload a swing (Live MVP)</div>
-        <div style={{ fontSize: 13, opacity: 0.85, marginTop: 6, lineHeight: 1.45 }}>
-          Upload → Analyze → Report. If you see “Building report…”, you're winning.
+        <div style={{ fontSize: 12, letterSpacing: 1.2, opacity: 0.75, marginBottom: 8 }}>VIRTUAL COACH AI</div>
+        <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 4 }}>Upload a swing (Live MVP)</div>
+        <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 16 }}>
+          Upload → Analyze → Report. If you see “Analyzing…”, you’re winning.
         </div>
 
-        <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
+        <div style={{ display: "grid", gap: 10 }}>
           <input
             type="file"
-            accept="video/*"
-            onChange={(e) => {
-              setErr(null);
-              setPhase("idle");
-              setFile(e.target.files?.[0] ?? null);
-            }}
+            accept="video/mp4,video/quicktime,video/webm,video/x-matroska"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            disabled={busy}
             style={{
-              width: "100%",
-              padding: 12,
-              borderRadius: 14,
-              border: "1px solid rgba(255,255,255,0.14)",
-              background: "rgba(0,0,0,0.35)",
-              color: "#eaf1ff",
+              padding: 10,
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,0.12)",
+              background: "rgba(0,0,0,0.22)",
+              color: "#e8eef7",
             }}
           />
 
-          {file ? (
-            <div style={{ fontSize: 12, opacity: 0.8 }}>
-              Selected: <span style={{ fontWeight: 800 }}>{file.name}</span>
-              {file.size ? <span style={{ opacity: 0.75 }}> · {prettyBytes(file.size)}</span> : null}
-            </div>
-          ) : (
-            <div style={{ fontSize: 12, opacity: 0.7 }}>
-              Tip: pick a slow-mo swing video. Keep it short (10s is plenty).
-            </div>
-          )}
+          <div style={{ fontSize: 12, opacity: 0.8 }}>Selected: <b>{fileLabel}</b></div>
 
           <button
-            onClick={onSubmit}
-            disabled={!file || busy}
+            type="button"
+            onClick={analyze}
+            disabled={busy || !file}
             style={{
-              height: 44,
+              height: 46,
               borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.18)",
-              background: busy ? "rgba(120,120,120,0.25)" : "rgba(120,180,255,0.22)",
-              color: "#eaf1ff",
-              fontWeight: 1000,
-              cursor: (!file || busy) ? "not-allowed" : "pointer",
+              border: "1px solid rgba(255,255,255,0.14)",
+              background: busy ? "rgba(120,120,120,0.18)" : "rgba(70,120,180,0.35)",
+              color: "#e8eef7",
+              fontWeight: 800,
+              cursor: busy || !file ? "not-allowed" : "pointer",
             }}
           >
-            {phaseLabel}
+            {busy ? "Analyzing…" : "Analyze swing →"}
           </button>
 
           <button
             type="button"
+            onClick={callDemo}
             disabled={busy}
-            onClick={() => (window.location.href = "/report-beta/full?golden=1")}
             style={{
-              height: 44,
+              height: 46,
               borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.16)",
-              background: "rgba(255,255,255,0.06)",
-              color: "#eaf1ff",
-              fontWeight: 900,
+              border: "1px solid rgba(255,255,255,0.12)",
+              background: "rgba(255,255,255,0.05)",
+              color: "#e8eef7",
+              fontWeight: 700,
               cursor: busy ? "not-allowed" : "pointer",
-              opacity: busy ? 0.6 : 1,
             }}
           >
             Try Golden Demo →
           </button>
 
-          <div style={{ fontSize: 12, opacity: 0.75, marginTop: -4 }}>
-            No upload needed.
-          </div>
-
-          {err ? <div style={{ fontSize: 13, color: "#ffd2d2" }}>{err}</div> : null}
+          {status ? <div style={{ fontSize: 12, opacity: 0.85 }}>{status}</div> : null}
+          {err ? <div style={{ fontSize: 12, color: "#ffb4b4" }}>{err}</div> : null}
         </div>
       </div>
     </div>
   );
 }
+
+
+
+
+
