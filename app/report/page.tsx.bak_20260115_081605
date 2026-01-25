@@ -1,9 +1,0 @@
-﻿export default function Report() {
-  return (
-    <main style={{ padding: 40 }}>
-      <h1>Your swing report</h1>
-      <p>What mattered. What to do next.</p>
-      {/* Result Mode goes here */}
-    </main>
-  );
-}

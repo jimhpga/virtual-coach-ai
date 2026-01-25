@@ -67,3 +67,8 @@ _ai-reports/
 # Local logs
 *.log
 
+
+# Local backups / throwaways
+*.bak
+*.bak_*
+*_bak_*
