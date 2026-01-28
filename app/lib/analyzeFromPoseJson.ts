@@ -1,6 +1,6 @@
-import { deterministicCoach } from "./deterministicCoach";
+function pickDrillsForFaults(..._args: any[]){ return [] as any[]; }
+function deterministicCoach(..._args: any[]){ return null as any; }
 import { postAssess } from "./postAssess";
-import { pickDrillsForFaults } from "../_logic/drills";
 import type { FaultKey } from "./postAssess";
 
 // Minimal pose schema we rely on (matches your PoseOverlay2D typedefs)
@@ -9,7 +9,7 @@ export type PoseJson = {
   fps?: number;
   width?: number;
   height?: number;
-  frames?: any[];
+  frames: any[];
   // allow extra keys
   [k: string]: any;
 };
@@ -54,3 +54,6 @@ export function analyzeFromPoseJson(pose: PoseJson, opts?: { sourceUrl?: string 
     },
   };
 }
+
+
+

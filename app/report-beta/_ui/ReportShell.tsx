@@ -113,7 +113,25 @@ export default function ReportShell(props: ReportShellProps) {
           }}
         >
           <div style={{ display: "grid", gap: 6 }}>
-            {titleTop ? <div style={{ fontSize: 14, opacity: 0.85 }}>{titleTop}</div> : null}
+            {titleTop ? <div style={{ fontSize: 14, opacity: 0.85 }}><div style={{ display:"flex", alignItems:"center", gap:10, minWidth: 0 }}>
+  <a href="/" title="Virtual Coach AI" style={{ display:"inline-flex", alignItems:"center" }}>
+    <img
+  src="/brand/vca-logo.png"
+  alt="Virtual Coach AI"
+  style={{
+    minHeight: 140,
+    height: 140,
+    width: "auto",
+    display: "block",
+    filter: "brightness(0) invert(1) drop-shadow(0 0 6px rgba(255,255,255,0.35))",
+    opacity: 0.95,
+  }}
+/>
+  </a>
+  <div style={{ minWidth: 0 }}>
+    {titleTop}
+  </div>
+</div></div> : null}
             {titleMain ? (
               <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: 0.2 }}>{titleMain}</div>
             ) : null}
@@ -131,3 +149,10 @@ export default function ReportShell(props: ReportShellProps) {
     </div>
   );
 }
+
+
+
+
+
+
+

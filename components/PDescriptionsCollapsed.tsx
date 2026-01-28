@@ -1,7 +1,6 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 "use client";
 
-import * as React from "react";
 
 type Props = {
   onJumpToP?: (p: number) => void;

@@ -23,7 +23,7 @@ export default function ReportPage() {
   }, []);
 
   const headline = data?.report?.headline || "Swing Report";
-  const swingScore = data?.report?.swingScore ?? data?.scores?.swing ?? null;
+  const swingScore = data?.scores?.swing ?? data?.report?.swingScore ?? null;
   const tour = data?.report?.tourDna?.label ? `${data.report.tourDna.label} · ${data.report.tourDna.match ?? ""}` : null;
 
   const scoreRows = useMemo(() => {
@@ -117,3 +117,4 @@ export default function ReportPage() {
     </div>
   );
 }
+

@@ -1,4 +1,5 @@
-﻿import { NextResponse } from "next/server";
+import { mkdir, writeFile } from "fs/promises";
+import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
 import crypto from "crypto";
@@ -37,7 +38,9 @@ async function __vcaDump(tag: string, payload: any) {
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  try {
+  
+  const url = new URL(req.url);
+try {
     const form = await req.formData();
     const file = form.get("file");
 
@@ -84,6 +87,9 @@ export async function POST(req: Request) {
 });
   }
 }
+
+
+
 
 
 

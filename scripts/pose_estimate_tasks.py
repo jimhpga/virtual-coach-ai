@@ -24,7 +24,7 @@ def main():
 
     cap = cv2.VideoCapture(inp)
     if not cap.isOpened():
-processed = 0  # heartbeat counter
+      processed = 0  # heartbeat counter
         raise SystemExit("Could not open video")
 
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
@@ -119,4 +119,5 @@ processed = 0  # heartbeat counter
 
 if __name__ == "__main__":
     main()
+
 

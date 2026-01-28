@@ -1,25 +1,21 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(req: NextRequest) {
-  const pathname = req.nextUrl.pathname;
+const GOLDEN = "v1_HERO_SWING.mkv_imp2p00";
 
-  // Public/static paths (do NOT force auth)
-  if (
-    pathname.startsWith("/golden") ||
-    pathname.startsWith("/frames") ||
-    pathname.startsWith("/uploads") ||
-    pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico"
-  ) {
-    return NextResponse.next();
+export function middleware(req: NextRequest) {
+  const url = req.nextUrl;
+
+  // rewrite /frames/p1.jpg -> /frames/<GOLDEN>/p1.jpg (and p2..p9)
+  if (/^\/frames\/p\d+\.(jpg|png)$/i.test(url.pathname)) {
+    const file = url.pathname.replace(/^\/frames\//, ""); // p1.jpg
+    url.pathname = "/frames/" + GOLDEN + "/" + file;
+    return NextResponse.rewrite(url);
   }
 
-  // Default: allow everything else through.
-  // (If you want auth gating, we'll add it back cleanly AFTER golden works.)
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!api).*)"],
+  matcher: ["/frames/:path*"],
 };

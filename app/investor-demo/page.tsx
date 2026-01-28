@@ -30,13 +30,13 @@ export default function InvestorDemo() {
     <Shell
       title="Investor Demo"
       subtitle="60 seconds: onboarding → upload → report → confidence."
-      right={
-        <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={() => { setMode("adult"); setStep(1); }} style={{ fontWeight: 900 }}>Adult</button>
-          <button onClick={() => { setMode("junior"); setStep(1); }} style={{ fontWeight: 900 }}>Junior</button>
-          <Link href="/report?golden=1" style={{ color: "#b9cff6", fontWeight: 900 }}>Open Report</Link>
-        </div>
-      }
+
+
+
+
+
+
+
     >
       <div style={{ display: "grid", gap: 14 }}>
         <TinyCard title={`Mode: ${mode.toUpperCase()}`} right={<div style={{ opacity: 0.75 }}>{script}</div>}>

@@ -1,55 +1,18 @@
-:root{
-  --vca-text:#e6edf6;
-  --vca-muted:rgba(230,237,246,0.78);
-  --vca-panel:rgba(10,14,20,0.42);
-  --vca-panel-2:rgba(10,14,20,0.30);
-  --vca-border:rgba(255,255,255,0.12);
-  --vca-shadow: 0 30px 90px rgba(0,0,0,0.55);
-}
-
 *{ box-sizing:border-box; }
+html,body{ height:100%; margin:0; padding:0; }
 a{ color:inherit; text-decoration:none; }
-button, input, select, textarea{ font:inherit; }
+button,input,select,textarea{ font:inherit; }
 ::selection{ background: rgba(120,170,255,0.35); }
 
-html, body{ height:100%; }
+/* VCA base */
 body{
-  margin:0;
-  color: var(--vca-text);
-  background:#070b12;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  background:#05070a;
+  color:#e6edf6;
 }
 
-/* Main app background (use the class you already set in layout.tsx) */
+/* Main app background (keep it simple + readable) */
 body.vca-bg{
-  min-height:100vh;
-  background-image: url("/bg/course-dusk.png");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-}
-
-/* Dark + blue overlay so text reads premium */
-body.vca-bg::before{
-  content:"";
-  position:fixed;
-  inset:0;
   background:
-    radial-gradient(900px 500px at 50% 30%, rgba(40,90,170,0.22), rgba(0,0,0,0) 55%),
-    linear-gradient(180deg, rgba(4,8,14,0.25) 0%, rgba(4,8,14,0.75) 55%, rgba(4,8,14,0.92) 100%),
-    rgba(0,0,0,0.28);
-  pointer-events:none;
-  z-index:-1;
+    linear-gradient(rgba(0,0,0,0.62), rgba(0,0,0,0.70)),
+    url("/bg/course-dusk.png") center/cover fixed no-repeat;
 }
-
-/* Helpful default “glass” utilities */
-.vca-card{
-  background: var(--vca-panel);
-  border: 1px solid var(--vca-border);
-  border-radius: 18px;
-  box-shadow: var(--vca-shadow);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-.vca-muted{ color: var(--vca-muted); }
-

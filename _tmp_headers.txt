@@ -1,0 +1,12 @@
+HTTP/1.1 500 Internal Server Error
+Cache-Control: no-store, must-revalidate
+X-Powered-By: Next.js
+ETag: "bdllkdu2v42la"
+Content-Type: text/html; charset=utf-8
+Vary: Accept-Encoding
+Content-Encoding: gzip
+Date: Mon, 26 Jan 2026 21:38:00 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+Transfer-Encoding: chunked
+

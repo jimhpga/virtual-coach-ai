@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 
 function drawDot(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
@@ -121,7 +121,8 @@ export function PoseOverlay2D({
 
   useEffect(() => {
     const video = videoRef.current;
-    const canvas = canvasRef.current;
+    const canvas = canvasRef.current!;
+    if(!canvas) return;
     if (!video || !canvas) return;
 
     function sizeCanvasToVideo() {
@@ -138,9 +139,10 @@ export function PoseOverlay2D({
 
   useEffect(() => {
     const video = videoRef.current;
-    const canvas = canvasRef.current;
+    const canvas = canvasRef.current!;
+    if(!canvas) return;
     if (!video || !canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d")!;
     if (!ctx) return;
 
     function findPoseFrameAt(tMs: number): PoseFrame | null {
@@ -233,6 +235,8 @@ export function PoseOverlay2D({
     />
   );
 }
+
+
 
 
 

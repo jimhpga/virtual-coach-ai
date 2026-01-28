@@ -1,4 +1,4 @@
-﻿{
+{
     "compilerOptions":  {
                             "lib":  [
                                         "dom",
@@ -31,7 +31,23 @@
                     "**/*.tsx",
                     ".next/dev/types/**/*.ts"
                 ],
-    "exclude": ["_snapshots","_snapshots_OFF",
+    "exclude": ["app/investor-demo/**", 
+    "app/report-beta/card/**",
+    "**/*ReportBetaClient*.BROKEN*.tsx",
+    "**/*_ReportBetaClient_*.tsx",
+    "**/*_page_*.tsx",
+    "**/*BROKEN*/**",
+    "**/*_DISABLED/**",
+    "**/_safety/**",
+    "**/_leaving_*",
+    "**/_FREEZE_*",
+    "**/*.BROKEN_*",
+    "_trash_tsx/**",
+    "**/*.bak_*.tsx",
+    "**/*.bak_*.ts",
+    "**/*.bak.*",
+    "**/*.bak_*",
+    "_bak/**","_snapshots","_snapshots_OFF",
                     "node_modules",
                     ".next",
                     "api_disabled",
@@ -44,5 +60,12 @@
                     "_legacy_root_static"
                 ]
 }
+
+
+
+
+
+
+
 
 

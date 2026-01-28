@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 
-import { PDescriptionsCollapsed } from "../components/PDescriptionsCollapsed";
+import { PDescriptionsCollapsed } from "../../components/PDescriptionsCollapsed";
 type PFrame = { p:number; label:string; frame:number; imageUrl:string; thumbUrl?:string };
 type PFramesJson = { ok:boolean; framesDir?:string; frames:PFrame[] };
 
@@ -171,5 +171,6 @@ export default function PStrip(props: { onPick?: (pf: PFrame) => void }) {
     </div>
   );
 }
+
 
 

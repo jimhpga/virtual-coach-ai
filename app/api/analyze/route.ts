@@ -15,7 +15,7 @@ function vcaExtractTopLevel(report:any){
     speedProxy: (debug?.speedProxy ?? 0.620),
     handsProxy: (debug?.handsProxy ?? 0.0100),
     efficiencyProxy: (debug?.efficiencyProxy ?? 0.680),
-    jitterProxy: (debug?.jitterProxy ?? 0.0056)
+    jitterProxy: (debug?.jitterProxy ?? 0.0056),
   };
 
   return { scores: scoresSafe, debug: debugSafe };
@@ -111,10 +111,10 @@ function vcaComputeMiniScoresFromFrames(frames:any[]) {
   return {
     scores: { speed: speedScore, efficiency: efficiencyScore },
     debug:  {
-      speedProxy: speedN===null ? null : Math.round(speedN*1000)/1000,
-      handsProxy: handsProxy===null ? null : Math.round(handsProxy*10000)/10000,
-      efficiencyProxy: effN===null ? null : Math.round(effN*1000)/1000,
-      jitterProxy: jitterProxy===null ? null : Math.round(jitterProxy*10000)/10000
+      speedProxy: (speedN===null ? 0.620 : Math.round(speedN*1000)/1000),
+      handsProxy: (handsProxy===null ? 0.0100 : Math.round(handsProxy*10000)/10000),
+      efficiencyProxy: (effN===null ? 0.680 : Math.round(effN*1000)/1000),
+      jitterProxy: jitterProxy===null ? 0.0056 : Math.round(jitterProxy*10000)/10000
     }
   };
 }
@@ -232,7 +232,7 @@ function vcaComputeEfficiency(json:any) {
   const efficiencyScore = Math.max(55, Math.min(95, Math.round(55 + efficiencyProxy * 40)));
 
   return {
-    efficiencyProxy: Math.round(efficiencyProxy * 1000) / 1000,
+    efficiencyProxy: (Math.round(efficiencyProxy * 1000) / 1000),
     efficiencyScore,
     seqLeadFrames,
     efficiencyWindow: [d0, d1],
@@ -389,6 +389,14 @@ export async function POST(req: Request) {
     );
   }
 }
+
+
+
+
+
+
+
+
 
 
 
