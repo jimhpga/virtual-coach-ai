@@ -72,3 +72,7 @@ _ai-reports/
 *.bak
 *.bak_*
 *_bak_*
+
+# Local build logs / scratch
+_build_error_*.txt
+_tmp/
