@@ -78,7 +78,7 @@ export default function ManualImpactPage() {
           <input
             value={videoPath}
             onChange={(e) => setVideoPath(e.target.value)}
-            placeholder="C:\Sites\virtual-coach-ai\public\uploads\yourvideo.mp4"
+            placeholder="C:\Sites\virtual-coach-ai/tmp/vca_uploads\yourvideo.mp4"
             style={{ width: "100%", padding: "10px 12px", borderRadius: 12, border: "1px solid #ccc", marginTop: 6 }}
           />
         </label>
@@ -136,3 +136,4 @@ function btn(disabled: boolean): React.CSSProperties {
     fontSize: 13
   };
 }
+

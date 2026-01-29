@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
@@ -39,9 +39,10 @@ export async function GET() {
       return NextResponse.json({ url: `/api/demo-video/file?name=${encodeURIComponent(pick.file)}` }, { status: 200 });
     }
 
-    // If from public/uploads, serve as static
+    // If from /tmp/vca_uploads, serve as static
     return NextResponse.json({ url: `/uploads/${pick.file}` }, { status: 200 });
   } catch (e: any) {
     return NextResponse.json({ url: "", error: String(e?.message || e) }, { status: 200 });
   }
 }
+

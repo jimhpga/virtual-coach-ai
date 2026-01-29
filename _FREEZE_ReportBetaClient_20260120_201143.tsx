@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useRef, useState } from "react";
 import { analyzeSwing } from "../lib/analyze/index";
 import { postAssess } from "../lib/postAssess";
@@ -380,7 +380,7 @@ React.useEffect(() => {
 
   
   
-  // Auto-load demo video (newest mp4 in /public/uploads)
+  // Auto-load demo video (newest mp4 in //tmp/vca_uploads)
 React.useEffect(() => {
   (async () => {
     try {
@@ -1480,6 +1480,7 @@ const bgWrap: React.CSSProperties = {
 
   );
 }
+
 
 
 

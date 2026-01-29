@@ -52,7 +52,7 @@ let _vcad: any = {};
 function vcaCheckpointUrl(jobId: string, p: number): string {
   const base = "/frames";
   try {
-    const absDir = path.join(process.cwd(), "public", "frames", String(jobId));
+    const absDir = path.join(VCA_FRAMES_ROOT,, String(jobId));
     // TS: manual list
     const exts = ["png","jpg","jpeg","webp"];
     for (const ext of exts) {
@@ -67,7 +67,7 @@ function vcaCheckpointUrl(jobId: string, p: number): string {
 
 function vcaTryLoadPoseForJobId(jobId: string): { frames: any[]; sourcePath: string; expectedPath: string } | null {
   const safe = String(jobId || "").replace(/[^a-zA-Z0-9_\-]/g, "");
-  const outDir = path.join(process.cwd(), "pose", "out");
+  const outDir = VCA_POSE_OUT_ROOT;
   const expectedPath = path.join(outDir, `${safe}.json`);
   try {
     if (!safe) return null;
@@ -497,7 +497,7 @@ try {
 }
 function vcaTryLoadLatestPoseFromDisk(): { frames: any[]; sourcePath: string } | null {
   try {
-    const outDir = path.join(process.cwd(), "pose", "out");
+    const outDir = VCA_POSE_OUT_ROOT;
     if (!fs.existsSync(outDir)) return null;
 
     const files = fs.readdirSync(outDir)
@@ -659,11 +659,11 @@ export async function POST(req: Request) {
 
         // Paths
         const repoRoot = process.cwd();
-        const pubDir = path.join(repoRoot, "public", "uploads", jobId);
+        const pubDir = path.join(VCA_UPLOAD_ROOT, jobId);
         const pubMp4 = path.join(pubDir, "swing.mp4");
 
-        const poseInDir = path.join(repoRoot, "pose", "in");
-        const poseOutDir = path.join(repoRoot, "pose", "out");
+        const poseInDir = VCA_POSE_IN_ROOT;
+        const poseOutDir = VCA_POSE_OUT_ROOT;
         const poseInMp4 = path.join(poseInDir, "latest.mp4");
         const poseOutLatest = path.join(poseOutDir, "latest.json");
         const poseOutJob = path.join(poseOutDir, `${jobId}.json`);
@@ -681,7 +681,7 @@ export async function POST(req: Request) {
         const _vcaMultipartBody: any = {
           demo: false,
           jobId,
-          videoUrl: `/uploads/${jobId}/swing.mp4`,
+          videoUrl: vcaUploadUrl(`${jobId}/swing.mp4`),
           uploaded: true,
         };
 
@@ -760,7 +760,7 @@ export async function POST(req: Request) {
       dbgB.latestPoseLoaderSeen = true;
 
       // Always record cwd/outDir/jsonCount BEFORE attempting loader
-      const outDir = path.join(process.cwd(), "pose", "out");
+      const outDir = VCA_POSE_OUT_ROOT;
       dbgB.latestPoseLoaderCwd = process.cwd();
       dbgB.latestPoseLoaderOutDir = outDir;
       dbgB.latestPoseLoaderOutDirExists = fs.existsSync(outDir);
@@ -785,7 +785,7 @@ if (gotJob && Array.isArray(gotJob.frames) && gotJob.frames.length > 0) {
   try {
     if (jobIdFromBody) {
       const safe = jobIdFromBody.replace(/[^a-zA-Z0-9_\-]/g, "");
-      const outDir = path.join(process.cwd(), "pose", "out");
+      const outDir = VCA_POSE_OUT_ROOT;
       const expectedPath = path.join(outDir, `${safe}.json`);
       if (fs.existsSync(expectedPath)) {
         _vcad.poseSource = "job_parse_error_fallback_latest";
@@ -856,7 +856,7 @@ if (gotJob && Array.isArray(gotJob.frames) && gotJob.frames.length > 0) {
   try {
     if (jobIdFromBody) {
       const safe = jobIdFromBody.replace(/[^a-zA-Z0-9_\-]/g, "");
-      const outDir = path.join(process.cwd(), "pose", "out");
+      const outDir = VCA_POSE_OUT_ROOT;
       const expectedPath = path.join(outDir, `${safe}.json`);
       if (fs.existsSync(expectedPath)) {
         _vcad.poseSource = "job_parse_error_fallback_latest";
@@ -1043,7 +1043,7 @@ if (gotJob && Array.isArray(gotJob.frames) && gotJob.frames.length > 0) {
   try {
     if (jobIdFromBody) {
       const safe = jobIdFromBody.replace(/[^a-zA-Z0-9_\-]/g, "");
-      const outDir = path.join(process.cwd(), "pose", "out");
+      const outDir = VCA_POSE_OUT_ROOT;
       const expectedPath = path.join(outDir, `${safe}.json`);
       if (fs.existsSync(expectedPath)) {
         _vcad.poseSource = "job_parse_error_fallback_latest";
@@ -1370,9 +1370,44 @@ try {
 
 
 
+export const runtime = "nodejs";
+
+const VCA_UPLOAD_ROOT = process.env.VERCEL
+  ? "/tmp/vca_uploads"
+  : path.join(process.cwd(), "public", "uploads");
+
+const VCA_FRAMES_ROOT = process.env.VERCEL
+  ? "/tmp/vca_frames"
+  : path.join(VCA_FRAMES_ROOT,);
+
+const VCA_POSE_IN_ROOT = process.env.VERCEL
+  ? "/tmp/vca_pose_in"
+  : path.join(process.cwd(), "pose", "in");
+
+const VCA_POSE_OUT_ROOT = process.env.VERCEL
+  ? "/tmp/vca_pose_out"
+  : VCA_POSE_OUT_ROOT;
+
+const VCA_REPORTS_ROOT = process.env.VERCEL
+  ? "/tmp/vca_reports"
+  : path.join(process.cwd(), "reports");
+
+fs.mkdirSync(VCA_UPLOAD_ROOT, { recursive: true });
+fs.mkdirSync(VCA_FRAMES_ROOT, { recursive: true });
+fs.mkdirSync(VCA_POSE_IN_ROOT, { recursive: true });
+fs.mkdirSync(VCA_POSE_OUT_ROOT, { recursive: true });
+fs.mkdirSync(VCA_REPORTS_ROOT, { recursive: true });
+
+function vcaUploadUrl(rel: string) {
+  return process.env.VERCEL ? `/api/uploads/${rel}` : `/uploads/${rel}`;
+}
+function vcaFrameUrl(rel: string) {
+  return process.env.VERCEL ? `/api/frames/${rel}` : `/frames/${rel}`;
+}
 export async function GET() {
   return NextResponse.json({
     ok: false,
     error: "Method not allowed. Use POST with JSON body, e.g. { demo: true }."
   }, { status: 405 });
 }
+

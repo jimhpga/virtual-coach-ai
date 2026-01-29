@@ -1,4 +1,4 @@
-﻿export const runtime = "nodejs";
+export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { mkdir, writeFile, readFile, access } from "fs/promises";
 import path from "path";
@@ -109,14 +109,14 @@ if (!localPath && !videoUrl) {
     }
     // --- AUTO-RESOLVE UPLOAD ID (no extension) ---
     // Some site flows pass "/uploads/<id>" instead of "/uploads/<filename.ext>".
-    // If the exact path doesn't exist, try matching a real file in /public/uploads that starts with the id.
+    // If the exact path doesn't exist, try matching a real file in //tmp/vca_uploads that starts with the id.
     if (!fs.existsSync(inputPath)) {
       try {
         const uploadsAbs = path.join(process.cwd(), "public", "uploads");
         const base = path.basename(inputPath);
         const hasExt = base.includes(".");
         const looksLikeUploads =
-          inputPath.replace(/\\/g, "/").includes("/public/uploads/") ||
+          inputPath.replace(/\\/g, "/").includes("//tmp/vca_uploads/") ||
           inputPath.replace(/\\/g, "/").includes("/uploads/");
 
         if (looksLikeUploads && !hasExt) {
@@ -243,6 +243,7 @@ const outId = cacheKey;
     try { if (tmpDir) await fs.promises.rm(tmpDir, { recursive: true, force: true }); } catch {}
   }
 }
+
 
 
 

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { postAssess } from "../lib/postAssess";
 import * as React from "react";
 import PStrip from "./PStrip";
@@ -426,7 +426,7 @@ React.useEffect(() => {
 
   
   
-  // Auto-load demo video (newest mp4 in /public/uploads)
+  // Auto-load demo video (newest mp4 in //tmp/vca_uploads)
 React.useEffect(() => {
   (async () => {
     try {
@@ -1471,6 +1471,7 @@ const f = sortedFrames.find((x) => x.p === p);
     </div>
   );
 }
+
 
 
 

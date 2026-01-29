@@ -371,7 +371,7 @@ export default function ReportBetaClient() {
 
   
   
-  // Auto-load demo video (newest mp4 in /public/uploads)
+  // Auto-load demo video (newest mp4 in //tmp/vca_uploads)
   useEffect(() => {
     (async () => {
       try {
@@ -381,7 +381,7 @@ export default function ReportBetaClient() {
       } catch {}
     })();
   }, []);
-// Auto-load demo video (newest mp4 in /public/uploads)
+// Auto-load demo video (newest mp4 in //tmp/vca_uploads)
   useEffect(() => {
     (async () => {
       try {
@@ -1408,6 +1408,7 @@ const f = sortedFrames.find((x) => x.p === p);
     </div>
   );
 }
+
 
 
 

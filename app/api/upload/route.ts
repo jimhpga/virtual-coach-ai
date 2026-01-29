@@ -3,7 +3,42 @@ import { NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
 import crypto from "crypto";
+import fs from "fs";
 
+export const runtime = "nodejs";
+
+const VCA_UPLOAD_ROOT = process.env.VERCEL
+  ? "/tmp/vca_uploads"
+  : path.join(process.cwd(), "public", "uploads");
+
+const VCA_FRAMES_ROOT = process.env.VERCEL
+  ? "/tmp/vca_frames"
+  : path.join(process.cwd(), "public", "frames");
+
+const VCA_POSE_IN_ROOT = process.env.VERCEL
+  ? "/tmp/vca_pose_in"
+  : path.join(process.cwd(), "pose", "in");
+
+const VCA_POSE_OUT_ROOT = process.env.VERCEL
+  ? "/tmp/vca_pose_out"
+  : path.join(process.cwd(), "pose", "out");
+
+const VCA_REPORTS_ROOT = process.env.VERCEL
+  ? "/tmp/vca_reports"
+  : path.join(process.cwd(), "reports");
+
+fs.mkdirSync(VCA_UPLOAD_ROOT, { recursive: true });
+fs.mkdirSync(VCA_FRAMES_ROOT, { recursive: true });
+fs.mkdirSync(VCA_POSE_IN_ROOT, { recursive: true });
+fs.mkdirSync(VCA_POSE_OUT_ROOT, { recursive: true });
+fs.mkdirSync(VCA_REPORTS_ROOT, { recursive: true });
+
+function vcaUploadUrl(rel: string) {
+  return process.env.VERCEL ? `/api/uploads/${rel}` : `/uploads/${rel}`;
+}
+function vcaFrameUrl(rel: string) {
+  return process.env.VERCEL ? `/api/frames/${rel}` : `/frames/${rel}`;
+}
 
 async function __vcaDump(tag: string, payload: any) {
   try {
@@ -66,7 +101,7 @@ try {
 
     const id = crypto.randomBytes(8).toString("hex");
     const safeName = `swing_${id}${extGuess}`;
-    const outDir = path.join(process.cwd(), "public", "uploads");
+    const outDir = VCA_UPLOAD_ROOT;
     const outPath = path.join(outDir, safeName);
 
     await fs.mkdir(outDir, { recursive: true });
@@ -75,7 +110,7 @@ try {
     await fs.writeFile(outPath, buf);
 
     // Public URL (Next serves /public at /)
-    const url = `/uploads/${safeName}`;
+    const url = vcaUploadUrl(safeName);
 
     return NextResponse.json({
   ok: true, id, filename: safeName, url }, { status: 200 
@@ -87,6 +122,7 @@ try {
 });
   }
 }
+
 
 
 
