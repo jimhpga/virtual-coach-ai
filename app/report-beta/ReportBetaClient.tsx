@@ -8,7 +8,6 @@ import { SwingFactsCard } from "../components/SwingFactsCard";
 import { PDescriptionsCollapsed } from "../../components/PDescriptionsCollapsed";
 import { TinyCard, ConfidenceMeter } from "../_components/UI";
 import { prescribe, type FaultKey } from "../_logic/drills";
-import SwingProofPanel from "./SwingProofPanel";
 
 type PFrame = {
   p: number;
@@ -70,54 +69,6 @@ function clamp(n: number, a: number, b: number) {
 function Bar({ label, value }: { label: string; value: number }) {
   const v = clamp(Math.round(value), 0, 100);
   return (
-{/* ===== VCA: CLASSIC REPORT SHELL (diagnostic + stable sections) ===== */}
-<div style={{ border: "1px solid rgba(255,255,255,0.10)", borderRadius: 16, overflow: "hidden", background: "rgba(0,0,0,0.22)", margin: "12px 0" }}>
-  <div style={{ padding: "10px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-    <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: 0.2 }}>Report (Classic Shell)</div>
-    <div style={{ fontSize: 12, opacity: 0.75 }}>Demo-safe • UI wiring check</div>
-  </div>
-
-  <div style={{ padding: "10px 12px", borderTop: "1px solid rgba(255,255,255,0.08)", fontSize: 12, opacity: 0.85 }}>
-    <div><b>clipUrl:</b> {String(clipUrl || "")}</div>
-    <div><b>jobId:</b> {String((report as any)?.jobId || (report as any)?.id || "")}</div>
-    <div><b>keys:</b> {Object.keys((report as any) || {}).slice(0, 30).join(", ")}</div>
-  </div>
-
-  {clipUrl ? (
-    <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-      <div style={{ padding: "10px 12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ fontSize: 12, fontWeight: 800, opacity: 0.9 }}>Swing clip</div>
-        <a href={clipUrl as any} target="_blank" rel="noreferrer" style={{ fontSize: 12, opacity: 0.8, textDecoration: "underline" }}>Open MP4</a>
-      </div>
-      <video src={clipUrl as any} controls playsInline preload="metadata" style={{ width: "100%", height: "auto", display: "block" }} />
-    </div>
-  ) : (
-    <div style={{ padding: "10px 12px", borderTop: "1px solid rgba(255,255,255,0.08)", fontSize: 12, opacity: 0.75 }}>
-      No clipUrl found. (This is a data loading issue, not CSS.)
-    </div>
-  )}
-
-  <div style={{ padding: "12px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-    <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.9, marginBottom: 8 }}>Classic Sections (placeholders)</div>
-    <div style={{ display: "grid", gap: 8 }}>
-      <div style={{ padding: 10, borderRadius: 12, border: "1px solid rgba(255,255,255,0.08)" }}>
-        <b>Player Overview</b> — make this match the 5-month template (headline, Swing Score, Tour DNA Match).
-      </div>
-      <div style={{ padding: 10, borderRadius: 12, border: "1px solid rgba(255,255,255,0.08)" }}>
-        <b>P1–P9 Checkpoints</b> — 9 tiles with images + notes. (Demo can show placeholders; real uses job frames.)
-      </div>
-      <div style={{ padding: 10, borderRadius: 12, border: "1px solid rgba(255,255,255,0.08)" }}>
-        <b>Top 2–3 Fixes</b> — rankedFaults + 1–2 drills each.
-      </div>
-      <div style={{ padding: 10, borderRadius: 12, border: "1px solid rgba(255,255,255,0.08)" }}>
-        <b>14-Day Plan</b> — practicePlan14 array.
-      </div>
-    </div>
-  </div>
-</div>
-{/* ===== END CLASSIC REPORT SHELL ===== */}
-
-
 
 <div style={{ marginBottom: 10 }}>
 {/* VCA_SWING_FACTS_CARD */}
@@ -1297,15 +1248,7 @@ const f = sortedFrames.find((x) => x.p === p);
               </div>
 
               <div style={{ marginTop: 14 }}>
-                <div style={{ marginTop: 10, display: "flex", justifyContent: "flex-end" }}>
-  <SwingProofPanel
-    width={320}
-    title="Your uploaded swing (analyzed)"
-    thumbUrl={((data as any)?.frames?.p7 ?? (data as any)?.thumbUrl ?? "/frames/v1_HERO_SWING.mkv_imp2p50/p7.jpg")}
-    videoUrl={((data as any)?.videoUrl ?? (data as any)?.media?.videoUrl ?? "")}
-  />
-</div>
-<div style={{ fontWeight: 900, marginBottom: 8, opacity: 0.92 }}>Power + Reliability (estimated)</div>
+                <div style={{ fontWeight: 900, marginBottom: 8, opacity: 0.92 }}>Power + Reliability (estimated)</div>
                 <Bar label="Speed" value={scores.speed} />
                 <Bar label="Impact efficiency" value={scores.efficiency} />
                 <Bar label="Consistency" value={scores.consistency} />
@@ -1465,12 +1408,6 @@ const f = sortedFrames.find((x) => x.p === p);
     </div>
   );
 }
-
-
-
-
-
-
 
 
 

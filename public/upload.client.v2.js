@@ -1,4 +1,84 @@
-﻿// /public/upload.client.js Ã¢â‚¬â€ Mux flow (no S3)
+;/* VCA_PROGRESS_OVERLAY (safe) */
+(function(){
+  try{
+    if(window.__VCA_OVERLAY_READY__) return;
+    window.__VCA_OVERLAY_READY__ = true;
+
+    function ensure(){
+      if(document.getElementById("vca-progress-overlay")) return;
+      var d = document.createElement("div");
+      d.id = "vca-progress-overlay";
+      d.style.cssText = "position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9999;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);";
+      d.innerHTML = '<div style="width:min(520px,92vw);border:1px solid rgba(255,255,255,0.16);border-radius:16px;background:rgba(15,18,22,0.92);box-shadow:0 18px 70px rgba(0,0,0,0.55);padding:18px 18px 16px;color:#eaf1ff;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;">'
+        + '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">'
+        + '  <div style="width:10px;height:10px;border-radius:999px;background:#6ee7b7;box-shadow:0 0 0 3px rgba(110,231,183,0.15)"></div>'
+        + '  <div style="font-weight:900;letter-spacing:.2px">Virtual Coach AI</div>'
+        + '</div>'
+        + '<div id="vca-progress-title" style="font-size:16px;font-weight:950;margin:6px 0 8px 0;">Uploading…</div>'
+        + '<div id="vca-progress-sub" style="font-size:12px;opacity:.82;margin-bottom:12px;">Stay on this page. This can take a moment.</div>'
+        + '<div style="height:10px;border-radius:999px;background:rgba(255,255,255,0.10);overflow:hidden;border:1px solid rgba(255,255,255,0.14);">'
+        + '  <div id="vca-progress-bar" style="height:100%;width:8%;border-radius:999px;background:rgba(255,255,255,0.65);transition:width .35s ease;"></div>'
+        + '</div>'
+        + '<div id="vca-progress-note" style="margin-top:10px;font-size:11px;opacity:.75;">Why this matters: upload → processing → report.</div>'
+        + '</div>';
+      document.body.appendChild(d);
+    }
+
+    window.vcaOverlayShow = function(title, sub){
+      ensure();
+      var o = document.getElementById("vca-progress-overlay");
+      var t = document.getElementById("vca-progress-title");
+      var s = document.getElementById("vca-progress-sub");
+      if(t && title) t.textContent = title;
+      if(s && sub) s.textContent = sub;
+      if(o) o.style.display = "flex";
+    };
+
+    window.vcaOverlayHide = function(){
+      var o = document.getElementById("vca-progress-overlay");
+      if(o) o.style.display = "none";
+    };
+
+    window.vcaOverlayBar = function(pct){
+      var b = document.getElementById("vca-progress-bar");
+      if(!b) return;
+      var v = Math.max(3, Math.min(97, pct|0));
+      b.style.width = v + "%";
+    };
+
+    window.vcaStage = function(title, pct, sub){
+      try{
+        window.vcaOverlayShow(title || "Processing…", sub || "One moment…");
+        if(typeof pct === "number") window.vcaOverlayBar(pct);
+      }catch(e){}
+    };
+  }catch(e){}
+})();
+function vcaSetStatus(msg){
+  try{
+    var el = document.querySelector("[data-vca-status]");
+    if(el) el.textContent = msg || "";
+  }catch(e){}
+}
+function vcaDisableAnalyze(disabled){
+  try{
+    var btn = document.querySelector("[data-vca-analyze]");
+    if(btn) btn.disabled = !!disabled;
+  }catch(e){}
+}
+function vcaSleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+async function vcaFakePipeline(){
+  vcaDisableAnalyze(true);
+  vcaSetStatus("Uploading your swing…");
+  await vcaSleep(650);
+  vcaSetStatus("Processing frames…");
+  await vcaSleep(650);
+  vcaSetStatus("Building your report…");
+  await vcaSleep(650);
+  vcaSetStatus("Almost there…");
+  await vcaSleep(450);
+}
+// /public/upload.client.js Ã¢â‚¬â€ Mux flow (no S3)
 // v5-final
 
 (() => {
@@ -145,8 +225,15 @@
       if (rep.url) {
         location.assign(`/report-beta/full?src=${encodeURIComponent(rep.url)}`);
       } else if (rep.id) {
-        location.assign(`/report-beta/full?jobId=${encodeURIComponent(rep.id)}`);
-      } else {
+        (async () => { try { await vcaFakePipeline();
+    await fetch("/api/analyze-swing", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jobId: rep.id })
+    });
+  } catch (e) { /* ignore */ }
+  location.assign(`/report-beta/full?jobId=${encodeURIComponent(rep.id)}`);
+})();} else {
         throw new Error("Report response missing url/id");
       }
     } catch (err) {
@@ -156,6 +243,9 @@
     }
   });
 })();
+
+
+
 
 
 

@@ -1,181 +1,45 @@
-"use client";
-
-import React, { useMemo, useState } from "react";
-
-type ApiResp = {
-  ok: boolean;
-  jobId?: string;
-  report?: any;
-  scores?: any;
-  debug?: any;
-  message?: string;
-};
+export const dynamic = "force-dynamic";
 
 export default function UploadPage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [status, setStatus] = useState<string>("");
-  const [err, setErr] = useState<string>("");
-
-  const fileLabel = useMemo(() => {
-    if (!file) return "No file selected";
-    const mb = (file.size / (1024 * 1024)).toFixed(2);
-    return `${file.name} — ${mb} MB`;
-  }, [file]);
-  function saveAndGoToReport(j: ApiResp) {
-  // Always clear UI FIRST (prevents ghost state if Next dev keeps component alive briefly)
-  try { setBusy(false); } catch {}
-  try { setStatus("Opening report…"); } catch {}
-  try { setErr(""); } catch {}
-
-  // Persist
-  try {
-    const payload = {
-      at: new Date().toISOString(),
-      jobId: j?.jobId || "",
-      report: j?.report || null,
-      scores: j?.scores || null,
-      debug: j?.debug || null,
-    };
-    localStorage.setItem("vca_last_report", JSON.stringify(payload));
-  } catch {}
-
-  // Hard navigation (avoids SPA weirdness)
-  try {
-    window.location.replace("/report");
-  } catch {
-    try { window.location.href = "/report"; } catch {}
-  }
-};
-  async function callDemo() {
-    setErr("");
-    setStatus("Building demo report…");
-    setBusy(true);
-    try {
-      const r = await fetch("/api/analyze-swing", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ demo: true }),
-      });
-      const j: ApiResp = await r.json();
-      if (!j?.ok) throw new Error(j?.message || "Demo failed");
-      saveAndGoToReport(j);
-    } catch (e: any) {
-      setErr(e?.message ? String(e.message) : "Demo failed");
-      setStatus("");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function analyze() {
-    setErr("");
-    if (!file) {
-      setErr("Pick a video first.");
-      return;
-    }
-
-    setStatus("Uploading…");
-    setBusy(true);
-
-    try {
-      // Minimal: call demo for now (swap to real upload pipeline next)
-      setStatus("Analyzing…");
-      const r = await fetch("/api/analyze-swing", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ demo: true }),
-      });
-      const j: ApiResp = await r.json();
-      if (!j?.ok) throw new Error(j?.message || "Analyze failed");
-      saveAndGoToReport(j);
-    } catch (e: any) {
-      setErr(e?.message ? String(e.message) : "Analyze failed");
-      setStatus("");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   return (
-    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
-      <div
-        style={{
-          width: "min(920px, 92vw)",
-          borderRadius: 18,
-          border: "1px solid rgba(255,255,255,0.10)",
-          background: "rgba(0,0,0,0.28)",
-          boxShadow: "0 30px 120px rgba(0,0,0,0.45)",
-          padding: 22,
-          color: "#e8eef7",
-        }}
-      >
-        <div style={{ fontSize: 12, letterSpacing: 1.2, opacity: 0.75, marginBottom: 8 }}>VIRTUAL COACH AI</div>
-        <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 4 }}>Upload a swing (Live MVP)</div>
-        <div style={{ fontSize: 13, opacity: 0.85, marginBottom: 16 }}>
-          Upload → Analyze → Report. If you see “Analyzing…”, you’re winning.
+    <main style={{ minHeight: "100vh", padding: 20 }}>
+      <div style={{ maxWidth: 980, margin: "0 auto" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+          <a href="/" style={{ display: "inline-flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+            <img src="/brand/vca-logo.png" alt="Virtual Coach AI" style={{ width: 110, height: "auto" }} />
+          </a>
+          <div style={{ color: "#e6edf6" }}>
+            <div style={{ fontSize: 22, fontWeight: 950, letterSpacing: -0.2 }}>Upload a swing</div>
+            <div style={{ fontSize: 13, opacity: 0.75 }}>Upload → Processing → Full report.</div>
+          </div>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+            <a href="/coming-soon" style={{ color: "#cfd7e6", textDecoration: "none", fontWeight: 800, fontSize: 13, opacity: 0.9 }}>Coming soon</a>
+            <a href="/report-beta/full" style={{ color: "#cfd7e6", textDecoration: "none", fontWeight: 800, fontSize: 13, opacity: 0.9 }}>Report</a>
+          </div>
         </div>
 
-        <div style={{ display: "grid", gap: 10 }}>
-          <input
-            type="file"
-            accept="video/mp4,video/quicktime,video/webm,video/x-matroska"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            disabled={busy}
-            style={{
-              padding: 10,
-              borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.12)",
-              background: "rgba(0,0,0,0.22)",
-              color: "#e8eef7",
-            }}
-          />
+        <div
+          style={{
+            borderRadius: 18,
+            border: "1px solid rgba(255,255,255,0.12)",
+            background: "rgba(0,0,0,0.28)",
+            padding: 18,
+            boxShadow: "0 30px 80px rgba(0,0,0,0.45)",
+          }}
+        >
+          <div style={{ display: "grid", gap: 8, marginBottom: 12 }}>
+            <div style={{ fontSize: 14, fontWeight: 900, color: "#f2f6ff" }}>Upload. Get a report. Improve.</div>
+            <div style={{ fontSize: 12, opacity: 0.75, color: "#c7cfdd" }}>
+              Demo mode: attempts live analysis when available. If anything fails, golden fallback kicks in so you still get a clean report.
+            </div>
+          </div>
 
-          <div style={{ fontSize: 12, opacity: 0.8 }}>Selected: <b>{fileLabel}</b></div>
+          <div id="vca-upload-root" />
 
-          <button
-            type="button"
-            onClick={analyze}
-            disabled={busy || !file}
-            style={{
-              height: 46,
-              borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.14)",
-              background: busy ? "rgba(120,120,120,0.18)" : "rgba(70,120,180,0.35)",
-              color: "#e8eef7",
-              fontWeight: 800,
-              cursor: busy || !file ? "not-allowed" : "pointer",
-            }}
-          >
-            {busy ? "Analyzing…" : "Analyze swing →"}
-          </button>
-
-          <button
-            type="button"
-            onClick={callDemo}
-            disabled={busy}
-            style={{
-              height: 46,
-              borderRadius: 999,
-              border: "1px solid rgba(255,255,255,0.12)",
-              background: "rgba(255,255,255,0.05)",
-              color: "#e8eef7",
-              fontWeight: 700,
-              cursor: busy ? "not-allowed" : "pointer",
-            }}
-          >
-            Try Golden Demo →
-          </button>
-
-          {status ? <div style={{ fontSize: 12, opacity: 0.85 }}>{status}</div> : null}
-          {err ? <div style={{ fontSize: 12, color: "#ffb4b4" }}>{err}</div> : null}
+          {/* Uses your existing proven client script */}
+          <script src="/upload.client.v2.js" defer></script>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
-
-
-
-
-

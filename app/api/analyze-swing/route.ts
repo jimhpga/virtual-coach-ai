@@ -1,7 +1,10 @@
 import { vcaBuildFullDemoReport } from "../../lib/report-demo";
+import path from "path";
+import { mkdir, writeFile, copyFile } from "fs/promises";
+import { spawnSync } from "child_process";
+import { randomUUID } from "crypto";
 const dbgB = (..._args:any[]) => {};
 import * as fs from "fs";
-import * as path from "path";
 import { NextResponse } from "next/server";
 
 
@@ -635,6 +638,92 @@ function vcaPickCheckpointsFromFrames(frames: any[]) {
 /* ===== END P1–P9 checkpoint picker ===== */
 
 export async function POST(req: Request) {
+  // ===== VCA_MULTIPART_UPLOAD_START =====
+  // Accept multipart/form-data from /upload page:
+  // - file: video
+  // - jobId: optional
+  try {
+    const ct = (req.headers.get("content-type") || "").toLowerCase();
+    if (ct.includes("multipart/form-data")) {
+      const fd = await req.formData();
+      const fAny = fd.get("file");
+      const jobIdFromForm = String(fd.get("jobId") || "").trim();
+      const jobId = jobIdFromForm || ("job_" + randomUUID());
+
+      if (fAny && typeof (fAny as any).arrayBuffer === "function") {
+        const f = fAny as unknown as File;
+
+        // Read bytes
+        const ab = await f.arrayBuffer();
+        const buf = Buffer.from(ab);
+
+        // Paths
+        const repoRoot = process.cwd();
+        const pubDir = path.join(repoRoot, "public", "uploads", jobId);
+        const pubMp4 = path.join(pubDir, "swing.mp4");
+
+        const poseInDir = path.join(repoRoot, "pose", "in");
+        const poseOutDir = path.join(repoRoot, "pose", "out");
+        const poseInMp4 = path.join(poseInDir, "latest.mp4");
+        const poseOutLatest = path.join(poseOutDir, "latest.json");
+        const poseOutJob = path.join(poseOutDir, `${jobId}.json`);
+
+        await mkdir(pubDir, { recursive: true });
+        await mkdir(poseInDir, { recursive: true });
+        await mkdir(poseOutDir, { recursive: true });
+
+        // Write video for playback + analysis
+        await writeFile(pubMp4, buf);
+        await writeFile(poseInMp4, buf);
+
+        // Build a "body" object so the rest of your logic keeps working
+        // (Your existing code expects JSON body; we simulate it here.)
+        const _vcaMultipartBody: any = {
+          demo: false,
+          jobId,
+          videoUrl: `/uploads/${jobId}/swing.mp4`,
+          uploaded: true,
+        };
+
+        // Optional: run pose estimation immediately if configured.
+        // Set env var in PowerShell before dev:
+        //   $env:VCA_POSE_MODEL="C:\path\to\pose_landmarker.task"
+        // It will write pose\out\latest.json and pose\out\<jobId>.json
+        try {
+          const model = process.env.VCA_POSE_MODEL || "";
+          if (model) {
+            const py = process.env.VCA_PYTHON || "python";
+            const args = [
+              ".\\scripts\\pose_estimate_tasks.py",
+              "--in", poseInMp4,
+              "--out", poseOutJob,
+              "--model", model,
+              "--sample", "90"
+            ];
+            const r = spawnSync(py, args, { cwd: repoRoot, stdio: "ignore" });
+            if (!r.error) {
+              try { await copyFile(poseOutJob, poseOutLatest); } catch {}
+              _vcaMultipartBody.poseRequested = true;
+              _vcaMultipartBody.poseOut = poseOutJob;
+            } else {
+              _vcaMultipartBody.poseRequested = false;
+              _vcaMultipartBody.poseErr = String(r.error || "");
+            }
+          } else {
+            _vcaMultipartBody.poseRequested = false;
+            _vcaMultipartBody.poseErr = "VCA_POSE_MODEL not set";
+          }
+        } catch (e: any) {
+          _vcaMultipartBody.poseRequested = false;
+          _vcaMultipartBody.poseErr = String(e?.message || e || "");
+        }
+
+        // Stash for downstream code: we re-route by overwriting req.json() logic below.
+        (globalThis as any).__VCA_MULTIPART_BODY__ = _vcaMultipartBody;
+      }
+    }
+  } catch {}
+  // ===== VCA_MULTIPART_UPLOAD_END =====
   // ===== VCA DEMO FAST PATH =====
   try {
     let _body: any = {};
@@ -1278,3 +1367,12 @@ try {
 
 
 
+
+
+
+export async function GET() {
+  return NextResponse.json({
+    ok: false,
+    error: "Method not allowed. Use POST with JSON body, e.g. { demo: true }."
+  }, { status: 405 });
+}

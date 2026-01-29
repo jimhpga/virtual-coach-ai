@@ -1,0 +1,153 @@
+:root{
+  --vca-text: #e9eef7;
+  --vca-dim: rgba(233,238,247,0.72);
+  --vca-card: rgba(18,22,28,0.60);
+  --vca-card2: rgba(18,22,28,0.42);
+  --vca-stroke: rgba(255,255,255,0.10);
+  --vca-stroke2: rgba(255,255,255,0.06);
+  --vca-shadow: 0 18px 60px rgba(0,0,0,0.45);
+  --vca-radius: 18px;
+}
+
+.vca-bg{
+  min-height: 100vh;
+  color: var(--vca-text);
+  background:
+    radial-gradient(1200px 600px at 18% 10%, rgba(26,102,140,0.28), transparent 60%),
+    radial-gradient(900px 500px at 80% 20%, rgba(120,75,15,0.18), transparent 55%),
+    linear-gradient(180deg, rgba(0,0,0,0.72), rgba(0,0,0,0.76)),
+    url("/bg/course-dusk.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.vca-wrap{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 26px 18px 40px;
+}
+
+.vca-topbar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: var(--vca-radius);
+  background: rgba(12,14,18,0.30);
+  border: 1px solid var(--vca-stroke2);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.vca-brand{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  min-width: 0;
+}
+
+.vca-logo{
+  height: 56px;
+  width: auto;
+  display: block;
+  filter: brightness(0) invert(1) drop-shadow(0 0 10px rgba(0,0,0,0.45));
+}
+
+.vca-brandText{ min-width: 0; }
+.vca-brandTitle{ font-weight: 700; letter-spacing: 0.2px; }
+.vca-brandSub{ font-size: 12px; color: var(--vca-dim); margin-top: 2px; }
+
+.vca-nav{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.vca-pill{
+  text-decoration: none;
+  color: var(--vca-text);
+  font-size: 13px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--vca-stroke);
+  background: rgba(0,0,0,0.22);
+  backdrop-filter: blur(10px);
+}
+
+.vca-pill:hover{
+  background: rgba(0,0,0,0.32);
+}
+
+.vca-main{ margin-top: 22px; }
+
+.vca-heroCard{
+  padding: 22px 22px;
+  border-radius: var(--vca-radius);
+  background: var(--vca-card);
+  border: 1px solid var(--vca-stroke);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--vca-shadow);
+}
+
+.vca-h1{
+  margin: 0 0 10px;
+  font-size: 44px;
+  line-height: 1.05;
+  letter-spacing: -0.6px;
+}
+
+.vca-sub{
+  margin: 0;
+  color: var(--vca-dim);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.vca-card{
+  margin-top: 16px;
+  padding: 18px 18px;
+  border-radius: var(--vca-radius);
+  background: var(--vca-card2);
+  border: 1px solid var(--vca-stroke);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.30);
+}
+
+.vca-row{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.vca-btnPrimary, .vca-btnGhost{
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.vca-btnPrimary{
+  color: #0b0e12;
+  background: #ffffff;
+}
+
+.vca-btnGhost{
+  color: var(--vca-text);
+  background: rgba(0,0,0,0.25);
+}
+
+.vca-foot{
+  margin-top: 24px;
+  color: rgba(233,238,247,0.55);
+  font-size: 12px;
+}
