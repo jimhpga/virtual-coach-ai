@@ -76,3 +76,18 @@ _ai-reports/
 # Local build logs / scratch
 _build_error_*.txt
 _tmp/
+# VCA generated artifacts
+/public/frames/
+/public/uploads/
+/public/tmp/
+/tmp/
+/.cache/
+/out/
+*.log
+
+# Pose big assets (keep off repo; store on E:)
+pose/model/
+pose/calib/
+pose/node/
+pose/scripts/
+pose/README_BIGFILES.txt
