@@ -1,48 +1,18 @@
-export const runtime = "nodejs";
 import { NextResponse } from "next/server";
-import { mkdir, writeFile, readFile, access } from "fs/promises";
+import fs from "fs";
 import path from "path";
-import os from "os";
-import { execFile } from "child_process";
-import * as fs from "fs";
+import { spawn } from "child_process";
 
 type Body = {
-  localPath?: string;
   videoUrl?: string;
-  pathname?: string;
+  posePath?: string;
+  timesSec?: number[];
   impactSec?: number;
 };
 
-function run(cmd: string, args: string[]): Promise<{ stdout: string; stderr: string }> {
-  return new Promise((resolve, reject) => {
-    execFile(cmd, args, { windowsHide: true }, (err, stdout, stderr) => {
-      if (err) return reject(new Error((stderr || stdout || err.message).toString()));
-      resolve({ stdout: (stdout || "").toString(), stderr: (stderr || "").toString() });
-    });
-  });
-}
-
-async function downloadToFile(url: string, outPath: string) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Download failed (${res.status})`);
-  const arr = new Uint8Array(await res.arrayBuffer());
-  await fs.promises.writeFile(outPath, arr);
-}
-
-async function ffprobeDurationSeconds(inputPath: string): Promise<number> {
-  const { stdout } = await run("ffprobe", [
-    "-v", "error",
-    "-show_entries", "format=duration",
-    "-of", "json",
-    inputPath,
-  ]);
-  const j = JSON.parse(stdout);
-  const d = Number(j?.format?.duration || 0) || 0;
-  return d;
-}
-
-function clamp(n: number, lo: number, hi: number) {
-  return Math.max(lo, Math.min(hi, n));
+function clamp(x: number, lo: number, hi: number) {
+  if (!Number.isFinite(x)) return lo;
+  return Math.max(lo, Math.min(hi, x));
 }
 
 function linspace(a: number, b: number, n: number) {
@@ -53,153 +23,211 @@ function linspace(a: number, b: number, n: number) {
   return out;
 }
 
-export async function POST(req: Request) {
-  let tmpDir: string | null = null;
-  let tempInput: string | null = null;
-
-  try {
-        // ---- VCA request body (safe JSON) ----
-    const __raw = await req.text();
-    let __t = (__raw ?? "").trim();
-
-    // strip UTF-8 BOM if present
-    if (__t.charCodeAt(0) === 0xFEFF) __t = __t.slice(1);
-
-    const __head = __t.slice(0, 80);
-    const __codes = Array.from(__head).map(c => c.charCodeAt(0)).join(",");
-
-    // Debug: echo what server received (no side effects)
-    if (req.headers.get("x-vca-echo") === "1") {
-      return NextResponse.json({ ok: true, head: __head, codes: __codes, len: __t.length }, { status: 200 });
-    }
-
-    let body: Body;
-    try {
-      body = (__t ? JSON.parse(__t) : {}) as Body;
-    } catch (e: any) {
-      return NextResponse.json({ ok: false, error: "Bad JSON body", head: __head, codes: __codes }, { status: 400 });
-    }
-    // --------------------------------------
-
-    const localPath = typeof body.localPath === "string" ? body.localPath : null;
-    const videoUrl  = typeof body.videoUrl === "string" ? body.videoUrl : null;
-    const pathname  = typeof body.pathname === "string" ? body.pathname : null;
-    const impactSec = (typeof body.impactSec === "number" && body.impactSec > 0) ? body.impactSec : 2.0; // default for site flow
-if (!localPath && !videoUrl) {
-      return NextResponse.json({ ok: false, error: "Provide localPath or videoUrl." }, { status: 400 });
-    }
-
-    // Decide input file path
-    let inputPath = localPath || "";
-    if (!inputPath && videoUrl) {
-      // ✅ Site behavior: "/uploads/..." is a local file in /public, not a fetchable URL.
-      if (videoUrl.startsWith("/")) {
-        inputPath = path.join(process.cwd(), "public", videoUrl.replace(/^\/+/, ""));
-      } else {
-        // download URL to tmp (only for real http(s) URLs)
-        tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), "vca-pframes-"));
-        const safeName =
-          (pathname && pathname.trim()) ||
-          `upload-${Date.now()}.mp4`;
-        const fileName = safeName.replace(/[^\w.\-]+/g, "_");
-        tempInput = path.join(tmpDir, fileName);
-        await downloadToFile(videoUrl, tempInput);
-        inputPath = tempInput;
-      }
-    }
-    // --- AUTO-RESOLVE UPLOAD ID (no extension) ---
-    // Some site flows pass "/uploads/<id>" instead of "/uploads/<filename.ext>".
-    // If the exact path doesn't exist, try matching a real file in //tmp/vca_uploads that starts with the id.
-    if (!fs.existsSync(inputPath)) {
-      try {
-        const uploadsAbs = path.join(process.cwd(), "public", "uploads");
-        const base = path.basename(inputPath);
-        const hasExt = base.includes(".");
-        const looksLikeUploads =
-          inputPath.replace(/\\/g, "/").includes("//tmp/vca_uploads/") ||
-          inputPath.replace(/\\/g, "/").includes("/uploads/");
-
-        if (looksLikeUploads && !hasExt) {
-          const files = fs.readdirSync(uploadsAbs);
-          const hit = files.find((n) =>
-  n.includes(base) && /\.(mp4|mov|m4v|webm|mkv)$/i.test(n)
-);
-          if (hit) {
-            inputPath = path.join(uploadsAbs, hit);
-          }
-        }
-      } catch (e) {
-        // swallow; normal not-found will be handled below
-      }
-    }
-    // --- END AUTO-RESOLVE ---
-    if (!fs.existsSync(inputPath)) {
-      return NextResponse.json({ ok: false, error: `Input file not found: ${inputPath}` }, { status: 400 });
-    }
-
-    const durationSec = await ffprobeDurationSeconds(inputPath);
-    // --- Auto-impact fallback (site-mode): if impactSec not provided, estimate it ---
-    // We bias slightly past midpoint to land closer to real impact in typical swing clips.
-    const fallbackImpactSec = clamp(durationSec * 0.55, 0.20, Math.max(0.20, durationSec - 0.20));
-    const impact = (typeof impactSec === "number" && impactSec > 0) ? impactSec : fallbackImpactSec;
-    if (!durationSec || durationSec <= 0) {
-      return NextResponse.json({ ok: false, error: "Could not read duration (ffprobe)." }, { status: 500 });
-    }
-
-    // Build a simple P1-P9 timeline around impact
-    // Window: ~2.5s before impact to ~1.5s after (clamped to video)
-    const start = clamp(impact - 2.5, 0.0, durationSec);
-    const end   = clamp(impact + 1.5, 0.0, durationSec);
-
-    const preEnd = clamp(impact - 0.10, 0.0, durationSec);
-    const postStart = clamp(impact + 0.10, 0.0, durationSec);
-
-    // P1..P6 spread from start..preEnd, P7 = impact, P8..P9 from postStart..end
-    const pre = linspace(start, preEnd, 6);
-    const post = linspace(postStart, end, 2);
-    const times = [...pre, impact, ...post]; // total 9
-
-    const baseName = path.basename(inputPath).replace(/[^\w.\-]+/g, "_");
-const cacheKey = `v1_${baseName}_imp${impact.toFixed(2).replace(".","p")}`;
-const cachedFramesDir = `/frames/${cacheKey}`;
-const cachedAbs = path.join(process.cwd(), "public", "frames", cacheKey);
-
-// Fast-path: if cached frames exist, return immediately (demo turbo)
-if (fs.existsSync(path.join(cachedAbs, "p1.jpg"))) {
-  const framesDir = cachedFramesDir;
-  const pframes = Array.from({ length: 9 }).map((_, i) => {
-    const p = i + 1;
-    const img = `${framesDir}/p${p}.jpg`;
-    return { p, label: `P${p}`, imageUrl: img, thumbUrl: img };
-  });
-  const checkpoints = Array.from({ length: 9 }).map((_, i) => {
-    const p = i + 1;
-    return { p, label: `P${p}`, note: "-" };
-  });
-  return NextResponse.json({
-    ok: true,
-    framesDir,
-    pframes,
-    checkpoints,
-    topFaults: [],
-    meta: { durationSec, impactSec: impact, source: { localPath, videoUrl, pathname }, cached: true },
+function run(cmd: string, args: string[], cwd?: string): Promise<{ code: number; stdout: string; stderr: string }> {
+  return new Promise((resolve) => {
+    const p = spawn(cmd, args, { cwd, windowsHide: true });
+    let stdout = "";
+    let stderr = "";
+    p.stdout.on("data", (d) => (stdout += d.toString()));
+    p.stderr.on("data", (d) => (stderr += d.toString()));
+    p.on("close", (code) => resolve({ code: code ?? -1, stdout, stderr }));
   });
 }
 
-const outId = cacheKey;
-    const framesDir = `/frames/${outId}`;
-    const framesAbs = path.join(process.cwd(), "public", "frames", outId);
+async function ffprobeDurationSec(inputPath: string): Promise<number> {
+  const args = [
+    "-v", "error",
+    "-show_entries", "format=duration",
+    "-of", "default=noprint_wrappers=1:nokey=1",
+    inputPath,
+  ];
+  const r = await run("ffprobe", args);
+  const raw = (r.stdout || "").trim();
+  const v = Number(raw);
+  if (r.code === 0 && Number.isFinite(v) && v > 0) return v;
+  return NaN;
+}
+
+function resolveLocalInputPath(videoUrl: string): { inputPath: string | null; source: any } {
+  // Supported: "/uploads/<file>" (served from public/uploads)
+  // Also allow absolute local path (advanced use)
+  const source: any = { localPath: null, videoUrl: videoUrl || null, pathname: null };
+
+  if (!videoUrl || typeof videoUrl !== "string") return { inputPath: null, source };
+
+  if (videoUrl.startsWith("/uploads/")) {
+    const base = path.basename(videoUrl);
+    const inputPath = path.join(process.cwd(), "public", "uploads", base);
+    source.videoUrl = videoUrl;
+    return { inputPath, source };
+  }
+
+  // Allow a raw local path if user passes one
+  if (videoUrl.match(/^[A-Za-z]:\\/) || videoUrl.startsWith("\\\\")) {
+    source.localPath = videoUrl;
+    return { inputPath: videoUrl, source };
+  }
+
+  // Anything else is unsupported in this clean version
+  return { inputPath: null, source };
+}
+
+function vcaTryLoadPoseFile(posePath: string): { fps: number; frames: any[] } | null {
+  try {
+    if (!posePath || typeof posePath !== "string") return null;
+    if (!fs.existsSync(posePath)) return null;
+    const raw = fs.readFileSync(posePath, "utf8");
+    const j = JSON.parse(raw);
+    const fps = Number(j?.fps ?? 30);
+    const frames = Array.isArray(j?.frames) ? j.frames : [];
+    if (!Number.isFinite(fps) || fps <= 0) return null;
+    if (!Array.isArray(frames) || frames.length === 0) return null;
+    return { fps, frames };
+  } catch {
+    return null;
+  }
+}
+
+function vcaPickP10FromPoseFrames(frames: any[]): number[] {
+  // We expect frames already sampled, and we want 10 indices across the motion.
+  // Use OK frames if present; else just use all frames.
+  const all = Array.isArray(frames) ? frames : [];
+  const ok = all.filter((f) => f && f.ok && Array.isArray(f.landmarks) && f.landmarks.length > 0);
+  const use = ok.length >= 10 ? ok : all;
+  const n = use.length;
+  if (n < 10) return [];
+  const idxs = linspace(0, n - 1, 10).map((x) => Math.round(x));
+  return idxs.map((i) => clamp(i, 0, n - 1) as any) as unknown as number[];
+}
+
+function vcaSecFromPoseFrame(poseFrame: any, fps: number): number {
+  // Prefer poseFrame.t if valid, else frame/fps, else 0.
+  const t = Number(poseFrame?.t);
+  if (Number.isFinite(t) && t >= 0) return t;
+  const fr = Number(poseFrame?.frame);
+  const fpsSafe = Number(fps);
+  if (Number.isFinite(fr) && fr >= 0 && Number.isFinite(fpsSafe) && fpsSafe > 0) return fr / fpsSafe;
+  return 0;
+}
+
+export async function POST(req: Request) {
+  try {
+    const body = (await req.json().catch(() => ({}))) as Body;
+
+    const videoUrl = typeof body.videoUrl === "string" ? body.videoUrl : "";
+    const posePath = typeof body.posePath === "string" ? body.posePath : null;
+    const impact = (typeof body.impactSec === "number" && body.impactSec > 0) ? body.impactSec : 2.0;
+
+    const resolved = resolveLocalInputPath(videoUrl);
+    const inputPath = resolved.inputPath;
+    const source = resolved.source;
+
+    if (!inputPath || !fs.existsSync(inputPath)) {
+      return NextResponse.json({ ok: false, error: `Input file not found: ${inputPath ?? "(null)"}` }, { status: 400 });
+    }
+
+    const durationRaw = await ffprobeDurationSec(inputPath);
+    const durationSec = Number(durationRaw);
+
+    if (!Number.isFinite(durationSec) || durationSec <= 0) {
+      return NextResponse.json({ ok: false, error: "Could not read duration (ffprobe).", debug: { inputPath } }, { status: 500 });
+    }
+
+    // Build times: prefer posePath -> timesSec[10] -> fallback window around impact
+    let times: number[] = [];
+
+    let usedPosePath = false;
+    let usedExplicitTimes = false;
+
+    if (posePath) {
+      const pose = vcaTryLoadPoseFile(posePath);
+      if (pose?.frames?.length) {
+        const idxs = vcaPickP10FromPoseFrames(pose.frames);
+        if (idxs.length === 10) {
+          usedPosePath = true;
+          times = idxs.map((idx) => {
+            const f = pose.frames[idx];
+            return vcaSecFromPoseFrame(f, pose.fps);
+          });
+        }
+      }
+    }
+
+    if (times.length !== 10 && Array.isArray(body.timesSec) && body.timesSec.length === 10) {
+      usedExplicitTimes = true;
+      times = body.timesSec.map((x) => Number(x));
+    }
+
+    if (times.length !== 10) {
+      // Fallback: 2.5s before to 1.5s after impact, mapped to P1..P10
+      const start = clamp(impact - 2.5, 0.0, durationSec);
+      const end = clamp(impact + 1.5, 0.0, durationSec);
+      if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+        return NextResponse.json({ ok: false, error: "Invalid timing window (start/end)." }, { status: 500 });
+      }
+      times = linspace(start, end, 10);
+    }
+
+    // --- SANITIZE times for ffmpeg (-ss must never be NaN) ---
+    let timesSafe: number[] = Array.isArray(times) ? times.slice(0, 10) : [];
+    let sanitized = false;
+    try {
+      if (timesSafe.length !== 10 || timesSafe.some((t: any) => !Number.isFinite(Number(t)))) {
+        sanitized = true;
+        timesSafe = linspace(0.0, durationSec, 10);
+      }
+      timesSafe = timesSafe.map((t: any) => clamp(Number(t), 0.0, durationSec));
+    } catch {
+      sanitized = true;
+      timesSafe = linspace(0.0, durationSec, 10).map((t: any) => clamp(Number(t), 0.0, durationSec));
+    }
+    // --- END SANITIZE ---
+
+    const baseName = path.basename(inputPath).replace(/[^\w.\-]+/g, "_");
+    const timesTag = usedPosePath ? "_P" : (usedExplicitTimes ? "_T" : "");
+    const cacheKey = `v2P10_${baseName}_imp${impact.toFixed(2).replace(".", "p")}${timesTag}`;
+
+    const framesDir = `/frames/${cacheKey}`;
+    const framesAbs = path.join(process.cwd(), "public", "frames", cacheKey);
+
+    // Cached fast-path
+    if (fs.existsSync(path.join(framesAbs, "p1.jpg"))) {
+      const pframes = Array.from({ length: 10 }).map((_, i) => {
+        const p = i + 1;
+        const img = `${framesDir}/p${p}.jpg`;
+        return { p, label: `P${p}`, imageUrl: img, thumbUrl: img };
+      });
+      const checkpoints = Array.from({ length: 10 }).map((_, i) => {
+        const p = i + 1;
+        return { p, label: `P${p}`, note: "-" };
+      });
+      return NextResponse.json({
+        ok: true,
+        framesDir,
+        pframes,
+        checkpoints,
+        topFaults: [],
+        meta: {
+          durationSec,
+          impactSec: impact,
+          source,
+          cached: true,
+          usedPosePath,
+          usedExplicitTimes,
+          sanitizedTimes: sanitized,
+        },
+      });
+    }
+
     await fs.promises.mkdir(framesAbs, { recursive: true });
 
     // Extract frames
-    for (let i = 0; i < 9; i++) {
+    for (let i = 0; i < 10; i++) {
       const p = i + 1;
-      const t = clamp(times[i], 0.0, durationSec);
-
+      const t = clamp(timesSafe[i], 0.0, durationSec);
       const outJpg = path.join(framesAbs, `p${p}.jpg`);
 
-      // -ss before -i is faster for keyframe-ish seeks; good enough here
-      await run("ffmpeg", [
+      const r = await run("ffmpeg", [
         "-y",
         "-ss", t.toFixed(3),
         "-i", inputPath,
@@ -210,15 +238,23 @@ const outId = cacheKey;
         "-strict", "-2",
         outJpg,
       ]);
+
+      if (r.code !== 0) {
+        return NextResponse.json({
+          ok: false,
+          error: (r.stderr || r.stdout || "ffmpeg failed").toString(),
+          debug: { i, p, t, inputPath, outJpg },
+        }, { status: 500 });
+      }
     }
 
-    const pframes = Array.from({ length: 9 }).map((_, i) => {
+    const pframes = Array.from({ length: 10 }).map((_, i) => {
       const p = i + 1;
       const img = `${framesDir}/p${p}.jpg`;
       return { p, label: `P${p}`, imageUrl: img, thumbUrl: img };
     });
 
-    const checkpoints = Array.from({ length: 9 }).map((_, i) => {
+    const checkpoints = Array.from({ length: 10 }).map((_, i) => {
       const p = i + 1;
       return { p, label: `P${p}`, note: "-" };
     });
@@ -232,32 +268,15 @@ const outId = cacheKey;
       meta: {
         durationSec,
         impactSec: impact,
-        source: { localPath, videoUrl, pathname },
+        source,
+        cached: false,
+        usedPosePath,
+        usedExplicitTimes,
+        sanitizedTimes: sanitized,
       },
     });
+
   } catch (e: any) {
     return NextResponse.json({ ok: false, error: e?.message || "extract-pframes failed" }, { status: 500 });
-  } finally {
-    // cleanup downloaded temp file
-    try { if (tempInput) await fs.promises.unlink(tempInput); } catch {}
-    try { if (tmpDir) await fs.promises.rm(tmpDir, { recursive: true, force: true }); } catch {}
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
