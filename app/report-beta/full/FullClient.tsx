@@ -245,6 +245,49 @@ function Panel(props: { title: string; right?: React.ReactNode; children: React.
 > 
       <ReadyBundleCoachTools />
 
+{/* ===== VCA: Confidence Summary (AUTO) ===== */}
+{(() => {
+  const src: any = (typeof data !== "undefined" ? (data as any) : {});
+  const entries = Object.entries(src)
+    .filter(([k, v]) => v && typeof v === "object" && (v as any).status === "low_confidence")
+    .map(([k, v]) => ({ key: k as string, v: v as any }));
+
+  if (!entries.length) return null;
+
+  return (
+    <div style={{ marginBottom: 12, padding: 12, borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.06)" }}>
+      <div style={{ fontWeight: 900, fontSize: 13, marginBottom: 6 }}>Confidence Notes</div>
+      <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 8 }}>
+        Some measurements were computed with low tracking confidence. The report still works — just treat these items as estimates.
+      </div>
+
+      <div style={{ display: "grid", gap: 10 }}>
+        {entries.slice(0, 4).map((e) => (
+          <div key={e.key} style={{ padding: 10, borderRadius: 14, border: "1px solid rgba(255,255,255,0.10)", background: "rgba(0,0,0,0.18)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline" }}>
+              <div style={{ fontWeight: 900, fontSize: 12 }}>{e.key}</div>
+              <div style={{ fontSize: 12, opacity: 0.85 }}>
+                Confidence: {e.v.confidenceLabel ?? "Low"}{typeof e.v.confidenceMin === "number" ?  () : ""}
+              </div>
+            </div>
+
+            <div style={{ fontSize: 12, opacity: 0.92, marginTop: 6 }}>
+              {e.v.message ?? "Low confidence for this metric."}
+            </div>
+
+            {Array.isArray(e.v.nextSteps) && e.v.nextSteps.length > 0 && (
+              <ul style={{ margin: "8px 0 0 16px", fontSize: 12, opacity: 0.9 }}>
+                {e.v.nextSteps.slice(0, 2).map((t: string, i: number) => <li key={i}>{t}</li>)}
+              </ul>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+})()}
+{/* ===== /VCA: Confidence Summary (AUTO) ===== */}
+
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
         <div style={{ fontSize: 14, fontWeight: 900 }}>{props.title}</div>
         {props.right}
