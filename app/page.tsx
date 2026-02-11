@@ -14,9 +14,9 @@ export default function HomePage() {
           </div>
 
           <nav className="vca-nav">
-            <a className="vca-pill" href="/upload">Upload Swing</a>
+            <a className="vca-pill" href="/upload">Upload swing</a>
             <a className="vca-pill" href="/coming-soon">Coming Soon</a>
-            <a className="vca-pill vca-pill-primary" href="/report-beta/full">View Demo Report</a>
+            <a className="vca-pill vca-pill-primary" href="/report-beta/full">View demo report</a>
           </nav>
         </header>
 
@@ -27,8 +27,8 @@ export default function HomePage() {
 </p>
 
           <div className="vca-actions">
-            <a className="vca-btn vca-btn-primary" href="/upload">Upload a swing</a>
-            <a className="vca-btn" href="/report-beta/full">See demo report</a>
+            <a className="vca-btn vca-btn-primary" href="/upload">Upload swing</a>
+            <a className="vca-btn" href="/report-beta/full">View demo report</a>
           </div>
 
           <p className="vca-footnote">Demo mode works locally even without full upload/pose wiring.</p>
