@@ -249,7 +249,7 @@ function Panel(props: { title: string; right?: React.ReactNode; children: React.
 {(() => {
   const src: any = (typeof data !== "undefined" ? (data as any) : {});
   const entries = Object.entries(src)
-    .filter(([k, v]) => v && typeof v === "object" && (v as any).status === "low_confidence")
+    .filter(([k, v]) => v && typeof v === "object" && (["low_confidence","not_available"] as const).includes((v as any).status))
     .map(([k, v]) => ({ key: k as string, v: v as any }));
 
   
@@ -261,13 +261,18 @@ function Panel(props: { title: string; right?: React.ReactNode; children: React.
     swingScore: "Swing Score"
   };
   const nice = (k: string) => nameMap[k] ?? k;
-if (!entries.length) return null;
+
+  const statusLabel = (s: string) => {
+    if (s === "not_available") return "Not available (insufficient tracking)";
+    if (s === "low_confidence") return "Low confidence (estimate)";
+    return s;
+  };if (!entries.length) return null;
 
   return (
     <div style={{ marginBottom: 12, padding: 12, borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.06)" }}>
       <div style={{ fontWeight: 900, fontSize: 13, marginBottom: 6 }}>Confidence Notes</div>
       <div style={{ fontSize: 12, opacity: 0.9, marginBottom: 8 }}>
-        Some measurements were computed with low tracking confidence. The report still works — just treat these items as estimates.
+        Some items below are estimates or unavailable due to tracking limits (camera angle, lighting, or club visibility). The report still works — just treat these as “info with a warning label.”
       </div>
 
       <div style={{ display: "grid", gap: 10 }}>
