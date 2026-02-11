@@ -328,7 +328,7 @@ try {
 
 
 
-    await fs.mkdir(outDir, { recursive: true });
+    await mkdir(outDir, { recursive: true });
 
 
 
@@ -337,7 +337,7 @@ try {
     const buf = Buffer.from(await file.arrayBuffer());
 
 
-    await fs.writeFile(outPath, buf);
+    await writeFile(outPath, buf);
 
 
 
