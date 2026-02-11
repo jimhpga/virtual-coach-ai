@@ -21,12 +21,10 @@ export default function HomePage() {
         </header>
 
         <section className="vca-card vca-hero">
-          <h1 className="vca-h1">The iPhone of golf instruction.</h1>
+          <h1 className="vca-h1">Stop guessing. Start improving.</h1>
           <p className="vca-p">
-            Upload a swing. Get a clear report. Fix the top 2–3 issues with a simple practice plan. No clutter.
-            <br />
-            No confusion. Just results.
-          </p>
+  Upload a swing. Get a clear report. Fix the top 2–3 issues with a simple practice plan.
+</p>
 
           <div className="vca-actions">
             <a className="vca-btn vca-btn-primary" href="/upload">Upload a swing</a>
