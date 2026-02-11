@@ -252,7 +252,16 @@ function Panel(props: { title: string; right?: React.ReactNode; children: React.
     .filter(([k, v]) => v && typeof v === "object" && (v as any).status === "low_confidence")
     .map(([k, v]) => ({ key: k as string, v: v as any }));
 
-  if (!entries.length) return null;
+  
+  const nameMap: Record<string, string> = {
+    p5p6p7ShaftArm: "Shaft & Lead Arm Alignment (P5–P7)",
+    p3p5Mirror: "Mirror Check (P3–P5)",
+    poseSnap: "Pose Snap (P-frames)",
+    rankedFaults: "Top Faults (ranked)",
+    swingScore: "Swing Score"
+  };
+  const nice = (k: string) => nameMap[k] ?? k;
+if (!entries.length) return null;
 
   return (
     <div style={{ marginBottom: 12, padding: 12, borderRadius: 16, border: "1px solid rgba(255,255,255,0.12)", background: "rgba(255,255,255,0.06)" }}>
@@ -263,9 +272,9 @@ function Panel(props: { title: string; right?: React.ReactNode; children: React.
 
       <div style={{ display: "grid", gap: 10 }}>
         {entries.slice(0, 4).map((e) => (
-          <div key={e.key} style={{ padding: 10, borderRadius: 14, border: "1px solid rgba(255,255,255,0.10)", background: "rgba(0,0,0,0.18)" }}>
+          <div key={nice(e.key)} style={{ padding: 10, borderRadius: 14, border: "1px solid rgba(255,255,255,0.10)", background: "rgba(0,0,0,0.18)" }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline" }}>
-              <div style={{ fontWeight: 900, fontSize: 12 }}>{e.key}</div>
+              <div style={{ fontWeight: 900, fontSize: 12 }}>{nice(e.key)}</div>
               <div style={{ fontSize: 12, opacity: 0.85 }}>
                 Confidence: {e.v.confidenceLabel ?? "Low"}{typeof e.v.confidenceMin === "number" ?  () : ""}
               </div>
