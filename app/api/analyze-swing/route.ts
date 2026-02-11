@@ -214,6 +214,24 @@ export const runtime = "nodejs";
 
 
 
+
+function vcaNeverNullBlock(key: string, block: any) {
+  if (block && typeof block === "object") return block;
+  return {
+    ok: false,
+    status: "not_available",
+    confidenceMin: null,
+    confidenceLabel: "Unknown",
+    usesProxy: false,
+    message: "Not enough data to score this reliably for this swing.",
+    nextSteps: [
+      "Re-record with the full club visible (grip to clubhead).",
+      "Use better lighting and a steady camera.",
+      "Avoid motion blur (higher fps if available)."
+    ],
+    meta: { key, note: "auto-filled: block was null/undefined" }
+  };
+}
 function enrichLowConfidenceBlock<T extends any>(key: string, block: T | null | undefined) {
   if (!block || typeof block !== "object") return block;
   const b: any = block;
@@ -331,7 +349,7 @@ function vcaEnsurePCheckpoints(o: any): any {
 
 function vcaDemoFastPayload(){
   return {
-    p5p6p7ShaftArm: enrichLowConfidenceBlock("p5p6p7ShaftArm", readJsonIfExists(path.join("E:\\VCA\\Cache\\repo-moved\\_shots\\vid_20260122_181118\\_mirror"),"P5_P6_P7_ShaftArm.json")),p3p5Mirror: readJsonIfExists(path.join("E:\\VCA\\Cache\\repo-moved\\_shots\\vid_20260122_181118\\_mirror","P3_P5_Mirror.json")),
+    p5p6p7ShaftArm: vcaNeverNullBlock("p5p6p7ShaftArm", enrichLowConfidenceBlock("p5p6p7ShaftArm"), readJsonIfExists(path.join("E:\\VCA\\Cache\\repo-moved\\_shots\\vid_20260122_181118\\_mirror"),"P5_P6_P7_ShaftArm.json")),p3p5Mirror: readJsonIfExists(path.join("E:\\VCA\\Cache\\repo-moved\\_shots\\vid_20260122_181118\\_mirror","P3_P5_Mirror.json")),
     ok: true,
     headline: "Demo report (safe)",
     swingScore: 82,
