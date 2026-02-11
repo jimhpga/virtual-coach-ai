@@ -80,7 +80,7 @@ export default function TopNav({ active = "home", logoSrc = "/vca-logo.png", bra
           <div style={{ display: "grid", lineHeight: 1.05 }}>
             <div style={{ color: "#fff", fontWeight: 1000, letterSpacing: 0.2, fontSize: 16 }}>{brandText}</div>
             <div style={{ color: "rgba(255,255,255,0.75)", fontWeight: 800, fontSize: 12 }}>
-              Swing analysis • P1–P9 • Tour DNA Match
+              Swing analysis • P1–P10 • Tour DNA Match
             </div>
           </div>
         </Link>

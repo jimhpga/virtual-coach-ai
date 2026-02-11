@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -83,7 +83,7 @@ export default function SiteNav() {
           <Link href="/upload" style={is("/upload") ? linkActive : link}>Upload</Link>
           <Link href="/report" style={is("/report") ? linkActive : link}>Report</Link>
           <Link href="/reports" style={is("/reports") ? linkActive : link}>Samples</Link>
-          <Link href="/p1p9" style={is("/p1p9") ? linkActive : link}>P1-P9</Link>
+          <Link href="/p1p9" style={is("/p1p9") ? linkActive : link}>P1-P10</Link>
         </div>
       </div>
     </div>

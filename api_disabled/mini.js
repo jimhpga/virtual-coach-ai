@@ -1,4 +1,4 @@
-﻿module.exports = async (req, res) => {
+module.exports = async (req, res) => {
   const url = new URL(req.url, `https://${req.headers.host}`);
   const key = (req.headers["x-api-key"] || url.searchParams.get("key") || "").toString();
   const objFromQuery = url.searchParams.get("objKey") || "";
@@ -41,7 +41,7 @@ if(!obj) return res.status(400).send("Missing objKey");
  .grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
  .card{border:1px solid #ddd;border-radius:10px;padding:12px}
 </style>
-<h2>Swing Report — P1–P9</h2>
+<h2>Swing Report — P1–P10</h2>
 <p class="sub">${esc(rep.date||'')} • Mode: ${esc(rep.mode||'')} • Swings: ${esc(rep.swings??'')} • <b>Score: ${esc(rep.swingScore??'')}</b></p>
 <p><small>Debug key: ${esc(obj)}</small></p>
 <div class="grid">
@@ -51,7 +51,7 @@ if(!obj) return res.status(400).send("Missing objKey");
   <div class="card"><h3>Position Consistency</h3><ul>${posList}</ul></div>
   <div class="card"><h3>Swing Consistency</h3><div>${(rep.swingConsistency?.value ?? rep.consistency?.swing ?? "") ? `Value: ${esc(rep.swingConsistency?.value ?? rep.consistency?.swing)}` : ""}</div></div>
   <div class="card"><h3>Power Score Summary</h3><div>${(rep.powerScoreSummary?.value ?? rep.power?.score ?? rep.power ?? "") ? `Value: ${esc(rep.powerScoreSummary?.value ?? rep.power?.score ?? rep.power)}` : ""}</div></div>
-  <div class="card"><h3>P1–P9 Phases</h3><ol>${phases}</ol></div>
+  <div class="card"><h3>P1–P10 Phases</h3><ol>${phases}</ol></div>
 </div>
 <details style="margin-top:16px"><summary>Raw normalized JSON</summary><pre>${esc(JSON.stringify(rep,null,2))}</pre></details>`);
 };

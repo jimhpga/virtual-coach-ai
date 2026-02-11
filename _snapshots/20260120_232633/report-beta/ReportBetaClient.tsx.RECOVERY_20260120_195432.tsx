@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useRef, useState } from "react";
 import { analyzeSwing } from "../lib/analyze/index";
 import { postAssess } from "../lib/postAssess";
@@ -365,7 +365,7 @@ const overlayVideoRef = useRef<HTMLVideoElement | null>(null);
     })();
   }, [poseUrl]);
 useEffect(() => {
-  // Golden demo: hydrate overlay frames from /demo/pose.json using /demo/pmap.json for correct P1..P9 timing
+  // Golden demo: hydrate overlay frames from /demo/pose.json using /demo/pmap.json for correct P1..P10 timing
   if (typeof window === "undefined") return;
   const params = new URLSearchParams(window.location.search);
   const golden = params.get("golden") === "1";

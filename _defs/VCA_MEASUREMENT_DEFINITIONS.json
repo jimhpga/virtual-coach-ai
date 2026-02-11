@@ -1,0 +1,29 @@
+{
+  "version": "2026-02-07",
+  "purpose": "Authoritative definitions for VCA measurement logic",
+  "shaftPlane": {
+    "targetLineResolution": [
+      "ball_to_target_if_visible",
+      "p1_shaft_vector_default",
+      "body_alignment_average_fallback"
+    ],
+    "note": "Impact shaft should not return exactly to address due to shaft lean, droop, and rotation.",
+    "reference": "target_line",
+    "impactExpectation": "slightly_higher_than_address"
+  },
+  "phases": {
+    "P3": "Backswing steepness baseline (lead arm parallel)",
+    "P8": "Exit / release (optional)",
+    "P1": "Intent, alignment, reference plane",
+    "P7": "Outcome confirmation",
+    "P4": "X-Factor capture (top)",
+    "P6": "Moment of Truth (delivery checkpoint)",
+    "P5": "Transition quality (lead arm parallel downswing)",
+    "P2": "Early structure (shaft parallel backswing)"
+  },
+  "coachingRules": {
+    "confidenceRule": "All metrics must report confidence and source.",
+    "p6Truth": "If shaft and face are functional at P6, P7 is largely predetermined.",
+    "transitionRule": "P3 to P5 change is contextual, not moral."
+  }
+}

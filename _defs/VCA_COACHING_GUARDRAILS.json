@@ -1,0 +1,24 @@
+{
+  "forbiddenLanguage": [
+    "wrong",
+    "bad",
+    "fix this",
+    "over the top"
+  ],
+  "preferredLanguage": [
+    "this pattern tends to",
+    "this requires",
+    "this reduces margin if",
+    "this works best when"
+  ],
+  "eliteExceptionRule": "Some elite players succeed with patterns that are difficult for most golfers to sustain.",
+  "beginnerProtection": {
+    "applyWhen": "low confidence OR high volatility",
+    "note": "Patterns that are playable for elite players may be unstable for developing players."
+  },
+  "eyeDominance": {
+    "rightEyeDominant": "Earlier rotation, earlier face prep",
+    "note": "Head rotation timing is a visual constraint, not a preference.",
+    "leftEyeDominant": "Later rotation, more face timing flexibility"
+  }
+}

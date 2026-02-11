@@ -1,4 +1,4 @@
-﻿import { useEffect } from "react";
+import { useEffect } from "react";
 
 export default function ReportPage() {
   // ---- TEMP SAFE DEMO PAYLOAD ----
@@ -35,7 +35,7 @@ export default function ReportPage() {
         <div key={i}>{d.name}</div>
       ))}
 
-      <h2>P1-P9 Checkpoints</h2>
+      <h2>P1-P10 Checkpoints</h2>
       {checkpoints.map((c: any) => (
         <div key={c.id}>
           <strong>{c.id} — {c.title}</strong>

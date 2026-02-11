@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import Head from "next/head";
 import BrandShell from "../components/BrandShell";
 
@@ -13,7 +13,7 @@ type Keypoint = {
 
 type PoseFrame = {
   frameIndex: number;
-  phase: string; // P1..P9
+  phase: string; // P1..P10
   points: Keypoint[];
 };
 
@@ -412,7 +412,7 @@ export default function PosePage() {
                 <div style={{ ...cardPad, fontSize: 13, opacity: 0.9, lineHeight: 1.55 }}>
                   <div style={{ marginBottom: 10 }}>1) Add a real video input (upload or URL) and feed frames to the API.</div>
                   <div style={{ marginBottom: 10 }}>2) Replace mock pose with MediaPipe / MMPose output.</div>
-                  <div>3) Use P1-P9 frameIndex to auto-sync your report checkpoints.</div>
+                  <div>3) Use P1-P10 frameIndex to auto-sync your report checkpoints.</div>
                 </div>
               </div>
             </div>

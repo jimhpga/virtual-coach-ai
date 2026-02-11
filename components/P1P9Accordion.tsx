@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 type Status = "ON_TRACK" | "NEEDS_ATTENTION" | "UNKNOWN";
 
@@ -194,7 +194,7 @@ export default function P1P9Accordion({
     <div style={styles.card}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
         <div>
-          <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 0.3 }}>P1-P9 Accordion (Test)</div>
+          <div style={{ fontSize: 28, fontWeight: 900, letterSpacing: 0.3 }}>P1-P10 Accordion (Test)</div>
           <div style={{ fontSize: 12, opacity: 0.7, marginTop: 4 }}>
             Click a checkpoint to open it. Use Expand all when you want the full scroll.
           </div>

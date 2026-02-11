@@ -1,4 +1,4 @@
-﻿module.exports = async (req, res) => {
+module.exports = async (req, res) => {
   try {
     const url = new URL(req.url, "http://local");
     if (url.searchParams.get("probe") === "1") {
@@ -84,7 +84,7 @@
     res.setHeader("Content-Type","text/html; charset=utf-8");
     res.setHeader("X-Print-Rev","r9");
     return res.status(200).send(`<!doctype html>
-<meta charset="utf-8"><title>Swing Report — P1–P9</title>
+<meta charset="utf-8"><title>Swing Report — P1–P10</title>
 <style>
   body{font-family:system-ui,Segoe UI,Arial;margin:24px}
   h2{margin:0 0 6px}
@@ -101,7 +101,7 @@
   details>summary::-webkit-details-marker{display:none}
   .debug{margin-top:8px;color:#777;font-size:12px}
 </style>
-<h2>Swing Report — P1–P9</h2>
+<h2>Swing Report — P1–P10</h2>
 <p class="muted">${esc(metaLine)}</p>
 <p class="debug"><small>Debug key: ${esc(obj)}</small></p>
 <div class="grid">
@@ -111,7 +111,7 @@
   <div class="card"><h3>Position Consistency</h3><ul>${posList}</ul></div>
   <div class="card"><h3>Swing Consistency</h3><div>${swingVal ? `Value: ${esc(swingVal)}` : ""}</div></div>
   <div class="card"><h3>Power Score Summary</h3><div>${powerVal ? `Value: ${esc(powerVal)}` : ""}</div></div>
-  <div class="card"><h3>P1–P9 Phases</h3><ul>${renderPhases()}</ul></div>
+  <div class="card"><h3>P1–P10 Phases</h3><ul>${renderPhases()}</ul></div>
 </div>`);
   } catch (e) {
     console.error("PRINT_ERROR", e);

@@ -1,8 +1,35 @@
 "use client";
+function vcaPickPriorityFault(rankedFaults: any[]) {
+  const rf = Array.isArray(rankedFaults) ? rankedFaults : [];
+  const top = rf[0] ?? null;
+  const conf = typeof top?.confidence === "number" ? top.confidence : 0;
+  const ok = conf >= 55;
+  return {
+    top, conf, ok,
+    label: ok ? "PRIORITY FIX" : "VERIFY",
+    note: ok ? "" : "Low confidence on the top fault — re-record or add the other angle for best accuracy."
+  };
+}
+
+
+import ReadyBundleCoachTools from "../_shared/ReadyBundleCoachTools";
 import SwingProofPanel from "../SwingProofPanel";
 import React, { useState } from "react";
 import ReportShell from "../_ui/ReportShell";
+import { getPPosition, type VcaPPositionId } from "../../../lib/p_positions";
 
+/** VCA_PPOSITION_HELPER
+ * Safe lookup for P-position guide text (works even if descriptions are blank).
+ */
+function vcaPGuide(id: VcaPPositionId){
+  const p = getPPosition(id);
+  if(!p) return { title: id, desc: "" };
+  const desc = (p.description || "").trim();
+  const title = (p.title || p.label || id).trim();
+  // Fallback text keeps UI usable until gold is pasted.
+  const fallback = `Description coming soon. Paste the gold text for ${id} to unlock the full guide.`;
+  return { title, desc: desc.length ? desc : fallback };
+}
 type Fault = { title: string; why: string; fix: string; severity?: "ontrack" | "needs" | "priority" };
 type Drill = { name: string; steps: string[]; reps: string };
 type PCheck = {
@@ -10,7 +37,7 @@ type PCheck = {
   title: string;
   coachNotes: string[];
   commonMisses: string[];
-  keyDrills: string[];
+  drills: string[];
   status: "ontrack" | "needs" | "priority";
 };
 
@@ -98,7 +125,7 @@ const FALLBACK: FullData = {
       title: "Setup",
       coachNotes: ["Balanced, athletic posture with clean alignment."],
       commonMisses: ["Too much knee bend can limit hip turn."],
-      keyDrills: ["Mirror setup check (spine tilt, ball position, weight 55/45)."],
+      drills: ["Mirror setup check (spine tilt, ball position, weight 55/45)."],
       status: "ontrack",
     },
     {
@@ -106,7 +133,7 @@ const FALLBACK: FullData = {
       title: "Shaft parallel backswing",
       coachNotes: ["Club tracks nicely along the target line."],
       commonMisses: ["Club rolling inside early with too much forearm rotation."],
-      keyDrills: ["Low-and-slow takeaway focusing on keeping the triangle."],
+      drills: ["Low-and-slow takeaway focusing on keeping the triangle."],
       status: "ontrack",
     },
     {
@@ -114,7 +141,7 @@ const FALLBACK: FullData = {
       title: "Lead arm parallel backswing",
       coachNotes: ["Good depth and rotation; coil potential is strong."],
       commonMisses: ["Trail leg locking early and stalling hip turn."],
-      keyDrills: ["Trail hip turn drill (feel knee stays athletic)."],
+      drills: ["Trail hip turn drill (feel knee stays athletic)."],
       status: "ontrack",
     },
     {
@@ -122,7 +149,7 @@ const FALLBACK: FullData = {
       title: "Top of swing",
       coachNotes: ["Playable club position at the top."],
       commonMisses: ["Across-the-line when rushing backswing."],
-      keyDrills: ["Three-count backswing (1-2-3) to control length."],
+      drills: ["Three-count backswing (1-2-3) to control length."],
       status: "ontrack",
     },
     {
@@ -130,7 +157,7 @@ const FALLBACK: FullData = {
       title: "Lead arm parallel downswing",
       coachNotes: ["Arms are close to on-plane; needs earlier pressure."],
       commonMisses: ["Upper body driving toward ball early."],
-      keyDrills: ["Step-through shift to feel lead-side pressure by P5."],
+      drills: ["Step-through shift to feel lead-side pressure by P5."],
       status: "needs",
     },
     {
@@ -138,7 +165,7 @@ const FALLBACK: FullData = {
       title: "Shaft parallel downswing",
       coachNotes: ["Face/path playable but timing can spike under speed."],
       commonMisses: ["Handle lifts; trail shoulder dives."],
-      keyDrills: ["P6 checkpoint + turn-through (keep pivot moving)."],
+      drills: ["P6 checkpoint + turn-through (keep pivot moving)."],
       status: "needs",
     },
     {
@@ -146,7 +173,7 @@ const FALLBACK: FullData = {
       title: "Impact",
       coachNotes: ["Good base; protect low point by staying forward."],
       commonMisses: ["Hanging back / adding loft at the bottom."],
-      keyDrills: ["Impact bag: chest forward + hands ahead feel."],
+      drills: ["Impact bag: chest forward + hands ahead feel."],
       status: "ontrack",
     },
     {
@@ -154,7 +181,7 @@ const FALLBACK: FullData = {
       title: "Trail arm parallel follow-through",
       coachNotes: ["Extension is improving; keep rotation continuous."],
       commonMisses: ["Arms outracing the body and flipping."],
-      keyDrills: ["Hold P8 for 2 seconds-feel balanced extension."],
+      drills: ["Hold P8 for 2 seconds-feel balanced extension."],
       status: "ontrack",
     },
     {
@@ -162,7 +189,7 @@ const FALLBACK: FullData = {
       title: "Finish",
       coachNotes: ["Tall, balanced finish with chest to target."],
       commonMisses: ["Falling back toward toes/heels."],
-      keyDrills: ["Finish holds (3 seconds) after every practice swing."],
+      drills: ["Finish holds (3 seconds) after every practice swing."],
       status: "ontrack",
     },
   ],
@@ -198,7 +225,8 @@ function pill(status: "ontrack" | "needs" | "priority") {
         fontWeight: 800,
         whiteSpace: "nowrap",
       }}
-    >
+
+>
       {m.label}
     </span>
   );
@@ -213,7 +241,10 @@ function Panel(props: { title: string; right?: React.ReactNode; children: React.
         background: "rgba(0,0,0,0.22)",
         padding: 16,
       }}
-    >
+
+> 
+      <ReadyBundleCoachTools />
+
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
         <div style={{ fontSize: 14, fontWeight: 900 }}>{props.title}</div>
         {props.right}
@@ -232,7 +263,8 @@ function SoftCard(props: { children: React.ReactNode }) {
         border: "1px solid rgba(255,255,255,0.12)",
         background: "rgba(255,255,255,0.05)",
       }}
-    >
+
+> 
       {props.children}
     </div>
   );
@@ -260,7 +292,10 @@ function BarRow(props: { label: string; grade: string }) {
 
 export default function FullClient() {
 
-  // ---- P1-P9 collapse state ----
+  // ---- P1 - P10 collapse state ----
+
+/* VCA_POSITION_GUIDE_UI disabled (was raw JSX outside return) */
+
   const [openP, setOpenP] = useState<number | null>(7); // default open = P7 (impact sells)
   const [expandAllP, setExpandAllP] = useState(false);
 
@@ -269,6 +304,16 @@ export default function FullClient() {
     setOpenP((cur) => (cur === p ? null : p));
   }
 const [data, setData] = React.useState<FullData>(FALLBACK);
+
+// ===== VCA_NORM_PCHECKS (AUTO) =====
+// Keep the UI stable: prefer pchecks, but accept API contract p_checkpoints and common aliases.
+const _pchecks: any[] =
+  ((data as any).pchecks ?? (data as any).p_checkpoints ?? (data as any).pCheckpoints ?? (data as any).pChecks ?? (data as any).pchecks ?? []) as any[];
+if(!Array.isArray((data as any).pchecks) || ((data as any).pchecks?.length ?? 0) === 0){
+  (data as any).pchecks = _pchecks;
+}
+// ===== /VCA_NORM_PCHECKS (AUTO) =====
+  const priority = vcaPickPriorityFault(((data as any)?.rankedFaults) || []);
 
   React.useEffect(() => {
     // Same source logic as card: ?src=, sessionStorage, fallback demo json
@@ -285,7 +330,7 @@ const [data, setData] = React.useState<FullData>(FALLBACK);
   const srcQ2 = qs2?.get("src") || "";
   const jobIdQ2 = qs2?.get("jobId") || "";
   // Primary: direct JSON URL (rep.url). Fallback: try local API by jobId if present.
-  const resolvedSrc = srcQ2 || (jobIdQ2 ? (`/api/report?id=${encodeURIComponent(jobIdQ2)}`) : "");
+  const resolvedSrc = srcQ2 || (jobIdQ2 ? (`/api/report?id=${encodeURIComponent(jobIdQ2)}`) : "VCA_DEMO_ANALYZE_SWING");
   const srcFromQuery = resolvedSrc;
   
 if (!src) return;
@@ -297,6 +342,9 @@ fetch(src, { cache: "no-store" })
         setData((prev) => ({
           ...prev,
           swingScore: j.swingScore ?? prev.swingScore,
+      headline: (j.headline ?? (prev as any).headline ?? ""),
+      rankedFaults: (Array.isArray(j.rankedFaults) ? j.rankedFaults : ((prev as any).rankedFaults ?? [])),
+      poseSnap: (j.poseSnap ?? (prev as any).poseSnap ?? null),
           tourDna: j.tourDna ?? prev.tourDna,
           priority: j.priority ?? prev.priority,
           faults: j.faults ?? prev.faults,
@@ -310,23 +358,27 @@ fetch(src, { cache: "no-store" })
     <ReportShell
       titleTop="Virtual Coach AI - Full Report (Demo)"
       rightPills={["Back to home", "Upload another swing", "Print report"]}
-    >
-<div style={{ display:"flex", gap:8, margin:"10px 0 14px" }}>
-  <button
-    type="button"
-    onClick={() => { setExpandAllP(true); setOpenP(null); }}
-    style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: expandAllP ? 0.7 : 1 }}
-  >
-    Expand all
-  </button>
-  <button
-    type="button"
-    onClick={() => { setExpandAllP(false); setOpenP(7); }}
-    style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: !expandAllP ? 0.85 : 1 }}
-  >
-    Collapse all
-  </button>
-</div>
+
+>
+
+
+      <div style={{ display:"flex", gap:8, margin:"10px 0 14px" }}>
+        <button
+          type="button"
+          onClick={() => { setExpandAllP(true); setOpenP(null); }}
+          style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: expandAllP ? 0.7 : 1 }}
+        >
+          Expand all
+        </button>
+        <button
+          type="button"
+          onClick={() => { setExpandAllP(false); setOpenP(7); }}
+          style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: !expandAllP ? 0.85 : 1 }}
+        >
+          Collapse all
+        </button>
+        <span style={{ fontSize:12, opacity:0.72, alignSelf:"center" }}>Default open: P7 (impact)</span>
+      </div>
       <div style={{
         marginTop: 0,
         marginBottom: 14,
@@ -359,7 +411,9 @@ fetch(src, { cache: "no-store" })
               cursor: "pointer",
               whiteSpace: "nowrap",
             }}
-          >
+>
+
+
             Print
           </button>
 
@@ -383,154 +437,42 @@ fetch(src, { cache: "no-store" })
               cursor: "pointer",
               whiteSpace: "nowrap",
             }}
-          >
+>
+
+
             Copy link
           </button>
         </div>
       </div>{/* TOP ROW: Overview + Power/Reliability like screenshot */}
       <div style={{ display: "grid", gridTemplateColumns: "1.45fr 1fr", gap: 14, marginBottom: 14 }}>
-        <Panel title="Player Overview" right={<span style={{ fontSize: 12, opacity: 0.75 }}>Generated by Virtual Coach AI</span>}>
-          <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 6 }}>{data.playerName}</div>
-          <div style={{ fontSize: 13, opacity: 0.92, lineHeight: 1.45 }}>
-            {data.overview}
-          </div>
-
-          <div style={{ marginTop: 12 }}>
-            <div style={{ fontSize: 12, fontWeight: 900, opacity: 0.9, marginBottom: 8 }}>Quick Highlights</div>
-            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, opacity: 0.92, lineHeight: 1.55 }}>
-              {data.highlights.map((h, i) => <li key={i}>{h}</li>)}
-            </ul>
-          </div>
-
-          <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 11, opacity: 0.7 }}>RIGHT HAND</span>
-            <span style={{ fontSize: 11, opacity: 0.7 }}>RIGHT EYE</span>
-            <span style={{ fontSize: 11, opacity: 0.7 }}>HCP 6</span>
-            <span style={{ fontSize: 11, opacity: 0.7 }}>6'0"</span>
-          </div>
-        </Panel>
-
-        <Panel title="Power & Reliability" right={<span style={{ fontSize: 12, opacity: 0.75 }}>Grades</span>}>
-          <div style={{ display: "grid", gap: 10 }}>
-            <BarRow label="Power" grade={data.grades.power} />
-            <BarRow label="Speed" grade={data.grades.speed} />
-            <BarRow label="Efficiency" grade={data.grades.efficiency} />
-            <BarRow label="Consistency" grade={data.grades.consistency} />
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 12 }}>
-            <SoftCard>
-              <div style={{ fontSize: 12, fontWeight: 900, marginBottom: 6 }}>What you're doing well</div>
-              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.9, lineHeight: 1.55 }}>
-                {data.doingWell.map((x, i) => <li key={i}>{x}</li>)}
-              </ul>
-            </SoftCard>
-
-            <SoftCard>
-              <div style={{ fontSize: 12, fontWeight: 900, marginBottom: 6 }}>Where you leak power</div>
-              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.9, lineHeight: 1.55 }}>
-                {data.leaks.map((x, i) => <li key={i}>{x}</li>)}
-              </ul>
-            </SoftCard>
-
-            <SoftCard>
-              <div style={{ fontSize: 12, fontWeight: 900, marginBottom: 6 }}>Top 3 fixes</div>
-              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, opacity: 0.9, lineHeight: 1.55 }}>
-                {data.topFixes.map((x, i) => <li key={i}>{x}</li>)}
-              </ul>
-            </SoftCard>
-          </div>
-        </Panel>
+        <Panel
+  title="P1 - P10 Checkpoints"
+  right={
+    <>
+      <div style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 12, opacity: 0.85, flexWrap: "wrap" }}>
+        <span style={{ opacity: 0.7 }}>Legend:</span>
+        {pill("ontrack")} {pill("needs")} {pill("priority")}
       </div>
-
-      {/* SECOND ROW: Score + DNA + Priority + Faults/Drills */}
-      <div style={{ display: "grid", gridTemplateColumns: "360px 1fr", gap: 14, marginBottom: 14 }}>
-        <Panel title="Score + Tour DNA" right={<span style={{ fontSize: 12, opacity: 0.75 }}>{data.tourDna}</span>}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <div style={{ fontSize: 12, opacity: 0.8 }}>Swing Score</div>
-            <div style={{ fontSize: 44, fontWeight: 950, lineHeight: 1 }}>{data.swingScore}</div>
-          </div>
-
-          <div style={{ marginTop: 12, borderTop: "1px solid rgba(255,255,255,0.10)", paddingTop: 12 }}>
-            <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 8 }}>Today's priority</div>
-            <SoftCard>
-              <div style={{ fontWeight: 900 }}>{data.priority}</div>
-              <div style={{ marginTop: 6, fontSize: 13, opacity: 0.9 }}>
-                Own the pattern first. Speed earns permission.
-              </div>
-            </SoftCard>
-          </div>
-                    <div style={{ marginTop: 10 }}>
-              <SwingProofPanel
-                width={260}
-                title="Your swing (proof)"
-                thumbUrl={((data as any)?.frames?.p7 ?? (data as any)?.thumbUrl ?? "/frames/v1_HERO_SWING.mkv_imp2p50/p7.jpg")}
-                videoUrl={((data as any)?.videoUrl ?? (data as any)?.media?.videoUrl ?? "")}
-              />
-            </div>
-</Panel>
-
-        <div style={{ display: "grid", gap: 14 }}>
-          <Panel title="Top 2 Faults (from this swing)" right={<span style={{ fontSize: 12, opacity: 0.7 }}>Auto-ranked</span>}>
-            <div style={{ display: "grid", gap: 10 }}>
-              {data.faults.slice(0, 2).map((f, i) => (
-                <SoftCard key={i}>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-                    <div style={{ fontWeight: 950 }}>{i + 1}. {f.title}</div>
-                    {pill(f.severity ?? "needs")}
-                  </div>
-                  <div style={{ fontSize: 13, opacity: 0.92, marginTop: 6 }}><b>Why:</b> {f.why}</div>
-                  <div style={{ fontSize: 13, opacity: 0.92, marginTop: 6 }}><b>Fix:</b> {f.fix}</div>
-                </SoftCard>
-              ))}
-            </div>
-          </Panel>
-
-          <Panel title="2 Drills (Efficient)" right={<span style={{ fontSize: 12, opacity: 0.7 }}>Best ROI</span>}>
-            <div style={{ display: "grid", gap: 10 }}>
-              {data.drills.slice(0, 2).map((d, i) => (
-                <SoftCard key={i}>
-                  <div style={{ fontWeight: 950 }}>{d.name}</div>
-                  <ol style={{ margin: "8px 0 8px 18px", opacity: 0.92, fontSize: 13 }}>
-                    {d.steps.map((s, j) => <li key={j} style={{ marginBottom: 4 }}>{s}</li>)}
-                  </ol>
-                  <div style={{ fontSize: 13, opacity: 0.92 }}><b>Reps:</b> {d.reps}</div>
-                </SoftCard>
-              ))}
-            </div>
-          </Panel>
-        </div>
+      <div style={{ display:"flex", gap:8, margin:"2px 0 12px", flexWrap:"wrap" }}>
+        <button
+          type="button"
+          onClick={() => { setExpandAllP(true); setOpenP(null); }}
+          style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: expandAllP ? 0.7 : 1 }}
+        >
+          Expand all
+        </button>
+        <button
+          type="button"
+          onClick={() => { setExpandAllP(false); setOpenP(7); }}
+          style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: !expandAllP ? 0.85 : 1 }}
+        >
+          Collapse all
+        </button>
+        <span style={{ fontSize:12, opacity:0.72, alignSelf:"center" }}>Default open: P7 (impact)</span>
       </div>
-
-      {/* P1-P9 CHECKPOINTS (tiles, collapsible) */}
-      {/* P1-P9 CHECKPOINTS (tiles, collapsible) */}
-      <Panel
-        title="P1-P9 Checkpoints"
-        right={
-          <div style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 12, opacity: 0.85, flexWrap: "wrap" }}>
-            <span style={{ opacity: 0.7 }}>Legend:</span>
-            {pill("ontrack")} {pill("needs")} {pill("priority")}
-          </div>
-        }
-      >
-        <div style={{ display:"flex", gap:8, margin:"2px 0 12px", flexWrap:"wrap" }}>
-          <button
-            type="button"
-            onClick={() => { setExpandAllP(true); setOpenP(null); }}
-            style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: expandAllP ? 0.7 : 1 }}
-          >
-            Expand all
-          </button>
-          <button
-            type="button"
-            onClick={() => { setExpandAllP(false); setOpenP(7); }}
-            style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: !expandAllP ? 0.85 : 1 }}
-          >
-            Collapse all
-          </button>
-          <span style={{ fontSize:12, opacity:0.72, alignSelf:"center" }}>Default open: P7 (impact)</span>
-        </div>
-
+    </>
+  }
+>
         <div style={{ display:"grid", gridTemplateColumns:"repeat(3, minmax(0, 1fr))", gap: 12 }}>
           {data.pchecks.map((c) => {
             const isOpen = expandAllP || openP === c.p;
@@ -538,6 +480,7 @@ fetch(src, { cache: "no-store" })
               <div key={c.p} style={{ borderRadius: 16, border: "1px solid rgba(255,255,255,0.10)", background: "rgba(0,0,0,0.14)", overflow:"hidden" }}>
                 <button
                   type="button"
+                  title={`P${c.p} — ${c.desc ?? ""}`} /* VCA_PCHECKPOINT_HOVER */
                   onClick={() => { if (!expandAllP) setOpenP((cur) => (cur === c.p ? null : c.p)); }}
                   style={{
                     width:"100%",
@@ -553,14 +496,14 @@ fetch(src, { cache: "no-store" })
                     color:"#eaf1ff"
                   }}
                   title={expandAllP ? "Expanded" : "Tap to expand / collapse"}
-                >
+                  >
                   <div style={{ display:"flex", gap:10, alignItems:"baseline" }}>
                     <div style={{ fontWeight: 950 }}>P{c.p}</div>
                     <div style={{ fontSize: 13, opacity: 0.92, fontWeight: 850 }}>{c.title}</div>
                   </div>
                   <div style={{ display:"flex", gap:10, alignItems:"center" }}>
                     {pill((c as any).status ?? (c.p === 7 ? "priority" : "needs"))}
-                    <span style={{ fontSize: 12, opacity: 0.75 }}>{isOpen ? "−" : "+"}</span>
+                    <span style={{ fontSize: 12, opacity: 0.75 }}>{isOpen ? "Ã¢â€“Â¾" : "+"}</span>
                   </div>
                 </button>
 
@@ -605,27 +548,14 @@ fetch(src, { cache: "no-store" })
           </ul>
         </Panel>
       </div>
+      </div>
 
       <div style={{ marginTop: 10, fontSize: 11, opacity: 0.55, textAlign: "center" }}>
-        Virtual Coach AI - demo report. If something doesn't fit, it may be your swing… or your feel and your hand.
+        Virtual Coach AI - demo report. If something doesn't fit, it may be your swing or your feel and your hand.
       </div>
     </ReportShell>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

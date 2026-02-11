@@ -25,7 +25,7 @@ function vcaExtractTopLevel(report:any){
 
 // VCA: attach scores/debug to /api/analyze response (fallback compute)
 function vcaGetFramesFromReport(r:any): any[] | null {
-  const frames = (r?.frames ?? r?.pose ?? r?.data?.frames ?? r?.report?.frames) as any[] | undefined;
+  const frames = (r?.frames ?? r?.poseSnap?.frames ?? (r as any)?.pose?.frames) as any[] | undefined;
   return Array.isArray(frames) && frames.length ? frames : null;
 }
 
@@ -389,6 +389,7 @@ export async function POST(req: Request) {
     );
   }
 }
+
 
 
 

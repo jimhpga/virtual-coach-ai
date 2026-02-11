@@ -1,10 +1,10 @@
-﻿# Virtual Coach AI — MVP LOCK
+# Virtual Coach AI — MVP LOCK
 
 If you change anything in these areas, you must test:
 - Upload → Analyze → Frames populate → Report renders
 - Reset Demo
 - Scoreboard values render
-- P1–P9 strip + jump works
+- P1–P10 strip + jump works
 
 ## Locked behaviors
 1) No refactors in core flow during MVP demo window.

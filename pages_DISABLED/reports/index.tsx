@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import BrandShell from "../../components/BrandShell";
 
 export default function ReportsIndex() {
@@ -18,7 +18,7 @@ export default function ReportsIndex() {
               Sample Swing Report (static)
             </h2>
             <p className="text-xs text-slate-300">
-              A fixed demo player with P1-P9 checkpoints, scores, and notes.
+              A fixed demo player with P1-P10 checkpoints, scores, and notes.
             </p>
             <Link
               href="/reports/sample"

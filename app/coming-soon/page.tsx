@@ -167,7 +167,7 @@ export default function ComingSoonPage() {
             <div style={small}>The goal: one upload, one clean report, one practice plan. Everything else is layered on — not bolted on.</div>
             <ul style={list}>
               <li>Frictionless upload (mobile-first file picker)</li>
-              <li>Pose estimation + P1–P9 checkpoints (estimated)</li>
+              <li>Pose estimation + P1–P10 checkpoints (estimated)</li>
               <li>Top 2–3 prioritized faults + 1–2 efficient drills each</li>
               <li>Swing Score + Tour DNA Match (mechanics similarity explanation)</li>
               <li>Instant report view + download + email delivery</li>

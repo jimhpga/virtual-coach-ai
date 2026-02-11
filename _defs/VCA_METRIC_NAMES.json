@@ -1,0 +1,36 @@
+{
+  "shaftTransition": {
+    "id": "SSI",
+    "name": "Shaft Transition Index",
+    "interpretation": {
+      "steep": "< -2 (possible issue for developing players)",
+      "neutral": "-1 to +1 (fade-compatible)",
+      "shallow": "+1 to +6 (draw-friendly)"
+    },
+    "definition": "P3_shaft_plane_deg - P5_shaft_plane_deg"
+  },
+  "planeReturn": {
+    "id": "PRI",
+    "name": "Plane Return Index",
+    "expectedWindowDeg": "2–6",
+    "definition": "Abs(P7_shaft_plane - P1_shaft_plane)"
+  },
+  "momentOfTruth": {
+    "description": "Delivery checkpoint that dictates impact behavior",
+    "phase": "P6"
+  },
+  "alignment": {
+    "components": [
+      "feet",
+      "hips",
+      "shoulders",
+      "bodyAvg"
+    ],
+    "name": "Alignment Intent"
+  },
+  "xFactor": {
+    "name": "X-Factor (2D Proxy)",
+    "note": "Proxy only; not lab-grade torque.",
+    "definition": "shouldersAcrossDeg - hipsAcrossDeg"
+  }
+}

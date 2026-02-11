@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from "react";
 import ReportShell from "../_ui/ReportShell";
@@ -291,7 +291,7 @@ export default function FullClient() {
   return (
     <ReportShell
       titleTop="Virtual Coach AI — Full Report (Demo)"
-      titleMain="Player Overview + P1–P9 Checkpoints"
+      titleMain="Player Overview + P1–P10 Checkpoints"
       rightPills={["Back to home", "Upload another swing", "Print report"]}
     >
       <div style={{
@@ -462,9 +462,9 @@ export default function FullClient() {
         </div>
       </div>
 
-      {/* P1–P9 CHECKPOINTS */}
+      {/* P1–P10 CHECKPOINTS */}
       <Panel
-        title="P1–P9 Checkpoints"
+        title="P1–P10 Checkpoints"
         right={
           <div style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 12, opacity: 0.85 }}>
             <span style={{ opacity: 0.7 }}>Legend:</span>

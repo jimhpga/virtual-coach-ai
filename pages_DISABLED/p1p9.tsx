@@ -52,9 +52,9 @@ const ITEMS: P1P9Item[] = [
 
 export default function P1P9TestPage() {
   return (
-<BrandShell title="P1-P9 Checkpoints">
+<BrandShell title="P1-P10 Checkpoints">
 <>
-      <Head><title>P1-P9 Accordion Test</title></Head>
+      <Head><title>P1-P10 Accordion Test</title></Head>
       <main style={{
         minHeight:"100vh",
         padding:"26px 18px 60px",
@@ -62,7 +62,7 @@ export default function P1P9TestPage() {
         color:"#e6edf6"
       }}>
         <div style={{maxWidth:1200, margin:"0 auto"}}>
-          <div style={{fontSize:28, fontWeight:1000, marginBottom:14}}>P1-P9 Accordion (Test)</div>
+          <div style={{fontSize:28, fontWeight:1000, marginBottom:14}}>P1-P10 Accordion (Test)</div>
           <P1P9Accordion items={ITEMS} defaultMode="single" showExpandAll />
         </div>
       </main>

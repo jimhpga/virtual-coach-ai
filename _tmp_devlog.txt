@@ -1,0 +1,25 @@
+
+> dev
+> next dev
+
+   Γû▓ Next.js 15.4.10
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.145:3000
+   - Environments: .env.local
+
+ Γ£ô Starting...
+ Γ£ô Ready in 1456ms
+ Γùï Compiling / ...
+ Γ£ô Compiled / in 2.4s (538 modules)
+ HEAD / 200 in 2652ms
+ Γ£ô Compiled /report-beta/full in 353ms (550 modules)
+ HEAD /report-beta/full 200 in 555ms
+ GET /report-beta/full 200 in 52ms
+ ΓÜá Found a change in next.config.js. Restarting the server to apply the changes...
+   Γû▓ Next.js 15.4.10
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.145:3000
+   - Environments: .env.local
+
+ Γ£ô Starting...
+ Γ£ô Ready in 1565ms

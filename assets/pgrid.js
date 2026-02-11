@@ -1,4 +1,4 @@
-// P1–P9 data. Replace youtube links with your existing ones.
+// P1–P10 data. Replace youtube links with your existing ones.
 const CHECKPOINTS = [
   {
     pos: "P1", label: "Setup (Grip/Posture)",

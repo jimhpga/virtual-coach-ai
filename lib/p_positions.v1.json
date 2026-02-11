@@ -1,0 +1,157 @@
+{
+    "version":  "v1",
+    "updatedAt":  "2026-02-07T14:01:35",
+    "source":  "STUB created (fill descriptions from raw template)",
+    "positions":  [
+                      {
+                          "id":  "P1",
+                          "label":  "Setup",
+                          "title":  "Set-up",
+                          "description":  "Setup (Address position)\nAthletic posture with a neutral spine and slight hip hinge.\nPressure balanced under the feet (often slightly favoring the lead side).\nArms hang naturally; no reaching or crowding.\nClubface square to the intended start line.\nGrip and posture you can repeat under pressure.\nPurpose: Create a stable, repeatable starting position that doesnâ€™t require timing later.",
+                          "keyChecks":  [
+
+                                        ],
+                          "commonFaults":  [
+
+                                           ],
+                          "drillTags":  [
+
+                                        ]
+                      },
+                      {
+                          "id":  "P2",
+                          "label":  "Shaft Parallel (Backswing)",
+                          "title":  "Club shaft parallel to the ground in the backswing",
+                          "description":  "Shaft Parallel (Backswing)\nClub, hands, and chest move together early (one-piece takeaway).\nShaft parallel to the ground with the clubhead outside the hands or on-plane.\nClubface roughly matches spine angle (not rolled open or shut).\nTrail hip begins to load without sway.\nPurpose: Establish structure and direction without manipulating the clubface.",
+                          "keyChecks":  [
+
+                                        ],
+                          "commonFaults":  [
+
+                                           ],
+                          "drillTags":  [
+
+                                        ]
+                      },
+                      {
+                          "id":  "P3",
+                          "label":  "Lead Arm Parallel (Backswing)",
+                          "title":  "Left arm parallel to the ground in backswing",
+                          "description":  "Lead Arm Parallel (Backswing)\nLead arm parallel to the ground with width maintained.\nHands stay in front of the chest (not trapped behind).\nShoulder turn continues while posture stays intact.\nPressure continues loading into the trail side.\nPurpose: Build coil and width without losing connection or balance.",
+                          "keyChecks":  [
+
+                                        ],
+                          "commonFaults":  [
+
+                                           ],
+                          "drillTags":  [
+
+                                        ]
+                      },
+                      {
+                          "id":  "P4",
+                          "label":  "Top",
+                          "title":  "The top of the backswing",
+                          "description":  "Top of Swing\nTurn is completed without collapsing the arms.\nLead wrist stable; clubface controlled.\nTrail elbow points more down than behind.\nPressure centered or slightly favoring trail side (ready to shift).\nPurpose: Reach a top position you can start down from without rerouting.",
+                          "keyChecks":  [
+
+                                        ],
+                          "commonFaults":  [
+
+                                           ],
+                          "drillTags":  [
+
+                                        ]
+                      },
+                      {
+                          "id":  "P5",
+                          "label":  "Lead Arm Parallel (Downswing)",
+                          "title":  "Left arm parallel to the ground in the downswing",
+                          "description":  "Lead Arm Parallel (Downswing)\nPressure has shifted toward the lead side before the arms drop.\nHips begin opening while the chest stays slightly closed.\nHands work down in front of the body (no over-the-top throw).\nPosture maintained; no early stand-up.\nPurpose: Sequence the downswing from the ground up.",
+                          "keyChecks":  [
+
+                                        ],
+                          "commonFaults":  [
+
+                                           ],
+                          "drillTags":  [
+
+                                        ]
+                      },
+                      {
+                          "id":  "P6",
+                          "label":  "Shaft Parallel (Downswing)",
+                          "title":  "Clubshaft parallel to the ground in the downswing",
+                          "description":  "Shaft Parallel (Downswing)\nShaft parallel to the ground with the handle leading the clubhead.\nClub approaching from the inside.\nLead wrist flat or slightly bowed (not flipping).\nTrail elbow in front of the trail hip.\nMajority of pressure now on the lead side.\nPurpose: Deliver the club with control, not timing.",
+                          "keyChecks":  [
+
+                                        ],
+                          "commonFaults":  [
+
+                                           ],
+                          "drillTags":  [
+
+                                        ]
+                      },
+                      {
+                          "id":  "P7",
+                          "label":  "Impact",
+                          "title":  "Impact",
+                          "description":  "Impact\nPressure firmly on the lead side with the lead leg bracing.\nHands ahead of the clubhead (irons).\nClubface square relative to path and start line.\nChest and hips open; posture maintained.\nPurpose: Strike the ball first with compression and predictable start direction.",
+                          "keyChecks":  [
+
+                                        ],
+                          "commonFaults":  [
+
+                                           ],
+                          "drillTags":  [
+
+                                        ]
+                      },
+                      {
+                          "id":  "P8",
+                          "label":  "Shaft Parallel (Follow-Through)",
+                          "title":  "Clubshaft parallel to the ground in the follow through",
+                          "description":  "Shaft Parallel (Follow-Through)\nArms extend through impact.\nBody rotation controls the release (not the hands).\nChest continues turning toward the target.\nTrail foot releasing naturally.\nPurpose: Prove the ball wasnâ€™t hit with a flip.",
+                          "keyChecks":  [
+
+                                        ],
+                          "commonFaults":  [
+
+                                           ],
+                          "drillTags":  [
+
+                                        ]
+                      },
+                      {
+                          "id":  "P9",
+                          "label":  "Trail Arm Parallel (Follow-Through)",
+                          "title":  "Right arm parallel to the ground in the follow through",
+                          "description":  "Trail Arm Parallel (Follow-Through)\nTrail arm extended; club exits left around the body.\nBalance fully on the lead side.\nHead and torso free to release with rotation.\nSpeed continues past impact.\nPurpose: Confirm full release and rotational control.",
+                          "keyChecks":  [
+
+                                        ],
+                          "commonFaults":  [
+
+                                           ],
+                          "drillTags":  [
+
+                                        ]
+                      },
+                      {
+                          "id":  "P10",
+                          "label":  "Finish",
+                          "title":  "Finish",
+                          "description":  "Finish\nFully rotated, tall, and balanced.\nWeight entirely on the lead side.\nTrail foot on the toe.\nFinish can be held comfortably.\nPurpose: A balanced finish confirms the swing was controlled and repeatable.",
+                          "keyChecks":  [
+
+                                        ],
+                          "commonFaults":  [
+
+                                           ],
+                          "drillTags":  [
+
+                                        ]
+                      }
+                  ]
+}

@@ -67,7 +67,7 @@ export function SwingFactsCard({ url = "/pose-demo/swing_facts.json" }: { url?: 
     normalizePFrames(facts?.frames);
 
   // also accept flat p1..p9 numbers
-  for (let i = 1; i <= 9; i++) {
+  for (let i = 1; i <= 10; i++) {
     const k = `p${i}` as const;
     const v = (facts as any)?.[k];
     if (v != null) pObj[`P${i}`] = Number(v);
@@ -104,7 +104,7 @@ export function SwingFactsCard({ url = "/pose-demo/swing_facts.json" }: { url?: 
           </div>
 
           <div style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {Array.from({ length: 9 }, (_, idx) => {
+            {Array.from({ length: 10 }, (_, idx) => {
               const p = `P${idx + 1}`;
               const v = pObj[p];
               return (

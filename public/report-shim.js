@@ -84,7 +84,7 @@
     view.innerHTML = `
       <div><b>Client:</b> ${data.client.id} â€¢ <b>Mode:</b> ${data.discipline || "-"} â€¢ <b>Swings:</b> ${data.swings ?? "-"}</div>
       <div class="card">
-        <h3>P1-P9</h3>
+        <h3>P1-P10</h3>
         <ol>${phases}</ol>
       </div>
       <div class="card">

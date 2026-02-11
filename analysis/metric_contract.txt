@@ -1,0 +1,12 @@
+tempo_ratio
+backswing_time_ms
+downswing_time_ms
+pelvis_rotation_p7
+torso_rotation_p7
+x_factor_proxy
+spine_tilt_p7
+side_bend_p7
+lead_arm_angle_p6
+handle_height_p7
+hip_drift_total
+center_mass_shift

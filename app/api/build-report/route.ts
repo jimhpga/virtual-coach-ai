@@ -85,9 +85,9 @@ export async function POST(req: Request) {
     const report = {
       id: `rpt_${Date.now()}`,
       createdAt: new Date().toISOString(),
-      headline: String(extractJson?.headline || "P1-P9 frames ready.").replace(
+      headline: String(extractJson?.headline || "P1-P10 frames ready.").replace(
         /P1[-â]P9/g,
-        "P1-P9"
+        "P1-P10"
       ),
       swingScore: Number(extractJson?.swingScore || 72),
       topFaults: Array.isArray(extractJson?.topFaults) ? extractJson.topFaults : [],

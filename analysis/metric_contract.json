@@ -1,0 +1,35 @@
+{
+  "version": "v1",
+  "phases": [
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5",
+    "P6",
+    "P7",
+    "P8",
+    "P9"
+  ],
+  "metrics": [
+    "tempo_ratio",
+    "backswing_time_ms",
+    "downswing_time_ms",
+    "pelvis_rotation_p7",
+    "torso_rotation_p7",
+    "x_factor_proxy",
+    "spine_tilt_p7",
+    "side_bend_p7",
+    "lead_arm_angle_p6",
+    "handle_height_p7",
+    "hip_drift_total",
+    "center_mass_shift"
+  ],
+  "outputs": [
+    "ranked_faults",
+    "swing_score",
+    "practice_plan",
+    "p_checkpoints"
+  ],
+  "note": "All values are estimated from video pose landmarks unless explicitly sensor-based."
+}

@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getTopPowerLeaks } from "../../lib/powerLeakMap";
 import { applyDeterministicCoaching } from "../../lib/deterministicCoach";
 import { mkdir, writeFile } from "fs/promises";
@@ -37,7 +37,7 @@ async function __vcaDump(tag: string, payload: any) {
 function __normalizeReport(report: any) {
   try {
     if (!report || typeof report !== "object") return report;
-    report.headline = String(report.headline || "P1-P9 frames ready.").replace(/P1[Ã¢â‚¬â€œÃƒÂ¢]P9/g, "P1-P9");
+    report.headline = String(report.headline || "P1-P10 frames ready.").replace(/P1[Ã¢â‚¬â€œÃƒÂ¢]P9/g, "P1-P10");
     if (!Array.isArray(report.topFaults)) report.topFaults = [];
     return report;
   } catch { return report; }
@@ -139,7 +139,7 @@ const v = videoUrl || (uploadId ? `/uploads/${uploadId}` : "");
     const report = {
       id: jobId,
       createdAt: new Date().toISOString(),
-      headline: "P1-P9 frames ready.",
+      headline: "P1-P10 frames ready.",
       swingScore: 72,
       topFaults: [],
       checkpoints: pframes.map((pf) => ({ p: pf.p, label: pf.label, note: "-" })),

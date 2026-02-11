@@ -15,7 +15,7 @@ export default function PStrip(props: { onPick?: (pf: PFrame) => void }) {
   const [openP, setOpenP] = useState<number | null>(7);useEffect(() => {
     let alive = true;
     (async () => {
-      const res = await fetch("/data/pframes-p1-p9.json", { cache: "no-store" });
+      const res = await fetch("/data/pframes-P1-P10.json", { cache: "no-store" });
       if (!res.ok) return;
       const json = (await res.json()) as PFramesJson;
       if (!json?.ok) return;

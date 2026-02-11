@@ -229,7 +229,7 @@ export function applyDeterministicCoaching(report: any) {
   report.practicePlan = plan;
 
   
-  // --- P1-P9: mark ONE checkpoint as NEEDS ATTENTION for collapsible focus ---
+  // --- P1-P10: mark ONE checkpoint as NEEDS ATTENTION for collapsible focus ---
   try {
     const cps = Array.isArray((report as any).checkpoints) ? (report as any).checkpoints : [];
     if (cps.length) {

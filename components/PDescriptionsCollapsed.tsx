@@ -76,7 +76,7 @@ return (
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-        <div style={{ fontWeight: 900, letterSpacing: 0.2 }}>P1–P9 Descriptions</div>
+        <div style={{ fontWeight: 900, letterSpacing: 0.2 }}>P1–P10 Descriptions</div>
         <div style={{ display: "flex", gap: 8 }}>
           <button
             type="button"

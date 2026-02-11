@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React from "react";
 
@@ -110,7 +110,7 @@ export default function CardClient() {
             <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: 0.2 }}>Swing Snapshot</div>
           </div>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            {pill("P1-P9 Ready")}
+            {pill("P1 - P10 Ready")}
             {pill("Golden=1")}
           </div>
         </div>
@@ -207,6 +207,7 @@ export default function CardClient() {
     </div>
   );
 }
+
 
 
 

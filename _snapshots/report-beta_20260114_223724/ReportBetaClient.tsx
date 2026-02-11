@@ -1087,7 +1087,7 @@ const f = sortedFrames.find((x) => x.p === p);
         </div>
       ) : null}
 
-      {/* P1–P9 descriptions (collapsed) */}
+      {/* P1–P10 descriptions (collapsed) */}
       <PDescriptionsCollapsed onJumpToP={jumpToP} activeP={activeP} />
 
       {error && (
@@ -1169,14 +1169,14 @@ const f = sortedFrames.find((x) => x.p === p);
               </div>
             </div>
 
-            <div style={{ marginTop: 12, fontWeight: 900, opacity: 0.92 }}>P1–P9 frames</div>
+            <div style={{ marginTop: 12, fontWeight: 900, opacity: 0.92 }}>P1–P10 frames</div>
 
             {!sortedFrames.length ? (
               <div style={{ opacity: 0.75, marginTop: 6 }}>Run Analyze to populate frames.</div>
             ) : (
               <>
                 <div style={{ marginTop: 10 }}>
-                  {/* P1–P9 frame thumbnails hidden (optional feature) */}
+                  {/* P1–P10 frame thumbnails hidden (optional feature) */}
                 </div>
 
                 <div style={{ marginTop: 8, display: "grid", gridTemplateColumns: "repeat(9, minmax(0, 1fr))", gap: 8 }}>

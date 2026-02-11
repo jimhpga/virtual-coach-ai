@@ -84,7 +84,7 @@ export default function HomePage() {
           </div>
 
           <div style={{ marginTop: 14, fontSize: 12, opacity: 0.75 }}>
-            Coming soon: Tour DNA Match, Impact Clip, and auto P1-P9 sync.
+            Coming soon: Tour DNA Match, Impact Clip, and auto P1-P10 sync.
           </div>
         </div>
       </main>

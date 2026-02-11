@@ -57,7 +57,7 @@ function clamp(n: number, a: number, b: number) {
 export default function ReportVideoPanel({ data }: { data: VideoPanelData }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // ===== VCA: dropdown state (P1–P9 + 14-day plan) =====
+  // ===== VCA: dropdown state (P1–P10 + 14-day plan) =====
   const pKeys = ["P1","P2","P3","P4","P5","P6","P7","P8","P9"];
   const [pSel, setPSel] = useState<string>("P1");
   const [daySel, setDaySel] = useState<number>(1);
@@ -386,7 +386,7 @@ const seekToP = (k: string) => {
                 textDecoration: "none",
                 pointerEvents: pos === "FULL" ? "none" : "auto",
               }}
-              title={pos === "FULL" ? "Pick P1–P9 to open a lesson" : "Open YouTube lesson for this position"}
+              title={pos === "FULL" ? "Pick P1–P10 to open a lesson" : "Open YouTube lesson for this position"}
             >
               YouTube Lesson
             </a>
@@ -417,7 +417,7 @@ const seekToP = (k: string) => {
             </button>
           </div>
           <div style={{ marginTop:6, fontSize:11, opacity:0.65 }}>
-            Pick P1–P9 to jump the video. Use YouTube for drills/explanations.
+            Pick P1–P10 to jump the video. Use YouTube for drills/explanations.
           </div>
         </div>
 
@@ -560,7 +560,7 @@ const seekToP = (k: string) => {
             </div>
 
             <div style={{ marginTop: 10, fontSize: 12, opacity: 0.65, lineHeight: 1.35 }}>
-              Tip: choose a position (P1–P9) to pause the video there. Use Line/Circle to mark key alignments.
+              Tip: choose a position (P1–P10) to pause the video there. Use Line/Circle to mark key alignments.
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 
 type Props = {
   // prefer this name
@@ -39,7 +39,7 @@ export default function ReportNavBar(props: Props) {
           </Link>
           <div style={{ width: 1, height: 18, background: "rgba(255,255,255,0.15)" }} />
           <Link href="/p1p9" style={{ color: "rgba(255,255,255,0.70)", textDecoration: "none" }}>
-            P1-P9
+            P1-P10
           </Link>
           <Link href="/view" style={{ color: "rgba(255,255,255,0.70)", textDecoration: "none" }}>
             Viewer
