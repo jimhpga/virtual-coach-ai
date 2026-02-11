@@ -213,6 +213,57 @@ function readJsonIfExists(p: string): any | null {
 export const runtime = "nodejs";
 
 
+
+function enrichLowConfidenceBlock<T extends any>(key: string, block: T | null | undefined) {
+  if (!block || typeof block !== "object") return block;
+  const b: any = block;
+
+  const confMin = (typeof b.confidenceMin === "number") ? b.confidenceMin : null;
+  const status  = (typeof b.status === "string") ? b.status : "not_available";
+
+  const usesProxy =
+    (b.P5?.shaftSource === "pose_proxy") ||
+    (b.P6?.shaftSource === "pose_proxy") ||
+    (b.P7?.shaftSource === "pose_proxy");
+
+  const confidenceLabel =
+    (confMin === null) ? "Unknown" :
+    (confMin >= 60) ? "High" :
+    (confMin >= 35) ? "Medium" : "Low";
+
+  // default user-facing message
+  let message = "";
+  if (status === "ok") {
+    message = "Measured shaft-vs-lead-arm alignment at P5/P6/P7.";
+  } else if (status === "low_confidence") {
+    message = usesProxy
+      ? "Confidence was low. Using a proxy shaft estimate for stability."
+      : "Confidence was low. Measurements may be less reliable.";
+  } else {
+    message = "Not enough tracking confidence to score this reliably.";
+  }
+
+  const nextSteps: string[] =
+    (status === "low_confidence") ? [
+      "Film face-on with the full club visible (grip to clubhead).",
+      "Use 120–240 fps if possible, good lighting, and a steady camera.",
+      "Avoid dark shafts/clothes against dark backgrounds."
+    ] :
+    (status === "not_available") ? [
+      "Re-record with the full club visible and steady framing.",
+      "Improve lighting and remove motion blur."
+    ] : [];
+
+  b.usesProxy = usesProxy;
+  b.confidenceLabel = confidenceLabel;
+  b.message = b.message ?? message;
+  b.nextSteps = Array.isArray(b.nextSteps) ? b.nextSteps : nextSteps;
+
+  // Keep meta for debug, but ensure it's always present/typed
+  b.meta = (b.meta && typeof b.meta === "object") ? b.meta : {};
+
+  return b as T;
+}
 /* ===== VCA_PCHECKPOINTS_DESC_PATCH (AUTO) ===== */
 function vcaPDesc(p: number): string {
   switch (p) {
@@ -280,7 +331,7 @@ function vcaEnsurePCheckpoints(o: any): any {
 
 function vcaDemoFastPayload(){
   return {
-    p5p6p7ShaftArm: readJsonIfExists(path.join("E:\\VCA\\Cache\\repo-moved\\_shots\\vid_20260122_181118\\_mirror","P5_P6_P7_ShaftArm.json")),p3p5Mirror: readJsonIfExists(path.join("E:\\VCA\\Cache\\repo-moved\\_shots\\vid_20260122_181118\\_mirror","P3_P5_Mirror.json")),
+    p5p6p7ShaftArm: enrichLowConfidenceBlock("p5p6p7ShaftArm", readJsonIfExists(path.join("E:\\VCA\\Cache\\repo-moved\\_shots\\vid_20260122_181118\\_mirror"),"P5_P6_P7_ShaftArm.json")),p3p5Mirror: readJsonIfExists(path.join("E:\\VCA\\Cache\\repo-moved\\_shots\\vid_20260122_181118\\_mirror","P3_P5_Mirror.json")),
     ok: true,
     headline: "Demo report (safe)",
     swingScore: 82,
