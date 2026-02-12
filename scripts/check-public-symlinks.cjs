@@ -1,23 +1,26 @@
+/* VCA_SAFE_REQUIRES: collision-proof requires for this script */
+const _fs = require("fs");
+const _path = require("path");
 /* VCA_ENSURE_DOTDATA: create .data in clean build env (Vercel/Linux) */
 try{
-  const dataDir = path.join(process.cwd(), ".data");
-  if(!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  const dataDir = _path.join(process.cwd(), ".data");
+  if(!_fs.existsSync(dataDir)) _fs.mkdirSync(dataDir, { recursive: true });
 }catch(e){
   // Don't fail build for this; it's just a safety net.
 }
 function walk(dir, out=[]) {
-  for (const name of fs.readdirSync(dir)) {
-    const p = path.join(dir, name);
+  for (const name of _fs.readdirSync(dir)) {
+    const p = _path.join(dir, name);
     let st;
-    try { st = fs.lstatSync(p); } catch { continue; }
+    try { st = _fs.lstatSync(p); } catch { continue; }
     if (st.isSymbolicLink()) out.push(p);
     if (st.isDirectory()) walk(p, out);
   }
   return out;
 }
 
-const pub = path.join(process.cwd(), "public");
-if (!fs.existsSync(pub)) process.exit(0);
+const pub = _path.join(process.cwd(), "public");
+if (!_fs.existsSync(pub)) process.exit(0);
 
 const links = walk(pub);
 if (links.length) {
@@ -27,5 +30,6 @@ if (links.length) {
 } else {
   console.log("✅ Prebuild check: no symlinks under /public");
 }
+
 
 
