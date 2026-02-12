@@ -11,7 +11,6 @@ try{
   console.error("❌ Prebuild: failed to ensure .data: " + (e && e.message ? e.message : String(e)));
   process.exit(1);
 }
-
 function walk(dir, out=[]) {
   for (const name of _fs.readdirSync(dir)) {
     const p = _path.join(dir, name);
