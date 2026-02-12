@@ -1,6 +1,18 @@
-﻿import { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
 import fs from "fs";
 import path from "path";
+import { mkdir } from "fs/promises";
+
+  // ===== VCA_DATA_ROOT_HELPER_V1 =====
+  function __vcaDataRoot(): string {
+    const env = process.env.VCA_DATA_DIR;
+    if (env && env.trim()) return env.trim();
+    // Vercel runtime/build: write only to /tmp (repo root isn't safe for writes)
+    if (process.env.VERCEL) return "/tmp/vca-data";
+    return __vcaDataRoot();
+  }
+  // ===== END VCA_DATA_ROOT_HELPER_V1 =====
+
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -13,7 +25,8 @@ export async function GET(req: NextRequest) {
   const safeName = path.basename(name);
   if (safeName !== name) return new Response("Invalid filename", { status: 400 });
 
-  const filePath = path.join(process.cwd(), ".data", "uploads", safeName);
+  const filePath = path.join(__vcaDataRoot(), "uploads", safeName);
+await mkdir(filePath, { recursive: true });
   if (!fs.existsSync(filePath)) return new Response("Not found", { status: 404 });
 
   const stat = fs.statSync(filePath);

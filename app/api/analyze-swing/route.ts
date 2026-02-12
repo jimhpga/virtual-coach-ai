@@ -2,6 +2,17 @@ import path from "path";
 
 import * as fs from "fs";
 
+  // ===== VCA_DATA_ROOT_HELPER_V1 =====
+  function __vcaDataRoot(): string {
+    const env = process.env.VCA_DATA_DIR;
+    if (env && env.trim()) return env.trim();
+    // Vercel runtime/build: write only to /tmp (repo root isn't safe for writes)
+    if (process.env.VERCEL) return "/tmp/vca-data";
+    return __vcaDataRoot();
+  }
+  // ===== END VCA_DATA_ROOT_HELPER_V1 =====
+
+
 
 
 
@@ -408,4 +419,5 @@ export async function POST(req: Request) {
     return new Response(JSON.stringify({ ok: false, where: "api/analyze-swing POST", error: msg }), { status: 500, headers: { "Content-Type": "application/json", "X-VCA-ERR": "1" } });
   }
 }
+
 

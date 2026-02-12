@@ -1,16 +1,71 @@
 import { mkdir, writeFile } from "fs/promises";
 
 
+
+
+
+
+
+
 import { NextResponse } from "next/server";
+
+
+
+
+
+
 
 
 import path from "path";
 
 
+
+
+
+
+
+
 import crypto from "crypto";
 
 
+
+
+
+
+
+
 import fs from "fs";
+
+  // ===== VCA_DATA_ROOT_HELPER_V1 =====
+  function __vcaDataRoot(): string {
+    const env = process.env.VCA_DATA_DIR;
+    if (env && env.trim()) return env.trim();
+    // Vercel runtime/build: write only to /tmp (repo root isn't safe for writes)
+    if (process.env.VERCEL) return "/tmp/vca-data";
+    return __vcaDataRoot();
+  }
+  // ===== END VCA_DATA_ROOT_HELPER_V1 =====
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -23,7 +78,31 @@ import fs from "fs";
 const uploadDir = path.join(process.cwd(), "uploads");
 
 
+
+
+
+
+
+
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -38,10 +117,34 @@ export const runtime = "nodejs";
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 const VCA_UPLOAD_ROOT = process.env.VERCEL
 
 
+
+
+
+
+
+
   ? "/tmp/vca_uploads"
+
+
+
+
+
+
 
 
   : path.join(process.cwd(), "public", "uploads");
@@ -50,10 +153,34 @@ const VCA_UPLOAD_ROOT = process.env.VERCEL
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 const VCA_FRAMES_ROOT = process.env.VERCEL
 
 
+
+
+
+
+
+
   ? "/tmp/vca_frames"
+
+
+
+
+
+
 
 
   : path.join(process.cwd(), "public", "frames");
@@ -62,10 +189,34 @@ const VCA_FRAMES_ROOT = process.env.VERCEL
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 const VCA_POSE_IN_ROOT = process.env.VERCEL
 
 
+
+
+
+
+
+
   ? "/tmp/vca_pose_in"
+
+
+
+
+
+
 
 
   : path.join(process.cwd(), "pose", "in");
@@ -74,10 +225,34 @@ const VCA_POSE_IN_ROOT = process.env.VERCEL
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 const VCA_POSE_OUT_ROOT = process.env.VERCEL
 
 
+
+
+
+
+
+
   ? "/tmp/vca_pose_out"
+
+
+
+
+
+
 
 
   : path.join(process.cwd(), "pose", "out");
@@ -86,10 +261,34 @@ const VCA_POSE_OUT_ROOT = process.env.VERCEL
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 const VCA_REPORTS_ROOT = process.env.VERCEL
 
 
+
+
+
+
+
+
   ? "/tmp/vca_reports"
+
+
+
+
+
+
 
 
   : path.join(process.cwd(), "reports");
@@ -98,16 +297,52 @@ const VCA_REPORTS_ROOT = process.env.VERCEL
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 fs.mkdirSync(VCA_UPLOAD_ROOT, { recursive: true });
+
+
+
+
+
+
 
 
 fs.mkdirSync(VCA_FRAMES_ROOT, { recursive: true });
 
 
+
+
+
+
+
+
 fs.mkdirSync(VCA_POSE_IN_ROOT, { recursive: true });
 
 
+
+
+
+
+
+
 fs.mkdirSync(VCA_POSE_OUT_ROOT, { recursive: true });
+
+
+
+
+
+
 
 
 fs.mkdirSync(VCA_REPORTS_ROOT, { recursive: true });
@@ -116,22 +351,76 @@ fs.mkdirSync(VCA_REPORTS_ROOT, { recursive: true });
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 function vcaUploadUrl(rel: string) {
+
+
+
+
+
+
 
 
   return process.env.VERCEL ? `/api/uploads/${rel}` : `/uploads/${rel}`;
 
 
+
+
+
+
+
+
 }
+
+
+
+
+
+
 
 
 function vcaFrameUrl(rel: string) {
 
 
+
+
+
+
+
+
   return process.env.VERCEL ? `/api/frames/${rel}` : `/frames/${rel}`;
 
 
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -140,7 +429,19 @@ function vcaFrameUrl(rel: string) {
 async function __vcaDump(tag: string, payload: any) {
 
 
+
+
+
+
+
+
   try {
+
+
+
+
+
+
 
 
     if (process.env.NODE_ENV === "production") return;
@@ -149,19 +450,61 @@ async function __vcaDump(tag: string, payload: any) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     const jobId =
+
+
+
+
+
+
 
 
       payload?.id ??
 
 
+
+
+
+
+
+
       payload?.jobId ??
+
+
+
+
+
+
 
 
       payload?.job?.id ??
 
 
+
+
+
+
+
+
       payload?.data?.id ??
+
+
+
+
+
+
 
 
       `dev_${Date.now()}`;
@@ -170,7 +513,25 @@ async function __vcaDump(tag: string, payload: any) {
 
 
 
-    const dir = path.join(process.cwd(), ".data", "jobs", String(jobId));
+
+
+
+
+
+
+
+
+
+
+
+
+    const dir = path.join(__vcaDataRoot(), "jobs", String(jobId));
+
+
+
+
+
+
 
 
     await mkdir(dir, { recursive: true });
@@ -179,16 +540,52 @@ async function __vcaDump(tag: string, payload: any) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     const write = async (name: string, obj: any) => {
+
+
+
+
+
+
 
 
       if (obj === undefined) return;
 
 
+
+
+
+
+
+
       const p = path.join(dir, name);
 
 
+
+
+
+
+
+
       await writeFile(p, JSON.stringify(obj, null, 2), "utf8");
+
+
+
+
+
+
 
 
     };
@@ -197,7 +594,25 @@ async function __vcaDump(tag: string, payload: any) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     await write("response.json", payload);
+
+
+
+
+
+
 
 
     await write(`${tag}.json`, payload);
@@ -206,22 +621,86 @@ async function __vcaDump(tag: string, payload: any) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     // Optional common keys (if present)
+
+
+
+
+
+
 
 
     await write("ai_raw.json", payload?.ai_raw ?? payload?.aiRaw ?? payload?.raw ?? payload?.model_raw);
 
 
+
+
+
+
+
+
     await write("ai_parsed.json", payload?.ai_parsed ?? payload?.aiParsed ?? payload?.parsed ?? payload?.model_parsed);
+
+
+
+
+
+
 
 
     await write("ai_summary.json", payload?.ai_summary ?? payload?.aiSummary ?? payload?.summary ?? payload?.report);
 
 
+
+
+
+
+
+
   } catch {}
 
 
+
+
+
+
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -235,16 +714,55 @@ async function __vcaDump(tag: string, payload: any) {
 export async function POST(req: Request) {
 
 
+
+
+
+
+
+
   
 
 
-  const url = new URL(req.url);
+
+
+
+
+
+
+  
+
+
+  // ===== VCA_UPLOAD_TRYCATCH (AUTO) =====
+
+
+  try {
+
+
+const url = new URL(req.url);
+
+
+
+
+
+
 
 
 try {
 
 
+
+
+
+
+
+
     const form = await req.formData();
+
+
+
+
+
+
 
 
     const file = form.get("file");
@@ -253,19 +771,67 @@ try {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     if (!file || !(file instanceof File)) {
+
+
+
+
+
+
 
 
       return NextResponse.json({
 
 
+
+
+
+
+
+
   ok: false, error: "Missing file field 'file'." }, { status: 400 
+
+
+
+
+
+
 
 
 });
 
 
+
+
+
+
+
+
     }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -274,19 +840,55 @@ try {
     // Basic guardrails (local demo)
 
 
+
+
+
+
+
+
     const maxBytes = 75 * 1024 * 1024; // 75MB
+
+
+
+
+
+
 
 
     if (file.size > maxBytes) {
 
 
+
+
+
+
+
+
       return NextResponse.json({
+
+
+
+
+
+
 
 
   ok: false, error: "File too large for demo (max 75MB)." }, { status: 413 
 
 
+
+
+
+
+
+
 });
+
+
+
+
+
+
 
 
     }
@@ -295,16 +897,52 @@ try {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     const extGuess =
+
+
+
+
+
+
 
 
       file.type?.includes("mp4") ? ".mp4" :
 
 
+
+
+
+
+
+
       file.type?.includes("quicktime") ? ".mov" :
 
 
+
+
+
+
+
+
       file.name?.includes(".") ? "." + file.name.split(".").pop() :
+
+
+
+
+
+
 
 
       "";
@@ -313,16 +951,58 @@ try {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     const id = crypto.randomBytes(8).toString("hex");
+
+
+
+
+
+
 
 
     const safeName = `swing_${id}${extGuess}`;
 
 
+
+
+
+
+
+
     const outDir = VCA_UPLOAD_ROOT;
 
 
+
+
+
+
+
+
     const outPath = path.join(outDir, safeName);
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -334,7 +1014,25 @@ try {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     const buf = Buffer.from(await file.arrayBuffer());
+
+
+
+
+
+
 
 
     await writeFile(outPath, buf);
@@ -343,7 +1041,25 @@ try {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     // Public URL (Next serves /public at /)
+
+
+
+
+
+
 
 
     const url = vcaUploadUrl(safeName);
@@ -352,34 +1068,173 @@ try {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
     return NextResponse.json({
+
+
+
+
+
+
 
 
   ok: true, id, filename: safeName, url }, { status: 200 
 
 
+
+
+
+
+
+
 });
+
+
+
+
+
+
 
 
   } catch (e: any) {
 
 
+
+
+
+
+
+
     return NextResponse.json({
+
+
+
+
+
+
 
 
   videoUrl: (typeof url === "string" ? url : undefined),
 
 
+
+
+
+
+
+
  ok: false, error: e?.message ?? "Upload failed." }, { status: 500 
+
+
+
+
+
+
 
 
 });
 
 
+
+
+
+
+
+
   }
 
 
+
+
+
+
+
+
+  } catch (e: any) {
+    const msg = (e && (e.message || e.toString())) ? (e.message || e.toString()) : "Unknown error";
+    const st  = (e && e.stack) ? String(e.stack) : "";
+    return NextResponse.json({ ok: false, where: "api/upload:POST", error: msg, stackHead: st.slice(0, 900) }, { status: 500 });
+  }
+  // ===== VCA_UPLOAD_TRYCATCH (AUTO) =====
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
