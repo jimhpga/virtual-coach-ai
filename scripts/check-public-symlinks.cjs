@@ -1,12 +1,15 @@
 /* VCA_SAFE_REQUIRES: collision-proof requires for this script */
 const _fs = require("fs");
 const _path = require("path");
-/* VCA_ENSURE_DOTDATA: create .data in clean build env (Vercel/Linux) */
+/* VCA_ENSURE_DOTDATA: guarantee .data exists for Next build (Vercel/Linux) */
 try{
   const dataDir = _path.join(process.cwd(), ".data");
-  if(!_fs.existsSync(dataDir)) _fs.mkdirSync(dataDir, { recursive: true });
+  _fs.mkdirSync(dataDir, { recursive: true });
+  if(!_fs.existsSync(dataDir)) throw new Error(".data still missing after mkdirSync");
+  console.log("✅ Prebuild: ensured .data at " + dataDir);
 }catch(e){
-  // Don't fail build for this; it's just a safety net.
+  console.error("❌ Prebuild: failed to ensure .data: " + (e && e.message ? e.message : String(e)));
+  process.exit(1);
 }
 function walk(dir, out=[]) {
   for (const name of _fs.readdirSync(dir)) {
@@ -30,6 +33,7 @@ if (links.length) {
 } else {
   console.log("✅ Prebuild check: no symlinks under /public");
 }
+
 
 
 
