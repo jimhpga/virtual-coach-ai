@@ -2,17 +2,6 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-  // ===== VCA_DATA_ROOT_HELPER_V1 =====
-  function __vcaDataRoot(): string {
-    const env = process.env.VCA_DATA_DIR;
-    if (env && env.trim()) return env.trim();
-    // Vercel runtime/build: write only to /tmp (repo root isn't safe for writes)
-    if (process.env.VERCEL) return "/tmp/vca-data";
-    return __vcaDataRoot();
-  }
-  // ===== END VCA_DATA_ROOT_HELPER_V1 =====
-
-
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({} as any));
@@ -77,7 +66,6 @@ return NextResponse.json({ report });
 return NextResponse.json({ error: String(e?.message ?? e) }, { status: 500 });
   }
 }
-
 
 
 

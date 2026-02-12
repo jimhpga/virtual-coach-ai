@@ -14,7 +14,7 @@ async function __vcaDump(tag: string, payload: any) {
       payload?.data?.id ??
       `dev_${Date.now()}`;
 
-    const base = process.env.VCA_DATA_DIR || __vcaDataRoot();
+    const base = process.env.VCA_DATA_DIR || path.join(process.cwd(), ".data");
     const dir = path.join(base, "jobs", String(jobId));
     await mkdir(dir, { recursive: true });
 
@@ -36,17 +36,6 @@ async function __vcaDump(tag: string, payload: any) {
 
 // IMPORTANT: we call extract-pframes route handler as a module function (no HTTP hop)
 import { POST as ExtractPframesPOST } from "../extract-pframes/route";
-
-  // ===== VCA_DATA_ROOT_HELPER_V1 =====
-  function __vcaDataRoot(): string {
-    const env = process.env.VCA_DATA_DIR;
-    if (env && env.trim()) return env.trim();
-    // Vercel runtime/build: write only to /tmp (repo root isn't safe for writes)
-    if (process.env.VERCEL) return "/tmp/vca-data";
-    return __vcaDataRoot();
-  }
-  // ===== END VCA_DATA_ROOT_HELPER_V1 =====
-
 
 export async function POST(req: Request) {
   try {
@@ -137,7 +126,6 @@ export async function POST(req: Request) {
     );
   }
 }
-
 
 
 

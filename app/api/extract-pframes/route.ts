@@ -3,17 +3,6 @@ import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
 
-  // ===== VCA_DATA_ROOT_HELPER_V1 =====
-  function __vcaDataRoot(): string {
-    const env = process.env.VCA_DATA_DIR;
-    if (env && env.trim()) return env.trim();
-    // Vercel runtime/build: write only to /tmp (repo root isn't safe for writes)
-    if (process.env.VERCEL) return "/tmp/vca-data";
-    return __vcaDataRoot();
-  }
-  // ===== END VCA_DATA_ROOT_HELPER_V1 =====
-
-
 type Body = {
   videoUrl?: string;
   posePath?: string;
@@ -291,4 +280,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: e?.message || "extract-pframes failed" }, { status: 500 });
   }
 }
-

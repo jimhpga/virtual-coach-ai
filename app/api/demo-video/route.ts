@@ -1,18 +1,6 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { mkdir } from "fs/promises";
-
-  // ===== VCA_DATA_ROOT_HELPER_V1 =====
-  function __vcaDataRoot(): string {
-    const env = process.env.VCA_DATA_DIR;
-    if (env && env.trim()) return env.trim();
-    // Vercel runtime/build: write only to /tmp (repo root isn't safe for writes)
-    if (process.env.VERCEL) return "/tmp/vca-data";
-    return __vcaDataRoot();
-  }
-  // ===== END VCA_DATA_ROOT_HELPER_V1 =====
-
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -39,8 +27,7 @@ function newestMp4(dir: string): { dir: string; file: string; t: number; size: n
 
 export async function GET() {
   try {
-    const dataUploads = path.join(__vcaDataRoot(), "uploads");
-await mkdir(dataUploads, { recursive: true });
+    const dataUploads = path.join(process.cwd(), ".data", "uploads");
     const publicUploads = path.join(process.cwd(), "public", "uploads");
 
     const pick = newestMp4(dataUploads) ?? newestMp4(publicUploads);

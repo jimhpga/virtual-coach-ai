@@ -1,15 +1,4 @@
 import { NextResponse } from "next/server";
-
-  // ===== VCA_DATA_ROOT_HELPER_V1 =====
-  function __vcaDataRoot(): string {
-    const env = process.env.VCA_DATA_DIR;
-    if (env && env.trim()) return env.trim();
-    // Vercel runtime/build: write only to /tmp (repo root isn't safe for writes)
-    if (process.env.VERCEL) return "/tmp/vca-data";
-    return __vcaDataRoot();
-  }
-  // ===== END VCA_DATA_ROOT_HELPER_V1 =====
-
 function vcaExtractTopLevel(report:any){
   const scores = report?.scores ?? report?.data?.scores ?? null;
   const debug  = report?.debug  ?? report?.data?.debug  ?? null;
