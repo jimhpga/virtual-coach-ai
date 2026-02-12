@@ -1,4 +1,10 @@
 {
-  "build": { "env": { "VCA_DATA_DIR": "/tmp/vca-data" } },
-  "env": { "VCA_DATA_DIR": "/tmp/vca-data" }
+  "build": {
+    "env": {
+      "VCA_DATA_DIR": "/tmp/vca-data"
+    }
+  },
+  "env": {
+    "VCA_DATA_DIR": "/tmp/vca-data"
+  }
 }
