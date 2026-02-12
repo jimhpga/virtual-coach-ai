@@ -14,8 +14,7 @@ async function __vcaDump(tag: string, payload: any) {
       payload?.data?.id ??
       `dev_${Date.now()}`;
 
-    const base = process.env.VCA_DATA_DIR || path.join(process.cwd(), ".data");
-    const dir = path.join(base, "jobs", String(jobId));
+    const dir = path.join(process.cwd(), ".data", "jobs", String(jobId));
     await mkdir(dir, { recursive: true });
 
     const write = async (name: string, obj: any) => {
@@ -126,6 +125,5 @@ export async function POST(req: Request) {
     );
   }
 }
-
 
 
