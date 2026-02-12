@@ -1,15 +1,10 @@
 /* VCA_ENSURE_DOTDATA: create .data in clean build env (Vercel/Linux) */
-const fs = require("fs");
-const path = require("path");
 try{
   const dataDir = path.join(process.cwd(), ".data");
   if(!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 }catch(e){
   // Don't fail build for this; it's just a safety net.
 }
-const fs = require("fs");
-const path = require("path");
-
 function walk(dir, out=[]) {
   for (const name of fs.readdirSync(dir)) {
     const p = path.join(dir, name);
@@ -32,4 +27,5 @@ if (links.length) {
 } else {
   console.log("✅ Prebuild check: no symlinks under /public");
 }
+
 
