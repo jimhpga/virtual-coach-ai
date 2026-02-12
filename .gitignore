@@ -1,4 +1,4 @@
-# ===== VCA ignores =====
+﻿# ===== VCA ignores =====
 
 # Node / Next
 node_modules/
@@ -93,5 +93,4 @@ pose/scripts/
 pose/README_BIGFILES.txt
 
 !.data/.gitkeep
-
 
