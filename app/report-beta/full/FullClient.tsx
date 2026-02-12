@@ -281,7 +281,7 @@ function Panel(props: { title: string; right?: React.ReactNode; children: React.
             <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "baseline" }}>
               <div style={{ fontWeight: 900, fontSize: 12 }}>{nice(e.key)}</div>
               <div style={{ fontSize: 12, opacity: 0.85 }}>
-                Confidence: {e.v.confidenceLabel ?? "Low"}{typeof e.v.confidenceMin === "number" ?  () : ""}
+Confidence: {e.v.confidenceLabel ?? "Low"}{typeof e.v.confidenceMin === "number" ? ` (${Math.round(e.v.confidenceMin * 100)}%)` : ""}
               </div>
             </div>
 
@@ -613,6 +613,8 @@ fetch(src, { cache: "no-store" })
     </ReportShell>
   );
 }
+
+
 
 
 
