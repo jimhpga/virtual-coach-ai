@@ -91,3 +91,6 @@ pose/calib/
 pose/node/
 pose/scripts/
 pose/README_BIGFILES.txt
+
+!.data/.gitkeep
+
