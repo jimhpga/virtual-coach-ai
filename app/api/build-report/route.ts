@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
-import { vcaDebugBaseDir } from "@/lib/vcaDebugDir";
 import fs from "fs";
 
 async function __vcaDump(tag: string, payload: any) {
@@ -138,7 +137,6 @@ export async function POST(req: Request) {
     );
   }
 }
-
 
 
 
