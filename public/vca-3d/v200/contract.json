@@ -1,0 +1,23 @@
+{
+  "schema": "VCA_P1_P10_PRODUCTION_CONTRACT_V1",
+  "motion_precision_master": "V197_KINEMATIC_MOTION_MASTER",
+  "presentation_master": "V191_FINAL_PRESENTATION_MASTER",
+  "body_rollback": "V180_COMBINED_PRODUCTION_BASELINE",
+  "P10_body": "P10_BODY_EXTENSION_V2_SEGMENT_LOCK",
+  "P10_club": "P10_CLUB_PRESENTATION_V1",
+  "precision_through": "P9 / state64 / screen206",
+  "P10_status": "contextual finish-pose presentation only",
+  "forbidden_claims": [
+    "post-P9 clubhead speed",
+    "post-P9 angular velocity",
+    "post-P9 acceleration",
+    "post-P9 force/kinetic inference"
+  ],
+  "locked_components": [
+    "V170 shoulder",
+    "V172 hands",
+    "V175 neck",
+    "V177 shoes/waist/shorts",
+    "V191 presentation geometry"
+  ]
+}

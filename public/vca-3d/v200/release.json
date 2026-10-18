@@ -1,0 +1,36 @@
+{
+  "schema": "VCA_PRODUCTION_RELEASE_V200",
+  "status": "locked",
+  "date": "2026-10-18",
+  "render_master": "V200_P1_P10_PRODUCTION_MASTER",
+  "analytical_motion_master": "V197_KINEMATIC_MOTION_MASTER",
+  "presentation_geometry_master": "V191_FINAL_PRESENTATION_MASTER",
+  "body_rollback": "V180_COMBINED_PRODUCTION_BASELINE",
+  "data_contract": "SEQUENCE_P1_P10_PRODUCTION_V1",
+  "precision_range": {
+    "states": [
+      1,
+      64
+    ],
+    "checkpoints": "P1-P9",
+    "timing_valid": true
+  },
+  "context_range": {
+    "states": [
+      65,
+      77
+    ],
+    "checkpoint": "P10",
+    "timing_valid": false,
+    "kinetics_allowed": false
+  },
+  "files": {
+    "blend": "V200_P1_P10_PRODUCTION_MASTER/V200_P1_P10_PRODUCTION_MASTER.blend",
+    "build_script": "V200_P1_P10_PRODUCTION_MASTER/build_v200_p1_p10_production_master.py",
+    "face_video": "V200_P1_P10_PRODUCTION_MASTER/V200_FACE_FULL77.mp4",
+    "dtl_video": "V200_P1_P10_PRODUCTION_MASTER/V200_DTL_FULL77.mp4",
+    "sequence": "SEQUENCE_P1_P10_PRODUCTION_V1/sequence_p1_p10_production_v1.json",
+    "club": "SEQUENCE_P1_P10_PRODUCTION_V1/club_p1_p10_production_v1.json",
+    "contract": "SEQUENCE_P1_P10_PRODUCTION_V1/P1_P10_PRODUCTION_CONTRACT_V1.json"
+  }
+}
