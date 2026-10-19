@@ -14,6 +14,7 @@ function vcaPickPriorityFault(rankedFaults: any[]) {
 
 import ReadyBundleCoachTools from "../_shared/ReadyBundleCoachTools";
 import SwingProofPanel from "../SwingProofPanel";
+import ModelSwing3DPanel from "../ModelSwing3DPanel";
 import React, { useState } from "react";
 import ReportShell from "../_ui/ReportShell";
 import { getPPosition, type VcaPPositionId } from "../../../lib/p_positions";
@@ -178,18 +179,26 @@ const FALLBACK: FullData = {
     },
     {
       p: 8,
-      title: "Trail arm parallel follow-through",
-      coachNotes: ["Extension is improving; keep rotation continuous."],
-      commonMisses: ["Arms outracing the body and flipping."],
-      drills: ["Hold P8 for 2 seconds-feel balanced extension."],
+      title: "Shaft parallel follow-through",
+      coachNotes: ["Arms extend through impact while the body keeps rotating."],
+      commonMisses: ["Release stalling while the hands flip past the body."],
+      drills: ["Hold P8 for 2 seconds - chest turning, arms extended."],
       status: "ontrack",
     },
     {
       p: 9,
+      title: "Trail arm parallel follow-through",
+      coachNotes: ["Release continues around the body with balance moving fully lead-side."],
+      commonMisses: ["Rotation stopping too early or the club exiting too vertically."],
+      drills: ["P9 hold: trail arm extended, chest continuing left around the body."],
+      status: "ontrack",
+    },
+    {
+      p: 10,
       title: "Finish",
-      coachNotes: ["Tall, balanced finish with chest to target."],
-      commonMisses: ["Falling back toward toes/heels."],
-      drills: ["Finish holds (3 seconds) after every practice swing."],
+      coachNotes: ["Tall, fully rotated finish that can be held comfortably."],
+      commonMisses: ["Falling back, stepping out, or losing the finish under speed."],
+      drills: ["Finish hold: freeze for 3 seconds after every practice swing."],
       status: "ontrack",
     },
   ],
@@ -560,7 +569,7 @@ fetch(src, { cache: "no-store" })
                   </div>
                   <div style={{ display:"flex", gap:10, alignItems:"center" }}>
                     {pill((c as any).status ?? (c.p === 7 ? "priority" : "needs"))}
-                    <span style={{ fontSize: 12, opacity: 0.75 }}>{isOpen ? "Ã¢â€“Â¾" : "+"}</span>
+                    <span style={{ fontSize: 12, opacity: 0.75 }}>{isOpen ? "▾" : "+"}</span>
                   </div>
                 </button>
 
@@ -606,6 +615,8 @@ fetch(src, { cache: "no-store" })
         </Panel>
       </div>
       </div>
+
+      <ModelSwing3DPanel />
 
       <div style={{ marginTop: 10, fontSize: 11, opacity: 0.55, textAlign: "center" }}>
         Virtual Coach AI - demo report. If something doesn't fit, it may be your swing or your feel and your hand.

@@ -93,5 +93,6 @@ pose/scripts/
 pose/README_BIGFILES.txt
 
 !.data/.gitkeep
-
-
+# VCA 3D locked runtime assets
+!public/vca-3d/
+!public/vca-3d/*.mp4

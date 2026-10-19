@@ -1,0 +1,54 @@
+﻿{
+  "id": "vca-3d-production-master",
+  "version": "V309",
+  "status": "locked",
+  "masters": {
+    "animation": "V309_FULL_SEQUENCE_ANIMATION_GATE",
+    "presentation": "V308_PRESENTATION_MASTER_P1_P10",
+    "analyticalMotion": "V197_KINEMATIC_MOTION_MASTER"
+  },
+  "sequence": {
+    "renderedStates": 77,
+    "timingValidStates": [1, 64],
+    "contextStates": [65, 77],
+    "fps": 60,
+    "trueSpeedDurationSeconds": 1.283333,
+    "slow4xDurationSeconds": 5.116667
+  },
+  "checkpoints": {
+    "P1": 1,
+    "P2": 12,
+    "P3": 23,
+    "P4": 39,
+    "P5": 49,
+    "P6": 53,
+    "P7": 56,
+    "P8": 59,
+    "P9": 64,
+    "P10": 77
+  },
+  "assets": {
+    "faceTrueSpeed": "FACE_TRUE_SPEED_60FPS.mp4",
+    "dtlTrueSpeed": "DTL_TRUE_SPEED_60FPS.mp4",
+    "faceSlow4x": "FACE_SLOW4X_60FPS.mp4",
+    "dtlSlow4x": "DTL_SLOW4X_60FPS.mp4",
+    "sideBySideTrueSpeed": "FACE_DTL_TRUE_SPEED_60FPS.mp4",
+    "sideBySideSlow4x": "FACE_DTL_SLOW4X_60FPS.mp4",
+    "faceContactSheet": "FACE_P1_P10_CONTACT_SHEET.jpg",
+    "dtlContactSheet": "DTL_P1_P10_CONTACT_SHEET.jpg",
+    "screenSpaceLandmarks": "SCREENSPACE_LANDMARKS.json",
+    "blendMaster": "VCA_3D_ANIMATION_MASTER.blend",
+    "buildScript": "build_animation_master.py"
+  },
+  "validation": {
+    "p1ToP10FaceAndDtl": true,
+    "full77StateFaceAndDtl": true,
+    "impactPostImpactContinuity": true,
+    "finishContextContinuity": true,
+    "noDroppedFrames": true
+  },
+  "rules": {
+    "doNotUseObsoleteTimingEncodes": true,
+    "doNotModifyLockedPresentationWithoutFullSequenceRegression": true
+  }
+}
