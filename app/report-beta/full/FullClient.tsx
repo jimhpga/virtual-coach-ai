@@ -395,27 +395,52 @@ if(!Array.isArray((data as any).pchecks) || ((data as any).pchecks?.length ?? 0)
   const qs2 = (typeof window !== "undefined") ? new URLSearchParams(window.location.search) : null;
   const srcQ2 = qs2?.get("src") || "";
   const jobIdQ2 = qs2?.get("jobId") || "";
-  // Primary: direct JSON URL (rep.url). Fallback: try local API by jobId if present.
-  const resolvedSrc = srcQ2 || (jobIdQ2 ? (`/api/report?id=${encodeURIComponent(jobIdQ2)}`) : "VCA_DEMO_ANALYZE_SWING");
-  const srcFromQuery = resolvedSrc;
-  
-if (!src) return;
-fetch(src, { cache: "no-store" })
+  // Primary: direct JSON URL. Secondary: explicit jobId. Otherwise use session/demo fallback.
+  const fetchSrc = srcQ2 || (jobIdQ2 ? (`/api/job/${encodeURIComponent(jobIdQ2)}`) : src);
+
+if (!fetchSrc) return;
+fetch(fetchSrc, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => {
-        // If someone passes card JSON (score/tourDna/faults/drills), keep full fallback but inject what exists
+        // Accept direct report JSON, { report }, and bundle-backed shapes.
         if (!j) return;
+        const root: any = (j as any).report ?? j;
+        const bundle: any = root?.bundle ?? (j as any).bundle ?? null;
+
         setData((prev) => ({
           ...prev,
-          swingScore: j.swingScore ?? prev.swingScore,
-      headline: (j.headline ?? (prev as any).headline ?? ""),
-      rankedFaults: (Array.isArray(j.rankedFaults) ? j.rankedFaults : ((prev as any).rankedFaults ?? [])),
-      poseSnap: (j.poseSnap ?? (prev as any).poseSnap ?? null),
-          tourDna: j.tourDna ?? prev.tourDna,
-          priority: j.priority ?? prev.priority,
-          faults: j.faults ?? prev.faults,
-          drills: j.drills ?? prev.drills,
-        }));
+          swingScore: root.swingScore ?? prev.swingScore,
+          headline: (root.headline ?? (prev as any).headline ?? ""),
+          rankedFaults: (
+            Array.isArray(root.rankedFaults)
+              ? root.rankedFaults
+              : ((prev as any).rankedFaults ?? [])
+          ),
+          poseSnap: (root.poseSnap ?? (prev as any).poseSnap ?? null),
+          pose: (root.pose ?? (prev as any).pose ?? null),
+          p5p6p7ShaftArm: (
+            root.p5p6p7ShaftArm ??
+            bundle?.p5p6p7ShaftArm ??
+            (prev as any).p5p6p7ShaftArm ??
+            null
+          ),
+          p3p5Mirror: (
+            root.p3p5Mirror ??
+            bundle?.p3p5Mirror ??
+            (prev as any).p3p5Mirror ??
+            null
+          ),
+          readyBundle: (
+            root.readyBundle ??
+            bundle?.readyBundle ??
+            (prev as any).readyBundle ??
+            null
+          ),
+          tourDna: root.tourDna ?? prev.tourDna,
+          priority: root.priority ?? prev.priority,
+          faults: root.faults ?? prev.faults,
+          drills: root.drills ?? prev.drills,
+        } as any));
       })
       .catch(() => {});
   }, []);
