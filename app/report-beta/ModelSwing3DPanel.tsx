@@ -1656,10 +1656,10 @@ export default function ModelSwing3DPanel({
             }}
           >
             <div style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: 0.45 }}>
-              Visual Geometry Delta • P{selectedP}
+              Screen-Space Geometry Reference • P{selectedP}
             </div>
-            <div style={{ fontSize: 10, opacity: 0.52 }}>
-              Camera-space estimate • match player camera to {projectionView === "face" ? "Face On" : "DTL"} for valid comparison
+            <div style={{ fontSize: 10, opacity: 0.58 }}>
+              Camera-space estimate only • reference view, not used for scoring
             </div>
           </div>
 
@@ -1670,7 +1670,7 @@ export default function ModelSwing3DPanel({
               fontSize: 11,
             }}
           >
-            {["Metric", "Player", "Model", "Δ"].map((h) => (
+            {["Metric", "Player cam.", "Model ref.", "Approx Δ"].map((h) => (
               <div
                 key={h}
                 style={{
@@ -1685,26 +1685,20 @@ export default function ModelSwing3DPanel({
             ))}
 
             {visualDeltas.rows.flatMap((row) => {
-              const deltaAbs = Math.abs(row.delta);
-              const deltaTone =
-                deltaAbs <= (row.unit === "°" ? 3 : 4)
-                  ? "rgba(110,255,170,0.95)"
-                  : deltaAbs <= (row.unit === "°" ? 7 : 8)
-                    ? "rgba(255,210,90,0.95)"
-                    : "rgba(255,125,125,0.95)";
+              const deltaTone = "rgba(255,215,135,0.92)";
 
               return [
                 <div key={`${row.label}-label`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.05)", fontWeight: 800 }}>
                   {row.label}
                 </div>,
                 <div key={`${row.label}-player`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                  {row.player.toFixed(1)}{row.unit}
+                  ~{row.player.toFixed(1)}{row.unit}
                 </div>,
                 <div key={`${row.label}-model`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                  {row.model.toFixed(1)}{row.unit}
+                  ~{row.model.toFixed(1)}{row.unit}
                 </div>,
                 <div key={`${row.label}-delta`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.05)", color: deltaTone, fontWeight: 900 }}>
-                  {row.delta >= 0 ? "+" : ""}{row.delta.toFixed(1)}{row.unit}
+                  ~{row.delta >= 0 ? "+" : ""}{row.delta.toFixed(1)}{row.unit}
                 </div>,
               ];
             })}
@@ -1723,7 +1717,7 @@ export default function ModelSwing3DPanel({
           lineHeight: 1.45,
         }}
       >
-        <b>Compare P{selectedP}:</b> body position, hand path, shaft orientation, pressure/rotation sequence and club delivery. This is the first production layer of the player-vs-model biomechanics viewer.
+        <b>Compare P{selectedP}:</b> use measured shaft, delivery and kinematic modules for coaching decisions; use screen-space geometry only as a visual reference.
       </div>
 
       <div
