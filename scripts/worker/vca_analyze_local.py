@@ -846,6 +846,8 @@ def main():
             phase_path,
             "--out",
             p56_path,
+            "--pose",
+            pose_path,
             "--repo",
             repo,
             "--minConfidence",

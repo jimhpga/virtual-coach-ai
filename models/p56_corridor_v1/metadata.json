@@ -321,5 +321,43 @@
     "learned corridor model",
     "view-specific human-derived P4->P7 fractions",
     "legacy timing scaffold"
-  ]
+  ],
+  "independent_holdout": {
+    "schema": "VCA_P56_INDEPENDENT_HOLDOUT_V1",
+    "cohort": "Blind-P5-P6-Mini-Gold",
+    "trainingOverlap": false,
+    "usableCandidates": 13,
+    "P5": {
+      "n": 13,
+      "maeFrames": 0.923,
+      "medianAbsErrorFrames": 1.0,
+      "maxAbsErrorFrames": 4,
+      "within1Frame": 10,
+      "within2Frames": 12
+    },
+    "P6": {
+      "n": 13,
+      "maeFrames": 0.769,
+      "medianAbsErrorFrames": 1.0,
+      "maxAbsErrorFrames": 1,
+      "within1Frame": 13,
+      "within2Frames": 13
+    },
+    "viewAccuracy": {
+      "correct": 12,
+      "total": 13,
+      "accuracy": 0.923
+    },
+    "sources": {
+      "cohortZip": {
+        "path": "Blind-P5-P6-Mini-Gold-Labeler.zip",
+        "sha256": "3d99c83a86ce292e206f02205d4de826f43c17098970ac4b7dd99c68c229b554"
+      },
+      "humanLabels": {
+        "path": "human-labels.completed.json",
+        "sha256": "48b5f78a81d30fe2e1409bd18662cb6cf04a7932c34ccaf91cb9667c2b9e43d9"
+      }
+    },
+    "detailFile": "mini_gold_holdout.json"
+  }
 }

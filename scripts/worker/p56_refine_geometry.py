@@ -1,5 +1,6 @@
 import argparse, json, os, sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import cv2
 import joblib
@@ -84,6 +85,7 @@ def main():
     ap.add_argument("--video", required=True)
     ap.add_argument("--phases", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--pose", default="")
     ap.add_argument("--repo", default="")
     ap.add_argument("--minConfidence", type=float, default=0.60)
     args = ap.parse_args()
@@ -116,26 +118,66 @@ def main():
         raise RuntimeError(f"Could not open video: {video}")
 
     fps = float(cap.get(cv2.CAP_PROP_FPS) or 30.0)
-    pose = mp.solutions.pose.Pose(
-        static_image_mode=True,
-        model_complexity=1,
-        enable_segmentation=False,
-        min_detection_confidence=0.25,
-    )
     LM = mp.solutions.pose.PoseLandmark
+
+    cached_pose = {}
+    if args.pose and os.path.isfile(args.pose):
+        pose_json = load_json(args.pose)
+        for idx, fr in enumerate(pose_json.get("frames") or []):
+            landmarks = fr.get("landmarks") or []
+            if len(landmarks) < 33:
+                continue
+            fi = int(fr.get("i", fr.get("frame", idx)))
+            cached_pose[fi] = landmarks
+
+    def cached_result(fi):
+        landmarks = cached_pose.get(fi)
+        if not landmarks:
+            return None
+        objs = [
+            SimpleNamespace(
+                x=float(lm.get("x", 0.0)),
+                y=float(lm.get("y", 0.0)),
+                z=float(lm.get("z", 0.0)),
+                visibility=float(lm.get("v", lm.get("visibility", 1.0))),
+            )
+            for lm in landmarks
+        ]
+        return SimpleNamespace(
+            pose_landmarks=SimpleNamespace(landmark=objs)
+        )
+
+    pose_engine = None
+    if not cached_pose:
+        pose_engine = mp.solutions.pose.Pose(
+            static_image_mode=True,
+            model_complexity=1,
+            enable_segmentation=False,
+            min_detection_confidence=0.25,
+        )
 
     by_view = {"face_on": [], "dtl": []}
     decoded = 0
+    pose_reused = 0
     span = max(1, p7 - p4)
 
     try:
+        cap.set(cv2.CAP_PROP_POS_FRAMES, p4)
         for fi in range(p4, p7 + 1):
-            cap.set(cv2.CAP_PROP_POS_FRAMES, fi)
             ok, image = cap.read()
             if not ok:
                 continue
 
-            result = pose.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            result = cached_result(fi)
+            if result is not None:
+                pose_reused += 1
+            elif pose_engine is not None:
+                result = pose_engine.process(
+                    cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+                )
+            else:
+                result = None
+
             decoded += 1
             for view in ("face_on", "dtl"):
                 x = frame_base_features(
@@ -148,7 +190,8 @@ def main():
                 if x is not None:
                     by_view[view].append({"frame": fi, "x": x})
     finally:
-        pose.close()
+        if pose_engine is not None:
+            pose_engine.close()
         cap.release()
 
     results = {}
@@ -167,6 +210,8 @@ def main():
             "P4": p4,
             "P7": p7,
             "decodedFrames": decoded,
+            "poseReusedFrames": pose_reused,
+            "poseSource": "cached_dense_pose" if cached_pose else "fresh_mediapipe",
             "minConfidence": args.minConfidence,
             "views": {},
         }
@@ -236,14 +281,11 @@ def main():
             "views": results,
             "fps": fps,
             "decodedFrames": decoded,
+            "poseReusedFrames": pose_reused,
+            "poseSource": "cached_dense_pose" if cached_pose else "fresh_mediapipe",
             "modelValidation": {
                 "obsLeaveOneSwingOut": metadata.get("held_out_validation"),
-                "miniGoldHoldout": {
-                    "P5MAEFrames": 0.923,
-                    "P6MAEFrames": 0.769,
-                    "P5Within2Frames": "12/13",
-                    "P6Within1Frame": "13/13",
-                },
+                "miniGoldHoldout": metadata.get("independent_holdout"),
             },
         }
 
