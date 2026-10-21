@@ -21,11 +21,11 @@ def main():
     every_n = max(1, int(args.sample or 1))
 
     vp = Path(in_video)
-    mp = Path(model_task)
+    model_path = Path(model_task)
     if not vp.exists():
         die(f"Could not find video: {vp}")
-    if not mp.exists():
-        die(f"Could not find model: {mp}")
+    if not model_path.exists():
+        die(f"Could not find model: {model_path}")
 
     try:
         from mediapipe.tasks import python as mp_python
@@ -52,7 +52,7 @@ def main():
         frame_count = tmp
 
     # VIDEO mode = tracking across frames
-    base = mp_python.BaseOptions(model_asset_path=str(mp))
+    base = mp_python.BaseOptions(model_asset_path=str(model_path))
     options = vision.PoseLandmarkerOptions(
         base_options=base,
         running_mode=vision.RunningMode.VIDEO,
@@ -107,7 +107,7 @@ def main():
         "fps": fps,
         "frame_count": frame_count,
         "sample": every_n,
-        "model": mp.name,
+        "model": model_path.name,
         "non_empty": non_empty,
         "total_frames_written": len(frames_out),
         "running_mode": "VIDEO",
