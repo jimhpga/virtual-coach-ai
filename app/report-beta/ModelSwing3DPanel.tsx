@@ -24,7 +24,13 @@ type ClubFrame = {
   clubhead_m: Vec3;
 };
 type ProjectionView = "face" | "dtl";
-type PlayerPoseLm = { x: number; y: number; z?: number; v?: number };
+type PlayerPoseLm = {
+  x: number;
+  y: number;
+  z?: number;
+  v?: number;
+  visibility?: number;
+};
 type PlayerPoseFrame = {
   frame: number;
   t?: number;
@@ -182,26 +188,118 @@ export default function ModelSwing3DPanel({
       [26, 28],
     ];
 
-    const handTrail = frames
-      .filter((f) => f.frame <= selectedPose.frame)
+    const vis = (p?: PlayerPoseLm | null) => {
+      if (!p) return 0;
+      if (typeof p.v === "number") return p.v;
+      if (typeof p.visibility === "number") return p.visibility;
+      return 1;
+    };
+
+    const trailStartFrame = selectedPose.frame - 16;
+
+    const rawHandTrail = [...frames]
+      .filter(
+        (f) =>
+          f.frame <= selectedPose.frame &&
+          f.frame >= trailStartFrame
+      )
+      .sort((a, b) => a.frame - b.frame)
       .map((f) => {
         const l = f.landmarks?.[15];
         const r = f.landmarks?.[16];
         if (!l || !r) return null;
-        if (
-          typeof l.x !== "number" ||
-          typeof l.y !== "number" ||
-          typeof r.x !== "number" ||
-          typeof r.y !== "number"
-        ) {
+
+        const lv = vis(l);
+        const rv = vis(r);
+        const lOk = Number.isFinite(l.x) && Number.isFinite(l.y) && lv >= 0.2;
+        const rOk = Number.isFinite(r.x) && Number.isFinite(r.y) && rv >= 0.2;
+
+        if (!lOk && !rOk) return null;
+
+        if (lOk && rOk) {
+          const sep = Math.hypot(l.x - r.x, l.y - r.y);
+
+          // Golf hands should remain close together. Large separation is usually
+          // a wrist swap/occlusion error, not real grip motion.
+          if (sep <= 0.18) {
+            const wl = Math.max(0.05, lv);
+            const wr = Math.max(0.05, rv);
+            const total = wl + wr;
+            return {
+              frame: f.frame,
+              x: (l.x * wl + r.x * wr) / total,
+              y: (l.y * wl + r.y * wr) / total,
+              quality: Math.min(1, (lv + rv) / 2),
+            };
+          }
+
+          // If one wrist is clearly more trustworthy, keep the stronger one.
+          if (Math.abs(lv - rv) >= 0.28) {
+            const best = lv > rv ? l : r;
+            return {
+              frame: f.frame,
+              x: best.x,
+              y: best.y,
+              quality: Math.max(lv, rv) * 0.82,
+            };
+          }
+
           return null;
         }
+
+        const best = lOk ? l : r;
+        const q = lOk ? lv : rv;
+        if (!best || q < 0.45) return null;
+
         return {
-          x: ((l.x + r.x) / 2) * 100,
-          y: ((l.y + r.y) / 2) * 100,
+          frame: f.frame,
+          x: best.x,
+          y: best.y,
+          quality: q * 0.78,
         };
       })
-      .filter((p): p is { x: number; y: number } => Boolean(p));
+      .filter(
+        (p): p is { frame: number; x: number; y: number; quality: number } =>
+          Boolean(p)
+      );
+
+    const deJumped: typeof rawHandTrail = [];
+    for (const p of rawHandTrail) {
+      const prev = deJumped[deJumped.length - 1];
+      if (!prev) {
+        deJumped.push(p);
+        continue;
+      }
+
+      const frameGap = Math.max(1, p.frame - prev.frame);
+      const jump = Math.hypot(p.x - prev.x, p.y - prev.y);
+      const allowed = 0.09 + Math.min(0.10, frameGap * 0.018);
+      const isSelectedPoint = p.frame === selectedPose.frame;
+
+      if (jump <= allowed || isSelectedPoint) {
+        deJumped.push(p);
+      }
+    }
+
+    // Always keep the latest trustworthy hand location so the trail terminates
+    // at the selected P-position rather than floating behind the golfer.
+    const latestRaw = rawHandTrail[rawHandTrail.length - 1];
+    if (
+      latestRaw &&
+      !deJumped.some((p) => p.frame === latestRaw.frame)
+    ) {
+      deJumped.push(latestRaw);
+    }
+
+    const handTrail = deJumped.map((p, i, arr) => {
+      const a = arr[Math.max(0, i - 1)];
+      const b = p;
+      const c = arr[Math.min(arr.length - 1, i + 1)];
+      return {
+        x: ((a.x + b.x + c.x) / 3) * 100,
+        y: ((a.y + b.y + c.y) / 3) * 100,
+      };
+    });
 
     const handPath = handTrail
       .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
