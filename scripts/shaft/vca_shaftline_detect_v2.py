@@ -52,6 +52,7 @@ def main():
     ap.add_argument("--out",required=True)
     ap.add_argument("--proxyAngle",default=None)
     ap.add_argument("--debugImg",default=None)
+    ap.add_argument("--roiScale",type=float,default=0.34)
     args=ap.parse_args()
 
     img=cv2.imread(args.img)
@@ -121,8 +122,8 @@ def main():
         if args.proxyAngle is not None: proxy=float(args.proxyAngle)
     except: proxy=None
 
-    # Large enough to contain most of the shaft, but still centered on the hands.
-    radius=int(round(0.34*min(w,h)))
+    roi_scale=clamp(float(args.roiScale),0.20,0.70)
+    radius=int(round(roi_scale*min(w,h)))
     x0=max(0,int(gx-radius)); x1=min(w,int(gx+radius))
     y0=max(0,int(gy-radius)); y1=min(h,int(gy+radius))
     roi=img[y0:y1,x0:x1]

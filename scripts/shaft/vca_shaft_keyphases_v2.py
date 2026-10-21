@@ -173,6 +173,10 @@ def main():
 
         run([sys.executable,anchor_script,"--img",img_path,"--out",grip_path])
         cmd=[sys.executable,shaft_script,"--img",img_path,"--grip",grip_path,"--out",shaft_path]
+        # Impact needs a wider grip-centered search because the shaft extends farther
+        # below the hands; earlier phases stay tight to avoid ground/background edges.
+        if phase == "P7":
+            cmd += ["--roiScale","0.55"]
         if args.debug:
             cmd += ["--debugImg",debug_path]
         run(cmd)
