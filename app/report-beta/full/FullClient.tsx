@@ -370,6 +370,9 @@ export default function FullClient() {
     setOpenP((cur) => (cur === p ? null : p));
   }
 const [data, setData] = React.useState<FullData>(FALLBACK);
+const [muxResolveStatus, setMuxResolveStatus] = React.useState<
+  "idle" | "resolving" | "pending" | "ready" | "error"
+>("idle");
 
 // ===== VCA_NORM_PCHECKS (AUTO) =====
 // Keep the UI stable: prefer pchecks, but accept API contract p_checkpoints and common aliases.
@@ -380,6 +383,13 @@ if(!Array.isArray((data as any).pchecks) || ((data as any).pchecks?.length ?? 0)
 }
 // ===== /VCA_NORM_PCHECKS (AUTO) =====
   const priority = vcaPickPriorityFault(((data as any)?.rankedFaults) || []);
+  const reportId = String((data as any)?.id ?? "");
+  const muxUploadId = String((data as any)?.muxUploadId ?? "");
+  const muxPlaybackId = String((data as any)?.muxPlaybackId ?? "");
+  const directVideoUrl = String((data as any)?.videoUrl ?? "");
+  const muxEmbedUrl = muxPlaybackId
+    ? `https://player.mux.com/${encodeURIComponent(muxPlaybackId)}`
+    : "";
 
   React.useEffect(() => {
     // Same source logic as card: ?src=, sessionStorage, fallback demo json
@@ -409,6 +419,26 @@ fetch(fetchSrc, { cache: "no-store" })
 
         setData((prev) => ({
           ...prev,
+          id: (root.id ?? (prev as any).id ?? null),
+          muxPlaybackId: (
+            root.muxPlaybackId ??
+            root.video?.muxPlaybackId ??
+            (prev as any).muxPlaybackId ??
+            null
+          ),
+          muxUploadId: (
+            root.muxUploadId ??
+            root.video?.muxUploadId ??
+            (prev as any).muxUploadId ??
+            null
+          ),
+          videoUrl: (
+            root.videoUrl ??
+            root.video?.url ??
+            root.meta?.source?.videoUrl ??
+            (prev as any).videoUrl ??
+            null
+          ),
           swingScore: root.swingScore ?? prev.swingScore,
           headline: (root.headline ?? (prev as any).headline ?? ""),
           rankedFaults: (
@@ -456,6 +486,65 @@ fetch(fetchSrc, { cache: "no-store" })
       })
       .catch(() => {});
   }, []);
+
+  React.useEffect(() => {
+    if (!reportId || !muxUploadId || muxPlaybackId) {
+      if (muxPlaybackId) setMuxResolveStatus("ready");
+      return;
+    }
+
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let attempts = 0;
+
+    const poll = async () => {
+      if (cancelled) return;
+      attempts += 1;
+      setMuxResolveStatus(attempts === 1 ? "resolving" : "pending");
+
+      try {
+        const res = await fetch("/api/resolve-mux", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id: reportId, uploadId: muxUploadId }),
+          cache: "no-store",
+        });
+        const json = await res.json().catch(() => ({}));
+
+        if (cancelled) return;
+
+        if (res.ok && json?.status === "ready" && json?.playbackId) {
+          setData((prev) => ({
+            ...prev,
+            muxPlaybackId: json.playbackId,
+            muxUploadId: null,
+          } as any));
+          setMuxResolveStatus("ready");
+          return;
+        }
+
+        if (attempts < 15) {
+          timer = setTimeout(poll, 2000);
+          return;
+        }
+
+        setMuxResolveStatus("pending");
+      } catch {
+        if (attempts < 6) {
+          timer = setTimeout(poll, 2000);
+        } else {
+          setMuxResolveStatus("error");
+        }
+      }
+    };
+
+    timer = setTimeout(poll, 350);
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [reportId, muxUploadId, muxPlaybackId]);
 
   return (
     <ReportShell
@@ -546,7 +635,91 @@ fetch(fetchSrc, { cache: "no-store" })
             Copy link
           </button>
         </div>
-      </div>{/* TOP ROW: Overview + Power/Reliability like screenshot */}
+      </div>
+
+      {(muxEmbedUrl || directVideoUrl || muxUploadId) && (
+        <div style={{ marginBottom: 14 }}>
+          <Panel
+            title="Swing Video"
+            right={
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 900,
+                  letterSpacing: 0.35,
+                  textTransform: "uppercase",
+                  opacity: 0.72,
+                }}
+              >
+                {muxPlaybackId
+                  ? "Ready"
+                  : directVideoUrl
+                    ? "Ready"
+                    : muxResolveStatus === "error"
+                      ? "Video still processing"
+                      : "Processing in background"}
+              </span>
+            }
+          >
+            <div
+              style={{
+                display: "grid",
+                placeItems: "center",
+                minHeight: muxEmbedUrl || directVideoUrl ? 0 : 130,
+              }}
+            >
+              {muxEmbedUrl ? (
+                <iframe
+                  src={muxEmbedUrl}
+                  title="Uploaded golf swing"
+                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  style={{
+                    width: "100%",
+                    maxWidth: 520,
+                    aspectRatio: "9 / 16",
+                    maxHeight: 620,
+                    border: 0,
+                    borderRadius: 14,
+                    background: "#000",
+                  }}
+                />
+              ) : directVideoUrl ? (
+                <video
+                  src={directVideoUrl}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  style={{
+                    width: "100%",
+                    maxWidth: 520,
+                    maxHeight: 620,
+                    display: "block",
+                    borderRadius: 14,
+                    background: "#000",
+                    objectFit: "contain",
+                  }}
+                />
+              ) : (
+                <div
+                  style={{
+                    padding: "22px 18px",
+                    textAlign: "center",
+                    fontSize: 12,
+                    lineHeight: 1.5,
+                    opacity: 0.72,
+                  }}
+                >
+                  Your report is ready. The swing video is finishing Mux processing and
+                  will appear here automatically.
+                </div>
+              )}
+            </div>
+          </Panel>
+        </div>
+      )}
+
+      {/* TOP ROW: Overview + Power/Reliability like screenshot */}
       <div style={{ display: "grid", gridTemplateColumns: "1.45fr 1fr", gap: 14, marginBottom: 14 }}>
         <Panel
   title="P1 - P10 Checkpoints"
