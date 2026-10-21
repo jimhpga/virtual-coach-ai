@@ -504,6 +504,144 @@ def main():
         )
         return
 
+    # Fast temporal-scale gate. Slow-motion clips can preserve useful shape,
+    # but millisecond-derived P5/P6 timing is not trustworthy when playback is scaled.
+    preflight_geom = []
+    for fr in preflight_pose.get("frames") or []:
+        lm = fr.get("landmarks") or []
+        if len(lm) < 25:
+            continue
+        try:
+            i = int(fr.get("i", fr.get("frame", 0)))
+            wx = (float(lm[15]["x"]) + float(lm[16]["x"])) / 2.0
+            wy = (float(lm[15]["y"]) + float(lm[16]["y"])) / 2.0
+            hx = (float(lm[23]["x"]) + float(lm[24]["x"])) / 2.0
+            hy = (float(lm[23]["y"]) + float(lm[24]["y"])) / 2.0
+        except Exception:
+            continue
+        preflight_geom.append(
+            (i, wy, ((wx - hx) ** 2 + (wy - hy) ** 2) ** 0.5)
+        )
+
+    temporal = {
+        "detected": False,
+        "p4Frame": None,
+        "p7Frame": None,
+        "downswingSeconds": None,
+        "wristDropNorm": None,
+        "thresholdSeconds": 1.0,
+        "minimumWristDropNorm": 0.08,
+    }
+    if len(preflight_geom) >= 6:
+        preflight_meta = preflight_pose.get("meta") or {}
+        frame_count = int(
+            preflight_meta.get("frame_count")
+            or (preflight_geom[-1][0] + 1)
+        )
+        fps = float(preflight_meta.get("fps") or 30.0)
+        first_half = [
+            r for r in preflight_geom if r[0] <= int(frame_count * 0.55)
+        ]
+        if not first_half:
+            first_half = preflight_geom[: max(3, len(preflight_geom) // 2)]
+
+        p4_row = max(first_half, key=lambda r: r[2])
+        after = [r for r in preflight_geom if r[0] > p4_row[0]]
+        if after:
+            p7_row = max(after, key=lambda r: r[1])
+            downswing_seconds = (
+                float(p7_row[0] - p4_row[0]) / max(1e-6, fps)
+            )
+            wrist_drop = float(p7_row[1] - p4_row[1])
+            slow_motion = downswing_seconds > 1.0 and wrist_drop >= 0.08
+            temporal = {
+                "detected": bool(slow_motion),
+                "p4Frame": int(p4_row[0]),
+                "p7Frame": int(p7_row[0]),
+                "downswingSeconds": round(downswing_seconds, 3),
+                "wristDropNorm": round(wrist_drop, 6),
+                "thresholdSeconds": 1.0,
+                "minimumWristDropNorm": 0.08,
+            }
+
+    if temporal["detected"]:
+        report_patch = {
+            "analysisStatus": "slow_motion_capture",
+            "analysisEngine": "local_worker_mvp_v1",
+            "videoUrl": None,
+            "sourceVideoFile": video,
+            "pose": {
+                "frames": [],
+                "meta": {
+                    "preflightSampled": preflight_total,
+                    "preflightUsable": preflight_usable,
+                    "preflightCoverage": round(preflight_ratio, 3),
+                },
+            },
+            "phaseFrames": {
+                "P4": temporal["p4Frame"],
+                "P7": temporal["p7Frame"],
+            },
+            "phaseMeta": {
+                "ok": False,
+                "status": "slow_motion_capture",
+                "reason": "temporal_scale_not_realtime",
+                "temporalPreflight": temporal,
+            },
+            "pframes": [],
+            "p5p6p7ShaftArm": None,
+            "deliveryCard": None,
+            "shaftV2": {
+                "source": "unavailable",
+                "measuredPhases": [],
+                "requestedPhases": ["P2", "P3", "P5", "P6", "P7"],
+                "phases": {},
+                "why": (
+                    "The clip appears temporally slowed, so millisecond-derived "
+                    "P5/P6 timing and shaft delivery are intentionally withheld."
+                ),
+            },
+            "recapture": {
+                "required": True,
+                "reason": "slow_motion_capture",
+                "message": (
+                    "This video appears to be slow motion. Upload the original-speed "
+                    "swing from setup through early follow-through so delivery timing "
+                    "and shaft geometry can be measured accurately."
+                ),
+            },
+            "meta": {
+                "worker": {
+                    "capturePreflight": {
+                        "sampledFrames": preflight_total,
+                        "usablePoseFrames": preflight_usable,
+                        "coverage": round(preflight_ratio, 3),
+                    },
+                    "temporalPreflight": temporal,
+                }
+            },
+        }
+
+        patch_path = os.path.join(out_dir, "report_patch.json")
+        with open(patch_path, "w", encoding="utf-8") as f:
+            json.dump(report_patch, f, indent=2)
+
+        print(
+            json.dumps(
+                {
+                    "ok": True,
+                    "analysisStatus": "slow_motion_capture",
+                    "video": video,
+                    "outDir": out_dir,
+                    "reportPatch": patch_path,
+                    "temporalPreflight": temporal,
+                    "recapture": report_patch["recapture"],
+                },
+                indent=2,
+            )
+        )
+        return
+
     selected_pose_model = None
     selected_pose_engine = None
     pose_failures = []
