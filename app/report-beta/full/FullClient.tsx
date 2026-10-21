@@ -616,7 +616,7 @@ fetch(src, { cache: "no-store" })
       </div>
       </div>
 
-      <ModelSwing3DPanel />
+      <ModelSwing3DPanel playerPose={(data as any)?.pose ?? null} />
 
       <div style={{ marginTop: 10, fontSize: 11, opacity: 0.55, textAlign: "center" }}>
         Virtual Coach AI - demo report. If something doesn't fit, it may be your swing or your feel and your hand.

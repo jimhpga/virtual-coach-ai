@@ -24,6 +24,16 @@ type ClubFrame = {
   clubhead_m: Vec3;
 };
 type ProjectionView = "face" | "dtl";
+type PlayerPoseLm = { x: number; y: number; z?: number; v?: number };
+type PlayerPoseFrame = {
+  frame: number;
+  t?: number;
+  ok?: boolean;
+  landmarks: PlayerPoseLm[];
+};
+type PlayerPoseJson = {
+  frames?: PlayerPoseFrame[];
+};
 
 const CHECKPOINT_FRAMES: Record<number, number> = {
   1: 1,
@@ -87,7 +97,7 @@ function nearestMetric(points: MetricPoint[], frame: number) {
   ).value;
 }
 
-export default function ModelSwing3DPanel() {
+export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerPoseJson | null }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [mode, setMode] = useState<Mode>("slow");
   const [selectedP, setSelectedP] = useState<number>(7);
@@ -97,6 +107,79 @@ export default function ModelSwing3DPanel() {
   const [projectionView, setProjectionView] = useState<ProjectionView>("face");
   const premiumCheckpoint = PREMIUM_CHECKPOINTS[selectedP];
   const playerCheckpoint = playerFrames.find((f) => f.p === selectedP) ?? null;
+
+  const playerOverlay = useMemo(() => {
+    const frames = (playerPose?.frames ?? []).filter(
+      (f) => Array.isArray(f?.landmarks) && f.landmarks.length >= 29
+    );
+    if (!frames.length || !playerCheckpoint) return null;
+
+    const selectedPose = frames.reduce((best, f) =>
+      Math.abs(f.frame - playerCheckpoint.frame) < Math.abs(best.frame - playerCheckpoint.frame)
+        ? f
+        : best
+    );
+
+    const lm = (idx: number) => {
+      const p = selectedPose.landmarks?.[idx];
+      if (!p || typeof p.x !== "number" || typeof p.y !== "number") return null;
+      if (typeof p.v === "number" && p.v < 0.25) return null;
+      return p;
+    };
+
+    const edges: Array<[number, number]> = [
+      [11, 12],
+      [11, 13],
+      [13, 15],
+      [12, 14],
+      [14, 16],
+      [11, 23],
+      [12, 24],
+      [23, 24],
+      [23, 25],
+      [25, 27],
+      [24, 26],
+      [26, 28],
+    ];
+
+    const handTrail = frames
+      .filter((f) => f.frame <= selectedPose.frame)
+      .map((f) => {
+        const l = f.landmarks?.[15];
+        const r = f.landmarks?.[16];
+        if (!l || !r) return null;
+        if (
+          typeof l.x !== "number" ||
+          typeof l.y !== "number" ||
+          typeof r.x !== "number" ||
+          typeof r.y !== "number"
+        ) {
+          return null;
+        }
+        return {
+          x: ((l.x + r.x) / 2) * 100,
+          y: ((l.y + r.y) / 2) * 100,
+        };
+      })
+      .filter((p): p is { x: number; y: number } => Boolean(p));
+
+    const handPath = handTrail
+      .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`)
+      .join(" ");
+
+    return {
+      selectedPose,
+      edges,
+      lm,
+      handPath,
+      leftWrist: lm(15),
+      rightWrist: lm(16),
+      leftShoulder: lm(11),
+      rightShoulder: lm(12),
+      leftHip: lm(23),
+      rightHip: lm(24),
+    };
+  }, [playerPose, playerCheckpoint]);
 
   useEffect(() => {
     let alive = true;
@@ -451,17 +534,101 @@ export default function ModelSwing3DPanel() {
             </span>
           </div>
           {playerCheckpoint ? (
-            <img
-              src={playerCheckpoint.imageUrl || playerCheckpoint.thumbUrl}
-              alt={`Player swing ${playerCheckpoint.label}`}
-              style={{
-                width: "100%",
-                display: "block",
-                aspectRatio: "4 / 3",
-                objectFit: "contain",
-                background: "#050505",
-              }}
-            />
+            <div style={{ position: "relative", background: "#050505" }}>
+              <img
+                src={playerCheckpoint.imageUrl || playerCheckpoint.thumbUrl}
+                alt={`Player swing ${playerCheckpoint.label}`}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  background: "#050505",
+                }}
+              />
+              {playerOverlay && (
+                <svg
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    pointerEvents: "none",
+                  }}
+                  aria-label={`Player pose overlay P${selectedP}`}
+                >
+                  {playerOverlay.handPath && (
+                    <path
+                      d={playerOverlay.handPath}
+                      fill="none"
+                      stroke="rgba(255,170,45,0.88)"
+                      strokeWidth="0.85"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  )}
+
+                  {playerOverlay.edges.map(([aIdx, bIdx], i) => {
+                    const a = playerOverlay.lm(aIdx);
+                    const b = playerOverlay.lm(bIdx);
+                    if (!a || !b) return null;
+                    return (
+                      <line
+                        key={`${aIdx}-${bIdx}-${i}`}
+                        x1={a.x * 100}
+                        y1={a.y * 100}
+                        x2={b.x * 100}
+                        y2={b.y * 100}
+                        stroke={
+                          aIdx === 11 && bIdx === 12
+                            ? "rgba(255,210,65,0.98)"
+                            : aIdx === 23 && bIdx === 24
+                              ? "rgba(110,255,170,0.95)"
+                              : "rgba(255,190,60,0.86)"
+                        }
+                        strokeWidth={aIdx === 11 || aIdx === 23 ? "0.75" : "0.55"}
+                        strokeLinecap="round"
+                      />
+                    );
+                  })}
+
+                  {[11,12,13,14,15,16,23,24,25,26,27,28].map((idx) => {
+                    const pt = playerOverlay.lm(idx);
+                    if (!pt) return null;
+                    return (
+                      <circle
+                        key={idx}
+                        cx={pt.x * 100}
+                        cy={pt.y * 100}
+                        r={idx === 15 || idx === 16 ? "0.95" : "0.62"}
+                        fill={idx === 15 || idx === 16 ? "rgb(255,170,45)" : "rgba(255,235,160,0.95)"}
+                      />
+                    );
+                  })}
+                </svg>
+              )}
+
+              {playerOverlay && (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 8,
+                    bottom: 8,
+                    padding: "5px 7px",
+                    borderRadius: 999,
+                    background: "rgba(0,0,0,0.62)",
+                    border: "1px solid rgba(255,190,60,0.28)",
+                    fontSize: 9,
+                    fontWeight: 900,
+                    letterSpacing: 0.35,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  Pose tracked • hand path
+                </div>
+              )}
+            </div>
           ) : (
             <div
               style={{
