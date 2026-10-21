@@ -601,6 +601,38 @@ export default function ModelSwing3DPanel({
       .map((f) => project(f.grip_center_m))
       .filter((p): p is [number, number] => Boolean(p));
 
+    const trajectorySegment = (fromFrame: number, toFrame: number) =>
+      pathFrom(
+        clubFrames
+          .filter(
+            (f) =>
+              f.frame >= fromFrame &&
+              f.frame <= Math.min(toFrame, precisionLimit)
+          )
+          .map((f) => project(f.clubhead_m))
+      );
+
+    const checkpointClub = (p: number) => {
+      const frame = CHECKPOINT_FRAMES[p];
+      const nearest = clubFrames.reduce((best, f) =>
+        Math.abs(f.frame - frame) < Math.abs(best.frame - frame) ? f : best
+      );
+      return project(nearest.clubhead_m);
+    };
+
+    const clubSegments = {
+      load: trajectorySegment(CHECKPOINT_FRAMES[1], CHECKPOINT_FRAMES[4]),
+      delivery: trajectorySegment(CHECKPOINT_FRAMES[4], CHECKPOINT_FRAMES[7]),
+      exit: trajectorySegment(CHECKPOINT_FRAMES[7], CHECKPOINT_FRAMES[9]),
+    };
+
+    const clubCheckpoints = [4, 6, 7, 8, 9]
+      .map((p) => ({ p, frame: CHECKPOINT_FRAMES[p], point: checkpointClub(p) }))
+      .filter(
+        (x): x is { p: number; frame: number; point: [number, number] } =>
+          Boolean(x.point) && x.frame <= precisionLimit
+      );
+
     const envelope = (pts: Array<[number, number]>) => {
       if (pts.length < 2) return null;
       const xs = pts.map((p) => p[0]);
@@ -621,6 +653,8 @@ export default function ModelSwing3DPanel({
       handPath: pathFrom(handProjected),
       clubPath: pathFrom(clubProjected),
       gripPath: pathFrom(gripProjected),
+      clubSegments,
+      clubCheckpoints,
       handEnvelope: envelope(handProjected),
       clubEnvelope: envelope(clubProjected),
       shoulderLeft: project(selectedBody.body?.left_shoulder),
@@ -1804,15 +1838,64 @@ export default function ModelSwing3DPanel({
                 />
               )}
 
-              <path
-                d={motionMap.clubPath}
-                fill="none"
-                stroke="rgba(223,79,255,0.82)"
-                strokeWidth="1.55"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                opacity={layers.paths ? 1 : 0}
-              />
+              {layers.paths && motionMap.clubSegments.load && (
+                <path
+                  d={motionMap.clubSegments.load}
+                  fill="none"
+                  stroke="rgba(170,105,255,0.72)"
+                  strokeWidth="1.15"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              )}
+
+              {layers.paths && motionMap.clubSegments.delivery && (
+                <path
+                  d={motionMap.clubSegments.delivery}
+                  fill="none"
+                  stroke="rgba(232,72,255,0.96)"
+                  strokeWidth="1.85"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              )}
+
+              {layers.paths && motionMap.clubSegments.exit && (
+                <path
+                  d={motionMap.clubSegments.exit}
+                  fill="none"
+                  stroke="rgba(90,210,255,0.78)"
+                  strokeWidth="1.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              )}
+
+              {layers.paths && motionMap.clubCheckpoints.map((cp) => (
+                <g key={`club-checkpoint-${cp.p}`}>
+                  <circle
+                    cx={cp.point[0]}
+                    cy={cp.point[1]}
+                    r={cp.p === 7 ? "1.65" : "1.15"}
+                    fill={cp.p === 7 ? "rgba(255,255,255,0.98)" : "rgba(235,245,255,0.92)"}
+                    stroke={
+                      cp.p === 7
+                        ? "rgba(232,72,255,0.96)"
+                        : "rgba(10,15,22,0.72)"
+                    }
+                    strokeWidth="0.5"
+                  />
+                  <text
+                    x={cp.point[0] + 1.7}
+                    y={cp.point[1] - 1.6}
+                    fill="rgba(235,242,250,0.82)"
+                    fontSize="3.0"
+                    fontWeight="800"
+                  >
+                    P{cp.p}
+                  </text>
+                </g>
+              ))}
               <path
                 d={motionMap.gripPath}
                 fill="none"
@@ -1953,9 +2036,11 @@ export default function ModelSwing3DPanel({
                 letterSpacing: 0.2,
               }}
             >
-              <span>● Hand path</span>
-              <span style={{ opacity: 0.85 }}>● Grip path</span>
-              <span style={{ opacity: 0.85 }}>● Clubhead path</span>
+              <span style={{ color: "rgba(70,196,255,0.95)" }}>● Hand path</span>
+              <span style={{ color: "rgba(250,182,70,0.92)" }}>● Grip path</span>
+              <span style={{ color: "rgba(170,105,255,0.92)" }}>● Club load</span>
+              <span style={{ color: "rgba(232,72,255,0.98)" }}>● Delivery</span>
+              <span style={{ color: "rgba(90,210,255,0.92)" }}>● Exit</span>
               <span style={{ opacity: 0.7 }}>Shoulders / pelvis</span>
             </div>
 
