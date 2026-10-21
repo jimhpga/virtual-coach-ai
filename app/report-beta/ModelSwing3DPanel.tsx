@@ -141,6 +141,19 @@ const PREMIUM_CHECKPOINTS: Partial<Record<number, string>> = {
   10: "/images/avatar/v437/p10.png",
 };
 
+const PREMIUM_AXES_CHECKPOINTS: Partial<Record<number, string>> = {
+  1: "/images/avatar/v442-axes/p1.png",
+  2: "/images/avatar/v442-axes/p2.png",
+  3: "/images/avatar/v442-axes/p3.png",
+  4: "/images/avatar/v442-axes/p4.png",
+  5: "/images/avatar/v442-axes/p5.png",
+  6: "/images/avatar/v442-axes/p6.png",
+  7: "/images/avatar/v442-axes/p7.png",
+  8: "/images/avatar/v442-axes/p8.png",
+  9: "/images/avatar/v442-axes/p9.png",
+  10: "/images/avatar/v442-axes/p10.png",
+};
+
 function pill(active = false): React.CSSProperties {
   return {
     height: 34,
@@ -202,13 +215,19 @@ export default function ModelSwing3DPanel({
   const [sequenceFrames, setSequenceFrames] = useState<SequenceFrame[]>([]);
   const [clubFrames, setClubFrames] = useState<ClubFrame[]>([]);
   const [projectionView, setProjectionView] = useState<ProjectionView>("face");
+  const [showBodyAxes, setShowBodyAxes] = useState(true);
   const [layers, setLayers] = useState({
     body: true,
     club: true,
     paths: true,
     volumes: true,
   });
-  const premiumCheckpoint = PREMIUM_CHECKPOINTS[selectedP];
+  const premiumBaseCheckpoint = PREMIUM_CHECKPOINTS[selectedP];
+  const premiumAxesCheckpoint = PREMIUM_AXES_CHECKPOINTS[selectedP];
+  const premiumCheckpoint =
+    showBodyAxes && premiumAxesCheckpoint
+      ? premiumAxesCheckpoint
+      : premiumBaseCheckpoint;
   const playerCheckpoint = playerFrames.find((f) => f.p === selectedP) ?? null;
 
   const playerOverlay = useMemo(() => {
@@ -1064,6 +1083,14 @@ export default function ModelSwing3DPanel({
           </button>
           <button
             type="button"
+            onClick={() => setShowBodyAxes((v) => !v)}
+            style={pill(showBodyAxes)}
+            title="Measured shoulder and pelvis orientation bars from the V437 checkpoint geometry"
+          >
+            Body Axes
+          </button>
+          <button
+            type="button"
             onClick={() => setPlaybackMode("normal")}
             style={pill(mode === "normal")}
           >
@@ -1287,7 +1314,11 @@ export default function ModelSwing3DPanel({
           >
             <span>VCA model • P{selectedP}</span>
             <span style={{ opacity: 0.55 }}>
-              {premiumCheckpoint ? "V437 premium" : "V309 motion"}
+              {premiumCheckpoint
+                ? showBodyAxes
+                  ? "V442 measured axes"
+                  : "V437 premium"
+                : "V309 motion"}
             </span>
           </div>
 
@@ -1303,6 +1334,30 @@ export default function ModelSwing3DPanel({
                   background: "#050505",
                 }}
               />
+
+              {showBodyAxes && (
+                <div
+                  style={{
+                    position: "absolute",
+                    left: 10,
+                    top: 10,
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "center",
+                    padding: "5px 7px",
+                    borderRadius: 999,
+                    border: "1px solid rgba(255,255,255,0.10)",
+                    background: "rgba(0,0,0,0.66)",
+                    fontSize: 8,
+                    fontWeight: 900,
+                    letterSpacing: 0.35,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  <span style={{ color: "rgba(70,210,255,0.98)" }}>● Shoulders</span>
+                  <span style={{ color: "rgba(135,255,185,0.98)" }}>● Pelvis</span>
+                </div>
+              )}
 
               <div
                 style={{
