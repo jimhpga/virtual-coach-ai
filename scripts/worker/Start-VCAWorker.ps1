@@ -2,6 +2,7 @@ param(
   [string]$BaseUrl = "https://virtualcoachai.net",
   [string]$WorkRoot = "E:\VCA\_runs\production_worker",
   [double]$PollSec = 15,
+  [string]$LogFile = "",
   [switch]$Once
 )
 
@@ -39,5 +40,11 @@ Write-Host ("  Repo     : " + $Repo)
 Write-Host ("  Work root: " + $WorkRoot)
 Write-Host ("  Mode     : " + $(if($Once){"one job"}else{"continuous"}))
 
-& $Python @Args
+if($LogFile){
+  $logDir = Split-Path -Parent $LogFile
+  if($logDir){ New-Item -ItemType Directory -Force -Path $logDir | Out-Null }
+  & $Python @Args *>> $LogFile
+} else {
+  & $Python @Args
+}
 exit $LASTEXITCODE

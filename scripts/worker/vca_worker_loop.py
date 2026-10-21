@@ -88,6 +88,15 @@ def multipart_upload(url, worker_key, fields, file_field, file_path, timeout=120
         return exc.code, parsed
 
 
+def short_payload(payload, limit=320):
+    try:
+        text = json.dumps(payload, ensure_ascii=False)
+    except Exception:
+        text = str(payload)
+    text = " ".join(text.split())
+    return text if len(text) <= limit else text[:limit] + "..."
+
+
 def run(cmd, cwd=None):
     print("RUN", " ".join(str(x) for x in cmd), flush=True)
     cp = subprocess.run(cmd, cwd=cwd, text=True)
@@ -219,7 +228,9 @@ def complete_job(base_url, worker_key, job_id, lease_id, report_patch=None, erro
         timeout=120,
     )
     if status != 200 or not response.get("ok"):
-        raise RuntimeError(f"Complete failed: HTTP {status} {response}")
+        raise RuntimeError(
+            f"Complete failed: HTTP {status} {short_payload(response)}"
+        )
     return response
 
 
@@ -290,7 +301,9 @@ def claim_next(args):
     endpoint = args.baseUrl.rstrip("/") + "/api/analysis-worker/next"
     status, payload = http_json(endpoint, args.workerKey, timeout=90)
     if status != 200 or not payload.get("ok"):
-        raise RuntimeError(f"Claim failed: HTTP {status} {payload}")
+        raise RuntimeError(
+            f"Claim failed: HTTP {status} {short_payload(payload)}"
+        )
     return payload.get("job")
 
 
