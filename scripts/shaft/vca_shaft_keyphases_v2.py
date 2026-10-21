@@ -206,7 +206,8 @@ def main():
                     "angleDeg":(s.get("shaft") or {}).get("angleDeg"),
                     "confidence":int((s.get("shaft") or {}).get("confidence") or 0),
                     "source":"vision_grip_anchor_v2",
-                    "line":(s.get("shaft") or {}).get("line")
+                    "line":(s.get("shaft") or {}).get("line"),
+                    "imageSize":{"width":int(img.shape[1]),"height":int(img.shape[0])}
                 }
             },
             "delta":{"deg":None,"note":"delta requires arm-plane consumer"}

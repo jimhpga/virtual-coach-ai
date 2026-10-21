@@ -35,6 +35,33 @@ type PlayerPoseJson = {
   frames?: PlayerPoseFrame[];
 };
 
+type PlayerShaftPhase = {
+  phase?: string;
+  frame?: number;
+  shaftDeg?: number | null;
+  conf?: number | null;
+  shaftSource?: string | null;
+  shaftLine?: {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  } | null;
+  imageSize?: {
+    width: number;
+    height: number;
+  } | null;
+  why?: string | null;
+};
+
+type PlayerShaftBlock = {
+  status?: string;
+  confidenceMin?: number | null;
+  P5?: PlayerShaftPhase | null;
+  P6?: PlayerShaftPhase | null;
+  P7?: PlayerShaftPhase | null;
+};
+
 const CHECKPOINT_FRAMES: Record<number, number> = {
   1: 1,
   2: 12,
@@ -97,7 +124,13 @@ function nearestMetric(points: MetricPoint[], frame: number) {
   ).value;
 }
 
-export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerPoseJson | null }) {
+export default function ModelSwing3DPanel({
+  playerPose,
+  playerShaft,
+}: {
+  playerPose?: PlayerPoseJson | null;
+  playerShaft?: PlayerShaftBlock | null;
+}) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [mode, setMode] = useState<Mode>("slow");
   const [selectedP, setSelectedP] = useState<number>(7);
@@ -187,6 +220,52 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
       rightHip: lm(24),
     };
   }, [playerPose, playerCheckpoint]);
+
+  const playerShaftOverlay = useMemo(() => {
+    if (!playerShaft || selectedP < 5 || selectedP > 7) return null;
+
+    const phase =
+      selectedP === 5
+        ? playerShaft.P5
+        : selectedP === 6
+          ? playerShaft.P6
+          : playerShaft.P7;
+
+    if (!phase) return null;
+
+    const conf = typeof phase.conf === "number" ? phase.conf : 0;
+    const source = phase.shaftSource ?? "";
+    const line = phase.shaftLine ?? null;
+    const size = phase.imageSize ?? null;
+    const measured =
+      conf > 0 &&
+      source !== "unavailable" &&
+      Boolean(line) &&
+      Boolean(size?.width) &&
+      Boolean(size?.height);
+
+    if (!measured || !line || !size) {
+      return {
+        available: false,
+        confidence: conf,
+        source,
+        why: phase.why ?? "Shaft tracking unavailable.",
+      };
+    }
+
+    return {
+      available: true,
+      confidence: conf,
+      source,
+      why: phase.why ?? "",
+      line: {
+        x1: (line.x1 / size.width) * 100,
+        y1: (line.y1 / size.height) * 100,
+        x2: (line.x2 / size.width) * 100,
+        y2: (line.y2 / size.height) * 100,
+      },
+    };
+  }, [playerShaft, selectedP]);
 
   useEffect(() => {
     let alive = true;
@@ -726,6 +805,18 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                     />
                   )}
 
+                  {layers.club && playerShaftOverlay?.available && playerShaftOverlay.line && (
+                    <line
+                      x1={playerShaftOverlay.line.x1}
+                      y1={playerShaftOverlay.line.y1}
+                      x2={playerShaftOverlay.line.x2}
+                      y2={playerShaftOverlay.line.y2}
+                      stroke="rgba(70,196,255,0.98)"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                    />
+                  )}
+
                   {layers.body && playerOverlay.edges.map(([aIdx, bIdx], i) => {
                     const a = playerOverlay.lm(aIdx);
                     const b = playerOverlay.lm(bIdx);
@@ -783,6 +874,34 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                   }}
                 >
                   Pose tracked • hand path
+                </div>
+              )}
+
+              {selectedP >= 5 && selectedP <= 7 && playerShaftOverlay && (
+                <div
+                  title={playerShaftOverlay.why}
+                  style={{
+                    position: "absolute",
+                    right: 8,
+                    bottom: 8,
+                    padding: "5px 7px",
+                    borderRadius: 999,
+                    background: "rgba(0,0,0,0.68)",
+                    border: playerShaftOverlay.available
+                      ? "1px solid rgba(70,196,255,0.42)"
+                      : "1px solid rgba(255,190,90,0.34)",
+                    color: playerShaftOverlay.available
+                      ? "rgba(175,230,255,0.98)"
+                      : "rgba(255,218,140,0.95)",
+                    fontSize: 9,
+                    fontWeight: 900,
+                    letterSpacing: 0.35,
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {playerShaftOverlay.available
+                    ? `Measured shaft • ${playerShaftOverlay.confidence}%`
+                    : "Shaft unavailable"}
                 </div>
               )}
             </div>

@@ -217,8 +217,12 @@ function PhaseBlock([string]$ph){
   }
 
   $line = $null
+  $imageSize = $null
   try{
-    if($null -ne $shaftDeg){ $line = $it.shaft.vision.line }
+    if($null -ne $shaftDeg){
+      $line = $it.shaft.vision.line
+      $imageSize = $it.shaft.vision.imageSize
+    }
   } catch {}
 
   return [pscustomobject]@{
@@ -230,6 +234,7 @@ function PhaseBlock([string]$ph){
     conf        = $conf
     shaftSource = $source
     shaftLine   = $line
+    imageSize   = $imageSize
     why         = [string]$it.shaft.why
   }
 }
