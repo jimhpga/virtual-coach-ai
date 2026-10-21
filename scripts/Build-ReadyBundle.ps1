@@ -102,7 +102,20 @@ if(-not (Test-Path $ShotDir)){ throw "Missing ShotDir: $ShotDir" }
 
 $alignmentFile = Get-LatestFile -Dir $ShotDir -Pattern "alignment_p1_*.json"
 $xfactorFile   = Get-LatestFile -Dir $ShotDir -Pattern "XFACTOR_key_phases_*.json"
-$shaftFile     = Get-LatestFile -Dir $ShotDir -Pattern "VCA_shaft_FINAL_*.json"
+
+# Prefer confidence-aware Grip Anchor V1 + Shaft V2 outputs.
+# Exclude sidecar *.meta.json files; consumers need the legacy-array-compatible phase file.
+$shaftFile = Get-ChildItem -LiteralPath $ShotDir -File -Filter "VCA_shaft_FINAL_V2_*.json" -ErrorAction SilentlyContinue |
+  Where-Object { $_.Name -notmatch '(?i)\.meta\.json$' } |
+  Sort-Object LastWriteTime -Descending |
+  Select-Object -First 1
+
+if(-not $shaftFile){
+  $shaftFile = Get-ChildItem -LiteralPath $ShotDir -File -Filter "VCA_shaft_FINAL_*.json" -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -notmatch '(?i)\.meta\.json$' } |
+    Sort-Object LastWriteTime -Descending |
+    Select-Object -First 1
+}
 if(-not $shaftFile){ $shaftFile = Get-LatestFile -Dir $ShotDir -Pattern "VCA_shaft_keypoints_*.json" }
 
 if(-not $alignmentFile){ throw "Missing alignment_p1_*.json in $ShotDir" }
@@ -131,23 +144,49 @@ $shaftPhases = @()
 if($shaftRaw -is [System.Array]){ $shaftPhases = $shaftRaw } else { $shaftPhases = @($shaftRaw) }
 
 $confVals = @()
+$measuredShaftPhases = @()
+$unavailableShaftPhases = @()
+
 foreach($p in $shaftPhases){
+  $phaseLabel = if($p.PSObject.Properties.Name -contains "phase"){ [string]$p.phase } else { "unknown" }
+  $src = if($p.shaft -and ($p.shaft.PSObject.Properties.Name -contains "source")){ [string]$p.shaft.source } else { "" }
+  $conf = $null
+
   if($p.shaft -and ($p.shaft.PSObject.Properties.Name -contains "confidenceRaw")){
-    $confVals += [double]$p.shaft.confidenceRaw
+    $conf = [double]$p.shaft.confidenceRaw
   } elseif($p.PSObject.Properties.Name -contains "Conf"){
-    $confVals += [double]$p.Conf
+    $conf = [double]$p.Conf
+  }
+
+  if($null -ne $conf -and $conf -gt 0 -and $src -ne "unavailable"){
+    $confVals += $conf
+    $measuredShaftPhases += $phaseLabel
+  } else {
+    $unavailableShaftPhases += $phaseLabel
   }
 }
-$shaftConf = if($confVals.Count -gt 0){ [Math]::Round((($confVals | Measure-Object -Average).Average / 100.0), 2) } else { 0.50 }
+
+$shaftMeasuredCount = $measuredShaftPhases.Count
+$shaftTotalCount = $shaftPhases.Count
+$shaftCoverage = if($shaftTotalCount -gt 0){ [Math]::Round($shaftMeasuredCount / $shaftTotalCount, 2) } else { 0 }
+$shaftMeasuredConfidence = if($confVals.Count -gt 0){ [Math]::Round((($confVals | Measure-Object -Average).Average / 100.0), 2) } else { 0 }
+
+# Overall confidence combines detector confidence with measurement coverage.
+$shaftConf = [Math]::Round($shaftMeasuredConfidence * $shaftCoverage, 2)
+$isV2 = $shaftFile.Name -like "VCA_shaft_FINAL_V2_*"
 
 $shaftOut = [ordered]@{
-  source     = "shaft_pipeline"
-  confidence = $shaftConf
-  phases     = $shaftPhases
-  notes      = @(
-    "Shaft plane is relative to target line; default target line is P1 shaft vector.",
-    "Impact may be slightly higher than address due to lean + droop + rotation.",
-    "P6 is Moment of Truth; face condition at P6 dictates required body behavior at impact."
+  source             = if($isV2){ "vision_grip_anchor_v2" } else { "shaft_pipeline_legacy" }
+  confidence         = $shaftConf
+  measuredConfidence = $shaftMeasuredConfidence
+  coverage           = $shaftCoverage
+  measuredPhases     = @($measuredShaftPhases)
+  unavailablePhases  = @($unavailableShaftPhases)
+  phases             = $shaftPhases
+  notes              = @(
+    "Shaft measurements are shown only when both the hand/grip anchor and shaft vision pass confidence gates.",
+    "Unavailable phases remain unavailable; V2 does not substitute a forearm proxy as measured shaft geometry.",
+    "P5-P7 delivery measurements should be interpreted with their phase-level confidence."
   )
 }
 
@@ -173,9 +212,9 @@ $xfOut        = Ensure-SourceAndConfidence -Obj $xfOut        -defaultSource "po
 
 $toggles = [ordered]@{
   showAlignment = $true
-  showShaft     = $true
+  showShaft     = ($shaftMeasuredCount -gt 0)
   showXFactor   = $true
-  showP6Card    = $true
+  showP6Card    = ($measuredShaftPhases -contains "P6")
 }
 
 $defsVersion = $null
