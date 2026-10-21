@@ -1,0 +1,51 @@
+{
+  "version": "V483",
+  "locked": true,
+  "view": "HERO",
+  "frames": [
+    {
+      "label": "F001",
+      "src": "/avatar/v483/F001.webp"
+    },
+    {
+      "label": "F012",
+      "src": "/avatar/v483/F012.webp"
+    },
+    {
+      "label": "F023",
+      "src": "/avatar/v483/F023.webp"
+    },
+    {
+      "label": "F039",
+      "src": "/avatar/v483/F039.webp"
+    },
+    {
+      "label": "F049",
+      "src": "/avatar/v483/F049.webp"
+    },
+    {
+      "label": "F053",
+      "src": "/avatar/v483/F053.webp"
+    },
+    {
+      "label": "F056",
+      "src": "/avatar/v483/F056.webp"
+    },
+    {
+      "label": "F059",
+      "src": "/avatar/v483/F059.webp"
+    },
+    {
+      "label": "F064",
+      "src": "/avatar/v483/F064.webp"
+    },
+    {
+      "label": "F077",
+      "src": "/avatar/v483/F077.webp"
+    }
+  ],
+  "defaultOverlay": "clubheadEnvelope",
+  "handPathDefault": false,
+  "visorDefault": false,
+  "stage": "softGrounded"
+}

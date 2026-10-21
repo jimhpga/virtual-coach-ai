@@ -142,16 +142,16 @@ const PREMIUM_CHECKPOINTS: Partial<Record<number, string>> = {
 };
 
 const PREMIUM_AXES_CHECKPOINTS: Partial<Record<number, string>> = {
-  1: "/images/avatar/v442-axes/p1.png",
-  2: "/images/avatar/v442-axes/p2.png",
-  3: "/images/avatar/v442-axes/p3.png",
-  4: "/images/avatar/v442-axes/p4.png",
-  5: "/images/avatar/v442-axes/p5.png",
-  6: "/images/avatar/v442-axes/p6.png",
-  7: "/images/avatar/v442-axes/p7.png",
-  8: "/images/avatar/v442-axes/p8.png",
-  9: "/images/avatar/v442-axes/p9.png",
-  10: "/images/avatar/v442-axes/p10.png",
+  1: "/avatar/v483/F001.webp",
+  2: "/avatar/v483/F012.webp",
+  3: "/avatar/v483/F023.webp",
+  4: "/avatar/v483/F039.webp",
+  5: "/avatar/v483/F049.webp",
+  6: "/avatar/v483/F053.webp",
+  7: "/avatar/v483/F056.webp",
+  8: "/avatar/v483/F059.webp",
+  9: "/avatar/v483/F064.webp",
+  10: "/avatar/v483/F077.webp",
 };
 
 function pill(active = false): React.CSSProperties {
@@ -216,6 +216,7 @@ export default function ModelSwing3DPanel({
   const [clubFrames, setClubFrames] = useState<ClubFrame[]>([]);
   const [projectionView, setProjectionView] = useState<ProjectionView>("face");
   const [showBodyAxes, setShowBodyAxes] = useState(true);
+  const [failedPlayerImageSrc, setFailedPlayerImageSrc] = useState<string | null>(null);
   const [layers, setLayers] = useState({
     body: true,
     club: true,
@@ -229,6 +230,10 @@ export default function ModelSwing3DPanel({
       ? premiumAxesCheckpoint
       : premiumBaseCheckpoint;
   const playerCheckpoint = playerFrames.find((f) => f.p === selectedP) ?? null;
+  const playerImageSrc =
+    playerCheckpoint?.imageUrl || playerCheckpoint?.thumbUrl || "";
+  const playerImageFailed =
+    Boolean(playerImageSrc) && failedPlayerImageSrc === playerImageSrc;
 
   const playerOverlay = useMemo(() => {
     const frames = (playerPose?.frames ?? []).filter(
@@ -1062,7 +1067,7 @@ export default function ModelSwing3DPanel({
             {projectionView === "face" ? "Face On" : "Down the Line"} synchronized
           </div>
           <div style={{ marginTop: 3, fontSize: 11, opacity: 0.64 }}>
-            Locked V200 reference • 30 fps state-native • P1–P10
+            Measured checkpoint model • synchronized P1–P10
           </div>
         </div>
 
@@ -1136,14 +1141,19 @@ export default function ModelSwing3DPanel({
           >
             <span>Your swing • P{selectedP}</span>
             <span style={{ opacity: 0.55 }}>
-              {playerCheckpoint ? `F${playerCheckpoint.frame}` : "Waiting for frame"}
+              {playerCheckpoint
+                ? playerImageFailed
+                  ? "Frame unavailable"
+                  : `F${playerCheckpoint.frame}`
+                : "Waiting for frame"}
             </span>
           </div>
-          {playerCheckpoint ? (
+          {playerCheckpoint && !playerImageFailed ? (
             <div style={{ position: "relative", background: "#050505" }}>
               <img
-                src={playerCheckpoint.imageUrl || playerCheckpoint.thumbUrl}
+                src={playerImageSrc}
                 alt={`Player swing ${playerCheckpoint.label}`}
+                onError={() => setFailedPlayerImageSrc(playerImageSrc)}
                 style={{
                   width: "100%",
                   height: "auto",
@@ -1287,7 +1297,9 @@ export default function ModelSwing3DPanel({
                 opacity: 0.55,
               }}
             >
-              Run analysis to populate the player P-frame.
+              {playerCheckpoint
+                ? "Player frame unavailable. The measured model remains available for this checkpoint."
+                : "Run analysis to populate the player P-frame."}
             </div>
           )}
         </div>
@@ -1316,9 +1328,9 @@ export default function ModelSwing3DPanel({
             <span style={{ opacity: 0.55 }}>
               {premiumCheckpoint
                 ? showBodyAxes
-                  ? "V442 measured axes"
-                  : "V437 premium"
-                : "V309 motion"}
+                  ? "Measured model + axes"
+                  : "Model view"
+                : "Motion view"}
             </span>
           </div>
 
