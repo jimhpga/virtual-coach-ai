@@ -1,8 +1,15 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 type Mode = "normal" | "slow";
+type PlayerPFrame = {
+  p: number;
+  label: string;
+  frame: number;
+  imageUrl: string;
+  thumbUrl?: string;
+};
 
 const CHECKPOINT_FRAMES: Record<number, number> = {
   1: 1,
@@ -49,7 +56,23 @@ export default function ModelSwing3DPanel() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [mode, setMode] = useState<Mode>("slow");
   const [selectedP, setSelectedP] = useState<number>(7);
+  const [playerFrames, setPlayerFrames] = useState<PlayerPFrame[]>([]);
   const premiumCheckpoint = PREMIUM_CHECKPOINTS[selectedP];
+  const playerCheckpoint = playerFrames.find((f) => f.p === selectedP) ?? null;
+
+  useEffect(() => {
+    let alive = true;
+    fetch("/data/pframes-P1-P10.json", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (!alive || !j?.ok || !Array.isArray(j.frames)) return;
+        setPlayerFrames([...j.frames].sort((a: PlayerPFrame, b: PlayerPFrame) => a.p - b.p));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const src = useMemo(
     () =>
@@ -138,13 +161,19 @@ export default function ModelSwing3DPanel() {
         </div>
       </div>
 
-      {premiumCheckpoint && (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+          gap: 12,
+          alignItems: "start",
+        }}
+      >
         <div
           style={{
-            marginBottom: 12,
             borderRadius: 14,
             overflow: "hidden",
-            border: "1px solid rgba(0,210,255,0.22)",
+            border: "1px solid rgba(240,190,60,0.30)",
             background: "#05070b",
           }}
         >
@@ -160,50 +189,125 @@ export default function ModelSwing3DPanel() {
               textTransform: "uppercase",
             }}
           >
-            <span>V435 Premium Checkpoint • P{selectedP}</span>
-            <span style={{ opacity: 0.55 }}>Commercial Avatar</span>
+            <span>Your swing • P{selectedP}</span>
+            <span style={{ opacity: 0.55 }}>
+              {playerCheckpoint ? `F${playerCheckpoint.frame}` : "Waiting for frame"}
+            </span>
           </div>
-          <img
-            src={premiumCheckpoint}
-            alt={`VCA commercial 3D model P${selectedP}`}
-            style={{
-              width: "100%",
-              display: "block",
-              aspectRatio: "4 / 3",
-              objectFit: "contain",
-              background: "#050505",
-            }}
-          />
+          {playerCheckpoint ? (
+            <img
+              src={playerCheckpoint.imageUrl || playerCheckpoint.thumbUrl}
+              alt={`Player swing ${playerCheckpoint.label}`}
+              style={{
+                width: "100%",
+                display: "block",
+                aspectRatio: "4 / 3",
+                objectFit: "contain",
+                background: "#050505",
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                aspectRatio: "4 / 3",
+                display: "grid",
+                placeItems: "center",
+                padding: 20,
+                textAlign: "center",
+                fontSize: 12,
+                opacity: 0.55,
+              }}
+            >
+              Run analysis to populate the player P-frame.
+            </div>
+          )}
         </div>
-      )}
 
-      <div style={{ marginBottom: 6, fontSize: 11, fontWeight: 900, opacity: 0.58, textTransform: "uppercase", letterSpacing: 0.5 }}>
-        Animated reference
+        <div
+          style={{
+            borderRadius: 14,
+            overflow: "hidden",
+            border: "1px solid rgba(0,210,255,0.28)",
+            background: "#05070b",
+          }}
+        >
+          <div
+            style={{
+              padding: "8px 10px",
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 10,
+              fontSize: 11,
+              fontWeight: 900,
+              letterSpacing: 0.4,
+              textTransform: "uppercase",
+            }}
+          >
+            <span>VCA model • P{selectedP}</span>
+            <span style={{ opacity: 0.55 }}>
+              {premiumCheckpoint ? "V435 premium" : "V309 motion"}
+            </span>
+          </div>
+
+          {premiumCheckpoint && (
+            <img
+              src={premiumCheckpoint}
+              alt={`VCA commercial 3D model P${selectedP}`}
+              style={{
+                width: "100%",
+                display: "block",
+                aspectRatio: "4 / 3",
+                objectFit: "contain",
+                background: "#050505",
+              }}
+            />
+          )}
+
+          <div style={{ padding: premiumCheckpoint ? "8px 8px 0" : 0 }}>
+            {premiumCheckpoint && (
+              <div style={{ marginBottom: 6, fontSize: 10, fontWeight: 900, opacity: 0.5, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                Animated reference
+              </div>
+            )}
+            <video
+              ref={videoRef}
+              key={src}
+              src={src}
+              controls
+              playsInline
+              preload="metadata"
+              onLoadedMetadata={() => {
+                const v = videoRef.current;
+                if (!v) return;
+                v.currentTime = checkpointTime(selectedP);
+                v.pause();
+              }}
+              style={{
+                width: "100%",
+                display: "block",
+                aspectRatio: premiumCheckpoint ? "8 / 3" : "4 / 3",
+                objectFit: "contain",
+                borderRadius: premiumCheckpoint ? 10 : 0,
+                background: "#050505",
+              }}
+            />
+          </div>
+        </div>
       </div>
 
-      <video
-        ref={videoRef}
-        key={src}
-        src={src}
-        controls
-        playsInline
-        preload="metadata"
-        onLoadedMetadata={() => {
-          const v = videoRef.current;
-          if (!v) return;
-          v.currentTime = checkpointTime(selectedP);
-          v.pause();
-        }}
+      <div
         style={{
-          width: "100%",
-          display: "block",
-          aspectRatio: "8 / 3",
-          objectFit: "contain",
-          borderRadius: 14,
-          background: "#050505",
+          marginTop: 10,
+          padding: "10px 12px",
+          borderRadius: 12,
           border: "1px solid rgba(255,255,255,0.10)",
+          background: "rgba(255,255,255,0.035)",
+          fontSize: 12,
+          lineHeight: 1.45,
         }}
-      />
+      >
+        <b>Compare P{selectedP}:</b> body position, hand path, shaft orientation, pressure/rotation sequence and club delivery. This is the first production layer of the player-vs-model biomechanics viewer.
+      </div>
 
       <div
         style={{
