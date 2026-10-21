@@ -84,10 +84,10 @@ const CHECKPOINT_FRAMES: Record<number, number> = {
 const FPS = 30;
 
 const PREMIUM_CHECKPOINTS: Partial<Record<number, string>> = {
-  1: "/images/avatar/p1.png",
-  4: "/images/avatar/p4.png",
-  7: "/images/avatar/p7.png",
-  10: "/images/avatar/p10.png",
+  1: "/images/avatar/tight/p1.png",
+  4: "/images/avatar/tight/p4.png",
+  7: "/images/avatar/tight/p7.png",
+  10: "/images/avatar/tight/p10.png",
 };
 
 function pill(active = false): React.CSSProperties {
@@ -1168,26 +1168,79 @@ export default function ModelSwing3DPanel({
             </span>
           </div>
 
-          {premiumCheckpoint && (
-            <img
-              src={premiumCheckpoint}
-              alt={`VCA commercial 3D model P${selectedP}`}
-              style={{
-                width: "100%",
-                display: "block",
-                aspectRatio: "4 / 3",
-                objectFit: "contain",
-                background: "#050505",
-              }}
-            />
-          )}
+          {premiumCheckpoint ? (
+            <div style={{ position: "relative", background: "#050505" }}>
+              <img
+                src={premiumCheckpoint}
+                alt={`VCA commercial 3D model P${selectedP}`}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  display: "block",
+                  background: "#050505",
+                }}
+              />
 
-          <div style={{ padding: premiumCheckpoint ? "8px 8px 0" : 0 }}>
-            {premiumCheckpoint && (
-              <div style={{ marginBottom: 6, fontSize: 10, fontWeight: 900, opacity: 0.5, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                Animated reference
+              <div
+                style={{
+                  position: "absolute",
+                  right: 10,
+                  bottom: 10,
+                  width: "40%",
+                  maxWidth: 260,
+                  minWidth: 150,
+                  padding: 6,
+                  borderRadius: 12,
+                  border: "1px solid rgba(0,210,255,0.28)",
+                  background: "rgba(0,0,0,0.78)",
+                  boxShadow: "0 10px 28px rgba(0,0,0,0.34)",
+                }}
+              >
+                <div
+                  style={{
+                    marginBottom: 4,
+                    fontSize: 8,
+                    fontWeight: 900,
+                    opacity: 0.62,
+                    textTransform: "uppercase",
+                    letterSpacing: 0.45,
+                  }}
+                >
+                  Synchronized motion
+                </div>
+                <video
+                  ref={videoRef}
+                  key={src}
+                  src={src}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  onLoadedMetadata={() => {
+                    const v = videoRef.current;
+                    if (!v) return;
+                    v.playbackRate = mode === "slow" ? 0.5 : 2;
+                    v.currentTime = frameToVideoTime(cursorFrame);
+                    v.pause();
+                  }}
+                  onTimeUpdate={(e) => {
+                    const frame = Math.max(
+                      1,
+                      Math.min(77, Math.round(e.currentTarget.currentTime * FPS) + 1)
+                    );
+                    setCursorFrame(frame);
+                  }}
+                  style={{
+                    width: "100%",
+                    display: "block",
+                    aspectRatio: "4 / 3",
+                    objectFit: "contain",
+                    borderRadius: 8,
+                    background: "#050505",
+                  }}
+                />
               </div>
-            )}
+            </div>
+          ) : (
             <video
               ref={videoRef}
               key={src}
@@ -1212,13 +1265,12 @@ export default function ModelSwing3DPanel({
               style={{
                 width: "100%",
                 display: "block",
-                aspectRatio: premiumCheckpoint ? "8 / 3" : "4 / 3",
+                aspectRatio: "4 / 3",
                 objectFit: "contain",
-                borderRadius: premiumCheckpoint ? 10 : 0,
                 background: "#050505",
               }}
             />
-          </div>
+          )}
         </div>
       </div>
 
