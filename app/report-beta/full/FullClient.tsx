@@ -430,6 +430,12 @@ fetch(fetchSrc, { cache: "no-store" })
             (prev as any).p3p5Mirror ??
             null
           ),
+          deliveryCard: (
+            root.deliveryCard ??
+            bundle?.deliveryCard ??
+            (prev as any).deliveryCard ??
+            null
+          ),
           readyBundle: (
             root.readyBundle ??
             bundle?.readyBundle ??
@@ -644,6 +650,7 @@ fetch(fetchSrc, { cache: "no-store" })
       <ModelSwing3DPanel
         playerPose={(data as any)?.pose ?? null}
         playerShaft={(data as any)?.p5p6p7ShaftArm ?? null}
+        deliveryCard={(data as any)?.deliveryCard ?? null}
       />
 
       <div style={{ marginTop: 10, fontSize: 11, opacity: 0.55, textAlign: "center" }}>

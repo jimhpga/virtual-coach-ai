@@ -68,6 +68,30 @@ type PlayerShaftBlock = {
   P7?: PlayerShaftPhase | null;
 };
 
+type DeliveryMetric = {
+  key?: string;
+  label?: string;
+  value?: number | null;
+  unit?: string | null;
+};
+
+type DeliveryCard = {
+  ok?: boolean;
+  title?: string;
+  metrics?: DeliveryMetric[];
+  deltas?: {
+    dtl_stack_delta?: number | null;
+    fo_shaft_forearm_delta?: number | null;
+  };
+  interpretation?: string[];
+  quality?: {
+    isValid?: boolean;
+    label?: string;
+    reasons?: string[];
+    userMessage?: string;
+  };
+};
+
 const CHECKPOINT_FRAMES: Record<number, number> = {
   1: 1,
   2: 12,
@@ -133,9 +157,11 @@ function nearestMetric(points: MetricPoint[], frame: number) {
 export default function ModelSwing3DPanel({
   playerPose,
   playerShaft,
+  deliveryCard,
 }: {
   playerPose?: PlayerPoseJson | null;
   playerShaft?: PlayerShaftBlock | null;
+  deliveryCard?: DeliveryCard | null;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [mode, setMode] = useState<Mode>("slow");
@@ -1273,6 +1299,141 @@ export default function ModelSwing3DPanel({
           )}
         </div>
       </div>
+
+      {deliveryCard?.metrics?.length ? (() => {
+        const valid = deliveryCard.quality?.isValid !== false;
+        const metrics = deliveryCard.metrics ?? [];
+        const deltaDtl = deliveryCard.deltas?.dtl_stack_delta;
+        const deltaFo = deliveryCard.deltas?.fo_shaft_forearm_delta;
+
+        const formatMetric = (m: DeliveryMetric) => {
+          if (typeof m.value !== "number") return "—";
+          const value = Math.abs(m.value) >= 100 ? m.value.toFixed(0) : m.value.toFixed(1);
+          if (m.unit === "deg") return `${valid ? "" : "~"}${value}°`;
+          if (m.unit === "score") return `${valid ? "" : "~"}${value}/100`;
+          return `${valid ? "" : "~"}${value}${m.unit ? ` ${m.unit}` : ""}`;
+        };
+
+        return (
+          <div
+            style={{
+              marginTop: 10,
+              padding: "10px 12px 12px",
+              borderRadius: 12,
+              border: valid
+                ? "1px solid rgba(110,255,170,0.20)"
+                : "1px solid rgba(255,200,90,0.28)",
+              background: valid
+                ? "rgba(110,255,170,0.035)"
+                : "rgba(255,190,70,0.045)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 12,
+                alignItems: "baseline",
+                flexWrap: "wrap",
+                marginBottom: 9,
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  Delivery Geometry • P6→P7
+                </div>
+                <div style={{ marginTop: 2, fontSize: 10, opacity: 0.54 }}>
+                  Shaft / forearm organization through delivery
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 900,
+                  color: valid ? "rgba(125,255,180,0.95)" : "rgba(255,215,125,0.95)",
+                }}
+              >
+                {valid
+                  ? "MEASURED"
+                  : `${deliveryCard.quality?.label ?? "LOW VISIBILITY"} • ESTIMATE`}
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(135px, 1fr))",
+                gap: 8,
+              }}
+            >
+              {metrics.map((m, i) => (
+                <div
+                  key={m.key ?? `${m.label}-${i}`}
+                  style={{
+                    padding: "9px 10px",
+                    borderRadius: 10,
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: "rgba(0,0,0,0.22)",
+                  }}
+                >
+                  <div style={{ fontSize: 9, opacity: 0.58, fontWeight: 800 }}>
+                    {m.label ?? m.key ?? "Metric"}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 4,
+                      fontSize: 18,
+                      fontWeight: 950,
+                      letterSpacing: -0.35,
+                      color: valid ? "#f4f7fb" : "rgba(255,220,150,0.95)",
+                    }}
+                  >
+                    {formatMetric(m)}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {(typeof deltaDtl === "number" || typeof deltaFo === "number") && (
+              <div
+                style={{
+                  marginTop: 8,
+                  display: "flex",
+                  gap: 8,
+                  flexWrap: "wrap",
+                  fontSize: 10,
+                  fontWeight: 800,
+                  opacity: 0.72,
+                }}
+              >
+                {typeof deltaDtl === "number" && (
+                  <span>DTL stack change {deltaDtl >= 0 ? "+" : ""}{deltaDtl.toFixed(1)}°</span>
+                )}
+                {typeof deltaFo === "number" && (
+                  <span>FO shaft/forearm change {deltaFo >= 0 ? "+" : ""}{deltaFo.toFixed(1)}°</span>
+                )}
+              </div>
+            )}
+
+            {!valid && (
+              <div
+                style={{
+                  marginTop: 8,
+                  padding: "8px 9px",
+                  borderRadius: 9,
+                  background: "rgba(255,190,70,0.06)",
+                  fontSize: 10,
+                  lineHeight: 1.4,
+                  color: "rgba(255,226,170,0.90)",
+                }}
+              >
+                {deliveryCard.quality?.userMessage ??
+                  "Tracking quality is too low for a coaching decision. Recapture before trusting fine delivery angles."}
+              </div>
+            )}
+          </div>
+        );
+      })() : null}
 
       <div
         style={{
