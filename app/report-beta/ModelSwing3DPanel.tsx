@@ -101,6 +101,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [mode, setMode] = useState<Mode>("slow");
   const [selectedP, setSelectedP] = useState<number>(7);
+  const [cursorFrame, setCursorFrame] = useState<number>(CHECKPOINT_FRAMES[7]);
   const [playerFrames, setPlayerFrames] = useState<PlayerPFrame[]>([]);
   const [sequenceFrames, setSequenceFrames] = useState<SequenceFrame[]>([]);
   const [clubFrames, setClubFrames] = useState<ClubFrame[]>([]);
@@ -227,11 +228,13 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
     [mode]
   );
 
-  const checkpointTime = (p: number, m: Mode = mode) => {
-    const frame = CHECKPOINT_FRAMES[p] ?? 1;
+  const frameToTime = (frame: number, m: Mode = mode) => {
     const normalSeconds = Math.max(0, frame - 1) / FPS;
     return m === "slow" ? normalSeconds * 4 : normalSeconds;
   };
+
+  const checkpointTime = (p: number, m: Mode = mode) =>
+    frameToTime(CHECKPOINT_FRAMES[p] ?? 1, m);
 
   const motionMap = useMemo(() => {
     if (!sequenceFrames.length || !clubFrames.length) return null;
@@ -564,7 +567,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
     const handSpeed = speedSeries(seq, (f) => f.body.hands, 2.23694);
     const pelvisSpeed = rotationSeries(seq, "left_hip", "right_hip");
     const torsoSpeed = rotationSeries(seq, "left_shoulder", "right_shoulder");
-    const selectedFrame = Math.min(CHECKPOINT_FRAMES[selectedP] ?? 1, 64);
+    const selectedFrame = Math.min(cursorFrame, 64);
 
     return {
       selectedFrame,
@@ -577,10 +580,12 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
       pelvisSpeedNow: nearestMetric(pelvisSpeed, selectedFrame),
       torsoSpeedNow: nearestMetric(torsoSpeed, selectedFrame),
     };
-  }, [sequenceFrames, clubFrames, selectedP]);
+  }, [sequenceFrames, clubFrames, cursorFrame]);
 
   const jumpTo = (p: number) => {
+    const frame = CHECKPOINT_FRAMES[p] ?? 1;
     setSelectedP(p);
+    setCursorFrame(frame);
     const v = videoRef.current;
     if (!v) return;
     v.currentTime = checkpointTime(p);
@@ -854,8 +859,14 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
               onLoadedMetadata={() => {
                 const v = videoRef.current;
                 if (!v) return;
-                v.currentTime = checkpointTime(selectedP);
+                v.currentTime = frameToTime(cursorFrame);
                 v.pause();
+              }}
+              onTimeUpdate={(e) => {
+                const t = e.currentTarget.currentTime;
+                const normalSeconds = mode === "slow" ? t / 4 : t;
+                const frame = Math.max(1, Math.min(77, Math.round(normalSeconds * FPS) + 1));
+                setCursorFrame(frame);
               }}
               style={{
                 width: "100%",
@@ -867,6 +878,83 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
               }}
             />
           </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: 10,
+          padding: "10px 12px 8px",
+          borderRadius: 12,
+          border: "1px solid rgba(255,255,255,0.10)",
+          background: "rgba(0,0,0,0.24)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 12,
+            alignItems: "baseline",
+            marginBottom: 8,
+            fontSize: 10,
+          }}
+        >
+          <span style={{ fontWeight: 900, letterSpacing: 0.45, textTransform: "uppercase" }}>
+            Synchronized Timeline
+          </span>
+          <span style={{ opacity: 0.58 }}>
+            F{cursorFrame} • {frameToTime(cursorFrame).toFixed(2)}s {cursorFrame > 64 ? "• finish context" : "• precision range"}
+          </span>
+        </div>
+
+        <input
+          type="range"
+          min={1}
+          max={77}
+          step={1}
+          value={cursorFrame}
+          onChange={(e) => {
+            const frame = Number(e.target.value);
+            setCursorFrame(frame);
+            const v = videoRef.current;
+            if (v) {
+              v.currentTime = frameToTime(frame);
+              v.pause();
+            }
+          }}
+          style={{ width: "100%", display: "block" }}
+          aria-label="Swing frame timeline"
+        />
+
+        <div style={{ position: "relative", height: 26, margin: "2px 4px 0" }}>
+          {Object.entries(CHECKPOINT_FRAMES).map(([pKey, frame]) => {
+            const pNum = Number(pKey);
+            const left = ((frame - 1) / 76) * 100;
+            return (
+              <button
+                key={pKey}
+                type="button"
+                onClick={() => jumpTo(pNum)}
+                title={`Jump to P${pNum} • F${frame}`}
+                style={{
+                  position: "absolute",
+                  left: `${left}%`,
+                  transform: "translateX(-50%)",
+                  top: 2,
+                  border: 0,
+                  padding: 0,
+                  background: "transparent",
+                  color: selectedP === pNum ? "#fff" : "rgba(255,255,255,0.52)",
+                  cursor: "pointer",
+                  fontSize: 9,
+                  fontWeight: selectedP === pNum ? 900 : 700,
+                }}
+              >
+                P{pNum}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -1380,6 +1468,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
           type="button"
           onClick={() => {
             setSelectedP(1);
+            setCursorFrame(1);
             const v = videoRef.current;
             if (!v) return;
             v.currentTime = 0;
