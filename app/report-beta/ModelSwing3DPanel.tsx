@@ -92,6 +92,25 @@ type DeliveryCard = {
   };
 };
 
+type FoWristPhase = {
+  wristHingeDeg?: number | null;
+  handleFwdNorm?: number | null;
+  shaftMinusForearmDeg?: number | null;
+  clubfaceControlScore?: number | null;
+};
+
+type FoWristHandle = {
+  status?: string;
+  note?: string;
+  P6?: FoWristPhase | null;
+  P7?: FoWristPhase | null;
+  relationship?: {
+    hingeDelta?: number | null;
+    handleDeltaNorm?: number | null;
+    shaftMinusForearmDelta?: number | null;
+  };
+};
+
 const CHECKPOINT_FRAMES: Record<number, number> = {
   1: 1,
   2: 12,
@@ -158,10 +177,12 @@ export default function ModelSwing3DPanel({
   playerPose,
   playerShaft,
   deliveryCard,
+  foWristHandle,
 }: {
   playerPose?: PlayerPoseJson | null;
   playerShaft?: PlayerShaftBlock | null;
   deliveryCard?: DeliveryCard | null;
+  foWristHandle?: FoWristHandle | null;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [mode, setMode] = useState<Mode>("slow");
@@ -1393,6 +1414,73 @@ export default function ModelSwing3DPanel({
                 </div>
               ))}
             </div>
+
+            {foWristHandle?.P6 && foWristHandle?.P7 && (
+              <div
+                style={{
+                  marginTop: 8,
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                  gap: 8,
+                }}
+              >
+                <div
+                  style={{
+                    padding: "9px 10px",
+                    borderRadius: 10,
+                    border: "1px solid rgba(70,196,255,0.12)",
+                    background: "rgba(70,196,255,0.035)",
+                  }}
+                >
+                  <div style={{ fontSize: 9, opacity: 0.58, fontWeight: 800 }}>
+                    Handle forward • 2D proxy
+                  </div>
+                  <div style={{ marginTop: 4, fontSize: 15, fontWeight: 900 }}>
+                    {typeof foWristHandle.P6.handleFwdNorm === "number"
+                      ? `${valid ? "" : "~"}${foWristHandle.P6.handleFwdNorm.toFixed(2)}`
+                      : "—"}
+                    <span style={{ opacity: 0.5, fontSize: 11 }}> → </span>
+                    {typeof foWristHandle.P7.handleFwdNorm === "number"
+                      ? `${valid ? "" : "~"}${foWristHandle.P7.handleFwdNorm.toFixed(2)} × shoulder width`
+                      : "—"}
+                  </div>
+                  {typeof foWristHandle.relationship?.handleDeltaNorm === "number" && (
+                    <div style={{ marginTop: 3, fontSize: 9, opacity: 0.52 }}>
+                      Δ {foWristHandle.relationship.handleDeltaNorm >= 0 ? "+" : ""}
+                      {foWristHandle.relationship.handleDeltaNorm.toFixed(3)}
+                    </div>
+                  )}
+                </div>
+
+                <div
+                  style={{
+                    padding: "9px 10px",
+                    borderRadius: 10,
+                    border: "1px solid rgba(70,196,255,0.12)",
+                    background: "rgba(70,196,255,0.035)",
+                  }}
+                >
+                  <div style={{ fontSize: 9, opacity: 0.58, fontWeight: 800 }}>
+                    Wrist hinge • 2D proxy
+                  </div>
+                  <div style={{ marginTop: 4, fontSize: 15, fontWeight: 900 }}>
+                    {typeof foWristHandle.P6.wristHingeDeg === "number"
+                      ? `${valid ? "" : "~"}${foWristHandle.P6.wristHingeDeg.toFixed(1)}°`
+                      : "—"}
+                    <span style={{ opacity: 0.5, fontSize: 11 }}> → </span>
+                    {typeof foWristHandle.P7.wristHingeDeg === "number"
+                      ? `${valid ? "" : "~"}${foWristHandle.P7.wristHingeDeg.toFixed(1)}°`
+                      : "—"}
+                  </div>
+                  {typeof foWristHandle.relationship?.hingeDelta === "number" && (
+                    <div style={{ marginTop: 3, fontSize: 9, opacity: 0.52 }}>
+                      Δ {foWristHandle.relationship.hingeDelta >= 0 ? "+" : ""}
+                      {foWristHandle.relationship.hingeDelta.toFixed(1)}°
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {(typeof deltaDtl === "number" || typeof deltaFo === "number") && (
               <div
