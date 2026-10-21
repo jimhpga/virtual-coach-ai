@@ -328,10 +328,61 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
       ? selectedClub.clubhead_m[2] * 100
       : 0;
 
+    const bodyKeys = [
+      "head",
+      "left_shoulder",
+      "right_shoulder",
+      "left_elbow",
+      "right_elbow",
+      "left_wrist",
+      "right_wrist",
+      "left_hip",
+      "right_hip",
+      "left_knee",
+      "right_knee",
+      "left_ankle",
+      "right_ankle",
+      "chest",
+      "pelvis",
+      "hands",
+    ];
+
+    const bodyPoints = Object.fromEntries(
+      bodyKeys.map((key) => [key, project(selectedBody.body?.[key])])
+    ) as Record<string, [number, number] | null>;
+
+    const handProjected = bodyTrail
+      .map((f) => project(f.body?.hands))
+      .filter((p): p is [number, number] => Boolean(p));
+    const clubProjected = clubTrail
+      .map((f) => project(f.clubhead_m))
+      .filter((p): p is [number, number] => Boolean(p));
+    const gripProjected = clubTrail
+      .map((f) => project(f.grip_center_m))
+      .filter((p): p is [number, number] => Boolean(p));
+
+    const envelope = (pts: Array<[number, number]>) => {
+      if (pts.length < 2) return null;
+      const xs = pts.map((p) => p[0]);
+      const ys = pts.map((p) => p[1]);
+      const minX = Math.min(...xs);
+      const maxX = Math.max(...xs);
+      const minY = Math.min(...ys);
+      const maxY = Math.max(...ys);
+      return {
+        cx: (minX + maxX) / 2,
+        cy: (minY + maxY) / 2,
+        rx: Math.max(2, (maxX - minX) / 2 + 2.5),
+        ry: Math.max(2, (maxY - minY) / 2 + 2.5),
+      };
+    };
+
     return {
-      handPath: pathFrom(bodyTrail.map((f) => project(f.body?.hands))),
-      clubPath: pathFrom(clubTrail.map((f) => project(f.clubhead_m))),
-      gripPath: pathFrom(clubTrail.map((f) => project(f.grip_center_m))),
+      handPath: pathFrom(handProjected),
+      clubPath: pathFrom(clubProjected),
+      gripPath: pathFrom(gripProjected),
+      handEnvelope: envelope(handProjected),
+      clubEnvelope: envelope(clubProjected),
       shoulderLeft: project(selectedBody.body?.left_shoulder),
       shoulderRight: project(selectedBody.body?.right_shoulder),
       hipLeft: project(selectedBody.body?.left_hip),
@@ -341,6 +392,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
       hands: project(selectedBody.body?.hands),
       clubhead: project(selectedClub.clubhead_m),
       grip: project(selectedClub.grip_center_m),
+      bodyPoints,
       selectedFrame,
       kineticsValid: selectedFrame <= 64,
       shoulderTurn,
@@ -962,6 +1014,30 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
               <line x1="8" y1="92" x2="92" y2="92" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
               <line x1="50" y1="8" x2="50" y2="92" stroke="rgba(255,255,255,0.06)" strokeWidth="0.35" />
 
+              {motionMap.clubEnvelope && (
+                <ellipse
+                  cx={motionMap.clubEnvelope.cx}
+                  cy={motionMap.clubEnvelope.cy}
+                  rx={motionMap.clubEnvelope.rx}
+                  ry={motionMap.clubEnvelope.ry}
+                  fill="rgba(190,65,235,0.10)"
+                  stroke="rgba(223,79,255,0.24)"
+                  strokeWidth="0.65"
+                />
+              )}
+
+              {motionMap.handEnvelope && (
+                <ellipse
+                  cx={motionMap.handEnvelope.cx}
+                  cy={motionMap.handEnvelope.cy}
+                  rx={motionMap.handEnvelope.rx}
+                  ry={motionMap.handEnvelope.ry}
+                  fill="rgba(60,180,255,0.08)"
+                  stroke="rgba(70,196,255,0.20)"
+                  strokeWidth="0.55"
+                />
+              )}
+
               <path
                 d={motionMap.clubPath}
                 fill="none"
@@ -986,6 +1062,67 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
+
+              {[
+                ["head", "chest"],
+                ["left_shoulder", "right_shoulder"],
+                ["left_shoulder", "left_elbow"],
+                ["left_elbow", "left_wrist"],
+                ["right_shoulder", "right_elbow"],
+                ["right_elbow", "right_wrist"],
+                ["left_shoulder", "left_hip"],
+                ["right_shoulder", "right_hip"],
+                ["left_hip", "right_hip"],
+                ["left_hip", "left_knee"],
+                ["left_knee", "left_ankle"],
+                ["right_hip", "right_knee"],
+                ["right_knee", "right_ankle"],
+                ["chest", "pelvis"],
+              ].map(([aKey, bKey]) => {
+                const a = motionMap.bodyPoints[aKey];
+                const b = motionMap.bodyPoints[bKey];
+                if (!a || !b) return null;
+                return (
+                  <line
+                    key={`${aKey}-${bKey}`}
+                    x1={a[0]}
+                    y1={a[1]}
+                    x2={b[0]}
+                    y2={b[1]}
+                    stroke="rgba(218,238,255,0.88)"
+                    strokeWidth="0.72"
+                    strokeLinecap="round"
+                  />
+                );
+              })}
+
+              {Object.entries(motionMap.bodyPoints).map(([key, pt]) =>
+                pt ? (
+                  <circle
+                    key={key}
+                    cx={pt[0]}
+                    cy={pt[1]}
+                    r={key.includes("wrist") || key === "hands" ? "0.85" : "0.55"}
+                    fill={
+                      key.includes("wrist") || key === "hands"
+                        ? "rgb(70,196,255)"
+                        : "rgba(225,240,255,0.94)"
+                    }
+                  />
+                ) : null
+              )}
+
+              {motionMap.grip && motionMap.clubhead && (
+                <line
+                  x1={motionMap.grip[0]}
+                  y1={motionMap.grip[1]}
+                  x2={motionMap.clubhead[0]}
+                  y2={motionMap.clubhead[1]}
+                  stroke="rgba(255,255,255,0.92)"
+                  strokeWidth="0.9"
+                  strokeLinecap="round"
+                />
+              )}
 
               {motionMap.shoulderLeft && motionMap.shoulderRight && (
                 <line
