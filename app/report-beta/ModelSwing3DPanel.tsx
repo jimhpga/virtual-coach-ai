@@ -81,7 +81,7 @@ const CHECKPOINT_FRAMES: Record<number, number> = {
   10: 77,
 };
 
-const FPS = 60;
+const FPS = 30;
 
 const PREMIUM_CHECKPOINTS: Partial<Record<number, string>> = {
   1: "/images/avatar/p1.png",
@@ -398,20 +398,15 @@ export default function ModelSwing3DPanel({
   }, []);
 
   const src = useMemo(
-    () =>
-      mode === "slow"
-        ? "/vca-3d/FACE_DTL_SLOW4X_60FPS.mp4"
-        : "/vca-3d/FACE_DTL_TRUE_SPEED_60FPS.mp4",
-    [mode]
+    () => `/vca-3d/v200/${projectionView}.mp4`,
+    [projectionView]
   );
 
-  const frameToTime = (frame: number, m: Mode = mode) => {
-    const normalSeconds = Math.max(0, frame - 1) / FPS;
-    return m === "slow" ? normalSeconds * 4 : normalSeconds;
-  };
+  const frameToTime = (frame: number) =>
+    Math.max(0, frame - 1) / FPS;
 
-  const checkpointTime = (p: number, m: Mode = mode) =>
-    frameToTime(CHECKPOINT_FRAMES[p] ?? 1, m);
+  const checkpointTime = (p: number) =>
+    frameToTime(CHECKPOINT_FRAMES[p] ?? 1);
 
   const motionMap = useMemo(() => {
     if (!sequenceFrames.length || !clubFrames.length) return null;
@@ -795,8 +790,11 @@ export default function ModelSwing3DPanel({
   };
 
   const setPlaybackMode = (next: Mode) => {
-    if (next === mode) return;
     setMode(next);
+    const v = videoRef.current;
+    if (v) {
+      v.playbackRate = next === "slow" ? 0.25 : 1;
+    }
   };
 
   return (
@@ -834,14 +832,28 @@ export default function ModelSwing3DPanel({
             3D Model Swing
           </div>
           <div style={{ marginTop: 3, fontSize: 13, fontWeight: 800 }}>
-            FACE + DTL synchronized
+            {projectionView === "face" ? "Face On" : "Down the Line"} synchronized
           </div>
           <div style={{ marginTop: 3, fontSize: 11, opacity: 0.64 }}>
-            Locked reference motion • 60 fps • P1–P10
+            Locked V200 reference • 30 fps state-native • P1–P10
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <button
+            type="button"
+            onClick={() => setProjectionView("face")}
+            style={pill(projectionView === "face")}
+          >
+            Face On
+          </button>
+          <button
+            type="button"
+            onClick={() => setProjectionView("dtl")}
+            style={pill(projectionView === "dtl")}
+          >
+            DTL
+          </button>
           <button
             type="button"
             onClick={() => setPlaybackMode("normal")}
@@ -1101,13 +1113,15 @@ export default function ModelSwing3DPanel({
               onLoadedMetadata={() => {
                 const v = videoRef.current;
                 if (!v) return;
+                v.playbackRate = mode === "slow" ? 0.25 : 1;
                 v.currentTime = frameToTime(cursorFrame);
                 v.pause();
               }}
               onTimeUpdate={(e) => {
-                const t = e.currentTarget.currentTime;
-                const normalSeconds = mode === "slow" ? t / 4 : t;
-                const frame = Math.max(1, Math.min(77, Math.round(normalSeconds * FPS) + 1));
+                const frame = Math.max(
+                  1,
+                  Math.min(77, Math.round(e.currentTarget.currentTime * FPS) + 1)
+                );
                 setCursorFrame(frame);
               }}
               style={{
