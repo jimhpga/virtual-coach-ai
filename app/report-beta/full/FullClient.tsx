@@ -402,7 +402,9 @@ if(!Array.isArray((data as any).pchecks) || ((data as any).pchecks?.length ?? 0)
     analysisStatus === "queued" || analysisStatus === "queued_retry";
   const analysisFailed = analysisStatus === "analysis_error";
   const analysisRecapture =
-    analysisStatus === "invalid_capture" || analysisStatus === "incomplete_swing";
+    analysisStatus === "invalid_capture" ||
+    analysisStatus === "incomplete_swing" ||
+    analysisStatus === "partial_swing";
   const showPChecks = !reportProvenance.real || reportProvenance.hasPChecks;
   const showPracticePlan =
     !reportProvenance.real || reportProvenance.hasPracticePlan;
@@ -451,7 +453,7 @@ fetch(fetchSrc, { cache: "no-store" })
         );
         const noCoaching = Boolean(
           looksReal &&
-          ["queued", "queued_retry", "analysis_error", "invalid_capture", "incomplete_swing"].includes(
+          ["queued", "queued_retry", "analysis_error", "invalid_capture", "incomplete_swing", "partial_swing"].includes(
             String(root.analysisStatus ?? "")
           )
         );
@@ -723,9 +725,11 @@ fetch(fetchSrc, { cache: "no-store" })
                 ? "Analysis could not complete after multiple attempts. The swing video is still saved."
                 : analysisStatus === "invalid_capture"
                   ? "Analysis stopped safely: we could not confirm a visible golfer in this video."
-                  : analysisStatus === "incomplete_swing"
-                    ? "Analysis stopped safely: the clip does not contain a complete downswing and impact."
-                    : analysisStatus === "measured_partial"
+                  : analysisStatus === "partial_swing"
+                    ? "Analysis stopped safely: the clip begins after setup, so full P1-P10 timing is unavailable."
+                    : analysisStatus === "incomplete_swing"
+                      ? "Analysis stopped safely: the clip does not contain a complete downswing and impact."
+                      : analysisStatus === "measured_partial"
                     ? "Measured biomechanics are ready. Coaching conclusions appear only when their source data is available."
                     : "Generated automatically from a single swing video."}
         </div>

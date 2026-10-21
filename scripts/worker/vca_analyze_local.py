@@ -639,8 +639,16 @@ def main():
     pose_non_empty = usable_pose_frames(pose)
 
     if not bool(phase_meta.get("ok", False)):
+        phase_status = str(phase_meta.get("status") or "incomplete_swing")
+        if phase_status == "partial_swing":
+            shaft_why = "The clip begins after setup/address, so full P1-P10 timing and P5/P6 shaft delivery are unavailable."
+            recapture_message = "Upload the complete swing beginning at address and continuing through impact and early follow-through."
+        else:
+            shaft_why = "Full downswing/impact evidence was not present in the clip."
+            recapture_message = "Upload a clip that includes the complete backswing, downswing, impact, and early follow-through."
+
         report_patch = {
-            "analysisStatus": str(phase_meta.get("status") or "incomplete_swing"),
+            "analysisStatus": phase_status,
             "analysisEngine": "local_worker_mvp_v1",
             "videoUrl": None,
             "sourceVideoFile": video,
@@ -655,12 +663,12 @@ def main():
                 "measuredPhases": [],
                 "requestedPhases": ["P2", "P3", "P5", "P6", "P7"],
                 "phases": {},
-                "why": "Full downswing/impact evidence was not present in the clip.",
+                "why": shaft_why,
             },
             "recapture": {
                 "required": True,
                 "reason": str(phase_meta.get("reason") or "incomplete_swing"),
-                "message": "Upload a clip that includes the complete backswing, downswing, impact, and early follow-through.",
+                "message": recapture_message,
             },
             "meta": {
                 "worker": {

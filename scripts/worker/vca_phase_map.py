@@ -54,6 +54,101 @@ def wrist_rows(frames):
     return rows
 
 
+
+
+def body_geometry_rows(frames):
+    rows = []
+    for k, fr in enumerate(frames):
+        lm = fr.get("landmarks") or []
+        if len(lm) < 25:
+            continue
+        try:
+            i = frame_index(fr, k)
+            wx = (float(lm[15]["x"]) + float(lm[16]["x"])) / 2.0
+            wy = (float(lm[15]["y"]) + float(lm[16]["y"])) / 2.0
+            hx = (float(lm[23]["x"]) + float(lm[24]["x"])) / 2.0
+            hy = (float(lm[23]["y"]) + float(lm[24]["y"])) / 2.0
+        except Exception:
+            continue
+        hip_distance = math.hypot(wx - hx, wy - hy)
+        wrist_vs_hip_y = wy - hy
+        rows.append((i, wx, wy, hip_distance, wrist_vs_hip_y))
+    return rows
+
+
+def address_evidence(frames):
+    rows = body_geometry_rows(frames)
+    early = rows[:20]
+    if len(early) < 5:
+        return {
+            "ok": False,
+            "reason": "insufficient_early_pose",
+            "hipDistanceMedian": None,
+            "wristVsHipYMedian": None,
+        }
+
+    hip_distances = sorted(r[3] for r in early)
+    wrist_rel = sorted(r[4] for r in early)
+    hip_med = hip_distances[len(hip_distances) // 2]
+    wrist_med = wrist_rel[len(wrist_rel) // 2]
+
+    # Address-like setup: hands are close to the pelvis and below/near the hip center.
+    # Mid-backswing clips begin with hands much farther from and above the pelvis.
+    ok = hip_med <= 0.15 and wrist_med >= -0.02
+    return {
+        "ok": bool(ok),
+        "reason": "address_visible" if ok else "clip_begins_after_address",
+        "hipDistanceMedian": round(float(hip_med), 6),
+        "wristVsHipYMedian": round(float(wrist_med), 6),
+        "hipDistanceThreshold": 0.15,
+        "wristVsHipYThreshold": -0.02,
+    }
+
+
+def partial_delivery_geometry(frames, frame_count, fps):
+    rows = body_geometry_rows(frames)
+    if len(rows) < 12:
+        return {
+            "ok": False,
+            "reason": "insufficient_pose_for_partial_delivery",
+        }
+
+    first_half_limit = int(frame_count * 0.55)
+    first_half = [r for r in rows if r[0] <= first_half_limit]
+    if len(first_half) < 6:
+        first_half = rows[: max(6, len(rows) // 2)]
+
+    # At/near the top the hands are maximally separated from the hip center.
+    p4_row = max(first_half, key=lambda r: r[3])
+    after = [r for r in rows if r[0] > p4_row[0]]
+    if len(after) < 5:
+        return {
+            "ok": False,
+            "reason": "insufficient_frames_after_partial_top",
+            "p4Frame": int(p4_row[0]),
+        }
+
+    # Through delivery the hands descend toward their image-space low point.
+    p7_row = max(after, key=lambda r: r[2])
+    delta_frames = int(p7_row[0] - p4_row[0])
+    wrist_drop = float(p7_row[2] - p4_row[2])
+    min_frames = max(5, round(0.18 * fps))
+    min_drop = 0.08
+    ok = delta_frames >= min_frames and wrist_drop >= min_drop
+
+    return {
+        "ok": bool(ok),
+        "reason": "visible_partial_delivery" if ok else "no_material_partial_delivery",
+        "p4Frame": int(p4_row[0]),
+        "p7Frame": int(p7_row[0]),
+        "deltaFrames": delta_frames,
+        "minimumDeltaFrames": int(min_frames),
+        "wristDropNorm": round(wrist_drop, 6),
+        "minimumWristDropNorm": min_drop,
+        "p4HipDistance": round(float(p4_row[3]), 6),
+    }
+
+
 def speeds(rows):
     out = []
     prev = None
@@ -318,6 +413,85 @@ def main():
     data, frames, fps = load_pose(args.pose)
     rows = wrist_rows(frames)
     frame_count = int((data.get("meta") or {}).get("frame_count") or max(x[0] for x in rows) + 1)
+
+    address = address_evidence(frames)
+    if not address["ok"]:
+        partial = partial_delivery_geometry(frames, frame_count, fps)
+        if partial.get("ok"):
+            partial_map = {
+                "P4": clamp_frame(partial["p4Frame"], frame_count),
+                "P7": clamp_frame(partial["p7Frame"], frame_count),
+            }
+            provenance = {
+                "P4": {
+                    "source": "partial_hip_distance_backswing_extent",
+                    "confidence": 0.72,
+                },
+                "P7": {
+                    "source": "partial_post_top_wrist_low_point",
+                    "confidence": 0.65,
+                },
+            }
+            status = "partial_swing"
+            reason = "clip_begins_after_address"
+            notes = [
+                "The clip begins after setup/address, so P1-P3 are intentionally unavailable.",
+                "Visible P4/P7 geometry is preserved as contextual anchors only.",
+                "P5/P6 shaft-delivery analysis is intentionally withheld because the complete timing chain is not available.",
+                "Upload the complete swing beginning at address for full P1-P10 analysis.",
+            ]
+        else:
+            partial_map = {}
+            if partial.get("p4Frame") is not None:
+                partial_map["P4"] = clamp_frame(partial["p4Frame"], frame_count)
+            provenance = {}
+            if "P4" in partial_map:
+                provenance["P4"] = {
+                    "source": "partial_hip_distance_backswing_extent",
+                    "confidence": 0.55,
+                }
+            status = "incomplete_swing"
+            reason = str(partial.get("reason") or "missing_address_and_no_delivery")
+            notes = [
+                "The clip begins after setup/address and does not contain enough visible delivery to reconstruct a full swing.",
+                "P1-P3 and P5-P10 are intentionally unavailable.",
+                "Upload a complete swing beginning at address and continuing through early follow-through.",
+            ]
+
+        out_path = Path(args.out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(json.dumps(partial_map, indent=2), encoding="utf-8")
+
+        meta_path = Path(args.metaOut) if args.metaOut else out_path.with_name("phase_frames_meta.json")
+        meta = {
+            "ok": False,
+            "status": status,
+            "reason": reason,
+            "fps": fps,
+            "frameCount": frame_count,
+            "phases": partial_map,
+            "provenance": provenance,
+            "addressEvidence": address,
+            "partialDelivery": partial,
+            "notes": notes,
+        }
+        meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
+
+        print(
+            json.dumps(
+                {
+                    "ok": False,
+                    "status": status,
+                    "phaseMap": partial_map,
+                    "addressEvidence": address,
+                    "partialDelivery": partial,
+                    "out": str(out_path),
+                    "meta": str(meta_path),
+                },
+                indent=2,
+            )
+        )
+        return
 
     # Preliminary onset using a broad first-half search, then solve P4.
     prelim_end = int(frame_count * 0.62)
