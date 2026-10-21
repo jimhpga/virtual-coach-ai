@@ -401,6 +401,8 @@ if(!Array.isArray((data as any).pchecks) || ((data as any).pchecks?.length ?? 0)
   const analysisPending =
     analysisStatus === "queued" || analysisStatus === "queued_retry";
   const analysisFailed = analysisStatus === "analysis_error";
+  const analysisRecapture =
+    analysisStatus === "invalid_capture" || analysisStatus === "incomplete_swing";
   const showPChecks = !reportProvenance.real || reportProvenance.hasPChecks;
   const showPracticePlan =
     !reportProvenance.real || reportProvenance.hasPracticePlan;
@@ -447,6 +449,12 @@ fetch(fetchSrc, { cache: "no-store" })
           root.videoUrl ||
           (root.id && !String(root.id).toLowerCase().includes("demo"))
         );
+        const noCoaching = Boolean(
+          looksReal &&
+          ["queued", "queued_retry", "analysis_error", "invalid_capture", "incomplete_swing"].includes(
+            String(root.analysisStatus ?? "")
+          )
+        );
 
         setReportProvenance({
           loaded: true,
@@ -491,13 +499,16 @@ fetch(fetchSrc, { cache: "no-store" })
             (prev as any).videoUrl ??
             null
           ),
-          swingScore: root.swingScore ?? prev.swingScore,
-          headline: (root.headline ?? (prev as any).headline ?? ""),
-          rankedFaults: (
-            Array.isArray(root.rankedFaults)
-              ? root.rankedFaults
-              : ((prev as any).rankedFaults ?? [])
-          ),
+          swingScore: noCoaching ? null : (root.swingScore ?? prev.swingScore),
+          headline: noCoaching ? "" : (root.headline ?? (prev as any).headline ?? ""),
+          rankedFaults: noCoaching
+            ? []
+            : (
+                Array.isArray(root.rankedFaults)
+                  ? root.rankedFaults
+                  : ((prev as any).rankedFaults ?? [])
+              ),
+          recapture: (root.recapture ?? (prev as any).recapture ?? null),
           poseSnap: (root.poseSnap ?? (prev as any).poseSnap ?? null),
           pose: (root.pose ?? (prev as any).pose ?? null),
           pframes: (
@@ -505,49 +516,69 @@ fetch(fetchSrc, { cache: "no-store" })
               ? root.pframes
               : ((prev as any).pframes ?? null)
           ),
-          p5p6p7ShaftArm: (
-            root.p5p6p7ShaftArm ??
-            bundle?.p5p6p7ShaftArm ??
-            (prev as any).p5p6p7ShaftArm ??
-            null
-          ),
-          p3p5Mirror: (
-            root.p3p5Mirror ??
-            bundle?.p3p5Mirror ??
-            (prev as any).p3p5Mirror ??
-            null
-          ),
-          deliveryCard: (
-            root.deliveryCard ??
-            bundle?.deliveryCard ??
-            (prev as any).deliveryCard ??
-            null
-          ),
-          foWristHandle: (
-            root.foWristHandle ??
-            bundle?.foWristHandle ??
-            (prev as any).foWristHandle ??
-            null
-          ),
-          readyBundle: (
-            root.readyBundle ??
-            bundle?.readyBundle ??
-            (prev as any).readyBundle ??
-            null
-          ),
+          p5p6p7ShaftArm: noCoaching
+            ? null
+            : (
+                root.p5p6p7ShaftArm ??
+                bundle?.p5p6p7ShaftArm ??
+                (prev as any).p5p6p7ShaftArm ??
+                null
+              ),
+          p3p5Mirror: noCoaching
+            ? null
+            : (
+                root.p3p5Mirror ??
+                bundle?.p3p5Mirror ??
+                (prev as any).p3p5Mirror ??
+                null
+              ),
+          deliveryCard: noCoaching
+            ? null
+            : (
+                root.deliveryCard ??
+                bundle?.deliveryCard ??
+                (prev as any).deliveryCard ??
+                null
+              ),
+          foWristHandle: noCoaching
+            ? null
+            : (
+                root.foWristHandle ??
+                bundle?.foWristHandle ??
+                (prev as any).foWristHandle ??
+                null
+              ),
+          readyBundle: noCoaching
+            ? null
+            : (
+                root.readyBundle ??
+                bundle?.readyBundle ??
+                (prev as any).readyBundle ??
+                null
+              ),
           playerName: root.playerName ?? prev.playerName,
-          overview: root.overview ?? prev.overview,
-          highlights: Array.isArray(root.highlights) ? root.highlights : prev.highlights,
-          tourDna: root.tourDna ?? prev.tourDna,
-          grades: root.grades ?? prev.grades,
-          doingWell: Array.isArray(root.doingWell) ? root.doingWell : prev.doingWell,
-          leaks: Array.isArray(root.leaks) ? root.leaks : prev.leaks,
-          topFixes: Array.isArray(root.topFixes) ? root.topFixes : prev.topFixes,
-          pchecks: Array.isArray(incomingPChecks) ? incomingPChecks : prev.pchecks,
-          practicePlan: incomingPractice ?? prev.practicePlan,
-          priority: root.priority ?? prev.priority,
-          faults: root.faults ?? prev.faults,
-          drills: root.drills ?? prev.drills,
+          overview: noCoaching ? "" : (root.overview ?? prev.overview),
+          highlights: noCoaching
+            ? []
+            : (Array.isArray(root.highlights) ? root.highlights : prev.highlights),
+          tourDna: noCoaching ? "" : (root.tourDna ?? prev.tourDna),
+          grades: noCoaching ? null : (root.grades ?? prev.grades),
+          doingWell: noCoaching
+            ? []
+            : (Array.isArray(root.doingWell) ? root.doingWell : prev.doingWell),
+          leaks: noCoaching
+            ? []
+            : (Array.isArray(root.leaks) ? root.leaks : prev.leaks),
+          topFixes: noCoaching
+            ? []
+            : (Array.isArray(root.topFixes) ? root.topFixes : prev.topFixes),
+          pchecks: noCoaching
+            ? []
+            : (Array.isArray(incomingPChecks) ? incomingPChecks : prev.pchecks),
+          practicePlan: noCoaching ? null : (incomingPractice ?? prev.practicePlan),
+          priority: noCoaching ? null : (root.priority ?? prev.priority),
+          faults: noCoaching ? [] : (root.faults ?? prev.faults),
+          drills: noCoaching ? [] : (root.drills ?? prev.drills),
         } as any));
       })
       .catch(() => {});
@@ -690,9 +721,11 @@ fetch(fetchSrc, { cache: "no-store" })
               ? "Analysis is retrying automatically. This page will update when it finishes."
               : analysisStatus === "analysis_error"
                 ? "Analysis could not complete after multiple attempts. The swing video is still saved."
-                : analysisStatus === "incomplete_swing"
-                  ? "Analysis stopped safely: the clip does not contain a complete downswing and impact."
-                  : analysisStatus === "measured_partial"
+                : analysisStatus === "invalid_capture"
+                  ? "Analysis stopped safely: we could not confirm a visible golfer in this video."
+                  : analysisStatus === "incomplete_swing"
+                    ? "Analysis stopped safely: the clip does not contain a complete downswing and impact."
+                    : analysisStatus === "measured_partial"
                     ? "Measured biomechanics are ready. Coaching conclusions appear only when their source data is available."
                     : "Generated automatically from a single swing video."}
         </div>
@@ -957,6 +990,25 @@ fetch(fetchSrc, { cache: "no-store" })
             <div>
               Pose, P1–P10 timing, club delivery and confidence checks are running.
               This report updates automatically.
+            </div>
+          </div>
+        </Panel>
+      ) : analysisRecapture ? (
+        <Panel title="Recapture Required">
+          <div
+            style={{
+              padding: "20px 8px",
+              fontSize: 13,
+              lineHeight: 1.6,
+              opacity: 0.9,
+            }}
+          >
+            <div style={{ fontWeight: 900, marginBottom: 6 }}>
+              No biomechanics were generated from this clip.
+            </div>
+            <div>
+              {(data as any)?.recapture?.message ??
+                "Upload the original swing video with the full golfer visible from setup through early follow-through."}
             </div>
           </div>
         </Panel>

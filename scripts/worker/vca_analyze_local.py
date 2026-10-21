@@ -375,6 +375,7 @@ def main():
     shaft_script = os.path.join(repo, "scripts", "shaft", "vca_shaft_keyphases_v2.py")
 
     pose_path = os.path.join(out_dir, "pose_dense.json")
+    preflight_pose_path = os.path.join(out_dir, "pose_preflight.json")
     phase_path = os.path.join(out_dir, "phase_frames_override.flat.json")
     phase_meta_path = os.path.join(out_dir, "phase_frames_meta.json")
 
@@ -384,6 +385,124 @@ def main():
             for fr in (pose_obj.get("frames") or [])
             if isinstance(fr, dict) and len(fr.get("landmarks") or []) >= 17
         )
+
+    # Fast capture gate: sample the clip before running dense pose/shaft analysis.
+    # This catches report-screen recordings, wrong uploads, and clips without a visible golfer.
+    if os.path.isfile(preflight_pose_path):
+        os.remove(preflight_pose_path)
+
+    preflight_cmd = [
+        sys.executable,
+        pose_solutions_script,
+        "--in",
+        video,
+        "--out",
+        preflight_pose_path,
+        "--sample",
+        "8",
+        "--complexity",
+        "1",
+        "--det",
+        "0.25",
+        "--trk",
+        "0.25",
+    ]
+    preflight_cp = subprocess.run(
+        preflight_cmd,
+        capture_output=True,
+        text=True,
+    )
+
+    preflight_pose = {}
+    if os.path.isfile(preflight_pose_path):
+        try:
+            preflight_pose = load_json(preflight_pose_path)
+        except Exception:
+            preflight_pose = {}
+
+    preflight_total = len(preflight_pose.get("frames") or [])
+    preflight_usable = usable_pose_frames(preflight_pose)
+    preflight_ratio = (
+        float(preflight_usable) / float(preflight_total)
+        if preflight_total > 0
+        else 0.0
+    )
+    preflight_ok = preflight_usable >= 3 and preflight_ratio >= 0.12
+
+    print(
+        f"CAPTURE_PREFLIGHT usable={preflight_usable} sampled={preflight_total} "
+        f"ratio={preflight_ratio:.3f} ok={preflight_ok}"
+    )
+
+    if not preflight_ok:
+        report_patch = {
+            "analysisStatus": "invalid_capture",
+            "analysisEngine": "local_worker_mvp_v1",
+            "videoUrl": None,
+            "sourceVideoFile": video,
+            "pose": {
+                "frames": [],
+                "meta": {
+                    "preflightSampled": preflight_total,
+                    "preflightUsable": preflight_usable,
+                    "preflightCoverage": round(preflight_ratio, 3),
+                },
+            },
+            "phaseFrames": {},
+            "phaseMeta": {
+                "ok": False,
+                "status": "invalid_capture",
+                "reason": "insufficient_visible_golfer",
+            },
+            "pframes": [],
+            "p5p6p7ShaftArm": None,
+            "deliveryCard": None,
+            "shaftV2": {
+                "source": "unavailable",
+                "measuredPhases": [],
+                "requestedPhases": ["P2", "P3", "P5", "P6", "P7"],
+                "phases": {},
+                "why": "Capture preflight could not confirm a visible golfer across the clip.",
+            },
+            "recapture": {
+                "required": True,
+                "reason": "invalid_capture",
+                "message": (
+                    "We could not confirm a golfer in this video. Upload the original swing clip "
+                    "with the full golfer visible from setup through early follow-through."
+                ),
+            },
+            "meta": {
+                "worker": {
+                    "capturePreflight": {
+                        "sampledFrames": preflight_total,
+                        "usablePoseFrames": preflight_usable,
+                        "coverage": round(preflight_ratio, 3),
+                        "minimumUsableFrames": 3,
+                        "minimumCoverage": 0.12,
+                    }
+                }
+            },
+        }
+
+        patch_path = os.path.join(out_dir, "report_patch.json")
+        with open(patch_path, "w", encoding="utf-8") as f:
+            json.dump(report_patch, f, indent=2)
+
+        print(
+            json.dumps(
+                {
+                    "ok": True,
+                    "analysisStatus": "invalid_capture",
+                    "video": video,
+                    "outDir": out_dir,
+                    "reportPatch": patch_path,
+                    "recapture": report_patch["recapture"],
+                },
+                indent=2,
+            )
+        )
+        return
 
     selected_pose_model = None
     selected_pose_engine = None
