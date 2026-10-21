@@ -373,6 +373,12 @@ const [data, setData] = React.useState<FullData>(FALLBACK);
 const [muxResolveStatus, setMuxResolveStatus] = React.useState<
   "idle" | "resolving" | "pending" | "ready" | "error"
 >("idle");
+const [reportProvenance, setReportProvenance] = React.useState({
+  loaded: false,
+  real: false,
+  hasPChecks: true,
+  hasPracticePlan: true,
+});
 
 // ===== VCA_NORM_PCHECKS (AUTO) =====
 // Keep the UI stable: prefer pchecks, but accept API contract p_checkpoints and common aliases.
@@ -390,6 +396,10 @@ if(!Array.isArray((data as any).pchecks) || ((data as any).pchecks?.length ?? 0)
   const muxEmbedUrl = muxPlaybackId
     ? `https://player.mux.com/${encodeURIComponent(muxPlaybackId)}`
     : "";
+  const analysisStatus = String((data as any)?.analysisStatus ?? "");
+  const showPChecks = !reportProvenance.real || reportProvenance.hasPChecks;
+  const showPracticePlan =
+    !reportProvenance.real || reportProvenance.hasPracticePlan;
 
   React.useEffect(() => {
     // Same source logic as card: ?src=, sessionStorage, fallback demo json
@@ -417,9 +427,46 @@ fetch(fetchSrc, { cache: "no-store" })
         const root: any = (j as any).report ?? j;
         const bundle: any = root?.bundle ?? (j as any).bundle ?? null;
 
+        const incomingPChecks =
+          root.pchecks ??
+          root.p_checkpoints ??
+          root.pCheckpoints ??
+          root.pChecks ??
+          null;
+        const incomingPractice = root.practicePlan ?? null;
+        const looksReal = Boolean(
+          root.analysisEngine ||
+          root.analysisStatus ||
+          root.muxUploadId ||
+          root.muxPlaybackId ||
+          root.videoUrl ||
+          (root.id && !String(root.id).toLowerCase().includes("demo"))
+        );
+
+        setReportProvenance({
+          loaded: true,
+          real: looksReal,
+          hasPChecks: Array.isArray(incomingPChecks) && incomingPChecks.length > 0,
+          hasPracticePlan: Boolean(
+            incomingPractice &&
+            Array.isArray(incomingPractice.bullets) &&
+            incomingPractice.bullets.length > 0
+          ),
+        });
+
         setData((prev) => ({
           ...prev,
           id: (root.id ?? (prev as any).id ?? null),
+          analysisStatus: (
+            root.analysisStatus ??
+            (prev as any).analysisStatus ??
+            null
+          ),
+          analysisEngine: (
+            root.analysisEngine ??
+            (prev as any).analysisEngine ??
+            null
+          ),
           muxPlaybackId: (
             root.muxPlaybackId ??
             root.video?.muxPlaybackId ??
@@ -448,6 +495,11 @@ fetch(fetchSrc, { cache: "no-store" })
           ),
           poseSnap: (root.poseSnap ?? (prev as any).poseSnap ?? null),
           pose: (root.pose ?? (prev as any).pose ?? null),
+          pframes: (
+            Array.isArray(root.pframes)
+              ? root.pframes
+              : ((prev as any).pframes ?? null)
+          ),
           p5p6p7ShaftArm: (
             root.p5p6p7ShaftArm ??
             bundle?.p5p6p7ShaftArm ??
@@ -478,7 +530,16 @@ fetch(fetchSrc, { cache: "no-store" })
             (prev as any).readyBundle ??
             null
           ),
+          playerName: root.playerName ?? prev.playerName,
+          overview: root.overview ?? prev.overview,
+          highlights: Array.isArray(root.highlights) ? root.highlights : prev.highlights,
           tourDna: root.tourDna ?? prev.tourDna,
+          grades: root.grades ?? prev.grades,
+          doingWell: Array.isArray(root.doingWell) ? root.doingWell : prev.doingWell,
+          leaks: Array.isArray(root.leaks) ? root.leaks : prev.leaks,
+          topFixes: Array.isArray(root.topFixes) ? root.topFixes : prev.topFixes,
+          pchecks: Array.isArray(incomingPChecks) ? incomingPChecks : prev.pchecks,
+          practicePlan: incomingPractice ?? prev.practicePlan,
           priority: root.priority ?? prev.priority,
           faults: root.faults ?? prev.faults,
           drills: root.drills ?? prev.drills,
@@ -548,12 +609,13 @@ fetch(fetchSrc, { cache: "no-store" })
 
   return (
     <ReportShell
-      titleTop="Virtual Coach AI - Full Report (Demo)"
+      titleTop={reportProvenance.real ? "Virtual Coach AI - Full Report" : "Virtual Coach AI - Full Report (Demo)"}
       rightPills={["Back to home", "Upload another swing", "Print report"]}
 
 >
 
 
+      {showPChecks && (
       <div style={{ display:"flex", gap:8, margin:"10px 0 14px" }}>
         <button
           type="button"
@@ -571,6 +633,7 @@ fetch(fetchSrc, { cache: "no-store" })
         </button>
         <span style={{ fontSize:12, opacity:0.72, alignSelf:"center" }}>Default open: P7 (impact)</span>
       </div>
+      )}
       <div style={{
         marginTop: 0,
         marginBottom: 14,
@@ -584,7 +647,11 @@ fetch(fetchSrc, { cache: "no-store" })
         background: "rgba(0,0,0,0.14)",
       }}>
         <div style={{ fontSize: 12, opacity: 0.82 }}>
-          Generated automatically from a single swing video in under 30 seconds.
+          {analysisStatus === "incomplete_swing"
+            ? "Analysis stopped safely: the clip does not contain a complete downswing and impact."
+            : analysisStatus === "measured_partial"
+              ? "Measured biomechanics are ready. Coaching conclusions appear only when their source data is available."
+              : "Generated automatically from a single swing video."}
         </div>
 
         <div style={{ display: "flex", gap: 10 }}>
@@ -721,6 +788,7 @@ fetch(fetchSrc, { cache: "no-store" })
 
       {/* TOP ROW: Overview + Power/Reliability like screenshot */}
       <div style={{ display: "grid", gridTemplateColumns: "1.45fr 1fr", gap: 14, marginBottom: 14 }}>
+        {showPChecks && (
         <Panel
   title="P1 - P10 Checkpoints"
   right={
@@ -814,8 +882,10 @@ fetch(fetchSrc, { cache: "no-store" })
           })}
         </div>
       </Panel>
+      )}
 
       {/* PRACTICE PLAN */}
+      {showPracticePlan && (
       <div style={{ marginTop: 14 }}>
         <Panel title={data.practicePlan.title} right={<span style={{ fontSize: 12, opacity: 0.75 }}>Show full plan</span>}>
           <div style={{ fontSize: 13, opacity: 0.9, marginBottom: 10 }}>{data.practicePlan.subtitle}</div>
@@ -824,6 +894,7 @@ fetch(fetchSrc, { cache: "no-store" })
           </ul>
         </Panel>
       </div>
+      )}
       </div>
 
       <ModelSwing3DPanel
@@ -831,10 +902,13 @@ fetch(fetchSrc, { cache: "no-store" })
         playerShaft={(data as any)?.p5p6p7ShaftArm ?? null}
         deliveryCard={(data as any)?.deliveryCard ?? null}
         foWristHandle={(data as any)?.foWristHandle ?? null}
+        playerPFrames={(data as any)?.pframes ?? null}
       />
 
       <div style={{ marginTop: 10, fontSize: 11, opacity: 0.55, textAlign: "center" }}>
-        Virtual Coach AI - demo report. If something doesn't fit, it may be your swing or your feel and your hand.
+        {reportProvenance.real
+          ? "Virtual Coach AI • measured where the source data supports it; estimates are labeled."
+          : "Virtual Coach AI - demo report. If something doesn't fit, it may be your swing or your feel and your hand."}
       </div>
     </ReportShell>
   );

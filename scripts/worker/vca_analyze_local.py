@@ -1,0 +1,665 @@
+import argparse
+import glob
+import json
+import os
+import subprocess
+import sys
+from pathlib import Path
+
+
+def run(cmd):
+    cp = subprocess.run(cmd, capture_output=True, text=True)
+    if cp.returncode != 0:
+        raise RuntimeError(
+            "Command failed:\n"
+            + " ".join(str(x) for x in cmd)
+            + "\nSTDOUT:\n"
+            + cp.stdout
+            + "\nSTDERR:\n"
+            + cp.stderr
+        )
+    if cp.stdout.strip():
+        print(cp.stdout.strip())
+    return cp
+
+
+def load_json(path):
+    with open(path, "r", encoding="utf-8-sig") as f:
+        return json.load(f)
+
+
+def newest(pattern):
+    hits = glob.glob(pattern)
+    if not hits:
+        return None
+    return max(hits, key=os.path.getmtime)
+
+
+def normalize_pose_for_report(pose):
+    out = []
+    for k, fr in enumerate(pose.get("frames") or []):
+        lm = fr.get("landmarks") or []
+        if not lm:
+            continue
+        out.append(
+            {
+                "frame": int(fr.get("i", fr.get("frame", k))),
+                "ok": True,
+                "landmarks": [
+                    {
+                        "x": float(p.get("x", 0.0)),
+                        "y": float(p.get("y", 0.0)),
+                        "z": float(p.get("z", 0.0)),
+                        "v": float(p.get("v", p.get("visibility", 1.0))),
+                    }
+                    for p in lm
+                ],
+            }
+        )
+    return {
+        "frames": out,
+        "meta": pose.get("meta") or {},
+    }
+
+
+def angle_deg(x1, y1, x2, y2):
+    import math
+    return math.degrees(math.atan2(y2 - y1, x2 - x1))
+
+
+def norm180(deg):
+    d = float(deg)
+    while d <= -180:
+        d += 360
+    while d > 180:
+        d -= 360
+    return d
+
+
+def stack_deg(shaft_deg, arm_deg):
+    return abs(norm180(float(shaft_deg) - float(arm_deg)))
+
+
+def pose_frame_map(pose):
+    out = {}
+    for k, fr in enumerate(pose.get("frames") or []):
+        idx = int(fr.get("i", fr.get("frame", k)))
+        out[idx] = fr
+    return out
+
+
+def build_shaft_arm_block(pose, shaft_by):
+    fmap = pose_frame_map(pose)
+
+    def phase_block(phase):
+        row = shaft_by.get(phase)
+        if not row:
+            return None
+
+        frame = int(row.get("frame"))
+        fr = fmap.get(frame)
+        arm = None
+        if fr:
+            lm = fr.get("landmarks") or []
+            if len(lm) >= 16:
+                ls = lm[11]
+                lw = lm[15]
+                arm = angle_deg(
+                    float(ls.get("x", 0.0)),
+                    float(ls.get("y", 0.0)),
+                    float(lw.get("x", 0.0)),
+                    float(lw.get("y", 0.0)),
+                )
+
+        shaft = row.get("shaft") or {}
+        source = str(shaft.get("source") or "")
+        conf = int(shaft.get("confidenceRaw") or 0)
+        shaft_angle = None
+        if source != "unavailable" and conf > 0 and shaft.get("angleDeg") is not None:
+            shaft_angle = float(shaft.get("angleDeg"))
+
+        stack = (
+            stack_deg(shaft_angle, arm)
+            if shaft_angle is not None and arm is not None
+            else None
+        )
+
+        vision = shaft.get("vision") or {}
+        return {
+            "phase": phase,
+            "frame": frame,
+            "armDeg": arm,
+            "shaftDeg": shaft_angle,
+            "stackDeg": stack,
+            "conf": conf,
+            "shaftSource": source,
+            "shaftLine": vision.get("line") if shaft_angle is not None else None,
+            "imageSize": vision.get("imageSize") if shaft_angle is not None else None,
+            "why": str(shaft.get("why") or ""),
+        }
+
+    p5 = phase_block("P5")
+    p6 = phase_block("P6")
+    p7 = phase_block("P7")
+    phases = [p5, p6, p7]
+    confs = [p["conf"] for p in phases if p is not None and isinstance(p.get("conf"), int)]
+    confidence_min = min(confs) if confs else None
+
+    all_exist = all(p is not None for p in phases)
+    all_arm = all_exist and all(p.get("armDeg") is not None for p in phases)
+    all_shaft = all_exist and all(p.get("shaftDeg") is not None for p in phases)
+    if all_arm and all_shaft:
+        status = "ok" if (confidence_min or 0) >= 25 else "low_confidence"
+    else:
+        status = "missing"
+
+    release_cliff = (
+        float(p6["stackDeg"]) - float(p5["stackDeg"])
+        if p5 and p6 and p5.get("stackDeg") is not None and p6.get("stackDeg") is not None
+        else None
+    )
+    finish_drop = (
+        float(p7["stackDeg"]) - float(p6["stackDeg"])
+        if p6 and p7 and p6.get("stackDeg") is not None and p7.get("stackDeg") is not None
+        else None
+    )
+
+    return {
+        "ok": True,
+        "status": status,
+        "confidenceMin": confidence_min,
+        "meta": {
+            "note": "Shaft-vs-left-arm angle (P5/P6/P7). armDeg uses left_shoulder(11)->left_wrist(15).",
+            "source": "worker_python_native",
+        },
+        "P5": p5,
+        "P6": p6,
+        "P7": p7,
+        "metrics": {
+            "releaseCliff": release_cliff,
+            "finishDrop": finish_drop,
+        },
+    }
+
+
+def build_delivery_card(shaft_arm):
+    if not shaft_arm:
+        return None
+
+    p5 = shaft_arm.get("P5") or {}
+    p6 = shaft_arm.get("P6") or {}
+    p7 = shaft_arm.get("P7") or {}
+    confidence_min = int(shaft_arm.get("confidenceMin") or 0)
+    status = str(shaft_arm.get("status") or "missing")
+
+    def metric(key, label, value, unit="deg"):
+        return {
+            "key": key,
+            "label": label,
+            "value": float(value) if value is not None else None,
+            "unit": unit,
+        }
+
+    metrics = [
+        metric("shaft_arm_p5", "Shaft-Arm Stack (P5)", p5.get("stackDeg")),
+        metric("shaft_arm_p6", "Shaft-Arm Stack (P6)", p6.get("stackDeg")),
+        metric("shaft_arm_p7", "Shaft-Arm Stack (P7)", p7.get("stackDeg")),
+    ]
+
+    release_cliff = (shaft_arm.get("metrics") or {}).get("releaseCliff")
+    finish_drop = (shaft_arm.get("metrics") or {}).get("finishDrop")
+
+    valid = (
+        status == "ok"
+        and confidence_min >= 50
+        and all(m.get("value") is not None for m in metrics)
+    )
+
+    interpretation = []
+    if release_cliff is not None:
+        if release_cliff < -8:
+            interpretation.append(
+                "Shaft-to-arm separation tightens materially from P5 to P6."
+            )
+        elif release_cliff > 8:
+            interpretation.append(
+                "Shaft-to-arm separation increases from P5 to P6."
+            )
+        else:
+            interpretation.append(
+                "Shaft-to-arm relationship stays relatively stable from P5 to P6."
+            )
+    if finish_drop is not None:
+        if finish_drop < -8:
+            interpretation.append(
+                "Delivery stack tightens materially from P6 into impact."
+            )
+        elif finish_drop > 8:
+            interpretation.append(
+                "Delivery stack opens from P6 into impact."
+            )
+        else:
+            interpretation.append(
+                "Delivery stack remains organized from P6 into impact."
+            )
+
+    quality_reasons = []
+    if status != "ok":
+        quality_reasons.append(f"Shaft-arm status: {status}")
+    if confidence_min < 50:
+        quality_reasons.append(
+            f"Minimum shaft confidence is {confidence_min}%; fine delivery angles are estimate-only."
+        )
+
+    return {
+        "ok": True,
+        "created": None,
+        "title": "Measured Delivery: Shaft vs Lead Arm",
+        "metrics": metrics,
+        "deltas": {
+            "p5_p6_stack_delta": release_cliff,
+            "p6_p7_stack_delta": finish_drop,
+        },
+        "interpretation": interpretation,
+        "frames": {
+            "P5": p5.get("frame"),
+            "P6": p6.get("frame"),
+            "P7": p7.get("frame"),
+        },
+        "quality": {
+            "isValid": valid,
+            "label": "Measured" if valid else "Low confidence",
+            "reasons": quality_reasons,
+            "userMessage": (
+                "Measured shaft and arm geometry passed the confidence gate."
+                if valid
+                else "Delivery geometry is available, but capture or shaft confidence is too low for fine-angle coaching."
+            ),
+        },
+        "provenance": {
+            "source": "vision_grip_anchor_v2+pose_video_robust",
+            "confidenceMin": confidence_min,
+            "note": "All displayed angles are measured shaft-vs-left-arm geometry. No clubface, path, loft, or force values are inferred here.",
+        },
+    }
+
+
+def export_pframes(video, phase_map, out_dir, asset_base_url=""):
+    import cv2
+
+    frame_dir = os.path.join(out_dir, "pframes")
+    os.makedirs(frame_dir, exist_ok=True)
+
+    cap = cv2.VideoCapture(video)
+    if not cap.isOpened():
+        raise RuntimeError(f"Could not open video for P-frame export: {video}")
+
+    base = str(asset_base_url or "").rstrip("/")
+    frames = []
+    try:
+        for i in range(1, 11):
+            key = f"P{i}"
+            if key not in phase_map:
+                continue
+            frame = int(phase_map[key])
+            cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
+            ok, img = cap.read()
+            if not ok:
+                continue
+
+            file_path = os.path.join(frame_dir, f"{key}.png")
+            cv2.imwrite(file_path, img, [cv2.IMWRITE_PNG_COMPRESSION, 3])
+            image_url = f"{base}/{key}.png" if base else None
+
+            frames.append(
+                {
+                    "p": i,
+                    "label": key,
+                    "frame": frame,
+                    "imageUrl": image_url,
+                    "thumbUrl": image_url,
+                    "imageFile": file_path,
+                }
+            )
+    finally:
+        cap.release()
+
+    return frames
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--video", required=True)
+    ap.add_argument("--outDir", required=True)
+    ap.add_argument("--repo", default=str(Path(__file__).resolve().parents[2]))
+    ap.add_argument("--poseModel", default="")
+    ap.add_argument(
+        "--assetBaseUrl",
+        default="",
+        help="Optional public base URL for exported P-frame images; P1.png etc are appended.",
+    )
+    ap.add_argument("--debug", action="store_true")
+    args = ap.parse_args()
+
+    video = os.path.abspath(args.video)
+    out_dir = os.path.abspath(args.outDir)
+    repo = os.path.abspath(args.repo)
+
+    if not os.path.isfile(video):
+        raise RuntimeError(f"Video not found: {video}")
+    os.makedirs(out_dir, exist_ok=True)
+
+    requested_pose_model = args.poseModel.strip()
+    candidates = []
+    if requested_pose_model:
+        candidates.append(requested_pose_model)
+    candidates.extend(
+        [
+            os.path.join(repo, "app", "api", "analyze-swing", "models", "pose_landmarker_full.task"),
+            os.path.join(repo, "pose", "models", "pose_landmarker_lite.task"),
+            r"E:\VCA\Cache\repo-moved\pose\model\pose_landmarker_full.task",
+        ]
+    )
+    pose_candidates = []
+    seen = set()
+    for candidate in candidates:
+        candidate = os.path.abspath(candidate)
+        if candidate in seen or not os.path.isfile(candidate):
+            continue
+        seen.add(candidate)
+        pose_candidates.append(candidate)
+
+    pose_script = os.path.join(repo, "scripts", "pose_video_robust.py")
+    pose_solutions_script = os.path.join(repo, "scripts", "pose_video_solutions_robust.py")
+    phase_script = os.path.join(repo, "scripts", "worker", "vca_phase_map.py")
+    shaft_script = os.path.join(repo, "scripts", "shaft", "vca_shaft_keyphases_v2.py")
+
+    pose_path = os.path.join(out_dir, "pose_dense.json")
+    phase_path = os.path.join(out_dir, "phase_frames_override.flat.json")
+    phase_meta_path = os.path.join(out_dir, "phase_frames_meta.json")
+
+    def usable_pose_frames(pose_obj):
+        return sum(
+            1
+            for fr in (pose_obj.get("frames") or [])
+            if isinstance(fr, dict) and len(fr.get("landmarks") or []) >= 17
+        )
+
+    selected_pose_model = None
+    selected_pose_engine = None
+    pose_failures = []
+
+    # Primary: legacy MediaPipe Solutions tracker. It is materially more robust on
+    # several archived VCA golf clips than the newer Tasks API.
+    try:
+        if os.path.isfile(pose_path):
+            os.remove(pose_path)
+        print("POSE_ENGINE_TRY mediapipe.solutions.pose")
+        run(
+            [
+                sys.executable,
+                pose_solutions_script,
+                "--in",
+                video,
+                "--out",
+                pose_path,
+                "--sample",
+                "1",
+                "--complexity",
+                "2",
+                "--det",
+                "0.1",
+                "--trk",
+                "0.1",
+            ]
+        )
+        pose_probe = load_json(pose_path)
+        non_empty = usable_pose_frames(pose_probe)
+        if non_empty < 12:
+            raise RuntimeError(
+                f"Solutions pose engine produced only {non_empty} usable frames"
+            )
+        selected_pose_model = "mediapipe.solutions.pose"
+        selected_pose_engine = "solutions"
+        print(
+            f"POSE_ENGINE_ACCEPT mediapipe.solutions.pose usableFrames={non_empty}"
+        )
+    except Exception as exc:
+        pose_failures.append(
+            {
+                "engine": "solutions",
+                "model": "mediapipe.solutions.pose",
+                "error": str(exc).splitlines()[-1] if str(exc) else type(exc).__name__,
+            }
+        )
+        print(
+            f"POSE_ENGINE_REJECT mediapipe.solutions.pose: {pose_failures[-1]['error']}"
+        )
+
+    # Fallback: MediaPipe Tasks models.
+    if not selected_pose_engine:
+        if not pose_candidates:
+            raise RuntimeError(
+                "Solutions pose engine failed and no Tasks pose models were found"
+            )
+
+        pose_candidates.sort(key=os.path.getsize, reverse=True)
+        for pose_model in pose_candidates:
+            try:
+                if os.path.isfile(pose_path):
+                    os.remove(pose_path)
+                print(f"POSE_MODEL_TRY {pose_model}")
+                run(
+                    [
+                        sys.executable,
+                        pose_script,
+                        "--in",
+                        video,
+                        "--out",
+                        pose_path,
+                        "--model",
+                        pose_model,
+                        "--sample",
+                        "1",
+                    ]
+                )
+                pose_probe = load_json(pose_path)
+                non_empty = usable_pose_frames(pose_probe)
+                if non_empty < 12:
+                    raise RuntimeError(
+                        f"Pose model produced only {non_empty} usable frames"
+                    )
+                selected_pose_model = os.path.basename(pose_model)
+                selected_pose_engine = "tasks"
+                print(
+                    f"POSE_MODEL_ACCEPT {pose_model} usableFrames={non_empty}"
+                )
+                break
+            except Exception as exc:
+                pose_failures.append(
+                    {
+                        "engine": "tasks",
+                        "model": pose_model,
+                        "error": str(exc).splitlines()[-1] if str(exc) else type(exc).__name__,
+                    }
+                )
+                print(
+                    f"POSE_MODEL_REJECT {pose_model}: {pose_failures[-1]['error']}"
+                )
+
+    if not selected_pose_engine:
+        raise RuntimeError(
+            "All pose engines failed: " + json.dumps(pose_failures)
+        )
+
+    run(
+        [
+            sys.executable,
+            phase_script,
+            "--pose",
+            pose_path,
+            "--video",
+            video,
+            "--out",
+            phase_path,
+            "--metaOut",
+            phase_meta_path,
+        ]
+    )
+
+    pose = load_json(pose_path)
+    phase_map = load_json(phase_path)
+    phase_meta = load_json(phase_meta_path)
+    pframes = export_pframes(
+        video,
+        phase_map,
+        out_dir,
+        asset_base_url=args.assetBaseUrl,
+    )
+    pose_frames_count = len(pose.get("frames") or [])
+    pose_non_empty = usable_pose_frames(pose)
+
+    if not bool(phase_meta.get("ok", False)):
+        report_patch = {
+            "analysisStatus": str(phase_meta.get("status") or "incomplete_swing"),
+            "analysisEngine": "local_worker_mvp_v1",
+            "videoUrl": None,
+            "sourceVideoFile": video,
+            "pose": normalize_pose_for_report(pose),
+            "phaseFrames": phase_map,
+            "phaseMeta": phase_meta,
+            "pframes": pframes,
+            "p5p6p7ShaftArm": None,
+            "deliveryCard": None,
+            "shaftV2": {
+                "source": "unavailable",
+                "measuredPhases": [],
+                "requestedPhases": ["P2", "P3", "P5", "P6", "P7"],
+                "phases": {},
+                "why": "Full downswing/impact evidence was not present in the clip.",
+            },
+            "recapture": {
+                "required": True,
+                "reason": str(phase_meta.get("reason") or "incomplete_swing"),
+                "message": "Upload a clip that includes the complete backswing, downswing, impact, and early follow-through.",
+            },
+            "meta": {
+                "worker": {
+                    "poseEngine": selected_pose_engine,
+                    "poseModel": selected_pose_model,
+                    "poseFrames": pose_frames_count,
+                    "poseNonEmpty": pose_non_empty,
+                    "phaseMap": phase_path,
+                }
+            },
+        }
+
+        patch_path = os.path.join(out_dir, "report_patch.json")
+        with open(patch_path, "w", encoding="utf-8") as f:
+            json.dump(report_patch, f, indent=2)
+
+        print(json.dumps({
+            "ok": True,
+            "analysisStatus": report_patch["analysisStatus"],
+            "video": video,
+            "outDir": out_dir,
+            "reportPatch": patch_path,
+            "phases": phase_map,
+            "recapture": report_patch["recapture"],
+        }, indent=2))
+        return
+
+    shaft_cmd = [
+        sys.executable,
+        shaft_script,
+        "--shotDir",
+        out_dir,
+        "--video",
+        video,
+    ]
+    if args.debug:
+        shaft_cmd.append("--debug")
+    run(shaft_cmd)
+
+    shaft_path = newest(
+        os.path.join(out_dir, "VCA_shaft_FINAL_V2_P2_P3_P5_P6_P7_*.json")
+    )
+    if shaft_path and shaft_path.endswith(".meta.json"):
+        valid = [
+            p
+            for p in glob.glob(
+                os.path.join(out_dir, "VCA_shaft_FINAL_V2_P2_P3_P5_P6_P7_*.json")
+            )
+            if not p.endswith(".meta.json")
+        ]
+        shaft_path = max(valid, key=os.path.getmtime) if valid else None
+
+    if not shaft_path:
+        raise RuntimeError("Shaft V2 output not found")
+
+    pose = load_json(pose_path)
+    phase_map = load_json(phase_path)
+    phase_meta = load_json(phase_meta_path)
+    shaft_rows = load_json(shaft_path)
+
+    shaft_by = {row.get("phase"): row for row in shaft_rows if isinstance(row, dict)}
+    measured = [
+        p
+        for p in ("P2", "P3", "P5", "P6", "P7")
+        if shaft_by.get(p, {}).get("shaft", {}).get("source") != "unavailable"
+        and int(shaft_by.get(p, {}).get("shaft", {}).get("confidenceRaw") or 0) > 0
+    ]
+
+    shaft_arm = build_shaft_arm_block(pose, shaft_by)
+    delivery_card = build_delivery_card(shaft_arm)
+
+    report_patch = {
+        "analysisStatus": "measured_partial",
+        "analysisEngine": "local_worker_mvp_v1",
+        "videoUrl": None,
+        "sourceVideoFile": video,
+        "pose": normalize_pose_for_report(pose),
+        "phaseFrames": phase_map,
+        "phaseMeta": phase_meta,
+        "pframes": pframes,
+        "p5p6p7ShaftArm": shaft_arm,
+        "deliveryCard": delivery_card,
+        "shaftV2": {
+            "source": "vision_grip_anchor_v2",
+            "measuredPhases": measured,
+            "requestedPhases": ["P2", "P3", "P5", "P6", "P7"],
+            "phases": shaft_by,
+        },
+        "meta": {
+            "worker": {
+                "poseEngine": selected_pose_engine,
+                "poseModel": selected_pose_model,
+                "poseFrames": pose_frames_count,
+                "poseNonEmpty": pose_non_empty,
+                "phaseMap": phase_path,
+                "shaftFile": shaft_path,
+            }
+        },
+    }
+
+    patch_path = os.path.join(out_dir, "report_patch.json")
+    with open(patch_path, "w", encoding="utf-8") as f:
+        json.dump(report_patch, f, indent=2)
+
+    print(
+        json.dumps(
+            {
+                "ok": True,
+                "video": video,
+                "outDir": out_dir,
+                "reportPatch": patch_path,
+                "phases": phase_map,
+                "measuredShaftPhases": measured,
+            },
+            indent=2,
+        )
+    )
+
+
+if __name__ == "__main__":
+    main()

@@ -82,6 +82,8 @@ type DeliveryCard = {
   deltas?: {
     dtl_stack_delta?: number | null;
     fo_shaft_forearm_delta?: number | null;
+    p5_p6_stack_delta?: number | null;
+    p6_p7_stack_delta?: number | null;
   };
   interpretation?: string[];
   quality?: {
@@ -178,11 +180,13 @@ export default function ModelSwing3DPanel({
   playerShaft,
   deliveryCard,
   foWristHandle,
+  playerPFrames,
 }: {
   playerPose?: PlayerPoseJson | null;
   playerShaft?: PlayerShaftBlock | null;
   deliveryCard?: DeliveryCard | null;
   foWristHandle?: FoWristHandle | null;
+  playerPFrames?: PlayerPFrame[] | null;
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [mode, setMode] = useState<Mode>("slow");
@@ -415,17 +419,49 @@ export default function ModelSwing3DPanel({
   useEffect(() => {
     let alive = true;
 
+    const reportFrames = Array.isArray(playerPFrames)
+      ? playerPFrames
+          .filter((f) => {
+            const src = f?.imageUrl || f?.thumbUrl;
+            return (
+              typeof f?.p === "number" &&
+              typeof f?.frame === "number" &&
+              typeof src === "string" &&
+              src.length > 0
+            );
+          })
+          .sort((a, b) => a.p - b.p)
+      : [];
+
+    if (reportFrames.length) {
+      setPlayerFrames(reportFrames);
+    }
+
     Promise.all([
-      fetch("/data/pframes-P1-P10.json", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)),
-      fetch("/vca-3d/v200/sequence.json", { cache: "force-cache" }).then((r) => (r.ok ? r.json() : null)),
-      fetch("/vca-3d/v200/club.json", { cache: "force-cache" }).then((r) => (r.ok ? r.json() : null)),
+      reportFrames.length
+        ? Promise.resolve(null)
+        : fetch("/data/pframes-P1-P10.json", { cache: "no-store" }).then((r) =>
+            r.ok ? r.json() : null
+          ),
+      fetch("/vca-3d/v200/sequence.json", { cache: "force-cache" }).then((r) =>
+        r.ok ? r.json() : null
+      ),
+      fetch("/vca-3d/v200/club.json", { cache: "force-cache" }).then((r) =>
+        r.ok ? r.json() : null
+      ),
     ])
       .then(([pframes, sequence, club]) => {
         if (!alive) return;
 
-        if (pframes?.ok && Array.isArray(pframes.frames)) {
+        if (
+          !reportFrames.length &&
+          pframes?.ok &&
+          Array.isArray(pframes.frames)
+        ) {
           setPlayerFrames(
-            [...pframes.frames].sort((a: PlayerPFrame, b: PlayerPFrame) => a.p - b.p)
+            [...pframes.frames].sort(
+              (a: PlayerPFrame, b: PlayerPFrame) => a.p - b.p
+            )
           );
         }
 
@@ -442,7 +478,7 @@ export default function ModelSwing3DPanel({
     return () => {
       alive = false;
     };
-  }, []);
+  }, [playerPFrames]);
 
   const src = useMemo(
     () => `/vca-3d/v200/${projectionView}.mp4`,
@@ -1360,6 +1396,8 @@ export default function ModelSwing3DPanel({
         const metrics = deliveryCard.metrics ?? [];
         const deltaDtl = deliveryCard.deltas?.dtl_stack_delta;
         const deltaFo = deliveryCard.deltas?.fo_shaft_forearm_delta;
+        const deltaP5P6 = deliveryCard.deltas?.p5_p6_stack_delta;
+        const deltaP6P7 = deliveryCard.deltas?.p6_p7_stack_delta;
 
         const formatMetric = (m: DeliveryMetric) => {
           if (typeof m.value !== "number") return "—";
@@ -1516,7 +1554,10 @@ export default function ModelSwing3DPanel({
               </div>
             )}
 
-            {(typeof deltaDtl === "number" || typeof deltaFo === "number") && (
+            {(typeof deltaDtl === "number" ||
+              typeof deltaFo === "number" ||
+              typeof deltaP5P6 === "number" ||
+              typeof deltaP6P7 === "number") && (
               <div
                 style={{
                   marginTop: 8,
@@ -1533,6 +1574,12 @@ export default function ModelSwing3DPanel({
                 )}
                 {typeof deltaFo === "number" && (
                   <span>FO shaft/forearm change {deltaFo >= 0 ? "+" : ""}{deltaFo.toFixed(1)}°</span>
+                )}
+                {typeof deltaP5P6 === "number" && (
+                  <span>P5→P6 stack change {deltaP5P6 >= 0 ? "+" : ""}{deltaP5P6.toFixed(1)}°</span>
+                )}
+                {typeof deltaP6P7 === "number" && (
+                  <span>P6→P7 stack change {deltaP6P7 >= 0 ? "+" : ""}{deltaP6P7.toFixed(1)}°</span>
                 )}
               </div>
             )}
