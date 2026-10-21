@@ -307,9 +307,9 @@ def export_pframes(video, phase_map, out_dir, asset_base_url=""):
             if not ok:
                 continue
 
-            file_path = os.path.join(frame_dir, f"{key}.png")
-            cv2.imwrite(file_path, img, [cv2.IMWRITE_PNG_COMPRESSION, 3])
-            image_url = f"{base}/{key}.png" if base else None
+            file_path = os.path.join(frame_dir, f"{key}.jpg")
+            cv2.imwrite(file_path, img, [cv2.IMWRITE_JPEG_QUALITY, 90])
+            image_url = f"{base}/{key}.jpg" if base else None
 
             frames.append(
                 {

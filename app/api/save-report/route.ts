@@ -26,12 +26,27 @@ export async function POST(req: Request) {
       cleanId(body?.jobId) ??
       `rpt_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
+    const createdAt = body?.createdAt ?? new Date().toISOString();
+    const shouldQueue = Boolean(
+      body?.muxUploadId &&
+      !body?.analysisEngine &&
+      !["measured", "measured_partial", "incomplete_swing"].includes(
+        String(body?.analysisStatus ?? "")
+      )
+    );
+
     const report = {
       ...body,
       id,
-      createdAt: body?.createdAt ?? new Date().toISOString(),
+      createdAt,
       status: body?.status ?? "ready",
       schemaVersion: body?.schemaVersion ?? "1.0",
+      analysisStatus: shouldQueue
+        ? "queued"
+        : (body?.analysisStatus ?? null),
+      analysisQueuedAt: shouldQueue
+        ? (body?.analysisQueuedAt ?? createdAt)
+        : (body?.analysisQueuedAt ?? null),
     };
 
     const pathname = `reports/${id}.json`;
@@ -39,8 +54,35 @@ export async function POST(req: Request) {
       access: "public",
       contentType: "application/json",
       addRandomSuffix: false,
+      allowOverwrite: true,
       token: process.env.BLOB_READ_WRITE_TOKEN,
     });
+
+    let queueStored = false;
+    let queuePathname: string | null = null;
+
+    if (shouldQueue) {
+      queuePathname = `analysis-queue/${id}.json`;
+      const queuePayload = {
+        id,
+        reportPathname: pathname,
+        reportUrl: blob.url,
+        muxUploadId: body.muxUploadId,
+        status: "queued",
+        createdAt,
+        updatedAt: createdAt,
+        attempt: 0,
+      };
+
+      await put(queuePathname, JSON.stringify(queuePayload), {
+        access: "public",
+        contentType: "application/json",
+        addRandomSuffix: false,
+        allowOverwrite: true,
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
+      queueStored = true;
+    }
 
     return NextResponse.json(
       {
@@ -48,6 +90,9 @@ export async function POST(req: Request) {
         id,
         url: blob.url,
         pathname: blob.pathname,
+        analysisStatus: report.analysisStatus,
+        queueStored,
+        queuePathname,
       },
       {
         status: 200,

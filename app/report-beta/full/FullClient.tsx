@@ -373,6 +373,7 @@ const [data, setData] = React.useState<FullData>(FALLBACK);
 const [muxResolveStatus, setMuxResolveStatus] = React.useState<
   "idle" | "resolving" | "pending" | "ready" | "error"
 >("idle");
+const [activeReportSource, setActiveReportSource] = React.useState<string>("");
 const [reportProvenance, setReportProvenance] = React.useState({
   loaded: false,
   real: false,
@@ -397,6 +398,9 @@ if(!Array.isArray((data as any).pchecks) || ((data as any).pchecks?.length ?? 0)
     ? `https://player.mux.com/${encodeURIComponent(muxPlaybackId)}`
     : "";
   const analysisStatus = String((data as any)?.analysisStatus ?? "");
+  const analysisPending =
+    analysisStatus === "queued" || analysisStatus === "queued_retry";
+  const analysisFailed = analysisStatus === "analysis_error";
   const showPChecks = !reportProvenance.real || reportProvenance.hasPChecks;
   const showPracticePlan =
     !reportProvenance.real || reportProvenance.hasPracticePlan;
@@ -419,6 +423,7 @@ if(!Array.isArray((data as any).pchecks) || ((data as any).pchecks?.length ?? 0)
   const fetchSrc = srcQ2 || (jobIdQ2 ? (`/api/job/${encodeURIComponent(jobIdQ2)}`) : src);
 
 if (!fetchSrc) return;
+setActiveReportSource(fetchSrc);
 fetch(fetchSrc, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => {
@@ -607,6 +612,38 @@ fetch(fetchSrc, { cache: "no-store" })
     };
   }, [reportId, muxUploadId, muxPlaybackId]);
 
+  React.useEffect(() => {
+    if (!analysisPending || !activeReportSource) return;
+
+    let cancelled = false;
+    const pendingStates = new Set(["queued", "queued_retry"]);
+
+    const check = async () => {
+      try {
+        const res = await fetch(activeReportSource, { cache: "no-store" });
+        if (!res.ok || cancelled) return;
+
+        const json = await res.json().catch(() => null);
+        if (!json || cancelled) return;
+
+        const root: any = (json as any).report ?? json;
+        const nextStatus = String(root?.analysisStatus ?? "");
+
+        if (nextStatus && !pendingStates.has(nextStatus)) {
+          window.location.reload();
+        }
+      } catch {}
+    };
+
+    const timer = window.setInterval(check, 3000);
+    check();
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [analysisPending, activeReportSource]);
+
   return (
     <ReportShell
       titleTop={reportProvenance.real ? "Virtual Coach AI - Full Report" : "Virtual Coach AI - Full Report (Demo)"}
@@ -647,11 +684,17 @@ fetch(fetchSrc, { cache: "no-store" })
         background: "rgba(0,0,0,0.14)",
       }}>
         <div style={{ fontSize: 12, opacity: 0.82 }}>
-          {analysisStatus === "incomplete_swing"
-            ? "Analysis stopped safely: the clip does not contain a complete downswing and impact."
-            : analysisStatus === "measured_partial"
-              ? "Measured biomechanics are ready. Coaching conclusions appear only when their source data is available."
-              : "Generated automatically from a single swing video."}
+          {analysisStatus === "queued"
+            ? "Swing uploaded. Analysis is queued and will appear here automatically."
+            : analysisStatus === "queued_retry"
+              ? "Analysis is retrying automatically. This page will update when it finishes."
+              : analysisStatus === "analysis_error"
+                ? "Analysis could not complete after multiple attempts. The swing video is still saved."
+                : analysisStatus === "incomplete_swing"
+                  ? "Analysis stopped safely: the clip does not contain a complete downswing and impact."
+                  : analysisStatus === "measured_partial"
+                    ? "Measured biomechanics are ready. Coaching conclusions appear only when their source data is available."
+                    : "Generated automatically from a single swing video."}
         </div>
 
         <div style={{ display: "flex", gap: 10 }}>
@@ -897,13 +940,50 @@ fetch(fetchSrc, { cache: "no-store" })
       )}
       </div>
 
-      <ModelSwing3DPanel
-        playerPose={(data as any)?.pose ?? null}
-        playerShaft={(data as any)?.p5p6p7ShaftArm ?? null}
-        deliveryCard={(data as any)?.deliveryCard ?? null}
-        foWristHandle={(data as any)?.foWristHandle ?? null}
-        playerPFrames={(data as any)?.pframes ?? null}
-      />
+      {analysisPending ? (
+        <Panel title="Swing Analysis">
+          <div
+            style={{
+              padding: "22px 8px",
+              textAlign: "center",
+              fontSize: 14,
+              lineHeight: 1.6,
+              opacity: 0.86,
+            }}
+          >
+            <div style={{ fontWeight: 900, marginBottom: 6 }}>
+              Analyzing your swing…
+            </div>
+            <div>
+              Pose, P1–P10 timing, club delivery and confidence checks are running.
+              This report updates automatically.
+            </div>
+          </div>
+        </Panel>
+      ) : analysisFailed ? (
+        <Panel title="Swing Analysis">
+          <div
+            style={{
+              padding: "20px 8px",
+              fontSize: 13,
+              lineHeight: 1.6,
+              opacity: 0.86,
+            }}
+          >
+            The analysis worker could not complete this swing after multiple
+            attempts. Your uploaded video is still available; no biomechanics
+            were fabricated.
+          </div>
+        </Panel>
+      ) : (
+        <ModelSwing3DPanel
+          playerPose={(data as any)?.pose ?? null}
+          playerShaft={(data as any)?.p5p6p7ShaftArm ?? null}
+          deliveryCard={(data as any)?.deliveryCard ?? null}
+          foWristHandle={(data as any)?.foWristHandle ?? null}
+          playerPFrames={(data as any)?.pframes ?? null}
+        />
+      )}
 
       <div style={{ marginTop: 10, fontSize: 11, opacity: 0.55, textAlign: "center" }}>
         {reportProvenance.real
