@@ -105,6 +105,12 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
   const [sequenceFrames, setSequenceFrames] = useState<SequenceFrame[]>([]);
   const [clubFrames, setClubFrames] = useState<ClubFrame[]>([]);
   const [projectionView, setProjectionView] = useState<ProjectionView>("face");
+  const [layers, setLayers] = useState({
+    body: true,
+    club: true,
+    paths: true,
+    volumes: true,
+  });
   const premiumCheckpoint = PREMIUM_CHECKPOINTS[selectedP];
   const playerCheckpoint = playerFrames.find((f) => f.p === selectedP) ?? null;
 
@@ -704,7 +710,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                   }}
                   aria-label={`Player pose overlay P${selectedP}`}
                 >
-                  {playerOverlay.handPath && (
+                  {layers.paths && playerOverlay.handPath && (
                     <path
                       d={playerOverlay.handPath}
                       fill="none"
@@ -715,7 +721,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                     />
                   )}
 
-                  {playerOverlay.edges.map(([aIdx, bIdx], i) => {
+                  {layers.body && playerOverlay.edges.map(([aIdx, bIdx], i) => {
                     const a = playerOverlay.lm(aIdx);
                     const b = playerOverlay.lm(bIdx);
                     if (!a || !b) return null;
@@ -739,7 +745,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                     );
                   })}
 
-                  {[11,12,13,14,15,16,23,24,25,26,27,28].map((idx) => {
+                  {layers.body && [11,12,13,14,15,16,23,24,25,26,27,28].map((idx) => {
                     const pt = playerOverlay.lm(idx);
                     if (!pt) return null;
                     return (
@@ -1003,6 +1009,36 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
           </div>
         </div>
 
+        <div
+          style={{
+            padding: "8px 12px",
+            display: "flex",
+            gap: 7,
+            flexWrap: "wrap",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(255,255,255,0.02)",
+          }}
+        >
+          {[
+            ["body", "Body"],
+            ["club", "Club"],
+            ["paths", "Paths"],
+            ["volumes", "Volumes"],
+          ].map(([key, label]) => {
+            const k = key as keyof typeof layers;
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setLayers((prev) => ({ ...prev, [k]: !prev[k] }))}
+                style={pill(layers[k])}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
+
         {motionMap ? (
           <div style={{ position: "relative", aspectRatio: "16 / 7", minHeight: 260 }}>
             <svg
@@ -1014,7 +1050,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
               <line x1="8" y1="92" x2="92" y2="92" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
               <line x1="50" y1="8" x2="50" y2="92" stroke="rgba(255,255,255,0.06)" strokeWidth="0.35" />
 
-              {motionMap.clubEnvelope && (
+              {layers.volumes && motionMap.clubEnvelope && (
                 <ellipse
                   cx={motionMap.clubEnvelope.cx}
                   cy={motionMap.clubEnvelope.cy}
@@ -1026,7 +1062,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                 />
               )}
 
-              {motionMap.handEnvelope && (
+              {layers.volumes && motionMap.handEnvelope && (
                 <ellipse
                   cx={motionMap.handEnvelope.cx}
                   cy={motionMap.handEnvelope.cy}
@@ -1045,6 +1081,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                 strokeWidth="1.55"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                opacity={layers.paths ? 1 : 0}
               />
               <path
                 d={motionMap.gripPath}
@@ -1053,6 +1090,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                 strokeWidth="1.15"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                opacity={layers.paths ? 1 : 0}
               />
               <path
                 d={motionMap.handPath}
@@ -1061,9 +1099,10 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                 strokeWidth="1.15"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                opacity={layers.paths ? 1 : 0}
               />
 
-              {[
+              {layers.body && [
                 ["head", "chest"],
                 ["left_shoulder", "right_shoulder"],
                 ["left_shoulder", "left_elbow"],
@@ -1096,7 +1135,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                 );
               })}
 
-              {Object.entries(motionMap.bodyPoints).map(([key, pt]) =>
+              {layers.body && Object.entries(motionMap.bodyPoints).map(([key, pt]) =>
                 pt ? (
                   <circle
                     key={key}
@@ -1112,7 +1151,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                 ) : null
               )}
 
-              {motionMap.grip && motionMap.clubhead && (
+              {layers.club && motionMap.grip && motionMap.clubhead && (
                 <line
                   x1={motionMap.grip[0]}
                   y1={motionMap.grip[1]}
@@ -1124,7 +1163,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                 />
               )}
 
-              {motionMap.shoulderLeft && motionMap.shoulderRight && (
+              {layers.body && motionMap.shoulderLeft && motionMap.shoulderRight && (
                 <line
                   x1={motionMap.shoulderLeft[0]}
                   y1={motionMap.shoulderLeft[1]}
@@ -1136,7 +1175,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                 />
               )}
 
-              {motionMap.hipLeft && motionMap.hipRight && (
+              {layers.body && motionMap.hipLeft && motionMap.hipRight && (
                 <line
                   x1={motionMap.hipLeft[0]}
                   y1={motionMap.hipLeft[1]}
@@ -1148,7 +1187,7 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                 />
               )}
 
-              {motionMap.chest && motionMap.pelvis && (
+              {layers.body && motionMap.chest && motionMap.pelvis && (
                 <line
                   x1={motionMap.chest[0]}
                   y1={motionMap.chest[1]}
@@ -1160,13 +1199,13 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
                 />
               )}
 
-              {motionMap.hands && (
+              {layers.body && motionMap.hands && (
                 <circle cx={motionMap.hands[0]} cy={motionMap.hands[1]} r="1.6" fill="rgb(70,196,255)" />
               )}
-              {motionMap.grip && (
+              {layers.club && motionMap.grip && (
                 <circle cx={motionMap.grip[0]} cy={motionMap.grip[1]} r="1.45" fill="rgb(250,182,70)" />
               )}
-              {motionMap.clubhead && (
+              {layers.club && motionMap.clubhead && (
                 <circle cx={motionMap.clubhead[0]} cy={motionMap.clubhead[1]} r="1.8" fill="rgb(223,79,255)" />
               )}
             </svg>
