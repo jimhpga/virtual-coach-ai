@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { put } from "@vercel/blob";
+import fs from "fs";
+import path from "path";
 
   // ===== VCA_DATA_ROOT_HELPER_V1 =====
   function __vcaDataRoot(): string {
@@ -338,6 +341,43 @@ export async function GET() {
   );
 }
 
+async function persistAnalyzeJob(jobId: string, payload: any) {
+  const result = { stored: false, storage: "none" as "none" | "blob" | "local", url: null as string | null };
+
+  try {
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      const blob = await put(
+        `jobs/${jobId}.json`,
+        JSON.stringify(payload),
+        {
+          access: "public",
+          contentType: "application/json",
+          addRandomSuffix: false,
+          token: process.env.BLOB_READ_WRITE_TOKEN,
+        }
+      );
+      result.stored = true;
+      result.storage = "blob";
+      result.url = blob.url;
+      return result;
+    }
+  } catch {}
+
+  try {
+    const dir = path.join(process.cwd(), ".data", "jobs", String(jobId));
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(
+      path.join(dir, "response.json"),
+      JSON.stringify(payload, null, 2),
+      "utf8"
+    );
+    result.stored = true;
+    result.storage = "local";
+  } catch {}
+
+  return result;
+}
+
 export async function POST(req: Request) {
   try {
     let body: any = {};
@@ -367,9 +407,16 @@ export async function POST(req: Request) {
       }
     } catch {}
     const top = vcaExtractTopLevel(report);
+    const payload = { ok: true, jobId, report, scores: top.scores, debug: top.debug };
+    const persisted = await persistAnalyzeJob(jobId, payload);
 
     return NextResponse.json(
-      { ok: true, jobId, report, scores: top.scores, debug: top.debug },
+      {
+        ...payload,
+        jobStored: persisted.stored,
+        jobStorage: persisted.storage,
+        jobUrl: persisted.url,
+      },
       { status: 200 }
     );
   } catch (e: any) {
@@ -393,9 +440,17 @@ export async function POST(req: Request) {
       }
     } catch {}
     const top = vcaExtractTopLevel(report);
+    const jobId = "job_fallback_" + Date.now();
+    const payload = { ok: true, jobId, report, scores: top.scores, debug: top.debug };
+    const persisted = await persistAnalyzeJob(jobId, payload);
 
     return NextResponse.json(
-      { ok: true, jobId: "job_fallback", report, scores: top.scores, debug: top.debug },
+      {
+        ...payload,
+        jobStored: persisted.stored,
+        jobStorage: persisted.storage,
+        jobUrl: persisted.url,
+      },
       { status: 200 }
     );
   }
