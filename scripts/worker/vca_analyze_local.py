@@ -372,12 +372,14 @@ def main():
     pose_script = os.path.join(repo, "scripts", "pose_video_robust.py")
     pose_solutions_script = os.path.join(repo, "scripts", "pose_video_solutions_robust.py")
     phase_script = os.path.join(repo, "scripts", "worker", "vca_phase_map.py")
+    p56_script = os.path.join(repo, "scripts", "worker", "p56_refine_geometry.py")
     shaft_script = os.path.join(repo, "scripts", "shaft", "vca_shaft_keyphases_v2.py")
 
     pose_path = os.path.join(out_dir, "pose_dense.json")
     preflight_pose_path = os.path.join(out_dir, "pose_preflight.json")
     phase_path = os.path.join(out_dir, "phase_frames_override.flat.json")
     phase_meta_path = os.path.join(out_dir, "phase_frames_meta.json")
+    p56_path = os.path.join(out_dir, "p56_geometry_refinement.json")
 
     def usable_pose_frames(pose_obj):
         return sum(
@@ -767,16 +769,16 @@ def main():
     pose = load_json(pose_path)
     phase_map = load_json(phase_path)
     phase_meta = load_json(phase_meta_path)
-    pframes = export_pframes(
-        video,
-        phase_map,
-        out_dir,
-        asset_base_url=args.assetBaseUrl,
-    )
     pose_frames_count = len(pose.get("frames") or [])
     pose_non_empty = usable_pose_frames(pose)
 
     if not bool(phase_meta.get("ok", False)):
+        pframes = export_pframes(
+            video,
+            phase_map,
+            out_dir,
+            asset_base_url=args.assetBaseUrl,
+        )
         phase_status = str(phase_meta.get("status") or "incomplete_swing")
         if phase_status == "partial_swing":
             shaft_why = "The clip begins after setup/address, so full P1-P10 timing and P5/P6 shaft delivery are unavailable."
@@ -834,6 +836,138 @@ def main():
         }, indent=2))
         return
 
+    run(
+        [
+            sys.executable,
+            p56_script,
+            "--video",
+            video,
+            "--phases",
+            phase_path,
+            "--out",
+            p56_path,
+            "--repo",
+            repo,
+            "--minConfidence",
+            "0.60",
+        ]
+    )
+
+    p56_refinement = load_json(p56_path)
+    if not bool(p56_refinement.get("ok", False)):
+        safe_phase_map = {
+            key: value
+            for key, value in phase_map.items()
+            if key not in ("P5", "P6")
+        }
+        pframes = export_pframes(
+            video,
+            safe_phase_map,
+            out_dir,
+            asset_base_url=args.assetBaseUrl,
+        )
+
+        report_patch = {
+            "analysisStatus": "p56_low_confidence",
+            "analysisEngine": "local_worker_mvp_v1",
+            "videoUrl": None,
+            "sourceVideoFile": video,
+            "pose": normalize_pose_for_report(pose),
+            "phaseFrames": safe_phase_map,
+            "phaseMeta": phase_meta,
+            "pframes": pframes,
+            "p5p6p7ShaftArm": None,
+            "deliveryCard": None,
+            "shaftV2": {
+                "source": "unavailable",
+                "measuredPhases": [],
+                "requestedPhases": ["P2", "P3", "P5", "P6", "P7"],
+                "phases": {},
+                "why": (
+                    "P5/P6 geometry confidence was below the production threshold, "
+                    "so delivery shaft analysis was intentionally withheld."
+                ),
+            },
+            "p56Refinement": p56_refinement,
+            "recapture": {
+                "required": True,
+                "reason": "p56_low_confidence",
+                "message": (
+                    "We found the swing, but P5/P6 delivery geometry was not clear enough "
+                    "for a high-confidence measurement. Re-record at original speed with the "
+                    "full golfer and club visible through impact."
+                ),
+            },
+            "meta": {
+                "worker": {
+                    "poseEngine": selected_pose_engine,
+                    "poseModel": selected_pose_model,
+                    "poseFrames": pose_frames_count,
+                    "poseNonEmpty": pose_non_empty,
+                    "phaseMap": phase_path,
+                    "p56Refinement": p56_path,
+                }
+            },
+        }
+
+        patch_path = os.path.join(out_dir, "report_patch.json")
+        with open(patch_path, "w", encoding="utf-8") as f:
+            json.dump(report_patch, f, indent=2)
+
+        print(
+            json.dumps(
+                {
+                    "ok": True,
+                    "analysisStatus": "p56_low_confidence",
+                    "video": video,
+                    "outDir": out_dir,
+                    "reportPatch": patch_path,
+                    "phases": safe_phase_map,
+                    "p56Refinement": p56_refinement,
+                    "recapture": report_patch["recapture"],
+                },
+                indent=2,
+            )
+        )
+        return
+
+    previous_p5 = phase_map.get("P5")
+    previous_p6 = phase_map.get("P6")
+    phase_map["P5"] = int(p56_refinement["P5"])
+    phase_map["P6"] = int(p56_refinement["P6"])
+
+    phase_meta["phases"] = dict(phase_map)
+    provenance = phase_meta.setdefault("provenance", {})
+    provenance["P5"] = {
+        "source": "p56_geometry_model_v1",
+        "confidence": float(p56_refinement["P5Confidence"]),
+        "previousFrame": previous_p5,
+        "geometryFrame": p56_refinement.get("geometryP5"),
+        "timingPriorFrame": p56_refinement.get("timingPriorP5"),
+        "fusionApplied": bool(p56_refinement.get("fusionAppliedP5", False)),
+    }
+    provenance["P6"] = {
+        "source": "p56_geometry_model_v1",
+        "confidence": float(p56_refinement["P6Confidence"]),
+        "previousFrame": previous_p6,
+        "geometryFrame": p56_refinement.get("geometryP6"),
+        "timingPriorFrame": p56_refinement.get("timingPriorP6"),
+        "fusionApplied": bool(p56_refinement.get("fusionAppliedP6", False)),
+    }
+    phase_meta["p56Refinement"] = p56_refinement
+
+    with open(phase_path, "w", encoding="utf-8") as f:
+        json.dump(phase_map, f, indent=2)
+    with open(phase_meta_path, "w", encoding="utf-8") as f:
+        json.dump(phase_meta, f, indent=2)
+
+    pframes = export_pframes(
+        video,
+        phase_map,
+        out_dir,
+        asset_base_url=args.assetBaseUrl,
+    )
+
     shaft_cmd = [
         sys.executable,
         shaft_script,
@@ -886,6 +1020,7 @@ def main():
         "pose": normalize_pose_for_report(pose),
         "phaseFrames": phase_map,
         "phaseMeta": phase_meta,
+        "p56Refinement": p56_refinement,
         "pframes": pframes,
         "p5p6p7ShaftArm": shaft_arm,
         "deliveryCard": delivery_card,
@@ -902,6 +1037,7 @@ def main():
                 "poseFrames": pose_frames_count,
                 "poseNonEmpty": pose_non_empty,
                 "phaseMap": phase_path,
+                "p56Refinement": p56_path,
                 "shaftFile": shaft_path,
             }
         },

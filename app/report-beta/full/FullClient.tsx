@@ -405,7 +405,8 @@ if(!Array.isArray((data as any).pchecks) || ((data as any).pchecks?.length ?? 0)
     analysisStatus === "invalid_capture" ||
     analysisStatus === "incomplete_swing" ||
     analysisStatus === "partial_swing" ||
-    analysisStatus === "slow_motion_capture";
+    analysisStatus === "slow_motion_capture" ||
+    analysisStatus === "p56_low_confidence";
   const showPChecks = !reportProvenance.real || reportProvenance.hasPChecks;
   const showPracticePlan =
     !reportProvenance.real || reportProvenance.hasPracticePlan;
@@ -454,7 +455,7 @@ fetch(fetchSrc, { cache: "no-store" })
         );
         const noCoaching = Boolean(
           looksReal &&
-          ["queued", "queued_retry", "analysis_error", "invalid_capture", "incomplete_swing", "partial_swing", "slow_motion_capture"].includes(
+          ["queued", "queued_retry", "analysis_error", "invalid_capture", "incomplete_swing", "partial_swing", "slow_motion_capture", "p56_low_confidence"].includes(
             String(root.analysisStatus ?? "")
           )
         );
@@ -730,7 +731,9 @@ fetch(fetchSrc, { cache: "no-store" })
                     ? "Analysis stopped safely: the clip begins after setup, so full P1-P10 timing is unavailable."
                     : analysisStatus === "slow_motion_capture"
                       ? "Analysis stopped safely: the clip is temporally slowed, so precise delivery timing is unavailable."
-                      : analysisStatus === "incomplete_swing"
+                      : analysisStatus === "p56_low_confidence"
+                        ? "Analysis stopped safely: P5/P6 delivery geometry did not clear the production confidence gate."
+                        : analysisStatus === "incomplete_swing"
                       ? "Analysis stopped safely: the clip does not contain a complete downswing and impact."
                       : analysisStatus === "measured_partial"
                     ? "Measured biomechanics are ready. Coaching conclusions appear only when their source data is available."

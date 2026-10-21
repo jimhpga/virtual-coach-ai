@@ -1,0 +1,325 @@
+{
+  "schema": "VCA_P56_CORRIDOR_MODEL_V1",
+  "feature_schema": "VCA_P56_FEATURES_V1",
+  "feature_count": 66,
+  "model_type": "ExtraTreesRegressor event-score pair with ordered P5<P6 decoder",
+  "training_sequences": 13,
+  "training_frame_rows": 235,
+  "training_manifest": [
+    {
+      "candidateId": "OBS01",
+      "view": "face_on",
+      "fps": 60.36709721278042,
+      "P4": 48,
+      "P5": 65,
+      "P6": 69,
+      "P7": 73,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 26
+    },
+    {
+      "candidateId": "OBS03",
+      "view": "face_on",
+      "fps": 60.68866571018651,
+      "P4": 56,
+      "P5": 65,
+      "P6": 70,
+      "P7": 75,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 20
+    },
+    {
+      "candidateId": "OBS04",
+      "view": "face_on",
+      "fps": 60.68866571018651,
+      "P4": 56,
+      "P5": 65,
+      "P6": 70,
+      "P7": 75,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 20
+    },
+    {
+      "candidateId": "OBS06",
+      "view": "face_on",
+      "fps": 60.284167794316645,
+      "P4": 214,
+      "P5": 223,
+      "P6": 227,
+      "P7": 237,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 24
+    },
+    {
+      "candidateId": "OBS07",
+      "view": "face_on",
+      "fps": 60.68866571018651,
+      "P4": 57,
+      "P5": 65,
+      "P6": 70,
+      "P7": 75,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 19
+    },
+    {
+      "candidateId": "OBS08",
+      "view": "dtl",
+      "fps": 30.245231607629428,
+      "P4": 95,
+      "P5": 101,
+      "P6": 102,
+      "P7": 105,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 11
+    },
+    {
+      "candidateId": "OBS09",
+      "view": "dtl",
+      "fps": 30.472320975114272,
+      "P4": 39,
+      "P5": 42,
+      "P6": 45,
+      "P7": 46,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 8
+    },
+    {
+      "candidateId": "OBS10",
+      "view": "dtl",
+      "fps": 60.116279069767444,
+      "P4": 398,
+      "P5": 410,
+      "P6": 414,
+      "P7": 417,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 20
+    },
+    {
+      "candidateId": "OBS11",
+      "view": "dtl",
+      "fps": 60.116279069767444,
+      "P4": 401,
+      "P5": 410,
+      "P6": 414,
+      "P7": 420,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 20
+    },
+    {
+      "candidateId": "OBS12",
+      "view": "dtl",
+      "fps": 60.11090573012939,
+      "P4": 471,
+      "P5": 479,
+      "P6": 483,
+      "P7": 488,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 18
+    },
+    {
+      "candidateId": "OBS13",
+      "view": "dtl",
+      "fps": 60.62992125984252,
+      "P4": 46,
+      "P5": 54,
+      "P6": 58,
+      "P7": 67,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 22
+    },
+    {
+      "candidateId": "OBS14",
+      "view": "dtl",
+      "fps": 30.293159609120522,
+      "P4": 98,
+      "P5": 101,
+      "P6": 103,
+      "P7": 107,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 10
+    },
+    {
+      "candidateId": "OBS15",
+      "view": "dtl",
+      "fps": 60.172413793103445,
+      "P4": 277,
+      "P5": 282,
+      "P6": 287,
+      "P7": 293,
+      "label_source": "human-labels.completed(5).json",
+      "frame_count_used": 17
+    }
+  ],
+  "source_manifest": {
+    "path": "C:\\Users\\jimh\\Downloads\\P5-P6-Observability-Labeler\\candidate-manifest.json",
+    "sha256": "99ff50a1519a8985c7526aa1a1627b70d024f89be81b0e5812d75f646bc4338f"
+  },
+  "label_files": [
+    {
+      "path": "C:\\Users\\jimh\\Downloads\\human-labels.completed.json",
+      "sha256": "48b5f78a81d30fe2e1409bd18662cb6cf04a7932c34ccaf91cb9667c2b9e43d9"
+    },
+    {
+      "path": "C:\\Users\\jimh\\Downloads\\human-labels.completed(1).json",
+      "sha256": "2d61b9d8865edf8b56740bb79d1af653ed9f31184d5c876c9bc36f253064bfb3"
+    },
+    {
+      "path": "C:\\Users\\jimh\\Downloads\\human-labels.completed(2).json",
+      "sha256": "ce3da7a1dc8de29b3df1aa567c1563bb462920a142aac26c88c1a0d19aed3210"
+    },
+    {
+      "path": "C:\\Users\\jimh\\Downloads\\human-labels.completed(3).json",
+      "sha256": "9d4b187c286dec6aad5287ac4ab9d98b2c8a7563019523a6318a30755c81161f"
+    },
+    {
+      "path": "C:\\Users\\jimh\\Downloads\\human-labels.completed(4).json",
+      "sha256": "c1a8bf2d11ae31a6cb74bebd73fe721328b9a51d45dff02852833f2b6ea1e4b2"
+    },
+    {
+      "path": "C:\\Users\\jimh\\Downloads\\human-labels.completed(5).json",
+      "sha256": "3bb9dc0b178aa12f97e2add0d170f50581c36abf2913acf9ddfc3e61d3712346"
+    }
+  ],
+  "held_out_validation": {
+    "predictions": [
+      {
+        "cid": "OBS01",
+        "view": "face_on",
+        "true5": 65,
+        "true6": 69,
+        "pred5": 64,
+        "pred6": 70,
+        "e5": 1,
+        "e6": 1
+      },
+      {
+        "cid": "OBS03",
+        "view": "face_on",
+        "true5": 65,
+        "true6": 70,
+        "pred5": 64,
+        "pred6": 70,
+        "e5": 1,
+        "e6": 0
+      },
+      {
+        "cid": "OBS04",
+        "view": "face_on",
+        "true5": 65,
+        "true6": 70,
+        "pred5": 65,
+        "pred6": 70,
+        "e5": 0,
+        "e6": 0
+      },
+      {
+        "cid": "OBS06",
+        "view": "face_on",
+        "true5": 223,
+        "true6": 227,
+        "pred5": 224,
+        "pred6": 228,
+        "e5": 1,
+        "e6": 1
+      },
+      {
+        "cid": "OBS07",
+        "view": "face_on",
+        "true5": 65,
+        "true6": 70,
+        "pred5": 65,
+        "pred6": 70,
+        "e5": 0,
+        "e6": 0
+      },
+      {
+        "cid": "OBS08",
+        "view": "dtl",
+        "true5": 101,
+        "true6": 102,
+        "pred5": 101,
+        "pred6": 102,
+        "e5": 0,
+        "e6": 0
+      },
+      {
+        "cid": "OBS09",
+        "view": "dtl",
+        "true5": 42,
+        "true6": 45,
+        "pred5": 43,
+        "pred6": 46,
+        "e5": 1,
+        "e6": 1
+      },
+      {
+        "cid": "OBS10",
+        "view": "dtl",
+        "true5": 410,
+        "true6": 414,
+        "pred5": 411,
+        "pred6": 414,
+        "e5": 1,
+        "e6": 0
+      },
+      {
+        "cid": "OBS11",
+        "view": "dtl",
+        "true5": 410,
+        "true6": 414,
+        "pred5": 410,
+        "pred6": 414,
+        "e5": 0,
+        "e6": 0
+      },
+      {
+        "cid": "OBS12",
+        "view": "dtl",
+        "true5": 479,
+        "true6": 483,
+        "pred5": 479,
+        "pred6": 482,
+        "e5": 0,
+        "e6": 1
+      },
+      {
+        "cid": "OBS13",
+        "view": "dtl",
+        "true5": 54,
+        "true6": 58,
+        "pred5": 54,
+        "pred6": 60,
+        "e5": 0,
+        "e6": 2
+      },
+      {
+        "cid": "OBS14",
+        "view": "dtl",
+        "true5": 101,
+        "true6": 103,
+        "pred5": 101,
+        "pred6": 103,
+        "e5": 0,
+        "e6": 0
+      },
+      {
+        "cid": "OBS15",
+        "view": "dtl",
+        "true5": 282,
+        "true6": 287,
+        "pred5": 282,
+        "pred6": 286,
+        "e5": 0,
+        "e6": 1
+      }
+    ],
+    "feature_count": 66,
+    "frame_rows": 235
+  },
+  "intended_use": "Refine P5/P6 only inside a plausible P4->P7 corridor. Does not solve P4 or P7.",
+  "fallback_order": [
+    "learned corridor model",
+    "view-specific human-derived P4->P7 fractions",
+    "legacy timing scaffold"
+  ]
+}
