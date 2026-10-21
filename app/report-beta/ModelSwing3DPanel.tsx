@@ -186,6 +186,42 @@ export default function ModelSwing3DPanel() {
         Math.abs(f.frame - selectedFrame) < Math.abs(best.frame - selectedFrame) ? f : best
       );
 
+    const p1Body =
+      sequenceFrames.find((f) => f.frame === 1)?.body ??
+      sequenceFrames[0]?.body ??
+      {};
+
+    const angleDeg = (a?: Vec3, b?: Vec3) => {
+      if (!a || !b) return 0;
+      return (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI;
+    };
+
+    const wrapDeg = (v: number) => {
+      let out = v;
+      while (out > 180) out -= 360;
+      while (out < -180) out += 360;
+      return out;
+    };
+
+    const shoulderTurn = wrapDeg(
+      angleDeg(selectedBody.body?.left_shoulder, selectedBody.body?.right_shoulder) -
+        angleDeg(p1Body?.left_shoulder, p1Body?.right_shoulder)
+    );
+
+    const pelvisTurn = wrapDeg(
+      angleDeg(selectedBody.body?.left_hip, selectedBody.body?.right_hip) -
+        angleDeg(p1Body?.left_hip, p1Body?.right_hip)
+    );
+
+    const separation = wrapDeg(shoulderTurn - pelvisTurn);
+    const handAbovePelvisCm =
+      selectedBody.body?.hands && selectedBody.body?.pelvis
+        ? (selectedBody.body.hands[2] - selectedBody.body.pelvis[2]) * 100
+        : 0;
+    const clubheadHeightCm = selectedClub.clubhead_m?.[2]
+      ? selectedClub.clubhead_m[2] * 100
+      : 0;
+
     return {
       handPath: pathFrom(bodyTrail.map((f) => project(f.body?.hands))),
       clubPath: pathFrom(clubTrail.map((f) => project(f.clubhead_m))),
@@ -201,6 +237,11 @@ export default function ModelSwing3DPanel() {
       grip: project(selectedClub.grip_center_m),
       selectedFrame,
       kineticsValid: selectedFrame <= 64,
+      shoulderTurn,
+      pelvisTurn,
+      separation,
+      handAbovePelvisCm,
+      clubheadHeightCm,
     };
   }, [sequenceFrames, clubFrames, projectionView, selectedP]);
 
@@ -592,6 +633,40 @@ export default function ModelSwing3DPanel() {
         ) : (
           <div style={{ minHeight: 260, display: "grid", placeItems: "center", fontSize: 12, opacity: 0.55 }}>
             Loading 3D motion data…
+          </div>
+        )}
+
+        {motionMap && (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+              gap: 8,
+              padding: "10px 12px 12px",
+              borderTop: "1px solid rgba(255,255,255,0.08)",
+            }}
+          >
+            {[
+              ["Shoulder turn", `${motionMap.shoulderTurn.toFixed(1)}°`],
+              ["Pelvis turn", `${motionMap.pelvisTurn.toFixed(1)}°`],
+              ["Separation", `${Math.abs(motionMap.separation).toFixed(1)}°`],
+              ["Hands vs pelvis", `${motionMap.handAbovePelvisCm.toFixed(0)} cm`],
+              ["Clubhead height", `${motionMap.clubheadHeightCm.toFixed(0)} cm`],
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                style={{
+                  minWidth: 0,
+                  padding: "9px 10px",
+                  borderRadius: 10,
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(255,255,255,0.035)",
+                }}
+              >
+                <div style={{ fontSize: 10, opacity: 0.58, fontWeight: 800 }}>{label}</div>
+                <div style={{ marginTop: 3, fontSize: 16, fontWeight: 900 }}>{value}</div>
+              </div>
+            ))}
           </div>
         )}
       </div>
