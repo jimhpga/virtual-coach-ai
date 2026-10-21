@@ -11,6 +11,18 @@ type PlayerPFrame = {
   thumbUrl?: string;
 };
 
+type Vec3 = [number, number, number];
+type SequenceFrame = {
+  frame: number;
+  body: Record<string, Vec3>;
+};
+type ClubFrame = {
+  frame: number;
+  grip_center_m: Vec3;
+  clubhead_m: Vec3;
+};
+type ProjectionView = "face" | "dtl";
+
 const CHECKPOINT_FRAMES: Record<number, number> = {
   1: 1,
   2: 12,
@@ -57,18 +69,39 @@ export default function ModelSwing3DPanel() {
   const [mode, setMode] = useState<Mode>("slow");
   const [selectedP, setSelectedP] = useState<number>(7);
   const [playerFrames, setPlayerFrames] = useState<PlayerPFrame[]>([]);
+  const [sequenceFrames, setSequenceFrames] = useState<SequenceFrame[]>([]);
+  const [clubFrames, setClubFrames] = useState<ClubFrame[]>([]);
+  const [projectionView, setProjectionView] = useState<ProjectionView>("face");
   const premiumCheckpoint = PREMIUM_CHECKPOINTS[selectedP];
   const playerCheckpoint = playerFrames.find((f) => f.p === selectedP) ?? null;
 
   useEffect(() => {
     let alive = true;
-    fetch("/data/pframes-P1-P10.json", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => {
-        if (!alive || !j?.ok || !Array.isArray(j.frames)) return;
-        setPlayerFrames([...j.frames].sort((a: PlayerPFrame, b: PlayerPFrame) => a.p - b.p));
+
+    Promise.all([
+      fetch("/data/pframes-P1-P10.json", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)),
+      fetch("/vca-3d/v200/sequence.json", { cache: "force-cache" }).then((r) => (r.ok ? r.json() : null)),
+      fetch("/vca-3d/v200/club.json", { cache: "force-cache" }).then((r) => (r.ok ? r.json() : null)),
+    ])
+      .then(([pframes, sequence, club]) => {
+        if (!alive) return;
+
+        if (pframes?.ok && Array.isArray(pframes.frames)) {
+          setPlayerFrames(
+            [...pframes.frames].sort((a: PlayerPFrame, b: PlayerPFrame) => a.p - b.p)
+          );
+        }
+
+        if (Array.isArray(sequence?.frames)) {
+          setSequenceFrames(sequence.frames as SequenceFrame[]);
+        }
+
+        if (Array.isArray(club?.frames)) {
+          setClubFrames(club.frames as ClubFrame[]);
+        }
       })
       .catch(() => {});
+
     return () => {
       alive = false;
     };
@@ -87,6 +120,89 @@ export default function ModelSwing3DPanel() {
     const normalSeconds = Math.max(0, frame - 1) / FPS;
     return m === "slow" ? normalSeconds * 4 : normalSeconds;
   };
+
+  const motionMap = useMemo(() => {
+    if (!sequenceFrames.length || !clubFrames.length) return null;
+
+    const selectedFrame = CHECKPOINT_FRAMES[selectedP] ?? 1;
+    const axisIndex = projectionView === "face" ? 0 : 1;
+
+    const rawPoints: Array<[number, number]> = [];
+
+    const addVec = (v?: Vec3) => {
+      if (!v) return;
+      rawPoints.push([v[axisIndex], v[2]]);
+    };
+
+    sequenceFrames.forEach((f) => {
+      addVec(f.body?.hands);
+      addVec(f.body?.left_shoulder);
+      addVec(f.body?.right_shoulder);
+      addVec(f.body?.left_hip);
+      addVec(f.body?.right_hip);
+    });
+
+    clubFrames.forEach((f) => {
+      addVec(f.grip_center_m);
+      addVec(f.clubhead_m);
+    });
+
+    if (!rawPoints.length) return null;
+
+    const xs = rawPoints.map((p) => p[0]);
+    const zs = rawPoints.map((p) => p[1]);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minZ = Math.min(...zs);
+    const maxZ = Math.max(...zs);
+    const spanX = Math.max(0.001, maxX - minX);
+    const spanZ = Math.max(0.001, maxZ - minZ);
+
+    const project = (v?: Vec3): [number, number] | null => {
+      if (!v) return null;
+      const x = 8 + ((v[axisIndex] - minX) / spanX) * 84;
+      const y = 92 - ((v[2] - minZ) / spanZ) * 84;
+      return [x, y];
+    };
+
+    const pathFrom = (pts: Array<[number, number] | null>) =>
+      pts
+        .filter((p): p is [number, number] => Boolean(p))
+        .map((p, i) => `${i === 0 ? "M" : "L"} ${p[0].toFixed(2)} ${p[1].toFixed(2)}`)
+        .join(" ");
+
+    const precisionLimit = Math.min(selectedFrame, 64);
+    const bodyTrail = sequenceFrames.filter((f) => f.frame <= precisionLimit);
+    const clubTrail = clubFrames.filter((f) => f.frame <= precisionLimit);
+
+    const selectedBody =
+      sequenceFrames.find((f) => f.frame === selectedFrame) ??
+      sequenceFrames.reduce((best, f) =>
+        Math.abs(f.frame - selectedFrame) < Math.abs(best.frame - selectedFrame) ? f : best
+      );
+    const selectedClub =
+      clubFrames.find((f) => f.frame === selectedFrame) ??
+      clubFrames.reduce((best, f) =>
+        Math.abs(f.frame - selectedFrame) < Math.abs(best.frame - selectedFrame) ? f : best
+      );
+
+    return {
+      handPath: pathFrom(bodyTrail.map((f) => project(f.body?.hands))),
+      clubPath: pathFrom(clubTrail.map((f) => project(f.clubhead_m))),
+      gripPath: pathFrom(clubTrail.map((f) => project(f.grip_center_m))),
+      shoulderLeft: project(selectedBody.body?.left_shoulder),
+      shoulderRight: project(selectedBody.body?.right_shoulder),
+      hipLeft: project(selectedBody.body?.left_hip),
+      hipRight: project(selectedBody.body?.right_hip),
+      chest: project(selectedBody.body?.chest),
+      pelvis: project(selectedBody.body?.pelvis),
+      hands: project(selectedBody.body?.hands),
+      clubhead: project(selectedClub.clubhead_m),
+      grip: project(selectedClub.grip_center_m),
+      selectedFrame,
+      kineticsValid: selectedFrame <= 64,
+    };
+  }, [sequenceFrames, clubFrames, projectionView, selectedP]);
 
   const jumpTo = (p: number) => {
     setSelectedP(p);
@@ -307,6 +423,177 @@ export default function ModelSwing3DPanel() {
         }}
       >
         <b>Compare P{selectedP}:</b> body position, hand path, shaft orientation, pressure/rotation sequence and club delivery. This is the first production layer of the player-vs-model biomechanics viewer.
+      </div>
+
+      <div
+        style={{
+          marginTop: 12,
+          borderRadius: 14,
+          border: "1px solid rgba(255,255,255,0.12)",
+          background: "radial-gradient(circle at 50% 45%, rgba(65,85,105,0.24), rgba(4,7,11,0.98) 72%)",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            padding: "10px 12px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 10,
+            flexWrap: "wrap",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 0.6, textTransform: "uppercase" }}>
+              3D Motion Map • P{selectedP}
+            </div>
+            <div style={{ marginTop: 2, fontSize: 11, opacity: 0.58 }}>
+              V197/V200 measured sequence • hand / grip / clubhead trajectories
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 7 }}>
+            <button
+              type="button"
+              onClick={() => setProjectionView("face")}
+              style={pill(projectionView === "face")}
+            >
+              Face On
+            </button>
+            <button
+              type="button"
+              onClick={() => setProjectionView("dtl")}
+              style={pill(projectionView === "dtl")}
+            >
+              DTL
+            </button>
+          </div>
+        </div>
+
+        {motionMap ? (
+          <div style={{ position: "relative", aspectRatio: "16 / 7", minHeight: 260 }}>
+            <svg
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
+              aria-label={`VCA 3D motion map ${projectionView} P${selectedP}`}
+            >
+              <line x1="8" y1="92" x2="92" y2="92" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
+              <line x1="50" y1="8" x2="50" y2="92" stroke="rgba(255,255,255,0.06)" strokeWidth="0.35" />
+
+              <path
+                d={motionMap.clubPath}
+                fill="none"
+                stroke="rgba(223,79,255,0.82)"
+                strokeWidth="1.55"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d={motionMap.gripPath}
+                fill="none"
+                stroke="rgba(250,182,70,0.88)"
+                strokeWidth="1.15"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d={motionMap.handPath}
+                fill="none"
+                stroke="rgba(70,196,255,0.92)"
+                strokeWidth="1.15"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {motionMap.shoulderLeft && motionMap.shoulderRight && (
+                <line
+                  x1={motionMap.shoulderLeft[0]}
+                  y1={motionMap.shoulderLeft[1]}
+                  x2={motionMap.shoulderRight[0]}
+                  y2={motionMap.shoulderRight[1]}
+                  stroke="rgba(95,205,255,0.95)"
+                  strokeWidth="1.25"
+                  strokeLinecap="round"
+                />
+              )}
+
+              {motionMap.hipLeft && motionMap.hipRight && (
+                <line
+                  x1={motionMap.hipLeft[0]}
+                  y1={motionMap.hipLeft[1]}
+                  x2={motionMap.hipRight[0]}
+                  y2={motionMap.hipRight[1]}
+                  stroke="rgba(110,255,170,0.92)"
+                  strokeWidth="1.25"
+                  strokeLinecap="round"
+                />
+              )}
+
+              {motionMap.chest && motionMap.pelvis && (
+                <line
+                  x1={motionMap.chest[0]}
+                  y1={motionMap.chest[1]}
+                  x2={motionMap.pelvis[0]}
+                  y2={motionMap.pelvis[1]}
+                  stroke="rgba(255,255,255,0.72)"
+                  strokeWidth="0.8"
+                  strokeDasharray="2 1.5"
+                />
+              )}
+
+              {motionMap.hands && (
+                <circle cx={motionMap.hands[0]} cy={motionMap.hands[1]} r="1.6" fill="rgb(70,196,255)" />
+              )}
+              {motionMap.grip && (
+                <circle cx={motionMap.grip[0]} cy={motionMap.grip[1]} r="1.45" fill="rgb(250,182,70)" />
+              )}
+              {motionMap.clubhead && (
+                <circle cx={motionMap.clubhead[0]} cy={motionMap.clubhead[1]} r="1.8" fill="rgb(223,79,255)" />
+              )}
+            </svg>
+
+            <div
+              style={{
+                position: "absolute",
+                left: 12,
+                bottom: 10,
+                display: "flex",
+                gap: 12,
+                flexWrap: "wrap",
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: 0.2,
+              }}
+            >
+              <span>● Hand path</span>
+              <span style={{ opacity: 0.85 }}>● Grip path</span>
+              <span style={{ opacity: 0.85 }}>● Clubhead path</span>
+              <span style={{ opacity: 0.7 }}>Shoulders / pelvis</span>
+            </div>
+
+            <div
+              style={{
+                position: "absolute",
+                right: 12,
+                bottom: 10,
+                fontSize: 10,
+                opacity: 0.58,
+                textAlign: "right",
+              }}
+            >
+              F{motionMap.selectedFrame}
+              <br />
+              {motionMap.kineticsValid ? "Precision motion range" : "P10 context only"}
+            </div>
+          </div>
+        ) : (
+          <div style={{ minHeight: 260, display: "grid", placeItems: "center", fontSize: 12, opacity: 0.55 }}>
+            Loading 3D motion data…
+          </div>
+        )}
       </div>
 
       <div
