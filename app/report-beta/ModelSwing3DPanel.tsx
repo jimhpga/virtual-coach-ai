@@ -19,6 +19,13 @@ const CHECKPOINT_FRAMES: Record<number, number> = {
 
 const FPS = 60;
 
+const PREMIUM_CHECKPOINTS: Partial<Record<number, string>> = {
+  1: "/images/avatar/p1.png",
+  4: "/images/avatar/p4.png",
+  7: "/images/avatar/p7.png",
+  10: "/images/avatar/p10.png",
+};
+
 function pill(active = false): React.CSSProperties {
   return {
     height: 34,
@@ -42,6 +49,7 @@ export default function ModelSwing3DPanel() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [mode, setMode] = useState<Mode>("slow");
   const [selectedP, setSelectedP] = useState<number>(7);
+  const premiumCheckpoint = PREMIUM_CHECKPOINTS[selectedP];
 
   const src = useMemo(
     () =>
@@ -128,6 +136,49 @@ export default function ModelSwing3DPanel() {
             4× Slow
           </button>
         </div>
+      </div>
+
+      {premiumCheckpoint && (
+        <div
+          style={{
+            marginBottom: 12,
+            borderRadius: 14,
+            overflow: "hidden",
+            border: "1px solid rgba(0,210,255,0.22)",
+            background: "#05070b",
+          }}
+        >
+          <div
+            style={{
+              padding: "8px 10px",
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 10,
+              fontSize: 11,
+              fontWeight: 900,
+              letterSpacing: 0.4,
+              textTransform: "uppercase",
+            }}
+          >
+            <span>V435 Premium Checkpoint • P{selectedP}</span>
+            <span style={{ opacity: 0.55 }}>Commercial Avatar</span>
+          </div>
+          <img
+            src={premiumCheckpoint}
+            alt={`VCA commercial 3D model P${selectedP}`}
+            style={{
+              width: "100%",
+              display: "block",
+              aspectRatio: "4 / 3",
+              objectFit: "contain",
+              background: "#050505",
+            }}
+          />
+        </div>
+      )}
+
+      <div style={{ marginBottom: 6, fontSize: 11, fontWeight: 900, opacity: 0.58, textTransform: "uppercase", letterSpacing: 0.5 }}>
+        Animated reference
       </div>
 
       <video
