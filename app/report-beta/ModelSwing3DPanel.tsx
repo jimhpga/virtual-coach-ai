@@ -351,6 +351,100 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
     };
   }, [sequenceFrames, clubFrames, projectionView, selectedP]);
 
+  const visualDeltas = useMemo(() => {
+    if (
+      !playerOverlay ||
+      !motionMap ||
+      !playerOverlay.leftShoulder ||
+      !playerOverlay.rightShoulder ||
+      !playerOverlay.leftHip ||
+      !playerOverlay.rightHip ||
+      !motionMap.shoulderLeft ||
+      !motionMap.shoulderRight ||
+      !motionMap.hipLeft ||
+      !motionMap.hipRight ||
+      !motionMap.hands ||
+      !motionMap.pelvis
+    ) {
+      return null;
+    }
+
+    const lineTilt = (a: { x: number; y: number }, b: { x: number; y: number }) => {
+      let deg = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
+      while (deg > 90) deg -= 180;
+      while (deg < -90) deg += 180;
+      return deg;
+    };
+
+    const tupleTilt = (a: [number, number], b: [number, number]) =>
+      lineTilt({ x: a[0], y: a[1] }, { x: b[0], y: b[1] });
+
+    const playerHands = (() => {
+      if (!playerOverlay.leftWrist || !playerOverlay.rightWrist) return null;
+      return {
+        x: ((playerOverlay.leftWrist.x + playerOverlay.rightWrist.x) / 2) * 100,
+        y: ((playerOverlay.leftWrist.y + playerOverlay.rightWrist.y) / 2) * 100,
+      };
+    })();
+
+    if (!playerHands) return null;
+
+    const playerPelvis = {
+      x: ((playerOverlay.leftHip.x + playerOverlay.rightHip.x) / 2) * 100,
+      y: ((playerOverlay.leftHip.y + playerOverlay.rightHip.y) / 2) * 100,
+    };
+
+    const playerShoulderTilt = lineTilt(
+      { x: playerOverlay.leftShoulder.x * 100, y: playerOverlay.leftShoulder.y * 100 },
+      { x: playerOverlay.rightShoulder.x * 100, y: playerOverlay.rightShoulder.y * 100 }
+    );
+    const playerPelvisTilt = lineTilt(
+      { x: playerOverlay.leftHip.x * 100, y: playerOverlay.leftHip.y * 100 },
+      { x: playerOverlay.rightHip.x * 100, y: playerOverlay.rightHip.y * 100 }
+    );
+
+    const modelShoulderTilt = tupleTilt(motionMap.shoulderLeft, motionMap.shoulderRight);
+    const modelPelvisTilt = tupleTilt(motionMap.hipLeft, motionMap.hipRight);
+
+    const playerHandHeight = playerPelvis.y - playerHands.y;
+    const modelHandHeight = motionMap.pelvis[1] - motionMap.hands[1];
+    const playerHandLateral = playerHands.x - playerPelvis.x;
+    const modelHandLateral = motionMap.hands[0] - motionMap.pelvis[0];
+
+    return {
+      rows: [
+        {
+          label: "Shoulder line",
+          player: playerShoulderTilt,
+          model: modelShoulderTilt,
+          delta: playerShoulderTilt - modelShoulderTilt,
+          unit: "°",
+        },
+        {
+          label: "Pelvis line",
+          player: playerPelvisTilt,
+          model: modelPelvisTilt,
+          delta: playerPelvisTilt - modelPelvisTilt,
+          unit: "°",
+        },
+        {
+          label: "Hand height",
+          player: playerHandHeight,
+          model: modelHandHeight,
+          delta: playerHandHeight - modelHandHeight,
+          unit: "%",
+        },
+        {
+          label: "Hand lateral",
+          player: playerHandLateral,
+          model: modelHandLateral,
+          delta: playerHandLateral - modelHandLateral,
+          unit: "%",
+        },
+      ],
+    };
+  }, [playerOverlay, motionMap]);
+
   const kinematicGraphs = useMemo(() => {
     const seq = [...sequenceFrames].filter((f) => f.frame <= 64).sort((a, b) => a.frame - b.frame);
     const club = [...clubFrames].filter((f) => f.frame <= 64).sort((a, b) => a.frame - b.frame);
@@ -717,6 +811,84 @@ export default function ModelSwing3DPanel({ playerPose }: { playerPose?: PlayerP
           </div>
         </div>
       </div>
+
+      {visualDeltas && (
+        <div
+          style={{
+            marginTop: 10,
+            borderRadius: 12,
+            border: "1px solid rgba(255,255,255,0.10)",
+            background: "rgba(255,255,255,0.035)",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              padding: "9px 11px",
+              borderBottom: "1px solid rgba(255,255,255,0.08)",
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 10,
+              flexWrap: "wrap",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", letterSpacing: 0.45 }}>
+              Visual Geometry Delta • P{selectedP}
+            </div>
+            <div style={{ fontSize: 10, opacity: 0.52 }}>
+              Camera-space estimate • match player camera to {projectionView === "face" ? "Face On" : "DTL"} for valid comparison
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1.25fr repeat(3, minmax(0, 1fr))",
+              fontSize: 11,
+            }}
+          >
+            {["Metric", "Player", "Model", "Δ"].map((h) => (
+              <div
+                key={h}
+                style={{
+                  padding: "7px 10px",
+                  fontWeight: 900,
+                  opacity: 0.58,
+                  borderBottom: "1px solid rgba(255,255,255,0.07)",
+                }}
+              >
+                {h}
+              </div>
+            ))}
+
+            {visualDeltas.rows.flatMap((row) => {
+              const deltaAbs = Math.abs(row.delta);
+              const deltaTone =
+                deltaAbs <= (row.unit === "°" ? 3 : 4)
+                  ? "rgba(110,255,170,0.95)"
+                  : deltaAbs <= (row.unit === "°" ? 7 : 8)
+                    ? "rgba(255,210,90,0.95)"
+                    : "rgba(255,125,125,0.95)";
+
+              return [
+                <div key={`${row.label}-label`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.05)", fontWeight: 800 }}>
+                  {row.label}
+                </div>,
+                <div key={`${row.label}-player`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                  {row.player.toFixed(1)}{row.unit}
+                </div>,
+                <div key={`${row.label}-model`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                  {row.model.toFixed(1)}{row.unit}
+                </div>,
+                <div key={`${row.label}-delta`} style={{ padding: "8px 10px", borderBottom: "1px solid rgba(255,255,255,0.05)", color: deltaTone, fontWeight: 900 }}>
+                  {row.delta >= 0 ? "+" : ""}{row.delta.toFixed(1)}{row.unit}
+                </div>,
+              ];
+            })}
+          </div>
+        </div>
+      )}
 
       <div
         style={{
