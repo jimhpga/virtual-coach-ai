@@ -649,39 +649,64 @@ export default function ModelSwing3DPanel({
     const playerHandLateral = playerHands.x - playerPelvis.x;
     const modelHandLateral = motionMap.hands[0] - motionMap.pelvis[0];
 
-    return {
-      rows: [
-        {
-          label: "Shoulder line",
-          player: playerShoulderTilt,
-          model: modelShoulderTilt,
-          delta: playerShoulderTilt - modelShoulderTilt,
-          unit: "°",
-        },
-        {
-          label: "Pelvis line",
-          player: playerPelvisTilt,
-          model: modelPelvisTilt,
-          delta: playerPelvisTilt - modelPelvisTilt,
-          unit: "°",
-        },
-        {
-          label: "Hand height",
-          player: playerHandHeight,
-          model: modelHandHeight,
-          delta: playerHandHeight - modelHandHeight,
-          unit: "%",
-        },
-        {
-          label: "Hand lateral",
-          player: playerHandLateral,
-          model: modelHandLateral,
-          delta: playerHandLateral - modelHandLateral,
-          unit: "%",
-        },
-      ],
-    };
-  }, [playerOverlay, motionMap]);
+    const rows = [
+      {
+        label: "Shoulder line",
+        player: playerShoulderTilt,
+        model: modelShoulderTilt,
+        delta: playerShoulderTilt - modelShoulderTilt,
+        unit: "°",
+      },
+      {
+        label: "Pelvis line",
+        player: playerPelvisTilt,
+        model: modelPelvisTilt,
+        delta: playerPelvisTilt - modelPelvisTilt,
+        unit: "°",
+      },
+      {
+        label: "Hand height",
+        player: playerHandHeight,
+        model: modelHandHeight,
+        delta: playerHandHeight - modelHandHeight,
+        unit: "%",
+      },
+      {
+        label: "Hand lateral",
+        player: playerHandLateral,
+        model: modelHandLateral,
+        delta: playerHandLateral - modelHandLateral,
+        unit: "%",
+      },
+    ];
+
+    if (
+      playerShaftOverlay?.available &&
+      playerShaftOverlay.line &&
+      motionMap.grip &&
+      motionMap.clubhead
+    ) {
+      const playerShaftTilt = lineTilt(
+        { x: playerShaftOverlay.line.x1, y: playerShaftOverlay.line.y1 },
+        { x: playerShaftOverlay.line.x2, y: playerShaftOverlay.line.y2 }
+      );
+      const modelShaftTilt = tupleTilt(motionMap.grip, motionMap.clubhead);
+
+      let shaftDelta = playerShaftTilt - modelShaftTilt;
+      while (shaftDelta > 90) shaftDelta -= 180;
+      while (shaftDelta < -90) shaftDelta += 180;
+
+      rows.push({
+        label: "Shaft angle",
+        player: playerShaftTilt,
+        model: modelShaftTilt,
+        delta: shaftDelta,
+        unit: "°",
+      });
+    }
+
+    return { rows };
+  }, [playerOverlay, playerShaftOverlay, motionMap]);
 
   const kinematicGraphs = useMemo(() => {
     const seq = [...sequenceFrames].filter((f) => f.frame <= 64).sort((a, b) => a.frame - b.frame);
