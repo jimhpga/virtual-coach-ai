@@ -129,10 +129,16 @@ const CHECKPOINT_FRAMES: Record<number, number> = {
 const FPS = 30;
 
 const PREMIUM_CHECKPOINTS: Partial<Record<number, string>> = {
-  1: "/images/avatar/tight/p1.png",
-  4: "/images/avatar/tight/p4.png",
-  7: "/images/avatar/tight/p7.png",
-  10: "/images/avatar/tight/p10.png",
+  1: "/images/avatar/v437/p1.png",
+  2: "/images/avatar/v437/p2.png",
+  3: "/images/avatar/v437/p3.png",
+  4: "/images/avatar/v437/p4.png",
+  5: "/images/avatar/v437/p5.png",
+  6: "/images/avatar/v437/p6.png",
+  7: "/images/avatar/v437/p7.png",
+  8: "/images/avatar/v437/p8.png",
+  9: "/images/avatar/v437/p9.png",
+  10: "/images/avatar/v437/p10.png",
 };
 
 function pill(active = false): React.CSSProperties {
@@ -1281,7 +1287,7 @@ export default function ModelSwing3DPanel({
           >
             <span>VCA model • P{selectedP}</span>
             <span style={{ opacity: 0.55 }}>
-              {premiumCheckpoint ? "V435 premium" : "V309 motion"}
+              {premiumCheckpoint ? "V437 premium" : "V309 motion"}
             </span>
           </div>
 
