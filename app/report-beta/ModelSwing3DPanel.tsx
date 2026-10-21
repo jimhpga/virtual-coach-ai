@@ -14,10 +14,12 @@ type PlayerPFrame = {
 type Vec3 = [number, number, number];
 type SequenceFrame = {
   frame: number;
+  relative_time_s?: number;
   body: Record<string, Vec3>;
 };
 type ClubFrame = {
   frame: number;
+  relative_time_s?: number;
   grip_center_m: Vec3;
   clubhead_m: Vec3;
 };
@@ -62,6 +64,27 @@ function pill(active = false): React.CSSProperties {
     fontWeight: 900,
     fontSize: 12,
   };
+}
+
+type MetricPoint = { frame: number; value: number };
+
+function metricPath(points: MetricPoint[], maxFrame = 64) {
+  if (!points.length) return "";
+  const maxValue = Math.max(1, ...points.map((p) => Math.abs(p.value)));
+  return points
+    .map((p, i) => {
+      const x = 4 + ((p.frame - 1) / Math.max(1, maxFrame - 1)) * 92;
+      const y = 38 - (Math.abs(p.value) / maxValue) * 32;
+      return `${i === 0 ? "M" : "L"} ${x.toFixed(2)} ${y.toFixed(2)}`;
+    })
+    .join(" ");
+}
+
+function nearestMetric(points: MetricPoint[], frame: number) {
+  if (!points.length) return 0;
+  return points.reduce((best, p) =>
+    Math.abs(p.frame - frame) < Math.abs(best.frame - frame) ? p : best
+  ).value;
 }
 
 export default function ModelSwing3DPanel() {
@@ -244,6 +267,82 @@ export default function ModelSwing3DPanel() {
       clubheadHeightCm,
     };
   }, [sequenceFrames, clubFrames, projectionView, selectedP]);
+
+  const kinematicGraphs = useMemo(() => {
+    const seq = [...sequenceFrames].filter((f) => f.frame <= 64).sort((a, b) => a.frame - b.frame);
+    const club = [...clubFrames].filter((f) => f.frame <= 64).sort((a, b) => a.frame - b.frame);
+    if (seq.length < 2 || club.length < 2) return null;
+
+    const dist = (a: Vec3, b: Vec3) =>
+      Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+
+    const dtFor = (cur: { relative_time_s?: number }, prev: { relative_time_s?: number }) => {
+      const dt =
+        typeof cur.relative_time_s === "number" &&
+        typeof prev.relative_time_s === "number"
+          ? cur.relative_time_s - prev.relative_time_s
+          : 1 / 60;
+      return Math.max(1 / 240, dt);
+    };
+
+    const speedSeries = <T extends { frame: number; relative_time_s?: number }>(
+      frames: T[],
+      pick: (f: T) => Vec3,
+      multiplier = 1
+    ): MetricPoint[] =>
+      frames.slice(1).map((f, i) => {
+        const prev = frames[i];
+        return {
+          frame: f.frame,
+          value: (dist(pick(f), pick(prev)) / dtFor(f, prev)) * multiplier,
+        };
+      });
+
+    const lineAngle = (a?: Vec3, b?: Vec3) => {
+      if (!a || !b) return 0;
+      return (Math.atan2(b[1] - a[1], b[0] - a[0]) * 180) / Math.PI;
+    };
+
+    const angleDelta = (a: number, b: number) => {
+      let d = a - b;
+      while (d > 180) d -= 360;
+      while (d < -180) d += 360;
+      return d;
+    };
+
+    const rotationSeries = (
+      frames: SequenceFrame[],
+      leftKey: string,
+      rightKey: string
+    ): MetricPoint[] =>
+      frames.slice(1).map((f, i) => {
+        const prev = frames[i];
+        const curA = lineAngle(f.body?.[leftKey], f.body?.[rightKey]);
+        const prevA = lineAngle(prev.body?.[leftKey], prev.body?.[rightKey]);
+        return {
+          frame: f.frame,
+          value: Math.abs(angleDelta(curA, prevA)) / dtFor(f, prev),
+        };
+      });
+
+    const clubSpeed = speedSeries(club, (f) => f.clubhead_m, 2.23694);
+    const handSpeed = speedSeries(seq, (f) => f.body.hands, 2.23694);
+    const pelvisSpeed = rotationSeries(seq, "left_hip", "right_hip");
+    const torsoSpeed = rotationSeries(seq, "left_shoulder", "right_shoulder");
+    const selectedFrame = Math.min(CHECKPOINT_FRAMES[selectedP] ?? 1, 64);
+
+    return {
+      selectedFrame,
+      clubSpeed,
+      handSpeed,
+      pelvisSpeed,
+      torsoSpeed,
+      clubSpeedNow: nearestMetric(clubSpeed, selectedFrame),
+      handSpeedNow: nearestMetric(handSpeed, selectedFrame),
+      pelvisSpeedNow: nearestMetric(pelvisSpeed, selectedFrame),
+      torsoSpeedNow: nearestMetric(torsoSpeed, selectedFrame),
+    };
+  }, [sequenceFrames, clubFrames, selectedP]);
 
   const jumpTo = (p: number) => {
     setSelectedP(p);
@@ -670,6 +769,88 @@ export default function ModelSwing3DPanel() {
           </div>
         )}
       </div>
+
+      {kinematicGraphs && (
+        <div
+          style={{
+            marginTop: 12,
+            display: "grid",
+            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gap: 10,
+          }}
+        >
+          {[
+            ["Club speed", kinematicGraphs.clubSpeed, kinematicGraphs.clubSpeedNow, "mph"],
+            ["Hand speed", kinematicGraphs.handSpeed, kinematicGraphs.handSpeedNow, "mph"],
+            ["Pelvis speed", kinematicGraphs.pelvisSpeed, kinematicGraphs.pelvisSpeedNow, "°/s"],
+            ["Torso speed", kinematicGraphs.torsoSpeed, kinematicGraphs.torsoSpeedNow, "°/s"],
+          ].map(([label, points, current, unit]) => {
+            const series = points as MetricPoint[];
+            const markerX = 4 + ((kinematicGraphs.selectedFrame - 1) / 63) * 92;
+            return (
+              <div
+                key={label as string}
+                style={{
+                  borderRadius: 12,
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  background: "rgba(0,0,0,0.28)",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    padding: "9px 10px 4px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "baseline",
+                    gap: 8,
+                  }}
+                >
+                  <span style={{ fontSize: 10, fontWeight: 900, opacity: 0.68 }}>
+                    {label as string}
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 900 }}>
+                    {(current as number).toFixed((unit as string) === "mph" ? 1 : 0)} {unit as string}
+                  </span>
+                </div>
+                <svg viewBox="0 0 100 42" style={{ width: "100%", height: 82, display: "block" }}>
+                  <line x1="4" y1="38" x2="96" y2="38" stroke="rgba(255,255,255,0.10)" strokeWidth="0.5" />
+                  <path
+                    d={metricPath(series)}
+                    fill="none"
+                    stroke="rgba(100,190,255,0.92)"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <line
+                    x1={markerX}
+                    y1="4"
+                    x2={markerX}
+                    y2="38"
+                    stroke="rgba(255,255,255,0.72)"
+                    strokeWidth="0.8"
+                    strokeDasharray="2 1.5"
+                  />
+                </svg>
+                <div
+                  style={{
+                    padding: "0 10px 8px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: 9,
+                    opacity: 0.45,
+                  }}
+                >
+                  <span>P1</span>
+                  <span>P{selectedP}</span>
+                  <span>P9</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <div
         style={{
