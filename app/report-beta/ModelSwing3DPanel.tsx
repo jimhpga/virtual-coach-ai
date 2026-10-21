@@ -402,11 +402,23 @@ export default function ModelSwing3DPanel({
     [projectionView]
   );
 
-  const frameToTime = (frame: number) =>
+  const frameToVideoTime = (frame: number) =>
     Math.max(0, frame - 1) / FPS;
 
+  const physicsTimeForFrame = (frame: number) => {
+    if (!sequenceFrames.length) {
+      return Math.max(0, frame - 1) / 60;
+    }
+    const nearest = sequenceFrames.reduce((best, f) =>
+      Math.abs(f.frame - frame) < Math.abs(best.frame - frame) ? f : best
+    );
+    return typeof nearest.relative_time_s === "number"
+      ? nearest.relative_time_s
+      : Math.max(0, frame - 1) / 60;
+  };
+
   const checkpointTime = (p: number) =>
-    frameToTime(CHECKPOINT_FRAMES[p] ?? 1);
+    frameToVideoTime(CHECKPOINT_FRAMES[p] ?? 1);
 
   const motionMap = useMemo(() => {
     if (!sequenceFrames.length || !clubFrames.length) return null;
@@ -766,6 +778,76 @@ export default function ModelSwing3DPanel({
     const torsoSpeed = rotationSeries(seq, "left_shoulder", "right_shoulder");
     const selectedFrame = Math.min(cursorFrame, 64);
 
+    const smoothSeries = (points: MetricPoint[], radius = 2): MetricPoint[] =>
+      points.map((p, i) => {
+        const lo = Math.max(0, i - radius);
+        const hi = Math.min(points.length, i + radius + 1);
+        const slice = points.slice(lo, hi);
+        return {
+          frame: p.frame,
+          value: slice.reduce((sum, q) => sum + q.value, 0) / Math.max(1, slice.length),
+        };
+      });
+
+    const firstDominantPeak = (points: MetricPoint[]) => {
+      const windowed = smoothSeries(points).filter(
+        (p) => p.frame >= CHECKPOINT_FRAMES[4] && p.frame <= CHECKPOINT_FRAMES[8]
+      );
+      if (!windowed.length) return null;
+
+      const maxValue = Math.max(...windowed.map((p) => p.value));
+      const threshold = maxValue * 0.55;
+
+      for (let i = 1; i < windowed.length - 1; i += 1) {
+        const prev = windowed[i - 1];
+        const cur = windowed[i];
+        const next = windowed[i + 1];
+        if (
+          cur.value >= threshold &&
+          cur.value >= prev.value &&
+          cur.value >= next.value
+        ) {
+          return cur;
+        }
+      }
+
+      return windowed.reduce((best, p) => (p.value > best.value ? p : best));
+    };
+
+    const timeForFrame = (frame: number) => {
+      const nearest = seq.reduce((best, f) =>
+        Math.abs(f.frame - frame) < Math.abs(best.frame - frame) ? f : best
+      );
+      return typeof nearest.relative_time_s === "number"
+        ? nearest.relative_time_s
+        : (frame - 1) / 60;
+    };
+
+    const peakDefs = [
+      { label: "Pelvis", unit: "°/s", point: firstDominantPeak(pelvisSpeed) },
+      { label: "Torso", unit: "°/s", point: firstDominantPeak(torsoSpeed) },
+      { label: "Hands", unit: "mph", point: firstDominantPeak(handSpeed) },
+      { label: "Club", unit: "mph", point: firstDominantPeak(clubSpeed) },
+    ];
+
+    const sequencePeaks = peakDefs
+      .filter((x): x is { label: string; unit: string; point: MetricPoint } => Boolean(x.point))
+      .map((x) => ({
+        label: x.label,
+        unit: x.unit,
+        frame: x.point.frame,
+        value: x.point.value,
+        time: timeForFrame(x.point.frame),
+      }));
+
+    const sequenceGapsMs = sequencePeaks.slice(1).map((peak, i) =>
+      Math.round((peak.time - sequencePeaks[i].time) * 1000)
+    );
+
+    const sequenceInOrder =
+      sequencePeaks.length === 4 &&
+      sequencePeaks.every((peak, i) => i === 0 || peak.time >= sequencePeaks[i - 1].time);
+
     return {
       selectedFrame,
       clubSpeed,
@@ -776,6 +858,9 @@ export default function ModelSwing3DPanel({
       handSpeedNow: nearestMetric(handSpeed, selectedFrame),
       pelvisSpeedNow: nearestMetric(pelvisSpeed, selectedFrame),
       torsoSpeedNow: nearestMetric(torsoSpeed, selectedFrame),
+      sequencePeaks,
+      sequenceGapsMs,
+      sequenceInOrder,
     };
   }, [sequenceFrames, clubFrames, cursorFrame]);
 
@@ -793,7 +878,7 @@ export default function ModelSwing3DPanel({
     setMode(next);
     const v = videoRef.current;
     if (v) {
-      v.playbackRate = next === "slow" ? 0.25 : 1;
+      v.playbackRate = next === "slow" ? 0.5 : 2;
     }
   };
 
@@ -1113,8 +1198,8 @@ export default function ModelSwing3DPanel({
               onLoadedMetadata={() => {
                 const v = videoRef.current;
                 if (!v) return;
-                v.playbackRate = mode === "slow" ? 0.25 : 1;
-                v.currentTime = frameToTime(cursorFrame);
+                v.playbackRate = mode === "slow" ? 0.5 : 2;
+                v.currentTime = frameToVideoTime(cursorFrame);
                 v.pause();
               }}
               onTimeUpdate={(e) => {
@@ -1160,7 +1245,7 @@ export default function ModelSwing3DPanel({
             Synchronized Timeline
           </span>
           <span style={{ opacity: 0.58 }}>
-            F{cursorFrame} • {frameToTime(cursorFrame).toFixed(2)}s {cursorFrame > 64 ? "• finish context" : "• precision range"}
+            F{cursorFrame} • swing {physicsTimeForFrame(cursorFrame).toFixed(2)}s {cursorFrame > 64 ? "• finish context" : "• precision range"}
           </span>
         </div>
 
@@ -1175,7 +1260,7 @@ export default function ModelSwing3DPanel({
             setCursorFrame(frame);
             const v = videoRef.current;
             if (v) {
-              v.currentTime = frameToTime(frame);
+              v.currentTime = frameToVideoTime(frame);
               v.pause();
             }
           }}
@@ -1628,6 +1713,106 @@ export default function ModelSwing3DPanel({
           </div>
         )}
       </div>
+
+      {kinematicGraphs && kinematicGraphs.sequencePeaks.length === 4 && (
+        <div
+          style={{
+            marginTop: 12,
+            padding: "10px 12px 12px",
+            borderRadius: 12,
+            border: "1px solid rgba(255,255,255,0.10)",
+            background: "rgba(0,0,0,0.28)",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              gap: 10,
+              flexWrap: "wrap",
+              marginBottom: 9,
+            }}
+          >
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 0.55, textTransform: "uppercase" }}>
+                Kinematic sequence • P4→P8
+              </div>
+              <div style={{ marginTop: 2, fontSize: 10, opacity: 0.52 }}>
+                First dominant true-time peak • smoothed 5-state window
+              </div>
+            </div>
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 900,
+                color: kinematicGraphs.sequenceInOrder
+                  ? "rgba(125,255,180,0.95)"
+                  : "rgba(255,205,100,0.95)",
+              }}
+            >
+              {kinematicGraphs.sequenceInOrder ? "TRANSFER ORDERED" : "ORDER CHECK"}
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(7, minmax(0, auto))",
+              alignItems: "center",
+              gap: 7,
+              overflowX: "auto",
+            }}
+          >
+            {kinematicGraphs.sequencePeaks.flatMap((peak, i) => {
+              const peakCard = (
+                <div
+                  key={`${peak.label}-peak`}
+                  style={{
+                    minWidth: 108,
+                    padding: "9px 10px",
+                    borderRadius: 10,
+                    border: "1px solid rgba(255,255,255,0.09)",
+                    background: "rgba(255,255,255,0.035)",
+                  }}
+                >
+                  <div style={{ fontSize: 10, fontWeight: 900, opacity: 0.66 }}>
+                    {peak.label}
+                  </div>
+                  <div style={{ marginTop: 3, fontSize: 15, fontWeight: 900 }}>
+                    {peak.value.toFixed(peak.unit === "mph" ? 1 : 0)} {peak.unit}
+                  </div>
+                  <div style={{ marginTop: 2, fontSize: 9, opacity: 0.48 }}>
+                    F{peak.frame} • {peak.time.toFixed(3)}s
+                  </div>
+                </div>
+              );
+
+              if (i === kinematicGraphs.sequencePeaks.length - 1) {
+                return [peakCard];
+              }
+
+              const gap = kinematicGraphs.sequenceGapsMs[i] ?? 0;
+              return [
+                peakCard,
+                <div
+                  key={`gap-${i}`}
+                  style={{
+                    minWidth: 54,
+                    textAlign: "center",
+                    fontSize: 10,
+                    fontWeight: 900,
+                    opacity: 0.62,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  → {gap >= 0 ? "+" : ""}{gap} ms
+                </div>,
+              ];
+            })}
+          </div>
+        </div>
+      )}
 
       {kinematicGraphs && (
         <div
