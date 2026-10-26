@@ -687,25 +687,7 @@ fetch(fetchSrc, { cache: "no-store" })
 >
 
 
-      {showPChecks && (
-      <div style={{ display:"flex", gap:8, margin:"10px 0 14px" }}>
-        <button
-          type="button"
-          onClick={() => { setExpandAllP(true); setOpenP(null); }}
-          style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: expandAllP ? 0.7 : 1 }}
-        >
-          Expand all
-        </button>
-        <button
-          type="button"
-          onClick={() => { setExpandAllP(false); setOpenP(7); }}
-          style={{ height:32, padding:"0 12px", borderRadius:999, border:"1px solid rgba(255,255,255,0.14)", background:"rgba(0,0,0,0.25)", color:"#e6edf6", fontWeight:900, cursor:"pointer", opacity: !expandAllP ? 0.85 : 1 }}
-        >
-          Collapse all
-        </button>
-        <span style={{ fontSize:12, opacity:0.72, alignSelf:"center" }}>Default open: P7 (impact)</span>
-      </div>
-      )}
+
       <div style={{
         marginTop: 0,
         marginBottom: 14,
@@ -873,7 +855,7 @@ fetch(fetchSrc, { cache: "no-store" })
       )}
 
       {/* TOP ROW: Overview + Power/Reliability like screenshot */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.45fr 1fr", gap: 14, marginBottom: 14 }}>
+      <div className="vcaFullTopRow" style={{ display: "grid", gridTemplateColumns: "1.45fr 1fr", gap: 14, marginBottom: 14 }}>
         {showPChecks && (
         <Panel
   title="P1 - P10 Checkpoints"
@@ -903,7 +885,7 @@ fetch(fetchSrc, { cache: "no-store" })
     </>
   }
 >
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(3, minmax(0, 1fr))", gap: 12 }}>
+        <div className="vcaPGrid" style={{ display:"grid", gridTemplateColumns:"repeat(3, minmax(0, 1fr))", gap: 12 }}>
           {data.pchecks.map((c) => {
             const isOpen = expandAllP || openP === c.p;
             return (
@@ -1050,8 +1032,15 @@ fetch(fetchSrc, { cache: "no-store" })
       <div style={{ marginTop: 10, fontSize: 11, opacity: 0.55, textAlign: "center" }}>
         {reportProvenance.real
           ? "Virtual Coach AI • measured where the source data supports it; estimates are labeled."
-          : "Virtual Coach AI - demo report. If something doesn't fit, it may be your swing or your feel and your hand."}
+          : "Virtual Coach AI - sample report."}
       </div>
+      <style>{`
+        @media (max-width: 700px) {
+          .vcaFullTopRow { grid-template-columns: 1fr !important; gap: 10px !important; }
+          .vcaPGrid { grid-template-columns: 1fr !important; gap: 8px !important; }
+          .vcaPGrid button { min-height: 52px; }
+        }
+      `}</style>
     </ReportShell>
   );
 }

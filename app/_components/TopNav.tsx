@@ -88,8 +88,6 @@ export default function TopNav({ active = "home", logoSrc = "/vca-logo.png", bra
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
           {pill("/", "Home", "home")}
           {pill("/upload", "Upload", "upload")}
-          {pill("/coming-soon", "Coming soon", "coming")}
-          {pill("/report-beta/full", "Report demo", "report")}
         </div>
       </div>
     </div>

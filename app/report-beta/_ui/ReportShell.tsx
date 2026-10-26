@@ -80,6 +80,7 @@ export default function ReportShell(props: ReportShellProps) {
 
   return (
     <div
+      className="vcaReportOuter"
       style={{
         minHeight: "100vh",
         padding: 20,
@@ -93,6 +94,7 @@ export default function ReportShell(props: ReportShellProps) {
       }}
     >
       <div
+        className="vcaReportCard"
         style={{
           maxWidth: 1180,
           margin: "0 auto",
@@ -104,6 +106,7 @@ export default function ReportShell(props: ReportShellProps) {
         }}
       >
         <div
+          className="vcaReportHeader"
           style={{
             padding: "18px 18px 14px 18px",
             display: "flex",
@@ -112,15 +115,14 @@ export default function ReportShell(props: ReportShellProps) {
             borderBottom: "1px solid rgba(255,255,255,0.10)", position: "relative", zIndex: 9999, pointerEvents: "auto",
           }}
         >
-          <div style={{ display: "grid", gap: 6 }}>
+          <div className="vcaReportBrand" style={{ display: "grid", gap: 6 }}>
             {titleTop ? <div style={{ fontSize: 14, opacity: 0.85 }}><div style={{ display:"flex", alignItems:"center", gap:10, minWidth: 0 }}>
   <a href="/" title="Virtual Coach AI" style={{ display:"inline-flex", alignItems:"center" }}>
     <img
   src="/brand/vca-logo.png"
   alt="Virtual Coach AI"
   style={{
-    minHeight: 140,
-    height: 140,
+    height: 68,
     width: "auto",
     display: "block",
     filter: "brightness(0) invert(1) drop-shadow(0 0 6px rgba(255,255,255,0.35))",
@@ -137,15 +139,26 @@ export default function ReportShell(props: ReportShellProps) {
             ) : null}
           </div>
 
-          <div style={{ display: "flex", gap: 10, alignItems: "center", position: "relative", zIndex: 9999, pointerEvents: "auto" }}>
+          <div className="vcaReportActions" style={{ display: "flex", gap: 10, alignItems: "center", position: "relative", zIndex: 9999, pointerEvents: "auto", flexWrap: "wrap" }}>
             {rightPills.map((p) => (
               <React.Fragment key={p}>{pill(p)}</React.Fragment>
             ))}
           </div>
         </div>
 
-        <div style={{ padding: 18 }}>{children}</div>
+        <div className="vcaReportBody" style={{ padding: 18 }}>{children}</div>
       </div>
+      <style>{`
+        @media (max-width: 700px) {
+          .vcaReportOuter { padding: 8px !important; }
+          .vcaReportCard { border-radius: 14px !important; }
+          .vcaReportHeader { padding: 12px !important; display: grid !important; gap: 12px !important; align-items: start !important; }
+          .vcaReportHeader img { height: 50px !important; min-height: 0 !important; max-width: 118px !important; object-fit: contain !important; }
+          .vcaReportActions { justify-content: flex-start !important; gap: 7px !important; }
+          .vcaReportActions a, .vcaReportActions button { height: 32px !important; padding: 0 10px !important; font-size: 11px !important; }
+          .vcaReportBody { padding: 10px !important; }
+        }
+      `}</style>
     </div>
   );
 }

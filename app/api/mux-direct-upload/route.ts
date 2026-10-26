@@ -3,7 +3,7 @@
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function POST() {
+export async function POST(req: Request) {
   try {
     const tokenId = process.env.MUX_TOKEN_ID;
     const tokenSecret = process.env.MUX_TOKEN_SECRET;
@@ -17,8 +17,11 @@ export async function POST() {
 
     const mux = new Mux({ tokenId, tokenSecret });
 
+    const requestOrigin = new URL(req.url).origin;
+    const corsOrigin = process.env.NEXT_PUBLIC_SITE_URL || requestOrigin;
+
     const upload = await mux.video.uploads.create({
-      cors_origin: "https://virtualcoachai.net",
+      cors_origin: corsOrigin,
       new_asset_settings: {
         playback_policy: ["public"],
       },
